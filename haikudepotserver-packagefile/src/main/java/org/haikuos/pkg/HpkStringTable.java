@@ -1,0 +1,112 @@
+/*
+ * Copyright 2013, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
+package org.haikuos.pkg;
+
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import org.haikuos.pkg.heap.HeapCoordinates;
+import org.haikuos.pkg.heap.HpkHeapReader;
+
+/**
+ * <p>The HPK* file format may contain a table of commonly used strings in a table.  This object will represent
+ * those strings and will lazily load them from the heap as necessary.</p>
+ */
+
+public class HpkStringTable implements StringTable {
+
+    private HpkHeapReader heapReader;
+
+    private long expectedCount;
+
+    private long heapLength;
+
+    private long heapOffset;
+
+    private String[] values = null;
+
+    public HpkStringTable(
+            HpkHeapReader heapReader,
+            long heapOffset,
+            long heapLength,
+            long expectedCount) {
+
+        super();
+
+        Preconditions.checkNotNull(heapReader);
+        Preconditions.checkState(heapOffset >= 0 && heapOffset < Integer.MAX_VALUE);
+        Preconditions.checkState(heapLength >= 0 && heapLength < Integer.MAX_VALUE);
+        Preconditions.checkState(expectedCount >= 0 && expectedCount < Integer.MAX_VALUE);
+
+        this.heapReader = heapReader;
+        this.expectedCount = expectedCount;
+        this.heapOffset = heapOffset;
+        this.heapLength = heapLength;
+
+    }
+
+    // TODO; could avoid the big read into a buffer by reading the heap byte by byte.
+    private String[] readStrings() throws HpkException {
+        String[] result = new String[(int) expectedCount];
+        byte[] stringsDataBuffer = new byte[(int) heapLength];
+
+        heapReader.readHeap(
+                stringsDataBuffer,
+                0,
+                new HeapCoordinates(
+                        heapOffset,
+                        heapLength));
+
+        // now work through the data and load them into the strings.
+
+        int stringIndex = 0;
+        int offset = 0;
+
+        while(offset < stringsDataBuffer.length) {
+
+            if(0==stringsDataBuffer[offset]) {
+                if(stringIndex != result.length) {
+                    throw new HpkException(String.format("expected to read %d package strings from the strings table, but actually found %d",expectedCount,stringIndex));
+                }
+
+                return result;
+            }
+
+            int start = offset;
+
+            while(0!=stringsDataBuffer[offset] && offset < stringsDataBuffer.length) {
+                offset++;
+            }
+
+            if(offset < stringsDataBuffer.length) {
+                result[stringIndex] = new String(stringsDataBuffer,start,offset-start, Charsets.UTF_8);
+                stringIndex++;
+                offset++;
+            }
+
+        }
+
+        throw new HpkException("expected to find the null-terminator for the list of strings, but was not able to find one.");
+    }
+
+    private String[] getStrings() throws HpkException {
+        if(null==values) {
+            if(0==heapLength) {
+                values = new String[] {};
+            }
+            else {
+                values = readStrings();
+            }
+        }
+
+        return values;
+    }
+
+    @Override
+    public String getString(int index) throws HpkException {
+        return getStrings()[index];
+    }
+
+}

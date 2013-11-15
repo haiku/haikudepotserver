@@ -1,0 +1,42 @@
+/*
+These styles are related to the application as a whole.
+*/
+
+body {
+    padding-top: 50px;
+}
+
+.table > thead > tr {
+    font-weight: bold;
+}
+
+.generic-page-content-container {
+    margin-top: 16px;
+}
+
+.container {
+    max-width: none;
+}
+
+/*
+This material is for the spinner; it will fill the screen will white and then put a small animation on top for
+a moment.
+*/
+
+#spinnerbackdrop {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    background-color: rgba(255, 255, 255, 0.90);
+    z-index: 1050;
+}
+
+#spinnerbackdrop > div {
+    width: 120px;
+    margin: 0 auto;
+    padding-top: 120px;
+}
+
+

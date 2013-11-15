@@ -1,0 +1,57 @@
+<!--
+This ant script is invoked from the 'compile' goal of the maven project.  From the internet, it will
+pull down all of the web-resources (js, css etc...) that it needs to function.  This approach avoids
+the need to incorporate these elements in the source distribution.  See the 'pom.xml' for the location
+from where this is invoked.
+-->
+
+<project name="fetchwebresources" default="main" basedir=".">
+
+    <!--
+    This exists in order to pre-check if the bootstrap material is already downloaded; if it is then
+    it is not necessary to re-fetch it.
+    -->
+
+    <target name="bootstrap.check">
+        <available property="bootstrap.present" file="${bootstrap.root}/dist"/>
+    </target>
+
+    <target name="js">
+        <!-- user interface / events / mvc -->
+        <get src="${js.angularjsurl}/${angularjs.version}/angular.js" dest="${js.libsroot}/angular.js" skipexisting="true" />
+        <get src="${js.angularjsurl}/${angularjs.version}/angular.min.js" dest="${js.libsroot}/angular-min.js" skipexisting="true" />
+        <get src="${js.angularjsurl}/${angularjs.version}/angular-route.js" dest="${js.libsroot}/angular-route.js" skipexisting="true" />
+        <get src="${js.angularjsurl}/${angularjs.version}/angular-route.min.js" dest="${js.libsroot}/angular-route-min.js" skipexisting="true" />
+
+        <get src="${js.cdnurl}/angular-ui-bootstrap/${angularuibootstrapjs.version}/ui-bootstrap-tpls.js" dest="${js.libsroot}/ui-bootstrap-tpls.js" skipexisting="true" />
+        <get src="${js.cdnurl}/angular-ui-bootstrap/${angularuibootstrapjs.version}/ui-bootstrap-tpls.min.js" dest="${js.libsroot}/ui-bootstrap-tpls-min.js" skipexisting="true" />
+        <get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui-ieshiv.js" dest="${js.libsroot}/angular-ui-ieshiv.js" skipexisting="true" />
+        <get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui-ieshiv.min.js" dest="${js.libsroot}/angular-ui-ieshiv-min.js" skipexisting="true" />
+        <!--<get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui.css" dest="${js.libsroot}/angular-ui.css" skipexisting="true" />-->
+        <get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui.js" dest="${js.libsroot}/angular-ui.js" skipexisting="true" />
+        <!--<get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui.min.css" dest="${js.libsroot}/angular-ui-min.css" skipexisting="true" />-->
+        <get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui.min.js" dest="${js.libsroot}/angular-ui-min.js" skipexisting="true" />
+
+        <get src="${js.cdnurl}/Base64/${base64js.version}/base64.min.js" dest="${js.libsroot}/base64-min.js" skipexisting="true" />
+
+        <!-- core extensions -->
+        <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore.js" dest="${js.libsroot}/underscore.js" skipexisting="true" />
+        <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore-min.js" dest="${js.libsroot}/underscore-min.js" skipexisting="true" />
+        <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore-min.js" dest="${js.libsroot}/underscore-min.js" skipexisting="true" />
+        <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore-min.map" dest="${js.libsroot}/underscore-min.js" skipexisting="true" />
+
+        <!-- date and time handling -->
+        <get src="${js.cdnurl}/moment.js/${momentjs.version}/moment.js" dest="${js.libsroot}/moment.js" skipexisting="true" />
+        <get src="${js.cdnurl}/moment.js/${momentjs.version}/moment.min.js" dest="${js.libsroot}/moment-min.js" skipexisting="true" />
+
+    </target>
+
+    <target name="bootstrap" depends="bootstrap.check" unless="bootstrap.present">
+        <get src="https://github.com/twbs/bootstrap/releases/download/v3.0.0/bootstrap-3.0.0-dist.zip" dest="${java.io.tmpdir}/bootstrap-3.0.0-dist.zip" />
+        <unzip src="${java.io.tmpdir}/bootstrap-3.0.0-dist.zip" dest="${bootstrap.root}"/>
+        <delete file="${java.io.tmpdir}/bootstrap-3.0.0-dist.zip"/>
+    </target>
+
+    <target name="main" depends="bootstrap,js"/>
+
+</project>

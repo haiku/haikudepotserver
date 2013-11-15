@@ -1,0 +1,25 @@
+<div class="generic-page-content-container">
+
+    <breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+    <h2>
+        {{pkg.name}}
+        <a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">
+            <span class="glyphicon glyphicon-link"></span>
+        </a>
+    </h2>
+
+    <p>
+<span class="label label-default">
+    <version-label version="pkg.versions[0]"></version-label>
+    - {{pkg.versions[0].architectureCode}}
+</span>
+    </p>
+
+    <p ng-show="pkg.versions[0].summary" class="lead">{{pkg.versions[0].summary}}</p>
+    <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

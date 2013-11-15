@@ -1,0 +1,70 @@
+
+<div id="home-search-criteria-bar" class="row">
+    <div class="col-md-3" ng-class="classMostRecent()" ng-click="goMostRecent()">Most Recent</div>
+    <div class="col-md-3" ng-class="classMostViewed()" ng-click="goMostViewed()">Most Viewed</div>
+    <div id="home-search-criteria-bar-categories" class="col-md-3" ng-class="classCategories()">
+        <span class="text-muted">Category :</span>
+        <select ng-model="selectedCategory" ng-options="category for category in categories"></select>
+    </div>
+    <div id="home-search-criteria-bar-search" class="col-md-3" ng-class="classSearch()">
+
+        <div class="input-group">
+            <input
+                    ng-model="searchExpression"
+                    type="search"
+                    class="form-control"
+                    ui-keypress="{enter:'goSearchExpression()'}"
+                    placeholder="Search..."></input>
+            <span class="input-group-btn">
+                <button
+                        class="btn btn-default"
+                        type="button"
+                        ng-click="goSearchExpression()">Go!</button>
+            </span>
+        </div><!-- /input-group -->
+    </div>
+</div>
+
+<div id="home-search-results-container" class="row text-center">
+
+    <div ng-show="!pkgs"><spinner></spinner></div>
+
+    <div ng-show="pkgs && 0==pkgs.length" class="alert alert-info">
+        <strong>No results; </strong>
+        There were no packages able to be found from your search criteria.
+    </div>
+
+    <div ng-show="pkgs && pkgs.length">
+        <table class="table table-striped table-bordered table-condensed">
+            <thead>
+            <td></td>
+            <td>Package</td>
+            <td>Current Version</td>
+            </thead>
+            <tbody>
+            <tr ng-repeat="pkg in pkgs">
+                <td class="text-center"><span class="glyphicon glyphicon-tower"></span></td>
+                <td><a href="" ng-click="goViewPkg(pkg)">{{pkg.name}}</a></td>
+                <td><version-label version="pkg.version"></version-label></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="text-right">
+            <ul class="pagination">
+                <li ng-class="classPreviousPage()">
+                    <a href="" ng-click="goPreviousPage()">&laquo;</a>
+                </li>
+                <!-- todo - pages inbetween -->
+                <li ng-class="classNextPage()">
+                    <a href="" ng-click="goNextPage()">&raquo;</a>
+                </li>
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>

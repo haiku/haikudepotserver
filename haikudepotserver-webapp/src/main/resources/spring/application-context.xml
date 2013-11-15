@@ -1,0 +1,41 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="org.haikuos.haikudepotserver">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:local.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <import resource="persistence-context.xml"/>
+    <import resource="webresourcegroup-context.xml"/>
+
+    <!-- CAPTCHA SUPPORT -->
+
+    <bean class="org.haikuos.haikudepotserver.captcha.CaptchaService">
+        <property name="captchaAlgorithm">
+            <bean class="org.haikuos.haikudepotserver.captcha.SimpleMathProblemCaptchaAlgorithm"/>
+        </property>
+        <property name="captchaRepository">
+            <bean class="org.haikuos.haikudepotserver.captcha.DatabaseCaptchaRepository">
+                <property name="dataSource" ref="dataSource"/>
+                <property name="expirySeconds" value="${captcha.expiryseconds:120}"/>
+            </bean>
+        </property>
+    </bean>
+
+</beans>

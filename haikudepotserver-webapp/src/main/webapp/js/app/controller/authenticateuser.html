@@ -1,0 +1,54 @@
+<div class="generic-page-content-container">
+
+    <breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+    <div class="alert alert-danger" ng-show="didFailAuthentication">
+        <strong>Login Failed!</strong>
+        Your login attempt has failed; try again.
+    </div>
+
+    <form name="authenticateUserForm" class="form-horizontal" role="form">
+
+        <div class="form-group">
+            <label for="nickname" class="col-sm-2 control-label">Nickname</label>
+            <div class="col-sm-4" ng-class="deriveFormControlsContainerClasses('nickname')">
+                <input
+                        type="text"
+                        name="nickname"
+                        class="form-control"
+                        placeholder="erik"
+                        ng-model="authenticationDetails.nickname"
+                        ng-required="true"></input>
+                <error-messages key-prefix="authenticateUser.nickname" error="authenticateUserForm.nickname.$error"></error-messages>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="passwordClear" class="col-sm-2 control-label">Password</label>
+            <div class="col-sm-4" ng-class="deriveFormControlsContainerClasses('passwordClear')">
+                <input
+                        type="password"
+                        name="passwordClear"
+                        class="form-control"
+                        ng-required="true"
+                        ng-model="authenticationDetails.passwordClear"></input>
+                <error-messages key-prefix="authenticateUser.passwordClear" error="authenticateUserForm.passwordClear.$error"></error-messages>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button
+                        ng-disabled="createUserForm.$invalid"
+                        ng-click="goAuthenticate()"
+                        type="submit"
+                        class="btn btn-default">Login</button>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

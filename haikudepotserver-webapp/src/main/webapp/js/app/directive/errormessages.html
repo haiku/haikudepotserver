@@ -1,0 +1,3 @@
+<div>
+    <div ng-repeat="(errorKey,errorValue) in error track by $index" ng-show="errorValue" class="text-danger"><message key="{{keyPrefix + '.' + errorKey}}"></message></div>
+</div>

@@ -1,0 +1,53 @@
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="" ng-click="goHome()">Haiku Depot Web - <span class="text-danger">Early Development</span></a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <!--<ul class="nav navbar-nav">-->
+                <!--<li class="active"><a href="#">Todo</a></li>-->
+                <!--<li><a href="#">Todo</a></li>-->
+                <!--<li><a href="#">Todo</a></li>-->
+            <!--</ul>-->
+            <ul class="nav navbar-nav navbar-right">
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <span>{{architecture.code}}</span>
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li
+                                ng-class="isArchitectureSelected(a) ? ['disabled'] : []"
+                                ng-repeat="a in architectures">
+                            <a
+                                    href=""
+                                    ng-click="goChooseArchitecture(a)">{{a.code}}</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <span class="glyphicon glyphicon-user"></span>
+                        <span>{{userDisplayTitle()}}</span>
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li ng-show="canCreateUser()">
+                            <a href="" ng-click="goCreateUser()">Register New User</a>
+                        </li>
+                        <li ng-show="canAuthenticateUser()">
+                            <a href="" ng-click="goAuthenticateUser()">Login</a>
+                        </li>
+                        <li ng-show="canLogoutUser()">
+                            <a href="" ng-click="goLogoutUser()">Logout</a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+

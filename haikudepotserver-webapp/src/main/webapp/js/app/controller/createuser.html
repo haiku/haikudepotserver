@@ -1,0 +1,70 @@
+<div class="generic-page-content-container">
+
+    <breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+    <form name="createUserForm" class="form-horizontal" role="form">
+
+        <div class="form-group">
+            <label for="nickname" class="col-sm-2 control-label">Nickname</label>
+            <div class="col-sm-4" ng-class="deriveFormControlsContainerClasses('nickname')">
+                <input
+                        type="text"
+                        name="nickname"
+                        class="form-control"
+                        placeholder="erik"
+                        ng-model="newUser.nickname"
+                        ng-required="true"
+                        ng-change="nicknameDidChange()"
+                        ng-pattern="/^[a-z0-9]{4,16}$/"></input>
+                <error-messages key-prefix="createUser.nickname" error="createUserForm.nickname.$error"></error-messages>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="passwordClear" class="col-sm-2 control-label">Password</label>
+            <div class="col-sm-4" ng-class="deriveFormControlsContainerClasses('passwordClear')">
+                <input
+                        type="password"
+                        name="passwordClear"
+                        class="form-control"
+                        ng-required="true"
+                        ng-minlength="5"
+                        ng-model="newUser.passwordClear"></input>
+                <error-messages key-prefix="createUser.passwordClear" error="createUserForm.passwordClear.$error"></error-messages>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="captchaResponse" class="col-sm-2 control-label">Check for a Person</label>
+            <div class="col-sm-10" ng-class="deriveFormControlsContainerClasses('captchaResponse')">
+                <img src="{{captchaImageUrl}}"></img>
+                =
+                <input
+                        id="create-user-captcha-response-input"
+                        size="3"
+                        type="text"
+                        name="captchaResponse"
+                        class="form-control"
+                        ng-required="true"
+                        ng-change="captchaResponseDidChange()"
+                        ng-model="newUser.captchaResponse"></input>
+                <error-messages key-prefix="createUserForm.captchaResponse" error="createUserForm.captchaResponse.$error"></error-messages>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button
+                        ng-disabled="createUserForm.$invalid"
+                        ng-click="goCreateUser()"
+                        type="submit"
+                        class="btn btn-default">Create</button>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

@@ -1,0 +1,83 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!--
+    These are third party libraries that the system requires as imports into the single-page application.
+    -->
+
+    <bean id="libScriptsWebResourceGroup" class="org.haikuos.haikudepotserver.support.web.model.WebResourceGroup">
+        <property name="code" value="libScripts"></property>
+        <property name="separated" value="${webresourcegroup.separated:false}"></property>
+        <property name="mimeType" value="application/javascript"/>
+        <property name="resources">
+            <list>
+                <value>/js/lib/base64-min.js</value>
+                <value>/js/lib/moment-min.js</value>
+                <value>/js/lib/underscore-min.js</value>
+                <value>/js/lib/angular-min.js</value>
+                <value>/js/lib/angular-route-min.js</value>
+                <value>/js/lib/ui-bootstrap-tpls.js</value>
+                <value>/js/lib/angular-ui.js</value>
+                <value>/js/lib/base64-min.js</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--
+    These are java-script resources that are part of the application's single-page application.
+    -->
+
+    <bean id="appScriptsWebResourceGroup" class="org.haikuos.haikudepotserver.support.web.model.WebResourceGroup">
+        <property name="code" value="appScripts"></property>
+        <property name="separated" value="${webresourcegroup.separated:false}"></property>
+        <property name="mimeType" value="application/javascript"/>
+        <property name="resources">
+            <list>
+                <value>/js/app/haikudepotserver.js</value>
+                <value>/js/app/routes.js</value>
+                <value>/js/app/constants.js</value>
+
+                <value>/js/app/directive/bannerdirective.js</value>
+                <value>/js/app/directive/spinnerdirective.js</value>
+                <value>/js/app/directive/versionlabeldirective.js</value>
+                <value>/js/app/directive/breadcrumbsdirective.js</value>
+                <value>/js/app/directive/messagedirective.js</value>
+                <value>/js/app/directive/errormessagesdirective.js</value>
+
+                <value>/js/app/controller/viewpkgcontroller.js</value>
+                <value>/js/app/controller/homecontroller.js</value>
+                <value>/js/app/controller/errorcontroller.js</value>
+                <value>/js/app/controller/createusercontroller.js</value>
+                <value>/js/app/controller/viewusercontroller.js</value>
+                <value>/js/app/controller/authenticateusercontroller.js</value>
+
+                <value>/js/app/service/jsonrpcservice.js</value>
+                <value>/js/app/service/messagesourceservice.js</value>
+                <value>/js/app/service/userstateservice.js</value>
+                <value>/js/app/service/referencedataservice.js</value>
+
+            </list>
+        </property>
+    </bean>
+
+    <!--
+    These are CSS resources that are part of the application's single-page application.
+    -->
+
+    <bean id="appStylesheetsWebResourceGroup" class="org.haikuos.haikudepotserver.support.web.model.WebResourceGroup">
+        <property name="code" value="appStylesheets"></property>
+        <property name="separated" value="${webresourcegroup.separated:false}"></property>
+        <property name="mimeType" value="text/css"/>
+        <property name="resources">
+            <list>
+                <value>/css/haikudepotserver.css</value>
+                <value>/css/home.css</value>
+                <value>/css/createuser.css</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>

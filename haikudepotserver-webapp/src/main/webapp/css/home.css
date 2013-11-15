@@ -1,0 +1,47 @@
+/*
+These styles are related to the 'home page' of the application.
+*/
+
+#home-search-criteria-bar > div {
+    background-color: rgb(253,207,49);
+    min-height: 44px;
+    text-align: center;
+    padding-top: 12px;
+}
+
+#home-search-criteria-bar-categories > span {
+    color: rgba(0, 0, 0, 0.50);
+}
+
+/*
+Special layout for the search field which is in the 3rd box
+*/
+
+#home-search-criteria-bar #home-search-criteria-bar-search {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+#home-search-criteria-bar > div.selected {
+    background-color: white;
+    border-bottom: white 1px solid;
+}
+
+#home-search-criteria-bar > div:not(.selected) {
+    border-bottom: black 1px solid;
+}
+
+#home-search-criteria-bar > div:nth-child(n+2) {
+    border-left: black 1px solid;
+}
+
+#home-search-results-container {
+    margin-top: 16px;
+    padding: 16px;
+}
+
+#home-search-results-container > table > tbody > tr > td:nth-child(1) {
+    width: 24px;
+}

@@ -1,0 +1,7 @@
+
+<ol ng-show="shouldShowItems()" class="breadcrumb">
+    <li ng-repeat="item in derivedItems" ng-class="listItemClass(item)">
+        <a href="" ng-click="goItem(item)" ng-show="!isItemActive(item)">{{item.title}}</a>
+        <span ng-show="isItemActive(item)">{{item.title}}</span>
+    </li>
+</ol>
