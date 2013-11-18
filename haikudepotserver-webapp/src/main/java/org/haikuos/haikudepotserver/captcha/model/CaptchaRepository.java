@@ -15,7 +15,7 @@ public interface CaptchaRepository {
      * <p>This method will remove those captchas that have expired.</p>
      */
 
-    public int purgeExpired();
+    public void purgeExpired();
 
     /**
      * <p>This method will delete the captcha identified by the UUID supplied.</p>

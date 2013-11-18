@@ -44,6 +44,10 @@ public class CaptchaService {
      */
 
     public Captcha generate() {
+
+        // maybe better done less frequently?
+        captchaRepository.purgeExpired();
+
         Captcha captcha = captchaAlgorithm.generate();
         captchaRepository.store(captcha.getToken(), captcha.getResponse());
         return captcha;

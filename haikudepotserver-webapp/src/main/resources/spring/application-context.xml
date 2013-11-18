@@ -32,7 +32,7 @@
         </property>
         <property name="captchaRepository">
             <bean class="org.haikuos.haikudepotserver.captcha.DatabaseCaptchaRepository">
-                <property name="dataSource" ref="dataSource"/>
+                <property name="serverRuntime" ref="haikuDepotServerRuntime"/>
                 <property name="expirySeconds" value="${captcha.expiryseconds:120}"/>
             </bean>
         </property>
