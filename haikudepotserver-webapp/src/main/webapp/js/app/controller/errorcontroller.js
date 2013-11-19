@@ -6,10 +6,10 @@
 angular.module('haikudepotserver').controller(
     'ErrorController',
     [
-        '$scope','$log','$location',
+        '$scope','$log','$location','userState',
         function(
-            $scope,$log,$location) {
-
+            $scope,$log,$location,userState) {
+               userState.user(null);
         }
     ]
 );

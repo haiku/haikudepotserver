@@ -73,7 +73,7 @@ public class UserApiImpl implements UserApi {
         User user = context.newObject(User.class);
         user.setNickname(createUserRequest.nickname);
         user.setPasswordSalt(); // random
-        user.setPasswordHash(Hashing.sha256().hashString(user.getPasswordSalt() + createUserRequest.passwordClear).toString());
+        user.setPasswordHash(Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + createUserRequest.passwordClear).toString());
         context.commitChanges();
 
         logger.info("data create user; {}",user.getNickname());
@@ -125,7 +125,7 @@ public class UserApiImpl implements UserApi {
 
             if(userOptional.isPresent()) {
                 String saltAndPasswordClear = userOptional.get().getPasswordSalt() + authenticateUserRequest.passwordClear;
-                String inboundHash = Hashing.sha256().hashString(saltAndPasswordClear).toString();
+                String inboundHash = Hashing.sha256().hashUnencodedChars(saltAndPasswordClear).toString();
                 authenticateUserResult.authenticated = inboundHash.equals(userOptional.get().getPasswordHash());
             }
         }

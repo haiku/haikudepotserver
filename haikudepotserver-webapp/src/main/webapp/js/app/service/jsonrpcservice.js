@@ -110,14 +110,15 @@ angular.module('haikudepotserver').factory('jsonRpc',
                     $http({
                         method: 'POST',
                         url: endpoint,
-                        headers: JsonRpcService.headers,
+                        headers: _.extend(
+                            { 'Content-Type' : 'application/json' },
+                            JsonRpcService.headers),
                         data: {
                             jsonrpc : "2.0",
                             method : method,
                             params : params,
                             id : id
-                        },
-                        headers:{'Content-Type':'application/json'}
+                        }
                     })
                     .success(function(data,status,header,config) {
                         if(200!=status) {
