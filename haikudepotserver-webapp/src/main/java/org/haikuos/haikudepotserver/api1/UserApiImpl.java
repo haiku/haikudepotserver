@@ -19,10 +19,12 @@ import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -35,6 +37,9 @@ public class UserApiImpl implements UserApi {
 
     @Resource
     CaptchaService captchaService;
+
+    @Resource
+    AuthenticationManager authenticationManager;
 
     @Override
     public CreateUserResult createUser(CreateUserRequest createUserRequest) {
@@ -115,20 +120,23 @@ public class UserApiImpl implements UserApi {
             authenticateUserRequest.passwordClear = authenticateUserRequest.passwordClear.trim();
         }
 
-        if(
-                !Strings.isNullOrEmpty(authenticateUserRequest.nickname)
-                        && !Strings.isNullOrEmpty(authenticateUserRequest.passwordClear)) {
+        // Use the spring security system to authenticate in the same fashion as the regular basic auth
+        // of the HTTP requests.
 
-            final ObjectContext context = serverRuntime.getContext();
+        UsernamePasswordAuthenticationToken authRequest =
+                new UsernamePasswordAuthenticationToken(
+                        authenticateUserRequest.nickname,
+                        authenticateUserRequest.passwordClear);
 
-            Optional<User> userOptional = User.getByNickname(context, authenticateUserRequest.nickname);
-
-            if(userOptional.isPresent()) {
-                String saltAndPasswordClear = userOptional.get().getPasswordSalt() + authenticateUserRequest.passwordClear;
-                String inboundHash = Hashing.sha256().hashUnencodedChars(saltAndPasswordClear).toString();
-                authenticateUserResult.authenticated = inboundHash.equals(userOptional.get().getPasswordHash());
-            }
+        try {
+            authenticateUserResult.authenticated = authenticationManager.authenticate(authRequest).isAuthenticated();
         }
+        catch(AuthenticationException ae) {
+            // ignore.
+        }
+
+        // if the authentication has failed then best to sleep for a moment
+        // to make brute forcing a bit more tricky.
 
         if(!authenticateUserResult.authenticated) {
             Uninterruptibles.sleepUninterruptibly(5,TimeUnit.SECONDS);

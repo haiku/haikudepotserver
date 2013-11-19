@@ -58,7 +58,9 @@ angular.module('haikudepotserver').directive('banner',function() {
                     }
 
                     $scope.canAuthenticateUser = function() {
-                        return !userState.user() && $location.path() != '/authenticateuser';
+                        return !userState.user()
+                            && $location.path() != '/authenticateuser'
+                            && $location.apth() != '/createuser';
                     }
 
                     $scope.canLogoutUser = function() {
