@@ -27,7 +27,8 @@ angular.module('haikudepotserver').factory('jsonRpc',
 
                     VALIDATION : -32800,
                     OBJECTNOTFOUND : -32801,
-                    CAPTCHABADRESPONSE : -32802
+                    CAPTCHABADRESPONSE : -32802,
+                    AUTHORIZATIONFAILURE : -32803
                 },
 
                 /**

@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.user.*;
+import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.CaptchaBadResponseException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
@@ -28,7 +29,7 @@ import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class UserApiImpl implements UserApi {
+public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     protected static Logger logger = LoggerFactory.getLogger(UserApiImpl.class);
 
@@ -69,10 +70,10 @@ public class UserApiImpl implements UserApi {
         //need to check that the nickname is not already in use.
 
         if(User.getByNickname(context,createUserRequest.nickname).isPresent()) {
-           throw new org.haikuos.haikudepotserver.api1.support.ValidationException(
-                   new org.haikuos.haikudepotserver.api1.support.ValidationFailure(
-                           User.NICKNAME_PROPERTY,"notunique")
-           );
+            throw new org.haikuos.haikudepotserver.api1.support.ValidationException(
+                    new org.haikuos.haikudepotserver.api1.support.ValidationFailure(
+                            User.NICKNAME_PROPERTY,"notunique")
+            );
         }
 
         User user = context.newObject(User.class);
@@ -87,11 +88,16 @@ public class UserApiImpl implements UserApi {
     }
 
     @Override
-    public GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException {
+    public GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException, AuthenticationException {
         Preconditions.checkNotNull(getUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getUserRequest.nickname));
 
         final ObjectContext context = serverRuntime.getContext();
+        User authUser = obtainAuthenticatedUser(context);
+
+        if(!authUser.getNickname().equals(getUserRequest.nickname) && !authUser.getDerivedCanManageUsers()) {
+            throw new AuthorizationFailureException();
+        }
 
         Optional<User> user = User.getByNickname(context, getUserRequest.nickname);
 

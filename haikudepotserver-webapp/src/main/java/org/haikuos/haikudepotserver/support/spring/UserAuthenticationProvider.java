@@ -14,14 +14,9 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.model.User;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import java.nio.file.attribute.UserPrincipalNotFoundException;
-import java.util.Collections;
 
 public class UserAuthenticationProvider implements AuthenticationProvider {
 
@@ -60,10 +55,7 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         String hash = Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + passwordClear).toString();
 
         if(hash.equals(user.getPasswordHash())) {
-            return new UsernamePasswordAuthenticationToken(
-                    user.getNickname(),
-                    passwordClear,
-                    Collections.<GrantedAuthority>emptySet());
+            return new UserAuthentication(user);
         }
 
         throw new BadCredentialsException("bad password supplied");
