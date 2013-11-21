@@ -11,7 +11,7 @@
             <!--</ul>-->
             <ul class="nav navbar-nav navbar-right">
 
-                <li class="dropdown">
+                <li class="dropdown" ng-show="architectures.length">
                     <a href="#" class="dropdown-toggle">
                         <span>{{architecture.code}}</span>
                         <b class="caret"></b>
@@ -27,21 +27,17 @@
                     </ul>
                 </li>
 
-                <li class="dropdown">
+                <li class="dropdown" ng-show="userActions.length">
                     <a href="#" class="dropdown-toggle">
                         <span class="glyphicon glyphicon-user"></span>
                         <span>{{userDisplayTitle()}}</span>
                         <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                        <li ng-show="canCreateUser()">
-                            <a href="" ng-click="goCreateUser()">Register New User</a>
-                        </li>
-                        <li ng-show="canAuthenticateUser()">
-                            <a href="" ng-click="goAuthenticateUser()">Login</a>
-                        </li>
-                        <li ng-show="canLogoutUser()">
-                            <a href="" ng-click="goLogoutUser()">Logout</a>
+                        <li ng-repeat="userAction in userActions">
+                            <a
+                                    href=""
+                                    ng-click="userAction.action()"><message key="{{userAction.titleKey}}"></message></a>
                         </li>
                     </ul>
                 </li>
