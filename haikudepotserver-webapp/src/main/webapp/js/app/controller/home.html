@@ -43,7 +43,9 @@
             </thead>
             <tbody>
             <tr ng-repeat="pkg in pkgs">
-                <td class="text-center"><span class="glyphicon glyphicon-tower"></span></td>
+                <td class="text-center">
+                    <pkg-icon size="16" pkg="pkg"></pkg-icon>
+                </td>
                 <td><a href="" ng-click="goViewPkg(pkg)">{{pkg.name}}</a></td>
                 <td><version-label version="pkg.version"></version-label></td>
             </tr>

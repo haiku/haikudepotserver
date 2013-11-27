@@ -61,4 +61,6 @@ public abstract class _User extends AbstractDataObject {
         return (String)readProperty(PASSWORD_SALT_PROPERTY);
     }
 
+    protected abstract void onPostAdd();
+
 }

@@ -49,7 +49,7 @@ public class WebResourceGroupController implements ApplicationContextAware {
         this.applicationContext = applicationContext;
     }
 
-    @RequestMapping(value = "/{code}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{"+KEY_CODE+"}", method = RequestMethod.GET)
     public void fetch(
             HttpServletResponse response,
             @PathVariable(value = KEY_CODE) String code)

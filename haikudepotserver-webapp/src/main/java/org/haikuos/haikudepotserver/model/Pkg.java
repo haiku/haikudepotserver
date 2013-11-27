@@ -6,7 +6,10 @@
 package org.haikuos.haikudepotserver.model;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
@@ -40,6 +43,39 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             }
         }
 
+    }
+
+    public Optional<PkgIconImage> getPkgIconImage(final MediaType mediaType, final int size) {
+        Preconditions.checkNotNull(mediaType);
+        Preconditions.checkState(16==size||32==size);
+
+        Optional<PkgIcon> pkgIconOptional = getPkgIcon(mediaType,size);
+
+        if(pkgIconOptional.isPresent()) {
+            Optional<PkgIconImage> pkgIconImageOptional = pkgIconOptional.get().getPkgIconImage();
+
+            if(pkgIconImageOptional.isPresent()) {
+                return pkgIconImageOptional;
+            }
+            else {
+                throw new IllegalStateException("a pkg icon does not have an image associated with it.");
+            }
+        }
+
+        return Optional.absent();
+    }
+
+        public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final int size) {
+        Preconditions.checkNotNull(mediaType);
+        Preconditions.checkState(16==size||32==size);
+
+        for(PkgIcon pkgIcon : getPkgIcons()) {
+            if(pkgIcon.getMediaType().equals(mediaType) && pkgIcon.getSize()==size) {
+                return Optional.of(pkgIcon);
+            }
+        }
+
+        return Optional.absent();
     }
 
 }

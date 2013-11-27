@@ -16,6 +16,15 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="media_type" schema="haikudepot">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>media_type_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="pkg" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
@@ -27,6 +36,49 @@
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_seq</db-generator-name>
 			<db-key-cache-size>10</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="pkg_icon" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="media_type_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="size" type="INTEGER"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>pkg_icon_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="pkg_icon_image" schema="haikudepot">
+		<db-attribute name="data" type="BLOB" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="pkg_icon_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>pkg_icon_image_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="pkg_screenshot" schema="haikudepot">
+		<db-attribute name="code" type="CHAR" isMandatory="true" length="36"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="ordering" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>pkg_screenshot_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="pkg_screenshot_image" schema="haikudepot">
+		<db-attribute name="data" type="BLOB" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="media_type_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_screenshot_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>pkg_screenshot_image_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_url_type" schema="haikudepot">
@@ -145,6 +197,9 @@
 	<obj-entity name="Architecture" className="org.haikuos.haikudepotserver.model.Architecture" readOnly="true" lock-type="optimistic" dbEntityName="architecture" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
+	<obj-entity name="MediaType" className="org.haikuos.haikudepotserver.model.MediaType" readOnly="true" lock-type="optimistic" dbEntityName="media_type" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
+	</obj-entity>
 	<obj-entity name="Pkg" className="org.haikuos.haikudepotserver.model.Pkg" lock-type="optimistic" dbEntityName="pkg" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
@@ -154,6 +209,19 @@
 			<post-add method-name="onPostAdd"/>
 			<pre-update method-name="onPreUpdate"/>
 		</entity-listener>
+	</obj-entity>
+	<obj-entity name="PkgIcon" className="org.haikuos.haikudepotserver.model.PkgIcon" lock-type="optimistic" dbEntityName="pkg_icon" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
+		<obj-attribute name="size" type="java.lang.Integer" db-attribute-path="size"/>
+	</obj-entity>
+	<obj-entity name="PkgIconImage" className="org.haikuos.haikudepotserver.model.PkgIconImage" dbEntityName="pkg_icon_image" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
+		<obj-attribute name="data" type="byte[]" db-attribute-path="data"/>
+	</obj-entity>
+	<obj-entity name="PkgScreenshot" className="org.haikuos.haikudepotserver.model.PkgScreenshot" lock-type="optimistic" dbEntityName="pkg_screenshot" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+		<obj-attribute name="ordering" type="java.lang.Integer" db-attribute-path="ordering"/>
+	</obj-entity>
+	<obj-entity name="PkgScreenshotImage" className="org.haikuos.haikudepotserver.model.PkgScreenshotImage" dbEntityName="pkg_screenshot_image" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
+		<obj-attribute name="data" type="byte[]" db-attribute-path="data"/>
 	</obj-entity>
 	<obj-entity name="PkgUrlType" className="org.haikuos.haikudepotserver.model.PkgUrlType" readOnly="true" lock-type="optimistic" dbEntityName="pkg_url_type" superClassName="org.haikuos.haikudepotserver.model.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
@@ -218,8 +286,44 @@
 		<obj-attribute name="passwordSalt" type="java.lang.String" lock="true" db-attribute-path="password_salt"/>
 		<post-add method-name="onPostAdd"/>
 	</obj-entity>
+	<db-relationship name="untitledRel" source="media_type" target="pkg_icon" toMany="true">
+		<db-attribute-pair source="id" target="media_type_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel1" source="media_type" target="pkg_screenshot_image" toMany="true">
+		<db-attribute-pair source="id" target="media_type_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_icons" source="pkg" target="pkg_icon" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_screenshots" source="pkg" target="pkg_screenshot" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
+	</db-relationship>
 	<db-relationship name="publisher" source="pkg" target="publisher" toMany="false">
 		<db-attribute-pair source="publisher_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="media_type" source="pkg_icon" target="media_type" toMany="false">
+		<db-attribute-pair source="media_type_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg" source="pkg_icon" target="pkg" toMany="false">
+		<db-attribute-pair source="pkg_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg_icon_images" source="pkg_icon" target="pkg_icon_image" toMany="true">
+		<db-attribute-pair source="id" target="pkg_icon_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_icon" source="pkg_icon_image" target="pkg_icon" toMany="false">
+		<db-attribute-pair source="pkg_icon_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg" source="pkg_screenshot" target="pkg" toMany="false">
+		<db-attribute-pair source="pkg_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg_screenshot_images" source="pkg_screenshot" target="pkg_screenshot_image" toMany="true">
+		<db-attribute-pair source="id" target="pkg_screenshot_id"/>
+	</db-relationship>
+	<db-relationship name="media_type" source="pkg_screenshot_image" target="media_type" toMany="false">
+		<db-attribute-pair source="media_type_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg_screenshot" source="pkg_screenshot_image" target="pkg_screenshot" toMany="false">
+		<db-attribute-pair source="pkg_screenshot_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="architecture" source="pkg_version" target="architecture" toMany="false">
 		<db-attribute-pair source="architecture_id" target="id"/>
@@ -266,7 +370,17 @@
 	<db-relationship name="pkg_versions" source="repository" target="pkg_version" toMany="true">
 		<db-attribute-pair source="id" target="repository_id"/>
 	</db-relationship>
+	<obj-relationship name="pkgIcons" source="Pkg" target="PkgIcon" deleteRule="Cascade" db-relationship-path="pkg_icons"/>
+	<obj-relationship name="pkgScreenshots" source="Pkg" target="PkgScreenshot" deleteRule="Cascade" db-relationship-path="pkg_screenshots"/>
 	<obj-relationship name="publisher" source="Pkg" target="Publisher" deleteRule="Nullify" db-relationship-path="publisher"/>
+	<obj-relationship name="mediaType" source="PkgIcon" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
+	<obj-relationship name="pkg" source="PkgIcon" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
+	<obj-relationship name="pkgIconImages" source="PkgIcon" target="PkgIconImage" deleteRule="Deny" db-relationship-path="pkg_icon_images"/>
+	<obj-relationship name="pkgIcon" source="PkgIconImage" target="PkgIcon" deleteRule="Nullify" db-relationship-path="pkg_icon"/>
+	<obj-relationship name="pkg" source="PkgScreenshot" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
+	<obj-relationship name="pkgScreenshotImages" source="PkgScreenshot" target="PkgScreenshotImage" deleteRule="Deny" db-relationship-path="pkg_screenshot_images"/>
+	<obj-relationship name="mediaType" source="PkgScreenshotImage" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
+	<obj-relationship name="pkgScreenshot" source="PkgScreenshotImage" target="PkgScreenshot" deleteRule="Nullify" db-relationship-path="pkg_screenshot"/>
 	<obj-relationship name="architecture" source="PkgVersion" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>
 	<obj-relationship name="pkg" source="PkgVersion" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgVersionCopyrights" source="PkgVersion" target="PkgVersionCopyright" deleteRule="Deny" db-relationship-path="pkg_version_copyrights"/>

@@ -46,6 +46,7 @@
                 <value>/js/app/directive/breadcrumbsdirective.js</value>
                 <value>/js/app/directive/messagedirective.js</value>
                 <value>/js/app/directive/errormessagesdirective.js</value>
+                <value>/js/app/directive/pkgicondirective.js</value>
 
                 <value>/js/app/controller/viewpkgcontroller.js</value>
                 <value>/js/app/controller/homecontroller.js</value>

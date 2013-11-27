@@ -1,7 +1,10 @@
 package org.haikuos.haikudepotserver.model.auto;
 
 import java.util.Date;
+import java.util.List;
 
+import org.haikuos.haikudepotserver.model.PkgIcon;
+import org.haikuos.haikudepotserver.model.PkgScreenshot;
 import org.haikuos.haikudepotserver.model.Publisher;
 import org.haikuos.haikudepotserver.model.support.AbstractDataObject;
 
@@ -17,6 +20,8 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NAME_PROPERTY = "name";
+    public static final String PKG_ICONS_PROPERTY = "pkgIcons";
+    public static final String PKG_SCREENSHOTS_PROPERTY = "pkgScreenshots";
     public static final String PUBLISHER_PROPERTY = "publisher";
 
     public static final String ID_PK_COLUMN = "id";
@@ -48,6 +53,31 @@ public abstract class _Pkg extends AbstractDataObject {
     public String getName() {
         return (String)readProperty(NAME_PROPERTY);
     }
+
+    public void addToPkgIcons(PkgIcon obj) {
+        addToManyTarget(PKG_ICONS_PROPERTY, obj, true);
+    }
+    public void removeFromPkgIcons(PkgIcon obj) {
+        removeToManyTarget(PKG_ICONS_PROPERTY, obj, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<PkgIcon> getPkgIcons() {
+        return (List<PkgIcon>)readProperty(PKG_ICONS_PROPERTY);
+    }
+
+
+    public void addToPkgScreenshots(PkgScreenshot obj) {
+        addToManyTarget(PKG_SCREENSHOTS_PROPERTY, obj, true);
+    }
+    public void removeFromPkgScreenshots(PkgScreenshot obj) {
+        removeToManyTarget(PKG_SCREENSHOTS_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PkgScreenshot> getPkgScreenshots() {
+        return (List<PkgScreenshot>)readProperty(PKG_SCREENSHOTS_PROPERTY);
+    }
+
 
     public void setPublisher(Publisher publisher) {
         setToOneTarget(PUBLISHER_PROPERTY, publisher, true);
