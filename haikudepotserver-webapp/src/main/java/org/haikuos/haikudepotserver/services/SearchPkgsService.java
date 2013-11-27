@@ -28,6 +28,10 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * <p>This service affords the ability for clients to search for packages in a standardized manner.</p>
+ */
+
 @Service
 public class SearchPkgsService {
 
@@ -71,7 +75,7 @@ public class SearchPkgsService {
             if(!Strings.isNullOrEmpty(search.getExpression())) {
                 queryBuilder.append(" AND");
                 queryBuilder.append(String.format(" pv.pkg.name LIKE ?%d",parameters.size()+1));
-                parameters.add("%" + LikeHelper.escapeExpression(search.getExpression()) + "%");
+                parameters.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
             }
 
             queryBuilder.append(" ORDER BY pv.pkg.name ASC");

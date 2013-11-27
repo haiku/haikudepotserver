@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.api1;
 
 import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haikuos.haikudepotserver.api1.model.user.*;
+import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 
 /**
@@ -29,7 +30,7 @@ public interface UserApi {
      * is thrown.</p>
      */
 
-    GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException;
+    GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException, AuthorizationFailureException;
 
     /**
      * <p>This method will allow a client to authenticate against the server.  If this is

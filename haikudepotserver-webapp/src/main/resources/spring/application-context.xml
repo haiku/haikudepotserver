@@ -23,6 +23,7 @@
 
     <import resource="persistence-context.xml"/>
     <import resource="webresourcegroup-context.xml"/>
+    <import resource="security-context.xml"/>
 
     <!-- CAPTCHA SUPPORT -->
 

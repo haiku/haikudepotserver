@@ -27,7 +27,8 @@ angular.module('haikudepotserver').factory('jsonRpc',
 
                     VALIDATION : -32800,
                     OBJECTNOTFOUND : -32801,
-                    CAPTCHABADRESPONSE : -32802
+                    CAPTCHABADRESPONSE : -32802,
+                    AUTHORIZATIONFAILURE : -32803
                 },
 
                 /**
@@ -110,14 +111,15 @@ angular.module('haikudepotserver').factory('jsonRpc',
                     $http({
                         method: 'POST',
                         url: endpoint,
-                        headers: JsonRpcService.headers,
+                        headers: _.extend(
+                            { 'Content-Type' : 'application/json' },
+                            JsonRpcService.headers),
                         data: {
                             jsonrpc : "2.0",
                             method : method,
                             params : params,
                             id : id
-                        },
-                        headers:{'Content-Type':'application/json'}
+                        }
                     })
                     .success(function(data,status,header,config) {
                         if(200!=status) {

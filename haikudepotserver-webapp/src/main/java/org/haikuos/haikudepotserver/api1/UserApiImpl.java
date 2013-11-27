@@ -13,20 +13,23 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.user.*;
+import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.CaptchaBadResponseException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class UserApiImpl implements UserApi {
+public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     protected static Logger logger = LoggerFactory.getLogger(UserApiImpl.class);
 
@@ -35,6 +38,9 @@ public class UserApiImpl implements UserApi {
 
     @Resource
     CaptchaService captchaService;
+
+    @Resource
+    AuthenticationManager authenticationManager;
 
     @Override
     public CreateUserResult createUser(CreateUserRequest createUserRequest) {
@@ -64,16 +70,16 @@ public class UserApiImpl implements UserApi {
         //need to check that the nickname is not already in use.
 
         if(User.getByNickname(context,createUserRequest.nickname).isPresent()) {
-           throw new org.haikuos.haikudepotserver.api1.support.ValidationException(
-                   new org.haikuos.haikudepotserver.api1.support.ValidationFailure(
-                           User.NICKNAME_PROPERTY,"notunique")
-           );
+            throw new org.haikuos.haikudepotserver.api1.support.ValidationException(
+                    new org.haikuos.haikudepotserver.api1.support.ValidationFailure(
+                            User.NICKNAME_PROPERTY,"notunique")
+            );
         }
 
         User user = context.newObject(User.class);
         user.setNickname(createUserRequest.nickname);
         user.setPasswordSalt(); // random
-        user.setPasswordHash(Hashing.sha256().hashString(user.getPasswordSalt() + createUserRequest.passwordClear).toString());
+        user.setPasswordHash(Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + createUserRequest.passwordClear).toString());
         context.commitChanges();
 
         logger.info("data create user; {}",user.getNickname());
@@ -82,11 +88,16 @@ public class UserApiImpl implements UserApi {
     }
 
     @Override
-    public GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException {
+    public GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException, AuthenticationException {
         Preconditions.checkNotNull(getUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getUserRequest.nickname));
 
         final ObjectContext context = serverRuntime.getContext();
+        User authUser = obtainAuthenticatedUser(context);
+
+        if(!authUser.getNickname().equals(getUserRequest.nickname) && !authUser.getDerivedCanManageUsers()) {
+            throw new AuthorizationFailureException();
+        }
 
         Optional<User> user = User.getByNickname(context, getUserRequest.nickname);
 
@@ -115,20 +126,23 @@ public class UserApiImpl implements UserApi {
             authenticateUserRequest.passwordClear = authenticateUserRequest.passwordClear.trim();
         }
 
-        if(
-                !Strings.isNullOrEmpty(authenticateUserRequest.nickname)
-                        && !Strings.isNullOrEmpty(authenticateUserRequest.passwordClear)) {
+        // Use the spring security system to authenticate in the same fashion as the regular basic auth
+        // of the HTTP requests.
 
-            final ObjectContext context = serverRuntime.getContext();
+        UsernamePasswordAuthenticationToken authRequest =
+                new UsernamePasswordAuthenticationToken(
+                        authenticateUserRequest.nickname,
+                        authenticateUserRequest.passwordClear);
 
-            Optional<User> userOptional = User.getByNickname(context, authenticateUserRequest.nickname);
-
-            if(userOptional.isPresent()) {
-                String saltAndPasswordClear = userOptional.get().getPasswordSalt() + authenticateUserRequest.passwordClear;
-                String inboundHash = Hashing.sha256().hashString(saltAndPasswordClear).toString();
-                authenticateUserResult.authenticated = inboundHash.equals(userOptional.get().getPasswordHash());
-            }
+        try {
+            authenticateUserResult.authenticated = authenticationManager.authenticate(authRequest).isAuthenticated();
         }
+        catch(AuthenticationException ae) {
+            // ignore.
+        }
+
+        // if the authentication has failed then best to sleep for a moment
+        // to make brute forcing a bit more tricky.
 
         if(!authenticateUserResult.authenticated) {
             Uninterruptibles.sleepUninterruptibly(5,TimeUnit.SECONDS);

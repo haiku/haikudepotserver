@@ -28,6 +28,15 @@ public class ErrorResolverImpl implements ErrorResolver {
     @Override
     public JsonError resolveError(Throwable t, Method method, List<JsonNode> arguments) {
 
+        // output for authorization failure.
+
+        if(AuthorizationFailureException.class.isAssignableFrom(t.getClass())) {
+            return new JsonError(
+                    Constants.ERROR_CODE_AUTHORIZATIONFAILURE,
+                    "authorizationfailure",
+                    null);
+        }
+
         // special output for a bad captcha
 
         if(CaptchaBadResponseException.class.isAssignableFrom(t.getClass())) {

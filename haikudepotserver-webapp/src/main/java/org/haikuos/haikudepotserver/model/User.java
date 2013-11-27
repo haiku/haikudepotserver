@@ -90,7 +90,11 @@ public class User extends _User {
      */
 
     public void setPasswordSalt() {
-        setPasswordSalt(Hashing.sha256().hashString(UUID.randomUUID().toString()).toString());
+        setPasswordSalt(Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString());
+    }
+
+    public Boolean getDerivedCanManageUsers() {
+        return getCanManageUsers() || getIsRoot();
     }
 
 }
