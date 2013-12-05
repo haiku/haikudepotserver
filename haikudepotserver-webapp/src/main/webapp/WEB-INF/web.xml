@@ -30,13 +30,17 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+    <listener>
+        <listener-class>org.haikuos.haikudepotserver.support.web.SessionListener</listener-class>
+    </listener>
+
     <filter>
-        <filter-name>basicAuthenticationFilter</filter-name>
+        <filter-name>authenticationFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
 
     <filter-mapping>
-        <filter-name>basicAuthenticationFilter</filter-name>
+        <filter-name>authenticationFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 

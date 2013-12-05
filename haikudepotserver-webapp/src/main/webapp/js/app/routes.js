@@ -12,6 +12,7 @@ angular.module('haikudepotserver').config(
                 .when('/createuser',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
                 .when('/viewuser/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
                 .when('/viewpkg/:name/:version',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
+                .when('/editpkgicon/:name',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
                 .when('/',{controller:'HomeController', templateUrl:'/js/app/controller/home.html'})
                 .otherwise({redirectTo:'/'});

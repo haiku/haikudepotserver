@@ -9,19 +9,21 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.api1.model.pkg.GetPkgRequest;
-import org.haikuos.haikudepotserver.api1.model.pkg.GetPkgResult;
-import org.haikuos.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
-import org.haikuos.haikudepotserver.api1.model.pkg.SearchPkgsResult;
+import org.haikuos.haikudepotserver.api1.model.pkg.*;
+import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haikuos.haikudepotserver.controller.WebResourceGroupController;
 import org.haikuos.haikudepotserver.model.*;
 import org.haikuos.haikudepotserver.services.SearchPkgsService;
 import org.haikuos.haikudepotserver.services.model.SearchPkgsSpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -33,7 +35,9 @@ import java.util.List;
  */
 
 @Component
-public class PkgApiImpl implements PkgApi {
+public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
+
+    protected static Logger logger = LoggerFactory.getLogger(PkgApiImpl.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -98,6 +102,7 @@ public class PkgApiImpl implements PkgApi {
                     public SearchPkgsResult.Pkg apply(org.haikuos.haikudepotserver.model.Pkg input) {
                         SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
                         resultPkg.name = input.getName();
+                        resultPkg.modifyTimestamp = input.getModifyTimestamp().getTime();
 
                         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
                                 context,
@@ -121,7 +126,6 @@ public class PkgApiImpl implements PkgApi {
                     }
                 }
         ));
-
 
         return result;
     }
@@ -185,15 +189,14 @@ public class PkgApiImpl implements PkgApi {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.name));
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.architectureCode));
         Preconditions.checkNotNull(request.versionType);
 
         final ObjectContext context = serverRuntime.getContext();
 
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context, request.architectureCode);
+        Optional<Architecture> architectureOptional = Optional.absent();
 
-        if(!architectureOptional.isPresent()) {
-            throw new IllegalStateException("the specified architecture was not able to be found; "+request.architectureCode);
+        if(!Strings.isNullOrEmpty(request.architectureCode)) {
+            architectureOptional = Architecture.getByCode(context, request.architectureCode);
         }
 
         GetPkgResult result = new GetPkgResult();
@@ -204,9 +207,16 @@ public class PkgApiImpl implements PkgApi {
         }
 
         result.name = pkgOptional.get().getName();
+        result.modifyTimestamp = pkgOptional.get().getModifyTimestamp().getTime();
+        result.canEdit = pkgOptional.get().canBeEditedBy(tryObtainAuthenticatedUser(context).orNull());
+        result.hasIcon = !pkgOptional.get().getPkgIcons().isEmpty();
 
         switch(request.versionType) {
             case LATEST:
+                if(!architectureOptional.isPresent()) {
+                    throw new IllegalStateException("the specified architecture was not able to be found; "+request.architectureCode);
+                }
+
                 Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
                         context,
                         pkgOptional.get(),
@@ -222,11 +232,49 @@ public class PkgApiImpl implements PkgApi {
                 result.versions = Collections.singletonList(createVersion(pkgVersionOptional.get()));
                 break;
 
+            case NONE: // no version is actually required.
+                break;
+
             default:
                 throw new IllegalStateException("unhandled version type in request");
         }
 
         return result;
+    }
+
+    @Override
+    public RemoveIconResult removeIcon(RemoveIconRequest request) throws ObjectNotFoundException {
+
+        Preconditions.checkNotNull(request);
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.name));
+
+        final ObjectContext context = serverRuntime.getContext();
+        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.name);
+
+        if(!pkgOptional.isPresent()) {
+            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.name);
+        }
+
+        User user = obtainAuthenticatedUser(context);
+
+        if(!pkgOptional.get().canBeEditedBy(user)) {
+            logger.warn("attempt to remove the icon for package {}, but the user {} is not able to",pkgOptional.get().getName(),user.getNickname());
+            throw new AuthorizationFailureException();
+        }
+
+        for(PkgIcon pkgIcon : ImmutableList.copyOf(pkgOptional.get().getPkgIcons())) {
+           context.deleteObjects(
+                   pkgIcon.getPkgIconImage().get(),
+                   pkgIcon);
+        }
+
+        pkgOptional.get().setModifyTimestamp();
+
+        context.commitChanges();
+
+        logger.info("did remove icons for pkg {}",pkgOptional.get().getName());
+
+        return new RemoveIconResult();
     }
 
 }

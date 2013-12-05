@@ -11,8 +11,8 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log','$q','jsonRpc','referenceData','constants',
-        function($log, $q, jsonRpc,referenceData,constants) {
+        '$log','$q','jsonRpc','pkgIcon','referenceData','constants',
+        function($log,$q,jsonRpc,pkgIcon,referenceData,constants) {
 
             var architecture = undefined;
             var user = undefined;
@@ -67,7 +67,10 @@ angular.module('haikudepotserver').factory('userState',
                     if(undefined !== value) {
                         if(null==value) {
                             user = undefined;
-                            jsonRpc.setHeader('Authorization'); // remove this header.
+
+                            // remove the Authorization header for HTTP transport
+                            jsonRpc.setHeader('Authorization');
+                            pkgIcon.setHeader('Authorization');
                         }
                         else {
 
@@ -80,6 +83,10 @@ angular.module('haikudepotserver').factory('userState',
                             }
 
                             jsonRpc.setHeader(
+                                'Authorization',
+                                'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear));
+
+                            pkgIcon.setHeader(
                                 'Authorization',
                                 'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear));
 

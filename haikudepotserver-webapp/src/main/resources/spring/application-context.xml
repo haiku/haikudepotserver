@@ -23,7 +23,6 @@
 
     <import resource="persistence-context.xml"/>
     <import resource="webresourcegroup-context.xml"/>
-    <import resource="security-context.xml"/>
 
     <!-- CAPTCHA SUPPORT -->
 
@@ -38,5 +37,9 @@
             </bean>
         </property>
     </bean>
+
+    <!-- SECURITY -->
+
+    <bean id="authenticationFilter" class="org.haikuos.haikudepotserver.support.web.AuthenticationFilter"/>
 
 </beans>

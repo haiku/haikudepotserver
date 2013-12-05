@@ -15,6 +15,26 @@ public class GetPkgResult {
 
     public String name;
 
+    /**
+     * <p>This is the timestamp (millis since epoc) at which the package was last edited.  This is helpful for
+     * situations where it is necessary to create a url that will cause the browser to refresh the data.</p>
+     */
+
+    public Long modifyTimestamp;
+
+    /**
+     * <p>This method will return true if the package has an icon configured for it.</p>
+     */
+
+    public Boolean hasIcon;
+
+    /**
+     * <p>This field will be true if the user who is presently authenticated would be able to
+     * edit the package.</p>
+     */
+
+    public Boolean canEdit;
+
     public List<Version> versions;
 
     public static class Version {

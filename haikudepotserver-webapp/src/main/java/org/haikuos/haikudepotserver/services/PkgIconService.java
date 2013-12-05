@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.controller.WebResourceGroupController;
 import org.haikuos.haikudepotserver.model.MediaType;
 import org.haikuos.haikudepotserver.model.Pkg;
 import org.haikuos.haikudepotserver.model.PkgIcon;
@@ -17,6 +18,8 @@ import org.haikuos.haikudepotserver.model.PkgIconImage;
 import org.haikuos.haikudepotserver.services.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.ImageHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -25,16 +28,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * <p>This service helps out with pacakge icons.</p>
+ * <p>This service helps out with package icons.</p>
  */
 
 @Service
 public class PkgIconService {
 
+    protected static Logger logger = LoggerFactory.getLogger(PkgIconService.class);
+
     @Resource
     ServerRuntime serverRuntime;
 
-    private ImageHelper imageHelper;
+    private ImageHelper imageHelper = new ImageHelper();
 
     private void writeGenericIconImage(
             OutputStream output,
@@ -96,12 +101,14 @@ public class PkgIconService {
 
     public void storePkgIconImage(
             InputStream input,
+            int expectedSize,
             ObjectContext context,
             Pkg pkg) throws IOException, BadPkgIconException {
 
         Preconditions.checkNotNull(input);
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
+        Preconditions.checkState(16==expectedSize||32==expectedSize);
 
         byte[] pngData = ByteStreams.toByteArray(input);
         ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
@@ -110,6 +117,12 @@ public class PkgIconService {
         // parsed and that the size fits the requirements for the icon.
 
         if(null==size || (!size.areSides(16) && !size.areSides(32))) {
+            logger.warn("attempt to set the package icon for package {}, but the size was not able to be established; either it is not a valid png image or the size of the png image is not appropriate",pkg.getName());
+            throw new BadPkgIconException();
+        }
+
+        if(expectedSize != size.height && expectedSize != size.width) {
+            logger.warn("attempt to set the package icon for package {}, but the size was note the expected {}px",pkg.getName(),expectedSize);
             throw new BadPkgIconException();
         }
 
@@ -129,7 +142,10 @@ public class PkgIconService {
             pkgIcon.addToManyTarget(PkgIcon.PKG_ICON_IMAGES_PROPERTY, pkgIconImage, true);
         }
 
-        pkgIconImage.setData(ByteStreams.toByteArray(input));
+        pkgIconImage.setData(pngData);
+        pkg.setModifyTimestamp(new java.util.Date());
+
+        logger.info("the icon {}px for package {} has been updated", size.width, pkg.getName());
     }
 
 }

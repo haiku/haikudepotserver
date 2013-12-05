@@ -21,7 +21,7 @@
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>media_type_seq</db-generator-name>
+			<db-generator-name>haikudepot.media_type_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -45,17 +45,17 @@
 		<db-attribute name="size" type="INTEGER"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>pkg_icon_seq</db-generator-name>
+			<db-generator-name>haikudepot.pkg_icon_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_icon_image" schema="haikudepot">
-		<db-attribute name="data" type="BLOB" isMandatory="true"/>
+		<db-attribute name="data" type="VARBINARY" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="pkg_icon_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>pkg_icon_image_seq</db-generator-name>
+			<db-generator-name>haikudepot.pkg_icon_image_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -66,7 +66,7 @@
 		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>pkg_screenshot_seq</db-generator-name>
+			<db-generator-name>haikudepot.pkg_screenshot_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -77,7 +77,7 @@
 		<db-attribute name="pkg_screenshot_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>pkg_screenshot_image_seq</db-generator-name>
+			<db-generator-name>haikudepot.pkg_screenshot_image_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>

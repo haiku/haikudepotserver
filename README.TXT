@@ -57,6 +57,10 @@ This artificial repository will obtain a file from the local file system's tempo
 
 You should now refresh your browser and it ought to be possible to view the packages that have been imported from the test file.
 
+In order to edit data such as package icons from the web application, it is necessary to create a user; do so by using the pop-up list on the top right side of the upper navigation bar.  At present it is necessary to be root to edit data.  You should set the "is_root" flag on the "user" table for your newly created user.  There is no user interface for this function; you must use SQL.  Assuming that your new user were called "erik" then you might issue a SQL statement such as;
+
+  UPDATE haikudepot.user SET is_root=true WHERE nickname='erik';
+
 ---
 API
 

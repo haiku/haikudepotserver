@@ -21,6 +21,6 @@ ALTER TABLE haikudepot.pkg_screenshot ADD FOREIGN KEY (pkg_id) REFERENCES haikud
 ALTER TABLE haikudepot.pkg_screenshot_image ADD FOREIGN KEY (media_type_id) REFERENCES haikudepot.media_type (id);
 ALTER TABLE haikudepot.pkg_screenshot_image ADD FOREIGN KEY (pkg_screenshot_id) REFERENCES haikudepot.pkg_screenshot (id);
 
-CREATE UNIQUE INDEX pkg_icon_idx01 ON haikudepot.pkg_icon(size,media_type_id);
+CREATE UNIQUE INDEX pkg_icon_idx01 ON haikudepot.pkg_icon(size,media_type_id,pkg_id);
 
 INSERT INTO haikudepot.media_type (id,code) VALUES (nextval('media_type_seq'), 'image/png');

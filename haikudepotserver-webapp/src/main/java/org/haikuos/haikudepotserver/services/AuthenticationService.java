@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.support.spring;
+package org.haikuos.haikudepotserver.services;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -16,18 +16,28 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectIdQuery;
 import org.haikuos.haikudepotserver.model.User;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class UserAuthenticationProvider implements AuthenticationProvider {
+/**
+ * <p>This service is able to provide the ability to authenticate a user given their nickname and their clear-text
+ * password.  It will maintain a cache of nickname to {@link ObjectId}s so that it is able to lookup users very quickly
+ * if they are known to this instance.  This may be useful in a small-scale deployment.  This class is accessed by
+ * the {@link org.haikuos.haikudepotserver.support.web.AuthenticationFilter}.</p>
+ */
 
-    private ServerRuntime serverRuntime;
+@Service
+public class AuthenticationService {
+
+    protected static Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+
+    @Resource
+    ServerRuntime serverRuntime;
 
     Cache<String,ObjectId> userNicknameToObjectIdCache = CacheBuilder
             .newBuilder()
@@ -45,7 +55,7 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
 
     /**
      * <p>This method will map the nickname to an {@link ObjectId} and in this way, it is possible to
-     * pull the {@link User} from the cache in Cayenne rather than re-fetching it from the database.  This
+     * pull the {@link org.haikuos.haikudepotserver.model.User} from the cache in Cayenne rather than re-fetching it from the database.  This
      * will make a series of API interactions with the system less computationally expensive.</p>
      */
 
@@ -78,39 +88,36 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         }
     }
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Optional<ObjectId> authenticate(String username, String passwordClear) {
 
-        Preconditions.checkNotNull(authentication);
-        Preconditions.checkNotNull(serverRuntime);
+        Optional<ObjectId> result = Optional.absent();
 
-        String nickname = authentication.getName();
-        String passwordClear = (String) authentication.getCredentials();
+        if(!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(passwordClear)) {
 
-        if(Strings.isNullOrEmpty(nickname) || Strings.isNullOrEmpty(passwordClear)) {
-            throw new BadCredentialsException("no nickname or password supplied; unable to authenticate the user");
+            ObjectContext objectContext = serverRuntime.getContext();
+
+            Optional<User> userOptional = getUserByNickname(objectContext, username);
+
+            if(userOptional.isPresent()) {
+                User user = userOptional.get();
+                String hash = Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + passwordClear).toString();
+
+                if(hash.equals(user.getPasswordHash())) {
+                    result = Optional.fromNullable(userOptional.get().getObjectId());
+                }
+                else {
+                    logger.info("the authentication for the user; {} failed", username);
+                }
+            }
+            else {
+                logger.info("unable to find the user; {}", username);
+            }
+        }
+        else {
+            logger.info("attempt to authenticate with no username or no password");
         }
 
-        ObjectContext objectContext = serverRuntime.getContext();
-
-        Optional<User> userOptional = getUserByNickname(objectContext, nickname);
-
-        if(!userOptional.isPresent()) {
-            throw new UsernameNotFoundException("unable to find the user; "+nickname);
-        }
-
-        User user = userOptional.get();
-        String hash = Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + passwordClear).toString();
-
-        if(hash.equals(user.getPasswordHash())) {
-            return new UserAuthentication(user);
-        }
-
-        throw new BadCredentialsException("bad password supplied");
+        return result;
     }
 
-    @Override
-    public boolean supports(Class<?> aClass) {
-        return true;
-    }
 }

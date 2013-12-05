@@ -14,6 +14,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.model.Pkg;
+import org.haikuos.haikudepotserver.model.User;
 import org.haikuos.haikudepotserver.services.PkgIconService;
 import org.haikuos.haikudepotserver.services.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.support.Closeables;
@@ -32,12 +33,13 @@ import java.io.InputStream;
 /**
  * <p>This controller vends the package icon.  This may be provided by data stored in the database, or it may be
  * deferring to the default icon.  This controller is also able to take an HTTP PUT request that is able to
- * update a packages icon.</p>
+ * update a packages icon.  This is not done using JSON-RPC because the binary nature of the data makes transport
+ * of the data in JSON impractical.</p>
  */
 
 @Controller
 @RequestMapping("/pkgicon")
-public class PkgIconController {
+public class PkgIconController extends AbstractController {
 
     protected static Logger logger = LoggerFactory.getLogger(WebResourceGroupController.class);
 
@@ -96,6 +98,7 @@ public class PkgIconController {
     public void put(
             HttpServletRequest request,
             HttpServletResponse response,
+            @RequestParam(value = KEY_SIZE, required = true) int expectedSize,
             @PathVariable(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName) throws IOException {
 
@@ -108,15 +111,26 @@ public class PkgIconController {
         }
 
         ObjectContext context = serverRuntime.getContext();
+
         Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
 
         if(!pkg.isPresent()) {
             throw new PkgNotFound();
         }
 
+        // check the authorization
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!user.isPresent() || !pkg.get().canBeEditedBy(user.get())) {
+            logger.warn("attempt to edit the pkg icon, but there is no user present or that user is not able to edit the pkg");
+           throw new PkgAuthorizationFailure();
+        }
+
         try {
             pkgIconService.storePkgIconImage(
                     request.getInputStream(),
+                    expectedSize,
                     context,
                     pkg.get());
         }
@@ -131,16 +145,19 @@ public class PkgIconController {
 
     // these are the various errors that can arise in supplying or providing a package icon.
 
-    @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the size must be 16 or 32")
+    @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the size must be 16 or 32")
     public class BadSize extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the package name must be supplied")
     public class MissingPkgName extends RuntimeException {}
 
-    @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the format must be supplied and must (presently) be 'png'")
+    @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the format must be supplied and must (presently) be 'png'")
     public class MissingOrBadFormat extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
     public class PkgNotFound extends RuntimeException {}
+
+    @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package cannot be edited by the authenticated user")
+    public class PkgAuthorizationFailure extends RuntimeException {}
 
 }

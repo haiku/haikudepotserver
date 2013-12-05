@@ -6,10 +6,7 @@
 package org.haikuos.haikudepotserver.api1;
 
 import com.googlecode.jsonrpc4j.JsonRpcService;
-import org.haikuos.haikudepotserver.api1.model.pkg.GetPkgRequest;
-import org.haikuos.haikudepotserver.api1.model.pkg.GetPkgResult;
-import org.haikuos.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
-import org.haikuos.haikudepotserver.api1.model.pkg.SearchPkgsResult;
+import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 
 /**
@@ -32,5 +29,11 @@ public interface PkgApi {
      */
 
     GetPkgResult getPkg(GetPkgRequest request) throws ObjectNotFoundException;
+
+    /**
+     * <p>This request will remove any icons from the package.</p>
+     */
+
+    RemoveIconResult removeIcon(RemoveIconRequest request) throws ObjectNotFoundException;
 
 }

@@ -15,6 +15,7 @@ public class SearchPkgsResult {
 
     public static class Pkg {
         public String name;
+        public Long modifyTimestamp;
         public Version version;
     }
 

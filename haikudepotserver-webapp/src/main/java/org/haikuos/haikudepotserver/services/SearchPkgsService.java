@@ -26,6 +26,7 @@ import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -132,8 +133,19 @@ public class SearchPkgsService {
         List<Pkg> pkgs = Collections.emptyList();
 
         if(0!=pkgNames.size()) {
+
             SelectQuery query = new SelectQuery(Pkg.class, ExpressionFactory.inExp(Pkg.NAME_PROPERTY, pkgNames));
-            pkgs = context.performQuery(query);
+
+            pkgs = Lists.newArrayList(context.performQuery(query));
+
+            // repeat the sort of the main query to get the packages back into order again.
+
+            Collections.sort(pkgs, new Comparator<Pkg>() {
+                @Override
+                public int compare(Pkg o1, Pkg o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
         }
 
         return pkgs;

@@ -5,9 +5,6 @@
     <h2>
         <pkg-icon size="32" pkg="pkg"></pkg-icon>
         {{pkg.name}}
-        <a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">
-            <span class="glyphicon glyphicon-link"></span>
-        </a>
     </h2>
 
     <p>
@@ -21,6 +18,14 @@
     <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
 
 </div>
+
+        <h3>Actions</h3>
+
+        <ul>
+            <li><a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">Visit web site</a></li>
+            <li ng-show="canRemoveIcon()"><a href="" ng-click="goRemoveIcon()">Remove icon</a></li>
+            <li ng-show="canEditIcon()"><a href="" ng-click="goEditIcon()">Edit icons</a></li>
+        </ul>
 
 <spinner spin="shouldSpin()"></spinner>
 

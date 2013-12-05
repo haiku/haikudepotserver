@@ -21,6 +21,14 @@ angular.module('haikudepotserver').controller(
                 return undefined == $scope.pkg;
             }
 
+            $scope.canRemoveIcon = function() {
+                return $scope.pkg && $scope.pkg.canEdit && $scope.pkg.hasIcon;
+            }
+
+            $scope.canEditIcon = function() {
+                return $scope.pkg && $scope.pkg.canEdit;
+            }
+
             $scope.homePageLink = function() {
                 var u = undefined;
 
@@ -71,6 +79,29 @@ angular.module('haikudepotserver').controller(
                     }
 
                 );
+            }
+
+            $scope.goEditIcon = function() {
+                $location.path("/editpkgicon/"+$scope.pkg.name).search({});
+            }
+
+            $scope.goRemoveIcon = function() {
+                jsonRpc.call(
+                        constants.ENDPOINT_API_V1_PKG,
+                        "removeIcon",
+                        [{ name: $routeParams.name }]
+                    ).then(
+                    function(result) {
+                        $log.info('removed icons for '+$routeParams.name+' pkg');
+                        $scope.pkg.hasIcon = false;
+                        $scope.pkg.modifyTimestamp = new Date().getTime();
+                    },
+                    function(err) {
+                        $log.error('unable to remove the icons for '+$routeParams.name+' pkg');
+                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                    }
+                );
+
             }
 
         }

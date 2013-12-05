@@ -13,7 +13,8 @@ public class GetPkgRequest {
      */
 
     public enum VersionType {
-        LATEST
+        LATEST,
+        NONE
     }
 
     /**

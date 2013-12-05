@@ -18,11 +18,9 @@ import org.haikuos.haikudepotserver.api1.support.CaptchaBadResponseException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.model.User;
+import org.haikuos.haikudepotserver.services.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -40,7 +38,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     CaptchaService captchaService;
 
     @Resource
-    AuthenticationManager authenticationManager;
+    AuthenticationService authenticationService;
 
     @Override
     public CreateUserResult createUser(CreateUserRequest createUserRequest) {
@@ -88,7 +86,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     }
 
     @Override
-    public GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException, AuthenticationException {
+    public GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(getUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getUserRequest.nickname));
 
@@ -126,20 +124,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             authenticateUserRequest.passwordClear = authenticateUserRequest.passwordClear.trim();
         }
 
-        // Use the spring security system to authenticate in the same fashion as the regular basic auth
-        // of the HTTP requests.
-
-        UsernamePasswordAuthenticationToken authRequest =
-                new UsernamePasswordAuthenticationToken(
-                        authenticateUserRequest.nickname,
-                        authenticateUserRequest.passwordClear);
-
-        try {
-            authenticateUserResult.authenticated = authenticationManager.authenticate(authRequest).isAuthenticated();
-        }
-        catch(AuthenticationException ae) {
-            // ignore.
-        }
+        authenticateUserResult.authenticated = authenticationService.authenticate(
+                    authenticateUserRequest.nickname,
+                    authenticateUserRequest.passwordClear).isPresent();
 
         // if the authentication has failed then best to sleep for a moment
         // to make brute forcing a bit more tricky.

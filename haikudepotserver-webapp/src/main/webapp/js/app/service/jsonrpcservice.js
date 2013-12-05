@@ -109,6 +109,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
                     var deferred = $q.defer();
 
                     $http({
+                        cache: false,
                         method: 'POST',
                         url: endpoint,
                         headers: _.extend(

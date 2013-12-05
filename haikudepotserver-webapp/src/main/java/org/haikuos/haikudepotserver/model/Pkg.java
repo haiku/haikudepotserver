@@ -18,6 +18,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.model.auto._Pkg;
 import org.haikuos.haikudepotserver.model.support.CreateAndModifyTimestamped;
 
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -76,6 +77,14 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         }
 
         return Optional.absent();
+    }
+
+    public boolean canBeEditedBy(User user) {
+        return null!=user && user.getIsRoot();
+    }
+
+    public void setModifyTimestamp() {
+        setModifyTimestamp(new java.util.Date());
     }
 
 }

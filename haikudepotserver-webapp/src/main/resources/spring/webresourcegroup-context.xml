@@ -47,6 +47,8 @@
                 <value>/js/app/directive/messagedirective.js</value>
                 <value>/js/app/directive/errormessagesdirective.js</value>
                 <value>/js/app/directive/pkgicondirective.js</value>
+                <value>/js/app/directive/pkglabeldirective.js</value>
+                <value>/js/app/directive/filesupplydirective.js</value>
 
                 <value>/js/app/controller/viewpkgcontroller.js</value>
                 <value>/js/app/controller/homecontroller.js</value>
@@ -54,11 +56,13 @@
                 <value>/js/app/controller/createusercontroller.js</value>
                 <value>/js/app/controller/viewusercontroller.js</value>
                 <value>/js/app/controller/authenticateusercontroller.js</value>
+                <value>/js/app/controller/editpkgiconcontroller.js</value>
 
                 <value>/js/app/service/jsonrpcservice.js</value>
                 <value>/js/app/service/messagesourceservice.js</value>
                 <value>/js/app/service/userstateservice.js</value>
                 <value>/js/app/service/referencedataservice.js</value>
+                <value>/js/app/service/pkgiconservice.js</value>
 
             </list>
         </property>
