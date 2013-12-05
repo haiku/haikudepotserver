@@ -6,10 +6,7 @@
 package org.haikuos.haikudepotserver.controller;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteStreams;
-import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -17,7 +14,6 @@ import org.haikuos.haikudepotserver.model.Pkg;
 import org.haikuos.haikudepotserver.model.User;
 import org.haikuos.haikudepotserver.services.PkgIconService;
 import org.haikuos.haikudepotserver.services.model.BadPkgIconException;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,7 +24,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * <p>This controller vends the package icon.  This may be provided by data stored in the database, or it may be

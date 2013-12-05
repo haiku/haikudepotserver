@@ -2,4 +2,4 @@ The 'generic' icons are used when there is no other icon for a given package.  T
 
 .../data/artwork/icons/App_Generic
 
-The icons were loaded into the 'Icon-o-Matic' application in Haiku and then exported to PNG and an SVG.
+The icons were loaded into the 'Icon-o-Matic' application in Haiku and then exported to PNG.
