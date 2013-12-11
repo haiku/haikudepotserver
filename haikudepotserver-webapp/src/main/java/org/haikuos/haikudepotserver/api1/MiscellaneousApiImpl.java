@@ -16,7 +16,7 @@ import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllArchitectures
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllArchitecturesResult;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllMessagesRequest;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllMessagesResult;
-import org.haikuos.haikudepotserver.model.Architecture;
+import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +50,7 @@ public class MiscellaneousApiImpl implements MiscellaneousApi {
                                         Architecture.getAll(serverRuntime.getContext()),
                                         new Predicate<Architecture>() {
                                             @Override
-                                            public boolean apply(org.haikuos.haikudepotserver.model.Architecture input) {
+                                            public boolean apply(org.haikuos.haikudepotserver.dataobjects.Architecture input) {
                                                 return
                                                         !input.getCode().equals(Architecture.CODE_SOURCE)
                                                                 && !input.getCode().equals(Architecture.CODE_ANY);
@@ -59,7 +59,7 @@ public class MiscellaneousApiImpl implements MiscellaneousApi {
                                 ),
                                 new Function<Architecture, GetAllArchitecturesResult.Architecture>() {
                                     @Override
-                                    public GetAllArchitecturesResult.Architecture apply(org.haikuos.haikudepotserver.model.Architecture input) {
+                                    public GetAllArchitecturesResult.Architecture apply(org.haikuos.haikudepotserver.dataobjects.Architecture input) {
                                         GetAllArchitecturesResult.Architecture result = new GetAllArchitecturesResult.Architecture();
                                         result.code = input.getCode();
                                         return result;

@@ -12,7 +12,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.haikuos.haikudepotserver.captcha.model.CaptchaRepository;
-import org.haikuos.haikudepotserver.model.Response;
+import org.haikuos.haikudepotserver.dataobjects.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

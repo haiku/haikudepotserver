@@ -5,7 +5,7 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import org.haikuos.haikudepotserver.support.AbstractUserAuthenticationAware;
+import org.haikuos.haikudepotserver.security.AbstractUserAuthenticationAware;
 
 
 /**

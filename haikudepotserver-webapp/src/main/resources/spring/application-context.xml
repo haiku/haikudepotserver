@@ -11,6 +11,7 @@
 
     <context:component-scan base-package="org.haikuos.haikudepotserver">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="regex" expression="org\.haikuos\.haikudepotserver\.api.*"/>
     </context:component-scan>
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -40,6 +41,10 @@
 
     <!-- SECURITY -->
 
-    <bean id="authenticationFilter" class="org.haikuos.haikudepotserver.support.web.AuthenticationFilter"/>
+    <bean id="authenticationFilter" class="org.haikuos.haikudepotserver.security.AuthenticationFilter"/>
+
+    <!-- LOGGING -->
+
+    <bean class="org.haikuos.haikudepotserver.support.logging.LoggingSetupOrchestration" init-method="init"/>
 
 </beans>

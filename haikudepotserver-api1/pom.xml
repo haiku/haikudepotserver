@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.googlecode</groupId>
+            <groupId>com.github.briandilley.jsonrpc4j</groupId>
             <artifactId>jsonrpc4j</artifactId>
         </dependency>
     </dependencies>

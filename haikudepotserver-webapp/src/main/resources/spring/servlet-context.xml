@@ -20,6 +20,16 @@
     <mvc:resources mapping="/bootstrap/**" location="/bootstrap/" />
     <mvc:resources mapping="/img/**" location="/img/" />
 
+    <bean
+            class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix">
+            <value>/WEB-INF/views/</value>
+        </property>
+        <property name="suffix">
+            <value>.jsp</value>
+        </property>
+    </bean>
+
     <!--
 The presence of this will get the JSON-RPC APIs activated without needing
 to do it manually.
@@ -31,16 +41,6 @@ to do it manually.
         </property>
         <property name="objectMapper">
             <bean class="org.haikuos.haikudepotserver.api1.support.ObjectMapperFactory"/>
-        </property>
-    </bean>
-
-    <bean
-            class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix">
-            <value>/WEB-INF/views/</value>
-        </property>
-        <property name="suffix">
-            <value>.jsp</value>
         </property>
     </bean>
 

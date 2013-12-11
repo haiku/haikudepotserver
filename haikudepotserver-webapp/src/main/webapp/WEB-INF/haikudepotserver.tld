@@ -7,7 +7,7 @@
 
     <tag>
         <name>webresourcegroup</name>
-        <tag-class>org.haikuos.haikudepotserver.support.web.WebResourceGroupTag</tag-class>
+        <tag-class>org.haikuos.haikudepotserver.web.WebResourceGroupTag</tag-class>
         <description>
             This tag can be used to include a script group on the page; either combined into one script element or as
             a set of separate script elements; contingent on the configuration of the script group.

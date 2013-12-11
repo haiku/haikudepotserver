@@ -11,15 +11,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>jsonrpc4j-webdav-maven-repo</id>
-            <name>jsonrpc4j maven repository</name>
-            <url>http://jsonrpc4j.googlecode.com/svn/maven/repo/</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-
     <dependencyManagement>
         <dependencies>
 
@@ -70,9 +61,9 @@
                 <version>3.0.1</version>
             </dependency>
             <dependency>
-                <groupId>com.googlecode</groupId>
+                <groupId>com.github.briandilley.jsonrpc4j</groupId>
                 <artifactId>jsonrpc4j</artifactId>
-                <version>0.28</version>
+                <version>1.0</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet.jsp</groupId>

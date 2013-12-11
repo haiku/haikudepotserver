@@ -19,3 +19,12 @@ angular.module('haikudepotserver').config(
         }
     ]
 );
+
+/*
+ Preload the error template because if the system is not able to access the server then it will have an
+ error, but may not be able to get access to the error template to show the error page!
+ */
+
+angular.module('haikudepotserver').run(function($http,$templateCache) {
+    $http.get('/js/app/controller/error.html', { cache: $templateCache });
+});

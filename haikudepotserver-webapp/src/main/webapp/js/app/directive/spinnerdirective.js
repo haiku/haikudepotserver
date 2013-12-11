@@ -17,6 +17,33 @@ angular.module('haikudepotserver').directive('spinner',function() {
         replace: true,
         scope: {
             spin: '='
-        }
+        },
+        controller:
+            ['$scope','$timeout',
+                function($scope,$timeout) {
+
+                    var t = undefined;
+
+                    $scope.delayedSpin = false;
+
+                    $scope.$watch('spin', function(newSpin) {
+                        if(t) {
+                            $timeout.cancel(t);
+                            t = undefined;
+                        }
+
+                        if(!newSpin) {
+                            $scope.delayedSpin = false;
+                        }
+                        else {
+                            t = $timeout(function() {
+                               $scope.delayedSpin = true;
+                            },
+                            250);
+                        }
+                    })
+
+                }
+            ]
     };
 });

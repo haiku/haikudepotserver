@@ -8,7 +8,7 @@
     These are third party libraries that the system requires as imports into the single-page application.
     -->
 
-    <bean id="libScriptsWebResourceGroup" class="org.haikuos.haikudepotserver.support.web.model.WebResourceGroup">
+    <bean id="libScriptsWebResourceGroup" class="org.haikuos.haikudepotserver.web.model.WebResourceGroup">
         <property name="code" value="libScripts"></property>
         <property name="separated" value="${webresourcegroup.separated:false}"></property>
         <property name="mimeType" value="application/javascript"/>
@@ -30,7 +30,7 @@
     These are java-script resources that are part of the application's single-page application.
     -->
 
-    <bean id="appScriptsWebResourceGroup" class="org.haikuos.haikudepotserver.support.web.model.WebResourceGroup">
+    <bean id="appScriptsWebResourceGroup" class="org.haikuos.haikudepotserver.web.model.WebResourceGroup">
         <property name="code" value="appScripts"></property>
         <property name="separated" value="${webresourcegroup.separated:false}"></property>
         <property name="mimeType" value="application/javascript"/>
@@ -72,7 +72,7 @@
     These are CSS resources that are part of the application's single-page application.
     -->
 
-    <bean id="appStylesheetsWebResourceGroup" class="org.haikuos.haikudepotserver.support.web.model.WebResourceGroup">
+    <bean id="appStylesheetsWebResourceGroup" class="org.haikuos.haikudepotserver.web.model.WebResourceGroup">
         <property name="code" value="appStylesheets"></property>
         <property name="separated" value="${webresourcegroup.separated:false}"></property>
         <property name="mimeType" value="text/css"/>

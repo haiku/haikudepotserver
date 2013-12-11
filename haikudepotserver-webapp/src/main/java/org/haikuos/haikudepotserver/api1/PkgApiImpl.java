@@ -18,10 +18,9 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haikuos.haikudepotserver.controller.WebResourceGroupController;
-import org.haikuos.haikudepotserver.model.*;
-import org.haikuos.haikudepotserver.services.SearchPkgsService;
-import org.haikuos.haikudepotserver.services.model.SearchPkgsSpecification;
+import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.pkg.PkgSearchService;
+import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,7 +42,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     ServerRuntime serverRuntime;
 
     @Resource
-    SearchPkgsService searchPkgsService;
+    PkgSearchService searchPkgsService;
 
     @Override
     public SearchPkgsResult searchPkgs(SearchPkgsRequest request) {
@@ -52,7 +51,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         final ObjectContext context = serverRuntime.getContext();
 
-        SearchPkgsSpecification specification = new SearchPkgsSpecification();
+        PkgSearchSpecification specification = new PkgSearchSpecification();
 
         String exp = request.expression;
 
@@ -64,7 +63,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         if(null!=request.expressionType) {
             specification.setExpressionType(
-                    SearchPkgsSpecification.ExpressionType.valueOf(request.expressionType.name()));
+                    PkgSearchSpecification.ExpressionType.valueOf(request.expressionType.name()));
         }
 
         final Optional<Architecture> architectureOptional = Architecture.getByCode(context,request.architectureCode);
@@ -99,7 +98,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 searchedPkgs,
                 new Function<Pkg, SearchPkgsResult.Pkg>() {
                     @Override
-                    public SearchPkgsResult.Pkg apply(org.haikuos.haikudepotserver.model.Pkg input) {
+                    public SearchPkgsResult.Pkg apply(org.haikuos.haikudepotserver.dataobjects.Pkg input) {
                         SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
                         resultPkg.name = input.getName();
                         resultPkg.modifyTimestamp = input.getModifyTimestamp().getTime();
@@ -148,7 +147,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 pkgVersion.getPkgVersionCopyrights(),
                 new Function<PkgVersionCopyright, String>() {
                     @Override
-                    public String apply(org.haikuos.haikudepotserver.model.PkgVersionCopyright input) {
+                    public String apply(org.haikuos.haikudepotserver.dataobjects.PkgVersionCopyright input) {
                         return input.getBody();
                     }
                 });
@@ -157,7 +156,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 pkgVersion.getPkgVersionLicenses(),
                 new Function<PkgVersionLicense, String>() {
                     @Override
-                    public String apply(org.haikuos.haikudepotserver.model.PkgVersionLicense input) {
+                    public String apply(org.haikuos.haikudepotserver.dataobjects.PkgVersionLicense input) {
                         return input.getBody();
                     }
                 });
@@ -173,7 +172,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 pkgVersion.getPkgVersionUrls(),
                 new Function<PkgVersionUrl, GetPkgResult.Url>() {
                     @Override
-                    public GetPkgResult.Url apply(org.haikuos.haikudepotserver.model.PkgVersionUrl input) {
+                    public GetPkgResult.Url apply(org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl input) {
                         GetPkgResult.Url url = new GetPkgResult.Url();
                         url.url = input.getUrl();
                         url.urlTypeCode = input.getPkgUrlType().getCode();

@@ -5,7 +5,7 @@
 
 package org.haikuos.haikudepotserver.support.cayenne;
 
-import org.haikuos.haikudepotserver.model.support.CreateAndModifyTimestamped;
+import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
 import java.util.Date;
 
