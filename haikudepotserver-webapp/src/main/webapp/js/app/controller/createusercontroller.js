@@ -96,7 +96,7 @@ angular.module('haikudepotserver').controller(
                     ).then(
                     function(result) {
                         $log.info('created new user; '+$scope.newUser.nickname);
-                        $location.path('/viewuser/'+$scope.newUser.nickname).search({});
+                        $location.path('/authenticateuser').search({});
                     },
                     function(err) {
 

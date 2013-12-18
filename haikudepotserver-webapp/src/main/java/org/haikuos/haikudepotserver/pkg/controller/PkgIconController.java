@@ -154,7 +154,7 @@ public class PkgIconController extends AbstractController {
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
     public class PkgNotFound extends RuntimeException {}
 
-    @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package cannot be edited by the authenticated user")
+    @ResponseStatus(value= HttpStatus.UNAUTHORIZED, reason="the requested package cannot be edited by the authenticated user")
     public class PkgAuthorizationFailure extends RuntimeException {}
 
 }

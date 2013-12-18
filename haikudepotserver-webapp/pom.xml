@@ -158,6 +158,19 @@
                 </executions>
             </plugin>
 
+            <!--
+            This is required in order to configure the exclusion of the local properties files from the build
+            product.
+            -->
+
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <packagingExcludes>WEB-INF/classes/local*.properties</packagingExcludes>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
@@ -172,6 +185,25 @@
                         <version>9.1-901.jdbc4</version>
                     </dependency>
                 </dependencies>
+                <executions>
+                    <execution>
+                        <id>tomcat-run</id>
+                        <goals>
+                            <goal>exec-war-only</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <path>/</path>
+                            <extraDependencies>
+                                <dependency>
+                                    <groupId>postgresql</groupId>
+                                    <artifactId>postgresql</artifactId>
+                                    <version>9.1-901.jdbc4</version>
+                                </dependency>
+                            </extraDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

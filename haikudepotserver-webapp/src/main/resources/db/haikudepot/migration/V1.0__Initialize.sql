@@ -82,3 +82,23 @@ CREATE INDEX pkg_version_url_idx03 ON haikudepot.pkg_version_url(pkg_version_id)
 CREATE INDEX repository_idx02 ON haikudepot.repository(architecture_id);
 
 -- ------------------------------------------------------
+-- CREATE A ROOT USER
+-- ------------------------------------------------------
+
+INSERT INTO haikudepot.user (
+  active,
+  can_manage_users,
+  id,
+  is_root,
+  nickname,
+  password_hash,
+  password_salt)
+VALUES (
+  true,
+  true,
+  (SELECT nextval('haikudepot.user_seq')),
+  true,
+  'root',
+  '1debaaa4aa99077a0cb564d9ef94cf645bb64323871d2dc70668703c7791172a',
+  '984ad9a98d9c52d257b35dea5fde02ef07f65ccf0a08dd42c6f5450488583266'
+);

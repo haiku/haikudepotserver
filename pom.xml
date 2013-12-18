@@ -13,4 +13,9 @@
         <module>haikudepotserver-parent</module>
     </modules>
 
+    <scm>
+        <connection>scm:git:https://code.google.com/p/haiku-depot-web-app/</connection>
+        <developerConnection>scm:git:https://code.google.com/p/haiku-depot-web-app/</developerConnection>
+    </scm>
+
 </project>
