@@ -13,6 +13,15 @@
         <module>haikudepotserver-parent</module>
     </modules>
 
+    <!--
+    This entry is necessary it seems to instruct the release process that there is an SCM (local GIT) for the
+    release process.
+    -->
+
+    <scm>
+        <connection>scm:git:git</connection>
+    </scm>
+
     <build>
         <plugins>
 
@@ -21,13 +30,36 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.4.1</version>
                 <configuration>
+
+                    <!--
+                    By default this will attempt to deploy the artifacts into a 'distribution management' system, but
+                    this is not necessary (or possible) here right now as there is nowhere to put it.
+                    -->
+                    <goals>install</goals>
+
+                    <!--
+                    This prevents the process from asking versions for each module; it will assume that the versions
+                    that apply at the top-level will trickle down.
+                    -->
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+
+                    <!--
+                    Without this set to 'false', the release process will attempt to push changes to the remote repo
+                    all through the process.  It is best to let the release run to completion on the local machine
+                    and then to manually push to the origin.
+                    -->
                     <pushChanges>false</pushChanges>
+
+                    <!--
+                    By setting this to true, the release process will work on the local repository rather than trying
+                    to get the origin involved.
+                    -->
+                    <localCheckout>true</localCheckout>
+
                 </configuration>
             </plugin>
 
         </plugins>
-
     </build>
 
 </project>
