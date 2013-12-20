@@ -37,8 +37,7 @@ from where this is invoked.
         <!-- core extensions -->
         <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore.js" dest="${js.libsroot}/underscore.js" skipexisting="true" />
         <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore-min.js" dest="${js.libsroot}/underscore-min.js" skipexisting="true" />
-        <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore-min.js" dest="${js.libsroot}/underscore-min.js" skipexisting="true" />
-        <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore-min.map" dest="${js.libsroot}/underscore-min.js" skipexisting="true" />
+        <get src="${js.cdnurl}/underscore.js/${underscorejs.version}/underscore-min.map" dest="${js.libsroot}/underscore-min.map" skipexisting="true" />
 
         <!-- date and time handling -->
         <get src="${js.cdnurl}/moment.js/${momentjs.version}/moment.js" dest="${js.libsroot}/moment.js" skipexisting="true" />
