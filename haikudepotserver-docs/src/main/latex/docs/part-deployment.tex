@@ -18,7 +18,7 @@ To launch the binary with 256 megabytes of heap memory, issue a command similar 
 java \
  -Xmx256m \
  -Djava.awt.headless=true \
- -Dconfig.properties=/opt/haikudepotserver/config.properties \
+ -Dconfig.properties=file:///opt/haikudepotserver/config.properties \
  -jar haikudepotserver-webapp-1.2.3-war-exec.jar \
  -resetExtract \
  -extractDirectory /var/cache/haikudepotserver-webapp
