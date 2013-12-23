@@ -1,0 +1,53 @@
+\section{Overview and General Information}
+
+These documents cover an ``application-server'' called ``Haiku Depot Server'' which aims to provide an internet application that stores and allows interaction with software packages for the \href{http://www.haiku-os.org}{Haiku Operating System}.
+
+The application-server is able to communicate with remote repositories to retrieve ``Haiku Package Repository'' (.hpkr) files.  .hpkr files contain a some detail of the packages that are stored at that repository.  The application server is able to consume the .hpkr data and will populate its own internal database with some of the information that it contains.
+
+The application-server then provides an HTTP-vended API to that data as well as a web user-interface to the data.  The system is able to augment the .hpkr sourced data with additional detail such as;
+
+\begin{itemize}
+\item Screenshots
+\item Icons
+\item Comments
+\end{itemize}
+
+\subsection{Hosted Source Code}
+
+The source code is hosted at;
+
+\framebox{http://code.google.com/p/haiku-depot-web-app/}
+
+\subsection{Prerequisites}
+\label{prerequisites}
+
+\begin{itemize}
+\item \href{https://community.java.net/open-jdk}{Java} $\geqslant$ 1.6
+\item \href{http://maven.apache.org}{Maven} $\geqslant$ 3.0.3
+\item \href{http://www.postgres.org}{Postgres} database $\geqslant$ 9.1
+\end{itemize}
+
+Note that on a debian host, these prerequisites can be installed with;
+
+\begin{verbatim}
+apt-get install default-jdk
+apt-get install maven
+apt-get install postgresql postgresql-client
+\end{verbatim}
+
+\subsubsection{Basic Postgres Setup}
+
+The setup discussed here is very simplistic as it is not possible to envisage all of the possible environmental factors involved in a production deployment.  By this point, the Postgres database product is now installed on a UNIX-like computer system and is running as the system user 'postgres'.  Create a new database with the following command;
+
+\framebox{\tt sudo -u postgres createuser -P -E haikudepotserver}
+
+Now create the database;
+
+\framebox{\tt sudo -u postgres createdb -O haikudepotserver haikudepotserver}
+
+You can check the login to the database works by opening a SQL terminal;
+
+\framebox{\tt psql -h localhost -U haikudepotserver haikudepotserver}
+
+Note that the database schema objects will be automatically configured by the application-server as it launches.
+

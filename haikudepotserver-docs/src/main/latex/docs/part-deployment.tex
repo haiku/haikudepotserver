@@ -1,0 +1,66 @@
+\section{Deployment}
+
+This section outlines the approximate steps to build and deploy the web application-server.  The application-server build process produces a  `stand-alone' java program.  This build artifact is a packaged `jar' file that contains the \href{http://tomcat.apache.org}{Tomcat} servlet container as well as the web application.  Upon launching, it will unbundle necessary parts and start-up listening on a socket for inbound HTTP requests.
+
+\fcolorbox{red}{white}{\parbox{\textwidth}{\color{red} The default database installs a user with the nickname of 'root' with a known password of 'p4mphl3t'.  This password {\bf must} be changed before the system is made available over a network.}}
+
+A further point to note is that the API-related HTTP traffic into the application server uses basic-authentication.  This technique exposes the username and password as a base64 encoded string in the HTTP payload.  For this reason it is advised that HTTP traffic to and from the application server be transported as secure HTTP (https) in order to prevent a third party from reading the HTTP headers and extracting a user's authentication details.
+
+Please see \ref{prerequisites} for prerequisites required for running this software and \ref{buildandrelease} for information about obtaining a build product and possibly also creating a release version.  The build product that you will require for deployment can be found at;
+
+\framebox{\tt haikudepotserver-webapp/target/haikudepotserver-webapp-1.2.3-war-exec.jar}
+
+Note that the leaf-name will vary depending on the release that is being build.  You should also refer to \ref{config} for details of the format and keys for the configuration file.  You will need to create a configuration file for your deployment.
+
+To launch the binary with 256 megabytes of heap memory, issue a command similar to;
+
+\begin{verbatim}
+java \
+ -Xmx256m \
+ -Djava.awt.headless=true \
+ -Dconfig.properties=/opt/haikudepotserver/config.properties \
+ -jar haikudepotserver-webapp-1.2.3-war-exec.jar \
+ -resetExtract \
+ -extractDirectory /var/cache/haikudepotserver-webapp
+\end{verbatim}
+
+By default the logging will be streamed to stdout/stderr.  It is possible to configure this using a \href{http://logback.qos.ch/}{logback} logging configuration file.
+
+There are a handful of other easily-accessed command line options which can be used to fine-tune the deployment.  These can be viewed by executing the binary as follows;
+
+\begin{verbatim}
+java \
+ -jar haikudepotserver-webapp-1.2.3-war-exec.jar \
+ -h
+\end{verbatim}
+
+\subsection{Setting Up Repositories}
+\label{settinguprepositories}
+
+{\it Note that this section is temporary until a user-interface exists for this.}
+
+The application server will pull ".hpkr" files from remote repositories that contain information about the packages at that repository.  At the time of writing, it is necessary to configure the repositories by hand.  A repository can be added using a SQL shell.
+
+In this ficticious example, an ".hpkr" file has been placed in the temporary directory.  The following SQL command can be executed to add a repository that pulls the ".hpkr" from the temporary directory.  In reality, the real repositories will have an internet-accessible URL.
+
+\begin{verbatim}
+INSERT INTO
+  haikudepot.repository (
+    id, active, create_timestamp, modify_timestamp,
+    architecture_id, code, url)
+  VALUES (
+    nextval('haikudepot.repository_seq'), true, now(), now(),
+    (SELECT id FROM haikudepot.architecture WHERE code='x86'),
+    'test',
+    'file:///tmp/repo.hpkr');
+\end{verbatim}
+
+In order to prompt the system to import this ".hpkr" file and populate some repository data into the system, you can use the curl tool as follows;
+
+\framebox{\tt curl "http://localhost:8080/importrepositorydata?code=test"}
+
+\subsection{Accessing the Web Environment}
+
+Once running, the web environment will be accessible from;
+
+\framebox{\tt http://localhost:8080/}

@@ -1,0 +1,194 @@
+\section{API}
+
+\subsection{General}
+
+This information applies to all areas of the API for the system; both JSON-RPC and REST packaged.
+
+\subsubsection{Clients}
+
+A client of this system's API may be a desktop application (eg; Haiku Depot) or may be logic in a web page where the web page is using some java-script to call back to the server.
+
+\subsubsection{API Version}
+
+The application generally refers to ``api 1'' in anticipation that at some point there is the {\it possibility} that a second, incompatible API may be required.
+
+\subsubsection{Object References}
+
+When objects such as packages or users are referred to in the API, the database primary key is {\bf not} used.  Instead either a natural or artifical identifier is employed.  For example, in the case of a package, the package's name may be used.  In the case of a screen-shot, a GUID (unique identifier) will be used to identify a particular screenshot.
+
+\subsubsection{Reference Data}
+
+Reference data means data in the application that is generally invariant.  Examples include the mime types, natural language, url types and so on.  In these cases, an API will generally provide for access to the list of reference data.  The client is expected to obtain such reference data as necessary and cache reference data locally.
+
+\subsubsection{Invocations and Transport}
+
+The term ``invocation'' refers to a request-response cycle from the client software into the application server over the HTTP protocol.  Each API invocation is made in a {\it stateless} manner in that each invocation is not dependent on the prior invocation.
+
+\subsubsection{Authentication}
+
+Authentication of invocations uses basic authentication for both REST and JSON-RPC.  This procedure involves an HTTP header being included in each invocation that identifies the user and also provides their password.  The value of the header includes a base-64 encoded string of the username and password, separated by a colon.  This is an example of such a header;
+
+\framebox{\tt Authorization: Basic dXNlcjpwYXNzd29yZA}
+
+If the authentication fails then the request will continue unauthenticated; there is no `challenge' returned back to the caller.  As part of the continuation of the invocation, an http 401 or 403 response maybe returned if authorization checks have failed.  A special API exists to provide a means to test an authentication for the purposes of a login panel or similar.
+
+The application does not support cookie-based authentication.
+
+\subsection{JSON-RPC API}
+
+Most API is vended as \href{http://www.jsonrpc.org}{JSON-RPC} encoded HTTP POST invocations.  The data transfer objects (DTOs) that describe the request and the response data as well as the APIs' interfaces exist in the ``haikudepotserver-api'' module in the java package;
+
+\framebox{\tt org.haikuos.haikudepotserver.api1}
+
+The documentation and list of available methods can be obtained by viewing the java interfaces and model objects in that module.
+
+\subsubsection{Example: Get a Package}
+
+In this example, the client knows the {\it name} of the package and would like to get the details of the package.  The java model objects that document the data required in request and the data that can be expected in the response can be found in the project.  The request model is;
+
+\framebox{\tt org.haikuos.haikudepotserver.api1.model.pkg.GetPkgRequest}
+
+The response model is;
+
+\framebox{\tt org.haikuos.haikudepotserver.api1.model.pkg.GetPkgResult}
+
+The actual server method that is invoked as a result of this request can be found at;
+
+\framebox{\tt org.haikuos.haikudepotserver.api1.PkgApi\#getPkg(..)}
+
+You will notice at the top of this interface, there is an annotation that describes the path or ``endpoint'' for this API.  In this case it is ``{\tt /api/v1/pkg}''.  Given a host and port, this can be extrapolated into a URL that can be used to invoke to this method.  An example would be;
+
+\framebox{\tt http://localhost:8080/api/v1/pkg}
+
+The invocation is made using the HTTP protocol to such a URL with the method POST.  The Content-Type HTTP header must be set to "{\tt application/json}" for both the request and the response.  The request object would look something like this;
+
+\begin{verbatim}
+{
+ "jsonrpc":"2.0",
+ "id":4143431,
+ "method":"getPkg",
+ "params":[{
+   "name":"apr",
+   "architectureCode":"x86",
+   "versionType":"NONE"
+ }]
+}
+\end{verbatim}
+
+All going well, the following (abridged) form of response would be sent back to the client;
+
+\begin{verbatim}
+{
+ "jsonrpc":"2.0",
+ "id":4143431,
+ "result":{
+  "name":"apr",
+  "hasIcon":true,
+  "canEdit":false,
+  "versions":[],
+  "modifyTimestamp":12345678
+ }
+}
+\end{verbatim}
+
+See the \href{http://www.jsonrpc.org}{JSON-RPC} web site for examples of the response envelope format for the scenario in which an error has arisen in the invocation.
+
+\subsubsection{Error Codes}
+
+A set of known JSON-RPC error codes are agreed between the client and server.  See the JSON-RPC specification for known error codes used for transport-related issues such as invalid parameters.  Application-specific error codes are documented in the java source at;
+
+\framebox{\tt org.haikuos.haikudepotserver.api1.support.Constants}
+
+Some errors such as the validation error (code {\tt -32800}) may also carry additional data that provides detail as to the nature of the error that has arisen.  Java logic for assembling the error payloads can be found at;
+
+\framebox{\tt org.haikuos.haikudepotserver.api1.support.ErrorResolverImpl}
+
+\subsection{REST API}
+
+REST API is generally required where data is inappropriate to encode as JSON-RPC.  This tends to be situations where the data is binary in nature.  An example of this is where a package icon needs to be uploaded.
+
+\subsubsection{Entry Point}
+
+This API will provide the web application's HTML user interface.
+
+\begin{itemize}
+\item HTTP Method : GET
+\item Path : /
+\item Response Content-Type : text/html
+\end{itemize}
+
+\subsubsection{Import Repository Data}
+
+This API provides a mechanism by which an external client is able to trigger the application to start importing package-related data from a remote repository.  This API is provided as REST because the client is likely to be scripted using a scripting language and REST is the most appropriate protocol to employ in this situation.  This invocation will trigger the import process, but the import process will execute in a background thread in the application server and will not block the client.
+
+\begin{itemize}
+\item HTTP Method : GET
+\item Path : /importrepositorydata
+\item Response Content-Type : text/plain
+\item Query Parameters
+  \begin{itemize}
+  \item {\bf code} : Identifies the repository from which data should be obtained
+  \end{itemize}
+\item Expected HTTP Status Codes
+  \begin{itemize}
+  \item {\bf 200} : The import job was accepted
+  \item {\bf 400} : The code was not supplied in the request
+  \end{itemize}
+\end{itemize}
+
+An example URL is;
+
+\framebox{\tt http://localhost:8080/importrepositorydata?code=haikuportsprod}
+
+\subsubsection{Get Package Icon}
+
+This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image.
+
+\begin{itemize}
+\item HTTP Method : GET
+\item Path : /pkgicon/$<$pkgname$>$.png
+\item Response Content-Type : image/png
+\item Query Parameters
+  \begin{itemize}
+  \item {\bf size} : Either 16 or 32 for the number of pixels; other values are not allowed
+  \end{itemize}
+\item Expected HTTP Status Codes
+  \begin{itemize}
+  \item {\bf 200} : The icon is provided in the response
+  \item {\bf 415} : The path did not include ".png" or the size is invalid
+  \item {\bf 400} : The package name was not supplied
+  \item {\bf 404} : The package was not found
+  \end{itemize}
+\end{itemize}
+
+An example URL is;
+
+\framebox{\tt http://localhost:8080/pkgicon/apr.png?size=32}
+
+\subsubsection{Put Package Icon}
+
+This API is able to store an icon for a given size for a package.
+
+\begin{itemize}
+\item HTTP Method : PUT
+\item Path : /pkgicon/$<$pkgname$>$.png
+\item Query Parameters
+  \begin{itemize}
+  \item {\bf size} : Either 16 or 32 for the number of pixels; other values are not allowed
+  \end{itemize}
+\item Expected HTTP Status Codes
+  \begin{itemize}
+  \item {\bf 200} : The icon was stored
+  \item {\bf 415} : The path did not include ".png" or the size is invalid or the supplied data is not in PNG format or the size of the suppied data does not agree with the size specified in the query parameter.
+  \item {\bf 404} : The package identified in the path was not able to be found
+  \item {\bf 400} : The package name was not supplied
+  \end{itemize}
+\end{itemize}
+
+An example URL is;
+
+\framebox{\tt http://localhost:8080/pkgicon/apr.png?size=32}
+
+
+
+

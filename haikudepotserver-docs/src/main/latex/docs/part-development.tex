@@ -1,0 +1,23 @@
+\section{Development}
+
+This section covers how to setup the system for development purposes.  First review \ref{prerequisites} for prerequisites.  The project consists of a number of modules.  "haikudepotserver-webapp" is the application server module.  You should configure a {\it development} configuration file at the following location relative to the top-level of the source;
+
+\framebox{\tt haikudepotserver-webapp/src/main/resources/local.properties}
+
+See \ref{config} for details on the format and keys for this configuration file.
+
+Some of the project source-files (web resources) are downloaded from the internet on the first build.  Your first step should be to undertake this first build by issuing this command from the top level of the project;
+
+\framebox{\tt mvn compile}
+
+This will compile the source code and in the process, download any necessary resources.
+
+To start-up the application server for development purposes, issue the following command from the same top level of the project;
+
+\framebox{\tt mvn org.apache.tomcat.maven:tomcat7-maven-plugin:2.1:run}
+
+This may take some time to start-up; especially the first time.  Once it has started-up, it should be possible to connect to the application server using the following URL;
+
+\framebox{\tt http://localhost:8080/}
+
+There won't be any repositories or data loaded, and because of this, it is not possible to view any data.  See \ref{settinguprepositories} for details on how to setup a repository and load-up some data to view.

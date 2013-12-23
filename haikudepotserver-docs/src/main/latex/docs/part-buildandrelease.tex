@@ -1,0 +1,43 @@
+\section{Build and Release}
+\label{buildandrelease}
+
+This section covers how to build the application server and how to produce release builds of it.
+
+\subsection{Building}
+
+The build process uses the \href{http://maven.apache.org}{Apache Maven} build tool.  This is discussed in the prerequisites at \ref{prerequisites}.
+
+From source code, you can obtain a build by issuing the following command from the UNIX shell;
+
+\framebox{\tt mvn package}
+
+Given the state of the source code, this will produce build artifacts.  Note that this may take some time for the first build because it will need to download various dependencies from the internet.
+
+\subsection{Release}
+
+A maven project has a ``version'' which is either a final version such as ``2.3.1'' or is a {\it snapshot} version such as ``2.3.2-SNAPSHOT''.  The snapshot version is the version under which the next release is being done.  Once it is ready, a release is made wherein that source-code is fixed to the version number without the trailing ``-SNAPSHOT'' and then the snapshot version is incremented.  The release yields a tag in the SCM in order to be able to reproduce the source-code for that release against a release version.  The tag will have a form such as ``haikudepotserver-2.3.2''.
+
+ The release process uses the maven 'release' system although there are two caveats;
+
+ \begin{itemize}
+ \item The release is made in the local git repository and is then pushed to remote repository {\bf manually} --- this differs from the typical behaviour where the changes are pushed to the remote repository automatically a number of times through the release process.
+ \item The build product(s) will not be copied to a remote maven repository (distribution management) because there is presently no such repository available.
+ \end{itemize}
+
+ To undertake a release, all changes in the local repository must be committed.  Note that during the release process, the user will be prompted to supply version numbers at the console.  The following commands will cause a release to be undertaken;
+
+ \begin{verbatim}
+ mvn clean
+ mvn release:prepare
+ mvn release:perform
+ git push
+ git push --tags
+ \end{verbatim}
+
+ In order to obtain source code state for a particular release, first pull changes from the remote repository and then checkout the source at the particular tag;
+
+ \begin{verbatim}
+ git checkout tags/haikudepotserver-2.3.2
+ \end{verbatim}
+
+ From there it will be possible to create a build product for that particular release.

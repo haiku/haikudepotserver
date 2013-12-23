@@ -1,0 +1,42 @@
+\section{Configuration}
+\label{config}
+
+The application server is configured using a standard java properties file.  This same format is used in different ways for either an actual deployment or a development environment.
+
+A typical java properties file has the following general form;
+
+\begin{verbatim}
+# Comment
+key1=value
+key2=value
+\end{verbatim}
+
+There are a number of keys which are described below.
+
+\subsection{Database-Related}
+
+\subsubsection{\tt jdbc.driver}
+
+Class name of the JDBC driver employed.
+
+example : \framebox{\tt org.postgresql.Driver}
+
+\subsubsection{\tt jdbc.url}
+
+JDBC connect URL to the main database
+
+example : \framebox{jdbc:postgres://localhost:5432/haikudepotserver}
+
+\subsubsection{{\tt jdbc.username} and {\tt jdbc.password}}
+
+Database user's username and password
+
+\subsubsection{\tt flyway.migrate}
+
+Set this to ``true'' if you would like database schema migrations to be applied automatically as necessary.  Generally this should be configured to ``true''.
+
+\subsection{Web-Related}
+
+\subsubsection{\tt webresourcegroup.separated}
+
+Some web resources such as javascript file can be concatinated for efficiency.  Setting this configuration key to ``true'' will mean that such resources are delivered to browsers as separated files; less efficient, but easier to debug.

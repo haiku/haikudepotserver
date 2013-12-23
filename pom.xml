@@ -11,6 +11,7 @@
         <module>haikudepotserver-api1</module>
         <module>haikudepotserver-packagefile</module>
         <module>haikudepotserver-parent</module>
+        <module>haikudepotserver-docs</module>
     </modules>
 
     <!--
