@@ -2,8 +2,7 @@
 *.iml
 target
 haikudepotserver-webapp/src/main/webapp/bootstrap/**
-haikudepotserver-webapp/src/main/webapp/js/lib/*.js
-haikudepotserver-webapp/src/main/webapp/js/lib/*.map
+haikudepotserver-webapp/src/main/webapp/js/lib/**
 haikudepotserver-webapp/src/main/resources/local.properties
 
 

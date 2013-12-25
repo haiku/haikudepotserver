@@ -5,8 +5,10 @@
 
 package org.haikuos.haikudepotserver.web;
 
+import com.google.common.base.Optional;
 import com.google.common.net.MediaType;
 import org.haikuos.haikudepotserver.web.model.WebResourceGroup;
+import org.haikuos.haikudepotserver.web.model.WebResourceGroupService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.tags.form.AbstractHtmlElementTag;
@@ -48,11 +50,14 @@ public class WebResourceGroupTag extends AbstractHtmlElementTag {
         HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
 
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(pageContext.getServletContext());
-        WebResourceGroup webResourceGroup = ctx.getBean(getCode() + WebResourceGroup.SUFFIX_BEANNAME, WebResourceGroup.class);
+        WebResourceGroupService service = ctx.getBean(WebResourceGroupService.class);
+        Optional<WebResourceGroup> webResourceGroupOptional = service.getWebResourceGroup(getCode());
 
-        if(null==webResourceGroup) {
+        if(!webResourceGroupOptional.isPresent()) {
             throw new JspException("unable to find the web resource group with the code '"+getCode()+"'");
         }
+
+        WebResourceGroup webResourceGroup = webResourceGroupOptional.get();
 
         // if they are to be separated then render a script tag for each one; otherwise just render one
         // script tag that will join them all together.

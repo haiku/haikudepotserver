@@ -17,18 +17,39 @@
 
     <properties>
 
+        <!--
+        This random UUID identifies the current version of the web-resources.  If this value is bumped, the effect
+        is that new resources will be downloaded from the internet.  Use the UNIX command "uuidgen" to get a new
+        identifier.
+        -->
+
+        <webresources.guid>79A1B854-6665-4254-B24C-E40564DCA393</webresources.guid>
+
+        <!--
+        These are the versions of web-resources that are downloaded as part of this version of web resources
+        -->
         <angularuibootstrapjs.version>0.6.0</angularuibootstrapjs.version>
         <angularuiutils.version>0.4.0</angularuiutils.version>
         <angularjs.version>1.2.0</angularjs.version>
         <base64js.version>0.1.3</base64js.version>
+        <bootstrap.version>3.0.0</bootstrap.version>
         <underscorejs.version>1.5.2</underscorejs.version>
         <momentjs.version>2.3.1</momentjs.version>
 
-        <!-- ANT -->
+        <!--
+        These are the source (base URLs) for the web resources to be downloaded from.
+        -->
+
         <js.angularjsurl>http://code.angularjs.org</js.angularjsurl>
         <js.cdnurl>http://cdnjs.cloudflare.com/ajax/libs</js.cdnurl>
-        <js.libsroot>${basedir}/src/main/webapp/js/lib</js.libsroot>
-        <bootstrap.root>${basedir}/src/main/webapp/bootstrap</bootstrap.root>
+        <bootstrap.url>https://github.com/twbs/bootstrap/releases/download</bootstrap.url>
+
+        <!--
+        These are the locations within the project into which the web-resources will be saved.
+        -->
+
+        <js.libsroot>${basedir}/src/main/webapp/js/lib/${webresources.guid}</js.libsroot>
+        <bootstrap.root>${basedir}/src/main/webapp/bootstrap/${webresources.guid}</bootstrap.root>
 
     </properties>
 
@@ -132,6 +153,24 @@
     </dependencies>
 
     <build>
+
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>webresources.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>webresources.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
         <plugins>
 
 

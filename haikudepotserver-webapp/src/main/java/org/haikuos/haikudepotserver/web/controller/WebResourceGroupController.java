@@ -5,12 +5,14 @@
 
 package org.haikuos.haikudepotserver.web.controller;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.haikuos.haikudepotserver.web.model.WebResourceGroup;
 import org.haikuos.haikudepotserver.support.Closeables;
+import org.haikuos.haikudepotserver.web.model.WebResourceGroupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -42,6 +44,9 @@ public class WebResourceGroupController implements ApplicationContextAware {
 
     public final static String KEY_CODE = "code";
 
+    @javax.annotation.Resource
+    WebResourceGroupService webResourceGroupService;
+
     private ApplicationContext applicationContext;
 
     @Override
@@ -61,33 +66,28 @@ public class WebResourceGroupController implements ApplicationContextAware {
             response.getWriter().print(String.format("the code is required"));
         }
         else {
+            Optional<WebResourceGroup> webResourceGroupOptional = webResourceGroupService.getWebResourceGroup(code);
 
-            String beanId = code + WebResourceGroup.SUFFIX_BEANNAME;
-            WebResourceGroup webResourceGroup = null;
+            if(
+                    !webResourceGroupOptional.isPresent() ||
+                            null==webResourceGroupOptional.get().getResources() ||
+                            0==webResourceGroupOptional.get().getResources().size()) {
 
-            try {
-                webResourceGroup = applicationContext.getBean(beanId, WebResourceGroup.class);
-            }
-            catch(NoSuchBeanDefinitionException nsbde) {
-                // this is ignored because the fact that the webResourceGroup is not defined will
-                // result in a 404 anyway.
-            }
-
-            if(null==webResourceGroup || null==webResourceGroup.getResources() || 0==webResourceGroup.getResources().size()) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
                 response.getWriter().print(String.format("unable to find script group; %s",code));
+
             }
             else {
                 response.setStatus(HttpServletResponse.SC_OK);
-                response.setHeader(HttpHeaders.CONTENT_TYPE, webResourceGroup.getMimeType());
+                response.setHeader(HttpHeaders.CONTENT_TYPE, webResourceGroupOptional.get().getMimeType());
                 OutputStream outputStream = null;
 
                 try {
 
                     outputStream = response.getOutputStream();
 
-                    for(String resource : webResourceGroup.getResources()) {
+                    for(String resource : webResourceGroupOptional.get().getResources()) {
                         Resource r = applicationContext.getResource(resource);
                         InputStream inputStream = null;
 

@@ -15,7 +15,7 @@ web-resources and then this starts the java-script single page environment drive
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap/<c:out value="${webResourcesGuid}"></c:out>/dist/css/bootstrap.min.css">
     <link rel="icon" type="image/png" href="/img/haikudepot16.png" >
 
     <hds:webresourcegroup code="libScripts"/>

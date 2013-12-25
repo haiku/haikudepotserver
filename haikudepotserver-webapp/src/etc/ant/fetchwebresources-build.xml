@@ -17,6 +17,10 @@ from where this is invoked.
     </target>
 
     <target name="js">
+
+        <mkdir dir="${js.libsroot}"/>
+        <mkdir dir="${bootstrap.root}"/>
+
         <!-- user interface / events / mvc -->
         <get src="${js.angularjsurl}/${angularjs.version}/angular.js" dest="${js.libsroot}/angular.js" skipexisting="true" />
         <get src="${js.angularjsurl}/${angularjs.version}/angular.min.js" dest="${js.libsroot}/angular-min.js" skipexisting="true" />
@@ -46,9 +50,9 @@ from where this is invoked.
     </target>
 
     <target name="bootstrap" depends="bootstrap.check" unless="bootstrap.present">
-        <get src="https://github.com/twbs/bootstrap/releases/download/v3.0.0/bootstrap-3.0.0-dist.zip" dest="${java.io.tmpdir}/bootstrap-3.0.0-dist.zip" />
-        <unzip src="${java.io.tmpdir}/bootstrap-3.0.0-dist.zip" dest="${bootstrap.root}"/>
-        <delete file="${java.io.tmpdir}/bootstrap-3.0.0-dist.zip"/>
+        <get src="${bootstrap.url}/v${bootstrap.version}/bootstrap-${bootstrap.version}-dist.zip" dest="${java.io.tmpdir}/bootstrap-${bootstrap.version}-dist.zip" />
+        <unzip src="${java.io.tmpdir}/bootstrap-${bootstrap.version}-dist.zip" dest="${bootstrap.root}"/>
+        <delete file="${java.io.tmpdir}/bootstrap-${bootstrap.version}-dist.zip"/>
     </target>
 
     <target name="main" depends="bootstrap,js"/>

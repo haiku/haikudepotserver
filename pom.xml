@@ -7,11 +7,11 @@
     <version>1.0.1-SNAPSHOT</version>
 
     <modules>
-        <module>haikudepotserver-webapp</module>
         <module>haikudepotserver-api1</module>
         <module>haikudepotserver-packagefile</module>
         <module>haikudepotserver-parent</module>
         <module>haikudepotserver-docs</module>
+        <module>haikudepotserver-webapp</module>
     </modules>
 
     <!--

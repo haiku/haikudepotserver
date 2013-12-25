@@ -17,8 +17,6 @@ import java.util.List;
 
 public class WebResourceGroup {
 
-    public final static String SUFFIX_BEANNAME = "WebResourceGroup";
-
     private String code;
 
     private List<String> resources;

@@ -18,6 +18,7 @@
         <property name="ignoreResourceNotFound" value="true"/>
         <property name="locations">
             <list>
+                <value>classpath:webresources.properties</value>
                 <value>classpath:local.properties</value>
                 <value>${config.properties}</value>
             </list>
