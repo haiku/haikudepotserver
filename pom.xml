@@ -4,7 +4,7 @@
     <groupId>org.haikuos</groupId>
     <artifactId>haikudepotserver</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
 
     <modules>
         <module>haikudepotserver-api1</module>
@@ -21,7 +21,7 @@
 
     <scm>
         <connection>scm:git:git</connection>
-      <tag>haikudepotserver-1.0.1</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <build>
