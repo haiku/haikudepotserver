@@ -25,11 +25,9 @@
         <!--
         These are the versions of web-resources that are downloaded as part of this version of web resources
         -->
-        <angularuibootstrapjs.version>0.6.0</angularuibootstrapjs.version>
         <angularuiutils.version>0.4.0</angularuiutils.version>
         <angularjs.version>1.2.0</angularjs.version>
         <base64js.version>0.1.3</base64js.version>
-        <bootstrap.version>3.0.0</bootstrap.version>
         <underscorejs.version>1.5.2</underscorejs.version>
         <momentjs.version>2.3.1</momentjs.version>
 
@@ -39,14 +37,12 @@
 
         <js.angularjsurl>http://code.angularjs.org</js.angularjsurl>
         <js.cdnurl>http://cdnjs.cloudflare.com/ajax/libs</js.cdnurl>
-        <bootstrap.url>https://github.com/twbs/bootstrap/releases/download</bootstrap.url>
 
         <!--
         These are the locations within the project into which the web-resources will be saved.
         -->
 
         <js.libsroot>${basedir}/src/main/webapp/js/lib/${webresources.guid}</js.libsroot>
-        <bootstrap.root>${basedir}/src/main/webapp/bootstrap/${webresources.guid}</bootstrap.root>
 
     </properties>
 

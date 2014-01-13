@@ -14,7 +14,17 @@ angular.module('haikudepotserver').config(
                 .when('/viewpkg/:name/:version',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
                 .when('/editpkgicon/:name',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
-                .when('/',{controller:'HomeController', templateUrl:'/js/app/controller/home.html'})
+                .when('/',{
+                    controller:'HomeController',
+                    templateUrl:'/js/app/controller/home.html',
+                    resolve: {
+                        'architectures':[
+                            'referenceData', function(referenceData) {
+                                return referenceData.architectures();
+                            }
+                        ]
+                    }
+                })
                 .otherwise({redirectTo:'/'});
         }
     ]

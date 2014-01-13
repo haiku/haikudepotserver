@@ -1,0 +1,77 @@
+#pkg-title {
+    margin-bottom: 16px;
+}
+
+#pkg-title-icon {
+    display: inline;
+    float:left;
+}
+
+#pkg-title-text {
+    padding-left: 38px;
+}
+
+#pkg-title-text h1 {
+    margin: 0;
+}
+
+#pkg-info-container {
+    margin-right: 500px;
+}
+
+#pkg-screenshot-container {
+    float: right;
+    width: 480px;
+    border: 1px solid black;
+    min-height: 320px;
+    position: relative;
+    background-color: #EEE;
+}
+
+#pkg-screenshot-title {
+    background-color: #444;
+    color: white;
+    padding: 4px;
+}
+
+/*
+This is for a small label which indicates that there are no screenshots to display
+for this package.
+*/
+
+#pkg-screenshot-none {
+    margin-top: 32px;
+    margin-bottom: 0px;
+    width: 240px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    border-radius: 4px;
+    color: grey;
+    text-align: center;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#pkg-screenshot-pagination-container {
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:4px;
+    padding-right:4px;
+    position: absolute; /* assumes that this is inside a 'pkg-screenshot-title' */
+    top: 0px;
+    right: 0px;
+    background-color: rgb(253,207,49);
+    border-bottom-left-radius: 4px;
+    display: inline;
+}
+
+#pkg-screenshot-pagination-container a {
+    color: black;
+    text-decoration: none;
+}
+
+#pkg-screenshot-pagination-container span {
+    color: rgba(0, 0, 0, 0.30);
+    text-decoration: none;
+}

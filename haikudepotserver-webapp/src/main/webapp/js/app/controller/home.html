@@ -1,72 +1,67 @@
 
-<div id="home-search-criteria-bar" class="row">
-    <div class="col-md-3" ng-class="classMostRecent()" ng-click="goMostRecent()">Most Recent</div>
-    <div class="col-md-3" ng-class="classMostViewed()" ng-click="goMostViewed()">Most Viewed</div>
-    <div id="home-search-criteria-bar-categories" class="col-md-3" ng-class="classCategories()">
-        <span class="text-muted">Category :</span>
-        <select ng-model="selectedCategory" ng-options="category for category in categories"></select>
-    </div>
-    <div id="home-search-criteria-bar-search" class="col-md-3" ng-class="classSearch()">
+<div class="content">
 
-        <div class="input-group">
-            <input
-                    ng-model="searchExpression"
-                    type="search"
-                    class="form-control"
-                    ui-keypress="{enter:'goSearchExpression()'}"
-                    placeholder="Search..."></input>
-            <span class="input-group-btn">
+    <div id="home-search-criteria-container">
+        <div id="home-search-criteria-architecture-container">
+            <select ng-model="selectedArchitecture" ng-options="anArchitecture.code for anArchitecture in architectures"></select>
+        </div>
+        <div id="home-search-criteria-category-container">
+            <select ng-model="selectedViewCriteriaTypeOption" ng-options="aViewCriteriaTypeOptions.name for aViewCriteriaTypeOptions in viewCriteriaTypeOptions"></select>
+        </div>
+        <div id="home-search-criteria-predicates-container">
+            <div ng-show="'SEARCH'==selectedViewCriteriaTypeOption.code">
+                <input
+                        ng-model="searchExpression"
+                        ui-keypress="{enter:'goSearch()'}"
+                        placeholder="Search..."></input>
                 <button
-                        class="btn btn-default"
-                        type="button"
-                        ng-click="goSearchExpression()">Go!</button>
-            </span>
-        </div><!-- /input-group -->
-    </div>
-</div>
-
-<div id="home-search-results-container" class="row text-center">
-
-    <div ng-show="!pkgs"><spinner></spinner></div>
-
-    <div ng-show="pkgs && 0==pkgs.length" class="alert alert-info">
-        <strong>No results; </strong>
-        There were no packages able to be found from your search criteria.
+                        ng-disabled="!searchExpression || !searchExpression.length"
+                        ng-click="goSearch()">
+                    Go
+                </button>
+            </div>
+            <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
+                Not supported yet!
+            </div>
+        </div>
     </div>
 
-    <div ng-show="pkgs && pkgs.length">
-        <table class="table table-striped table-bordered table-condensed">
-            <thead>
-            <td></td>
-            <td>Package</td>
-            <td>Current Version</td>
-            </thead>
-            <tbody>
-            <tr ng-repeat="pkg in pkgs">
-                <td class="text-center">
-                    <pkg-icon size="16" pkg="pkg"></pkg-icon>
-                </td>
-                <td><a href="" ng-click="goViewPkg(pkg)">{{pkg.name}}</a></td>
-                <td><version-label version="pkg.version"></version-label></td>
-            </tr>
-            </tbody>
-        </table>
+    <!-- RESULTS -->
 
-        <div class="text-right">
-            <ul class="pagination">
-                <li ng-class="classPreviousPage()">
-                    <a href="" ng-click="goPreviousPage()">&laquo;</a>
-                </li>
-                <!-- todo - pages inbetween -->
-                <li ng-class="classNextPage()">
-                    <a href="" ng-click="goNextPage()">&raquo;</a>
-                </li>
-            </ul>
+    <div id="home-search-results-container">
 
+        <div ng-show="pkgs && 0==pkgs.length" class="info-container">
+            <strong>No results; </strong>
+            There were no packages able to be found from your search criteria.
         </div>
 
-    </div>
+        <div ng-show="pkgs && pkgs.length" class="table-general-container">
 
+            <div class="table-general-pagination-container">
+                <a href="" ng-click="goPreviousPage()" ng-show="0!=offset">&laquo;</a>
+                <span ng-show="0==offset">&laquo;</span>
+                <a href="" ng-click="goNextPage()" ng-show="hasMore">&raquo;</a>
+                <span ng-show="!hasMore">&raquo;</span>
+            </div>
+
+            <table id="home-search-results-table" class="generaltable">
+                <thead>
+                <th></th>
+                <th>Package</th>
+                <th>Current Version</th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="pkg in pkgs">
+                    <td><pkg-icon size="16" pkg="pkg"></pkg-icon></td>
+                    <td><a href="" ng-click="goViewPkg(pkg)">{{pkg.name}}</a></td>
+                    <td><version-label version="pkg.version"></version-label></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
 </div>
 
+<div class="footer"></div>
 <spinner spin="shouldSpin()"></spinner>

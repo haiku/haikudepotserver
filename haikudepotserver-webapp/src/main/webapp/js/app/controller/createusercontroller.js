@@ -29,12 +29,12 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.deriveFormControlsContainerClasses = function(name) {
-                return $scope.createUserForm[name].$invalid ? ['has-error'] : [];
+                return $scope.createUserForm[name].$invalid ? ['formitemgrouperror'] : [];
             }
 
             function refreshBreadcrumbItems() {
                 $scope.breadcrumbItems = [{
-                    title : 'Create User',
+                    title : 'Register User',
                     path : $location.path()
                 }];
             }
@@ -96,7 +96,10 @@ angular.module('haikudepotserver').controller(
                     ).then(
                     function(result) {
                         $log.info('created new user; '+$scope.newUser.nickname);
-                        $location.path('/authenticateuser').search({});
+                        $location.path('/authenticateuser').search({
+                            nickname : $scope.newUser.nickname,
+                            didCreate : true
+                        });
                     },
                     function(err) {
 

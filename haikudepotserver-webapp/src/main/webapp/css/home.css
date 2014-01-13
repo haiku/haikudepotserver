@@ -1,12 +1,41 @@
-/*
-These styles are related to the 'home page' of the application.
-*/
 
-#home-search-criteria-bar > div {
+#home-search-criteria-container {
     background-color: rgb(253,207,49);
-    min-height: 44px;
-    text-align: center;
-    padding-top: 12px;
+    border: 1px solid black;
+}
+
+#home-search-criteria-container > div {
+    display: inline-block;
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:4px;
+    padding-right:4px;
+}
+
+#home-search-criteria-container input {
+    font-size: 10px;
+}
+
+#home-search-criteria-container button {
+    font-size: 10px;
+    background-color: rgb(253,207,49);
+    border: 1px solid black;
+    border-radius: 3px;
+}
+
+#home-search-criteria-container button[disabled] {
+    border: 1px solid rgba(0, 0, 0, 0.30);
+}
+
+#home-search-criteria-architecture-container {
+    border-right: 1px dotted black;
+}
+
+#home-search-criteria-category-container {
+    border-right: 1px dotted black;
+}
+
+#home-search-criteria-predicates-container {
 }
 
 #home-search-criteria-bar-categories > span {
@@ -38,10 +67,18 @@ Special layout for the search field which is in the 3rd box
 }
 
 #home-search-results-container {
-    margin-top: 16px;
-    padding: 16px;
+    margin-top: 8px;
 }
 
 #home-search-results-container > table > tbody > tr > td:nth-child(1) {
     width: 24px;
+}
+
+#home-search-results-table > tbody > tr > td:nth-child(1) {
+    width:18px;
+    text-align: center;
+}
+
+#home-search-results-table > tbody > tr > td:nth-child(2) {
+    width:50%;
 }

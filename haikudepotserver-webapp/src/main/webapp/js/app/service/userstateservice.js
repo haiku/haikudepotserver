@@ -14,48 +14,9 @@ angular.module('haikudepotserver').factory('userState',
         '$log','$q','jsonRpc','pkgIcon','referenceData','constants',
         function($log,$q,jsonRpc,pkgIcon,referenceData,constants) {
 
-            var architecture = undefined;
             var user = undefined;
 
             var UserState = {
-
-                /**
-                 * <p>This function will return a promise to get the current architecture that the user would like to
-                 * see.</p>
-                 */
-
-                architecture : function(value) {
-
-                    if(undefined !== value) {
-                        architecture = value;
-                        $log.info('set architecture; '+value.code);
-                    }
-
-                    var deferred = $q.defer();
-
-                    if(!architecture) {
-                        referenceData.architecture(constants.ARCHITECTURE_CODE_DEFAULT).then(
-                            function(data) {
-                                if(!data) {
-                                    $log.error('architecture \''+constants.ARCHITECTURE_CODE_DEFAULT+'\' unknown');
-                                    deferred.reject();
-                                }
-                                else {
-                                    architecture = data;
-                                    deferred.resolve(data);
-                                }
-                            },
-                            function() {
-                                deferred.reject();
-                            }
-                        );
-                    }
-                    else {
-                        deferred.resolve(architecture);
-                    }
-
-                    return deferred.promise;
-                },
 
                 /**
                  * <p>Invoked with no argument, this function will return the user.  If it is supplied with null then

@@ -18,6 +18,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.didFailAuthentication = false;
             $scope.amAuthenticating = false;
+            $scope.didCreate = !!$location.search()['didCreate'];
             $scope.authenticationDetails = {
                 nickname : undefined,
                 passwordClear : undefined
@@ -27,12 +28,16 @@ angular.module('haikudepotserver').controller(
                 path : $location.path()
             }];
 
+            if($location.search()['nickname']) {
+                $scope.authenticationDetails.nickname = $location.search()['nickname'];
+            }
+
             $scope.shouldSpin = function() {
                 return $scope.amAuthenticating;
             }
 
             $scope.deriveFormControlsContainerClasses = function(name) {
-                return $scope.authenticateUserForm[name].$invalid ? ['has-error'] : [];
+                return $scope.authenticateUserForm[name].$invalid ? ['formitemgrouperror'] : [];
             }
 
             // This function will take the data from the form and will authenticate
@@ -71,7 +76,9 @@ angular.module('haikudepotserver').controller(
                             var destination = $location.search()['destination'];
 
                             if(destination && 0!=destination.length) {
-                                $location.path(destination).search({});
+                                var s = angular.copy($location.search());
+                                delete s['destination'];
+                                $location.path(destination).search(s);
                             }
                             else {
                                 $location.path('/').search({});

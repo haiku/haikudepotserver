@@ -7,19 +7,9 @@ from where this is invoked.
 
 <project name="fetchwebresources" default="main" basedir=".">
 
-    <!--
-    This exists in order to pre-check if the bootstrap material is already downloaded; if it is then
-    it is not necessary to re-fetch it.
-    -->
-
-    <target name="bootstrap.check">
-        <available property="bootstrap.present" file="${bootstrap.root}/dist"/>
-    </target>
-
     <target name="js">
 
         <mkdir dir="${js.libsroot}"/>
-        <mkdir dir="${bootstrap.root}"/>
 
         <!-- user interface / events / mvc -->
         <get src="${js.angularjsurl}/${angularjs.version}/angular.js" dest="${js.libsroot}/angular.js" skipexisting="true" />
@@ -27,8 +17,6 @@ from where this is invoked.
         <get src="${js.angularjsurl}/${angularjs.version}/angular-route.js" dest="${js.libsroot}/angular-route.js" skipexisting="true" />
         <get src="${js.angularjsurl}/${angularjs.version}/angular-route.min.js" dest="${js.libsroot}/angular-route-min.js" skipexisting="true" />
 
-        <get src="${js.cdnurl}/angular-ui-bootstrap/${angularuibootstrapjs.version}/ui-bootstrap-tpls.js" dest="${js.libsroot}/ui-bootstrap-tpls.js" skipexisting="true" />
-        <get src="${js.cdnurl}/angular-ui-bootstrap/${angularuibootstrapjs.version}/ui-bootstrap-tpls.min.js" dest="${js.libsroot}/ui-bootstrap-tpls-min.js" skipexisting="true" />
         <get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui-ieshiv.js" dest="${js.libsroot}/angular-ui-ieshiv.js" skipexisting="true" />
         <get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui-ieshiv.min.js" dest="${js.libsroot}/angular-ui-ieshiv-min.js" skipexisting="true" />
         <!--<get src="${js.cdnurl}/angular-ui/${angularuiutils.version}/angular-ui.css" dest="${js.libsroot}/angular-ui.css" skipexisting="true" />-->
@@ -49,12 +37,6 @@ from where this is invoked.
 
     </target>
 
-    <target name="bootstrap" depends="bootstrap.check" unless="bootstrap.present">
-        <get src="${bootstrap.url}/v${bootstrap.version}/bootstrap-${bootstrap.version}-dist.zip" dest="${java.io.tmpdir}/bootstrap-${bootstrap.version}-dist.zip" />
-        <unzip src="${java.io.tmpdir}/bootstrap-${bootstrap.version}-dist.zip" dest="${bootstrap.root}"/>
-        <delete file="${java.io.tmpdir}/bootstrap-${bootstrap.version}-dist.zip"/>
-    </target>
-
-    <target name="main" depends="bootstrap,js"/>
+    <target name="main" depends="js"/>
 
 </project>

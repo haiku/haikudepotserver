@@ -1,31 +1,58 @@
-<div class="generic-page-content-container">
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
 
-    <breadcrumbs items="breadcrumbItems"></breadcrumbs>
+<div class="content">
 
-    <h2>
-        <pkg-icon size="32" pkg="pkg"></pkg-icon>
-        {{pkg.name}}
-    </h2>
+    <div id="pkg-title">
+        <div id="pkg-title-icon">
+            <pkg-icon size="32" pkg="pkg"></pkg-icon>
+        </div>
+        <div id="pkg-title-text">
+            <h1>
+                {{pkg.name}}
+            </h1>
+            <div class="muted">
+                <version-label version="pkg.versions[0]"></version-label>
+                - {{pkg.versions[0].architectureCode}}
+            </div>
+        </div>
+    </div>
 
-    <p>
-<span class="label label-default">
-    <version-label version="pkg.versions[0]"></version-label>
-    - {{pkg.versions[0].architectureCode}}
-</span>
-    </p>
+    <hr/>
 
-    <p ng-show="pkg.versions[0].summary" class="lead">{{pkg.versions[0].summary}}</p>
-    <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
+    <div>
 
+        <div id="pkg-screenshot-container">
+
+            <div id="pkg-screenshot-pagination-container">
+                <a href="">&laquo;</a>
+                <a href="">&raquo;</a>
+            </div>
+
+            <div id="pkg-screenshot-title">
+                Screenshots
+            </div>
+
+            <div id="pkg-screenshot-none">
+                No screenshots available
+            </div>
+        </div>
+
+        <div id="pkg-info-container">
+            <h2 ng-show="pkg.versions[0].summary" class="lead">{{pkg.versions[0].summary}}</h2>
+            <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
+
+            <h2>Actions</h2>
+
+            <ul>
+                <li><a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">Visit web site</a></li>
+                <li ng-show="canRemoveIcon()"><a href="" ng-click="goRemoveIcon()">Remove icon</a></li>
+                <li ng-show="canEditIcon()"><a href="" ng-click="goEditIcon()">Edit icons</a></li>
+            </ul>
+        </div>
+
+    </div>
 </div>
 
-        <h3>Actions</h3>
-
-        <ul>
-            <li><a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">Visit web site</a></li>
-            <li ng-show="canRemoveIcon()"><a href="" ng-click="goRemoveIcon()">Remove icon</a></li>
-            <li ng-show="canEditIcon()"><a href="" ng-click="goEditIcon()">Edit icons</a></li>
-        </ul>
-
+<div class="footer"></div>
 <spinner spin="shouldSpin()"></spinner>
 

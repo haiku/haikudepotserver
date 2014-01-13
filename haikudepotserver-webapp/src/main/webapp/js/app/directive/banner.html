@@ -1,49 +1,18 @@
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="" ng-click="goHome()">Haiku Depot Web</a>
-        </div>
-        <div class="collapse navbar-collapse">
-            <!--<ul class="nav navbar-nav">-->
-                <!--<li class="active"><a href="#">Todo</a></li>-->
-                <!--<li><a href="#">Todo</a></li>-->
-                <!--<li><a href="#">Todo</a></li>-->
-            <!--</ul>-->
-            <ul class="nav navbar-nav navbar-right">
-
-                <li class="dropdown" ng-show="architectures.length">
-                    <a href="#" class="dropdown-toggle">
-                        <span>{{architecture.code}}</span>
-                        <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li
-                                ng-class="isArchitectureSelected(a) ? ['disabled'] : []"
-                                ng-repeat="a in architectures">
-                            <a
-                                    href=""
-                                    ng-click="goChooseArchitecture(a)">{{a.code}}</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="dropdown" ng-show="userActions.length">
-                    <a href="#" class="dropdown-toggle">
-                        <span class="glyphicon glyphicon-user"></span>
-                        <span>{{userDisplayTitle()}}</span>
-                        <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li ng-repeat="userAction in userActions">
-                            <a
-                                    href=""
-                                    ng-click="userAction.action()"><message key="{{userAction.titleKey}}"></message></a>
-                        </li>
-                    </ul>
-                </li>
-
-            </ul>
-        </div><!--/.nav-collapse -->
-    </div>
+<div id="banner">
+    <span id="banner-title" ng-click="goHome()">
+        <div>Haiku Depot Server</div>
+    </span>
+    <span id="banner-user">
+        <span ng-show="canAuthenticateOrCreate()">
+            <a href="" ng-click="goAuthenticateUser()">login</a>
+            |
+            <a href="" ng-click="goCreateUser()">register</a>
+        </span>
+        <span ng-show="canShowAuthenticated()">
+            <a href="" ng-click="goViewUser()">{{userDisplayTitle()}}</a>
+            <a href="" ng-click="goLogoutUser()"><img src="img/logout.svg" alt="Logout"/></a>
+        </span>
+    </span>
 </div>
+
 

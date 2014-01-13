@@ -25,7 +25,7 @@ public class SimpleMathProblemCaptchaAlgorithm implements CaptchaAlgorithm {
     private static final int PADDING_TEXT = 4;
 
     private static final int WIDTH = 128;
-    private static final int HEIGHT = 32;
+    private static final int HEIGHT = 24;
 
     private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
 

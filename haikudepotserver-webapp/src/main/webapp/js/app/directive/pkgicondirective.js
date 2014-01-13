@@ -12,7 +12,7 @@
 angular.module('haikudepotserver').directive('pkgIcon',function() {
         return {
             restrict: 'E',
-            template:'<img ng-src="{{imgUrl}}"></img>',
+            template:'<img width="{{size}}" height="{{size}}" ng-src="{{imgUrl}}"></img>',
             replace: true,
             scope: {
                 size:'@',

@@ -1,43 +1,40 @@
-<div class="generic-page-content-container">
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
 
-    <breadcrumbs items="breadcrumbItems"></breadcrumbs>
+<div class="content">
 
-    <form name="editPkgIconForm" class="form-horizontal" role="form">
+    <form name="editPkgIconForm" novalidate="novalidate">
 
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Package</label>
-            <div class="col-sm-4"><pkg-label pkg="pkg"></pkg-label></div>
+        <label>Package</label>
+        <div class="formitemgroup">
+            <div class="formitemgroupstatic">
+            <pkg-label pkg="pkg"></pkg-label>
+                </div>
         </div>
 
-        <div class="form-group">
-            <label for="icon-32-file" class="col-sm-2 control-label">Icon 32x32px</label>
-            <div class="col-sm-4" ng-class="deriveFormControlsContainerClasses('icon32File')">
-                <input id="icon-32-file" name="icon32File" type="file" ng-model="editPkgIcon.icon32File" file-supply required></input>
-                <error-messages key-prefix="editPkgIcon.icon32File" error="editPkgIconForm.icon32File.$error"></error-messages>
-            </div>
+        <label for="icon-32-file">Icon 32x32px</label>
+        <div class="formitemgroup" ng-class="deriveFormControlsContainerClasses('icon32File')">
+            <input id="icon-32-file" name="icon32File" type="file" ng-model="editPkgIcon.icon32File" file-supply required></input>
+            <error-messages key-prefix="editPkgIcon.icon32File" error="editPkgIconForm.icon32File.$error"></error-messages>
         </div>
 
-        <div class="form-group">
-            <label for="icon-16-file" class="col-sm-2 control-label">Icon 16x16px</label>
-            <div class="col-sm-4" ng-class="deriveFormControlsContainerClasses('icon16File')">
-                <input id="icon-16-file" name="icon16File" type="file" ng-model="editPkgIcon.icon16File" file-supply required></input>
-                <error-messages key-prefix="editPkgIcon.icon16File" error="editPkgIconForm.icon16File.$error"></error-messages>
-            </div>
+        <label for="icon-16-file">Icon 16x16px</label>
+        <div class="formitemgroup" ng-class="deriveFormControlsContainerClasses('icon16File')">
+            <input id="icon-16-file" name="icon16File" type="file" ng-model="editPkgIcon.icon16File" file-supply required></input>
+            <error-messages key-prefix="editPkgIcon.icon16File" error="editPkgIconForm.icon16File.$error"></error-messages>
         </div>
 
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button
-                        ng-disabled="editPkgIconForm.$invalid"
-                        ng-click="goStorePkgIcons()"
-                        type="submit"
-                        class="btn btn-default">Store Icons</button>
-            </div>
+        <div class="formactiongroup">
+            <button
+                    ng-disabled="editPkgIconForm.$invalid"
+                    ng-click="goStorePkgIcons()"
+                    type="submit"
+                    class="buttonprimary">Store Icons</button>
         </div>
 
     </form>
 
 </div>
 
+<div class="footer"></div>
 <spinner spin="shouldSpin()"></spinner>
 

@@ -12,6 +12,12 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,userState) {
 
+            var architectureCode = $location.search()['architecture'];
+
+            if(!architectureCode || 0==architectureCode.length) {
+                throw 'the \'architecture\' value must be supplied';
+            }
+
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
 
@@ -52,37 +58,30 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkg() {
 
-                userState.architecture().then(
-                    function(architecture) {
-                        jsonRpc.call(
-                                constants.ENDPOINT_API_V1_PKG,
-                                "getPkg",
-                                [{
-                                    name: $routeParams.name,
-                                    versionType: 'LATEST',
-                                    architectureCode: architecture.code
-                                }]
-                            ).then(
-                            function(result) {
-                                $scope.pkg = result;
-                                $log.info('found '+result.name+' pkg');
-                                refreshBreadcrumbItems();
-                            },
-                            function(err) {
-                                constants.ERRORHANDLING_JSONRPC(err,$location,$log);
-                            }
-                        );
-                    },
-                    function() {
-                        $log.error('a problem has arisen getting the architecture');
-                        $location.path("/error").search({});
-                    }
+                $scope.pkg = undefined;
 
+                jsonRpc.call(
+                        constants.ENDPOINT_API_V1_PKG,
+                        "getPkg",
+                        [{
+                            name: $routeParams.name,
+                            versionType: 'LATEST',
+                            architectureCode: architectureCode
+                        }]
+                    ).then(
+                    function(result) {
+                        $scope.pkg = result;
+                        $log.info('found '+result.name+' pkg');
+                        refreshBreadcrumbItems();
+                    },
+                    function(err) {
+                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                    }
                 );
             }
 
             $scope.goEditIcon = function() {
-                $location.path("/editpkgicon/"+$scope.pkg.name).search({});
+                $location.path("/editpkgicon/"+$scope.pkg.name); // don't edit the search criteria
             }
 
             $scope.goRemoveIcon = function() {

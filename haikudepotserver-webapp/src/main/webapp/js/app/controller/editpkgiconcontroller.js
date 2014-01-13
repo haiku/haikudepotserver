@@ -25,7 +25,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.deriveFormControlsContainerClasses = function(name) {
-                return $scope.editPkgIconForm[name].$invalid ? ['has-error'] : [];
+                return $scope.editPkgIconForm[name].$invalid ? ['formitemgrouperror'] : [];
             }
 
             // pulls the pkg data back from the server so that it can be used to
@@ -118,7 +118,7 @@ angular.module('haikudepotserver').controller(
                             function() {
                                 $scope.amSaving = false;
                                 $log.info('have set the 32px icon for the pkg '+$scope.pkg.name);
-                                $location.path('/viewpkg/'+$scope.pkg.name+'/latest').search({});
+                                $location.path('/viewpkg/'+$scope.pkg.name+'/latest'); // don't clear the search values
                             },
                             function(e) {
                                 $scope.amSaving = false;
