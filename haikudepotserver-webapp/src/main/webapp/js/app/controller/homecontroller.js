@@ -149,11 +149,7 @@ angular.module('haikudepotserver').controller(
             // ---- VIEW PKG + VERSION
 
             $scope.goViewPkg = function(pkg) {
-
-                $location.path('/viewpkg/'+pkg.name+'/latest').search({
-                    architecture : $scope.selectedArchitecture.code
-                });
-
+                $location.path('/viewpkg/'+pkg.name+'/latest/'+$scope.selectedArchitecture.code);
                 return false;
             }
 

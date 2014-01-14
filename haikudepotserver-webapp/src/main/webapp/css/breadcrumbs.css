@@ -1,0 +1,35 @@
+/*
+These styles are to do with the breadcrumbs that appear under the banner.
+*/
+
+#breadcrumbs-container {
+    border-bottom: 1px solid black;
+    background: #444444;
+    margin: 0;
+    padding: 0;
+    padding: 4px 32px;
+}
+
+#breadcrumbs-container ul {
+    padding: 0;
+    margin: 0;
+}
+
+#breadcrumbs-container ul li {
+    display: inline;
+    background: url('/img/breadcrumbseparator.svg') no-repeat;
+    background-position: 4px 2px;
+    padding: 0 0 0 18px;
+    color: white;
+    font-size: 12px;
+}
+
+#breadcrumbs-container ul li a {
+    color: white;
+}
+
+#breadcrumbs-container ul li:nth-child(1) {
+    display: inline;
+    background: none;
+    padding: 0;
+}

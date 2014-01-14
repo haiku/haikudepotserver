@@ -7,7 +7,7 @@
 
 This section outlines the approximate steps to build and deploy the web application-server.  The application-server build process produces a  `stand-alone' java program.  This build artifact is a packaged `jar' file that contains the \href{http://tomcat.apache.org}{Tomcat} servlet container as well as the web application.  Upon launching, it will unbundle necessary parts and start-up listening on a socket for inbound HTTP requests.
 
-\fcolorbox{red}{white}{\parbox{\textwidth}{\color{red} The default database installs a user with the nickname of 'root' with a known password of 'p4mphl3t'.  This password {\bf must} be changed before the system is made available over a network.}}
+\fcolorbox{red}{white}{\parbox{\textwidth}{\color{red} The default database installs a user with the nickname of `root' with a known password of `p4mphl3t'.  This password {\bf must} be changed before the system is made available over a network.}}
 
 A further point to note is that the API-related HTTP traffic into the application server uses basic-authentication.  This technique exposes the username and password as a base64 encoded string in the HTTP payload.  For this reason it is advised that HTTP traffic to and from the application server be transported as secure HTTP (https) in order to prevent a third party from reading the HTTP headers and extracting a user's authentication details.
 

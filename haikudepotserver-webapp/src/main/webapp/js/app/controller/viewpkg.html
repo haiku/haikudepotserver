@@ -1,6 +1,6 @@
 <breadcrumbs items="breadcrumbItems"></breadcrumbs>
 
-<div class="content">
+<div class="content-container">
 
     <div id="pkg-title">
         <div id="pkg-title-icon">
@@ -11,8 +11,10 @@
                 {{pkg.name}}
             </h1>
             <div class="muted">
-                <version-label version="pkg.versions[0]"></version-label>
-                - {{pkg.versions[0].architectureCode}}
+                <small>
+                    <version-label version="pkg.versions[0]"></version-label>
+                    - {{pkg.versions[0].architectureCode}}
+                </small>
             </div>
         </div>
     </div>

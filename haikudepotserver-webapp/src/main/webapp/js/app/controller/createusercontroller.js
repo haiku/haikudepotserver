@@ -29,7 +29,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.deriveFormControlsContainerClasses = function(name) {
-                return $scope.createUserForm[name].$invalid ? ['formitemgrouperror'] : [];
+                return $scope.createUserForm[name].$invalid ? ['form-control-group-error'] : [];
             }
 
             function refreshBreadcrumbItems() {

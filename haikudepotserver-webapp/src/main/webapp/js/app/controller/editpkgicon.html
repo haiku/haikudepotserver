@@ -1,34 +1,34 @@
 <breadcrumbs items="breadcrumbItems"></breadcrumbs>
 
-<div class="content">
+<div class="content-container">
 
     <form name="editPkgIconForm" novalidate="novalidate">
 
         <label>Package</label>
-        <div class="formitemgroup">
-            <div class="formitemgroupstatic">
+        <div class="form-control-group">
+            <div class="form-control-group-static">
             <pkg-label pkg="pkg"></pkg-label>
                 </div>
         </div>
 
         <label for="icon-32-file">Icon 32x32px</label>
-        <div class="formitemgroup" ng-class="deriveFormControlsContainerClasses('icon32File')">
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('icon32File')">
             <input id="icon-32-file" name="icon32File" type="file" ng-model="editPkgIcon.icon32File" file-supply required></input>
             <error-messages key-prefix="editPkgIcon.icon32File" error="editPkgIconForm.icon32File.$error"></error-messages>
         </div>
 
         <label for="icon-16-file">Icon 16x16px</label>
-        <div class="formitemgroup" ng-class="deriveFormControlsContainerClasses('icon16File')">
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('icon16File')">
             <input id="icon-16-file" name="icon16File" type="file" ng-model="editPkgIcon.icon16File" file-supply required></input>
             <error-messages key-prefix="editPkgIcon.icon16File" error="editPkgIconForm.icon16File.$error"></error-messages>
         </div>
 
-        <div class="formactiongroup">
+        <div class="form-action-container">
             <button
                     ng-disabled="editPkgIconForm.$invalid"
                     ng-click="goStorePkgIcons()"
                     type="submit"
-                    class="buttonprimary">Store Icons</button>
+                    class="main-action">Store Icons</button>
         </div>
 
     </form>

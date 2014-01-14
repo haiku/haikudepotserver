@@ -1,4 +1,4 @@
-<div id="banner">
+<div id="banner-container">
     <span id="banner-title" ng-click="goHome()">
         <div>Haiku Depot Server</div>
     </span>
@@ -9,8 +9,12 @@
             <a href="" ng-click="goCreateUser()">register</a>
         </span>
         <span ng-show="canShowAuthenticated()">
-            <a href="" ng-click="goViewUser()">{{userDisplayTitle()}}</a>
-            <a href="" ng-click="goLogoutUser()"><img src="img/logout.svg" alt="Logout"/></a>
+            <div id="banner-user-logout">
+                <a href="" ng-click="goLogoutUser()"><img src="img/logout.svg" alt="Logout"/></a>
+            </div>
+            <div id="banner-user-identification">
+                <a href="" ng-click="goViewUser()">{{userDisplayTitle()}}</a>
+            </div>
         </span>
     </span>
 </div>

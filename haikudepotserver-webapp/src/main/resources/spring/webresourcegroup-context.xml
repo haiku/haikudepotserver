@@ -88,6 +88,8 @@
                             <value>/css/home.css</value>
                             <value>/css/createuser.css</value>
                             <value>/css/viewpkg.css</value>
+                            <value>/css/banner.css</value>
+                            <value>/css/breadcrumbs.css</value>
                         </list>
                     </property>
                 </bean>

@@ -1,19 +1,19 @@
 <breadcrumbs items="breadcrumbItems"></breadcrumbs>
 
-<div class="content">
+<div class="content-container">
 
     <div class="form-info-container" ng-show="didCreate">
         The new account was created; you can now login and use it.
     </div>
 
-    <div class="formalert" ng-show="didFailAuthentication">
+    <div class="form-alert-container" ng-show="didFailAuthentication">
         Your login attempt has failed; try again.
     </div>
 
     <form name="authenticateUserForm" novalidate="novalidate">
 
         <label for="nickname">Nickname</label>
-        <div class="formitemgroup" ng-class="deriveFormControlsContainerClasses('nickname')">
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('nickname')">
                 <input
                         type="text"
                         id="nickname"
@@ -25,7 +25,7 @@
         </div>
 
         <label for="password-clear">Password</label>
-        <div class="formitemgroup" ng-class="deriveFormControlsContainerClasses('passwordClear')">
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClear')">
                 <input
                         type="password"
                         id="password-clear"
@@ -37,12 +37,12 @@
                         error="authenticateUserForm.passwordClear.$error"></error-messages>
         </div>
 
-        <div class="formactiongroup">
+        <div class="form-action-container">
                 <button
                         ng-disabled="authenticateUserForm.$invalid"
                         ng-click="goAuthenticate()"
                         type="submit"
-                        class="buttonprimary">Login</button>
+                        class="main-action">Login</button>
         </div>
 
     </form>

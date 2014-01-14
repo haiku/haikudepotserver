@@ -12,12 +12,6 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,userState) {
 
-            var architectureCode = $location.search()['architecture'];
-
-            if(!architectureCode || 0==architectureCode.length) {
-                throw 'the \'architecture\' value must be supplied';
-            }
-
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
 
@@ -66,7 +60,7 @@ angular.module('haikudepotserver').controller(
                         [{
                             name: $routeParams.name,
                             versionType: 'LATEST',
-                            architectureCode: architectureCode
+                            architectureCode: $routeParams.architectureCode
                         }]
                     ).then(
                     function(result) {
@@ -81,7 +75,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goEditIcon = function() {
-                $location.path("/editpkgicon/"+$scope.pkg.name); // don't edit the search criteria
+                $location.path("/editpkgicon/"+$scope.pkg.name).search({});
             }
 
             $scope.goRemoveIcon = function() {

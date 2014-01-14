@@ -1,0 +1,57 @@
+/*
+These styles are related to the banner at the top of the screen containing the title of the application
+as well as the status of the authenticated user.
+*/
+
+#banner-container {
+    position: relative;
+    margin: 0;
+    background-color: #336698;
+    width: 100%;
+    height: 40px;
+    padding: 0px;
+    border-bottom: 1px solid black;
+}
+
+#banner-title {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding-left: 68px;
+    height: 40px;
+    background: url('/img/haikudepot32.png') no-repeat 32px 4px transparent;
+}
+
+#banner-title div {
+    position: relative;
+    top: 8px;
+    left: 0px;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    vertical-align: middle;
+}
+
+#banner-user {
+    position: absolute;
+    top: 12px;
+    right: 0px;
+    overflow: hidden;
+    padding-right: 32px;
+    color: white;
+    overflow: hidden;
+}
+
+#banner-user-logout {
+    display: inline;
+    float:right;
+}
+
+#banner-user-identification {
+    display: inline;
+    margin-right: 4px;
+}
+
+#banner-container a {
+    color: white;
+}

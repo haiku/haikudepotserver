@@ -37,7 +37,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.deriveFormControlsContainerClasses = function(name) {
-                return $scope.authenticateUserForm[name].$invalid ? ['formitemgrouperror'] : [];
+                return $scope.authenticateUserForm[name].$invalid ? ['form-control-group-error'] : [];
             }
 
             // This function will take the data from the form and will authenticate

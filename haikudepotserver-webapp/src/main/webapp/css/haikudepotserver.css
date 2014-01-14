@@ -1,3 +1,12 @@
+/*
+These styles are applicable across a number of pages of the system.
+*/
+
+/*
+==================================
+GENERAL PAGE LAYOUT
+*/
+
 body {
     font-family: sans-serif;
     padding: 0;
@@ -13,6 +22,68 @@ a, a:link, a:visited, a:active, a:hover {
     color: blue;
 }
 
+h1 {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+h2 {
+    font-weight: bold;
+    font-size: 16px;
+    color: #444;
+}
+
+.muted {
+    color: gray;
+}
+
+small {
+    font-size: 10px;
+}
+
+/*
+==================================
+PAGE STRUCTURE
+*/
+
+.content-container {
+    margin-left: 32px;
+    margin-right: 32px;
+    margin-top: 16px;
+    margin-bottom: 0px; // handled by the trailer class
+width: auto;
+}
+
+.footer {
+    clear:both;
+    margin-bottom: 32px;
+}
+
+/*
+==================================
+ALERT BOXES FOR USE OUTSIDE OF FORMS
+*/
+
+
+.alert-container {
+    padding: 8px;
+    border: 1px solid red;
+    background-color: white;
+    color: red;
+}
+
+.info-container {
+    padding: 8px;
+    border: 1px solid #336698;
+    background-color: white;
+    color: black;
+}
+
+/*
+==================================
+FORMS
+*/
+
 label {
     width: 30%;
     display: inline-block;
@@ -27,32 +98,60 @@ input, textarea {
     font-size: 14px;
     border: 1px solid darkgray;
     padding: 2px;
+    border-radius: 3px;
 }
 
-textarea {
-    font-size: 14px;
+button {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 6px;
+    font-size: 16px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
-div.formitemgroupstatic {
-   padding: 8px;
+button.main-action {
+    border: 2px solid black;
+}
+
+button[disabled] {
+    border: 1px solid darkgray;
+}
+
+button.main-action[disabled] {
+    border: 2px solid darkgray;
 }
 
 .form-error-container {
-    margin-top: 4px;
+    padding-top: 4px;
 }
 
-.formitemgroup {
+.form-control-group {
     width: 69%;
     display: inline-block;
     line-height: 100%;
     padding-bottom: 8px;
 }
 
-.formitemgrouperror input {
+/*
+In a form, you may want to place some static text as one of the 'controls'.  This style helps with this.
+*/
+
+.form-control-group .form-control-group-static {
+    padding: 8px;
+}
+
+.form-control-group.form-control-group-error input {
     border: 1px solid red;
 }
 
-.formalert {
+/*
+This is used to place a box above the form in order to show some alert text such as "your login has failed."
+*/
+
+.form-alert-container {
     width:69%;
     margin-left: 30%;
     margin-top: 16px;
@@ -74,7 +173,11 @@ div.formitemgroupstatic {
     color: #336698;
 }
 
-.formactiongroup {
+/*
+This resides at the bottom of the form and contains the action buttons relating to the controls.
+*/
+
+.form-action-container {
     width: 69%;
     margin-left: 30%;
     margin-top: 16px;
@@ -82,210 +185,44 @@ div.formitemgroupstatic {
     border-top: 1px solid black;
 }
 
-button {
-    background-color: white;
-    border: 1px solid black;
-    border-radius: 6px;
-    font-size: 16px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 8px;
-    padding-right: 8px;
-}
+/*
+==================================
+TABLE
+*/
 
-button.buttonprimary {
-    border: 2px solid black;
-}
-
-button[disabled] {
-    border: 1px solid darkgray;
-}
-
-button.buttonprimary[disabled] {
-    border: 2px solid darkgray;
-}
-
-.formresultgroup {
-    width: 69%;
-    margin-left: 30%;
-    margin-top: 4px;
-    margin-bottom: 4px;
-}
-
-.alert {
-    color: red;
-    font-weight: normal;
-}
-
-.alert-container {
-    padding: 8px;
-    border: 1px solid red;
-    background-color: white;
-    color: red;
-}
-
-.info-container {
-    padding: 8px;
-    border: 1px solid #336698;
-    background-color: white;
-    color: black;
-}
-
-.muted {
-    font-size: 10px;
-    color: gray;
-}
-
-#banner {
-    position: relative;
-    margin: 0;
-    background-color: #336698;
-    width: 100%;
-    height: 40px;
-    padding: 0px;
-    border-bottom: 1px solid black;
-}
-
-#banner-title {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    padding-left: 68px;
-    height: 40px;
-    background: url('/img/haikudepot32.png') no-repeat 32px 4px transparent;
-}
-
-#banner-title div {
-    position: relative;
-    top: 8px;
-    left: 0px;
-    color: white;
-    font-weight: bold;
-    font-size: 24px;
-    vertical-align: middle;
-}
-
-#banner-user {
-    position: absolute;
-    top: 12px;
-    right: 0px;
-    overflow: hidden;
-    padding-right: 32px;
-    color: white;
-    overflow: hidden;
-}
-
-#banner a {
-    color: white;
-}
-
-#breadcrumbs {
-    border-bottom: 1px solid black;
-    background: #444444;
-    margin: 0;
-    padding: 0;
-    padding: 4px 32px;
-}
-
-#breadcrumbs ul {
-    padding: 0;
-    margin: 0;
-}
-
-#breadcrumbs ul li {
-    display: inline;
-    background: url('/img/breadcrumbseparator.svg') no-repeat;
-    background-position: 4px 2px;
-    padding: 0 0 0 18px;
-    color: white;
-    font-size: 12px;
-}
-
-#breadcrumbs ul li a {
-    color: white;
-}
-
-#breadcrumbs ul li:nth-child(1) {
-    display: inline;
-    background: none;
-    padding: 0;
-}
-
-.content {
-    margin-left: 32px;
-    margin-right: 32px;
-    margin-top: 16px;
-    margin-bottom: 0px; // handled by the trailer class
-    width: auto;
-}
-
-.footer {
-    clear:both;
-    margin-bottom: 32px;
-}
-
-h1 {
-    font-weight: bold;
-    font-size: 18px;
-}
-
-h2 {
-    font-weight: bold;
-    font-size: 16px;
-    color: #444;
-}
-
-#systemerrorcontainer {
-    width: 196px;
-    margin-left: auto ;
-    margin-right: auto ;
-    margin-top: 32px;
-    margin-bottom: 32px;
-}
-
-.groupcontainer {
-    border: rgba(254, 0, 254, 0.15) 1px solid;
-    background: rgba(254, 0, 254, 0.1);
-    padding-top: 8px;
-    padding-bottom: 8px;
-    padding-left: 8px;
-    padding-right: 8px;
-    margin: 4px;
-}
-
-table.generaltable {
+table.table-general {
     width: 100%;
     border: 1px solid black;
     border-collapse: collapse;
 }
 
-table.generaltable thead th {
+table.table-general thead th {
     background: #444;
     color: white;
     text-align: left;
     padding: 4px;
 }
 
-table.generaltable tbody td {
+table.table-general tbody td {
     padding: 4px;
 }
 
-table.generaltable tbody td:nth-child(n+1) {
+table.table-general tbody td:nth-child(n+1) {
     border-left: 1px dotted #444;
 }
 
-table.generaltable tbody tr:nth-child(even) {
+table.table-general tbody tr:nth-child(even) {
     background: white;
 }
-table.generaltable tbody tr:nth-child(odd) {
+table.table-general tbody tr:nth-child(odd) {
     background: #EEE;
 }
 
-table.generaltable tbody tr td.timestampcell {
+table.table-general tbody tr td.timestampcell {
     width: 172px;
 }
 
-table.generaltable tbody tr td.selectioncell {
+table.table-general tbody tr td.selectioncell {
     width: 32px;
     text-align: center;
 }
@@ -317,7 +254,10 @@ table.generaltable tbody tr td.selectioncell {
     text-decoration: none;
 }
 
-/* ANGULARJS */
+/*
+==================================
+TABLE
+*/
 
 [ng\:cloak], [ng-cloak], .ng-cloak {
     display: none;
@@ -328,7 +268,7 @@ This material is for the spinner; it will fill the screen will white and then pu
 a moment.
 */
 
-#spinnerbackdrop {
+#spinner-container {
     position: fixed;
     left: 0px;
     top: 0px;
@@ -338,7 +278,7 @@ a moment.
     z-index: 1050;
 }
 
-#spinnerbackdrop > div {
+#spinner-container > div {
     width: 120px;
     margin: 0 auto;
     padding-top: 120px;
