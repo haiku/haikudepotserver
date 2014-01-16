@@ -24,24 +24,37 @@
                     type="password"
                     name="passwordClear"
                     ng-required="true"
-                    ng-minlength="5"
+                    ng-change="passwordsChanged()"
+                    valid-password=""
                     ng-model="newUser.passwordClear"></input>
             <error-messages key-prefix="createUser.passwordClear" error="createUserForm.passwordClear.$error"></error-messages>
         </div>
 
-        <label for="create-user-captcha-response-input">Check for a Person</label>
+        <label for="password-clear-repeated">Password Repeated</label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClearRepeated')">
+            <input
+                    id="password-clear-repeated"
+                    type="password"
+                    name="passwordClearRepeated"
+                    ng-change="passwordsChanged()"
+                    ng-required="true"
+                    ng-model="newUser.passwordClearRepeated"></input>
+            <error-messages key-prefix="createUser.passwordClearRepeated" error="createUserForm.passwordClearRepeated.$error"></error-messages>
+        </div>
+
+        <label for="captcha-response-input">Check for a Person</label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('captchaResponse')">
             <img style="vertical-align:middle;" src="{{captchaImageUrl}}"></img>
             =
             <input
-                    id="create-user-captcha-response-input"
+                    id="captcha-response-input"
                     size="3"
                     type="text"
                     name="captchaResponse"
                     ng-required="true"
                     ng-change="captchaResponseDidChange()"
                     ng-model="newUser.captchaResponse"></input>
-            <error-messages key-prefix="createUserForm.captchaResponse" error="createUserForm.captchaResponse.$error"></error-messages>
+            <error-messages key-prefix="createUser.captchaResponse" error="createUserForm.captchaResponse.$error"></error-messages>
         </div>
 
         <div class="form-action-container">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -100,7 +100,7 @@ public class AuthenticationService {
 
             if(userOptional.isPresent()) {
                 User user = userOptional.get();
-                String hash = Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + passwordClear).toString();
+                String hash = hashPassword(user, passwordClear);
 
                 if(hash.equals(user.getPasswordHash())) {
                     result = Optional.fromNullable(userOptional.get().getObjectId());
@@ -118,6 +118,58 @@ public class AuthenticationService {
         }
 
         return result;
+    }
+
+    /**
+     * <p>This method will hash the password in a consistent manner across the whole system.</p>
+     */
+
+    public String hashPassword(User user, String passwordClear) {
+        return Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + passwordClear).toString();
+    }
+
+    private int countMatches(String s, CharToBooleanFunction fn) {
+        int length = s.length();
+        int count = 0;
+        for(int i=0;i<length;i++) {
+            char c = s.charAt(i);
+            if(fn.test(c)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * <p>Passwords should be hard to guess and so there needs to be a certain level of complexity to
+     * them.  They should of a certain length and should contain some mix of letters and digits as well
+     * as at least one upper case letter.</p>
+     *
+     * <p>This method will check the password for suitability.</p>
+     */
+
+    public boolean validatePassword(String passwordClear) {
+        Preconditions.checkNotNull(passwordClear);
+
+        if(passwordClear.length() < 8) {
+            return false;
+        }
+
+        // get a count of digits - should be at least two.
+        if(countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 48 && c <= 57; } }) < 2) {
+            return false;
+        }
+
+        // get a count of upper case letters - should be at least one.
+        if(countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 65 && c <= 90; } }) < 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private interface CharToBooleanFunction {
+        boolean test(char c);
     }
 
 }

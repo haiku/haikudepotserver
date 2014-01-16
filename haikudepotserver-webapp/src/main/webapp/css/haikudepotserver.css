@@ -140,7 +140,7 @@ In a form, you may want to place some static text as one of the 'controls'.  Thi
 */
 
 .form-control-group .form-control-group-static {
-    padding: 8px;
+    padding: 3px;
 }
 
 .form-control-group.form-control-group-error input {

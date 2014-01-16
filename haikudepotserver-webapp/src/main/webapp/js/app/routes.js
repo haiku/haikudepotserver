@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ angular.module('haikudepotserver').config(
             $routeProvider
                 .when('/authenticateuser',{controller:'AuthenticateUserController', templateUrl:'/js/app/controller/authenticateuser.html'})
                 .when('/createuser',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
+                .when('/changepassword/:nickname',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})
                 .when('/viewuser/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
                 .when('/viewpkg/:name/:version/:architectureCode',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
                 .when('/editpkgicon/:name',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})

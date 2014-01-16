@@ -55,6 +55,8 @@
                             <value>/js/app/directive/pkgicondirective.js</value>
                             <value>/js/app/directive/pkglabeldirective.js</value>
                             <value>/js/app/directive/filesupplydirective.js</value>
+                            <value>/js/app/directive/validpassworddirective.js</value>
+                            <value>/js/app/directive/userlabeldirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>
@@ -63,12 +65,14 @@
                             <value>/js/app/controller/viewusercontroller.js</value>
                             <value>/js/app/controller/authenticateusercontroller.js</value>
                             <value>/js/app/controller/editpkgiconcontroller.js</value>
+                            <value>/js/app/controller/changepasswordcontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
                             <value>/js/app/service/userstateservice.js</value>
                             <value>/js/app/service/referencedataservice.js</value>
                             <value>/js/app/service/pkgiconservice.js</value>
+                            <value>/js/app/service/breadcrumbsservice.js</value>
 
                         </list>
                     </property>

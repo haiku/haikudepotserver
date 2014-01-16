@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ angular.module('haikudepotserver').controller(
             $scope.newUser = {
                 nickname : undefined,
                 passwordClear : undefined,
+                passwordClearRepeated : undefined,
                 captchaResponse : undefined
             };
 
@@ -74,6 +75,14 @@ angular.module('haikudepotserver').controller(
                 $scope.createUserForm.nickname.$setValidity('notunique',true);
             }
 
+            $scope.passwordsChanged = function() {
+                $scope.createUserForm.passwordClearRepeated.$setValidity(
+                    'repeat',
+                    !$scope.newUser.passwordClear
+                    || !$scope.newUser.passwordClearRepeated
+                    || $scope.newUser.passwordClear == $scope.newUser.passwordClearRepeated);
+            }
+
             // This function will take the data from the form and will create the user from this data.
 
             $scope.goCreateUser = function() {
@@ -115,19 +124,17 @@ angular.module('haikudepotserver').controller(
                                 // default handler.
 
                                 if(err.data && err.data.validationfailures) {
-                                    var nicknameFailure = _.find(err.data.validationfailures, function(e) { return e.property == 'nickname'; });
+                                    _.each(err.data.validationfailures, function(vf) {
+                                        var model = $scope.createUserForm[vf.property];
 
-                                    if(nicknameFailure) {
-                                        $scope.createUserForm.nickname.$setValidity(nicknameFailure.message,false);
-                                    }
-                                }
-
-                                if(
-                                    !err.data
-                                        || !err.data.validationfailures
-                                        || 0!=_.filter(err.data.validationfailures, function(e) { return e.property != 'nickname'; }).length) {
-                                    $log.error('other validation failures exist; will invoke default handling');
-                                    constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                                        if(model) {
+                                            model.$setValidity(vf.message, false);
+                                        }
+                                        else {
+                                            $log.error('other validation failures exist; will invoke default handling');
+                                            constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                                        }
+                                    })
                                 }
 
                                 break;

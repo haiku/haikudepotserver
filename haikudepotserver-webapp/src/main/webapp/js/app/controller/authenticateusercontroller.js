@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ angular.module('haikudepotserver').controller(
             $scope.didFailAuthentication = false;
             $scope.amAuthenticating = false;
             $scope.didCreate = !!$location.search()['didCreate'];
+            $scope.didChangePassword = !!$location.search()['didChangePassword'];
             $scope.authenticationDetails = {
                 nickname : undefined,
                 passwordClear : undefined

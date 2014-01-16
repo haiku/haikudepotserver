@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haikuos.haikudepotserver.api1.support.ValidationException;
 
 /**
  * <p>This interface defines operations that can be undertaken around users.</p>
@@ -39,5 +40,11 @@ public interface UserApi {
      */
 
     AuthenticateUserResult authenticateUser(AuthenticateUserRequest authenticateUserRequest);
+
+    /**
+     * <p>This method will allow the client to modify the password of a user.</p>
+     */
+
+    ChangePasswordResult changePassword(ChangePasswordRequest changePasswordRequest) throws ObjectNotFoundException, AuthorizationFailureException, ValidationException;
 
 }
