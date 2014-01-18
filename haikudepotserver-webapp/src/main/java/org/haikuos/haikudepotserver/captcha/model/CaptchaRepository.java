@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,8 @@ public interface CaptchaRepository {
     public boolean delete(String token);
 
     /**
-     * <p>This method will obtain the response for the captcha identified by the UUID.
+     * <p>This method will obtain the response for the captcha identified by the UUID.  This method will return
+     * a null value if the token was not able to be looked up against the repository of captchas.
      */
 
     public String get(String token);

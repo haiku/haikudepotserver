@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,9 +20,9 @@ import javax.sql.DataSource;
  * flyway project to achieve this.</p>
  */
 
-public class FlywayMigrationOrchestration {
+public class ManagedDatabase {
 
-    protected static Logger logger = LoggerFactory.getLogger(FlywayMigrationOrchestration.class);
+    protected static Logger logger = LoggerFactory.getLogger(ManagedDatabase.class);
 
     private DataSource dataSource;
 
@@ -55,7 +55,10 @@ public class FlywayMigrationOrchestration {
     }
 
     public void init() {
+        migrate();
+    }
 
+    public void migrate() {
         Preconditions.checkNotNull(getDataSource());
         Preconditions.checkState(!Strings.isNullOrEmpty(getSchema()));
 
@@ -67,7 +70,6 @@ public class FlywayMigrationOrchestration {
         logger.info("will migrate database to latest version...");
         flyway.migrate();
         logger.info("did migrate database to latest version...");
-
     }
 
 }

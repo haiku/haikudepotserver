@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,7 +63,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         return Optional.absent();
     }
 
-        public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final int size) {
+    public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final int size) {
         Preconditions.checkNotNull(mediaType);
         Preconditions.checkState(16==size||32==size);
 

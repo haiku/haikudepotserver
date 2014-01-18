@@ -1,5 +1,5 @@
 % -----------
-% Copyright 2013, Andrew Lindesay
+% Copyright 2013-2014, Andrew Lindesay
 % Distributed under the terms of the MIT License.
 % -----------
 
@@ -17,6 +17,29 @@ From source code, you can obtain a clean build by issuing the following command 
 \framebox{\tt mvn clean \&\& mvn package}
 
 Given the state of the source code, this will produce build artifacts.  Note that this may take some time for the first build because it will need to download various dependencies from the internet.
+
+\subsection{Automated Testing}
+
+The build system has a number of automated tests.  To skip automated testing, use the {\tt -DskipTests} flag on the ``mvn" command.
+
+\subsubsection{Integration Testing}
+
+Some of the automated tests are ``integration tests''.  The integration tests can be run with the following maven command;
+
+\framebox{\tt mvn clean \&\& mvn verify}
+
+The integration tests {\bf require} the presence of a Postgres database in order to execute.  The database for the execution of integration tests should be available at localhost:5432 where the build is occurring.  The database should be setup as follows;
+
+\begin{tabular}{ | l | l | }
+  \hline
+  Database name & {\tt haikudepotserver\_integrationtest} \\
+  Database owner & {\tt haikudepotserver\_integrationtest} \\
+  User & {\tt haikudepotserver\_integrationtest} \\
+  User password & {\tt haikudepotserver\_integrationtest} \\
+  \hline
+\end{tabular}
+
+The configuration for accessing this database is located in the file {\tt local.properties} within the test resources of the {\tt haikudepotserver-webapp} module, but it should not be necessary to edit this file.  As part of the integration testing process, the database schema objects in the integration test database will be dropped and will be re-assembled from scratch before each test is undertaken.  This ensures a clean test each time.
 
 \subsection{Release}
 

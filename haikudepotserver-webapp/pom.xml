@@ -136,10 +136,14 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -191,6 +195,25 @@
             </plugin>
 
             <!--
+            This plugin will ensure that the integration tests are run when
+            appropriate.
+            -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.16</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
             This is required in order to configure the exclusion of the local properties files from the build
             product.
             -->
@@ -212,9 +235,9 @@
                 </configuration>
                 <dependencies>
                     <dependency>
-                        <groupId>postgresql</groupId>
+                        <groupId>org.postgresql</groupId>
                         <artifactId>postgresql</artifactId>
-                        <version>9.1-901.jdbc4</version>
+                        <version>${postgresql.version}</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -228,9 +251,9 @@
                             <path>/</path>
                             <extraDependencies>
                                 <dependency>
-                                    <groupId>postgresql</groupId>
+                                    <groupId>org.postgresql</groupId>
                                     <artifactId>postgresql</artifactId>
-                                    <version>9.1-901.jdbc4</version>
+                                    <version>${postgresql.version}</version>
                                 </dependency>
                             </extraDependencies>
                         </configuration>

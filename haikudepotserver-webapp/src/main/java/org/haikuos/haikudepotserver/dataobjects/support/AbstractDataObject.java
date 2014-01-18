@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractDataObject extends CayenneDataObject {
 
-    public final static Pattern CODE_PATTERN = Pattern.compile("^[a-f0-9]{2,16}$");
+    public final static Pattern CODE_PATTERN = Pattern.compile("^[a-z0-9]{2,16}$");
 
     @Override
     protected void validateForSave(ValidationResult validationResult) {
