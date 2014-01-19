@@ -23,6 +23,7 @@ Given the state of the source code, this will produce build artifacts.  Note tha
 The build system has a number of automated tests.  To skip automated testing, use the {\tt -DskipTests} flag on the ``mvn" command.
 
 \subsubsection{Integration Testing}
+\label{integrationtesting}
 
 Some of the automated tests are ``integration tests''.  The integration tests can be run with the following maven command;
 
@@ -43,14 +44,16 @@ The configuration for accessing this database is located in the file {\tt local.
 
 \subsection{Release}
 
-A maven project has a ``version'' which is either a final version such as ``2.3.1'' or is a {\it snapshot} version such as ``2.3.2-SNAPSHOT''.  The snapshot version is the version under which the next release is being done.  Once it is ready, a release is made wherein that source-code is fixed to the version number without the trailing ``-SNAPSHOT'' and then the snapshot version is incremented.  The release yields a tag in the SCM in order to be able to reproduce the source-code for that release against a release version.  The tag will have a form such as ``haikudepotserver-2.3.2''.
+A maven project has a ``version'' which is either a final version such as ``2.3.1'' or is a {\it snapshot} version such as ``2.3.2-SNAPSHOT''.  The snapshot version is the version under which the next release is being done.  Once the snapshot is ready, a release is made wherein that source-code is fixed to the version number without the trailing ``-SNAPSHOT'' and then the snapshot version is incremented.  The release yields a tag in the SCM in order to be able to reproduce the source-code for that release against a release version.  The tag will have a form such as ``haikudepotserver-2.3.2''.
 
- The release process uses the maven 'release' system although there are two caveats;
+ The release process uses the maven release system although there are two caveats;
 
  \begin{itemize}
  \item The release is made in the local git repository and is then pushed to remote repository {\bf manually} --- this differs from the typical behaviour where the changes are pushed to the remote repository automatically a number of times through the release process.
  \item The build product(s) will not be copied to a remote maven repository (distribution management) because there is presently no such repository available.
  \end{itemize}
+
+ The release process will run the automated testing including the integration testing detailed in \ref{integrationtesting}.  This may require some local build-system configuration such as a testing database to be available.
 
  To undertake a release, all changes in the local repository must be committed.  Note that during the release process, the user will be prompted to supply version numbers at the console.  The following commands will cause a release to be undertaken;
 
