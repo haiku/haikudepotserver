@@ -16,6 +16,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -82,6 +83,16 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     public void setModifyTimestamp() {
         setModifyTimestamp(new java.util.Date());
+    }
+
+    /**
+     * <p>The regular {$link #getModifyTimestamp} is at millisecond accuracy.  When dealing with second-accuracy
+     * dates, this can cause anomalies.  For this reason, this method will provide the modify timestamp at
+     * second accuracy.</p>
+     */
+
+    public Date getModifyTimestampSecondAccuracy() {
+        return new java.util.Date((getModifyTimestamp().getTime() / 1000) * 1000);
     }
 
 }

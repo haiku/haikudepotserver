@@ -7,9 +7,12 @@ package org.haikuos.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
+import org.haikuos.haikudepotserver.support.NoOpOutputStream;
 import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -50,8 +53,8 @@ public class PkgIconController extends AbstractController {
     @Resource
     PkgIconService pkgIconService;
 
-    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
-    public void fetch(
+    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
+    public void fetchHead(
             HttpServletRequest request,
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = true) int size,
@@ -78,7 +81,60 @@ public class PkgIconController extends AbstractController {
             throw new PkgNotFound();
         }
 
+        ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
+
+        pkgIconService.writePkgIconImage(
+                byteCounter,
+                context,
+                pkg.get(),
+                size);
+
+        response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
         response.setContentType(MediaType.PNG.toString());
+        response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
+
+    }
+
+    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
+    public void fetchGet(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestParam(value = KEY_SIZE, required = true) int size,
+            @PathVariable(value = KEY_FORMAT) String format,
+            @PathVariable(value = KEY_PKGNAME) String pkgName)
+            throws IOException {
+
+        if(size != 16 && size != 32) {
+            throw new BadSize();
+        }
+
+        if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
+            throw new MissingPkgName();
+        }
+
+        if(Strings.isNullOrEmpty(format) || !"png".equals(format)) {
+            throw new MissingOrBadFormat();
+        }
+
+        ObjectContext context = serverRuntime.getContext();
+        Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
+
+        if(!pkg.isPresent()) {
+            throw new PkgNotFound();
+        }
+
+        if(!Strings.isNullOrEmpty(request.getHeader(HttpHeaders.IF_MODIFIED_SINCE))) {
+            long value = (request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE) / 1000) * 1000; // round to second
+            long lastModified = pkg.get().getModifyTimestampSecondAccuracy().getTime();
+
+            if(lastModified <= value) {
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+        }
+
+        response.setContentType(MediaType.PNG.toString());
+        response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
 
         pkgIconService.writePkgIconImage(
                 response.getOutputStream(),
@@ -121,7 +177,7 @@ public class PkgIconController extends AbstractController {
 
         if(!user.isPresent() || !pkg.get().canBeEditedBy(user.get())) {
             logger.warn("attempt to edit the pkg icon, but there is no user present or that user is not able to edit the pkg");
-           throw new PkgAuthorizationFailure();
+            throw new PkgAuthorizationFailure();
         }
 
         try {
