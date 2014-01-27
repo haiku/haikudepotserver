@@ -1,0 +1,92 @@
+#!/bin/bash
+#
+# This script is for starting and stopping the haikudepotserver service.
+#
+# chkconfig: 345 80 20
+#
+### BEGIN INIT INFO
+# Provides: haikudepotserver
+# Required-Start: $network $syslog
+# Required-Stop: $network $syslog
+# Default-Start:
+# Default-Stop:
+# Description: Haiku Depot Server
+# Short-Description: start and stop haikudepotserver
+### END INIT INFO
+
+HDS_CONFIGBASE=/etc/haikudepotserver
+HDS_HOME=/opt/haikudepotserver
+HDS_LOGFILE=/var/log/haikudepotserver/haikudepotserver.log
+HDS_PSIDENTIFIER=haikudepotserver-6B03C28C-4AF1-450E-909D-2E623B571F93
+
+MAXSHUTDOWNDELAYSECONDS=20
+
+JAVA_HOME=/usr/lib/jvm/jre
+JAVA_OPTS="-Dfile.encoding=UTF-8 \
+-Xms512m -Xmx640m \
+-Djava.awt.headless=true \
+-Dconfig.properties=file://${HDS_CONFIGBASE}/config.properties \
+-jar ${HDS_HOME}/haikudepotserver-webapp-exec-war.jar \
+-resetExtract \
+-extractDirectory /var/cache/haikudepotserver/extract"
+
+haikudepotserver_pid() {
+  echo `ps aux | grep "${HDS_PSIDENTIFIER}" | grep -v grep | awk '{ print $2 }'`
+}
+
+start() {
+  pid="$(haikudepotserver_pid)"
+  if [ -n "$pid" ]; then
+    echo "haikudepotserver; is already running (pid: $pid)"
+  else
+    echo "haikudepotserver; starting..."
+    /bin/su -s /bin/bash haikudepotserver -c "${JAVA_HOME}/bin/java ${JAVA_OPTS} -Dcommand.identifier=${HDS_PSIDENTIFIER} 2>&1 | tee -a ${HDS_LOGFILE} > /dev/null &"
+  fi
+  return 0
+}
+
+stop() {
+ pid="$(haikudepotserver_pid)"
+  if [ -n "$pid" ]; then
+    echo "haikudepotserver; stopping... (pid: $pid)"
+    kill "$pid"
+
+    count=0;
+    while [[ -n "$(haikudepotserver_pid)" && ("$count" -lt "${MAXSHUTDOWNDELAYSECONDS}") ]]; do
+        sleep 1
+        let count+=1
+    done;
+
+    if [[ -n "$(haikudepotserver_pid)" ]]; then
+        echo "haikudepotserver; unable to be stopped"
+    else
+        echo "haikudepotserver; stopped"
+    fi
+  else
+    echo "haikudepotserver; not running"
+  fi
+  return 0
+}
+
+case $1 in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  status)
+    pid="$(haikudepotserver_pid)"
+    if [ -n "$pid" ]; then
+      echo "haikudepotserver; running (pid: $pid)"
+    else
+      echo "haikudepotserver; not running"
+    fi
+    ;;
+esac
+
+exit 0

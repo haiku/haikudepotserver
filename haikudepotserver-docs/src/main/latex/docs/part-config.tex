@@ -12,8 +12,8 @@ A typical java properties file has the following general form;
 
 \begin{verbatim}
 # Comment
-key1=value
-key2=value
+key1=value1
+key2=value2
 \end{verbatim}
 
 There are a number of keys which are described below.
@@ -38,10 +38,10 @@ Database user's username and password
 
 \subsubsection{\tt flyway.migrate}
 
-Set this to ``true'' if you would like database schema migrations to be applied automatically as necessary.  Generally this should be configured to ``true''.
+Set this to {\tt true} if you would like database schema migrations to be applied automatically as necessary.  Generally this should be configured to {\tt true}.
 
 \subsection{Web-Related}
 
 \subsubsection{\tt webresourcegroup.separated}
 
-Some web resources such as javascript file can be concatinated for efficiency.  Setting this configuration key to ``true'' will mean that such resources are delivered to browsers as separated files; less efficient, but easier to debug.
+Some web resources such as javascript file can be concatenated for efficiency.  Setting this configuration key to {\tt true} will mean that such resources are delivered to browsers as separated files; less efficient, but easier to debug.

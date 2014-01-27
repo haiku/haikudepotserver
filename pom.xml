@@ -14,6 +14,25 @@
         <module>haikudepotserver-webapp</module>
     </modules>
 
+    <profiles>
+    <profile>
+
+    <id>rpm-capable-build</id>
+
+    <activation>
+        <os>
+            <family>unix</family>
+            <name>Linux</name>
+        </os>
+    </activation>
+
+        <modules>
+            <module>haikudepotserver-rpm</module>
+        </modules>
+
+    </profile>
+    </profiles>
+
     <!--
     This entry is necessary it seems to instruct the release process that there is an SCM (local GIT) for the
     release process.

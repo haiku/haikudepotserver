@@ -1,0 +1,159 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <artifactId>haikudepotserver-parent</artifactId>
+        <groupId>org.haikuos</groupId>
+        <relativePath>../haikudepotserver-parent</relativePath>
+        <version>1.0.2-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.haikuos</groupId>
+    <artifactId>haikudepotserver-rpm</artifactId>
+    <packaging>rpm</packaging>
+
+
+
+    <build>
+
+        <finalName>haikudepotserver-${project.version}.rpm</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1-alpha-3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <name>haikudepotserver</name>
+                    <group>haikuos</group>
+                    <packager>haikuos</packager>
+                    <version>${project.version}</version>
+                    <copyright>MIT</copyright>
+                    <defineStatements>
+                        <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+                    </defineStatements>
+
+                    <preinstallScriptlet>
+                        <script><![CDATA[
+/usr/bin/getent group haikudepotserver || groupadd -r haikudepotserver >> /dev/null
+/usr/bin/getent passwd haikudepotserver || useradd -r -g haikudepotserver -s /sbin/nologin haikudepotserver >> /dev/null
+                ]]></script>
+                    </preinstallScriptlet>
+
+                    <mappings>
+
+                        <mapping>
+                            <directory>/etc/haikudepotserver</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver</username>
+                            <groupname>haikudepotserver</groupname>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/haikudepotserver</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>660</filemode>
+                            <configuration>noreplace</configuration>
+                            <username>haikudepotserver</username>
+                            <groupname>haikudepotserver</groupname>
+                            <sources>
+                                <source>
+                                    <location>src/main/etc/config__config.properties</location>
+                                    <destination>config.properties</destination>
+                                </source>
+                                <source>
+                                    <location>src/main/etc/logging__logback.xml</location>
+                                    <destination>logback.xml</destination>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/logrotate.d</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>700</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>src/main/etc/logrotate__haikudepotserver</location>
+                                    <destination>haikudepotserver</destination>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/init.d</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>700</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>src/main/etc/initd__haikudepotserver</location>
+                                    <destination>haikudepotserver</destination>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/opt/haikudepotserver</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver</username>
+                            <groupname>haikudepotserver</groupname>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/opt/haikudepotserver</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>660</filemode>
+                            <username>haikudepotserver</username>
+                            <groupname>haikudepotserver</groupname>
+                            <dependency>
+                                <includes>
+                                    <include>org.haikuos:haikudepotserver-webapp</include>
+                                </includes>
+                                <stripVersion>true</stripVersion>
+                            </dependency>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/var/cache/haikudepotserver</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver</username>
+                            <groupname>haikudepotserver</groupname>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/var/log/haikudepotserver</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver</username>
+                            <groupname>haikudepotserver</groupname>
+                        </mapping>
+
+                    </mappings>
+
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.haikuos</groupId>
+            <artifactId>haikudepotserver-webapp</artifactId>
+            <version>${project.version}</version>
+            <classifier>exec-war</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+</project>

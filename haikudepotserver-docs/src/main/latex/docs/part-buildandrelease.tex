@@ -16,7 +16,11 @@ From source code, you can obtain a clean build by issuing the following command 
 
 \framebox{\tt mvn clean \&\& mvn package}
 
-Given the state of the source code, this will produce build artifacts.  Note that this may take some time for the first build because it will need to download various dependencies from the internet.
+Given the state of the source code, this will produce corresponding build artifacts.  Note that this may take some time for the first build because the process will need to download various dependencies from the internet.
+
+\subsubsection{Linux}
+
+Building on a linux host will also cause the build system to produce an RPM file.  The RPM tooling is required on the build host to make this possible.  More detail about this can be found at \ref{prerequisites-buildingonlinux}.
 
 \subsection{Automated Testing}
 
@@ -29,7 +33,7 @@ Some of the automated tests are ``integration tests''.  The integration tests ca
 
 \framebox{\tt mvn clean \&\& mvn verify}
 
-The integration tests {\bf require} the presence of a Postgres database in order to execute.  The database for the execution of integration tests should be available at localhost:5432 where the build is occurring.  The database should be setup as follows;
+The integration tests {\bf require} the presence of a specifically configured Postgres database in order to execute.  The database for the execution of integration tests should be available at localhost:5432 where the build is occurring.  The database should be setup as follows;
 
 \begin{tabular}{ | l | l | }
   \hline
@@ -44,31 +48,33 @@ The configuration for accessing this database is located in the file {\tt local.
 
 \subsection{Release}
 
-A maven project has a ``version'' which is either a final version such as ``2.3.1'' or is a {\it snapshot} version such as ``2.3.2-SNAPSHOT''.  The snapshot version is the version under which the next release is being done.  Once the snapshot is ready, a release is made wherein that source-code is fixed to the version number without the trailing ``-SNAPSHOT'' and then the snapshot version is incremented.  The release yields a tag in the SCM in order to be able to reproduce the source-code for that release against a release version.  The tag will have a form such as ``haikudepotserver-2.3.2''.
+A maven project has a ``version'' which is either a final version such as ``2.3.1'' or is a {\it snapshot} version such as ``2.3.2-SNAPSHOT''.  The snapshot version is the work in progress for the next release.  Once the snapshot is ready, a release is made wherein that source-code is fixed to the version number without the trailing ``-SNAPSHOT'' and then the snapshot version is incremented.  The release yields a tag in the source code management system (git) in order to be able to reproduce the source-code for that release against a release version.  The tag will have a form such as ``haikudepotserver-2.3.2''.
 
- The release process uses the maven release system although there are two caveats;
+The release process uses the maven release system although there are two caveats;
 
- \begin{itemize}
- \item The release is made in the local git repository and is then pushed to remote repository {\bf manually} --- this differs from the typical behaviour where the changes are pushed to the remote repository automatically a number of times through the release process.
- \item The build product(s) will not be copied to a remote maven repository (distribution management) because there is presently no such repository available.
- \end{itemize}
+\begin{itemize}
+\item The release is made in the local git repository and is then pushed to remote repository {\bf manually} --- this differs from the typical behaviour where the changes are pushed to the remote repository automatically a number of times through the release process.
+\item The build product(s) will {\bf not} be copied to a remote maven repository (distribution management) because there is presently no such repository available.
+\end{itemize}
 
- The release process will run the automated testing including the integration testing detailed in \ref{integrationtesting}.  This may require some local build-system configuration such as a testing database to be available.
+The release process will run the automated testing including the integration testing detailed in \ref{integrationtesting}.  This may require some local build-system configuration such as a testing database to be available.
 
- To undertake a release, all changes in the local repository must be committed.  Note that during the release process, the user will be prompted to supply version numbers at the console.  The following commands will cause a release to be undertaken;
+\subsubsection{Undertaking a Release}
 
- \begin{verbatim}
- mvn clean
- mvn release:prepare
- mvn release:perform
- git push
- git push --tags
- \end{verbatim}
+To undertake a release, all changes in the local repository must be committed.  Note that during the release process, the user will be prompted to supply version numbers at the console.  The following commands will cause a release to be undertaken;
 
- In order to obtain source code state for a particular release, first pull changes from the remote repository and then checkout the source at the particular tag;
+\begin{verbatim}
+mvn clean
+mvn release:prepare
+mvn release:perform
+git push
+git push --tags
+\end{verbatim}
 
- \begin{verbatim}
- git checkout tags/haikudepotserver-2.3.2
- \end{verbatim}
+\subsubsection{Obtaining Source for a Release}
 
- From there it will be possible to create a build product for that particular release.
+In order to obtain source code state for a particular release, first pull any pending changes from the remote repository and then checkout the source at the particular tag;
+
+\framebox{\tt git checkout tags/haikudepotserver-2.3.2}
+
+From there it will be possible to create a build product for that particular release by initiating the build process.

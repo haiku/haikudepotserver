@@ -5,11 +5,11 @@
 
 \section{Overview and General Information}
 
-These documents cover an ``application-server'' called ``Haiku Depot Server'' which aims to provide an internet application that stores and allows interaction with software packages for the \href{http://www.haiku-os.org}{Haiku Operating System}.
+These documents relate to an ``application-server'' called ``Haiku Depot Server'' which vends an internet application that stores and allows interaction with software packages for the \href{http://www.haiku-os.org}{Haiku Operating System}.
 
-The application-server is able to communicate with remote repositories to retrieve ``Haiku Package Repository'' (.hpkr) files.  .hpkr files contain a some detail of the packages that are stored at that repository.  The application server is able to consume the .hpkr data and will populate its own internal database with some of the information that it contains.
+The application server is able to communicate with remote repositories to retrieve ``Haiku Package Repository'' (.hpkr) files.  .hpkr files contain meta-data of the packages that are stored at that repository.  The application server is able to consume the .hpkr data and populate its own internal database with some of the meta-data that it contains.
 
-The application-server then provides an HTTP-vended API to that data as well as a web user-interface to the data.  The system is able to augment the .hpkr sourced data with additional detail such as;
+The application-server then provides an HTTP-vended API as well as a web user-interface to the data.  The application server is also intended to interact with a desktop client also called ``Haiku Depot''.  The system augments the information acquired from the .hpkr data with additional detail such as;
 
 \begin{itemize}
 \item Screenshots
@@ -19,7 +19,7 @@ The application-server then provides an HTTP-vended API to that data as well as 
 
 \subsection{License}
 
-The license can be found in the file {\tt LICENSE.TXT} at the top level of the project source.
+The license can be found in the file {\tt LICENSE.TXT} at the top level of the project source.  The license also applies to this documentation.
 
 \subsection{Hosted Source Code}
 
@@ -36,7 +36,7 @@ The source code is hosted at;
 \item \href{http://www.postgres.org}{Postgres} database $\geqslant$ 9.1
 \end{itemize}
 
-Note that on a debian host, these prerequisites can be installed with;
+On a debian host, these prerequisites can be installed with;
 
 \begin{verbatim}
 apt-get install default-jdk
@@ -44,13 +44,35 @@ apt-get install maven
 apt-get install postgresql postgresql-client
 \end{verbatim}
 
+\subsubsection{Building on Linux}
+\label{prerequisites-buildingonlinux}
+
+The build system for a linux host requires the presence of RPM assembly tools.
+
+\begin{tabular}{|l|l|}
+\hline
+RPM-based Linux & {\tt yum install rpm-build} \\
+Debian-based Linux & {\tt apt-get install rpm} \\
+\hline
+\end{tabular}
+
 \subsubsection{Basic Postgres Setup}
 
-The setup discussed here is very simplistic as it is not possible to envisage all of the possible environmental factors involved in a production deployment.  By this point, the Postgres database product is now installed on a UNIX-like computer system and is running as the system user 'postgres'.  Create a new database with the following command;
+The setup discussed here is {\bf very simplistic} as it is not possible to envisage all of the possible environmental factors involved in a production deployment.  By this point, the Postgres database server is  installed on a UNIX-like computer system and is running as the system user {\tt postgres}.
+
+To get the Postgres database server to listen on an internet socket, uncomment the {\tt postgresql.conf} file line;
+
+\framebox{\tt listen\_address = `localhost'}
+
+In order to get connections to localhost to take authentication via username and password, edit the table at the end of the {\tt pg\_hba.conf} file by modifying the ``METHOD'' column for rows pertaining to the localhost; change {\tt ident} to {\tt md5}.
+
+The Postgres database server should then be restarted.
+
+Create a new database user with the following command;
 
 \framebox{\tt sudo -u postgres createuser -P -E haikudepotserver}
 
-Now create the database;
+Now create the new database;
 
 \framebox{\tt sudo -u postgres createdb -O haikudepotserver haikudepotserver}
 
@@ -58,5 +80,5 @@ You can check the login to the database works by opening a SQL terminal;
 
 \framebox{\tt psql -h localhost -U haikudepotserver haikudepotserver}
 
-Note that the database schema objects will be automatically configured by the application-server as it launches.
+The database schema objects will be automatically populated into the fresh database by the application-server as it launches.
 

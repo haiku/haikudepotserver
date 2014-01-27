@@ -1,0 +1,5 @@
+/var/log/haikudepotserver/haikudepotserver.log {
+  rotate 20
+  size 10M
+  compress
+}

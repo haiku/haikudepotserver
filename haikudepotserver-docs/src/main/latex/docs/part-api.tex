@@ -35,9 +35,11 @@ Authentication of invocations uses basic authentication for both REST and JSON-R
 
 \framebox{\tt Authorization: Basic dXNlcjpwYXNzd29yZA}
 
-If the authentication fails then the request will continue unauthenticated; there is no `challenge' returned back to the caller.  As part of the continuation of the invocation, an http 401 or 403 response maybe returned if authorization checks have failed.  A special API exists to provide a means to test an authentication for the purposes of a login panel or similar.
+If the authentication fails then the request will continue unauthenticated; there is no `challenge' returned back to the caller.  As part of the continuation of the invocation, an http 401 or 403 response maybe returned should authorization checks have failed.  A special API exists to provide a means to test an authentication for the purposes of a login panel or similar.
 
 The application does not support cookie-based authentication.
+
+In a production environment, it is important that the request and response payloads are transported over secure HTTP (https) in order to avoid the ``Authorization'' header from being intercepted.
 
 \subsection{JSON-RPC API}
 
@@ -147,10 +149,10 @@ An example URL is;
 
 \subsubsection{Get Package Icon}
 
-This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image.
+This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image.  The request will return a {\tt Last-Modified} header and will process a {\tt If-Modified-Since} header on the request if there is one present.  The timestamps here will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.
 
 \begin{itemize}
-\item HTTP Method : GET
+\item HTTP Method : GET, HEAD
 \item Path : /pkgicon/$<$pkgname$>$.png
 \item Response Content-Type : image/png
 \item Query Parameters
