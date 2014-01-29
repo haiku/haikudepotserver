@@ -15,22 +15,22 @@
     </modules>
 
     <profiles>
-    <profile>
+        <profile>
 
-    <id>rpm-capable-build</id>
+            <id>rpm-capable-build</id>
 
-    <activation>
-        <os>
-            <family>unix</family>
-            <name>Linux</name>
-        </os>
-    </activation>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+            </activation>
 
-        <modules>
-            <module>haikudepotserver-rpm</module>
-        </modules>
+            <modules>
+                <module>haikudepotserver-rpm</module>
+            </modules>
 
-    </profile>
+        </profile>
     </profiles>
 
     <!--
@@ -40,8 +40,8 @@
 
     <scm>
         <connection>scm:git:git</connection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <build>
         <plugins>

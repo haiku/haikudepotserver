@@ -21,7 +21,9 @@ To launch the binary with 256 megabytes of heap memory, issue a command similar 
 
 \begin{verbatim}
 java \
- -Xmx256m \
+ -Xmx512m \
+ -Dfile.encoding=UTF-8 \
+ -Duser.timezone=GMT0 \
  -Djava.awt.headless=true \
  -Dconfig.properties=file:///etc/haikudepotserver/config.properties \
  -jar haikudepotserver-webapp-1.2.3-war-exec.jar \

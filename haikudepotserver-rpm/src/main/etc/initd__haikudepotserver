@@ -23,6 +23,7 @@ MAXSHUTDOWNDELAYSECONDS=20
 
 JAVA_HOME=/usr/lib/jvm/jre
 JAVA_OPTS="-Dfile.encoding=UTF-8 \
+-Duser.timezone=GMT0 \
 -Xms512m -Xmx640m \
 -Djava.awt.headless=true \
 -Dconfig.properties=file://${HDS_CONFIGBASE}/config.properties \

@@ -19,7 +19,13 @@ This will compile the source code and in the process, download any necessary res
 
 To start-up the application server for development purposes, issue the following command from the same top level of the project;
 
-\framebox{\tt mvn org.apache.tomcat.maven:tomcat7-maven-plugin:2.1:run}
+\begin{verbatim}
+mvn \
+ -Dfile.encoding=UTF-8 \
+ -Duser.timezone=GMT0 \
+ -Djava.awt.headless=true \
+ org.apache.tomcat.maven:tomcat7-maven-plugin:2.1:run
+\end{verbatim}
 
 This may take some time to start-up; especially the first time.  Once it has started-up, it should be possible to connect to the application server using the following URL;
 
