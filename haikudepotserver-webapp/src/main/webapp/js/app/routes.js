@@ -28,7 +28,7 @@ angular.module('haikudepotserver').config(
                         ]
                     }
                 })
-                .otherwise({redirectTo:'/'});
+                .otherwise({controller:'OtherwiseController', template: '<div></div>'});
         }
     ]
 );
@@ -41,3 +41,22 @@ angular.module('haikudepotserver').config(
 angular.module('haikudepotserver').run(function($http,$templateCache) {
     $http.get('/js/app/controller/error.html', { cache: $templateCache });
 });
+
+/*
+This is a controller for an unknown page which just goes through to the error page.
+ */
+
+angular.module('haikudepotserver').controller(
+    'OtherwiseController',
+    [
+        '$log','$location',
+        'errorHandling',
+        function(
+            $log,$location,
+            errorHandling) {
+
+            errorHandling.handleUnknownLocation();
+
+        }
+    ]
+);

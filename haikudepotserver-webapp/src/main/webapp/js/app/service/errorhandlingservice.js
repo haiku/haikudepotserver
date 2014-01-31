@@ -29,7 +29,17 @@ angular.module('haikudepotserver').factory('errorHandling',
                     }
 
                     $location.path("/error").search({});
+                },
+
+                /**
+                 * <p>This situation arises when somebody navigates to a page that does not exist.</p>
+                 */
+
+                handleUnknownLocation : function() {
+                    $log.error('unknown location; ' + $location.path());
+                    $location.path("/error").search({});
                 }
+
             };
 
             return ErrorHandlingService;
