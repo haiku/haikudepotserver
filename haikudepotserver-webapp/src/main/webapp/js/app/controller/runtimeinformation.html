@@ -1,0 +1,45 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <h1>Actions</h1>
+    <ul>
+        <li><a href="" ng-click="goRaiseExceptionInLocalRuntime()">Raise test exception in javascript environment</a></li>
+        <li><a href="" ng-click="goRaiseExceptionInServerRuntime()">Raise test exception on server via json-rpc</a></li>
+    </ul>
+
+    <h1>Uptime</h1>
+    <p>
+        This instance of the application-server has been running since
+        <span ng-show="serverStartTimestamp">{{serverStartTimestamp|timestamp}}</span>
+        <span ng-show="!serverStartTimestamp">...</span>.
+    </p>
+
+    <h1>Versions</h1>
+
+    <p>The application has been running for some time.</p>
+
+    <table class="table-general">
+        <thead>
+        <th>Component</th>
+        <th>Version</th>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Haiku Depot Server</td>
+            <td><code>{{versions.serverProject}}</code></td>
+        </tr>
+        <tr>
+            <td>Java (on Server)</td>
+            <td><code>{{versions.serverJava}}</code></td>
+        </tr>
+        <tr>
+            <td>AngularJS</td>
+            <td><code>{{versions.angularFull}}</code></td>
+        </tr>
+        </tbody>
+    </table>
+
+
+</div>
+<div class="footer"></div>

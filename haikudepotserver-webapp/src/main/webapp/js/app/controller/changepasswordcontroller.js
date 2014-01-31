@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'ChangePasswordController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','userState',
+        'jsonRpc','constants','breadcrumbs','userState','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,userState) {
+            jsonRpc,constants,breadcrumbs,userState,errorHandling) {
 
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
@@ -55,7 +55,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('fetched user; '+result.nickname);
                     },
                     function(err) {
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
             };
@@ -77,7 +77,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                     },
                     function(err) {
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
@@ -153,7 +153,7 @@ angular.module('haikudepotserver').controller(
                                         }
                                         else {
                                             $log.error('other validation failures exist; will invoke default handling');
-                                            constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                                            errorHandling.handleJsonRpcError(err);
                                         }
                                     })
                                 }
@@ -166,7 +166,7 @@ angular.module('haikudepotserver').controller(
                                 break;
 
                             default:
-                                constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                                errorHandling.handleJsonRpcError(err);
                                 break;
                         }
                     }

@@ -20,16 +20,16 @@
         identifier.
         -->
 
-        <webresources.guid>79A1B854-6665-4254-B24C-E40564DCA393</webresources.guid>
+        <webresources.guid>D4BAB0F5-EFDC-436B-8692-D756A5CE9FCA</webresources.guid>
 
         <!--
         These are the versions of web-resources that are downloaded as part of this version of web resources
         -->
         <angularuiutils.version>0.4.0</angularuiutils.version>
-        <angularjs.version>1.2.0</angularjs.version>
-        <base64js.version>0.1.3</base64js.version>
+        <angularjs.version>1.2.10</angularjs.version>
+        <base64js.version>0.2.0</base64js.version>
         <underscorejs.version>1.5.2</underscorejs.version>
-        <momentjs.version>2.3.1</momentjs.version>
+        <momentjs.version>2.5.1</momentjs.version>
 
         <!--
         These are the source (base URLs) for the web resources to be downloaded from.
@@ -157,6 +157,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>webresources.properties</include>
+                    <include>build.properties</include>
                 </includes>
             </resource>
             <resource>
@@ -164,6 +165,7 @@
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>webresources.properties</exclude>
+                    <exclude>build.properties</exclude>
                 </excludes>
             </resource>
         </resources>

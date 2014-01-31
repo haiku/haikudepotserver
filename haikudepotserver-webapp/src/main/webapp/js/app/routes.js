@@ -8,6 +8,8 @@ angular.module('haikudepotserver').config(
         '$routeProvider',
         function($routeProvider) {
             $routeProvider
+                .when('/runtimeinformation',{controller:'RuntimeInformationController', templateUrl:'/js/app/controller/runtimeinformation.html'})
+                .when('/more',{controller:'MoreController', templateUrl:'/js/app/controller/more.html'})
                 .when('/authenticateuser',{controller:'AuthenticateUserController', templateUrl:'/js/app/controller/authenticateuser.html'})
                 .when('/createuser',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
                 .when('/changepassword/:nickname',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})

@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'ViewUserController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants',
+        'jsonRpc','constants','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants) {
+            jsonRpc,constants,errorHandling) {
 
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
@@ -42,7 +42,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('fetched user; '+result.nickname);
                     },
                     function(err) {
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
             };

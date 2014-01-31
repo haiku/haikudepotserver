@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'CreateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants',
+        'jsonRpc','constants','errorHandling',
         function(
             $scope,$log,$location,
-            jsonRpc,constants) {
+            jsonRpc,constants,errorHandling) {
 
             $scope.breadcrumbItems = undefined;
             $scope.captchaToken = undefined;
@@ -57,7 +57,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                     },
                     function(err) {
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
@@ -132,7 +132,7 @@ angular.module('haikudepotserver').controller(
                                         }
                                         else {
                                             $log.error('other validation failures exist; will invoke default handling');
-                                            constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                                            errorHandling.handleJsonRpcError(err);
                                         }
                                     })
                                 }
@@ -145,7 +145,7 @@ angular.module('haikudepotserver').controller(
                                 break;
 
                             default:
-                                constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                                errorHandling.handleJsonRpcError(err);
                                 break;
                         }
                     }

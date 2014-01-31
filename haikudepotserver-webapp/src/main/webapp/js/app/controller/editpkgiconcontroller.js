@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'EditPkgIconController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','pkgIcon',
+        'jsonRpc','constants','pkgIcon','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgIcon) {
+            jsonRpc,constants,pkgIcon,errorHandling) {
 
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
@@ -47,7 +47,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                     },
                     function(err) {
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
             }

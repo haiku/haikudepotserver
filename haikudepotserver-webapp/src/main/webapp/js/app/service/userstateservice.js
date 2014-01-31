@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,8 +11,8 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log','$q','jsonRpc','pkgIcon','referenceData','constants',
-        function($log,$q,jsonRpc,pkgIcon,referenceData,constants) {
+        '$log','$q','jsonRpc','pkgIcon',
+        function($log,$q,jsonRpc,pkgIcon) {
 
             var user = undefined;
 
@@ -21,7 +21,7 @@ angular.module('haikudepotserver').factory('userState',
                 /**
                  * <p>Invoked with no argument, this function will return the user.  If it is supplied with null then
                  * it will set the current user to empty.  If it is supplied with a user value, it will configure the
-                 * user.</p>
+                 * user.  The user should consist of the 'nickname' and the 'passwordClear'.</p>
                  */
 
                 user : function(value) {

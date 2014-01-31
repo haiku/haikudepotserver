@@ -54,4 +54,8 @@
 
     <bean class="org.haikuos.haikudepotserver.support.logging.LoggingSetupOrchestration" init-method="init"/>
 
+    <!-- SUNDRY -->
+
+    <bean class="org.haikuos.haikudepotserver.support.RuntimeInformationService"></bean>
+
 </beans>

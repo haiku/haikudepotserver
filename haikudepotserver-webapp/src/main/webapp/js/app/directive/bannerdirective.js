@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,6 +21,11 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $rootScope,$scope,$log,$location,$route,
                     userState) {
 
+                    $scope.goMore = function() {
+                        $location.path('/more').search({});
+                        return false;
+                    }
+
                     // This will take the user back to the home page.
 
                     $scope.goHome = function() {
@@ -34,6 +39,11 @@ angular.module('haikudepotserver').directive('banner',function() {
                     function isLocationPathDisablingUserState() {
                         var p = $location.path();
                         return '/error' == p || '/authenticateuser' == p || '/createuser' == p;
+                    }
+
+                    $scope.canGoMore = function() {
+                        var p = $location.path();
+                        return '/error' != p && '/more' != p;
                     }
 
                     $scope.canAuthenticateOrCreate = function() {

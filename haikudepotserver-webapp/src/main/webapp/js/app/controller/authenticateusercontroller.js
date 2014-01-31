@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'AuthenticateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','userState',
+        'jsonRpc','constants','userState','errorHandling',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,userState) {
+            jsonRpc,constants,userState,errorHandling) {
 
             if(userState.user()) {
                 throw 'it is not possible to enter the authenticate user controller with a currently authenticated user';
@@ -95,7 +95,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function(err) {
                         $scope.amAuthenticating = false;
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
 

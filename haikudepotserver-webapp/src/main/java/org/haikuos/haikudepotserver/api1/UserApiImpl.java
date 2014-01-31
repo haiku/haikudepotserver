@@ -108,6 +108,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         GetUserResult result = new GetUserResult();
         result.nickname = user.get().getNickname();
+        result.isRoot = user.get().getIsRoot();
         return result;
     }
 

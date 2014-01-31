@@ -13,6 +13,20 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
             var BreadcrumbsService = {
 
+                createRuntimeInformation : function() {
+                    return {
+                        title : 'Runtime Information',
+                        path : '/runtimeinformation'
+                    };
+                },
+
+                createMore : function() {
+                  return {
+                      title : 'More',
+                      path : '/more'
+                  };
+                },
+
                 createViewUser : function(user) {
                     return {
                         title : user.nickname,

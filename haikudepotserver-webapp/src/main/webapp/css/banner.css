@@ -32,7 +32,7 @@ as well as the status of the authenticated user.
     vertical-align: middle;
 }
 
-#banner-user {
+#banner-actions {
     position: absolute;
     top: 12px;
     right: 0px;

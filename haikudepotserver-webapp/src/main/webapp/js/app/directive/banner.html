@@ -2,7 +2,10 @@
     <span id="banner-title" ng-click="goHome()">
         <div>Haiku Depot Server</div>
     </span>
-    <span id="banner-user">
+    <span id="banner-actions">
+        <span ng-show="canGoMore()">
+            <a href="" ng-click="goMore()">more</a> |
+        </span>
         <span ng-show="canAuthenticateOrCreate()">
             <a href="" ng-click="goAuthenticateUser()">login</a>
             |

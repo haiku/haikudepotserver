@@ -24,8 +24,8 @@
                             <value>/js/lib/${webresources.guid}/base64-min.js</value>
                             <value>/js/lib/${webresources.guid}/moment-min.js</value>
                             <value>/js/lib/${webresources.guid}/underscore-min.js</value>
-                            <value>/js/lib/${webresources.guid}/angular-min.js</value>
-                            <value>/js/lib/${webresources.guid}/angular-route-min.js</value>
+                            <value>/js/lib/${webresources.guid}/angular/angular.min.js</value>
+                            <value>/js/lib/${webresources.guid}/angular/angular-route.min.js</value>
                             <value>/js/lib/${webresources.guid}/angular-ui.js</value>
                             <value>/js/lib/${webresources.guid}/base64-min.js</value>
                         </list>
@@ -66,6 +66,8 @@
                             <value>/js/app/controller/authenticateusercontroller.js</value>
                             <value>/js/app/controller/editpkgiconcontroller.js</value>
                             <value>/js/app/controller/changepasswordcontroller.js</value>
+                            <value>/js/app/controller/morecontroller.js</value>
+                            <value>/js/app/controller/runtimeinformationcontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
@@ -73,6 +75,9 @@
                             <value>/js/app/service/referencedataservice.js</value>
                             <value>/js/app/service/pkgiconservice.js</value>
                             <value>/js/app/service/breadcrumbsservice.js</value>
+                            <value>/js/app/service/errorhandlingservice.js</value>
+
+                            <value>/js/app/filter/timestampfilter.js</value>
 
                         </list>
                     </property>

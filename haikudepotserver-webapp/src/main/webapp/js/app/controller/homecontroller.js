@@ -1,14 +1,16 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 angular.module('haikudepotserver').controller(
     'HomeController',
     [
-        '$scope','$q','$log','$location','jsonRpc','constants','userState','architectures','messageSource',
+        '$scope','$q','$log','$location',
+        'jsonRpc','constants','userState','architectures','messageSource','errorHandling',
         function(
-            $scope,$q,$log,$location,jsonRpc,constants,userState,architectures,messageSource) {
+            $scope,$q,$log,$location,
+            jsonRpc,constants,userState,architectures,messageSource,errorHandling) {
 
             const PAGESIZE = 14;
 
@@ -193,7 +195,7 @@ angular.module('haikudepotserver').controller(
                         amFetchingPkgs = false;
                     },
                     function(err) {
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
 

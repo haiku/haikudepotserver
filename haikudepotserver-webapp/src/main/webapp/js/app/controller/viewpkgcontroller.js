@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'ViewPkgController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','userState',
+        'jsonRpc','constants','userState','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,userState) {
+            jsonRpc,constants,userState,errorHandling) {
 
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
@@ -69,7 +69,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                     },
                     function(err) {
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
@@ -91,7 +91,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function(err) {
                         $log.error('unable to remove the icons for '+$routeParams.name+' pkg');
-                        constants.ERRORHANDLING_JSONRPC(err,$location,$log);
+                        errorHandling.handleJsonRpcError(err);
                     }
                 );
 
