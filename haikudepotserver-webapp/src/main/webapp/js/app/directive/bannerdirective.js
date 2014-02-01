@@ -21,10 +21,28 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $rootScope,$scope,$log,$location,$route,
                     userState) {
 
-                    $scope.goMore = function() {
-                        $location.path('/more').search({});
-                        return false;
-                    }
+                    $scope.actions = [];
+                    refreshActions(); // not direct assignment in case it later has to be a promise.
+
+                    // when the page changes, the actions may change; for example, it is not appropriate to
+                    // show the 'login' option when the user is presently logging in.
+
+                    $rootScope.$on(
+                        "$locationChangeSuccess",
+                        function(event, next, current) {
+                            refreshActions();
+                        }
+                    );
+
+                    // when the user logs in or out then the actions may also change; for example, it makes
+                    // no sense to show the logout button if nobody is presently logged in.
+
+                    $rootScope.$on(
+                        "userChangeSuccess",
+                        function(event, next, current) {
+                            refreshActions();
+                        }
+                    );
 
                     // This will take the user back to the home page.
 
@@ -33,53 +51,74 @@ angular.module('haikudepotserver').directive('banner',function() {
                         return false;
                     }
 
-                    // --------------------------
-                    // USER / AUTHENTICATION
+                    function canGoMore() {
+                        var p = $location.path();
+                        return '/error' != p && '/more' != p;
+                    }
 
                     function isLocationPathDisablingUserState() {
                         var p = $location.path();
                         return '/error' == p || '/authenticateuser' == p || '/createuser' == p;
                     }
 
-                    $scope.canGoMore = function() {
-                        var p = $location.path();
-                        return '/error' != p && '/more' != p;
-                    }
-
-                    $scope.canAuthenticateOrCreate = function() {
+                    function canAuthenticateOrCreate() {
                         return !isLocationPathDisablingUserState() && !userState.user();
                     }
 
-                    $scope.canShowAuthenticated = function() {
+                    function canShowAuthenticated() {
                         return !isLocationPathDisablingUserState() && userState.user()
                     }
 
-                    $scope.goViewUser = function() {
-                        $location.path('/viewuser/'+userState.user().nickname).search({});
-                        return false;
-                    }
+                    function refreshActions() {
+                        var a = [];
 
-                    $scope.goCreateUser = function() {
-                        $location.path('/createuser').search({});
-                        return false;
-                    }
+                        if(canGoMore()) {
+                            a.push({
+                                title : 'more',
+                                action: function() {
+                                    $location.path('/more').search({});
+                                }
+                            });
+                        }
 
-                    $scope.goAuthenticateUser = function() {
-                        var p = $location.path();
-                        $location.path('/authenticateuser').search(
-                            _.extend($location.search(), { destination: p }));
-                        return false;
-                    }
+                        if(canAuthenticateOrCreate()) {
+                            a.push({
+                                title : 'login',
+                                action: function() {
+                                    var p = $location.path();
+                                    $location.path('/authenticateuser').search(
+                                        _.extend($location.search(), { destination: p }));
+                                }
+                            });
 
-                    $scope.goLogoutUser = function() {
-                        userState.user(null);
-                        $location.path('/').search({});
-                        return false;
-                    }
+                            a.push({
+                                title : 'register',
+                                action: function() {
+                                    $location.path('/createuser').search({});
+                                }
+                            });
+                        }
 
-                    $scope.userDisplayTitle = function() {
-                        var data = userState.user();
-                        return data ? data.nickname : undefined;
+                        if(canShowAuthenticated()) {
+
+                            a.push({
+                                title : userState.user().nickname,
+                                action: function() {
+                                    $location.path('/viewuser/'+userState.user().nickname).search({});
+                                }
+                            });
+
+                            a.push({
+                                title : 'logout',
+                                action: function() {
+                                    userState.user(null);
+                                    $location.path('/').search({});
+                                }
+                            });
+
+                        }
+
+                        $scope.actions = a;
                     }
 
                 }

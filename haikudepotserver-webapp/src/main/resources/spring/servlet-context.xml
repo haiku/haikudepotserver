@@ -16,6 +16,7 @@
     </context:component-scan>
 
     <mvc:annotation-driven/>
+
     <mvc:resources mapping="/js/**" location="/js/" />
     <mvc:resources mapping="/css/**" location="/css/" />
     <mvc:resources mapping="/img/**" location="/img/" />

@@ -2,22 +2,10 @@
     <span id="banner-title" ng-click="goHome()">
         <div>Haiku Depot Server</div>
     </span>
-    <span id="banner-actions">
-        <span ng-show="canGoMore()">
-            <a href="" ng-click="goMore()">more</a> |
-        </span>
-        <span ng-show="canAuthenticateOrCreate()">
-            <a href="" ng-click="goAuthenticateUser()">login</a>
-            |
-            <a href="" ng-click="goCreateUser()">register</a>
-        </span>
-        <span ng-show="canShowAuthenticated()">
-            <div id="banner-user-logout">
-                <a href="" ng-click="goLogoutUser()"><img src="img/logout.svg" alt="Logout"/></a>
-            </div>
-            <div id="banner-user-identification">
-                <a href="" ng-click="goViewUser()">{{userDisplayTitle()}}</a>
-            </div>
+    <span id="banner-actions" ng-show="actions.length">
+        <span ng-repeat="a in actions">
+            <span ng-show="$index">|</span>
+            <a href="" ng-click="a.action()">{{a.title}}</a>
         </span>
     </span>
 </div>

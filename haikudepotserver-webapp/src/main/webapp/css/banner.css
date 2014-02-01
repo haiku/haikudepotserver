@@ -42,16 +42,6 @@ as well as the status of the authenticated user.
     overflow: hidden;
 }
 
-#banner-user-logout {
-    display: inline;
-    float:right;
-}
-
-#banner-user-identification {
-    display: inline;
-    margin-right: 4px;
-}
-
 #banner-container a {
     color: white;
 }

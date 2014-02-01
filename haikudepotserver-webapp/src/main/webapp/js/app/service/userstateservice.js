@@ -11,8 +11,8 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log','$q','jsonRpc','pkgIcon',
-        function($log,$q,jsonRpc,pkgIcon) {
+        '$log','$q','$rootScope','jsonRpc','pkgIcon',
+        function($log,$q,$rootScope,jsonRpc,pkgIcon) {
 
             var user = undefined;
 
@@ -26,6 +26,9 @@ angular.module('haikudepotserver').factory('userState',
 
                 user : function(value) {
                     if(undefined !== value) {
+
+                        $rootScope.$broadcast('userChangeStart',value);
+
                         if(null==value) {
                             user = undefined;
 
@@ -54,6 +57,8 @@ angular.module('haikudepotserver').factory('userState',
                             user = value;
                             $log.info('have set user; '+user.nickname);
                         }
+
+                        $rootScope.$broadcast('userChangeSuccess',value);
                     }
 
                     return user;
