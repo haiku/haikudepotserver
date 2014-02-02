@@ -4,7 +4,7 @@
  */
 
 /**
- * <p>This directive renders a small span which briefly describes the package.</p>
+ * <p>This directive renders a small span which briefly describes the repository.</p>
  */
 
 angular.module('haikudepotserver').directive('repositoryLabel',function() {

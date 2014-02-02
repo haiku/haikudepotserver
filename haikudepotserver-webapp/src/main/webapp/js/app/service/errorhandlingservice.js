@@ -4,7 +4,7 @@
  */
 
 /**
- * <p>This service is used to centralize the handling of errors; providing consistent handling and error feedback.
+ * <p>This service is used to centralize the handling of errors; providing consistent handling and error feedback.</p>
  */
 
 angular.module('haikudepotserver').factory('errorHandling',

@@ -104,8 +104,6 @@ public class IntegrationTestSupportService {
 
     public static class StandardTestData {
 
-        public User rootUser;
-
         public Repository repository;
 
         public Pkg pkg1;

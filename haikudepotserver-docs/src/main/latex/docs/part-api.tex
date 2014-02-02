@@ -25,6 +25,10 @@ When objects such as packages or users are referred to in the API, the database 
 
 Reference data means data in the application that is generally invariant.  Examples include the mime types, natural language, url types and so on.  In these cases, an API will generally provide for access to the list of reference data.  The client is expected to obtain such reference data as necessary and cache reference data locally.
 
+\subsubsection{Date and Time Data}
+
+The system has only a concept of a {\it moment in time} which is called a timestamp.  The timestamp is typically communicated as the number of milliseconds elapsed since the epoc represented as a 64bit integer.  The timestamp communicated via the API is always relative to UTC.
+
 \subsubsection{Invocations and Transport}
 
 The term ``invocation'' refers to a request-response cycle from the client software into the application server over the HTTP protocol.  Each API invocation is made in a {\it stateless} manner in that each invocation is not dependent on the prior invocation.
