@@ -1,84 +1,12 @@
-
-#home-search-criteria-container {
-    background-color: rgb(253,207,49);
-    border: 1px solid black;
-}
-
-#home-search-criteria-container > div {
-    display: inline-block;
-    padding-top:2px;
-    padding-bottom:2px;
-    padding-left:4px;
-    padding-right:4px;
-}
-
-#home-search-criteria-container input {
-    font-size: 10px;
-}
-
-#home-search-criteria-container button {
-    font-size: 10px;
-    background-color: rgb(253,207,49);
-    border: 1px solid black;
-    border-radius: 3px;
-}
-
-#home-search-criteria-container button[disabled] {
-    border: 1px solid rgba(0, 0, 0, 0.30);
-}
-
-#home-search-criteria-architecture-container {
-    border-right: 1px dotted black;
-}
-
-#home-search-criteria-category-container {
-    border-right: 1px dotted black;
-}
-
-#home-search-criteria-predicates-container {
-}
-
-#home-search-criteria-bar-categories > span {
-    color: rgba(0, 0, 0, 0.50);
-}
-
-/*
-Special layout for the search field which is in the 3rd box
-*/
-
-#home-search-criteria-bar #home-search-criteria-bar-search {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-#home-search-criteria-bar > div.selected {
-    background-color: white;
-    border-bottom: white 1px solid;
-}
-
-#home-search-criteria-bar > div:not(.selected) {
-    border-bottom: black 1px solid;
-}
-
-#home-search-criteria-bar > div:nth-child(n+2) {
-    border-left: black 1px solid;
-}
-
-#home-search-results-container {
-    margin-top: 8px;
-}
-
-#home-search-results-container > table > tbody > tr > td:nth-child(1) {
+#search-results-container > table > tbody > tr > td:nth-child(1) {
     width: 24px;
 }
 
-#home-search-results-table > tbody > tr > td:nth-child(1) {
+#search-results-container > table > tbody > tr > td:nth-child(1) {
     width:18px;
     text-align: center;
 }
 
-#home-search-results-table > tbody > tr > td:nth-child(2) {
+#search-results-container > table > tbody > tr > td:nth-child(2) {
     width:50%;
 }

@@ -59,6 +59,13 @@ angular.module('haikudepotserver').controller(
             refreshAuthorization();
 
             // -------------------
+            // REPOSITORIES
+
+            $scope.goListRepositories = function() {
+                $location.path('/listrepositories').search({});
+            }
+
+            // -------------------
             // RUNTIME INFORMATION
 
             function refreshRuntimeInformation() {

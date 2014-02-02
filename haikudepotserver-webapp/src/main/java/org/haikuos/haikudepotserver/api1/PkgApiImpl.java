@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.pkg.PkgSearchService;
+import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     ServerRuntime serverRuntime;
 
     @Resource
-    PkgSearchService searchPkgsService;
+    PkgService pkgService;
 
     @Override
     public SearchPkgsResult searchPkgs(SearchPkgsRequest request) {
@@ -84,7 +84,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         specification.setOffset(request.offset);
 
         SearchPkgsResult result = new SearchPkgsResult();
-        List<Pkg> searchedPkgs = searchPkgsService.search(context,specification);
+        List<Pkg> searchedPkgs = pkgService.search(context,specification);
 
         // if there are more than we asked for then there must be more available.
 
@@ -94,7 +94,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             searchedPkgs = searchedPkgs.subList(0,request.limit);
         }
 
-        result.pkgs = Lists.newArrayList(Iterables.transform(
+        result.items = Lists.newArrayList(Iterables.transform(
                 searchedPkgs,
                 new Function<Pkg, SearchPkgsResult.Pkg>() {
                     @Override
@@ -142,6 +142,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.revision = pkgVersion.getRevision();
         version.preRelease = pkgVersion.getPreRelease();
 
+        version.repositoryCode = pkgVersion.getRepository().getCode();
         version.architectureCode = pkgVersion.getArchitecture().getCode();
         version.copyrights = Lists.transform(
                 pkgVersion.getPkgVersionCopyrights(),

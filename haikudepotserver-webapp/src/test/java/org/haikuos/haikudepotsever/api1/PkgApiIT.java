@@ -13,7 +13,7 @@ import org.haikuos.haikudepotserver.api1.PkgApi;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.pkg.PkgIconService;
+import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
 import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
@@ -31,7 +31,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     PkgApi pkgApi;
 
     @Resource
-    PkgIconService pkgIconService;
+    PkgService pkgService;
 
     @Test
     public void searchPkgsTest() {
@@ -49,9 +49,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.hasMore).isTrue();
-        Assertions.assertThat(result.pkgs.size()).isEqualTo(2);
-        Assertions.assertThat(result.pkgs.get(0).name).isEqualTo("pkg1");
-        Assertions.assertThat(result.pkgs.get(1).name).isEqualTo("pkg2");
+        Assertions.assertThat(result.items.size()).isEqualTo(2);
+        Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
+        Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");
     }
 
     @Test
@@ -123,7 +123,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
                 throw new IllegalStateException("unable to find the test input stream for the icon image");
             }
 
-            pkgIconService.storePkgIconImage(
+            pkgService.storePkgIconImage(
                     sample32InputStream,
                     32,
                     integrationTestSupportService.getObjectContext(),

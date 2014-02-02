@@ -256,12 +256,17 @@ table.table-general tbody tr td.selectioncell {
 
 /*
 ==================================
-TABLE
+ANGULARJS
 */
 
 [ng\:cloak], [ng-cloak], .ng-cloak {
     display: none;
 }
+
+/*
+==================================
+SPINNER
+*/
 
 /*
 This material is for the spinner; it will fill the screen will white and then put a small animation on top for
@@ -284,4 +289,68 @@ a moment.
     padding-top: 120px;
 }
 
+/*
+==================================
+SEARCH BAR
+*/
 
+#search-criteria-container {
+    background-color: rgb(253,207,49);
+    border: 1px solid black;
+}
+
+#search-criteria-container input {
+    font-size: 10px;
+}
+
+#search-criteria-container button {
+    font-size: 10px;
+    background-color: rgb(253,207,49);
+    border: 1px solid black;
+    border-radius: 3px;
+}
+
+#search-criteria-container button[disabled] {
+    border: 1px solid rgba(0, 0, 0, 0.30);
+}
+
+#search-criteria-container > div {
+    display: inline-block;
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:4px;
+    padding-right:4px;
+}
+
+/*
+Within the search criteria to break-up the sections of the search criteria, this will put a dotted line
+between the sections.
+*/
+
+#search-criteria-container > div:nth-child(n+2) {
+    border-left: 1px dotted black;
+}
+
+#search-results-container {
+    margin-top: 8px;
+}
+
+/*
+==================================
+ACTIVE / INACTIVE INDICATORS
+*/
+
+.active-indicator {
+    background-color: grey;
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+}
+
+.active-indicator.active-indicator-true {
+    background-color: darkolivegreen;
+}
+
+.inactive-indicator.active-indicator-false {
+    background-color: firebrick;
+}

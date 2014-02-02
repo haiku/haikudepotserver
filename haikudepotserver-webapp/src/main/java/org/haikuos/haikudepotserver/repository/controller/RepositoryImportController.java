@@ -1,14 +1,14 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.pkg.controller;
+package org.haikuos.haikudepotserver.repository.controller;
 
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import org.haikuos.haikudepotserver.pkg.PkgRepositoryImportService;
+import org.haikuos.haikudepotserver.repository.RepositoryImportService;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +30,14 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/importrepositorydata")
-public class PkgRepositoryImportController {
+public class RepositoryImportController {
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgRepositoryImportController.class);
+    protected static Logger logger = LoggerFactory.getLogger(RepositoryImportController.class);
 
     public final static String KEY_CODE = "code";
 
     @Resource
-    PkgRepositoryImportService importRepositoryDataService;
+    RepositoryImportService importRepositoryDataService;
 
     @RequestMapping(method = RequestMethod.GET)
     public void fetch(

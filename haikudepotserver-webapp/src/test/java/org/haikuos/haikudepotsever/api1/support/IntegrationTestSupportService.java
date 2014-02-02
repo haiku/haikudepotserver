@@ -7,10 +7,7 @@ package org.haikuos.haikudepotsever.api1.support;
 
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
-import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -106,6 +103,8 @@ public class IntegrationTestSupportService {
      */
 
     public static class StandardTestData {
+
+        public User rootUser;
 
         public Repository repository;
 

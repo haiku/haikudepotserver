@@ -1,17 +1,13 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-import java.util.List;
+import org.haikuos.haikudepotserver.api1.support.AbstractSearchResult;
 
-public class SearchPkgsResult {
-
-    public List<Pkg> pkgs;
-
-    public Boolean hasMore;
+public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg> {
 
     public static class Pkg {
         public String name;

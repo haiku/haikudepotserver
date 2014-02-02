@@ -57,6 +57,8 @@
                             <value>/js/app/directive/filesupplydirective.js</value>
                             <value>/js/app/directive/validpassworddirective.js</value>
                             <value>/js/app/directive/userlabeldirective.js</value>
+                            <value>/js/app/directive/repositorylabeldirective.js</value>
+                            <value>/js/app/directive/activeindicatordirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>
@@ -68,6 +70,7 @@
                             <value>/js/app/controller/changepasswordcontroller.js</value>
                             <value>/js/app/controller/morecontroller.js</value>
                             <value>/js/app/controller/runtimeinformationcontroller.js</value>
+                            <value>/js/app/controller/listrepositoriescontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>

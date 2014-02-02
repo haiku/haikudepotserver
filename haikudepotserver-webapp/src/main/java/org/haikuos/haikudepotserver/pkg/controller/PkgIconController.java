@@ -16,7 +16,7 @@ import org.haikuos.haikudepotserver.support.NoOpOutputStream;
 import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.User;
-import org.haikuos.haikudepotserver.pkg.PkgIconService;
+import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class PkgIconController extends AbstractController {
     ServerRuntime serverRuntime;
 
     @Resource
-    PkgIconService pkgIconService;
+    PkgService pkgService;
 
     @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
     public void fetchHead(
@@ -83,7 +83,7 @@ public class PkgIconController extends AbstractController {
 
         ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
 
-        pkgIconService.writePkgIconImage(
+        pkgService.writePkgIconImage(
                 byteCounter,
                 context,
                 pkg.get(),
@@ -136,7 +136,7 @@ public class PkgIconController extends AbstractController {
         response.setContentType(MediaType.PNG.toString());
         response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
 
-        pkgIconService.writePkgIconImage(
+        pkgService.writePkgIconImage(
                 response.getOutputStream(),
                 context,
                 pkg.get(),
@@ -181,7 +181,7 @@ public class PkgIconController extends AbstractController {
         }
 
         try {
-            pkgIconService.storePkgIconImage(
+            pkgService.storePkgIconImage(
                     request.getInputStream(),
                     expectedSize,
                     context,

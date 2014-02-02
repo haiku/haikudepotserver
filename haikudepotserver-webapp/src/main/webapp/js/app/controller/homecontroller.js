@@ -189,9 +189,9 @@ angular.module('haikudepotserver').controller(
                         }]
                     ).then(
                     function(result) {
-                        $scope.pkgs = result.pkgs;
+                        $scope.pkgs = result.items;
                         $scope.hasMore = result.hasMore;
-                        $log.info('found '+result.pkgs.length+' packages');
+                        $log.info('found '+result.items.length+' packages');
                         amFetchingPkgs = false;
                     },
                     function(err) {

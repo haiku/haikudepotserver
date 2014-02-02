@@ -1,34 +1,31 @@
-
 <div class="content-container">
 
-    <div id="home-search-criteria-container">
-        <div id="home-search-criteria-architecture-container">
+    <div id="search-criteria-container">
+        <div>
             <select ng-model="selectedArchitecture" ng-options="anArchitecture.code for anArchitecture in architectures"></select>
         </div>
-        <div id="home-search-criteria-category-container">
+        <div>
             <select ng-model="selectedViewCriteriaTypeOption" ng-options="aViewCriteriaTypeOptions.name for aViewCriteriaTypeOptions in viewCriteriaTypeOptions"></select>
         </div>
-        <div id="home-search-criteria-predicates-container">
-            <div ng-show="'SEARCH'==selectedViewCriteriaTypeOption.code">
-                <input
-                        ng-model="searchExpression"
-                        ui-keypress="{enter:'goSearch()'}"
-                        placeholder="Search..."></input>
-                <button
-                        ng-disabled="!searchExpression || !searchExpression.length"
-                        ng-click="goSearch()">
-                    Go
-                </button>
-            </div>
-            <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
-                Not supported yet!
-            </div>
+        <div ng-show="'SEARCH'==selectedViewCriteriaTypeOption.code">
+            <input
+                    ng-model="searchExpression"
+                    ui-keypress="{enter:'goSearch()'}"
+                    placeholder="Search..."></input>
+            <button
+                    ng-disabled="!searchExpression || !searchExpression.length"
+                    ng-click="goSearch()">
+                Go
+            </button>
+        </div>
+        <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
+            Not supported yet!
         </div>
     </div>
 
     <!-- RESULTS -->
 
-    <div id="home-search-results-container">
+    <div id="search-results-container">
 
         <div ng-show="pkgs && 0==pkgs.length" class="info-container">
             <strong>No results; </strong>
@@ -44,7 +41,7 @@
                 <span ng-show="!hasMore">&raquo;</span>
             </div>
 
-            <table id="home-search-results-table" class="table-general">
+            <table class="table-general">
                 <thead>
                 <th></th>
                 <th>Package</th>

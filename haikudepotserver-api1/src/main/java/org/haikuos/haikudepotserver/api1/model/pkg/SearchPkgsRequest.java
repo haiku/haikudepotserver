@@ -5,25 +5,14 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
+import org.haikuos.haikudepotserver.api1.support.AbstractSearchRequest;
+
 /**
  * <p>This is the model object that is used to define the request to search for packages in the system.</p>
  */
 
-public class SearchPkgsRequest {
-
-    public enum ExpressionType {
-        CONTAINS
-    }
-
-    public String expression;
+public class SearchPkgsRequest extends AbstractSearchRequest {
 
     public String architectureCode;
-
-    public ExpressionType expressionType;
-
-    public Integer offset;
-
-    public Integer limit;
-
 
 }

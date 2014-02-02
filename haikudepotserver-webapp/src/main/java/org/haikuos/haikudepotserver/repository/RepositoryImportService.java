@@ -1,9 +1,9 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.pkg;
+package org.haikuos.haikudepotserver.repository;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -11,8 +11,10 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Queues;
 import com.google.common.io.InputSupplier;
+import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.pkg.PkgIterator;
@@ -42,9 +44,9 @@ import java.util.concurrent.TimeUnit;
  */
 
 @Service
-public class PkgRepositoryImportService {
+public class RepositoryImportService {
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgRepositoryImportService.class);
+    protected static Logger logger = LoggerFactory.getLogger(RepositoryImportService.class);
 
     public final static int SIZE_QUEUE = 10;
 
@@ -52,7 +54,7 @@ public class PkgRepositoryImportService {
     ServerRuntime serverRuntime;
 
     @Resource
-    PkgImportService importPackageService;
+    PkgService pkgService;
 
     private ThreadPoolExecutor executor = null;
 
@@ -146,7 +148,9 @@ public class PkgRepositoryImportService {
             logger.info("will process data for repository {}",job.getCode());
 
             while(pkgIterator.hasNext()) {
-                importPackageService.run(repository.getObjectId(), pkgIterator.next());
+                ObjectContext pkgImportContext = serverRuntime.getContext();
+                pkgService.importFrom(pkgImportContext, repository.getObjectId(), pkgIterator.next());
+                pkgImportContext.commitChanges();
             }
 
             logger.info("did process data for repository {} in {}ms",job.getCode(),System.currentTimeMillis()-startTimeMs);
@@ -173,10 +177,10 @@ public class PkgRepositoryImportService {
 
         private PkgRepositoryImportJob job;
 
-        private PkgRepositoryImportService service;
+        private RepositoryImportService service;
 
         public ImportRepositoryDataJobRunnable(
-                PkgRepositoryImportService service,
+                RepositoryImportService service,
                 PkgRepositoryImportJob job) {
             Preconditions.checkNotNull(service);
             Preconditions.checkNotNull(job);

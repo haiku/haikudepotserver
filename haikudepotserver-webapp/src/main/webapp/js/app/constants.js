@@ -7,6 +7,7 @@ angular.module('haikudepotserver').constant('constants', {
 
         ARCHITECTURE_CODE_DEFAULT : 'x86',
 
+        ENDPOINT_API_V1_REPOSITORY : '/api/v1/repository',
         ENDPOINT_API_V1_PKG : '/api/v1/pkg',
         ENDPOINT_API_V1_CAPTCHA : '/api/v1/captcha',
         ENDPOINT_API_V1_MISCELLANEOUS : '/api/v1/miscellaneous',

@@ -1,0 +1,53 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <div id="search-criteria-container">
+        <div>
+            <input
+                    ng-model="searchExpression"
+                    ui-keypress="{enter:'goSearch()'}"
+                    placeholder="Filter by code..."></input>
+            <button ng-click="goSearch()">Go</button>
+        </div>
+    </div>
+
+    <!-- RESULTS -->
+
+    <div id="search-results-container">
+
+        <div ng-show="repositories && 0==repositories.length" class="info-container">
+            <strong>No results; </strong>
+            There were no repositories able to be found.
+        </div>
+
+        <div ng-show="repositories && repositories.length" class="table-general-container">
+
+            <div class="table-general-pagination-container">
+                <a href="" ng-click="goPreviousPage()" ng-show="0!=offset">&laquo;</a>
+                <span ng-show="0==offset">&laquo;</span>
+                <a href="" ng-click="goNextPage()" ng-show="hasMore">&raquo;</a>
+                <span ng-show="!hasMore">&raquo;</span>
+            </div>
+
+            <table class="table-general">
+                <thead>
+                <th>Code</th>
+                <th>Architecture</th>
+                <th>Active</th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="repository in repositories">
+                    <td><repository-label repository="repository"></repository-label></td>
+                    <td><code>{{repository.architectureCode}}</code></td>
+                    <td><active-indicator state="repository.active"></active-indicator></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>

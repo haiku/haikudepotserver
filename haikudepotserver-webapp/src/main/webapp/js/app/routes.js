@@ -8,6 +8,7 @@ angular.module('haikudepotserver').config(
         '$routeProvider',
         function($routeProvider) {
             $routeProvider
+                .when('/listrepositories',{controller:'ListRepositoriesController', templateUrl:'/js/app/controller/listrepositories.html'})
                 .when('/runtimeinformation',{controller:'RuntimeInformationController', templateUrl:'/js/app/controller/runtimeinformation.html'})
                 .when('/more',{controller:'MoreController', templateUrl:'/js/app/controller/more.html'})
                 .when('/authenticateuser',{controller:'AuthenticateUserController', templateUrl:'/js/app/controller/authenticateuser.html'})
