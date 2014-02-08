@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
-import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -26,20 +25,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthorizationService {
 
-    private AuthorizationTargetType deriveTargetType(DataObject dataObject) {
+    private TargetType deriveTargetType(DataObject dataObject) {
         if(null==dataObject)
             return null;
 
         if(User.class.isAssignableFrom(dataObject.getClass())) {
-            return AuthorizationTargetType.USER;
+            return TargetType.USER;
         }
 
         if(Pkg.class.isAssignableFrom(dataObject.getClass())) {
-            return AuthorizationTargetType.PKG;
+            return TargetType.PKG;
         }
 
         if(Repository.class.isAssignableFrom(dataObject.getClass())) {
-            return AuthorizationTargetType.REPOSITORY;
+            return TargetType.REPOSITORY;
         }
 
         throw new IllegalStateException("the data object type '"+dataObject.getClass().getSimpleName()+"' is not handled");

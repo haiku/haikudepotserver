@@ -5,30 +5,28 @@
 
 package org.haikuos.haikudepotserver.security.model;
 
-import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
-
 public enum Permission {
 
-    REPOSITORY_VIEW(AuthorizationTargetType.REPOSITORY),
-    REPOSITORY_EDIT(AuthorizationTargetType.REPOSITORY),
-    REPOSITORY_IMPORT(AuthorizationTargetType.REPOSITORY),
+    REPOSITORY_VIEW(TargetType.REPOSITORY),
+    REPOSITORY_EDIT(TargetType.REPOSITORY),
+    REPOSITORY_IMPORT(TargetType.REPOSITORY),
     REPOSITORY_LIST(null),
     REPOSITORY_LIST_INACTIVE(null),
 
-    USER_VIEW(AuthorizationTargetType.USER),
-    USER_EDIT(AuthorizationTargetType.USER),
-    USER_CHANGEPASSWORD(AuthorizationTargetType.USER),
+    USER_VIEW(TargetType.USER),
+    USER_EDIT(TargetType.USER),
+    USER_CHANGEPASSWORD(TargetType.USER),
     USER_LIST(null),
 
-    PKG_EDITICON(AuthorizationTargetType.PKG);
+    PKG_EDITICON(TargetType.PKG);
 
-    private AuthorizationTargetType requiredTargetType;
+    private TargetType requiredTargetType;
 
-    Permission(AuthorizationTargetType requiredTargetType) {
+    Permission(TargetType requiredTargetType) {
         this.requiredTargetType = requiredTargetType;
     }
 
-    public AuthorizationTargetType getRequiredTargetType() {
+    public TargetType getRequiredTargetType() {
         return requiredTargetType;
     }
 
