@@ -14,7 +14,7 @@
         <li>
             <a href="" ng-click="goHome()">Home</a>
         </li>
-        <li>
+        <li show-if-permission="'REPOSITORY_LIST'">
             <a href="" ng-click="goListRepositories()">Repositories</a>
         </li>
         <li ng-show="canGoRuntimeInformation">

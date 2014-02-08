@@ -1,6 +1,6 @@
 <breadcrumbs items="breadcrumbItems"></breadcrumbs>
 
-<div class="content-container">
+<div class="content-container list-repositories">
 
     <div id="search-criteria-container">
         <div>
@@ -32,21 +32,28 @@
 
             <table class="table-general">
                 <thead>
+                <th>Active</th>
                 <th>Code</th>
                 <th>Architecture</th>
-                <th>Active</th>
                 </thead>
                 <tbody>
                 <tr ng-repeat="repository in repositories">
+                    <td><active-indicator state="repository.active"></active-indicator></td>
                     <td><repository-label repository="repository"></repository-label></td>
                     <td><code>{{repository.architectureCode}}</code></td>
-                    <td><active-indicator state="repository.active"></active-indicator></td>
                 </tr>
                 </tbody>
             </table>
 
         </div>
     </div>
+
+    <ul>
+        <li ng-show="!amShowingInactive" show-if-permission="'REPOSITORY_LIST_INACTIVE'">
+            <a href="" ng-click="goShowInactive()">Show inactive repositories</a>
+        </li>
+    </ul>
+
 </div>
 
 <div class="footer"></div>

@@ -118,7 +118,15 @@ angular.module('haikudepotserver').controller(
                             function() {
                                 $scope.amSaving = false;
                                 $log.info('have set the 32px icon for the pkg '+$scope.pkg.name);
-                                $location.path('/viewpkg/'+$scope.pkg.name+'/latest').search({});
+                                var arch = $location.search()['arch'];
+
+                                if(arch) {
+                                    $location.path('/viewpkg/'+$scope.pkg.name+'/latest/'+arch).search({});
+                                }
+                                else {
+                                    $log.info('unable to navigate back to the pkg as no \'arch\' was supplied in the search parameters --> will go home');
+                                    $location.path('/').search({});
+                                }
                             },
                             function(e) {
                                 $scope.amSaving = false;

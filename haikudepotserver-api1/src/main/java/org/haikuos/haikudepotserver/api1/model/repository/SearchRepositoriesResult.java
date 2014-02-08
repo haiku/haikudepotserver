@@ -13,10 +13,7 @@ public class SearchRepositoriesResult extends AbstractSearchResult<SearchReposit
 
         public Boolean active;
         public String code;
-        public String url;
         public String architectureCode;
-        public Long createTimestamp;
-        public Long modifyTimestamp;
 
     }
 

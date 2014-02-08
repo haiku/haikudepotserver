@@ -18,9 +18,11 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
+import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,6 +42,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     @Resource
     ServerRuntime serverRuntime;
+
+    @Resource
+    AuthorizationService authorizationService;
 
     @Resource
     PkgService pkgService;
@@ -208,7 +213,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         result.name = pkgOptional.get().getName();
         result.modifyTimestamp = pkgOptional.get().getModifyTimestamp().getTime();
-        result.canEdit = pkgOptional.get().canBeEditedBy(tryObtainAuthenticatedUser(context).orNull());
         result.hasIcon = !pkgOptional.get().getPkgIcons().isEmpty();
 
         switch(request.versionType) {
@@ -257,8 +261,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User user = obtainAuthenticatedUser(context);
 
-        if(!pkgOptional.get().canBeEditedBy(user)) {
-            logger.warn("attempt to remove the icon for package {}, but the user {} is not able to",pkgOptional.get().getName(),user.getNickname());
+        if(!authorizationService.check(context, user, pkgOptional.get(), Permission.PKG_EDITICON)) {
+            logger.warn("attempt to remove the icon for package {}, but the user {} is not able to", pkgOptional.get().getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 

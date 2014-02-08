@@ -8,4 +8,7 @@ package org.haikuos.haikudepotserver.api1.model.repository;
 import org.haikuos.haikudepotserver.api1.support.AbstractSearchRequest;
 
 public class SearchRepositoriesRequest extends AbstractSearchRequest {
+
+    public Boolean includeInactive;
+
 }

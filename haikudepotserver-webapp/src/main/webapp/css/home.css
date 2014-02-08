@@ -2,15 +2,15 @@
 This specific layout works off the premise that there is only one table on this page.
 */
 
-.table-general > tbody > tr > td:nth-child(1) {
+.home .table-general > tbody > tr > td:nth-child(1) {
     width: 24px;
 }
 
-.table-general > tbody > tr > td:nth-child(1) {
+.home .table-general > tbody > tr > td:nth-child(1) {
     width:18px;
     text-align: center;
 }
 
-.table-general > tbody > tr > td:nth-child(2) {
+.home .table-general > tbody > tr > td:nth-child(2) {
     width:50%;
 }

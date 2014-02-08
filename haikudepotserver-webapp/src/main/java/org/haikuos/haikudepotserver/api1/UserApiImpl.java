@@ -11,11 +11,13 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.*;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
+import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     @Resource
     ServerRuntime serverRuntime;
+
+    @Resource
+    AuthorizationService authorizationService;
 
     @Resource
     CaptchaService captchaService;
@@ -96,14 +101,14 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         final ObjectContext context = serverRuntime.getContext();
         User authUser = obtainAuthenticatedUser(context);
 
-        if(!authUser.getNickname().equals(getUserRequest.nickname) && !authUser.getDerivedCanManageUsers()) {
-            throw new AuthorizationFailureException();
-        }
-
         Optional<User> user = User.getByNickname(context, getUserRequest.nickname);
 
         if(!user.isPresent()) {
             throw new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY);
+        }
+
+        if(!authorizationService.check(context, authUser, user.get(), Permission.USER_VIEW)) {
+            throw new AuthorizationFailureException();
         }
 
         GetUserResult result = new GetUserResult();
@@ -177,18 +182,6 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             }
         }
 
-        // if the logged in user is not root then only the user who has authenticated can change their password.
-
-        if(!authUser.getNickname().equals(changePasswordRequest.nickname)) {
-            if(authUser.getIsRoot()) {
-                logger.info("allowing change password for root user");
-            }
-            else {
-                logger.info("the logged in user {} is not allowed to change the password of another user {}",authUser.getNickname(),changePasswordRequest.nickname);
-                throw new AuthorizationFailureException();
-            }
-        }
-
         // if the logged in user is non-root then we need to make sure that the old and new passwords
         // match-up.
 
@@ -218,6 +211,12 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         }
 
         User user = userOptional.get();
+
+        if(!authorizationService.check(context, authUser, userOptional.get(), Permission.USER_CHANGEPASSWORD)) {
+            logger.info("the logged in user {} is not allowed to change the password of another user {}",authUser.getNickname(),changePasswordRequest.nickname);
+            throw new AuthorizationFailureException();
+        }
+
         user.setPasswordHash(authenticationService.hashPassword(user, changePasswordRequest.newPasswordClear));
         context.commitChanges();
         logger.info("did change password for user {}", changePasswordRequest.nickname);

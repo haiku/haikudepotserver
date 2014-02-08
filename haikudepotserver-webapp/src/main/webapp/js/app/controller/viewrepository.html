@@ -1,0 +1,36 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <dl>
+        <dt>Code</dt>
+        <dd><code>{{repository.code}}</code>&nbsp;</dd>
+        <dt>Active</dt>
+        <dd><active-indicator state="repository.active"></active-indicator></dd>
+        <dt>URL</dt>
+        <dd><a href="{{repository.code}}">{{repository.url}}</a></dd>
+        <dt>Architecture</dt>
+        <dd>{{repository.architectureCode}}</dd>
+        <dt>Created</dt>
+        <dd>{{repository.createTimestamp|timestamp}}</dd>
+        <dt>Modified</dt>
+        <dd>{{repository.modifyTimestamp|timestamp}}</dd>
+    </dl>
+
+    <ul>
+        <li ng-show="canDeactivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goDeactivate()">Deactivate</a>
+        </li>
+        <li ng-show="canActivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goActivate()">Reactivate</a>
+        </li>
+        <li ng-show="repository.active" repository="repository" show-if-repository-permission="'REPOSITORY_IMPORT'">
+            <a href="" ng-click="goTriggerImport()">Trigger import</a>
+        </li>
+    </ul>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

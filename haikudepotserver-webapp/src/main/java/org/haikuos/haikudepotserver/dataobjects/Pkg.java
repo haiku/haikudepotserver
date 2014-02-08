@@ -77,10 +77,6 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         return Optional.absent();
     }
 
-    public boolean canBeEditedBy(User user) {
-        return null!=user && user.getIsRoot();
-    }
-
     public void setModifyTimestamp() {
         setModifyTimestamp(new java.util.Date());
     }

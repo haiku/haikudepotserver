@@ -8,13 +8,15 @@ package org.haikuos.haikudepotsever.api1;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.MiscellaneousApi;
-import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllArchitecturesRequest;
-import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllArchitecturesResult;
-import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllMessagesRequest;
-import org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllMessagesResult;
+import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
+import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
+import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -23,6 +25,90 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
 
     @Resource
     MiscellaneousApi miscellaneousApi;
+
+    @Resource
+    RuntimeInformationService runtimeInformationService;
+
+    @Resource
+    IntegrationTestSupportService integrationTestSupportService;
+
+    private void assertTargetAndPermission(
+            IntegrationTestSupportService.StandardTestData data,
+            CheckAuthorizationResult.AuthorizationTargetAndPermission targetAndPermission,
+            boolean result) {
+        Assertions.assertThat(targetAndPermission.permissionCode).isEqualTo(Permission.PKG_EDITICON.name());
+        Assertions.assertThat(targetAndPermission.targetIdentifier).isEqualTo(data.pkg1.getName());
+        Assertions.assertThat(targetAndPermission.targetType).isEqualTo(AuthorizationTargetType.PKG);
+        Assertions.assertThat(targetAndPermission.authorized).isEqualTo(result);
+    }
+
+    @Test
+    public void checkAuthorizationRequest_asUnauthenticated() {
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+
+        CheckAuthorizationRequest request = new CheckAuthorizationRequest();
+        request.targetAndPermissions = Lists.newArrayList();
+
+        request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
+                AuthorizationTargetType.PKG,
+                data.pkg1.getName(),
+                Permission.PKG_EDITICON.name()));
+
+        // ------------------------------------
+        CheckAuthorizationResult result = miscellaneousApi.checkAuthorization(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.targetAndPermissions.size()).isEqualTo(1);
+        assertTargetAndPermission(data, result.targetAndPermissions.get(0), false);
+
+    }
+
+    // TODO : when some more sophisticated cases are available; implement some better tests
+    @Test
+    public void checkAuthorizationRequest_asRoot() {
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+
+        setAuthenticatedUserToRoot();
+
+        CheckAuthorizationRequest request = new CheckAuthorizationRequest();
+        request.targetAndPermissions = Lists.newArrayList();
+
+        request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
+                AuthorizationTargetType.PKG,
+                data.pkg1.getName(),
+                Permission.PKG_EDITICON.name()));
+
+        // ------------------------------------
+        CheckAuthorizationResult result = miscellaneousApi.checkAuthorization(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.targetAndPermissions.size()).isEqualTo(1);
+        assertTargetAndPermission(data, result.targetAndPermissions.get(0), true);
+
+    }
+
+    @Test
+    public void getRuntimeInformation_asUnauthenticated() {
+
+        // ------------------------------------
+        GetRuntimeInformationResult result = miscellaneousApi.getRuntimeInformation(new GetRuntimeInformationRequest());
+        // ------------------------------------
+
+        Assertions.assertThat(result.javaVersion).isNull();
+    }
+
+    @Test
+    public void getRuntimeInformation_asRoot() {
+
+        setAuthenticatedUserToRoot();
+
+        // ------------------------------------
+        GetRuntimeInformationResult result = miscellaneousApi.getRuntimeInformation(new GetRuntimeInformationRequest());
+        // ------------------------------------
+
+        Assertions.assertThat(result.javaVersion).isEqualTo(runtimeInformationService.getJavaVersion());
+
+    }
 
     @Test
     public void testGetAllMessages() {

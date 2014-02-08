@@ -5,18 +5,18 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
+import com.google.common.base.*;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.security.AuthorizationService;
+import org.haikuos.haikudepotserver.security.model.TargetType;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
@@ -41,7 +41,41 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     ServerRuntime serverRuntime;
 
     @Resource
+    AuthorizationService authorizationService;
+
+    @Resource
     RuntimeInformationService runtimeInformationService;
+
+    @Override
+    public CheckAuthorizationResult checkAuthorization(CheckAuthorizationRequest deriveAuthorizationRequest) {
+
+        Preconditions.checkNotNull(deriveAuthorizationRequest);
+        Preconditions.checkNotNull(deriveAuthorizationRequest.targetAndPermissions);
+
+        final ObjectContext context = serverRuntime.getContext();
+        CheckAuthorizationResult result = new CheckAuthorizationResult();
+        result.targetAndPermissions = Lists.newArrayList();
+
+        for(CheckAuthorizationRequest.AuthorizationTargetAndPermission targetAndPermission : deriveAuthorizationRequest.targetAndPermissions) {
+
+            CheckAuthorizationResult.AuthorizationTargetAndPermission authorizationTargetAndPermission = new CheckAuthorizationResult.AuthorizationTargetAndPermission();
+
+            authorizationTargetAndPermission.permissionCode = targetAndPermission.permissionCode;
+            authorizationTargetAndPermission.targetIdentifier = targetAndPermission.targetIdentifier;
+            authorizationTargetAndPermission.targetType = targetAndPermission.targetType;
+
+            authorizationTargetAndPermission.authorized = authorizationService.check(
+                    context,
+                    tryObtainAuthenticatedUser(context).orNull(),
+                    null!=targetAndPermission.targetType ? TargetType.valueOf(targetAndPermission.targetType.name()) : null,
+                    targetAndPermission.targetIdentifier,
+                    Permission.valueOf(targetAndPermission.permissionCode));
+
+            result.targetAndPermissions.add(authorizationTargetAndPermission);
+        }
+
+        return result;
+    }
 
     @Override
     public RaiseExceptionResult raiseException(RaiseExceptionRequest raiseExceptionRequest) {

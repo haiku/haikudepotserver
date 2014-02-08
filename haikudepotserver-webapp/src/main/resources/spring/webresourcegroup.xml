@@ -59,6 +59,9 @@
                             <value>/js/app/directive/userlabeldirective.js</value>
                             <value>/js/app/directive/repositorylabeldirective.js</value>
                             <value>/js/app/directive/activeindicatordirective.js</value>
+                            <value>/js/app/directive/showifpkgpermissiondirective.js</value>
+                            <value>/js/app/directive/showifrepositorypermissiondirective.js</value>
+                            <value>/js/app/directive/showifpermissiondirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>
@@ -71,6 +74,7 @@
                             <value>/js/app/controller/morecontroller.js</value>
                             <value>/js/app/controller/runtimeinformationcontroller.js</value>
                             <value>/js/app/controller/listrepositoriescontroller.js</value>
+                            <value>/js/app/controller/viewrepositorycontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
@@ -99,6 +103,7 @@
                             <value>/css/haikudepotserver.css</value>
                             <value>/css/home.css</value>
                             <value>/css/createuser.css</value>
+                            <value>/css/listrepositories.css</value>
                             <value>/css/viewpkg.css</value>
                             <value>/css/banner.css</value>
                             <value>/css/breadcrumbs.css</value>

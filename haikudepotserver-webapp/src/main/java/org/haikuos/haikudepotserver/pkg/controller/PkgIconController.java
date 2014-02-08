@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,8 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
 import org.haikuos.haikudepotserver.support.NoOpOutputStream;
 import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
@@ -52,6 +54,9 @@ public class PkgIconController extends AbstractController {
 
     @Resource
     PkgService pkgService;
+
+    @Resource
+    AuthorizationService authorizationService;
 
     @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
     public void fetchHead(
@@ -175,7 +180,7 @@ public class PkgIconController extends AbstractController {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!user.isPresent() || !pkg.get().canBeEditedBy(user.get())) {
+        if(!authorizationService.check(context, user.orNull(), pkg.get(), Permission.PKG_EDITICON)) {
             logger.warn("attempt to edit the pkg icon, but there is no user present or that user is not able to edit the pkg");
             throw new PkgAuthorizationFailure();
         }

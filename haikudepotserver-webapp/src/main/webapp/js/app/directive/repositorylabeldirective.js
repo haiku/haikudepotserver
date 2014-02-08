@@ -10,14 +10,18 @@
 angular.module('haikudepotserver').directive('repositoryLabel',function() {
     return {
         restrict: 'E',
-        template:'<span>{{repository.code}}</span>',
+        template:'<a href=\"\" ng-click=\"goView()\">{{repository.code}}</a>',
         replace: true,
         scope: {
             repository: '='
         },
         controller:
-            ['$scope',
-                function($scope) {
+            ['$scope','$location',
+                function($scope,$location) {
+
+                    $scope.goView = function() {
+                        $location.path('/viewrepository/'+$scope.repository.code).search({});
+                    }
                 }
             ]
     };

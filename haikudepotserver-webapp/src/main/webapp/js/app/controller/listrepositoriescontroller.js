@@ -24,13 +24,18 @@ angular.module('haikudepotserver').controller(
             $scope.repositories = undefined;
             $scope.hasMore = undefined;
             $scope.offset = 0;
+            $scope.amShowingInactive = false;
+            var amFetchingRepositories = false;
 
             refetchRepositoriesAtFirstPage();
 
-            var amFetchingRepositories = false;
-
             $scope.shouldSpin = function() {
                 return amFetchingRepositories;
+            }
+
+            $scope.goShowInactive = function() {
+                $scope.amShowingInactive = true;
+                refetchRepositoriesAtFirstPage();
             }
 
             // ---- PAGINATION
@@ -55,6 +60,7 @@ angular.module('haikudepotserver').controller(
                         [{
                             expression : $scope.searchExpression,
                             expressionType : 'CONTAINS',
+                            includeInactive : $scope.amShowingInactive,
                             offset : $scope.offset,
                             limit : PAGESIZE
                         }]

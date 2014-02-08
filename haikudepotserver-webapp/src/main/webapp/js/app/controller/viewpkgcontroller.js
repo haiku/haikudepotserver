@@ -22,11 +22,11 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.canRemoveIcon = function() {
-                return $scope.pkg && $scope.pkg.canEdit && $scope.pkg.hasIcon;
+                return $scope.pkg && $scope.pkg.hasIcon;
             }
 
             $scope.canEditIcon = function() {
-                return $scope.pkg && $scope.pkg.canEdit;
+                return $scope.pkg;
             }
 
             $scope.homePageLink = function() {
@@ -75,7 +75,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goEditIcon = function() {
-                $location.path("/editpkgicon/"+$scope.pkg.name).search({});
+                $location.path("/editpkgicon/"+$scope.pkg.name).search({'arch':$routeParams.architectureCode});
             }
 
             $scope.goRemoveIcon = function() {

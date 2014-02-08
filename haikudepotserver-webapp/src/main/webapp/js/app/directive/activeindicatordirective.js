@@ -11,7 +11,7 @@
 angular.module('haikudepotserver').directive('activeIndicator',function() {
     return {
         restrict: 'E',
-        template:'<div ng-class="classes">&nbsp;</div>',
+        templateUrl:'/js/app/directive/activeindicator.html',
         replace: true,
         scope: {
             state: '='
@@ -25,7 +25,7 @@ angular.module('haikudepotserver').directive('activeIndicator',function() {
                     $scope.$watch('state',function(newValue, oldValue) {
                         $scope.classes = [
                             'active-indicator',
-                            newValue ? 'active-indicator-true' : 'inactive-indicator-false'
+                            newValue ? 'active-indicator-true' : 'active-indicator-false'
                         ];
                     });
 

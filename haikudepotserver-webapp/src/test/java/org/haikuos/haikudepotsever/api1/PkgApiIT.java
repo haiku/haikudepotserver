@@ -69,7 +69,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(result.hasIcon).isFalse();
         Assertions.assertThat(result.name).isEqualTo("pkg1");
-        Assertions.assertThat(result.canEdit).isFalse();
         Assertions.assertThat(result.versions.size()).isEqualTo(1);
         Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
         Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");

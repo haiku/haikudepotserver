@@ -28,13 +28,6 @@ public class GetPkgResult {
 
     public Boolean hasIcon;
 
-    /**
-     * <p>This field will be true if the user who is presently authenticated would be able to
-     * edit the package.</p>
-     */
-
-    public Boolean canEdit;
-
     public List<Version> versions;
 
     public static class Version {

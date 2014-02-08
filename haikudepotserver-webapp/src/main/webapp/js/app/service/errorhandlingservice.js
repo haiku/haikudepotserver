@@ -13,21 +13,26 @@ angular.module('haikudepotserver').factory('errorHandling',
 
             var ErrorHandlingService = {
 
+                logJsonRpcError : function(jsonRpcErrorEnvelope, message) {
+                    var prefix = message ? message + ' - json-rpc error; ' : 'json-rpc error; ';
+
+                    if(null==jsonRpcErrorEnvelope) {
+                        $log.error(prefix+'cause is unknown as no error envelope was available');
+                    }
+                    else {
+                        var code = jsonRpcErrorEnvelope.code ? jsonRpcErrorEnvelope.code : '?';
+                        var message = jsonRpcErrorEnvelope.message ? jsonRpcErrorEnvelope.message : '?';
+                        $log.error(prefix+'code:'+code+", msg:"+message);
+                    }
+                },
+
                 /**
                  * <p>When a JSON-RPC failure occurs, this method can be invoked to provide uniform logging and
                  * handling.</p>
                  */
 
                 handleJsonRpcError : function(jsonRpcErrorEnvelope) {
-                    if(null==jsonRpcErrorEnvelope) {
-                        $log.error('json-rpc error; cause is unknown as no error envelope was available');
-                    }
-                    else {
-                        var code = jsonRpcErrorEnvelope.code ? jsonRpcErrorEnvelope.code : '?';
-                        var message = jsonRpcErrorEnvelope.message ? jsonRpcErrorEnvelope.message : '?';
-                        $log.error('json-rpc error; code:'+code+", msg:"+message);
-                    }
-
+                    ErrorHandlingService.logJsonRpcError(jsonRpcErrorEnvelope);
                     $location.path("/error").search({});
                 },
 
