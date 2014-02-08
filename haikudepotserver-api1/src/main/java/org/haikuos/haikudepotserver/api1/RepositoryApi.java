@@ -37,6 +37,6 @@ public interface RepositoryApi {
      * <p>This method will trigger the import process for a repository.</p>
      */
 
-    TriggerImportRepositoryResult triggerImportRepositoryResult(TriggerImportRepositoryRequest triggerImportRepositoryRequest) throws ObjectNotFoundException;
+    TriggerImportRepositoryResult triggerImportRepository(TriggerImportRepositoryRequest triggerImportRepositoryRequest) throws ObjectNotFoundException;
 
 }

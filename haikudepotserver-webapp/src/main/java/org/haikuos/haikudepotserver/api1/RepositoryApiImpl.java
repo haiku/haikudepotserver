@@ -17,7 +17,6 @@ import org.haikuos.haikudepotserver.api1.model.repository.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
-import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.repository.RepositoryImportService;
@@ -52,7 +51,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
     // note; no integration test for this one.
     @Override
-    public TriggerImportRepositoryResult triggerImportRepositoryResult(
+    public TriggerImportRepositoryResult triggerImportRepository(
             TriggerImportRepositoryRequest triggerImportRepositoryRequest)
             throws ObjectNotFoundException {
 

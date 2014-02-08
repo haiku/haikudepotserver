@@ -6,14 +6,15 @@
 angular.module('haikudepotserver').controller(
     'ViewRepositoryController',
     [
-        '$scope','$log','$location','$routeParams',
+        '$scope','$log','$location','$routeParams','$timeout',
         'jsonRpc','constants','userState','errorHandling','breadcrumbs',
         function(
-            $scope,$log,$location,$routeParams,
+            $scope,$log,$location,$routeParams,$timeout,
             jsonRpc,constants,userState,errorHandling,breadcrumbs) {
 
             $scope.breadcrumbItems = undefined;
             $scope.repository = undefined;
+            $scope.didTriggerImportRepository = false;
             var amUpdatingActive = false;
 
             refetchRepository();
@@ -68,7 +69,23 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goTriggerImport = function() {
+                jsonRpc.call(
+                        constants.ENDPOINT_API_V1_REPOSITORY,
+                        "triggerImportRepository",
+                        [{ code: $routeParams.code }]
+                    ).then(
+                    function(result) {
+                        $log.info('triggered import for repository; '+$scope.repository.code);
+                        $scope.didTriggerImportRepository = true;
+                        $timeout(function() {
+                            $scope.didTriggerImportRepository = false;
+                        }, 3000)
 
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             }
 
             function refreshBreadcrumbItems() {
