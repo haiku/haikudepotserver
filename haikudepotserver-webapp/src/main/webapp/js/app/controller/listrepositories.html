@@ -24,10 +24,8 @@
         <div ng-show="repositories && repositories.length" class="table-general-container">
 
             <div class="table-general-pagination-container">
-                <a href="" ng-click="goPreviousPage()" ng-show="0!=offset">&laquo;</a>
-                <span ng-show="0==offset">&laquo;</span>
-                <a href="" ng-click="goNextPage()" ng-show="hasMore">&raquo;</a>
-                <span ng-show="!hasMore">&raquo;</span>
+                <pagination-arrow active="0!=offset" page-click="goPreviousPage()" direction="left"></pagination-arrow>
+                <pagination-arrow active="hasMore" page-click="goNextPage()" direction="right"></pagination-arrow>
             </div>
 
             <table class="table-general">

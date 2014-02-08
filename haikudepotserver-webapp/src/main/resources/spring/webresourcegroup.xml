@@ -62,6 +62,7 @@
                             <value>/js/app/directive/showifpkgpermissiondirective.js</value>
                             <value>/js/app/directive/showifrepositorypermissiondirective.js</value>
                             <value>/js/app/directive/showifpermissiondirective.js</value>
+                            <value>/js/app/directive/paginationarrowdirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>

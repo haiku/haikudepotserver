@@ -232,8 +232,8 @@ table.table-general tbody tr td.selectioncell {
 }
 
 .table-general-pagination-container {
-    padding-top:2px;
-    padding-bottom:2px;
+    padding-top:3px;
+    padding-bottom:0px;
     padding-left:4px;
     padding-right:4px;
     position: absolute; /* assumes that this is inside a 'table-general-container' */
