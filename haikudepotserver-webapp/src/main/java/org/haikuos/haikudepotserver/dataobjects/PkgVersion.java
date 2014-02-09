@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,7 +15,7 @@ import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
-import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
@@ -78,31 +78,31 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
         if(null != getMajor()) {
             if(!MAJOR_PATTERN.matcher(getMajor()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,MAJOR_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,MAJOR_PROPERTY,"malformed"));
             }
         }
 
         if(null != getMinor()) {
             if(!MINOR_PATTERN.matcher(getMinor()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,MINOR_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,MINOR_PROPERTY,"malformed"));
             }
         }
 
         if(null != getMicro()) {
             if(!MICRO_PATTERN.matcher(getMicro()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,MICRO_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,MICRO_PROPERTY,"malformed"));
             }
         }
 
         if(null != getPreRelease()) {
             if(!PRE_RELEASE_PATTERN.matcher(getPreRelease()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,PRE_RELEASE_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,PRE_RELEASE_PROPERTY,"malformed"));
             }
         }
 
         if(null != getRevision()) {
             if(getRevision().intValue() <= 0) {
-                validationResult.addFailure(new SimpleValidationFailure(this,REVISION_PROPERTY + ".lessThanEqualZero"));
+                validationResult.addFailure(new BeanValidationFailure(this,REVISION_PROPERTY,"lessThanEqualZero"));
             }
         }
 

@@ -8,6 +8,28 @@ angular.module('haikudepotserver').config(
         '$routeProvider',
         function($routeProvider) {
             $routeProvider
+                .when('/addrepository',{
+                    controller:'AddEditRepositoryController',
+                    templateUrl:'/js/app/controller/addeditrepository.html',
+                    resolve: {
+                        'architectures':[
+                            'referenceData', function(referenceData) {
+                                return referenceData.architectures();
+                            }
+                        ]
+                    }
+                })
+                .when('/editrepository/:code',{
+                    controller:'AddEditRepositoryController',
+                    templateUrl:'/js/app/controller/addeditrepository.html',
+                    resolve: {
+                        'architectures':[
+                            'referenceData', function(referenceData) {
+                                return referenceData.architectures();
+                            }
+                        ]
+                    }
+                })
                 .when('/viewrepository/:code',{controller:'ViewRepositoryController', templateUrl:'/js/app/controller/viewrepository.html'})
                 .when('/listrepositories',{controller:'ListRepositoriesController', templateUrl:'/js/app/controller/listrepositories.html'})
                 .when('/runtimeinformation',{controller:'RuntimeInformationController', templateUrl:'/js/app/controller/runtimeinformation.html'})

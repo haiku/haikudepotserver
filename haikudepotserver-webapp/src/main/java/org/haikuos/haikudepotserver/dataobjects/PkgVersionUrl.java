@@ -1,11 +1,11 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersionUrl;
 
@@ -23,7 +23,7 @@ public class PkgVersionUrl extends _PkgVersionUrl {
                     new URL(getUrl());
             }
             catch(MalformedURLException mue) {
-                validationResult.addFailure(new SimpleValidationFailure(this,URL_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,URL_PROPERTY,"malformed"));
             }
         }
 

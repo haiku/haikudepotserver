@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,7 +11,7 @@ import com.google.common.hash.Hashing;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._User;
 
@@ -65,19 +65,19 @@ public class User extends _User {
 
         if(null != getNickname()) {
             if(!NICKNAME_PATTERN.matcher(getNickname()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,NICKNAME_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,NICKNAME_PROPERTY,"malformed"));
             }
         }
 
         if(null != getPasswordHash()) {
             if(!PASSWORDHASH_PATTERN.matcher(getPasswordHash()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,PASSWORD_HASH_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,PASSWORD_HASH_PROPERTY,"malformed"));
             }
         }
 
         if(null != getPasswordSalt()) {
             if(!PASSWORDSALT_PATTERN.matcher(getPasswordSalt()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,PASSWORD_HASH_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,PASSWORD_HASH_PROPERTY,"malformed"));
             }
         }
 

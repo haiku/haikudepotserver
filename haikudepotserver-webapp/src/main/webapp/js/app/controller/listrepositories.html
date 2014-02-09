@@ -50,6 +50,9 @@
         <li ng-show="!amShowingInactive" show-if-permission="'REPOSITORY_LIST_INACTIVE'">
             <a href="" ng-click="goShowInactive()">Show inactive repositories</a>
         </li>
+        <li show-if-permission="'REPOSITORY_ADD'">
+            <a href="" ng-click="goAdd()">Add repository</a>
+        </li>
     </ul>
 
 </div>

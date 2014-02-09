@@ -1,12 +1,12 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.dataobjects.support;
 
 import org.apache.cayenne.CayenneDataObject;
-import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ public abstract class AbstractDataObject extends CayenneDataObject {
 
             if(null != coded.getCode()) {
                 if(!CODE_PATTERN.matcher(coded.getCode()).matches()) {
-                    validationResult.addFailure(new SimpleValidationFailure(this,"code.malformed"));
+                    validationResult.addFailure(new BeanValidationFailure(this,"code","malformed"));
                 }
             }
         }

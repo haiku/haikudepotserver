@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -104,9 +104,10 @@ public class ErrorResolverImpl implements ErrorResolver {
                                         public Map<String,String> apply(org.apache.cayenne.validation.ValidationFailure input) {
                                             if(BeanValidationFailure.class.isAssignableFrom(input.getClass())) {
                                                 BeanValidationFailure beanValidationFailure = (BeanValidationFailure) input;
+                                                Object err = beanValidationFailure.getError();
                                                 return ImmutableMap.of(
                                                         "property", beanValidationFailure.getProperty(),
-                                                        "message", beanValidationFailure.toString());
+                                                        "message", null!=err ? err.toString() : "");
                                             }
 
                                             if(SimpleValidationFailure.class.isAssignableFrom(input.getClass())) {

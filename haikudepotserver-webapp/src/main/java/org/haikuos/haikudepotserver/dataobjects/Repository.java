@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,7 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._Repository;
 import org.haikuos.haikudepotserver.dataobjects.support.Coded;
@@ -40,7 +40,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
 
         if(null != getCode()) {
             if(!CODE_PATTERN.matcher(getCode()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,CODE_PROPERTY + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,CODE_PROPERTY,"malformed"));
             }
         }
 

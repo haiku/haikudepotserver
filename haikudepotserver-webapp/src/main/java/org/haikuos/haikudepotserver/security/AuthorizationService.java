@@ -135,7 +135,7 @@ public class AuthorizationService {
             case REPOSITORY_LIST_INACTIVE:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
-            case REPOSITORY_CREATE:
+            case REPOSITORY_ADD:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case USER_VIEW:

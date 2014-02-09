@@ -11,7 +11,7 @@ import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
@@ -38,7 +38,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
         if(null != getName()) {
             if(!NAME_PATTERN.matcher(getName()).matches()) {
-                validationResult.addFailure(new SimpleValidationFailure(this,NAME_PATTERN + ".malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,NAME_PROPERTY,"malformed"));
             }
         }
 

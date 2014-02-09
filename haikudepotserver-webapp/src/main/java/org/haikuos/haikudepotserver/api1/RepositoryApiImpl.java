@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.naming.ldap.PagedResultsControl;
 import java.util.List;
 
 @Component
@@ -246,11 +245,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.getContext();
 
-        authorizationService.check(
+        if(!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orNull(),
                 null,
-                Permission.REPOSITORY_CREATE);
+                Permission.REPOSITORY_ADD)) {
+            throw new AuthorizationFailureException();
+        }
 
         Optional<Architecture> architectureOptional = Architecture.getByCode(context, createRepositoryRequest.architectureCode);
 

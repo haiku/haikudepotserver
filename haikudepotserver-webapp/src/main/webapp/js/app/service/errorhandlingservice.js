@@ -43,6 +43,33 @@ angular.module('haikudepotserver').factory('errorHandling',
                 handleUnknownLocation : function() {
                     $log.error('unknown location; ' + $location.path());
                     $location.path("/error").search({});
+                },
+
+                /**
+                 * <p>Splay validation failures into the form.  The validation failures are objects that are
+                 * returned as part of the error envelope in RPC invocations.  This method will return true
+                 * if all of the validation errors were able to be assigned to models in the form.</p>
+                 */
+
+                handleValidationFailures : function(validationFailures, form) {
+                    var result = true;
+
+                    if(validationFailures) {
+                        _.each(validationFailures, function(vf) {
+                            if(vf.property && vf.property.length) {
+                                var model = form[vf.property];
+
+                                if(model) {
+                                    model.$setValidity(vf.message, false);
+                                }
+                                else {
+                                    result = false;
+                                }
+                            }
+                        })
+                    }
+
+                    return result;
                 }
 
             };

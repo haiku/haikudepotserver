@@ -32,6 +32,9 @@
         <li ng-show="repository.active" repository="repository" show-if-repository-permission="'REPOSITORY_IMPORT'">
             <a href="" ng-click="goTriggerImport()">Trigger import</a>
         </li>
+        <li repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goEdit()">Edit</a>
+        </li>
     </ul>
 
 </div>

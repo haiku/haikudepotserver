@@ -106,6 +106,9 @@ angular.module('haikudepotserver').controller(
                 return $scope.hasMore ? [] : ['disabled'];
             }
 
+            $scope.goAdd = function() {
+                $location.path('/addrepository').search({});
+            }
 
         }
     ]

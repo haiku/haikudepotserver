@@ -13,6 +13,20 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
             var BreadcrumbsService = {
 
+                createEditRepository : function(repository) {
+                    return {
+                        title : 'Edit ' + repository.code,
+                        path : '/editrepository/' + repository.code
+                    }
+                },
+
+                createAddRepository : function(repository) {
+                    return {
+                        title : 'Add Repository',
+                        path : '/addrepository'
+                    }
+                },
+
                 createViewRepository : function(repository) {
                   return {
                       title : repository.code,
