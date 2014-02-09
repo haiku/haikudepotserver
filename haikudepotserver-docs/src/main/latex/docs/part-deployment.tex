@@ -44,27 +44,7 @@ java \
 \subsection{Setting Up Repositories}
 \label{settinguprepositories}
 
-{\it This section is temporary until a user-interface exists for this.}
-
-The application server will pull ``.hpkr'' files from remote repositories that contain information about the packages at that repository.  At the time of writing, it is necessary to configure the repositories by hand.  A repository can be added using a SQL shell.
-
-In this ficticious example, an ``.hpkr'' file has been placed in the temporary directory.  The following SQL command can be executed to add a repository that pulls the ``.hpkr'' from the temporary directory.  In reality, the real repositories will have an internet-accessible URL.
-
-\begin{verbatim}
-INSERT INTO
-  haikudepot.repository (
-    id, active, create_timestamp, modify_timestamp,
-    architecture_id, code, url)
-  VALUES (
-    nextval('haikudepot.repository_seq'), true, now(), now(),
-    (SELECT id FROM haikudepot.architecture WHERE code='x86'),
-    'test',
-    'file:///tmp/repo.hpkr');
-\end{verbatim}
-
-In order to prompt the system to import this ".hpkr" file and populate some repository data into the system, you can use the curl tool as follows;
-
-\framebox{\tt curl "http://localhost:8080/importrepositorydata?code=test"}
+The application server will pull ``.hpkr'' files from remote repositories that contain information about the packages at that repository.  Authenticated as root, it is possible to use the ``more'' link at the top of the home page to get to the repositories, to add a repository and to trigger the import of a repository.  There also exists an HTTP GET invocation (see \ref{api-importrepositorydata}) that can be made to trigger the import of a repository from another system.
 
 \subsection{Accessing the Web Environment}
 

@@ -18,6 +18,8 @@ import org.haikuos.haikudepotserver.dataobjects.auto._Repository;
 import org.haikuos.haikudepotserver.dataobjects.support.Coded;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 public class Repository extends _Repository implements CreateAndModifyTimestamped, Coded {
@@ -41,6 +43,15 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
         if(null != getCode()) {
             if(!CODE_PATTERN.matcher(getCode()).matches()) {
                 validationResult.addFailure(new BeanValidationFailure(this,CODE_PROPERTY,"malformed"));
+            }
+        }
+
+        if(null != getUrl()) {
+            try {
+                new URL(getUrl());
+            }
+            catch(MalformedURLException mue) {
+                validationResult.addFailure(new BeanValidationFailure(this,URL_PROPERTY,"malformed"));
             }
         }
 

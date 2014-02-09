@@ -36,9 +36,10 @@
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('url')">
             <input
                     id="url"
-                    type="url"
+                    type="text"
                     size="64"
                     name="url"
+                    ng-change="urlChanged()"
                     ng-required="true"
                     ng-model="workingRepository.url"></input>
             <error-messages key-prefix="addEditRepository.url" error="addEditRepositoryForm.url.$error"></error-messages>

@@ -34,6 +34,10 @@ angular.module('haikudepotserver').controller(
                 $scope.addEditRepositoryForm.code.$setValidity('unique',true);
             }
 
+            $scope.urlChanged = function() {
+                $scope.addEditRepositoryForm.url.$setValidity('malformed',true);
+            }
+
             refreshRepository();
 
             function refreshBreadcrumbItems() {

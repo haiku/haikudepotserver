@@ -129,6 +129,7 @@ This API will provide the web application's HTML user interface.
 \end{itemize}
 
 \subsubsection{Import Repository Data}
+\label{api-importrepositorydata}
 
 This API provides a mechanism by which an external client is able to trigger the application to start importing package-related data from a remote repository.  This API is provided as REST because the client is likely to be scripted using a scripting language and REST is the most appropriate protocol to employ in this situation.  This invocation will trigger the import process, but the import process will execute in a background thread in the application server and will not block the client.
 
