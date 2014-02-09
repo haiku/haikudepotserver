@@ -12,6 +12,7 @@ public enum Permission {
     REPOSITORY_IMPORT(TargetType.REPOSITORY),
     REPOSITORY_LIST(null),
     REPOSITORY_LIST_INACTIVE(null),
+    REPOSITORY_CREATE(null),
 
     USER_VIEW(TargetType.USER),
     USER_EDIT(TargetType.USER),

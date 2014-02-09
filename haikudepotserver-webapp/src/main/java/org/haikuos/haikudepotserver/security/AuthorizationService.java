@@ -112,6 +112,13 @@ public class AuthorizationService {
         Preconditions.checkNotNull(objectContext);
         Preconditions.checkState(deriveTargetType(target) == permission.getRequiredTargetType());
 
+        // if the authenticated user is not active then there should not be a situation arising where
+        // an authorization check is being made.
+
+        if(null!=authenticatedUser && !authenticatedUser.getActive()) {
+            throw new IllegalStateException("the authenticated user '"+authenticatedUser.getNickname()+"' is not active and so authorization queries cannot be resolved for them");
+        }
+
         switch(permission) {
 
             case REPOSITORY_EDIT:
@@ -126,6 +133,9 @@ public class AuthorizationService {
                 return true;
 
             case REPOSITORY_LIST_INACTIVE:
+                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+
+            case REPOSITORY_CREATE:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case USER_VIEW:

@@ -39,4 +39,12 @@ public interface RepositoryApi {
 
     TriggerImportRepositoryResult triggerImportRepository(TriggerImportRepositoryRequest triggerImportRepositoryRequest) throws ObjectNotFoundException;
 
+    /**
+     * <p>This method will create a repository.  This method will throw
+     * {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException} if the architecture identified by a
+     * supplied code is not able to be found as an architecture.</p>
+     */
+
+    CreateRepositoryResult createRepository(CreateRepositoryRequest createRepositoryRequest) throws ObjectNotFoundException;
+
 }

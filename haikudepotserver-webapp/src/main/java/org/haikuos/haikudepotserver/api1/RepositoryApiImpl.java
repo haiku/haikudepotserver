@@ -16,6 +16,9 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.repository.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haikuos.haikudepotserver.api1.support.ValidationException;
+import org.haikuos.haikudepotserver.api1.support.ValidationFailure;
+import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -214,6 +217,11 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
                     break;
 
+                case URL:
+                    repositoryOptional.get().setUrl(updateRepositoryRequest.url);
+                    logger.info("did set the url on repository {} to {}", updateRepositoryRequest.code,updateRepositoryRequest.url);
+                    break;
+
                 default:
                     throw new IllegalStateException("unhandled filter for updating a repository");
             }
@@ -228,5 +236,55 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         return new UpdateRepositoryResult();
     }
+
+    @Override
+    public CreateRepositoryResult createRepository(
+            CreateRepositoryRequest createRepositoryRequest)
+            throws ObjectNotFoundException {
+
+        Preconditions.checkNotNull(createRepositoryRequest);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orNull(),
+                null,
+                Permission.REPOSITORY_CREATE);
+
+        Optional<Architecture> architectureOptional = Architecture.getByCode(context, createRepositoryRequest.architectureCode);
+
+        if(!architectureOptional.isPresent()) {
+            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), createRepositoryRequest.architectureCode);
+        }
+
+        // the code must be supplied.
+
+        if(Strings.isNullOrEmpty(createRepositoryRequest.code)) {
+            throw new ValidationException(new ValidationFailure(Repository.CODE_PROPERTY, "required"));
+        }
+
+        // check to see if there is an existing repository with the same code; non-unique.
+
+        {
+            Optional<Repository> repositoryOptional = Repository.getByCode(context, createRepositoryRequest.code);
+
+            if(repositoryOptional.isPresent()) {
+                throw new ValidationException(new ValidationFailure(Repository.CODE_PROPERTY, "unique"));
+            }
+        }
+
+        Repository repository = context.newObject(Repository.class);
+
+        repository.setCode(createRepositoryRequest.code);
+        repository.setActive(Boolean.TRUE);
+        repository.setUrl(createRepositoryRequest.url);
+        repository.setArchitecture(architectureOptional.get());
+
+        context.commitChanges();
+
+        return new CreateRepositoryResult();
+    }
+
 
 }

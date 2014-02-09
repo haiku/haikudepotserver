@@ -5,21 +5,10 @@
 
 package org.haikuos.haikudepotserver.api1.model.repository;
 
-import java.util.List;
-
-public class UpdateRepositoryRequest {
-
-    public enum Filter {
-        ACTIVE,
-        URL
-    };
+public class CreateRepositoryRequest {
 
     public String code;
-
-    public Boolean active;
-
+    public String architectureCode;
     public String url;
-
-    public List<Filter> filter;
 
 }
