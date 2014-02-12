@@ -71,7 +71,7 @@
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_screenshot_image" schema="haikudepot">
-		<db-attribute name="data" type="BLOB" isMandatory="true"/>
+		<db-attribute name="data" type="VARBINARY" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="media_type_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="pkg_screenshot_id" type="BIGINT" isMandatory="true"/>

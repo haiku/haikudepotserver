@@ -20,23 +20,24 @@ import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
+import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.ImageHelper;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
-import org.haikuos.pkg.model.*;
+import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -46,6 +47,8 @@ import java.util.List;
 public class PkgService {
 
     protected static Logger logger = LoggerFactory.getLogger(PkgService.class);
+
+    protected static int SCREENSHOT_SIDE_LIMIT = 1500;
 
     private ImageHelper imageHelper = new ImageHelper();
 
@@ -277,6 +280,106 @@ public class PkgService {
         pkg.setModifyTimestamp(new java.util.Date());
 
         logger.info("the icon {}px for package {} has been updated", size.width, pkg.getName());
+    }
+
+    // ------------------------------
+    // SCREENSHOT
+
+    /**
+     * <p>This method will write the package's screenshot to the output stream.  It will constrain the output to the
+     * size given by scaling the image.  The output is a PNG image.</p>
+     */
+
+    public void writePkgScreenshotImage(
+            OutputStream output,
+            ObjectContext context,
+            PkgScreenshot screenshot,
+            int targetWidth,
+            int targetHeight) throws IOException {
+
+        Preconditions.checkNotNull(output);
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(screenshot);
+        Preconditions.checkState(targetHeight > 0);
+        Preconditions.checkState(targetWidth > 0);
+
+        Optional<PkgScreenshotImage> pkgScreenshotImageOptional = screenshot.getPkgScreenshotImage();
+
+        if(!pkgScreenshotImageOptional.isPresent()) {
+            throw new IllegalStateException("the screenshot "+screenshot.getCode()+" is missing a screenshot image");
+        }
+
+        if(!pkgScreenshotImageOptional.get().getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.toString())) {
+            throw new IllegalStateException("the screenshot system only supports png images at the present time");
+        }
+
+        byte[] data = pkgScreenshotImageOptional.get().getData();
+        ImageHelper.Size size = imageHelper.derivePngSize(data);
+
+        // check to see if the screenshot needs to be resized to fit.
+        if(size.width > targetWidth || size.height > targetHeight) {
+            ByteArrayInputStream imageInputStream = new ByteArrayInputStream(data);
+            BufferedImage bufferedImage = ImageIO.read(imageInputStream);
+            BufferedImage scaledBufferedImage = Scalr.resize(bufferedImage, targetWidth, targetHeight);
+            ImageIO.write(scaledBufferedImage, "PNG", output);
+        }
+        else {
+            output.write(data);
+        }
+    }
+
+    /**
+     * <p>This method will write the PNG data supplied in the input to the package as a screenshot.  Note that the icon
+     * must comply with necessary characteristics.  If it is not compliant then an images of
+     * {@link org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException} will be thrown.</p>
+     */
+
+    public PkgScreenshot storePkgScreenshotImage(
+            InputStream input,
+            ObjectContext context,
+            Pkg pkg) throws IOException, BadPkgScreenshotException {
+
+        Preconditions.checkNotNull(input);
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+
+        byte[] pngData = ByteStreams.toByteArray(input);
+        ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
+
+        // check that the file roughly looks like PNG and the size is something
+        // reasonable.
+
+        if(size.height > SCREENSHOT_SIDE_LIMIT || size.width > SCREENSHOT_SIDE_LIMIT) {
+            logger.warn("attempt to store a screenshot image that is too large; "+size.toString());
+        }
+
+        MediaType png = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
+
+        // now we need to know the largest ordering so we can add this one at the end of the orderings
+        // such that it is the next one in the list.
+
+        int ordering = 1;
+        Optional<Integer> highestExistingScreenshotOrdering = pkg.getHighestPkgScreenshotOrdering();
+
+        if(highestExistingScreenshotOrdering.isPresent()) {
+            ordering = highestExistingScreenshotOrdering.get().intValue() + 1;
+        }
+
+        PkgScreenshot screenshot = context.newObject(PkgScreenshot.class);
+        screenshot.setCode(UUID.randomUUID().toString());
+        screenshot.setOrdering(new Integer(ordering));
+        pkg.addToManyTarget(Pkg.PKG_SCREENSHOTS_PROPERTY, screenshot, true);
+
+        PkgScreenshotImage screenshotImage = context.newObject(PkgScreenshotImage.class);
+        screenshotImage.setMediaType(png);
+        screenshotImage.setData(pngData);
+        screenshot.addToManyTarget(PkgScreenshot.PKG_SCREENSHOT_IMAGES_PROPERTY, screenshotImage, true);
+
+        pkg.setModifyTimestamp(new java.util.Date());
+
+        logger.info("a screenshot #{} has been added to package {} ({})", ordering, pkg.getName(), screenshot.getCode());
+
+        return screenshot;
     }
 
     // ------------------------------

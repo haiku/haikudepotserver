@@ -7,7 +7,9 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
@@ -16,6 +18,8 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -89,6 +93,69 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     public Date getModifyTimestampSecondAccuracy() {
         return new java.util.Date((getModifyTimestamp().getTime() / 1000) * 1000);
+    }
+
+    public List<PkgScreenshot> getSortedPkgScreenshots() {
+        List<PkgScreenshot> screenshots = Lists.newArrayList(getPkgScreenshots());
+        Collections.sort(screenshots);
+        return screenshots;
+    }
+
+    public Optional<Integer> getHighestPkgScreenshotOrdering() {
+        List<PkgScreenshot> screenshots = getSortedPkgScreenshots();
+
+        if(screenshots.isEmpty()) {
+            return Optional.absent();
+        }
+
+        return Optional.of(screenshots.get(screenshots.size()-1).getOrdering());
+    }
+
+    /**
+     * <p>This method will re-order the screenshots according to the set of codes present in the supplied list.
+     * If the same code appears twice in the list, an {@link java.lang.IllegalArgumentException} will be
+     * thrown.  Any screenshots that are not mentioned in the list will be indeterminately ordered at the end
+     * of the list.</p>
+     */
+
+    public void reorderPkgScreenshots(final List<String> codes) {
+        Preconditions.checkNotNull(codes);
+
+        // first check that there are no duplicates.
+        if(ImmutableSet.copyOf(codes).size() != codes.size()) {
+            throw new IllegalArgumentException("the codes supplied contain duplicates which would interfere with the ordering");
+        }
+
+        List<PkgScreenshot> screenshots = Lists.newArrayList(getPkgScreenshots());
+        Collections.sort(
+                screenshots,
+                new Comparator<PkgScreenshot>() {
+                    @Override
+                    public int compare(PkgScreenshot o1, PkgScreenshot o2) {
+                        int o1i = codes.indexOf(o1.getCode());
+                        int o2i = codes.indexOf(o2.getCode());
+
+                        if(-1==o1i && -1==o2i) {
+                            return o1.getCode().compareTo(o2.getCode());
+                        }
+
+                        if(-1==o1i) {
+                            o1i = Integer.MAX_VALUE;
+                        }
+
+                        if(-1==o2i) {
+                            o2i = Integer.MAX_VALUE;
+                        }
+
+                        return Integer.compare(o1i,o2i);
+                    }
+                }
+        );
+
+        for(int i=0;i<screenshots.size();i++) {
+            PkgScreenshot pkgScreenshot = screenshots.get(i);
+            pkgScreenshot.setOrdering(i+1);
+        }
     }
 
 }

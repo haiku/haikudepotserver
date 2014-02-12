@@ -19,7 +19,8 @@ public enum Permission {
     USER_CHANGEPASSWORD(TargetType.USER),
     USER_LIST(null),
 
-    PKG_EDITICON(TargetType.PKG);
+    PKG_EDITICON(TargetType.PKG),
+    PKG_EDITSCREENSHOT(TargetType.PKG);
 
     private TargetType requiredTargetType;
 

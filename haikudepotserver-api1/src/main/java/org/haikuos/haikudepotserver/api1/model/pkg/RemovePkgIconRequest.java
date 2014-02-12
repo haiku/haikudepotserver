@@ -5,7 +5,7 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class RemoveIconRequest {
+public class RemovePkgIconRequest {
 
     /**
      * <p>This is the name of the package that you wish to reset the icon for.</p>
@@ -13,11 +13,11 @@ public class RemoveIconRequest {
 
     public String name;
 
-    public RemoveIconRequest() {
+    public RemovePkgIconRequest() {
     }
 
 
-    public RemoveIconRequest(String name) {
+    public RemovePkgIconRequest(String name) {
 
         if(null==name || 0==name.length()) {
             throw new IllegalArgumentException("the name must be supplied when removing the icon for a package");

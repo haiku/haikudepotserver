@@ -112,6 +112,12 @@
             <artifactId>tomcat-jdbc</artifactId>
         </dependency>
 
+        <!-- MEDIA -->
+        <dependency>
+            <groupId>org.imgscalr</groupId>
+            <artifactId>imgscalr-lib</artifactId>
+        </dependency>
+
         <!-- SPRING -->
         <dependency>
             <groupId>org.springframework</groupId>

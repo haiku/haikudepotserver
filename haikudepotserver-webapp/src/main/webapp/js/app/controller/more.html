@@ -14,6 +14,9 @@
         <li>
             <a href="" ng-click="goHome()">Home</a>
         </li>
+        <li ng-show="canViewUser()">
+            <a href="" ng-click="goViewUser()">View currently authenticated user</a>
+        </li>
         <li show-if-permission="'REPOSITORY_LIST'">
             <a href="" ng-click="goListRepositories()">Repositories</a>
         </li>

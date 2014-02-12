@@ -247,7 +247,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public RemoveIconResult removeIcon(RemoveIconRequest request) throws ObjectNotFoundException {
+    public RemovePkgIconResult removePkgIcon(RemovePkgIconRequest request) throws ObjectNotFoundException {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.name));
@@ -278,7 +278,96 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         logger.info("did remove icons for pkg {}",pkgOptional.get().getName());
 
-        return new RemoveIconResult();
+        return new RemovePkgIconResult();
     }
 
+    @Override
+    public GetPkgScreenshotsResult getPkgScreenshots(GetPkgScreenshotsRequest getPkgScreenshotsRequest) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(getPkgScreenshotsRequest);
+        Preconditions.checkNotNull(getPkgScreenshotsRequest.pkgName);
+
+        final ObjectContext context = serverRuntime.getContext();
+        Optional<Pkg> pkgOptional = Pkg.getByName(context, getPkgScreenshotsRequest.pkgName);
+
+        if(!pkgOptional.isPresent()) {
+            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), getPkgScreenshotsRequest.pkgName);
+        }
+
+        GetPkgScreenshotsResult result = new GetPkgScreenshotsResult();
+        result.items = Lists.transform(
+                pkgOptional.get().getSortedPkgScreenshots(),
+                new Function<PkgScreenshot, GetPkgScreenshotsResult.PkgScreenshot>() {
+                    @Override
+                    public GetPkgScreenshotsResult.PkgScreenshot apply(PkgScreenshot pkgScreenshot) {
+                        GetPkgScreenshotsResult.PkgScreenshot rs = new GetPkgScreenshotsResult.PkgScreenshot();
+                        rs.code = pkgScreenshot.getCode();
+                        return rs;
+                    }
+                }
+        );
+
+        return result;
+    }
+
+    @Override
+    public RemovePkgScreenshotResult removePkgScreenshot(RemovePkgScreenshotRequest removePkgScreenshotRequest) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(removePkgScreenshotRequest);
+        Preconditions.checkNotNull(removePkgScreenshotRequest.code);
+
+        final ObjectContext context = serverRuntime.getContext();
+        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.getByCode(context, removePkgScreenshotRequest.code);
+
+        if(!screenshotOptional.isPresent()) {
+            throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), removePkgScreenshotRequest.code);
+        }
+
+        User authUser = obtainAuthenticatedUser(context);
+        Pkg pkg = screenshotOptional.get().getPkg();
+
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITSCREENSHOT)) {
+            throw new AuthorizationFailureException();
+        }
+
+        pkg.removeToManyTarget(Pkg.PKG_SCREENSHOTS_PROPERTY, screenshotOptional.get(), true);
+
+        Optional<PkgScreenshotImage> image = screenshotOptional.get().getPkgScreenshotImage();
+
+        if(image.isPresent()) {
+            context.deleteObjects(image.get());
+        }
+
+        context.deleteObjects(screenshotOptional.get());
+        context.commitChanges();
+
+        logger.info("did remove the screenshot {} on package {}", removePkgScreenshotRequest.code, pkg.getName());
+
+        return new RemovePkgScreenshotResult();
+    }
+
+    @Override
+    public ReorderPkgScreenshotsResult reorderPkgScreenshots(ReorderPkgScreenshotsRequest reorderPkgScreenshotsRequest) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(reorderPkgScreenshotsRequest);
+        Preconditions.checkNotNull(reorderPkgScreenshotsRequest.pkgName);
+        Preconditions.checkNotNull(reorderPkgScreenshotsRequest.codes);
+
+        final ObjectContext context = serverRuntime.getContext();
+        Optional<Pkg> pkgOptional = Pkg.getByName(context, reorderPkgScreenshotsRequest.pkgName);
+
+        if(!pkgOptional.isPresent()) {
+            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), reorderPkgScreenshotsRequest.pkgName);
+        }
+
+        User authUser = obtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(context, authUser, pkgOptional.get(), Permission.PKG_EDITSCREENSHOT)) {
+            throw new AuthorizationFailureException();
+        }
+
+        pkgOptional.get().reorderPkgScreenshots(reorderPkgScreenshotsRequest.codes);
+        context.commitChanges();
+
+        logger.info("did reorder the screenshots on package {}", pkgOptional.get().getName());
+
+        return null;
+    }
 }

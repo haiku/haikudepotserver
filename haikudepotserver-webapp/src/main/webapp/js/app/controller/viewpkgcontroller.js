@@ -81,7 +81,7 @@ angular.module('haikudepotserver').controller(
             $scope.goRemoveIcon = function() {
                 jsonRpc.call(
                         constants.ENDPOINT_API_V1_PKG,
-                        "removeIcon",
+                        "removePkgIcon",
                         [{ name: $routeParams.name }]
                     ).then(
                     function(result) {

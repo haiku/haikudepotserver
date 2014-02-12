@@ -25,6 +25,14 @@ angular.module('haikudepotserver').controller(
             // -------------------
             // USER
 
+            $scope.canViewUser = function() {
+                return !!userState.user();
+            }
+
+            $scope.goViewUser = function() {
+                $location.path('/viewuser/'+userState.user().nickname).search({});
+            }
+
             function refreshAuthorization() {
 
                 function disallowAll() {

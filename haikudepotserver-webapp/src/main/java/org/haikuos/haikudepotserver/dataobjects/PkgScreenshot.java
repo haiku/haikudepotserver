@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,7 +16,7 @@ import org.haikuos.haikudepotserver.dataobjects.auto._PkgScreenshot;
 
 import java.util.List;
 
-public class PkgScreenshot extends _PkgScreenshot {
+public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScreenshot> {
 
     public static Optional<PkgScreenshot> getByCode(ObjectContext context, String code) {
         Preconditions.checkNotNull(context);
@@ -28,4 +28,24 @@ public class PkgScreenshot extends _PkgScreenshot {
                 null));
     }
 
+    /**
+     * <p>As there should be only one of these, if there are two then this method will throw an
+     * {@link IllegalStateException}.</p>
+     */
+
+    public Optional<PkgScreenshotImage> getPkgScreenshotImage() {
+        List<PkgScreenshotImage> images = getPkgScreenshotImages();
+
+        switch(images.size()) {
+            case 0: return Optional.absent();
+            case 1: return Optional.of(images.get(0));
+            default:
+                throw new IllegalStateException("more than one pkg icon image found on an icon image");
+        }
+    }
+
+    @Override
+    public int compareTo(PkgScreenshot o) {
+        return getOrdering().compareTo(o.getOrdering());
+    }
 }

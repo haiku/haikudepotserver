@@ -8,9 +8,12 @@ package org.haikuos.haikudepotsever.api1.support;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.pkg.PkgService;
+import org.haikuos.haikudepotserver.support.Closeables;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
 
 /**
  * <p>This class is designed to help out with creating some common test data that can be re-used between tests.</p>
@@ -22,6 +25,9 @@ public class IntegrationTestSupportService {
     @Resource
     ServerRuntime serverRuntime;
 
+    @Resource
+    PkgService pkgService;
+
     private ObjectContext objectContext = null;
 
     public ObjectContext getObjectContext() {
@@ -30,6 +36,21 @@ public class IntegrationTestSupportService {
         }
 
         return objectContext;
+    }
+
+    private PkgScreenshot addPkgScreenshot(ObjectContext objectContext, Pkg pkg) {
+        InputStream inputStream = null;
+
+        try {
+            inputStream = IntegrationTestSupportService.class.getResourceAsStream("/sample-320x240.png");
+            return pkgService.storePkgScreenshotImage(inputStream, objectContext, pkg);
+        }
+        catch(Exception e) {
+            throw new IllegalStateException("an issue has arisen loading a sample screenshot into a test package",e);
+        }
+        finally {
+            Closeables.closeQuietly(inputStream);
+        }
     }
 
     public StandardTestData createStandardTestData() {
@@ -48,6 +69,10 @@ public class IntegrationTestSupportService {
         result.pkg1 = context.newObject(Pkg.class);
         result.pkg1.setActive(true);
         result.pkg1.setName("pkg1");
+
+        addPkgScreenshot(context,result.pkg1);
+        addPkgScreenshot(context,result.pkg1);
+        addPkgScreenshot(context,result.pkg1);
 
         result.pkg1Version1 = context.newObject(PkgVersion.class);
         result.pkg1Version1.setActive(Boolean.FALSE);

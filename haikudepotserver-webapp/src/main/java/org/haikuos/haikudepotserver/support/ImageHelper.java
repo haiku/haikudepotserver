@@ -79,6 +79,10 @@ public class ImageHelper {
         public boolean areSides(int s) {
             return s==width && s==height;
         }
+
+        public String toString() {
+            return String.format("{%d,%d}",width,height);
+        }
     }
 
 }
