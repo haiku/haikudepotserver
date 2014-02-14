@@ -53,6 +53,26 @@ public class IntegrationTestSupportService {
         }
     }
 
+    private void addPkgIcon(ObjectContext objectContext, Pkg pkg, int size) {
+        InputStream inputStream = null;
+
+        try {
+            inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png",size,size));
+            pkgService.storePkgIconImage(inputStream, size, objectContext, pkg);
+        }
+        catch(Exception e) {
+            throw new IllegalStateException("an issue has arisen loading an icon",e);
+        }
+        finally {
+            Closeables.closeQuietly(inputStream);
+        }
+    }
+
+    private void addPkgIcons(ObjectContext objectContext, Pkg pkg) {
+        addPkgIcon(objectContext, pkg, 16);
+        addPkgIcon(objectContext, pkg, 32);
+    }
+
     public StandardTestData createStandardTestData() {
 
         ObjectContext context = getObjectContext();
@@ -73,6 +93,7 @@ public class IntegrationTestSupportService {
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
+        addPkgIcons(context, result.pkg1);
 
         result.pkg1Version1 = context.newObject(PkgVersion.class);
         result.pkg1Version1.setActive(Boolean.FALSE);

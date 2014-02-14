@@ -72,7 +72,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgResult result = pkgApi.getPkg(request);
         // ------------------------------------
 
-        Assertions.assertThat(result.hasIcon).isFalse();
+        Assertions.assertThat(result.hasIcon).isTrue(); // icons are preloaded in the test data
         Assertions.assertThat(result.name).isEqualTo("pkg1");
         Assertions.assertThat(result.versions.size()).isEqualTo(1);
         Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
@@ -108,8 +108,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     /**
-     * <p>This test will first of all load an icon in for a package and will then use the API to remove it; checking
-     * that the icon is there before and is not there afterwards.</p>
+     * <p>This test knows that an icon exists for pkg1 and then removes it.</p>
      */
 
     @Test
@@ -118,31 +117,11 @@ public class PkgApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        InputStream sample32InputStream = null;
-
-        try {
-            sample32InputStream = getClass().getResourceAsStream("/sample-32x32.png");
-
-            if(null==sample32InputStream) {
-                throw new IllegalStateException("unable to find the test input stream for the icon image");
-            }
-
-            pkgService.storePkgIconImage(
-                    sample32InputStream,
-                    32,
-                    integrationTestSupportService.getObjectContext(),
-                    data.pkg1);
-
-            integrationTestSupportService.getObjectContext().commitChanges();
-        }
-        finally {
-            Closeables.closeQuietly(sample32InputStream);
-        }
 
         {
             ObjectContext objectContext = serverRuntime.getContext();
             Optional<Pkg> pkgOptionalBefore = Pkg.getByName(objectContext, "pkg1");
-            Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(1);
+            Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(2); // 16 and 32 px sizes
         }
 
         // ------------------------------------

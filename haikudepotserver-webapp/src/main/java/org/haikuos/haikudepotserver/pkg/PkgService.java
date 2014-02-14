@@ -223,8 +223,9 @@ public class PkgService {
         if(pkgIconImageOptional.isPresent()) {
             output.write(pkgIconImageOptional.get().getData());
         }
-
-        writeGenericIconImage(output, size);
+        else {
+            writeGenericIconImage(output, size);
+        }
     }
 
     /**

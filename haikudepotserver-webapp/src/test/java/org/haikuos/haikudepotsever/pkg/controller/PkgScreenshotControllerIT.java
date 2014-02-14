@@ -37,15 +37,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
      */
 
     private byte[] getScreenshotData() throws IOException {
-        InputStream inputStream = null;
-
-        try {
-            inputStream = this.getClass().getResourceAsStream("/sample-320x240.png");
-            return ByteStreams.toByteArray(inputStream);
-        }
-        finally {
-            Closeables.closeQuietly(inputStream);
-        }
+        return getResourceData("/sample-320x240.png");
     }
 
     @Test

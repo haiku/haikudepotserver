@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotsever.api1.support;
 
 import com.google.common.base.Optional;
+import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -22,6 +23,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -56,6 +59,23 @@ public abstract class AbstractIntegrationTest {
 
     @Resource
     AuthenticationService authenticationService;
+
+    protected byte[] getResourceData(String path) throws IOException {
+        InputStream inputStream = null;
+
+        try {
+            inputStream = this.getClass().getResourceAsStream(path);
+
+            if(null==inputStream) {
+                throw new IllegalStateException("unable to find the test resource; "+path);
+            }
+
+            return ByteStreams.toByteArray(inputStream);
+        }
+        finally {
+            Closeables.closeQuietly(inputStream);
+        }
+    }
 
     /**
      * <p>Before each test is run, we want to remove all of the database objects and then re-populate
