@@ -58,7 +58,10 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 $scope.breadcrumbItems = [
-                    breadcrumbs.createViewPkg($scope.pkg,'latest',$location.search()['arch']),
+                    breadcrumbs.createViewPkg(
+                        $scope.pkg,
+                        $routeParams.version,
+                        $routeParams.architectureCode),
                     breadcrumbs.createEditPkgIcon($scope.pkg)
                 ];
             }
@@ -110,15 +113,7 @@ angular.module('haikudepotserver').controller(
                             function() {
                                 $scope.amSaving = false;
                                 $log.info('have set the 32px icon for the pkg '+$scope.pkg.name);
-                                var arch = $location.search()['arch'];
-
-                                if(arch) {
-                                    $location.path('/viewpkg/'+$scope.pkg.name+'/latest/'+arch).search({});
-                                }
-                                else {
-                                    $log.info('unable to navigate back to the pkg as no \'arch\' was supplied in the search parameters --> will go home');
-                                    $location.path('/').search({});
-                                }
+                                $location.path('/viewpkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
                             },
                             function(e) {
                                 $scope.amSaving = false;

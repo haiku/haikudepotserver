@@ -39,8 +39,8 @@ angular.module('haikudepotserver').config(
                 .when('/changepassword/:nickname',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})
                 .when('/viewuser/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
                 .when('/viewpkg/:name/:version/:architectureCode',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
-                .when('/editpkgicon/:name',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
-                .when('/editpkgscreenshots/:name',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
+                .when('/viewpkg/:name/:version/:architectureCode/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
+                .when('/viewpkg/:name/:version/:architectureCode/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
                 .when('/',{
                     controller:'HomeController',

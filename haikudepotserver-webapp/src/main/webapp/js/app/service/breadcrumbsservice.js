@@ -56,6 +56,19 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                 },
 
                 createViewPkg : function(pkg,versionType,architectureCode) {
+
+                    if(!pkg||!pkg.name||!pkg.name.length) {
+                        throw 'the package must be supplied to create a view pkg and must have a name';
+                    }
+
+                    if(!versionType||!versionType.length) {
+                        throw 'the versionType must be supplied to create a view pkg';
+                    }
+
+                    if(!architectureCode||!architectureCode.length) {
+                        throw 'the architectureCode must be supplied to create a view pkg';
+                    }
+
                     return {
                         title : pkg.name,
                         path : '/viewpkg/' + pkg.name + '/' + versionType + '/' + architectureCode

@@ -147,11 +147,11 @@ angular.module('haikudepotserver').controller(
             // ACTIONS FOR PACKAGE
 
             $scope.goEditIcon = function() {
-                $location.path("/editpkgicon/"+$scope.pkg.name).search({'arch':$routeParams.architectureCode});
+                $location.path($location.path() + '/editicon').search({});
             }
 
             $scope.goEditScreenshots = function() {
-                $location.path("/editpkgscreenshots/"+$scope.pkg.name).search({'arch':$routeParams.architectureCode});
+                $location.path($location.path() + '/editscreenshots').search({});
             }
 
             $scope.goRemoveIcon = function() {

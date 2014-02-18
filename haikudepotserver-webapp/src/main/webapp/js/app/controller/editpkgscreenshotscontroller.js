@@ -93,7 +93,10 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 $scope.breadcrumbItems = [
-                    breadcrumbs.createViewPkg($scope.pkg,'latest',$location.search()['arch']),
+                    breadcrumbs.createViewPkg(
+                        $scope.pkg,
+                        $routeParams.version,
+                        $routeParams.architectureCode),
                     breadcrumbs.createEditPkgScreenshots($scope.pkg)
                 ];
             }
