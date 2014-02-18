@@ -13,8 +13,11 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log','$q','$rootScope','jsonRpc','pkgIcon','errorHandling','constants',
-        function($log,$q,$rootScope,jsonRpc,pkgIcon,errorHandling,constants) {
+        '$log','$q','$rootScope','jsonRpc',
+        'pkgIcon','pkgScreenshot','errorHandling','constants',
+        function(
+            $log,$q,$rootScope,jsonRpc,
+            pkgIcon,pkgScreenshot,errorHandling,constants) {
 
             const SIZE_CHECKED_PERMISSION_CACHE = 25;
 
@@ -208,6 +211,7 @@ angular.module('haikudepotserver').factory('userState',
                             // remove the Authorization header for HTTP transport
                             jsonRpc.setHeader('Authorization');
                             pkgIcon.setHeader('Authorization');
+                            pkgScreenshot.setHeader('Authorization');
                         }
                         else {
 
@@ -219,13 +223,11 @@ angular.module('haikudepotserver').factory('userState',
                                 throw 'the password clear is required when setting a user';
                             }
 
-                            jsonRpc.setHeader(
-                                'Authorization',
-                                'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear));
+                            var basic = 'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear);
 
-                            pkgIcon.setHeader(
-                                'Authorization',
-                                'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear));
+                            jsonRpc.setHeader('Authorization',basic);
+                            pkgIcon.setHeader('Authorization',basic);
+                            pkgScreenshot.setHeader('Authorization',basic);
 
                             user = value;
 

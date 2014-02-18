@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,7 @@ angular.module('haikudepotserver').factory('pkgIcon',
                 errorCodes : {
                     BADFORMATORSIZEERROR : 415,
                     NOTFOUND : 404,
-                    BADREQUEST : 404,
+                    BADREQUEST : 400,
                     UNKNOWN : -1
                 },
 

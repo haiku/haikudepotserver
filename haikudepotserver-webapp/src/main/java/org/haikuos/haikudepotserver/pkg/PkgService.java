@@ -248,6 +248,11 @@ public class PkgService {
         byte[] pngData = ByteStreams.toByteArray(input);
         ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
 
+        if(null==size) {
+            logger.warn("attempt to set the package icon for package {}, but the data does not look like png",pkg.getName());
+            throw new BadPkgIconException();
+        }
+
         // check that the file roughly looks like PNG and that the size can be
         // parsed and that the size fits the requirements for the icon.
 
@@ -322,7 +327,7 @@ public class PkgService {
             ByteArrayInputStream imageInputStream = new ByteArrayInputStream(data);
             BufferedImage bufferedImage = ImageIO.read(imageInputStream);
             BufferedImage scaledBufferedImage = Scalr.resize(bufferedImage, targetWidth, targetHeight);
-            ImageIO.write(scaledBufferedImage, "PNG", output);
+            ImageIO.write(scaledBufferedImage, "png", output);
         }
         else {
             output.write(data);
@@ -347,11 +352,17 @@ public class PkgService {
         byte[] pngData = ByteStreams.toByteArray(input);
         ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
 
+        if(null==size) {
+            logger.warn("attempt to store a screenshot image that is not a png");
+            throw new BadPkgScreenshotException();
+        }
+
         // check that the file roughly looks like PNG and the size is something
         // reasonable.
 
         if(size.height > SCREENSHOT_SIDE_LIMIT || size.width > SCREENSHOT_SIDE_LIMIT) {
             logger.warn("attempt to store a screenshot image that is too large; "+size.toString());
+            throw new BadPkgScreenshotException();
         }
 
         MediaType png = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();

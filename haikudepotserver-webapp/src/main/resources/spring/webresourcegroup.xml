@@ -77,12 +77,14 @@
                             <value>/js/app/controller/listrepositoriescontroller.js</value>
                             <value>/js/app/controller/viewrepositorycontroller.js</value>
                             <value>/js/app/controller/addeditrepositorycontroller.js</value>
+                            <value>/js/app/controller/editpkgscreenshotscontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
                             <value>/js/app/service/userstateservice.js</value>
                             <value>/js/app/service/referencedataservice.js</value>
                             <value>/js/app/service/pkgiconservice.js</value>
+                            <value>/js/app/service/pkgscreenshotservice.js</value>
                             <value>/js/app/service/breadcrumbsservice.js</value>
                             <value>/js/app/service/errorhandlingservice.js</value>
 
@@ -109,6 +111,7 @@
                             <value>/css/viewpkg.css</value>
                             <value>/css/banner.css</value>
                             <value>/css/breadcrumbs.css</value>
+                            <value>/css/editpkgscreenshots.css</value>
                         </list>
                     </property>
                 </bean>

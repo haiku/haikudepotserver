@@ -26,16 +26,28 @@
         <div id="pkg-screenshot-container">
 
             <div id="pkg-screenshot-pagination-container">
-                <pagination-arrow active="false" direction="left"></pagination-arrow>
-                <pagination-arrow active="false" direction="right"></pagination-arrow>
+                <pagination-arrow
+                        page-click="goPreviousScreenshot()"
+                        active="pkgScreenshots.length && pkgScreenshotOffset > 0"
+                        direction="left"></pagination-arrow>
+                <pagination-arrow
+                        page-click="goNextScreenshot()"
+                        active="pkgScreenshots.length && pkgScreenshotOffset < (pkgScreenshots.length-1)"
+                        direction="right"></pagination-arrow>
             </div>
 
             <div id="pkg-screenshot-title">
-                Screenshots
+                <span ng-show="!pkgScreenshots.length">Screenshots</span>
+                <span ng-show="pkgScreenshots.length">
+                    Screenshot {{pkgScreenshotOffset+1}} <span class="muted">of {{pkgScreenshots.length}}</span>
+                </span>
             </div>
 
-            <div id="pkg-screenshot-none">
-                No screenshots available
+            <img ng-show="pkgScreenshots.length" ng-src="{{currentPkgScreenshot().imageThumbnailUrl}}">
+
+            <div id="pkg-screenshot-status" ng-show="!pkgScreenshots.length">
+                <span ng-show="undefined==pkgScreenshots">Loading...</span>
+                <span ng-show="pkgScreenshots && !pkgScreenshots.length">No screenshots available</span>
             </div>
         </div>
 
@@ -50,6 +62,9 @@
                 </li>
                 <li ng-show="canEditIcon()" pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
                     <a href="" ng-click="goEditIcon()">Edit icons</a>
+                </li>
+                <li ng-show="canEditScreenshots()" pkg="pkg" show-if-pkg-permission="'PKG_EDITSCREENSHOT'">
+                    <a href="" ng-click="goEditScreenshots()">Edit screenshots</a>
                 </li>
             </ul>
         </div>

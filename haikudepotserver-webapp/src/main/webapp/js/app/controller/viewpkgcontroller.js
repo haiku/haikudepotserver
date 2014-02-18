@@ -8,12 +8,19 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','userState','errorHandling',
+        'pkgScreenshot',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,userState,errorHandling) {
+            jsonRpc,constants,userState,errorHandling,
+            pkgScreenshot) {
+
+            var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 480;
+            var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 320;
 
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
+            $scope.pkgScreenshots = undefined;
+            $scope.pkgScreenshotOffset = 0;
 
             refetchPkg();
 
@@ -26,6 +33,10 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.canEditIcon = function() {
+                return $scope.pkg;
+            }
+
+            $scope.canEditScreenshots = function() {
                 return $scope.pkg;
             }
 
@@ -67,6 +78,7 @@ angular.module('haikudepotserver').controller(
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
+                        refetchPkgScreenshots();
                     },
                     function(err) {
                         errorHandling.handleJsonRpcError(err);
@@ -74,8 +86,72 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
+            // ------------------------
+            // SCREENSHOTS
+
+            $scope.goPreviousScreenshot = function() {
+                if($scope.pkgScreenshots && $scope.pkgScreenshotOffset > 0) {
+                    $scope.pkgScreenshotOffset--;
+                }
+                return false;
+            }
+
+            $scope.goNextScreenshot = function() {
+                if($scope.pkgScreenshots && $scope.pkgScreenshotOffset < ($scope.pkgScreenshots.length-1)) {
+                    $scope.pkgScreenshotOffset++;
+                }
+                return false;
+            }
+
+            $scope.currentPkgScreenshot = function() {
+                return $scope.pkgScreenshots ? $scope.pkgScreenshots[$scope.pkgScreenshotOffset] : null;
+            }
+
+            function refetchPkgScreenshots() {
+
+                $scope.pkgScreenshots = undefined;
+
+                jsonRpc.call(
+                        constants.ENDPOINT_API_V1_PKG,
+                        "getPkgScreenshots",
+                        [{ pkgName: $scope.pkg.name }]
+                    ).then(
+                    function(result) {
+                        $scope.pkgScreenshots = _.map(result.items, function(item) {
+                            return {
+                                code : item.code,
+                                imageThumbnailUrl : pkgScreenshot.url(
+                                    $scope.pkg,
+                                    item.code,
+                                    SCREENSHOT_THUMBNAIL_TARGETWIDTH,
+                                    SCREENSHOT_THUMBNAIL_TARGETHEIGHT),
+                                imageDownloadUrl : pkgScreenshot.rawUrl(
+                                    $scope.pkg,
+                                    item.code)
+                            };
+                        });
+
+                        $scope.pkgScreenshotOffset = 0;
+
+                        $log.info('found '+result.items.length+' screenshots for pkg '+$routeParams.name);
+                        refreshBreadcrumbItems();
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+
+            }
+
+            // ---------------------
+            // ACTIONS FOR PACKAGE
+
             $scope.goEditIcon = function() {
                 $location.path("/editpkgicon/"+$scope.pkg.name).search({'arch':$routeParams.architectureCode});
+            }
+
+            $scope.goEditScreenshots = function() {
+                $location.path("/editpkgscreenshots/"+$scope.pkg.name).search({'arch':$routeParams.architectureCode});
             }
 
             $scope.goRemoveIcon = function() {

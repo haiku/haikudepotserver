@@ -64,7 +64,6 @@ width: auto;
 ALERT BOXES FOR USE OUTSIDE OF FORMS
 */
 
-
 .alert-container {
     padding: 8px;
     border: 1px solid red;
@@ -77,6 +76,17 @@ ALERT BOXES FOR USE OUTSIDE OF FORMS
     border: 1px solid #336698;
     background-color: white;
     color: black;
+}
+
+.onelineform-container {
+    padding: 8px;
+    border: 1px solid black;
+    background-color: white;
+    color: black;
+}
+
+.onelineform-container form {
+    margin-bottom: 0;
 }
 
 /*

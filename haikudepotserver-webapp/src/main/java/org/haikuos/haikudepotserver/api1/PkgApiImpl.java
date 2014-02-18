@@ -284,7 +284,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public GetPkgScreenshotsResult getPkgScreenshots(GetPkgScreenshotsRequest getPkgScreenshotsRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(getPkgScreenshotsRequest);
-        Preconditions.checkNotNull(getPkgScreenshotsRequest.pkgName);
+        Preconditions.checkState(!Strings.isNullOrEmpty(getPkgScreenshotsRequest.pkgName));
 
         final ObjectContext context = serverRuntime.getContext();
         Optional<Pkg> pkgOptional = Pkg.getByName(context, getPkgScreenshotsRequest.pkgName);

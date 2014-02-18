@@ -16,7 +16,7 @@ angular.module('haikudepotserver').directive('validPassword',function() {
 
             ctrl.$parsers.unshift(function(value) {
 
-                var valid = (value.length >= 8)
+                var valid = value && (value.length >= 8)
                     && value.replace(/[^0-9]/g,'').length >= 2
                     && value.replace(/[^A-Z]/g,'').length >= 1;
 

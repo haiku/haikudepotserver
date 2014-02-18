@@ -40,6 +40,7 @@ angular.module('haikudepotserver').config(
                 .when('/viewuser/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
                 .when('/viewpkg/:name/:version/:architectureCode',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
                 .when('/editpkgicon/:name',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
+                .when('/editpkgscreenshots/:name',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
                 .when('/',{
                     controller:'HomeController',

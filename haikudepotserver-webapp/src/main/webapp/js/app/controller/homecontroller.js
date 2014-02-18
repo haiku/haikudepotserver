@@ -140,14 +140,6 @@ angular.module('haikudepotserver').controller(
                 return false;
             }
 
-            $scope.classPreviousPage = function() {
-                return $scope.offset > 0 ? [] : ['disabled'];
-            }
-
-            $scope.classNextPage = function() {
-                return $scope.hasMore ? [] : ['disabled'];
-            }
-
             // ---- VIEW PKG + VERSION
 
             $scope.goViewPkg = function(pkg) {

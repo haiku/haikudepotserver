@@ -62,8 +62,8 @@ public class PkgScreenshotController extends AbstractController {
     public void fetchHead(
             HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam(value = KEY_TARGETWIDTH) Integer targetWidth,
-            @RequestParam(value = KEY_TARGETHEIGHT) Integer targetHeight,
+            @RequestParam(value = KEY_TARGETWIDTH, required=true) Integer targetWidth,
+            @RequestParam(value = KEY_TARGETHEIGHT, required=true) Integer targetHeight,
             @PathVariable(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
             throws IOException {
@@ -149,9 +149,6 @@ public class PkgScreenshotController extends AbstractController {
             throw new ScreenshotNotFound();
         }
 
-        ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
-
-        response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
         response.setContentType(MediaType.PNG.toString());
         response.setDateHeader(
                 HttpHeaders.LAST_MODIFIED,
@@ -163,6 +160,55 @@ public class PkgScreenshotController extends AbstractController {
                 screenshotOptional.get(),
                 targetWidth,
                 targetHeight);
+    }
+
+    /**
+     * <p>This one downloads the raw data that is stored for a screenshot.</p>
+     */
+
+    @RequestMapping(value = "/raw/{"+KEY_SCREENSHOTCODE+"}", method = RequestMethod.GET)
+    public void fetchRawGet(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
+            throws IOException {
+
+        if(Strings.isNullOrEmpty(screenshotCode)) {
+            throw new MissingScreenshotCode();
+        }
+
+        ObjectContext context = serverRuntime.getContext();
+        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.getByCode(context, screenshotCode);
+
+        if(!screenshotOptional.isPresent()) {
+            throw new ScreenshotNotFound();
+        }
+
+        byte[] data = screenshotOptional.get().getPkgScreenshotImage().get().getData();
+        org.haikuos.haikudepotserver.dataobjects.MediaType mediaType = screenshotOptional.get().getPkgScreenshotImage().get().getMediaType();
+
+        // TODO - find a better way to do this.
+        String extension = null;
+
+        if(mediaType.getCode().equals(MediaType.PNG.toString())) {
+            extension = "png";
+        }
+
+        if(null==extension) {
+            throw new IllegalStateException("the media type for the screenshot is not able to be converted into a file extension");
+        }
+
+        response.setContentLength(data.length);
+        response.setContentType(mediaType.getCode());
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION,
+                String.format(
+                        "attachment; filename=\"%s__%s.%s\"",
+                        screenshotOptional.get().getPkg().getName(),
+                        screenshotOptional.get().getCode(),
+                        extension));
+
+        response.getOutputStream().write(data);
     }
 
     /**

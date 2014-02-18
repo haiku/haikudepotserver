@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -338,7 +338,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
                     buffer,
                     bufferOffset + chunkLength,
                     new HeapCoordinates(
-                            heapOffset + chunkLength,
+                            coordinates.getOffset() + chunkLength,
                             coordinates.getLength() - chunkLength));
         }
 

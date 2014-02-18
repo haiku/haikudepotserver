@@ -8,9 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
+        'breadcrumbs',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgIcon,errorHandling) {
+            jsonRpc,constants,pkgIcon,errorHandling,
+            breadcrumbs) {
 
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
@@ -56,14 +58,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 $scope.breadcrumbItems = [
-                    {
-                        title : $scope.pkg.name,
-                        path : '/viewpkg/'+$scope.pkg.name
-                    },
-                    {
-                        title : 'Edit Icon', // TODO - localize
-                        path : '/editpkgicon/'+$scope.pkg.name
-                    }];
+                    breadcrumbs.createViewPkg($scope.pkg,'latest',$location.search()['arch']),
+                    breadcrumbs.createEditPkgIcon($scope.pkg)
+                ];
             }
 
             // This function will check to make sure that the file is not too large or too small to be a valid PNG.
@@ -93,12 +90,7 @@ angular.module('haikudepotserver').controller(
                 icon16FileDidChange();
             });
 
-
-            $scope.nicknameDidChange = function() {
-                $scope.createUserForm.nickname.$setValidity('notunique',true);
-            }
-
-            // This function will take the data from the form and will create the user from this data.
+            // This function will take the data from the form and load in the new pkg icons
 
             $scope.goStorePkgIcons = function() {
 

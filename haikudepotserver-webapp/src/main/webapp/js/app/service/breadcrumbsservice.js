@@ -55,6 +55,27 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                   };
                 },
 
+                createViewPkg : function(pkg,versionType,architectureCode) {
+                    return {
+                        title : pkg.name,
+                        path : '/viewpkg/' + pkg.name + '/' + versionType + '/' + architectureCode
+                    };
+                },
+
+                createEditPkgIcon : function(pkg) {
+                    return {
+                        title : 'Edit Icon',
+                        path : '/editpkgicon/' + pkg.name
+                    };
+                },
+
+                createEditPkgScreenshots : function(pkg) {
+                    return {
+                        title : 'Screenshots', // TODO - localize
+                            path : '/editpkgscreenshots/'+pkg.name
+                    };
+                },
+
                 createViewUser : function(user) {
                     return {
                         title : user.nickname,

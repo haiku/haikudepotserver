@@ -23,7 +23,7 @@
     float: right;
     width: 480px;
     border: 1px solid black;
-    min-height: 320px;
+    min-height: 96px;
     position: relative;
     background-color: #EEE;
 }
@@ -32,6 +32,11 @@
     background-color: #444;
     color: white;
     padding: 4px;
+    border-bottom: 1px solid black;
+}
+
+#pkg-screenshot-title.muted {
+    background-color: rgba(1,1,1,0.5);
 }
 
 /*
@@ -39,8 +44,8 @@ This is for a small label which indicates that there are no screenshots to displ
 for this package.
 */
 
-#pkg-screenshot-none {
-    margin-top: 32px;
+#pkg-screenshot-status {
+    margin-top: 20px;
     margin-bottom: 0px;
     width: 240px;
     margin-left: auto;

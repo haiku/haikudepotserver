@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -47,7 +47,7 @@ public class HpkStringTable implements StringTable {
 
     }
 
-    // TODO; could avoid the big read into a buffer by reading the heap byte by byte.
+    // TODO; could avoid the big read into a buffer by reading the heap byte by byte or with a buffer.
     private String[] readStrings() throws HpkException {
         String[] result = new String[(int) expectedCount];
         byte[] stringsDataBuffer = new byte[(int) heapLength];
@@ -58,6 +58,9 @@ public class HpkStringTable implements StringTable {
                 new HeapCoordinates(
                         heapOffset,
                         heapLength));
+
+//        try { Files.write(stringsDataBuffer, new File("/tmp/dat")); }
+//        catch(IOException ioe) {}
 
         // now work through the data and load them into the strings.
 
@@ -74,9 +77,13 @@ public class HpkStringTable implements StringTable {
                 return result;
             }
 
+            if(stringIndex >= expectedCount) {
+                throw new HpkException("have already read all of the strings from the string table, but have not exhausted the string table data");
+            }
+
             int start = offset;
 
-            while(0!=stringsDataBuffer[offset] && offset < stringsDataBuffer.length) {
+            while(offset < stringsDataBuffer.length && 0!=stringsDataBuffer[offset]) {
                 offset++;
             }
 
@@ -88,7 +95,7 @@ public class HpkStringTable implements StringTable {
 
         }
 
-        throw new HpkException("expected to find the null-terminator for the list of strings, but was not able to find one.");
+        throw new HpkException("expected to find the null-terminator for the list of strings, but was not able to find one; did read "+stringIndex+" of "+expectedCount);
     }
 
     private String[] getStrings() throws HpkException {

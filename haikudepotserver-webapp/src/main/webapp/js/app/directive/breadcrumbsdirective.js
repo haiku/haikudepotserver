@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,7 +49,12 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
                     });
 
                     $scope.goItem = function(item) {
-                        $location.path(item.path).search({});
+                        $location.path(item.path);
+
+                        if(item.search) {
+                            $location.search(item.search);
+                        }
+
                         return false;
                     }
 

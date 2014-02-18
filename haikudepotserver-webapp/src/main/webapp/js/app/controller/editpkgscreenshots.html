@@ -1,0 +1,39 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container edit-pkg-screenshots">
+
+    <div class="onelineform-container">
+        <form name="addPkgScreenshotForm" novalidate="novalidate">
+            PNG Image File :
+            <input name="file" type="file" ng-model="addPkgScreenshot.file" file-supply required></input>
+            <button
+                    ng-disabled="addPkgScreenshotForm.$invalid"
+                    ng-click="goAddPkgScreenshot()"
+                    type="submit"
+                    class="main-action">Add</button>
+
+            <error-messages key-prefix="addPkgScreenshot.file" error="addPkgScreenshotForm.file.$error" ng-show="!addPkgScreenshotForm.$pristine"></error-messages>
+
+        </form>
+    </div>
+
+    <div id="pkg-screenshots-list">
+        <div ng-repeat="pkgScreenshot in pkgScreenshots">
+            <img ng-src="{{pkgScreenshot.imageThumbnailUrl}}"></img>
+            <div class="pkg-screenshot-controls">
+                <div><strong>#{{$index+1}}</strong></div>
+
+                <ul>
+                    <li><a href="" ng-click="goRemovePkgScreenshot(pkgScreenshot)">Remove</a></li>
+                    <li><a href="{{pkgScreenshot.imageDownloadUrl}}">Download</a></li>
+                </ul>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+
