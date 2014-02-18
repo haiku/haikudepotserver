@@ -12,11 +12,14 @@ import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.validation.BeanValidationFailure;
+import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgScreenshot;
+import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
 import java.util.List;
 
-public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScreenshot> {
+public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScreenshot>, CreateAndModifyTimestamped {
 
     public static Optional<PkgScreenshot> getByCode(ObjectContext context, String code) {
         Preconditions.checkNotNull(context);
@@ -48,4 +51,22 @@ public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScree
     public int compareTo(PkgScreenshot o) {
         return getOrdering().compareTo(o.getOrdering());
     }
+
+    @Override
+    protected void validateForSave(ValidationResult validationResult) {
+        super.validateForSave(validationResult);
+
+        if(getHeight() <= 0) {
+            validationResult.addFailure(new BeanValidationFailure(this,HEIGHT_PROPERTY,"range"));
+        }
+
+        if(getWidth() <= 0) {
+            validationResult.addFailure(new BeanValidationFailure(this,WIDTH_PROPERTY,"range"));
+        }
+
+        if(getLength() <= 0) {
+            validationResult.addFailure(new BeanValidationFailure(this,LENGTH_PROPERTY,"range"));
+        }
+    }
+
 }

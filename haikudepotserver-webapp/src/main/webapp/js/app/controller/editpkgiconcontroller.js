@@ -14,6 +14,8 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,pkgIcon,errorHandling,
             breadcrumbs) {
 
+            var ICON_SIZE_LIMIT = 100 * 1024; // 100k
+
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
             $scope.amSaving = false;
@@ -74,7 +76,7 @@ angular.module('haikudepotserver').controller(
 
             function validateIconFile(file, model) {
                 model.$setValidity('badformatorsize',true);
-                model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < 32*1024));
+                model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < ICON_SIZE_LIMIT));
             }
 
             function icon32FileDidChange() {

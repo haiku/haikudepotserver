@@ -1,5 +1,6 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
+import java.util.Date;
 import java.util.List;
 
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
@@ -15,7 +16,12 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 public abstract class _PkgScreenshot extends AbstractDataObject {
 
     public static final String CODE_PROPERTY = "code";
+    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
+    public static final String HEIGHT_PROPERTY = "height";
+    public static final String LENGTH_PROPERTY = "length";
+    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String ORDERING_PROPERTY = "ordering";
+    public static final String WIDTH_PROPERTY = "width";
     public static final String PKG_PROPERTY = "pkg";
     public static final String PKG_SCREENSHOT_IMAGES_PROPERTY = "pkgScreenshotImages";
 
@@ -28,11 +34,46 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
         return (String)readProperty(CODE_PROPERTY);
     }
 
+    public void setCreateTimestamp(Date createTimestamp) {
+        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+    }
+    public Date getCreateTimestamp() {
+        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
+
+    public void setHeight(Integer height) {
+        writeProperty(HEIGHT_PROPERTY, height);
+    }
+    public Integer getHeight() {
+        return (Integer)readProperty(HEIGHT_PROPERTY);
+    }
+
+    public void setLength(Integer length) {
+        writeProperty(LENGTH_PROPERTY, length);
+    }
+    public Integer getLength() {
+        return (Integer)readProperty(LENGTH_PROPERTY);
+    }
+
+    public void setModifyTimestamp(Date modifyTimestamp) {
+        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+    }
+    public Date getModifyTimestamp() {
+        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+    }
+
     public void setOrdering(Integer ordering) {
         writeProperty(ORDERING_PROPERTY, ordering);
     }
     public Integer getOrdering() {
         return (Integer)readProperty(ORDERING_PROPERTY);
+    }
+
+    public void setWidth(Integer width) {
+        writeProperty(WIDTH_PROPERTY, width);
+    }
+    public Integer getWidth() {
+        return (Integer)readProperty(WIDTH_PROPERTY);
     }
 
     public void setPkg(Pkg pkg) {

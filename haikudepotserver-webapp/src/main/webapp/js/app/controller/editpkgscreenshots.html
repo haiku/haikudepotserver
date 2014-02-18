@@ -21,7 +21,7 @@
         <div ng-repeat="pkgScreenshot in pkgScreenshots">
             <img ng-src="{{pkgScreenshot.imageThumbnailUrl}}"></img>
             <div class="pkg-screenshot-controls">
-                <div><strong>#{{$index+1}}</strong></div>
+                <div><strong>#{{$index+1}}</strong> - ({{pkgScreenshot.width}} x {{pkgScreenshot.height}}), {{pkgScreenshot.length|dataLength}}</div>
 
                 <ul>
                     <li><a href="" ng-click="goRemovePkgScreenshot(pkgScreenshot)">Remove</a></li>

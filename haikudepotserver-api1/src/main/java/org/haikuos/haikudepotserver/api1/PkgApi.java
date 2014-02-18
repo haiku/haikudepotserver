@@ -37,6 +37,12 @@ public interface PkgApi {
     RemovePkgIconResult removePkgIcon(RemovePkgIconRequest request) throws ObjectNotFoundException;
 
     /**
+     * <p>This method will get the details of a screenshot image.</p>
+     */
+
+    GetPkgScreenshotResult getPkgScreenshot(GetPkgScreenshotRequest request) throws ObjectNotFoundException;
+
+    /**
      * <p>This method will return an ordered list of the screenshots that are available for this package.  It will
      * throw an {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException} in the case where the
      * nominated package is not able to be found.</p>

@@ -17,7 +17,7 @@ angular.module('haikudepotserver').controller(
             // the upload size must be less than this or it is too big for the
             // far end to process.
 
-            var FILESIZEMAX = 2 * 1024 * 1024;
+            var SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
 
             var THUMBNAIL_TARGETWIDTH = 180;
             var THUMBNAIL_TARGETHEIGHT = 90;
@@ -51,6 +51,9 @@ angular.module('haikudepotserver').controller(
                         $scope.pkgScreenshots = _.map(result.items, function(item) {
                             return {
                                 code : item.code,
+                                width : item.width,
+                                height : item.height,
+                                length : item.length,
                                 imageThumbnailUrl : pkgScreenshot.url($scope.pkg,item.code,THUMBNAIL_TARGETWIDTH,THUMBNAIL_TARGETHEIGHT),
                                 imageDownloadUrl : pkgScreenshot.rawUrl($scope.pkg,item.code)
                             };
@@ -114,7 +117,7 @@ angular.module('haikudepotserver').controller(
                 var file = $scope.addPkgScreenshot.file;
                 var model = $scope.addPkgScreenshotForm['file']
                 model.$setValidity('badformatorsize',true);
-                model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < FILESIZEMAX));
+                model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < SCREENSHOT_SIZE_LIMIT));
             });
 
             // This function will take the data from the form and will create the user from this data.
@@ -134,11 +137,28 @@ angular.module('haikudepotserver').controller(
                         $log.info('have added a screenshot for the pkg '+$scope.pkg.name);
                         $scope.addPkgScreenshot.file = undefined;
                         $scope.addPkgScreenshotForm.$setPristine();
-                        $scope.pkgScreenshots.push({
-                            code : code,
-                            imageThumbnailUrl : pkgScreenshot.url($scope.pkg,code,THUMBNAIL_TARGETWIDTH,THUMBNAIL_TARGETHEIGHT),
-                            imageDownloadUrl : pkgScreenshot.rawUrl($scope.pkg,code)
-                        })
+
+                        jsonRpc.call(
+                                constants.ENDPOINT_API_V1_PKG,
+                                "getPkgScreenshot",
+                                [{ code : code }]
+                            ).then(
+                            function(result) {
+                                $scope.pkgScreenshots.push({
+                                    code : code,
+                                    height : result.height,
+                                    width : result.width,
+                                    length : result.length,
+                                    imageThumbnailUrl : pkgScreenshot.url($scope.pkg,code,THUMBNAIL_TARGETWIDTH,THUMBNAIL_TARGETHEIGHT),
+                                    imageDownloadUrl : pkgScreenshot.rawUrl($scope.pkg,code)
+                                });
+
+                                $scope.amCommunicating = false;
+                            },
+                            function(err) {
+                                errorHandling.handleJsonRpcError(err);
+                            }
+                        );
                     },
                     function(e) {
                         if(e==pkgScreenshot.errorCodes.BADFORMATORSIZEERROR) {
@@ -148,13 +168,11 @@ angular.module('haikudepotserver').controller(
                             $log.error('unable to add the screenshot for; '+$scope.pkg.name);
                             $location.path('/error').search({});
                         }
-                    }
-                )['finally'](
-                    function() {
+
                         $scope.amCommunicating = false;
 
                     }
-                )
+                );
             }
 
             // -------------------------

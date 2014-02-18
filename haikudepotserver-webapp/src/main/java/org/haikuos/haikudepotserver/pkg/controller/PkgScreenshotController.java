@@ -16,6 +16,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
+import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
@@ -62,8 +63,8 @@ public class PkgScreenshotController extends AbstractController {
     public void fetchHead(
             HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam(value = KEY_TARGETWIDTH, required=true) Integer targetWidth,
-            @RequestParam(value = KEY_TARGETHEIGHT, required=true) Integer targetHeight,
+            @RequestParam(value = KEY_TARGETWIDTH) Integer targetWidth,
+            @RequestParam(value = KEY_TARGETHEIGHT) Integer targetHeight,
             @PathVariable(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
             throws IOException {
@@ -254,6 +255,10 @@ public class PkgScreenshotController extends AbstractController {
                     request.getInputStream(),
                     context,
                     pkg.get()).getCode();
+        }
+        catch(SizeLimitReachedException sizeLimit) {
+            logger.warn("attempt to load in a screenshot larger than the size limit");
+            throw new MissingOrBadFormat();
         }
         catch(BadPkgScreenshotException badIcon) {
             throw new MissingOrBadFormat();

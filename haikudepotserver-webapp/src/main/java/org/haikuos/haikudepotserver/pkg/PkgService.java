@@ -23,6 +23,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
+import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.ImageHelper;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
@@ -50,7 +51,41 @@ public class PkgService {
 
     protected static int SCREENSHOT_SIDE_LIMIT = 1500;
 
+    // these seem like reasonable limits for the size of image data to have to
+    // handle in-memory.
+
+    protected static int SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
+    protected static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
+
     private ImageHelper imageHelper = new ImageHelper();
+
+    // ------------------------------
+    // HELP
+
+    /**
+     * <p>This method will read in the quantity of bytes from the input stream upto the limit.  If the limit is
+     * reached, the method will throw {@link org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException}.</p>
+     */
+
+    public static byte[] toByteArray(InputStream inputStream, int sizeLimit) throws IOException {
+        Preconditions.checkNotNull(inputStream);
+        Preconditions.checkState(sizeLimit > 0);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8*1024];
+        int read;
+
+        while(-1 != (read = inputStream.read(buffer,0,buffer.length))) {
+
+            if(read + baos.size() > sizeLimit) {
+                throw new SizeLimitReachedException();
+            }
+
+            baos.write(buffer,0,read);
+        }
+
+        return baos.toByteArray();
+    }
 
     // ------------------------------
     // SEARCH
@@ -245,7 +280,7 @@ public class PkgService {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkState(16==expectedSize||32==expectedSize);
 
-        byte[] pngData = ByteStreams.toByteArray(input);
+        byte[] pngData = toByteArray(input, ICON_SIZE_LIMIT);
         ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
 
         if(null==size) {
@@ -349,7 +384,7 @@ public class PkgService {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
 
-        byte[] pngData = ByteStreams.toByteArray(input);
+        byte[] pngData = toByteArray(input, SCREENSHOT_SIZE_LIMIT);
         ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
 
         if(null==size) {
@@ -380,6 +415,9 @@ public class PkgService {
         PkgScreenshot screenshot = context.newObject(PkgScreenshot.class);
         screenshot.setCode(UUID.randomUUID().toString());
         screenshot.setOrdering(new Integer(ordering));
+        screenshot.setHeight(size.height);
+        screenshot.setWidth(size.width);
+        screenshot.setLength(pngData.length);
         pkg.addToManyTarget(Pkg.PKG_SCREENSHOTS_PROPERTY, screenshot, true);
 
         PkgScreenshotImage screenshotImage = context.newObject(PkgScreenshotImage.class);

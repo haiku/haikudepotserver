@@ -11,6 +11,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
@@ -191,6 +192,10 @@ public class PkgIconController extends AbstractController {
                     expectedSize,
                     context,
                     pkg.get());
+        }
+        catch(SizeLimitReachedException sizeLimit) {
+            logger.warn("attempt to load in an icon file that is larger than that allowed");
+            throw new MissingOrBadFormat();
         }
         catch(BadPkgIconException badIcon) {
             throw new MissingOrBadFormat();

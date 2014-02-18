@@ -61,9 +61,14 @@
 	</db-entity>
 	<db-entity name="pkg_screenshot" schema="haikudepot">
 		<db-attribute name="code" type="CHAR" isMandatory="true" length="36"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="height" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="length" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="ordering" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="width" type="INTEGER" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_screenshot_seq</db-generator-name>
@@ -218,7 +223,16 @@
 	</obj-entity>
 	<obj-entity name="PkgScreenshot" className="org.haikuos.haikudepotserver.dataobjects.PkgScreenshot" lock-type="optimistic" dbEntityName="pkg_screenshot" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="height" type="java.lang.Integer" db-attribute-path="height"/>
+		<obj-attribute name="length" type="java.lang.Integer" db-attribute-path="length"/>
+		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="ordering" type="java.lang.Integer" db-attribute-path="ordering"/>
+		<obj-attribute name="width" type="java.lang.Integer" db-attribute-path="width"/>
+		<entity-listener class="org.haikuos.haikudepotserver.support.cayenne.PostAddCreateAndModifyTimestampListener">
+			<post-add method-name="onPostAdd"/>
+			<pre-update method-name="onPreUpdate"/>
+		</entity-listener>
 	</obj-entity>
 	<obj-entity name="PkgScreenshotImage" className="org.haikuos.haikudepotserver.dataobjects.PkgScreenshotImage" dbEntityName="pkg_screenshot_image" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="data" type="byte[]" db-attribute-path="data"/>

@@ -60,7 +60,6 @@ public abstract class _Pkg extends AbstractDataObject {
     public void removeFromPkgIcons(PkgIcon obj) {
         removeToManyTarget(PKG_ICONS_PROPERTY, obj, true);
     }
-
     @SuppressWarnings("unchecked")
     public List<PkgIcon> getPkgIcons() {
         return (List<PkgIcon>)readProperty(PKG_ICONS_PROPERTY);

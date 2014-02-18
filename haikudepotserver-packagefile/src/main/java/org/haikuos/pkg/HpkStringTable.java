@@ -59,9 +59,6 @@ public class HpkStringTable implements StringTable {
                         heapOffset,
                         heapLength));
 
-//        try { Files.write(stringsDataBuffer, new File("/tmp/dat")); }
-//        catch(IOException ioe) {}
-
         // now work through the data and load them into the strings.
 
         int stringIndex = 0;

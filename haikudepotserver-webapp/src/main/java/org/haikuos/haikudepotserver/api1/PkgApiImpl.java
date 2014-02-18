@@ -282,6 +282,26 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
+    public GetPkgScreenshotResult getPkgScreenshot(GetPkgScreenshotRequest request) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(request.code);
+
+        final ObjectContext context = serverRuntime.getContext();
+        Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.getByCode(context, request.code);
+
+        if(!pkgScreenshotOptional.isPresent()) {
+            throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), request.code);
+        }
+
+        GetPkgScreenshotResult result = new GetPkgScreenshotResult();
+        result.code = pkgScreenshotOptional.get().getCode();
+        result.height = pkgScreenshotOptional.get().getHeight();
+        result.width = pkgScreenshotOptional.get().getWidth();
+        result.length = pkgScreenshotOptional.get().getLength();
+        return result;
+    }
+
+    @Override
     public GetPkgScreenshotsResult getPkgScreenshots(GetPkgScreenshotsRequest getPkgScreenshotsRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(getPkgScreenshotsRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgScreenshotsRequest.pkgName));
@@ -301,6 +321,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     public GetPkgScreenshotsResult.PkgScreenshot apply(PkgScreenshot pkgScreenshot) {
                         GetPkgScreenshotsResult.PkgScreenshot rs = new GetPkgScreenshotsResult.PkgScreenshot();
                         rs.code = pkgScreenshot.getCode();
+                        rs.height = pkgScreenshot.getHeight();
+                        rs.width = pkgScreenshot.getWidth();
+                        rs.length = pkgScreenshot.getLength();
                         return rs;
                     }
                 }
