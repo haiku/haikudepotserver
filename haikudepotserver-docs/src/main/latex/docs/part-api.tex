@@ -216,8 +216,8 @@ This API is able to produce an image for a screenshot that can be identified by 
   \end{itemize}
 \item Expected HTTP Status Codes
   \begin{itemize}
-  \item {\bf 200} : The icon is provided in the response (for GET)
-  \item {\bf 415} : The path did not include ".png" or the target width or height is invalid
+  \item {\bf 200} : The image data is provided in the response (for GET)
+  \item {\bf 415} : The path did not include ".png" or the target width or height is invalid or the length of the data is too large
   \item {\bf 400} : The screenshot code was not supplied
   \item {\bf 404} : The screenshot was not found
   \end{itemize}
@@ -226,6 +226,25 @@ This API is able to produce an image for a screenshot that can be identified by 
 An example URL is;
 
 \framebox{\tt http://localhost:8080/pkgscreenshot/a78hw20fh2p20fh122jd92.png?tw=640\&th=480}
+
+\subsubsection{Get Raw Screenshot Image}
+
+This API is able to provide the {\it raw} screenshot data.
+
+\begin{itemize}
+\item HTTP Method : GET
+\item Path : /pkgscreenshot/raw/$<$screenshotcode$>$
+\item Response Content-Type : {\it As per the stored data}
+\item Expected HTTP Status Codes
+  \begin{itemize}
+  \item {\bf 200} : The image data is provided in the response (for GET)
+  \item {\bf 404} : The screenshot was not found
+  \end{itemize}
+\end{itemize}
+
+An example URL is;
+
+\framebox{\tt http://localhost:8080/pkgscreenshot/raw/a78hw20fh2p20fh122jd92}
 
 \subsubsection{Put Screenshot Image}
 
@@ -237,7 +256,7 @@ This API is able to store an image for a screenshot for the nominated package.  
 \item Expected HTTP Status Codes
   \begin{itemize}
   \item {\bf 200} : The screenshot image was stored
-  \item {\bf 415} : The path did not include ".png" or the size of the image is invalid or the payload is not PNG image data.
+  \item {\bf 415} : The path did not include ".png" or the size (pixels or data) of the image is invalid or the payload is not PNG image data.
   \item {\bf 404} : The package identified in the path was not able to be found
   \item {\bf 400} : The package name was not supplied
   \end{itemize}

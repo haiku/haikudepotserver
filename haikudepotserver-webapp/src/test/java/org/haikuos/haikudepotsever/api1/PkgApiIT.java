@@ -154,7 +154,29 @@ public class PkgApiIT extends AbstractIntegrationTest {
             PkgScreenshot pkgScreenshot = sortedScreenshots.get(i);
             GetPkgScreenshotsResult.PkgScreenshot apiPkgScreenshot = result.items.get(i);
             Assertions.assertThat(pkgScreenshot.getCode()).isEqualTo(apiPkgScreenshot.code);
+            Assertions.assertThat(pkgScreenshot.getWidth()).isEqualTo(320);
+            Assertions.assertThat(pkgScreenshot.getHeight()).isEqualTo(240);
+            Assertions.assertThat(pkgScreenshot.getLength()).isEqualTo(41296);
         }
+    }
+
+    /**
+     * <p>This test depends on the sample package pkg1 having some screenshots associated with it.</p>
+     */
+
+    @Test
+    public void testGetPkgScreenshot() throws ObjectNotFoundException {
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        String code = data.pkg1.getSortedPkgScreenshots().get(0).getCode();
+
+        // ------------------------------------
+        GetPkgScreenshotResult result = pkgApi.getPkgScreenshot(new GetPkgScreenshotRequest(code));
+        // ------------------------------------
+
+        Assertions.assertThat(result.code).isEqualTo(code);
+        Assertions.assertThat(result.width).isEqualTo(320);
+        Assertions.assertThat(result.height).isEqualTo(240);
+        Assertions.assertThat(result.length).isEqualTo(41296);
     }
 
     /**

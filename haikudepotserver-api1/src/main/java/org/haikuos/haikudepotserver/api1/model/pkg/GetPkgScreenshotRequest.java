@@ -9,4 +9,11 @@ public class GetPkgScreenshotRequest {
 
     public String code;
 
+    public GetPkgScreenshotRequest() {
+    }
+
+    public GetPkgScreenshotRequest(String code) {
+        this.code = code;
+    }
+
 }
