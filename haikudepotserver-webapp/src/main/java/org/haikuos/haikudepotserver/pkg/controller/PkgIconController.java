@@ -140,6 +140,7 @@ public class PkgIconController extends AbstractController {
         }
 
         response.setContentType(MediaType.PNG.toString());
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
         response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
 
         pkgService.writePkgIconImage(

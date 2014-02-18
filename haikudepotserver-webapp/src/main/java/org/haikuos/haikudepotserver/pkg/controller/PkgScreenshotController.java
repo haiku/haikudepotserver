@@ -151,6 +151,7 @@ public class PkgScreenshotController extends AbstractController {
         }
 
         response.setContentType(MediaType.PNG.toString());
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
         response.setDateHeader(
                 HttpHeaders.LAST_MODIFIED,
                 screenshotOptional.get().getPkg().getModifyTimestampSecondAccuracy().getTime());
