@@ -12,40 +12,6 @@
     <artifactId>haikudepotserver-webapp</artifactId>
     <packaging>war</packaging>
 
-    <properties>
-
-        <!--
-        This random UUID identifies the current version of the web-resources.  If this value is bumped, the effect
-        is that new resources will be downloaded from the internet.  Use the UNIX command "uuidgen" to get a new
-        identifier.
-        -->
-
-        <webresources.guid>D4BAB0F5-EFDC-436B-8692-D756A5CE9FCA</webresources.guid>
-
-        <!--
-        These are the versions of web-resources that are downloaded as part of this version of web resources
-        -->
-        <angularuiutils.version>0.4.0</angularuiutils.version>
-        <angularjs.version>1.2.10</angularjs.version>
-        <base64js.version>0.2.0</base64js.version>
-        <underscorejs.version>1.5.2</underscorejs.version>
-        <momentjs.version>2.5.1</momentjs.version>
-
-        <!--
-        These are the source (base URLs) for the web resources to be downloaded from.
-        -->
-
-        <js.angularjsurl>http://code.angularjs.org</js.angularjsurl>
-        <js.cdnurl>http://cdnjs.cloudflare.com/ajax/libs</js.cdnurl>
-
-        <!--
-        These are the locations within the project into which the web-resources will be saved.
-        -->
-
-        <js.libsroot>${basedir}/src/main/webapp/js/lib/${webresources.guid}</js.libsroot>
-
-    </properties>
-
     <dependencies>
 
         <!-- haikudepot -->
@@ -153,6 +119,23 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>angularjs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>angular-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>underscorejs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>momentjs</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -162,7 +145,7 @@
                 <directory>${basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>webresources.properties</include>
+                    <include>webjars.properties</include>
                     <include>build.properties</include>
                 </includes>
             </resource>
@@ -170,37 +153,13 @@
                 <directory>${basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>webresources.properties</exclude>
+                    <exclude>webjars.properties</exclude>
                     <exclude>build.properties</exclude>
                 </excludes>
             </resource>
         </resources>
 
         <plugins>
-
-
-            <!--
-            Download and install various things from the internet into the
-            project so that they do not need to be supplied as source.
-            -->
-
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <target>
-                                <ant antfile="${project.basedir}/src/etc/ant/fetchwebresources-build.xml" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 
             <!--
             This plugin will ensure that the integration tests are run when

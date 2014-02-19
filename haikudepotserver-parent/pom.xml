@@ -7,9 +7,17 @@
     <version>1.0.2-SNAPSHOT</version>
 
     <properties>
-        <spring.version>3.2.4.RELEASE</spring.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <spring.version>3.2.4.RELEASE</spring.version>
         <postgresql.version>9.3-1100-jdbc41</postgresql.version>
+
+        <web-angularjs.version>1.2.13</web-angularjs.version>
+        <web-angular-ui.version>0.4.0-1</web-angular-ui.version>
+        <web-underscorejs.version>1.5.2-2</web-underscorejs.version>
+        <web-momentjs.version>2.5.0</web-momentjs.version>
+
     </properties>
 
     <dependencyManagement>
@@ -21,7 +29,7 @@
                 <version>2.0.23</version>
             </dependency>
 
-            <!-- logging -->
+            <!-- LOGGING -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -135,6 +143,28 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+
+            <!-- WEB JARS (http://www.webjars.org/) -->
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>angularjs</artifactId>
+                <version>${web-angularjs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>angular-ui</artifactId>
+                <version>${web-angular-ui.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>underscorejs</artifactId>
+                <version>${web-underscorejs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>momentjs</artifactId>
+                <version>${web-momentjs.version}</version>
             </dependency>
 
         </dependencies>
