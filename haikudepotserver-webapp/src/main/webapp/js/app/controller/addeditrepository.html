@@ -12,6 +12,7 @@
                     id="code"
                     type="text"
                     name="code"
+                    autocomplete="off"
                     ng-show="!amEditing"
                     ng-change="codeChanged()"
                     ng-required="true"
@@ -39,6 +40,7 @@
                     type="text"
                     size="64"
                     name="url"
+                    autocomplete="off"
                     ng-change="urlChanged()"
                     ng-required="true"
                     ng-model="workingRepository.url"></input>

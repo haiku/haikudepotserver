@@ -10,6 +10,7 @@
         <div ng-show="'SEARCH'==selectedViewCriteriaTypeOption.code">
             <input
                     ng-model="searchExpression"
+                    autocomplete="off"
                     ui-keypress="{enter:'goSearch()'}"
                     placeholder="Search..."></input>
             <button
