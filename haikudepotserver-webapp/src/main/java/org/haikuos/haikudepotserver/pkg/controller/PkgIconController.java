@@ -163,10 +163,10 @@ public class PkgIconController extends AbstractController {
     @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
     public void handleHead(
             HttpServletResponse response,
-            @RequestParam(value = KEY_SIZE) Integer size,
+            @RequestParam(value = KEY_SIZE, required = false) Integer size,
             @PathVariable(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName,
-            @RequestParam(value = KEY_FALLBACK) Boolean fallback)
+            @RequestParam(value = KEY_FALLBACK, required = false) Boolean fallback)
             throws IOException {
         handleHeadOrGet(
                 RequestMethod.HEAD,
@@ -180,10 +180,10 @@ public class PkgIconController extends AbstractController {
     @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
     public void handleGet(
             HttpServletResponse response,
-            @RequestParam(value = KEY_SIZE, required = true) int size,
+            @RequestParam(value = KEY_SIZE, required = false) Integer size,
             @PathVariable(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName,
-            @RequestParam(value = KEY_FALLBACK) Boolean fallback)
+            @RequestParam(value = KEY_FALLBACK, required = false) Boolean fallback)
     throws IOException {
         handleHeadOrGet(
                 RequestMethod.GET,

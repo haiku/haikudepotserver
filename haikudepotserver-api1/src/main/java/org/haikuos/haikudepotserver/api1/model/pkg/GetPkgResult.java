@@ -22,12 +22,6 @@ public class GetPkgResult {
 
     public Long modifyTimestamp;
 
-    /**
-     * <p>This method will return true if the package has an icon configured for it.</p>
-     */
-
-    public Boolean hasIcon;
-
     public List<Version> versions;
 
     public static class Version {

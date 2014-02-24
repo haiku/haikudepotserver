@@ -76,7 +76,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgResult result = pkgApi.getPkg(request);
         // ------------------------------------
 
-        Assertions.assertThat(result.hasIcon).isTrue(); // icons are preloaded in the test data
         Assertions.assertThat(result.name).isEqualTo("pkg1");
         Assertions.assertThat(result.versions.size()).isEqualTo(1);
         Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
@@ -111,9 +110,23 @@ public class PkgApiIT extends AbstractIntegrationTest {
         }
     }
 
-    /**
-     * <p>Here we are trying to load the HVIF data in as PNG images.</p>
-     */
+    @Test
+    public void testGetPkgIcons() throws Exception {
+
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+
+        // ------------------------------------
+        GetPkgIconsResult result = pkgApi.getPkgIcons(new GetPkgIconsRequest("pkg1"));
+        // ------------------------------------
+
+        Assertions.assertThat(result.pkgIcons.size()).isEqualTo(2);
+        // check more stuff...
+
+    }
+
+        /**
+         * <p>Here we are trying to load the HVIF data in as PNG images.</p>
+         */
 
     @Test
     public void testConfigurePkgIcon_badData() throws Exception {

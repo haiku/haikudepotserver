@@ -63,6 +63,9 @@
                 <li ng-show="canEditIcon()" pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
                     <a href="" ng-click="goEditIcon()">Edit icons</a>
                 </li>
+                <li ng-show="pkgIconHvifUrl">
+                    <a href="{{pkgIconHvifUrl}}">Download icon in 'hvif' format</a>
+                </li>
                 <li ng-show="canEditScreenshots()" pkg="pkg" show-if-pkg-permission="'PKG_EDITSCREENSHOT'">
                     <a href="" ng-click="goEditScreenshots()">Edit screenshots</a>
                 </li>

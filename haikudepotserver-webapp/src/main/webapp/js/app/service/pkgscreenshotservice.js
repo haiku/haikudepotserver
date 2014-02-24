@@ -66,8 +66,8 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
 
                     $http({
                         cache: false,
-                        method: 'PUT',
-                        url: '/pkgscreenshot/'+pkg.name+'.png',
+                        method: 'POST',
+                        url: '/pkgscreenshot/'+pkg.name+'/add?format=png',
                         headers: _.extend(
                             { 'Content-Type' : 'image/png' },
                             PkgScreenshot.headers),
@@ -123,7 +123,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                         throw 'the code must be supplied to derive a url for the screenshot image';
                     }
 
-                    return '/pkgscreenshot/raw/' + code;
+                    return '/pkgscreenshot/' + code + '/raw';
                 },
 
                 /**

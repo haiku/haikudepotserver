@@ -19,8 +19,8 @@ angular.module('haikudepotserver').directive('pkgIcon',function() {
                 pkg:'='
             },
             controller:
-                ['$scope','pkgIcon',
-                    function($scope,pkgIcon) {
+                ['$scope','pkgIcon','constants',
+                    function($scope,pkgIcon,constants) {
 
                         $scope.imgUrl = '';
 
@@ -30,7 +30,7 @@ angular.module('haikudepotserver').directive('pkgIcon',function() {
                                     throw 'pkg does not contain a name to identify the pkg for the pkg-icon';
                                 }
                                 else {
-                                    $scope.imgUrl = pkgIcon.url($scope.pkg, $scope.size);
+                                    $scope.imgUrl = pkgIcon.url($scope.pkg, constants.MEDIATYPE_PNG, $scope.size);
                                 }
                             }
                         }

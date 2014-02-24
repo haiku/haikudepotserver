@@ -154,14 +154,14 @@ An example URL is;
 
 \subsubsection{Get Package Icon}
 
-This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image if the ``f'' query parameter is configured to ``true'' --- otherwise it will return a 404 HTTP status code.  Providing a fallback image may not be possible in all cases.  The request will return a {\tt Last-Modified} header.  The timestamps here will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  The path includes a {\it mediatype-extension} which can have one of the following values;
+This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image if the ``f'' query parameter is configured to ``true'' --- otherwise it will return a 404 HTTP status code.  Providing a fallback image may not be possible in all cases.  The request will return a {\tt Last-Modified} header.  The timestamps of this header will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  The path includes a {\it mediatype-extension} which can have one of the following values;
 
 \begin{itemize}
 \item png
 \item hvif
 \end{itemize}
 
-For example ``somepage.png''.
+Details of the API;
 
 \begin{itemize}
 \item HTTP Method : GET, HEAD
@@ -183,11 +183,11 @@ For example ``somepage.png''.
 
 An example URL is;
 
-\framebox{\tt http://localhost:8080/pkgicon/apr.png?size=32}
+\framebox{\tt http://localhost:8080/pkgicon/apr.png?size=32\&f=true}
 
 \subsubsection{Get Screenshot Image}
 
-This API is able to produce an image for a screenshot that can be identified by its code.  The request will return a {\tt Last-Modified} header.  The timestamps here will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  Requests for screenshot image should be accompanied by a target width and height.  These values must be within a range of 1..1500.  The image will maintain its aspect ratio as it is scaled.
+This API is able to produce an image for a screenshot that can be identified by its code.  The request will return a {\tt Last-Modified} header.  The timestamps of this header will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  Requests for screenshot image should be accompanied by a target width and height.  These values must be within a range of 1..1500.  The image will maintain its aspect ratio as it is scaled to fit within the target width and height.
 
 \begin{itemize}
 \item HTTP Method : GET, HEAD
@@ -195,8 +195,8 @@ This API is able to produce an image for a screenshot that can be identified by 
 \item Response Content-Type : image/png
 \item Query Parameters
   \begin{itemize}
-  \item {\bf tw} : An integer that describes the width that the image should be scaled to
-  \item {\bf th} : An integer that describes the height that the image should be scaled to
+  \item {\bf tw} : An integer value that describes the width that the image should be scaled to
+  \item {\bf th} : An integer value that describes the height that the image should be scaled to
   \end{itemize}
 \item Expected HTTP Status Codes
   \begin{itemize}
@@ -217,26 +217,30 @@ This API is able to provide the {\it raw} screenshot data.
 
 \begin{itemize}
 \item HTTP Method : GET
-\item Path : /pkgscreenshot/raw/$<$screenshotcode$>$
+\item Path : /pkgscreenshot/$<$screenshotcode$>$/raw
 \item Response Content-Type : {\it As per the stored data}
 \item Expected HTTP Status Codes
   \begin{itemize}
   \item {\bf 200} : The image data is provided in the response (for GET)
-  \item {\bf 404} : The screenshot was not found
+  \item {\bf 404} : The screenshot was not found for the code supplied
   \end{itemize}
 \end{itemize}
 
 An example URL is;
 
-\framebox{\tt http://localhost:8080/pkgscreenshot/raw/a78hw20fh2p20fh122jd92}
+\framebox{\tt http://localhost:8080/pkgscreenshot/a78hw20fh2p20fh122jd92/raw}
 
 \subsubsection{Put Screenshot Image}
 
-This API is able to store an image for a screenshot for the nominated package.  The screenshot will be ordered last.  The payload of the PUT must be a PNG image.
+This API is able to add an image as a screenshot for the nominated package.  The screenshot will be ordered last.  The payload of the PUT must be a PNG image that is a maximum of 1500x1500 pixels and 2MB in size.
 
 \begin{itemize}
-\item HTTP Method : PUT
-\item Path : /pkgscreenshot/$<$pkgname$>$.png
+\item HTTP Method : POST
+\item Path : /pkgscreenshot/$<$pkgname$>$/add
+\item Query Parameters
+  \begin{itemize}
+  \item {\bf format} : The string 'png' to define the image format.
+  \end{itemize}
 \item Expected HTTP Status Codes
   \begin{itemize}
   \item {\bf 200} : The screenshot image was stored
@@ -252,7 +256,7 @@ This API is able to store an image for a screenshot for the nominated package.  
 
 An example URL is;
 
-\framebox{\tt http://localhost:8080/pkgscreenshot/apr.png}
+\framebox{\tt http://localhost:8080/pkgscreenshot/apr/add?format=png}
 
 
 

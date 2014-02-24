@@ -53,6 +53,19 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Resource
     PkgService pkgService;
 
+    private Pkg getPkg(ObjectContext context, String pkgName) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));
+
+        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+
+        if(!pkgOptional.isPresent()) {
+            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), pkgName);
+        }
+
+        return pkgOptional.get();
+    }
+
     @Override
     public SearchPkgsResult searchPkgs(SearchPkgsRequest request) {
         Preconditions.checkNotNull(request);
@@ -209,15 +222,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         GetPkgResult result = new GetPkgResult();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.name);
+        Pkg pkg = getPkg(context, request.name);
 
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.name);
-        }
-
-        result.name = pkgOptional.get().getName();
-        result.modifyTimestamp = pkgOptional.get().getModifyTimestamp().getTime();
-        result.hasIcon = !pkgOptional.get().getPkgIcons().isEmpty();
+        result.name = pkg.getName();
+        result.modifyTimestamp = pkg.getModifyTimestamp().getTime();
 
         switch(request.versionType) {
             case LATEST:
@@ -227,7 +235,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
                 Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
                         context,
-                        pkgOptional.get(),
+                        pkg,
                         Lists.newArrayList(
                                 architectureOptional.get(),
                                 Architecture.getByCode(context, Architecture.CODE_ANY).get(),
@@ -269,21 +277,42 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
+    public GetPkgIconsResult getPkgIcons(GetPkgIconsRequest request) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
+
+        final ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = getPkg(context, request.pkgName);
+
+        GetPkgIconsResult result = new GetPkgIconsResult();
+        result.pkgIcons = Lists.transform(
+                pkg.getPkgIcons(),
+                new Function<PkgIcon, GetPkgIconsResult.PkgIcon>() {
+                    @Override
+                    public GetPkgIconsResult.PkgIcon apply(PkgIcon input) {
+                        GetPkgIconsResult.PkgIcon apiPkgIcon = new GetPkgIconsResult.PkgIcon();
+                        apiPkgIcon.size = input.getSize();
+                        apiPkgIcon.mediaTypeCode = input.getMediaType().getCode();
+                        return apiPkgIcon;
+                    }
+                }
+        );
+
+        return result;
+    }
+
+    @Override
     public ConfigurePkgIconResult configurePkgIcon(ConfigurePkgIconRequest request) throws ObjectNotFoundException, BadPkgIconException {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
 
         final ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.pkgName);
-
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
-        }
+        Pkg pkg = getPkg(context, request.pkgName);
 
         User user = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user, pkgOptional.get(), Permission.PKG_EDITICON)) {
-            logger.warn("attempt to configure the icon for package {}, but the user {} is not able to", pkgOptional.get().getName(), user.getNickname());
+        if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
+            logger.warn("attempt to configure the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 
@@ -328,7 +357,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                                     mediaTypeOptional.get(),
                                     pkgIconApi.size,
                                     context,
-                                    pkgOptional.get()
+                                    pkg
                             )
                     );
 
@@ -347,7 +376,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         // now we have some icons stored which may not be in the replacement data; we should remove those ones.
 
-        for(PkgIcon pkgIcon : ImmutableList.copyOf(pkgOptional.get().getPkgIcons())) {
+        for(PkgIcon pkgIcon : ImmutableList.copyOf(pkg.getPkgIcons())) {
             if(!createdOrUpdatedPkgIcons.contains(pkgIcon)) {
                 context.deleteObjects(
                         pkgIcon.getPkgIconImage().get(),
@@ -357,14 +386,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             }
         }
 
-        pkgOptional.get().setModifyTimestamp();
+        pkg.setModifyTimestamp();
 
         context.commitChanges();
 
         logger.info(
                 "did configure icons for pkg {} (updated {}, removed {})",
                 new Object[] {
-                        pkgOptional.get().getName(),
+                        pkg.getName(),
                         updated,
                         removed
                 }
@@ -380,30 +409,26 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
 
         final ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.pkgName);
-
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
-        }
+        Pkg pkg = getPkg(context, request.pkgName);
 
         User user = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user, pkgOptional.get(), Permission.PKG_EDITICON)) {
-            logger.warn("attempt to remove the icon for package {}, but the user {} is not able to", pkgOptional.get().getName(), user.getNickname());
+        if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
+            logger.warn("attempt to remove the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 
-        for(PkgIcon pkgIcon : ImmutableList.copyOf(pkgOptional.get().getPkgIcons())) {
+        for(PkgIcon pkgIcon : ImmutableList.copyOf(pkg.getPkgIcons())) {
             context.deleteObjects(
                     pkgIcon.getPkgIconImage().get(),
                     pkgIcon);
         }
 
-        pkgOptional.get().setModifyTimestamp();
+        pkg.setModifyTimestamp();
 
         context.commitChanges();
 
-        logger.info("did remove icons for pkg {}",pkgOptional.get().getName());
+        logger.info("did remove icons for pkg {}",pkg.getName());
 
         return new RemovePkgIconResult();
     }
@@ -434,15 +459,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgScreenshotsRequest.pkgName));
 
         final ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, getPkgScreenshotsRequest.pkgName);
-
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), getPkgScreenshotsRequest.pkgName);
-        }
+        Pkg pkg = getPkg(context, getPkgScreenshotsRequest.pkgName);
 
         GetPkgScreenshotsResult result = new GetPkgScreenshotsResult();
         result.items = Lists.transform(
-                pkgOptional.get().getSortedPkgScreenshots(),
+                pkg.getSortedPkgScreenshots(),
                 new Function<PkgScreenshot, GetPkgScreenshotsResult.PkgScreenshot>() {
                     @Override
                     public GetPkgScreenshotsResult.PkgScreenshot apply(PkgScreenshot pkgScreenshot) {
@@ -501,22 +522,18 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(reorderPkgScreenshotsRequest.codes);
 
         final ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, reorderPkgScreenshotsRequest.pkgName);
-
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), reorderPkgScreenshotsRequest.pkgName);
-        }
+        Pkg pkg = getPkg(context, reorderPkgScreenshotsRequest.pkgName);
 
         User authUser = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, authUser, pkgOptional.get(), Permission.PKG_EDITSCREENSHOT)) {
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITSCREENSHOT)) {
             throw new AuthorizationFailureException();
         }
 
-        pkgOptional.get().reorderPkgScreenshots(reorderPkgScreenshotsRequest.codes);
+        pkg.reorderPkgScreenshots(reorderPkgScreenshotsRequest.codes);
         context.commitChanges();
 
-        logger.info("did reorder the screenshots on package {}", pkgOptional.get().getName());
+        logger.info("did reorder the screenshots on package {}", pkg.getName());
 
         return null;
     }

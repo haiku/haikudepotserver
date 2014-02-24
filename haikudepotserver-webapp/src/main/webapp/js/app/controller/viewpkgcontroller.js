@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','userState','errorHandling',
-        'pkgScreenshot',
+        'pkgScreenshot','pkgIcon',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,userState,errorHandling,
-            pkgScreenshot) {
+            pkgScreenshot, pkgIcon) {
 
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 480;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 320;
@@ -21,6 +21,9 @@ angular.module('haikudepotserver').controller(
             $scope.pkg = undefined;
             $scope.pkgScreenshots = undefined;
             $scope.pkgScreenshotOffset = 0;
+            $scope.pkgIconHvifUrl = undefined;
+
+            var hasPkgIcons = undefined;
 
             refetchPkg();
 
@@ -29,7 +32,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.canRemoveIcon = function() {
-                return $scope.pkg && $scope.pkg.hasIcon;
+                return $scope.pkg && hasPkgIcons;
             }
 
             $scope.canEditIcon = function() {
@@ -79,11 +82,40 @@ angular.module('haikudepotserver').controller(
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
                         refetchPkgScreenshots();
+                        refetchPkgIconMetaData();
                     },
                     function(err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
+            }
+
+            function refetchPkgIconMetaData() {
+
+                $scope.pkgIconHvifUrl = undefined;
+
+                jsonRpc.call(
+                        constants.ENDPOINT_API_V1_PKG,
+                        "getPkgIcons",
+                        [{ pkgName: $routeParams.name }]
+                    ).then(
+                    function(result) {
+
+                        var has = !!_.findWhere(
+                            result.pkgIcons,
+                            { mediaTypeCode : constants.MEDIATYPE_HAIKUVECTORICONFILE });
+
+                        $scope.pkgIconHvifUrl = has ? pkgIcon.url(
+                            $scope.pkg,
+                            constants.MEDIATYPE_HAIKUVECTORICONFILE) : undefined;
+
+                        hasPkgIcons = !!result.pkgIcons.length;
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+
             }
 
             // ------------------------
@@ -162,7 +194,7 @@ angular.module('haikudepotserver').controller(
                     ).then(
                     function(result) {
                         $log.info('removed icons for '+$routeParams.name+' pkg');
-                        $scope.pkg.hasIcon = false;
+                        refetchPkgIconMetaData();
                         $scope.pkg.modifyTimestamp = new Date().getTime();
                     },
                     function(err) {

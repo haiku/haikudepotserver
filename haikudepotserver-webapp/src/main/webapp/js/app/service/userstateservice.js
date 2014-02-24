@@ -210,7 +210,6 @@ angular.module('haikudepotserver').factory('userState',
 
                             // remove the Authorization header for HTTP transport
                             jsonRpc.setHeader('Authorization');
-                            pkgIcon.setHeader('Authorization');
                             pkgScreenshot.setHeader('Authorization');
                         }
                         else {
@@ -226,7 +225,6 @@ angular.module('haikudepotserver').factory('userState',
                             var basic = 'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear);
 
                             jsonRpc.setHeader('Authorization',basic);
-                            pkgIcon.setHeader('Authorization',basic);
                             pkgScreenshot.setHeader('Authorization',basic);
 
                             user = value;

@@ -59,72 +59,13 @@ public class PkgScreenshotController extends AbstractController {
     @Resource
     AuthorizationService authorizationService;
 
-    @RequestMapping(value = "/{"+KEY_SCREENSHOTCODE+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
-    public void fetchHead(
-            HttpServletRequest request,
+    private void handleHeadOrGet(
+            RequestMethod requestMethod,
             HttpServletResponse response,
-            @RequestParam(value = KEY_TARGETWIDTH) Integer targetWidth,
-            @RequestParam(value = KEY_TARGETHEIGHT) Integer targetHeight,
-            @PathVariable(value = KEY_FORMAT) String format,
-            @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
-            throws IOException {
-
-        if(null!=targetWidth && (targetWidth <= 0 || targetWidth > SCREENSHOT_SIDE_LIMIT)) {
-            throw new BadSize();
-        }
-
-        if(null!=targetHeight && (targetHeight <= 0 || targetHeight > SCREENSHOT_SIDE_LIMIT)) {
-            throw new BadSize();
-        }
-
-        if(null==targetHeight) {
-            targetHeight = SCREENSHOT_SIDE_LIMIT * 2;
-        }
-
-        if(null==targetWidth) {
-            targetWidth = SCREENSHOT_SIDE_LIMIT * 2;
-        }
-
-        if(Strings.isNullOrEmpty(screenshotCode)) {
-            throw new MissingScreenshotCode();
-        }
-
-        if(Strings.isNullOrEmpty(format) || !"png".equals(format)) {
-            throw new MissingOrBadFormat();
-        }
-
-        ObjectContext context = serverRuntime.getContext();
-        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.getByCode(context, screenshotCode);
-
-        if(!screenshotOptional.isPresent()) {
-            throw new ScreenshotNotFound();
-        }
-
-        ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
-
-        pkgService.writePkgScreenshotImage(
-                byteCounter,
-                context,
-                screenshotOptional.get(),
-                targetWidth,
-                targetHeight);
-
-        response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
-        response.setContentType(MediaType.PNG.toString());
-        response.setDateHeader(
-                HttpHeaders.LAST_MODIFIED,
-                screenshotOptional.get().getPkg().getModifyTimestampSecondAccuracy().getTime());
-
-    }
-
-    @RequestMapping(value = "/{"+KEY_SCREENSHOTCODE+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
-    public void fetchGet(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @RequestParam(value = KEY_TARGETWIDTH, required = true) int targetWidth,
-            @RequestParam(value = KEY_TARGETHEIGHT, required = true) int targetHeight,
-            @PathVariable(value = KEY_FORMAT) String format,
-            @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
+            Integer targetWidth,
+            Integer targetHeight,
+            String format,
+            String screenshotCode)
             throws IOException {
 
         if(targetWidth <= 0 || targetWidth > SCREENSHOT_SIDE_LIMIT) {
@@ -152,25 +93,85 @@ public class PkgScreenshotController extends AbstractController {
 
         response.setContentType(MediaType.PNG.toString());
         response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
+
         response.setDateHeader(
                 HttpHeaders.LAST_MODIFIED,
                 screenshotOptional.get().getPkg().getModifyTimestampSecondAccuracy().getTime());
 
-        pkgService.writePkgScreenshotImage(
-                response.getOutputStream(),
-                context,
-                screenshotOptional.get(),
+        switch(requestMethod) {
+            case HEAD:
+                ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
+
+                pkgService.writePkgScreenshotImage(
+                        byteCounter,
+                        context,
+                        screenshotOptional.get(),
+                        targetWidth,
+                        targetHeight);
+
+                response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
+
+                break;
+
+            case GET:
+                pkgService.writePkgScreenshotImage(
+                        response.getOutputStream(),
+                        context,
+                        screenshotOptional.get(),
+                        targetWidth,
+                        targetHeight);
+                break;
+
+            default:
+                throw new IllegalStateException("unhandled request method; "+requestMethod);
+        }
+
+    }
+
+    @RequestMapping(value = "/{"+KEY_SCREENSHOTCODE+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
+    public void handleHead(
+            HttpServletResponse response,
+            @RequestParam(value = KEY_TARGETWIDTH) Integer targetWidth,
+            @RequestParam(value = KEY_TARGETHEIGHT) Integer targetHeight,
+            @PathVariable(value = KEY_FORMAT) String format,
+            @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
+            throws IOException {
+
+        handleHeadOrGet(
+                RequestMethod.HEAD,
+                response,
                 targetWidth,
-                targetHeight);
+                targetHeight,
+                format,
+                screenshotCode);
+
+    }
+
+    @RequestMapping(value = "/{"+KEY_SCREENSHOTCODE+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
+    public void handleGet(
+            HttpServletResponse response,
+            @RequestParam(value = KEY_TARGETWIDTH, required = true) int targetWidth,
+            @RequestParam(value = KEY_TARGETHEIGHT, required = true) int targetHeight,
+            @PathVariable(value = KEY_FORMAT) String format,
+            @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
+            throws IOException {
+
+        handleHeadOrGet(
+                RequestMethod.GET,
+                response,
+                targetWidth,
+                targetHeight,
+                format,
+                screenshotCode);
+
     }
 
     /**
      * <p>This one downloads the raw data that is stored for a screenshot.</p>
      */
 
-    @RequestMapping(value = "/raw/{"+KEY_SCREENSHOTCODE+"}", method = RequestMethod.GET)
-    public void fetchRawGet(
-            HttpServletRequest request,
+    @RequestMapping(value = "/{"+KEY_SCREENSHOTCODE+"}/raw", method = RequestMethod.GET)
+    public void handleRawGet(
             HttpServletResponse response,
             @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
             throws IOException {
@@ -217,11 +218,11 @@ public class PkgScreenshotController extends AbstractController {
      * <p>This handler will take-up an HTTP PUT that provides a new screenshot for the package.</p>
      */
 
-    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.PUT)
-    public void put(
+    @RequestMapping(value = "/{"+KEY_PKGNAME+"}/add", method = RequestMethod.POST)
+    public void handleAdd(
             HttpServletRequest request,
             HttpServletResponse response,
-            @PathVariable(value = KEY_FORMAT) String format,
+            @RequestParam(value = KEY_FORMAT, required = true) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName) throws IOException {
 
         if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
@@ -267,7 +268,7 @@ public class PkgScreenshotController extends AbstractController {
 
         context.commitChanges();
 
-        response.setHeader(HEADER_SCREENSHOTCODE,screenshotCode);
+        response.setHeader(HEADER_SCREENSHOTCODE, screenshotCode);
         response.setStatus(HttpServletResponse.SC_OK);
     }
 

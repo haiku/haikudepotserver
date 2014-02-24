@@ -32,6 +32,13 @@ public interface PkgApi {
     GetPkgResult getPkg(GetPkgRequest request) throws ObjectNotFoundException;
 
     /**
+     * <p>Returns a list of meta-data regarding the icon data related to the pkg.  This does not contain the icon
+     * data itself; just the meta data.</p>
+     */
+
+    GetPkgIconsResult getPkgIcons(GetPkgIconsRequest request) throws ObjectNotFoundException;
+
+    /**
      * <p>This request will configure the icons for the package nominated.  Note that only certain configurations of
      * icon data may be acceptable; for example, it will require a 16x16px and 32x32px bitmap image.</p>
      */
