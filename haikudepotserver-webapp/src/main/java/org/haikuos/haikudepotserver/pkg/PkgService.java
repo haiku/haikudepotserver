@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
+import com.google.common.net.*;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
@@ -18,6 +19,7 @@ import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.dataobjects.MediaType;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
@@ -210,7 +212,11 @@ public class PkgService {
     // ------------------------------
     // ICONS
 
-    private void writeGenericIconImage(
+    /**
+     * <p>This will output a bitmap image for a generic icon.</p>
+     */
+
+    public void writeGenericIconImage(
             OutputStream output,
             int size) throws IOException {
 
@@ -236,91 +242,89 @@ public class PkgService {
     }
 
     /**
-     * <p>This method will write the package's icon to the supplied output stream.  If there is no icon stored
-     * for the package then a generic icon will be provided instead.</p>
+     * <p>This method will write the icon data supplied in the input to the package as its icon.  Note that the icon
+     * must comply with necessary characteristics; for example it must be either 16 or 32 pixels along both its sides
+     * if it is a PNG.  If it is non-compliant then an instance of
+     * {@link org.haikuos.haikudepotserver.pkg.model.BadPkgIconException} will be thrown.</p>
      */
 
-    public void writePkgIconImage(
-            OutputStream output,
-            ObjectContext context,
-            Pkg pkg,
-            int size) throws IOException {
-
-        Preconditions.checkNotNull(output);
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkState(16==size||32==size);
-
-        Optional<PkgIconImage> pkgIconImageOptional = pkg.getPkgIconImage(
-                MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get(),
-                size);
-
-        if(pkgIconImageOptional.isPresent()) {
-            output.write(pkgIconImageOptional.get().getData());
-        }
-        else {
-            writeGenericIconImage(output, size);
-        }
-    }
-
-    /**
-     * <p>This method will write the PNG data supplied in the input to the package as its icon.  Note that the icon
-     * must comply with necessary characteristics; for example it must be either 16 or 32 pixels along both its sides.
-     * If it is non-compliant then an instance of {@link org.haikuos.haikudepotserver.pkg.model.BadPkgIconException} will be thrown.</p>
-     */
-
-    public void storePkgIconImage(
+    public PkgIcon storePkgIconImage(
             InputStream input,
-            int expectedSize,
+            MediaType mediaType,
+            Integer expectedSize,
             ObjectContext context,
             Pkg pkg) throws IOException, BadPkgIconException {
 
         Preconditions.checkNotNull(input);
+        Preconditions.checkNotNull(mediaType);
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
-        Preconditions.checkState(16==expectedSize||32==expectedSize);
 
-        byte[] pngData = toByteArray(input, ICON_SIZE_LIMIT);
-        ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
+        byte[] imageData = toByteArray(input, ICON_SIZE_LIMIT);
+        Optional<PkgIcon> pkgIconOptional = null;
+        Integer size = null;
 
-        if(null==size) {
-            logger.warn("attempt to set the package icon for package {}, but the data does not look like png",pkg.getName());
-            throw new BadPkgIconException();
+        if(com.google.common.net.MediaType.PNG.toString().equals(mediaType.getCode())) {
+
+            ImageHelper.Size pngSize =  imageHelper.derivePngSize(imageData);
+
+            if(null==pngSize) {
+                logger.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it is not a valid png image",pkg.getName());
+                throw new BadPkgIconException();
+            }
+
+            if(!pngSize.areSides(16) && !pngSize.areSides(32)) {
+                logger.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it must be either 32x32 or 16x16 px, but was {}",pkg.getName(),pngSize.toString());
+                throw new BadPkgIconException();
+            }
+
+            if(null!=expectedSize && !pngSize.areSides(expectedSize)) {
+                logger.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not match the expected size",pkg.getName());
+                throw new BadPkgIconException();
+            }
+
+            size = pngSize.width;
+            pkgIconOptional = pkg.getPkgIcon(mediaType, pngSize.width);
+        }
+        else {
+            if(MediaType.MEDIATYPE_HAIKUVECTORICONFILE.equals(mediaType.getCode())) {
+                if(!imageHelper.looksLikeHaikuVectorIconFormat(imageData)) {
+                    logger.warn("attempt to set the vector (hvif) package icon for package {}, but the data does not look like hvif",pkg.getName());
+                    throw new BadPkgIconException();
+                } 
+                pkgIconOptional = pkg.getPkgIcon(mediaType, null);
+            }
+            else {
+                throw new IllegalStateException("unhandled media type; "+mediaType.getCode());
+            }
         }
 
-        // check that the file roughly looks like PNG and that the size can be
-        // parsed and that the size fits the requirements for the icon.
-
-        if(null==size || (!size.areSides(16) && !size.areSides(32))) {
-            logger.warn("attempt to set the package icon for package {}, but the size was not able to be established; either it is not a valid png image or the size of the png image is not appropriate",pkg.getName());
-            throw new BadPkgIconException();
-        }
-
-        if(expectedSize != size.height && expectedSize != size.width) {
-            logger.warn("attempt to set the package icon for package {}, but the size was note the expected {}px",pkg.getName(),expectedSize);
-            throw new BadPkgIconException();
-        }
-
-        MediaType png = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
-        Optional<PkgIconImage> pkgIconImageOptional = pkg.getPkgIconImage(png,size.width);
         PkgIconImage pkgIconImage = null;
 
-        if(pkgIconImageOptional.isPresent()) {
-            pkgIconImage = pkgIconImageOptional.get();
+        if(pkgIconOptional.isPresent()) {
+            pkgIconImage = pkgIconOptional.get().getPkgIconImage().get();
         }
         else {
             PkgIcon pkgIcon = context.newObject(PkgIcon.class);
             pkg.addToManyTarget(Pkg.PKG_ICONS_PROPERTY, pkgIcon, true);
-            pkgIcon.setMediaType(png);
-            pkgIcon.setSize(size.width);
+            pkgIcon.setMediaType(mediaType);
+            pkgIcon.setSize(size);
             pkgIconImage = context.newObject(PkgIconImage.class);
             pkgIcon.addToManyTarget(PkgIcon.PKG_ICON_IMAGES_PROPERTY, pkgIconImage, true);
+            pkgIconOptional = Optional.of(pkgIcon);
         }
 
-        pkgIconImage.setData(pngData);
+        pkgIconImage.setData(imageData);
         pkg.setModifyTimestamp(new java.util.Date());
 
-        logger.info("the icon {}px for package {} has been updated", size.width, pkg.getName());
+        if(null!=size) {
+            logger.info("the icon {}px for package {} has been updated", size, pkg.getName());
+        }
+        else {
+            logger.info("the icon for package {} has been updated", pkg.getName());
+        }
+
+        return pkgIconOptional.get();
     }
 
     // ------------------------------

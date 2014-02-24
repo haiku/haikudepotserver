@@ -7,8 +7,10 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -48,37 +50,35 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     }
 
-    public Optional<PkgIconImage> getPkgIconImage(final MediaType mediaType, final int size) {
+    public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final Integer size) {
         Preconditions.checkNotNull(mediaType);
-        Preconditions.checkState(16==size||32==size);
 
-        Optional<PkgIcon> pkgIconOptional = getPkgIcon(mediaType,size);
+        List<PkgIcon> icons = getPkgIcons(mediaType,size);
 
-        if(pkgIconOptional.isPresent()) {
-            Optional<PkgIconImage> pkgIconImageOptional = pkgIconOptional.get().getPkgIconImage();
+        switch(icons.size()) {
+            case 0:
+                return Optional.absent();
 
-            if(pkgIconImageOptional.isPresent()) {
-                return pkgIconImageOptional;
-            }
-            else {
-                throw new IllegalStateException("a pkg icon does not have an image associated with it.");
-            }
+            case 1:
+                return Optional.of(icons.get(0));
+
+            default:
+                throw new IllegalStateException("more than one pkg icon of media type "+mediaType.getCode()+" of size "+size+" on pkg "+getName());
         }
-
-        return Optional.absent();
     }
 
-    public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final int size) {
+    private List<PkgIcon> getPkgIcons(final MediaType mediaType, final Integer size) {
         Preconditions.checkNotNull(mediaType);
-        Preconditions.checkState(16==size||32==size);
 
-        for(PkgIcon pkgIcon : getPkgIcons()) {
-            if(pkgIcon.getMediaType().equals(mediaType) && pkgIcon.getSize()==size) {
-                return Optional.of(pkgIcon);
+        return Lists.newArrayList(Iterables.filter(getPkgIcons(), new Predicate<PkgIcon>() {
+            @Override
+            public boolean apply(PkgIcon o) {
+                return
+                        o.getMediaType().equals(mediaType)
+                                && (null==size) == (null==o.getSize())
+                                && ((null==size) || size.equals(o.getSize()));
             }
-        }
-
-        return Optional.absent();
+        }));
     }
 
     public void setModifyTimestamp() {

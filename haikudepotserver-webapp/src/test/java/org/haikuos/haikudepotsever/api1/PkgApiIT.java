@@ -9,13 +9,17 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.net.MediaType;
+import com.googlecode.jsonrpc4j.Base64;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.PkgApi;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
+import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
+import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.support.Closeables;
@@ -104,6 +108,116 @@ public class PkgApiIT extends AbstractIntegrationTest {
         }
         catch(Throwable th) {
             Assert.fail("expected an instance of "+ObjectNotFoundException.class.getSimpleName()+" to be thrown, but "+th.getClass().getSimpleName()+" was instead");
+        }
+    }
+
+    /**
+     * <p>Here we are trying to load the HVIF data in as PNG images.</p>
+     */
+
+    @Test
+    public void testConfigurePkgIcon_badData() throws Exception {
+
+        setAuthenticatedUserToRoot();
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        byte[] sample16 = getResourceData("/sample-16x16.png");
+        byte[] sample32 = getResourceData("/sample-32x32.png");
+        byte[] sampleHvif = getResourceData("/sample.hvif");
+
+        ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
+
+        request.pkgName = "pkg1";
+        request.pkgIcons = ImmutableList.of(
+                new ConfigurePkgIconRequest.PkgIcon(
+                        MediaType.PNG.toString(),
+                        16,
+                        Base64.encodeBytes(sampleHvif)),
+                new ConfigurePkgIconRequest.PkgIcon(
+                        MediaType.PNG.toString(),
+                        32,
+                        Base64.encodeBytes(sampleHvif)),
+                new ConfigurePkgIconRequest.PkgIcon(
+                        org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE,
+                        null,
+                        Base64.encodeBytes(sampleHvif)));
+
+        try {
+
+            // ------------------------------------
+            pkgApi.configurePkgIcon(request);
+            // ------------------------------------
+
+            Assert.fail("expected an instance of '"+BadPkgIconException.class.getSimpleName()+"' to have been thrown");
+
+        }
+        catch(BadPkgIconException bpie) {
+
+            // This is the first one that failed so we should get this come up as the exception that was thrown.
+
+            Assertions.assertThat(bpie.getSize()).isEqualTo(16);
+            Assertions.assertThat(bpie.getMediaTypeCode()).isEqualTo(MediaType.PNG.toString());
+        }
+    }
+
+
+    /**
+     * <p>This test will configure the icons for the package.</p>
+     */
+
+    @Test
+    public void testConfigurePkgIcon_ok() throws Exception {
+
+        setAuthenticatedUserToRoot();
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        byte[] sample16 = getResourceData("/sample-16x16.png");
+        byte[] sample32 = getResourceData("/sample-32x32.png");
+        byte[] sampleHvif = getResourceData("/sample.hvif");
+
+        ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
+
+        request.pkgName = "pkg1";
+        request.pkgIcons = ImmutableList.of(
+                new ConfigurePkgIconRequest.PkgIcon(
+                        MediaType.PNG.toString(),
+                        16,
+                        Base64.encodeBytes(sample16)),
+                new ConfigurePkgIconRequest.PkgIcon(
+                        MediaType.PNG.toString(),
+                        32,
+                        Base64.encodeBytes(sample32)),
+                new ConfigurePkgIconRequest.PkgIcon(
+                        org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE,
+                        null,
+                        Base64.encodeBytes(sampleHvif)));
+
+        // ------------------------------------
+        pkgApi.configurePkgIcon(request);
+        // ------------------------------------
+
+        {
+            ObjectContext objectContext = serverRuntime.getContext();
+            Optional<Pkg> pkgOptionalafter = Pkg.getByName(objectContext, "pkg1");
+
+            org.haikuos.haikudepotserver.dataobjects.MediaType mediaTypePng
+                    = org.haikuos.haikudepotserver.dataobjects.MediaType.getByCode(
+                    objectContext,
+                    MediaType.PNG.toString()).get();
+
+            org.haikuos.haikudepotserver.dataobjects.MediaType mediaTypeHvif
+                    = org.haikuos.haikudepotserver.dataobjects.MediaType.getByCode(
+                    objectContext,
+                    org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get();
+
+            Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(3);
+
+            Optional<PkgIcon> pkgIcon16Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 16);
+            Assertions.assertThat(pkgIcon16Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample16);
+
+            Optional<PkgIcon> pkgIcon32Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 32);
+            Assertions.assertThat(pkgIcon32Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample32);
+
+            Optional<PkgIcon> pkgIconHvifOptional = pkgOptionalafter.get().getPkgIcon(mediaTypeHvif, null);
+            Assertions.assertThat(pkgIconHvifOptional.get().getPkgIconImage().get().getData()).isEqualTo(sampleHvif);
         }
     }
 

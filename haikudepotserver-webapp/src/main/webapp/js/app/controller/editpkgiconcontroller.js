@@ -20,8 +20,9 @@ angular.module('haikudepotserver').controller(
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.editPkgIcon = {
-                icon16File : undefined,
-                icon32File : undefined
+                iconBitmap16File : undefined, // bitmap
+                iconBitmap32File : undefined, // bitmap
+                iconHvifFile : undefined // vector 'Haiku Vector Icon Format'
             };
 
             $scope.shouldSpin = function() {
@@ -74,26 +75,39 @@ angular.module('haikudepotserver').controller(
             // the server because the user will not know if an updated file is also bad until the server has seen it;
             // ie: the validation is happening server-side rather than client-side.
 
-            function validateIconFile(file, model) {
+            function validateBitmapIconFile(file, model) {
                 model.$setValidity('badformatorsize',true);
                 model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < ICON_SIZE_LIMIT));
             }
 
-            function icon32FileDidChange() {
-                validateIconFile($scope.editPkgIcon.icon32File, $scope.editPkgIconForm['icon32File']);
+            function validateHvifIconFile(file, model) {
+                model.$setValidity('badformatorsize',true);
+                model.$setValidity('badsize',undefined==file || (file.size > 4 && file.size < ICON_SIZE_LIMIT));
             }
 
-            function icon16FileDidChange() {
-                validateIconFile($scope.editPkgIcon.icon16File, $scope.editPkgIconForm['icon16File']);
+            function iconBitmap32FileDidChange() {
+                validateBitmapIconFile($scope.editPkgIcon.iconBitmap32File, $scope.editPkgIconForm['iconBitmap32File']);
             }
 
-            $scope.$watch('editPkgIcon.icon32File', function(newValue) {
-                icon32FileDidChange();
+            function iconBitmap16FileDidChange() {
+                validateBitmapIconFile($scope.editPkgIcon.iconBitmap16File, $scope.editPkgIconForm['iconBitmap16File']);
+            }
+
+            $scope.$watch('editPkgIcon.iconBitmap32File', function(newValue) {
+                iconBitmap32FileDidChange();
             });
 
-            $scope.$watch('editPkgIcon.icon16File', function(newValue) {
-                icon16FileDidChange();
+            $scope.$watch('editPkgIcon.iconBitmap16File', function(newValue) {
+                iconBitmap16FileDidChange();
             });
+
+            $scope.$watch('editPkgIcon.iconHvifFile', function(newValue) {
+                validateHvifIconFile($scope.editPkgIcon.iconHvifFile, $scope.editPkgIconForm['iconHvifFile']);
+            });
+
+            $scope.goClearIconHvifFile = function() {
+                $scope.editPkgIcon.iconHvifFile = undefined;
+            }
 
             // This function will take the data from the form and load in the new pkg icons
 
@@ -105,42 +119,164 @@ angular.module('haikudepotserver').controller(
 
                 $scope.amSaving = true;
 
-                // two PUT requests are made to the server in order to convey the PNG data.
+                function handleStorePkgIcons(base64IconBitmap16, base64IconBitmap32, base64IconHvif) {
 
-                pkgIcon.setPkgIcon($scope.pkg, $scope.editPkgIcon.icon16File,16).then(
-                    function() {
-                        $log.info('have set the 16px icon for the pkg '+$scope.pkg.name);
+                    var pkgIcons = [
+                        {
+                            mediaTypeCode : constants.MEDIATYPE_PNG,
+                            size : 16,
+                            dataBase64 : base64IconBitmap16
+                        },
+                        {
+                            mediaTypeCode : constants.MEDIATYPE_PNG,
+                            size : 32,
+                            dataBase64 : base64IconBitmap32
+                        }
+                    ];
 
-                        pkgIcon.setPkgIcon($scope.pkg, $scope.editPkgIcon.icon32File,32).then(
-                            function() {
-                                $scope.amSaving = false;
-                                $log.info('have set the 32px icon for the pkg '+$scope.pkg.name);
-                                $location.path('/viewpkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
-                            },
-                            function(e) {
-                                $scope.amSaving = false;
-                                if(e==pkgIcon.errorCodes.BADFORMATORSIZEERROR) {
-                                    $scope.editPkgIconForm['icon32File'].$setValidity('badformatorsize',false);
-                                }
-                                else {
-                                    $log.error('unable to set the 32px icon for the pkg '+$scope.pkg.name);
-                                    $location.path('/error').search({});
-                                }
-                            }
-                        )
-                    },
-                    function(e) {
-                        $scope.amSaving = false;
-                        if(e==pkgIcon.errorCodes.BADFORMATORSIZEERROR) {
-                            $scope.editPkgIconForm['icon16File'].$setValidity('badformatorsize',false);
-                        }
-                        else {
-                            $log.error('unable to set the 16px icon for the pkg '+$scope.pkg.name);
-                            $location.path('/error').search({});
-                        }
+                    if(base64IconHvif) {
+                        pkgIcons.push({
+                            mediaTypeCode : constants.MEDIATYPE_HAIKUVECTORICONFILE,
+                            dataBase64 : base64IconHvif
+                        });
                     }
-                );
-            }
+
+                    jsonRpc.call(
+                            constants.ENDPOINT_API_V1_PKG,
+                            "configurePkgIcon",
+                            [{
+                                pkgName: $routeParams.name,
+                                pkgIcons: pkgIcons
+                            }]
+                        ).then(
+                        function(result) {
+                            $log.info('have updated the pkg icons for pkg '+$scope.pkg);
+                            $location.path('/viewpkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
+                            $scope.amSaving = false;
+                        },
+                        function(err) {
+
+                            switch(err.code) {
+
+                                // the inbound error may involve reporting on bad data.  If this is the case then the error
+                                // should be reverse mapped to the input field.
+
+                                case jsonRpc.errorCodes.BADPKGICON:
+
+                                    if(err.data) {
+                                        switch(err.data.mediaTypeCode) {
+
+                                            case constants.MEDIATYPE_PNG:
+                                                switch(err.data.size) {
+                                                    case 16:
+                                                        $scope.editPkgIconForm['iconBitmap16File'].$setValidity('badformatorsize',false);
+                                                        break;
+
+                                                    case 32:
+                                                        $scope.editPkgIconForm['iconBitmap32File'].$setValidity('badformatorsize',false);
+                                                        break;
+
+                                                    default:
+                                                        throw 'expected size; ' + error.data.size;
+                                                }
+                                                break;
+
+                                            case constants.MEDIATYPE_HAIKUVECTORICONFILE:
+                                                $scope.editPkgIconForm['iconHvifFile'].$setValidity('badformatorsize',false);
+                                                break;
+
+                                            default:
+                                                throw 'unexpected media type code; ' + err.data.mediaTypeCode;
+
+                                        }
+                                    }
+                                    else {
+                                        throw 'expected data to be supplied with a bad pkg icon';
+                                    }
+
+                                    break;
+
+                                default:
+                                    errorHandling.handleJsonRpcError(err);
+                                    break;
+
+                            }
+
+                            $scope.amSaving = false;
+
+                        }
+                    );
+
+                }
+
+                // pull in all of the data as base64-ized data URLs
+
+                var readerIconBitmap16 = new FileReader();
+                var readerIconBitmap32 = new FileReader();
+                var readerHvif = $scope.editPkgIcon.iconHvifFile ? new FileReader() : undefined;
+
+                function checkHasCompletedFileReaderProcessing() {
+
+                    // data urls can come in a number of forms.  This function will strip ut the data material and
+                    // just get at the base64.  If the data is not base64, it will throw an exception.  Maybe a more
+                    // elaborate handling will be required?
+
+                    function dataUrlToBase64(u) {
+
+                        if(!u) {
+                            throw 'the data url must be supplied to convert to base64';
+                        }
+
+                        if(0!= u.indexOf('data:')) {
+                            throw 'the data url was unable to be converted to base64 because it does not look like a data url';
+                        }
+
+                        var commaI = u.indexOf(',');
+
+                        if(-1==commaI) {
+                            throw 'expecting comma in data url to preceed the base64 data';
+                        }
+
+                        if(!_.indexOf(u.substring(5,commaI).split(';'),'base64')) {
+                            throw 'expecting base64 to appear in the data url';
+                        }
+
+                        return u.substring(commaI+1);
+                    }
+
+                   if(2==readerIconBitmap16.readyState
+                       && 2==readerIconBitmap32.readyState
+                       && (!readerHvif || 2==readerHvif.readyState)) {
+
+                       handleStorePkgIcons(
+                           dataUrlToBase64(readerIconBitmap16.result),
+                           dataUrlToBase64(readerIconBitmap32.result),
+                           readerHvif ? dataUrlToBase64(readerHvif.result) : null);
+                   }
+                }
+
+                readerIconBitmap16.onloadend = function() {
+                    checkHasCompletedFileReaderProcessing();
+                }
+
+                readerIconBitmap16.readAsDataURL($scope.editPkgIcon.iconBitmap16File);
+
+                readerIconBitmap32.onloadend = function() {
+                    checkHasCompletedFileReaderProcessing();
+                }
+
+                readerIconBitmap32.readAsDataURL($scope.editPkgIcon.iconBitmap32File);
+
+                if($scope.editPkgIcon.iconHvifFile) {
+
+                    readerHvif.onloadend = function() {
+                        checkHasCompletedFileReaderProcessing();
+                    }
+
+                    readerHvif.readAsDataURL($scope.editPkgIcon.iconHvifFile);
+                }
+
+            } // goStorePkgIcons
 
         }
     ]

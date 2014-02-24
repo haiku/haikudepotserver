@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.api1;
 
 import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
+import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 
 /**
@@ -29,6 +30,13 @@ public interface PkgApi {
      */
 
     GetPkgResult getPkg(GetPkgRequest request) throws ObjectNotFoundException;
+
+    /**
+     * <p>This request will configure the icons for the package nominated.  Note that only certain configurations of
+     * icon data may be acceptable; for example, it will require a 16x16px and 32x32px bitmap image.</p>
+     */
+
+    ConfigurePkgIconResult configurePkgIcon(ConfigurePkgIconRequest request) throws ObjectNotFoundException, BadPkgIconException;
 
     /**
      * <p>This request will remove any icons from the package.</p>

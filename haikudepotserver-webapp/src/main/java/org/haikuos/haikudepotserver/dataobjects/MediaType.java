@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,32 @@ import org.haikuos.haikudepotserver.dataobjects.auto._MediaType;
 import java.util.List;
 
 public class MediaType extends _MediaType {
+
+    public final static String MEDIATYPE_HAIKUVECTORICONFILE = "application/x-vnd.haiku-icon";
+
+    public final static String EXTENSION_HAIKUVECTORICONFILE = "hvif";
+
+    public final static String EXTENSION_PNG = "png";
+
+    /**
+     * <p>Files can have extensions that help to signify what sort of files they are.  For example, a PNG file would
+     * have the extension "png".  This method will be able to return a media type for a given file extension.</p>
+     */
+
+    public static Optional<MediaType> getByExtension(ObjectContext context, String extension) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkState(!Strings.isNullOrEmpty(extension));
+
+        if(extension.equals(EXTENSION_HAIKUVECTORICONFILE)) {
+            return getByCode(context, MEDIATYPE_HAIKUVECTORICONFILE);
+        }
+
+        if(extension.equals(EXTENSION_PNG)) {
+            return getByCode(context, com.google.common.net.MediaType.PNG.toString());
+        }
+
+        return Optional.absent();
+    }
 
     public static Optional<MediaType> getByCode(ObjectContext context, String code) {
         Preconditions.checkNotNull(context);

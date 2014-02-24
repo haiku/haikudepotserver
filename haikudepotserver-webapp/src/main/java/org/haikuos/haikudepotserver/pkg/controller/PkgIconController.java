@@ -7,21 +7,23 @@ package org.haikuos.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
-import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.dataobjects.Pkg;
+import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
+import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
+import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.NoOpOutputStream;
-import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.User;
-import org.haikuos.haikudepotserver.pkg.PkgService;
-import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
+import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,9 +31,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * <p>This controller vends the package icon.  This may be provided by data stored in the database, or it may be
@@ -49,6 +51,7 @@ public class PkgIconController extends AbstractController {
     public final static String KEY_PKGNAME = "pkgname";
     public final static String KEY_FORMAT = "format";
     public final static String KEY_SIZE = "s";
+    public final static String KEY_FALLBACK = "f";
 
     @Resource
     ServerRuntime serverRuntime;
@@ -59,152 +62,136 @@ public class PkgIconController extends AbstractController {
     @Resource
     AuthorizationService authorizationService;
 
-    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
-    public void fetchHead(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @RequestParam(value = KEY_SIZE, required = true) int size,
-            @PathVariable(value = KEY_FORMAT) String format,
-            @PathVariable(value = KEY_PKGNAME) String pkgName)
-            throws IOException {
+    private LoadingCache<Integer, byte[]> genericBitmapIcons = CacheBuilder.newBuilder()
+            .maximumSize(10)
+            .build(
+                    new CacheLoader<Integer, byte[]>() {
+                        public byte[] load(Integer size) {
+                            String resource = String.format("/img/generic/generic%d.png", size);
+                            InputStream inputStream = null;
 
-        if(size != 16 && size != 32) {
-            throw new BadSize();
-        }
+                            try {
+                                inputStream = this.getClass().getResourceAsStream(resource);
+
+                                if(null==inputStream) {
+                                    throw new IllegalStateException(String.format("the resource; %s was not able to be found, but should be in the application build product", resource));
+                                }
+                                else {
+                                    return ByteStreams.toByteArray(inputStream);
+                                }
+                            }
+                            catch(IOException ioe) {
+                                throw new IllegalStateException("unable to read the generic icon",ioe);
+                            }
+                            finally {
+                                Closeables.closeQuietly(inputStream);
+                            }
+                        }
+                    });
+
+    private void handleHeadOrGet(
+            RequestMethod requestMethod,
+            HttpServletResponse response,
+            Integer size,
+            String format,
+            String pkgName,
+            Boolean fallback)
+            throws IOException {
 
         if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
             throw new MissingPkgName();
         }
 
-        if(Strings.isNullOrEmpty(format) || !"png".equals(format)) {
+        ObjectContext context = serverRuntime.getContext();
+        Optional<org.haikuos.haikudepotserver.dataobjects.MediaType> mediaTypeOptional
+                = org.haikuos.haikudepotserver.dataobjects.MediaType.getByExtension(context, format);
+
+        if(!mediaTypeOptional.isPresent()) {
+            logger.warn("attempt to request icon of format '{}', but this format was not recognized",format);
             throw new MissingOrBadFormat();
         }
 
-        ObjectContext context = serverRuntime.getContext();
         Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
 
         if(!pkg.isPresent()) {
+            logger.info("request for icon for package '{}', but no such package was able to be found",pkgName);
             throw new PkgNotFound();
         }
 
         ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
+        Optional<PkgIcon> pkgIconOptional = pkg.get().getPkgIcon(mediaTypeOptional.get(), size);
 
-        pkgService.writePkgIconImage(
-                byteCounter,
-                context,
-                pkg.get(),
-                size);
+        if(!pkgIconOptional.isPresent()) {
 
-        response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
-        response.setContentType(MediaType.PNG.toString());
-        response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
+            // if there is no icon, under very specific circumstances, it may be possible to provide one.
 
+            if(
+                    (null!=fallback)
+                            && fallback.booleanValue()
+                            && mediaTypeOptional.get().getCode().equals(MediaType.PNG.toString())
+                            && (null!=size)
+                            && (16==size || 32==size)) {
+
+                byte[] data = genericBitmapIcons.getUnchecked(size);
+                response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
+                response.setContentType(mediaTypeOptional.get().getCode());
+
+                if(requestMethod == RequestMethod.GET) {
+                    response.getOutputStream().write(data);
+                }
+
+            }
+            else {
+                throw new PkgIconNotFound();
+            }
+
+        }
+        else {
+
+            byte[] data = pkgIconOptional.get().getPkgIconImage().get().getData();
+
+            response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
+            response.setContentType(mediaTypeOptional.get().getCode());
+            response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
+
+            if(requestMethod == RequestMethod.GET) {
+                response.getOutputStream().write(data);
+            }
+        }
+    }
+
+    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
+    public void handleHead(
+            HttpServletResponse response,
+            @RequestParam(value = KEY_SIZE) Integer size,
+            @PathVariable(value = KEY_FORMAT) String format,
+            @PathVariable(value = KEY_PKGNAME) String pkgName,
+            @RequestParam(value = KEY_FALLBACK) Boolean fallback)
+            throws IOException {
+        handleHeadOrGet(
+                RequestMethod.HEAD,
+                response,
+                size,
+                format,
+                pkgName,
+                fallback);
     }
 
     @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
-    public void fetchGet(
-            HttpServletRequest request,
+    public void handleGet(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = true) int size,
             @PathVariable(value = KEY_FORMAT) String format,
-            @PathVariable(value = KEY_PKGNAME) String pkgName)
-            throws IOException {
-
-        if(size != 16 && size != 32) {
-            throw new BadSize();
-        }
-
-        if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
-            throw new MissingPkgName();
-        }
-
-        if(Strings.isNullOrEmpty(format) || !"png".equals(format)) {
-            throw new MissingOrBadFormat();
-        }
-
-        ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
-
-        if(!pkg.isPresent()) {
-            throw new PkgNotFound();
-        }
-
-        if(!Strings.isNullOrEmpty(request.getHeader(HttpHeaders.IF_MODIFIED_SINCE))) {
-            long value = (request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE) / 1000) * 1000; // round to second
-            long lastModified = pkg.get().getModifyTimestampSecondAccuracy().getTime();
-
-            if(lastModified <= value) {
-                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                return;
-            }
-        }
-
-        response.setContentType(MediaType.PNG.toString());
-        response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
-        response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
-
-        pkgService.writePkgIconImage(
-                response.getOutputStream(),
-                context,
-                pkg.get(),
-                size);
-    }
-
-    /**
-     * <p>This handler will take-up an HTTP PUT that provides an icon image for the package.</p>
-     */
-
-    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.PUT)
-    public void put(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @RequestParam(value = KEY_SIZE, required = true) int expectedSize,
-            @PathVariable(value = KEY_FORMAT) String format,
-            @PathVariable(value = KEY_PKGNAME) String pkgName) throws IOException {
-
-        if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
-            throw new MissingPkgName();
-        }
-
-        if(Strings.isNullOrEmpty(format) || !"png".equals(format)) {
-            throw new MissingOrBadFormat();
-        }
-
-        ObjectContext context = serverRuntime.getContext();
-
-        Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
-
-        if(!pkg.isPresent()) {
-            throw new PkgNotFound();
-        }
-
-        // check the authorization
-
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(context, user.orNull(), pkg.get(), Permission.PKG_EDITICON)) {
-            logger.warn("attempt to edit the pkg icon, but there is no user present or that user is not able to edit the pkg");
-            throw new PkgAuthorizationFailure();
-        }
-
-        try {
-            pkgService.storePkgIconImage(
-                    request.getInputStream(),
-                    expectedSize,
-                    context,
-                    pkg.get());
-        }
-        catch(SizeLimitReachedException sizeLimit) {
-            logger.warn("attempt to load in an icon file that is larger than that allowed");
-            throw new MissingOrBadFormat();
-        }
-        catch(BadPkgIconException badIcon) {
-            throw new MissingOrBadFormat();
-        }
-
-        context.commitChanges();
-
-        response.setStatus(HttpServletResponse.SC_OK);
+            @PathVariable(value = KEY_PKGNAME) String pkgName,
+            @RequestParam(value = KEY_FALLBACK) Boolean fallback)
+    throws IOException {
+        handleHeadOrGet(
+                RequestMethod.GET,
+                response,
+                size,
+                format,
+                pkgName,
+                fallback);
     }
 
     // these are the various errors that can arise in supplying or providing a package icon.
@@ -221,7 +208,7 @@ public class PkgIconController extends AbstractController {
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
     public class PkgNotFound extends RuntimeException {}
 
-    @ResponseStatus(value= HttpStatus.UNAUTHORIZED, reason="the requested package cannot be edited by the authenticated user")
-    public class PkgAuthorizationFailure extends RuntimeException {}
+    @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package icon was unable to found")
+    public class PkgIconNotFound extends RuntimeException {}
 
 }

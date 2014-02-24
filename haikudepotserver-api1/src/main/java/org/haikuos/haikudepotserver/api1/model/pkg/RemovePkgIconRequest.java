@@ -11,18 +11,17 @@ public class RemovePkgIconRequest {
      * <p>This is the name of the package that you wish to reset the icon for.</p>
      */
 
-    public String name;
+    public String pkgName;
 
     public RemovePkgIconRequest() {
     }
 
+    public RemovePkgIconRequest(String pkgName) {
 
-    public RemovePkgIconRequest(String name) {
-
-        if(null==name || 0==name.length()) {
-            throw new IllegalArgumentException("the name must be supplied when removing the icon for a package");
+        if(null==pkgName || 0==pkgName.length()) {
+            throw new IllegalArgumentException("the package name must be supplied when removing the icon for a package");
         }
 
-        this.name = name;
+        this.pkgName = pkgName;
     }
 }

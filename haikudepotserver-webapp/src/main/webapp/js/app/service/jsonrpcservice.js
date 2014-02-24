@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,7 +28,8 @@ angular.module('haikudepotserver').factory('jsonRpc',
                     VALIDATION : -32800,
                     OBJECTNOTFOUND : -32801,
                     CAPTCHABADRESPONSE : -32802,
-                    AUTHORIZATIONFAILURE : -32803
+                    AUTHORIZATIONFAILURE : -32803,
+                    BADPKGICON : -32804
                 },
 
                 /**

@@ -42,48 +42,19 @@ public class PkgIconControllerIT extends AbstractIntegrationTest {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
         byte[] imageData = getIconData();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // ------------------------------------
-        pkgIconController.fetchGet(
-                request, response,
+        pkgIconController.handleGet(
+                response,
                 32,
                 "png",
-                "pkg1");
+                "pkg1",
+                true);
         // -----------------------------------
 
         Assertions.assertThat(response.getContentType()).isEqualTo(MediaType.PNG.toString());
         Assertions.assertThat(response.getContentAsByteArray()).isEqualTo(imageData);
-
-    }
-
-    @Test
-    public void testPut() throws Exception {
-
-        setAuthenticatedUserToRoot();
-
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        byte[] imageData = getIconData();
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setContent(imageData);
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        // ------------------------------------
-         pkgIconController.put(
-                 request,response,
-                 32,
-                 "png",
-                 "pkg2");
-        // ------------------------------------
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            Optional<Pkg> pkgOptional = Pkg.getByName(context,"pkg2");
-            Optional<org.haikuos.haikudepotserver.dataobjects.MediaType> mediaTypeOptional = org.haikuos.haikudepotserver.dataobjects.MediaType.getByCode(context,MediaType.PNG.toString());
-            Assertions.assertThat(pkgOptional.get().getPkgIcon(mediaTypeOptional.get(),32).get().getPkgIconImage().get().getData()).isEqualTo(imageData);
-        }
 
     }
 

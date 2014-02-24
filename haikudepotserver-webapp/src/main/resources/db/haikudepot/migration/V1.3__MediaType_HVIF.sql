@@ -1,0 +1,1 @@
+INSERT INTO media_type (id,code) VALUES ((SELECT nextval('haikudepot.media_type_seq')),'application/x-vnd.haiku-icon');

@@ -11,16 +11,25 @@
             </div>
         </div>
 
-        <label for="icon-32-file">Icon 32x32px</label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('icon32File')">
-            <input id="icon-32-file" name="icon32File" type="file" ng-model="editPkgIcon.icon32File" file-supply required></input>
-            <error-messages key-prefix="editPkgIcon.icon32File" error="editPkgIconForm.icon32File.$error"></error-messages>
+        <label for="icon-bitmap-16-file">Icon 16x16px</label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconBitmap16File')">
+            <input id="icon-bitmap-16-file" name="iconBitmap16File" type="file" ng-model="editPkgIcon.iconBitmap16File" file-supply required></input>
+            <error-messages key-prefix="editPkgIcon.iconBitmap16File" error="editPkgIconForm.iconBitmap16File.$error"></error-messages>
         </div>
 
-        <label for="icon-16-file">Icon 16x16px</label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('icon16File')">
-            <input id="icon-16-file" name="icon16File" type="file" ng-model="editPkgIcon.icon16File" file-supply required></input>
-            <error-messages key-prefix="editPkgIcon.icon16File" error="editPkgIconForm.icon16File.$error"></error-messages>
+        <label for="icon-bitmap-32-file">Icon 32x32px</label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconBitmap32File')">
+            <input id="icon-bitmap-32-file" name="iconBitmap32File" type="file" ng-model="editPkgIcon.iconBitmap32File" file-supply required></input>
+            <error-messages key-prefix="editPkgIcon.iconBitmap32File" error="editPkgIconForm.iconBitmap32File.$error"></error-messages>
+        </div>
+
+        <label for="icon-hvif-file">Icon Hvif</label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconHvifFile')">
+            <input id="icon-hvif-file" name="iconHvifFile" type="file" ng-model="editPkgIcon.iconHvifFile" file-supply></input>
+            <span ng-show="editPkgIcon.iconHvifFile">
+                (<a href="" ng-click="goClearIconHvifFile()">Clear</a>)
+            </span>
+            <error-messages key-prefix="editPkgIcon.iconHvifFile" error="editPkgIconForm.iconHvifFile.$error"></error-messages>
         </div>
 
         <div class="form-action-container">

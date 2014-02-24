@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,11 +17,23 @@ angular.module('haikudepotserver').directive(
             restrict: 'A',
             replace: true,
             link: function(scope, elem, attrs, ngModel) {
-               elem.on('change', function() {
-                   scope.$apply(function() {
-                       ngModel.$setViewValue(elem[0].files[0]);
-                   });
+
+                elem.on('change', function() {
+                    scope.$apply(function() {
+                        ngModel.$setViewValue(elem[0].files[0]);
+                    });
                 });
+
+                scope.$watch(
+                    function() {
+                        return ngModel.$viewValue
+                    },
+                    function(oldValue, newValue) {
+                        if(!oldValue && newValue) {
+                            elem.val('');
+                        }
+                    }
+                );
             }
         };
     }

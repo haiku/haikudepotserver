@@ -154,46 +154,30 @@ An example URL is;
 
 \subsubsection{Get Package Icon}
 
-This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image.  The request will return a {\tt Last-Modified} header and will process a {\tt If-Modified-Since} header on the request if there is one present.  The timestamps here will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.
+This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image if the ``f'' query parameter is configured to ``true'' --- otherwise it will return a 404 HTTP status code.  Providing a fallback image may not be possible in all cases.  The request will return a {\tt Last-Modified} header.  The timestamps here will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  The path includes a {\it mediatype-extension} which can have one of the following values;
+
+\begin{itemize}
+\item png
+\item hvif
+\end{itemize}
+
+For example ``somepage.png''.
 
 \begin{itemize}
 \item HTTP Method : GET, HEAD
-\item Path : /pkgicon/$<$pkgname$>$.png
-\item Response Content-Type : image/png
+\item Path : /pkgicon/$<$pkgname$>$.$<$mediatype-extension$>$
+\item Response Content-Type : ``image/png'' or ``application/x-vnd.haiku-icon''
 \item Query Parameters
   \begin{itemize}
-  \item {\bf size} : Either 16 or 32 for the number of pixels; other values are not allowed
+  \item {\bf s} : Either 16 or 32 for the number of pixels; omitt for hivf files
+  \item {\bf f} : ``true'' will yield a fallback image in the response if possible
   \end{itemize}
 \item Expected HTTP Status Codes
   \begin{itemize}
   \item {\bf 200} : The icon is provided in the response (for GET)
   \item {\bf 415} : The path did not include ".png" or the size is invalid
   \item {\bf 400} : The package name was not supplied
-  \item {\bf 404} : The package was not found
-  \end{itemize}
-\end{itemize}
-
-An example URL is;
-
-\framebox{\tt http://localhost:8080/pkgicon/apr.png?size=32}
-
-\subsubsection{Put Package Icon}
-
-This API is able to store an icon for a given size for a package.
-
-\begin{itemize}
-\item HTTP Method : PUT
-\item Path : /pkgicon/$<$pkgname$>$.png
-\item Query Parameters
-  \begin{itemize}
-  \item {\bf size} : Either 16 or 32 for the number of pixels; other values are not allowed
-  \end{itemize}
-\item Expected HTTP Status Codes
-  \begin{itemize}
-  \item {\bf 200} : The icon was stored
-  \item {\bf 415} : The path did not include ".png" or the size is invalid or the supplied data is not in PNG format or the size of the suppied data does not agree with the size specified in the query parameter.
-  \item {\bf 404} : The package identified in the path was not able to be found
-  \item {\bf 400} : The package name was not supplied
+  \item {\bf 404} : The package was not found or no image was present
   \end{itemize}
 \end{itemize}
 

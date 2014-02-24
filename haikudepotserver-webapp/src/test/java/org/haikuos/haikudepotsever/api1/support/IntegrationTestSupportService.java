@@ -5,12 +5,18 @@
 
 package org.haikuos.haikudepotsever.api1.support;
 
+import com.google.common.net.*;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.dataobjects.MediaType;
 import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.support.Closeables;
+import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import sun.util.logging.resources.logging;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
@@ -21,6 +27,8 @@ import java.io.InputStream;
 
 @Service
 public class IntegrationTestSupportService {
+
+    protected static Logger logger = LoggerFactory.getLogger(IntegrationTestSupportService.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -58,7 +66,12 @@ public class IntegrationTestSupportService {
 
         try {
             inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png",size,size));
-            pkgService.storePkgIconImage(inputStream, size, objectContext, pkg);
+            pkgService.storePkgIconImage(
+                    inputStream,
+                    MediaType.getByCode(objectContext, com.google.common.net.MediaType.PNG.toString()).get(),
+                    size,
+                    objectContext,
+                    pkg);
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading an icon",e);
@@ -74,6 +87,8 @@ public class IntegrationTestSupportService {
     }
 
     public StandardTestData createStandardTestData() {
+
+        logger.info("will create standard test data");
 
         ObjectContext context = getObjectContext();
         StandardTestData result = new StandardTestData();
@@ -140,6 +155,8 @@ public class IntegrationTestSupportService {
         result.pkg3Version1.setRepository(result.repository);
 
         context.commitChanges();
+
+        logger.info("did create standard test data");
 
         return result;
     }

@@ -16,7 +16,7 @@ import java.io.InputStream;
 
 public class ImageHelperTest {
 
-    private byte[] getPngData(String leafname) throws IOException {
+    private byte[] getData(String leafname) throws IOException {
         InputStream inputStream = null;
 
         try {
@@ -29,7 +29,7 @@ public class ImageHelperTest {
     }
 
     private void assertImageSize(String leafname, int width, int height) throws IOException {
-        byte[] png = getPngData(leafname);
+        byte[] png = getData(leafname);
         ImageHelper imageHelper = new ImageHelper();
         ImageHelper.Size size = imageHelper.derivePngSize(png);
         assertThat(size).isNotNull();
@@ -42,6 +42,20 @@ public class ImageHelperTest {
         assertImageSize("/sample-260x16.png",260,16);
         assertImageSize("/sample-32x32.png",32,32);
         assertImageSize("/sample-16x16.png",16,16);
+    }
+
+    @Test
+    public void testLooksLikeHaikuVectorImageFormat_true() throws IOException {
+         byte[] data = getData("/sample.hvif");
+        ImageHelper imageHelper = new ImageHelper();
+        assertThat(imageHelper.looksLikeHaikuVectorIconFormat(data)).isTrue();
+    }
+
+    @Test
+    public void testLooksLikeHaikuVectorImageFormat_false() throws IOException {
+        byte[] data = getData("/sample-16x16.png");
+        ImageHelper imageHelper = new ImageHelper();
+        assertThat(imageHelper.looksLikeHaikuVectorIconFormat(data)).isFalse();
     }
 
 }

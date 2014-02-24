@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.googlecode.jsonrpc4j.DefaultErrorResolver;
 import com.googlecode.jsonrpc4j.ErrorResolver;
 import org.apache.cayenne.validation.BeanValidationFailure;
@@ -46,6 +47,22 @@ public class ErrorResolverImpl implements ErrorResolver {
                     null);
         }
 
+        if(BadPkgIconException.class.isAssignableFrom(t.getClass())) {
+            BadPkgIconException badPkgIconException = (BadPkgIconException) t;
+
+            Map<String,Object> errorData = Maps.newHashMap();
+            errorData.put("mediaTypeCode", badPkgIconException.getMediaTypeCode());
+
+            if(null!=badPkgIconException.getSize()) {
+                errorData.put("size", badPkgIconException.getSize());
+            }
+
+            return new JsonError(
+                    Constants.ERROR_CODE_BADPKGICON,
+                    "badpkgicon",
+                    errorData);
+        }
+
         // special output for the object not found exceptions
 
         if(ObjectNotFoundException.class.isAssignableFrom(t.getClass())) {
@@ -55,7 +72,7 @@ public class ErrorResolverImpl implements ErrorResolver {
                     Constants.ERROR_CODE_OBJECTNOTFOUND,
                     "objectnotfound",
                     ImmutableMap.of(
-                            "entityname", objectNotFoundException.getEntityName(),
+                            "entityName", objectNotFoundException.getEntityName(),
                             "identifier", objectNotFoundException.getIdentifier()
                     )
             );
