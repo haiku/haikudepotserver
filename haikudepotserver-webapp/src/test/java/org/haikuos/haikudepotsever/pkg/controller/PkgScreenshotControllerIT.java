@@ -53,7 +53,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         request.setContent(imageData);
 
         // ------------------------------------
-        pkgScreenshotController.put(request, response, "png", "pkg1");
+        pkgScreenshotController.handleAdd(request, response, "png", "pkg1");
         // -----------------------------------   
 
         // the header should contain the image code
@@ -74,12 +74,11 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
         byte[] imageData = getScreenshotData();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // ------------------------------------
-        pkgScreenshotController.fetchGet(
-                request, response,
+        pkgScreenshotController.handleGet(
+                response,
                 640, 480,
                 "png",
                 data.pkg1.getSortedPkgScreenshots().get(0).getCode());
@@ -96,12 +95,11 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
         byte[] imageData = getScreenshotData();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // ------------------------------------
-        pkgScreenshotController.fetchGet(
-                request, response,
+        pkgScreenshotController.handleGet(
+                response,
                 160, 120,
                 "png",
                 data.pkg1.getSortedPkgScreenshots().get(0).getCode());
