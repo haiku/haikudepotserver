@@ -154,7 +154,7 @@ An example URL is;
 
 \subsubsection{Get Package Icon}
 
-This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image if the ``f'' query parameter is configured to ``true'' --- otherwise it will return a 404 HTTP status code.  Providing a fallback image may not be possible in all cases.  The request will return a {\tt Last-Modified} header.  The timestamps of this header will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  The path includes a {\it mediatype-extension} which can have one of the following values;
+This API is able to provide the icon for a package.  If there is no icon stored then this method will provide a fall-back image if the {\t f} query parameter is configured to ``true'' --- otherwise it will return a 404 HTTP status code.  Providing a fallback image may not be possible in all cases.  The request will return a {\tt Last-Modified} header.  The timestamps of this header will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  The path includes a {\it mediatype-extension} which can have one of the following values;
 
 \begin{itemize}
 \item png
@@ -181,13 +181,18 @@ Details of the API;
   \end{itemize}
 \end{itemize}
 
-An example URL is;
+An example URL for obtaining a bitmap image;
 
 \framebox{\tt http://localhost:8080/pkgicon/apr.png?size=32\&f=true}
 
+An example URL for obtaining a Haiku vector image file image;
+
+\framebox{\tt http://localhost:8080/pkgicon/apr.hvif}
+
+
 \subsubsection{Get Screenshot Image}
 
-This API is able to produce an image for a screenshot that can be identified by its code.  The request will return a {\tt Last-Modified} header.  The timestamps of this header will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  Requests for screenshot image should be accompanied by a target width and height.  These values must be within a range of 1..1500.  The image will maintain its aspect ratio as it is scaled to fit within the target width and height.
+This API is able to produce an image for a screenshot.  The screenshot is identified in the path by its code.  The response will return a {\tt Last-Modified} header.  The timestamps of this header will correlate to the {\it modifyTimestamp} that is provided in API responses such as {\tt GetPkResult} and {\tt SearchPkgsResult}.  The value for {\it modifyTimestamp} will be at millisecond resolution, but the HTTP headers will be at second resolution.  Requests for screenshot image should be accompanied by a target width and height.  These values must be within a range of 1..1500.  The image will maintain its aspect ratio as it is scaled to fit within the supplied target width and height.
 
 \begin{itemize}
 \item HTTP Method : GET, HEAD
@@ -230,9 +235,9 @@ An example URL is;
 
 \framebox{\tt http://localhost:8080/pkgscreenshot/a78hw20fh2p20fh122jd92/raw}
 
-\subsubsection{Put Screenshot Image}
+\subsubsection{Add Screenshot Image}
 
-This API is able to add an image as a screenshot for the nominated package.  The screenshot will be ordered last.  The payload of the PUT must be a PNG image that is a maximum of 1500x1500 pixels and 2MB in size.
+This API is able to add an image as a screenshot for the nominated package.  The screenshot will be ordered last.  The payload of the POST must be a PNG image that is a maximum of 1500x1500 pixels and a maximum of 2MB in size.
 
 \begin{itemize}
 \item HTTP Method : POST
