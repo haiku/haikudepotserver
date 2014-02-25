@@ -26,14 +26,25 @@
         <div id="pkg-screenshot-container">
 
             <div id="pkg-screenshot-pagination-container">
+
+                <a href="{{currentPkgScreenshot().imageDownloadUrl}}" target="_blank" ng-show="pkgScreenshots.length">
+                    <img src="/img/download.svg">
+                </a>
+
+                <a href="{{currentPkgScreenshot().imageLargeUrl}}" target="_blank" ng-show="pkgScreenshots.length">
+                    <img src="/img/newwindow.svg">
+                </a>
+
                 <pagination-arrow
                         page-click="goPreviousScreenshot()"
                         active="pkgScreenshots.length && pkgScreenshotOffset > 0"
                         direction="left"></pagination-arrow>
+
                 <pagination-arrow
                         page-click="goNextScreenshot()"
                         active="pkgScreenshots.length && pkgScreenshotOffset < (pkgScreenshots.length-1)"
                         direction="right"></pagination-arrow>
+
             </div>
 
             <div id="pkg-screenshot-title">

@@ -16,6 +16,7 @@ angular.module('haikudepotserver').controller(
 
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 480;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 320;
+            var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
 
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
@@ -159,7 +160,12 @@ angular.module('haikudepotserver').controller(
                                     SCREENSHOT_THUMBNAIL_TARGETHEIGHT),
                                 imageDownloadUrl : pkgScreenshot.rawUrl(
                                     $scope.pkg,
-                                    item.code)
+                                    item.code),
+                                imageLargeUrl : pkgScreenshot.url(
+                                    $scope.pkg,
+                                    item.code,
+                                    SCREENSHOT_MAX_TARGETHEIGHT,
+                                    SCREENSHOT_MAX_TARGETHEIGHT)
                             };
                         });
 
