@@ -28,6 +28,12 @@
     background-color: #EEE;
 }
 
+#pkg-screenshot-container > img {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
 #pkg-screenshot-title {
     background-color: #444;
     color: white;
