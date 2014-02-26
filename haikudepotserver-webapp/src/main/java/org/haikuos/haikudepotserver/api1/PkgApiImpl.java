@@ -535,6 +535,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         logger.info("did reorder the screenshots on package {}", pkg.getName());
 
-        return null;
+        return new ReorderPkgScreenshotsResult();
     }
 }

@@ -196,6 +196,73 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
+            // -------------------------
+            // ORDERING
+
+            function storeOrdering() {
+
+                $scope.amCommunicating = true;
+
+                jsonRpc.call(
+                        constants.ENDPOINT_API_V1_PKG,
+                        "reorderPkgScreenshots",
+                        [{
+                            pkgName : $scope.pkg.name,
+                            codes: _.map($scope.pkgScreenshots, function(s) { return s.code; })
+                        }]
+                    ).then(
+                    function() {
+                        $log.info('did re-order screenshots for package '+$scope.pkg.name);
+                        $scope.amCommunicating = false;
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+            }
+
+            $scope.goOrderUp = function(pkgScreenshot) {
+                var i = _.indexOf($scope.pkgScreenshots, pkgScreenshot);
+
+                switch(i) {
+
+                    case -1:
+                        throw 'unable to find the screenshot to re-order in the list of screenshots';
+
+                    case 0:
+                        // already at the start
+                        break;
+
+                    default:
+                        var earlier = $scope.pkgScreenshots[i-1];
+                        $scope.pkgScreenshots[i-1] = pkgScreenshot;
+                        $scope.pkgScreenshots[i] = earlier;
+                        storeOrdering();
+                        break;
+                }
+            }
+
+            $scope.goOrderDown = function(pkgScreenshot) {
+                var i = _.indexOf($scope.pkgScreenshots, pkgScreenshot);
+
+                switch(i) {
+
+                    case -1:
+                        throw 'unable to find the screenshot to re-order in the list of screenshots';
+
+                    case $scope.pkgScreenshots.length-1:
+                        // already at the end
+                        break;
+
+                    default:
+                        var later = $scope.pkgScreenshots[i+1];
+                        $scope.pkgScreenshots[i+1] = pkgScreenshot;
+                        $scope.pkgScreenshots[i] = later;
+                        storeOrdering();
+                        break;
+                }
+            }
+
         }
     ]
 );
