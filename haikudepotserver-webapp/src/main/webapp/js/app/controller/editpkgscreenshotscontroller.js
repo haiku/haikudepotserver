@@ -20,7 +20,7 @@ angular.module('haikudepotserver').controller(
             var SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
 
             var THUMBNAIL_TARGETWIDTH = 180;
-            var THUMBNAIL_TARGETHEIGHT = 90;
+            var THUMBNAIL_TARGETHEIGHT = 180;
 
             $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
