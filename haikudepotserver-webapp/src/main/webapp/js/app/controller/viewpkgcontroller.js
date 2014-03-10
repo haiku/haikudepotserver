@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','userState','errorHandling',
-        'pkgScreenshot','pkgIcon',
+        'pkgScreenshot','pkgIcon','referenceData',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,userState,errorHandling,
-            pkgScreenshot, pkgIcon) {
+            pkgScreenshot,pkgIcon,referenceData) {
 
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 480;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 320;
@@ -23,6 +23,7 @@ angular.module('haikudepotserver').controller(
             $scope.pkgScreenshots = undefined;
             $scope.pkgScreenshotOffset = 0;
             $scope.pkgIconHvifUrl = undefined;
+            $scope.pkgCategories = undefined;
 
             var hasPkgIcons = undefined;
 
@@ -34,14 +35,6 @@ angular.module('haikudepotserver').controller(
 
             $scope.canRemoveIcon = function() {
                 return $scope.pkg && hasPkgIcons;
-            }
-
-            $scope.canEditIcon = function() {
-                return $scope.pkg;
-            }
-
-            $scope.canEditScreenshots = function() {
-                return $scope.pkg;
             }
 
             $scope.homePageLink = function() {
@@ -84,11 +77,29 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                         refetchPkgScreenshots();
                         refetchPkgIconMetaData();
+                        refetchPkgCategories();
                     },
                     function(err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
+            }
+
+            function refetchPkgCategories() {
+
+                referenceData.pkgCategories().then(
+                    function(pkgCategories) {
+                        $scope.pkgCategories = _.filter(
+                            pkgCategories,
+                            function(c) { return _.contains($scope.pkg.pkgCategoryCodes, c.code); }
+                        );
+                    },
+                    function() {
+                        $log.error('unable to obtain the list of categories');
+                        $location.path("/error").search({});
+                    }
+                );
+
             }
 
             function refetchPkgIconMetaData() {
@@ -190,6 +201,10 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEditScreenshots = function() {
                 $location.path($location.path() + '/editscreenshots').search({});
+            }
+
+            $scope.goEditPkgCategories = function() {
+                $location.path($location.path() + '/editcategories').search({});
             }
 
             $scope.goRemoveIcon = function() {

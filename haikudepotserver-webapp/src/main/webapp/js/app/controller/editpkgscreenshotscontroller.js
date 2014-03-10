@@ -100,7 +100,10 @@ angular.module('haikudepotserver').controller(
                         $scope.pkg,
                         $routeParams.version,
                         $routeParams.architectureCode),
-                    breadcrumbs.createEditPkgScreenshots($scope.pkg)
+                    {
+                        title : 'Edit Screenshots',
+                        path : $location.path()
+                    }
                 ];
             }
 

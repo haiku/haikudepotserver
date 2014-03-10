@@ -75,20 +75,6 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     };
                 },
 
-                createEditPkgIcon : function(pkg) {
-                    return {
-                        title : 'Edit Icon',
-                        path : '/editpkgicon/' + pkg.name
-                    };
-                },
-
-                createEditPkgScreenshots : function(pkg) {
-                    return {
-                        title : 'Screenshots', // TODO - localize
-                            path : '/editpkgscreenshots/'+pkg.name
-                    };
-                },
-
                 createViewUser : function(user) {
                     return {
                         title : user.nickname,

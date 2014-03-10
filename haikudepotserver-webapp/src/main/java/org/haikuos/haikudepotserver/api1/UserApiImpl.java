@@ -11,13 +11,14 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.*;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
+import org.haikuos.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,13 +44,14 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     AuthenticationService authenticationService;
 
     @Override
-    public CreateUserResult createUser(CreateUserRequest createUserRequest) {
+    public CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException {
 
         Preconditions.checkNotNull(createUserRequest);
         Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.nickname));
         Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.passwordClear));
         Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.captchaToken));
         Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.captchaResponse));
+        Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.naturalLanguageCode));
 
         if(!authenticationService.validatePassword(createUserRequest.passwordClear)) {
             throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
@@ -82,7 +84,18 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             );
         }
 
+        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(
+                context,
+                createUserRequest.naturalLanguageCode);
+
+        if(!naturalLanguageOptional.isPresent()) {
+            throw new ObjectNotFoundException(
+                    NaturalLanguage.class.getSimpleName(),
+                    createUserRequest.naturalLanguageCode);
+        }
+
         User user = context.newObject(User.class);
+        user.setNaturalLanguage(naturalLanguageOptional.get());
         user.setNickname(createUserRequest.nickname);
         user.setPasswordSalt(); // random
         user.setPasswordHash(authenticationService.hashPassword(user, createUserRequest.passwordClear));

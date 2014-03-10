@@ -24,6 +24,8 @@ public class GetPkgResult {
 
     public List<Version> versions;
 
+    public List<String> pkgCategoryCodes;
+
     public static class Version {
 
         public String major;

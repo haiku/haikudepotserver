@@ -9,9 +9,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.MiscellaneousApi;
 import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
@@ -20,6 +23,7 @@ import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 public class MiscelaneousApiIT extends AbstractIntegrationTest {
 
@@ -40,6 +44,48 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(targetAndPermission.targetIdentifier).isEqualTo(data.pkg1.getName());
         Assertions.assertThat(targetAndPermission.targetType).isEqualTo(AuthorizationTargetType.PKG);
         Assertions.assertThat(targetAndPermission.authorized).isEqualTo(result);
+    }
+
+    @Test
+    public void testGetAllPkgCategories() {
+
+        // ------------------------------------
+        GetAllPkgCategoriesResult result = miscellaneousApi.getAllPkgCategories(new GetAllPkgCategoriesRequest());
+        // ------------------------------------
+
+        ObjectContext objectContext = serverRuntime.getContext();
+
+        List<PkgCategory> pkgCategories = PkgCategory.getAll(objectContext);
+
+        Assertions.assertThat(pkgCategories.size()).isEqualTo(result.pkgCategories.size());
+
+        for(int i=0;i<pkgCategories.size();i++) {
+            PkgCategory pkgCategory = pkgCategories.get(i);
+            GetAllPkgCategoriesResult.PkgCategory apiPkgCategory = result.pkgCategories.get(i);
+            Assertions.assertThat(pkgCategory.getName()).isEqualTo(apiPkgCategory.name);
+            Assertions.assertThat(pkgCategory.getCode()).isEqualTo(apiPkgCategory.code);
+        }
+    }
+
+    @Test
+    public void testGetAllNaturalLanguages() {
+
+        // ------------------------------------
+        GetAllNaturalLanguagesResult result = miscellaneousApi.getAllNaturalLanguages(new GetAllNaturalLanguagesRequest());
+        // ------------------------------------
+
+        ObjectContext objectContext = serverRuntime.getContext();
+
+        List<NaturalLanguage> naturalLanguages = NaturalLanguage.getAll(objectContext);
+
+        Assertions.assertThat(naturalLanguages.size()).isEqualTo(result.naturalLanguages.size());
+
+        for(int i=0;i<naturalLanguages.size();i++) {
+            NaturalLanguage naturalLanguage = naturalLanguages.get(i);
+            GetAllNaturalLanguagesResult.NaturalLanguage apiNaturalLanguage = result.naturalLanguages.get(i);
+            Assertions.assertThat(naturalLanguage.getName()).isEqualTo(apiNaturalLanguage.name);
+            Assertions.assertThat(naturalLanguage.getCode()).isEqualTo(apiNaturalLanguage.code);
+        }
     }
 
     @Test

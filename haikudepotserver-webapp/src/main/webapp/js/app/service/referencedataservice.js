@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,12 +10,40 @@
 
 angular.module('haikudepotserver').factory('referenceData',
     [
-        '$log','$q','jsonRpc','constants',
-        function($log, $q, jsonRpc,constants) {
+        '$log','$q','jsonRpc','constants','errorHandling',
+        function($log, $q, jsonRpc,constants,errorHandling) {
 
             var architectures = undefined;
+            var pkgCategories = undefined;
 
             var ReferenceData = {
+
+                pkgCategories : function() {
+
+                    var deferred = $q.defer();
+
+                    if(pkgCategories) {
+                        deferred.resolve(pkgCategories);
+                    }
+                    else {
+                        jsonRpc
+                            .call(
+                                constants.ENDPOINT_API_V1_MISCELLANEOUS,'getAllPkgCategories',[{}]
+                            )
+                            .then(
+                            function(data) {
+                                pkgCategories = data.pkgCategories;
+                                deferred.resolve(pkgCategories);
+                            },
+                            function(err) {
+                                errorHandling.logJsonRpcError(err,'issue obtaining the list of pkg categories');
+                                deferred.reject(err);
+                            }
+                        );
+                    }
+
+                    return deferred.promise;
+                },
 
                 /**
                  * <p>This function returns a promise to return the architecture identified by the code.</p>
@@ -69,6 +97,7 @@ angular.module('haikudepotserver').factory('referenceData',
                                 deferred.resolve(architectures);
                             },
                             function(err) {
+                                errorHandling.logJsonRpcError(err,'issue obtaining the list of architectures');
                                 deferred.reject(null);
                             }
                         );

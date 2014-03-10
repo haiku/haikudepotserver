@@ -16,12 +16,12 @@ angular.module('haikudepotserver').factory('errorHandling',
                 logJsonRpcError : function(jsonRpcErrorEnvelope, message) {
                     var prefix = message ? message + ' - json-rpc error; ' : 'json-rpc error; ';
 
-                    if(null==jsonRpcErrorEnvelope) {
-                        $log.error(prefix+'cause is unknown as no error envelope was available');
+                    if(!jsonRpcErrorEnvelope) {
+                        $log.error(prefix+'cause is unknown as no error was available in the envelope');
                     }
                     else {
-                        var code = jsonRpcErrorEnvelope.error.code ? jsonRpcErrorEnvelope.error.code : '?';
-                        var message = jsonRpcErrorEnvelope.error.message ? jsonRpcErrorEnvelope.error.message : '?';
+                        var code = jsonRpcErrorEnvelope.code ? jsonRpcErrorEnvelope.code : '?';
+                        var message = jsonRpcErrorEnvelope.message ? jsonRpcErrorEnvelope.message : '?';
                         $log.error(prefix+'code:'+code+", msg:"+message);
                     }
                 },

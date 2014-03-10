@@ -5,9 +5,11 @@
 
 package org.haikuos.haikudepotsever.api1;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.MediaType;
 import com.googlecode.jsonrpc4j.Base64;
@@ -18,9 +20,7 @@ import org.haikuos.haikudepotserver.api1.PkgApi;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
-import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
@@ -41,6 +41,63 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
     @Resource
     PkgService pkgService;
+
+    @Test
+    public void testUpdatePkgCategories() throws Exception {
+
+        setAuthenticatedUserToRoot();
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+
+        // setup some categories as a start condition.
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Pkg pkg = Pkg.getByName(context, data.pkg1.getName()).get();
+
+            {
+                PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
+                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "GAMES").get());
+                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+            }
+
+            {
+                PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
+                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "BUSINESS").get());
+                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+            }
+
+            context.commitChanges();
+        }
+
+        UpdatePkgCategoriesRequest request = new UpdatePkgCategoriesRequest();
+        request.pkgName = data.pkg1.getName();
+        request.pkgCategoryCodes = ImmutableList.of("BUSINESS", "DEVELOPMENT");
+
+        // ------------------------------------
+        pkgApi.updatePkgCategories(request);
+        // ------------------------------------
+
+        // now we need to check on those categories.  GAMES should have gone, BUSINESS should remain
+        // and DEVELOPMENT should be added.
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Pkg pkg = Pkg.getByName(context, data.pkg1.getName()).get();
+
+            Assertions.assertThat(ImmutableSet.of("BUSINESS", "DEVELOPMENT")).isEqualTo(
+                ImmutableSet.copyOf(Iterables.transform(
+                        pkg.getPkgPkgCategories(),
+                        new Function<PkgPkgCategory, String>() {
+                            @Override
+                            public String apply(PkgPkgCategory input) {
+                                return input.getPkgCategory().getCode();
+                            }
+                        }
+                ))
+            );
+        }
+
+    }
 
     @Test
     public void searchPkgsTest() {
@@ -124,9 +181,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
     }
 
-        /**
-         * <p>Here we are trying to load the HVIF data in as PNG images.</p>
-         */
+    /**
+     * <p>Here we are trying to load the HVIF data in as PNG images.</p>
+     */
 
     @Test
     public void testConfigurePkgIcon_badData() throws Exception {

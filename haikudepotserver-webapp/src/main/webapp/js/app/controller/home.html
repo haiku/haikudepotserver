@@ -2,10 +2,16 @@
 
     <div id="search-criteria-container">
         <div>
-            <select ng-model="selectedArchitecture" ng-options="anArchitecture.code for anArchitecture in architectures"></select>
+            <select
+                    ng-model="selectedArchitecture"
+                    ng-options="anArchitecture.code for anArchitecture in architectures">
+            </select>
         </div>
         <div>
-            <select ng-model="selectedViewCriteriaTypeOption" ng-options="aViewCriteriaTypeOptions.name for aViewCriteriaTypeOptions in viewCriteriaTypeOptions"></select>
+            <select
+                    ng-model="selectedViewCriteriaTypeOption"
+                    ng-options="aViewCriteriaTypeOptions.name for aViewCriteriaTypeOptions in viewCriteriaTypeOptions">
+            </select>
         </div>
         <div ng-show="'SEARCH'==selectedViewCriteriaTypeOption.code">
             <input
@@ -20,7 +26,12 @@
             </button>
         </div>
         <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
-            Not supported yet!
+            <span ng-show="!pkgCategories">...</span>
+            <select
+                    ng-show="pkgCategories"
+                    ng-model="selectedPkgCategory"
+                    ng-options="aPkgCategory.name for aPkgCategory in pkgCategories">
+            </select>
         </div>
     </div>
 

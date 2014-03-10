@@ -65,7 +65,10 @@ angular.module('haikudepotserver').controller(
                         $scope.pkg,
                         $routeParams.version,
                         $routeParams.architectureCode),
-                    breadcrumbs.createEditPkgIcon($scope.pkg)
+                    {
+                        title : 'Edit Icon',
+                        path : $location.path()
+                    }
                 ];
             }
 
@@ -150,7 +153,7 @@ angular.module('haikudepotserver').controller(
                             }]
                         ).then(
                         function(result) {
-                            $log.info('have updated the pkg icons for pkg '+$scope.pkg);
+                            $log.info('have updated the pkg icons for pkg '+$scope.pkg.name);
                             $location.path('/viewpkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
                             $scope.amSaving = false;
                         },

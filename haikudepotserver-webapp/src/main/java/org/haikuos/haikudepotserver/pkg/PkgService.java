@@ -100,6 +100,10 @@ public class PkgService {
         Preconditions.checkNotNull(search.getArchitectures());
         Preconditions.checkState(!search.getArchitectures().isEmpty());
 
+        if(null!=search.getPkgCategories() && search.getPkgCategories().isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<String> pkgNames;
 
         // using jpql because of need to get out raw rows for the pkg name.
@@ -135,6 +139,23 @@ public class PkgService {
                 queryBuilder.append(" AND");
                 queryBuilder.append(String.format(" pv.pkg.name LIKE ?%d",parameters.size()+1));
                 parameters.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
+            }
+
+            if(null!=search.getPkgCategories()) {
+                List<PkgCategory> pkgCategoryList = Lists.newArrayList(search.getPkgCategories());
+
+                queryBuilder.append(" AND EXISTS(SELECT pcc1 FROM " + PkgPkgCategory.class.getSimpleName() + " pcc1 WHERE pcc1.pkg=pv.pkg AND (");
+
+                for(int i=0; i < pkgCategoryList.size(); i++) {
+                   if(0!=i) {
+                       queryBuilder.append(" OR");
+                   }
+
+                    queryBuilder.append(String.format(" pcc1.pkgCategory=?%d",parameters.size()+1));
+                    parameters.add(pkgCategoryList.get(i));
+                }
+
+                queryBuilder.append("))");
             }
 
             queryBuilder.append(" ORDER BY pv.pkg.name ASC");
@@ -535,10 +556,12 @@ public class PkgService {
             }
 
             if(!Strings.isNullOrEmpty(pkg.getSummary()) || !Strings.isNullOrEmpty(pkg.getDescription())) {
+                Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(objectContext, NaturalLanguage.CODE_ENGLISH);
                 PkgVersionLocalization persistedPkgVersionLocalization = objectContext.newObject(PkgVersionLocalization.class);
                 persistedPkgVersionLocalization.setDescription(pkg.getDescription());
                 persistedPkgVersionLocalization.setSummary(pkg.getSummary());
                 persistedPkgVersionLocalization.setPkgVersion(persistedPkgVersion);
+                persistedPkgVersionLocalization.setNaturalLanguage(naturalLanguageOptional.get());
             }
 
             logger.info("the version {} of package {} did not exist; will create", pkg.getVersion().toString(), pkg.getName());

@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
@@ -45,6 +47,46 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
     @Resource
     RuntimeInformationService runtimeInformationService;
+
+    @Override
+    public GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest) {
+        Preconditions.checkNotNull(getAllPkgCategoriesRequest);
+        final ObjectContext context = serverRuntime.getContext();
+
+        return new GetAllPkgCategoriesResult(
+                Lists.transform(
+                        PkgCategory.getAll(context),
+                        new Function<PkgCategory, GetAllPkgCategoriesResult.PkgCategory>() {
+                            @Override
+                            public GetAllPkgCategoriesResult.PkgCategory apply(PkgCategory input) {
+                                return new GetAllPkgCategoriesResult.PkgCategory(
+                                        input.getCode(),
+                                        input.getName());
+                            }
+                        }
+                )
+        );
+    }
+
+    @Override
+    public GetAllNaturalLanguagesResult getAllNaturalLanguages(GetAllNaturalLanguagesRequest getAllNaturalLanguagesRequest) {
+        Preconditions.checkNotNull(getAllNaturalLanguagesRequest);
+        final ObjectContext context = serverRuntime.getContext();
+
+        return new GetAllNaturalLanguagesResult(
+                Lists.transform(
+                        NaturalLanguage.getAll(context),
+                        new Function<NaturalLanguage, GetAllNaturalLanguagesResult.NaturalLanguage>() {
+                            @Override
+                            public GetAllNaturalLanguagesResult.NaturalLanguage apply(NaturalLanguage input) {
+                                return new GetAllNaturalLanguagesResult.NaturalLanguage(
+                                        input.getCode(),
+                                        input.getName());
+                            }
+                        }
+                )
+        );
+    }
 
     @Override
     public CheckAuthorizationResult checkAuthorization(CheckAuthorizationRequest deriveAuthorizationRequest) {

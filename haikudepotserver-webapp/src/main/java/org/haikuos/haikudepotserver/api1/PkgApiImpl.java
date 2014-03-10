@@ -42,6 +42,8 @@ import java.util.Set;
 @Component
 public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
+    public final static int PKGPKGCATEGORIES_MAX = 3;
+
     protected static Logger logger = LoggerFactory.getLogger(PkgApiImpl.class);
 
     @Resource
@@ -67,6 +69,77 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
+    public UpdatePkgCategoriesResult updatePkgCategories(UpdatePkgCategoriesRequest updatePkgCategoriesRequest) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(updatePkgCategoriesRequest);
+        Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgCategoriesRequest.pkgName));
+        Preconditions.checkNotNull(updatePkgCategoriesRequest.pkgCategoryCodes);
+
+        if(updatePkgCategoriesRequest.pkgCategoryCodes.size() > PKGPKGCATEGORIES_MAX) {
+            throw new IllegalStateException("a package is not able to be configured with more than " + PKGPKGCATEGORIES_MAX + " categories");
+        }
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Pkg pkg = getPkg(context, updatePkgCategoriesRequest.pkgName);
+
+        User user = obtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITCATEGORIES)) {
+            logger.warn("attempt to configure the categories for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
+            throw new AuthorizationFailureException();
+        }
+
+        List<PkgCategory> pkgCategories = Lists.newArrayList(
+                PkgCategory.getByCodes(context, updatePkgCategoriesRequest.pkgCategoryCodes));
+
+        if(pkgCategories.size() != updatePkgCategoriesRequest.pkgCategoryCodes.size()) {
+            logger.warn(
+                    "request for {} categories yielded only {}; must be a code mismatch",
+                    updatePkgCategoriesRequest.pkgCategoryCodes.size(),
+                    pkgCategories.size());
+
+            throw new ObjectNotFoundException(PkgCategory.class.getSimpleName(), null);
+        }
+
+        // now go through and delete any of those pkg relationships to packages that are already present
+        // and which are no longer required.  Also remove those that we already have from the list.
+
+        for(PkgPkgCategory pkgPkgCategory : ImmutableList.copyOf(pkg.getPkgPkgCategories())) {
+            if(!pkgCategories.contains(pkgPkgCategory.getPkgCategory())) {
+                pkg.removeToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+                context.deleteObjects(pkgPkgCategory);
+            }
+            else {
+                pkgCategories.remove(pkgPkgCategory.getPkgCategory());
+            }
+        }
+
+        // now any remaining in the pkgCategories will need to be added to the pkg.
+
+        for(PkgCategory pkgCategory : pkgCategories) {
+            PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
+            pkgPkgCategory.setPkgCategory(pkgCategory);
+            pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+        }
+
+        // now save and finish.
+
+        pkg.setModifyTimestamp();
+
+        context.commitChanges();
+
+        logger.info(
+                "did configure {} categories for pkg {}",
+                new Object[] {
+                        updatePkgCategoriesRequest.pkgCategoryCodes.size(),
+                        pkg.getName(),
+                }
+        );
+
+        return new UpdatePkgCategoriesResult();
+    }
+
+    @Override
     public SearchPkgsResult searchPkgs(SearchPkgsRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.architectureCode));
@@ -82,6 +155,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         specification.setExpression(exp);
+
+        if(null!=request.pkgCategoryCodes) {
+            specification.setPkgCategories(PkgCategory.getByCodes(context, request.pkgCategoryCodes));
+        }
 
         if(null!=request.expressionType) {
             specification.setExpressionType(
@@ -147,6 +224,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     }
                 }
         ));
+
+        logger.info("search for pkgs found {} results", result.items.size());
 
         return result;
     }
@@ -226,6 +305,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         result.name = pkg.getName();
         result.modifyTimestamp = pkg.getModifyTimestamp().getTime();
+        result.pkgCategoryCodes = Lists.transform(pkg.getPkgPkgCategories(), new Function<PkgPkgCategory, String>() {
+            @Override
+            public String apply(PkgPkgCategory input) {
+                return input.getPkgCategory().getCode();
+            }
+        });
 
         switch(request.versionType) {
             case LATEST:

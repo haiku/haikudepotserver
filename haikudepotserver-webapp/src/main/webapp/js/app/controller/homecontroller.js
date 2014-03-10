@@ -6,11 +6,13 @@
 angular.module('haikudepotserver').controller(
     'HomeController',
     [
-        '$scope','$q','$log','$location',
+        '$log','$scope','$q','$log','$location',
         'jsonRpc','constants','userState','architectures','messageSource','errorHandling',
+        'referenceData',
         function(
-            $scope,$q,$log,$location,
-            jsonRpc,constants,userState,architectures,messageSource,errorHandling) {
+            $log,$scope,$q,$log,$location,
+            jsonRpc,constants,userState,architectures,messageSource,errorHandling,
+            referenceData) {
 
             const PAGESIZE = 14;
 
@@ -25,11 +27,14 @@ angular.module('haikudepotserver').controller(
             // default model settings.
 
             var amFetchingPkgs = false;
-            $scope.selectedViewCriteriaTypeOption = { code : ViewCriteriaTypes.ALL };
+
+            $scope.selectedViewCriteriaTypeOption = undefined;
             $scope.searchExpression = '';
             $scope.lastRefetchPkgsSearchExpression = '';
             $scope.architectures = architectures;
             $scope.selectedArchitecture = $scope.architectures[0];
+            $scope.pkgCategories = undefined;
+            $scope.selectedPkgCategory = undefined;
 
             $scope.pkgs = undefined;
             $scope.hasMore = undefined;
@@ -66,7 +71,6 @@ angular.module('haikudepotserver').controller(
                         });
 
                         $scope.viewCriteriaTypeOptions = options;
-                        refetchPkgsAtFirstPage();
 
                     },
                     function() {
@@ -78,6 +82,14 @@ angular.module('haikudepotserver').controller(
             }
 
             deriveViewCriteriaTypeOptions();
+
+            $scope.$watch('selectedPkgCategory', function(newValue) {
+                var option = $scope.selectedViewCriteriaTypeOption;
+
+                if(option && option.code == ViewCriteriaTypes.CATEGORIES) {
+                    refetchPkgsAtFirstPage();
+                }
+            });
 
             // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
 
@@ -92,32 +104,63 @@ angular.module('haikudepotserver').controller(
             // this gets hit when the user chooses between the various options such as "all", "search" etc...
 
             $scope.$watch('selectedViewCriteriaTypeOption', function(newValue) {
-                if(ViewCriteriaTypes.SEARCH != newValue.code) {
-                    $scope.searchExpression = '';
-                    $scope.lastRefetchPkgsSearchExpression = '';
-                }
-
                 $scope.pkgs = undefined;
 
-                switch(newValue.code) {
+                if(newValue) { // will initially be undefined.
 
-                    case ViewCriteriaTypes.ALL:
-                        refetchPkgsAtFirstPage();
-                        break;
+                    if(ViewCriteriaTypes.SEARCH != newValue.code) {
+                        $scope.searchExpression = '';
+                        $scope.lastRefetchPkgsSearchExpression = '';
+                    }
 
-                    case ViewCriteriaTypes.SEARCH:
-                        break;
+                    switch(newValue.code) {
 
-                    case ViewCriteriaTypes.CATEGORIES: // TODO
-                    case ViewCriteriaTypes.MOSTRECENT: // TODO
-                    case ViewCriteriaTypes.MOSTVIEWED: // TODO
-                        break;
+                        case ViewCriteriaTypes.ALL:
+                            refetchPkgsAtFirstPage();
+                            break;
 
+                        case ViewCriteriaTypes.SEARCH:
+                            break;
+
+                        case ViewCriteriaTypes.CATEGORIES:
+                            if(!$scope.pkgCategories) {
+                                refetchPkgCategories();
+                            }
+                            refetchPkgsAtFirstPage();
+                            break;
+
+                        case ViewCriteriaTypes.MOSTRECENT: // TODO
+                        case ViewCriteriaTypes.MOSTVIEWED: // TODO
+                            break;
+
+                    }
                 }
             });
 
             $scope.shouldSpin = function() {
                 return amFetchingPkgs;
+            }
+
+            // ---- CATEGORIES
+
+            // if the user is searching by category; view only those packages in a given category then they will need
+            // to be presented with that list of categories.  This function will pull those categories into this page
+            // and setup the default selection.
+
+            function refetchPkgCategories() {
+                $scope.pkgCategories = undefined;
+                $scope.selectedPkgCategory = undefined;
+
+                referenceData.pkgCategories().then(
+                    function(data) {
+                        $scope.pkgCategories = data;
+                        $scope.selectedPkgCategory = data[0]; // will trigger refetch of packages if required.
+                    },
+                    function() {
+                        $log.error('unable to obtain the list of pkg categories');
+                        $location.path("/error").search({});
+                    }
+                );
             }
 
             // ---- PAGINATION
@@ -167,19 +210,42 @@ angular.module('haikudepotserver').controller(
             function refetchPkgs() {
 
                 amFetchingPkgs = true;
+                $scope.pkgs = undefined;
+                $scope.hasMore = false;
+
+                var req = {
+                    architectureCode : $scope.selectedArchitecture.code,
+                    offset : $scope.offset,
+                    limit : PAGESIZE
+                }
+
+                switch($scope.selectedViewCriteriaTypeOption.code) {
+
+                    case ViewCriteriaTypes.ALL:
+                        break;
+
+                    case ViewCriteriaTypes.SEARCH:
+                        req.expression = $scope.searchExpression;
+                        req.expressionType = 'CONTAINS';
+                        break;
+
+                    case ViewCriteriaTypes.CATEGORIES:
+                        if(!$scope.selectedPkgCategory) {
+                            amFetchingPkgs = false;
+                            return;
+                        }
+                        req.pkgCategoryCodes = [ $scope.selectedPkgCategory.code ];
+                        break;
+
+                    case ViewCriteriaTypes.MOSTRECENT: // TODO
+                    case ViewCriteriaTypes.MOSTVIEWED: // TODO
+                        break;
+
+                }
+
                 $scope.lastRefetchPkgsSearchExpression = $scope.searchExpression;
 
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "searchPkgs",
-                        [{
-                            expression : $scope.searchExpression,
-                            architectureCode : $scope.selectedArchitecture.code,
-                            expressionType : 'CONTAINS',
-                            offset : $scope.offset,
-                            limit : PAGESIZE
-                        }]
-                    ).then(
+                jsonRpc.call(constants.ENDPOINT_API_V1_PKG,"searchPkgs",[req]).then(
                     function(result) {
                         $scope.pkgs = result.items;
                         $scope.hasMore = result.hasMore;
@@ -190,7 +256,6 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-
 
             }
         }

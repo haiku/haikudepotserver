@@ -41,6 +41,7 @@ angular.module('haikudepotserver').config(
                 .when('/viewpkg/:name/:version/:architectureCode',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
                 .when('/viewpkg/:name/:version/:architectureCode/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
                 .when('/viewpkg/:name/:version/:architectureCode/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
+                .when('/viewpkg/:name/:version/:architectureCode/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
                 .when('/',{
                     controller:'HomeController',

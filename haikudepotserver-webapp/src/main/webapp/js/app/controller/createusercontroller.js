@@ -100,7 +100,8 @@ angular.module('haikudepotserver').controller(
                             nickname : $scope.newUser.nickname,
                             passwordClear : $scope.newUser.passwordClear,
                             captchaToken : $scope.captchaToken,
-                            captchaResponse : $scope.newUser.captchaResponse
+                            captchaResponse : $scope.newUser.captchaResponse,
+                            naturalLanguageCode : 'en' // TODO; deal with later
                         }]
                     ).then(
                     function(result) {

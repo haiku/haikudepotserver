@@ -20,7 +20,8 @@ public enum Permission {
     USER_LIST(null),
 
     PKG_EDITICON(TargetType.PKG),
-    PKG_EDITSCREENSHOT(TargetType.PKG);
+    PKG_EDITSCREENSHOT(TargetType.PKG),
+    PKG_EDITCATEGORIES(TargetType.PKG);
 
     private TargetType requiredTargetType;
 

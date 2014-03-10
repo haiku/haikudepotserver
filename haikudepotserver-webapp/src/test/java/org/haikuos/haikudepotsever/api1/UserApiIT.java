@@ -13,6 +13,7 @@ import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.captcha.model.Captcha;
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
@@ -36,12 +37,13 @@ public class UserApiIT extends AbstractIntegrationTest {
         user.setNickname(nickname);
         user.setPasswordSalt(); // random
         user.setPasswordHash(authenticationService.hashPassword(user, password));
+        user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
         context.commitChanges();
         return user;
     }
 
     @Test
-    public void testCreateUser() {
+    public void testCreateUser() throws Exception {
 
         Captcha captcha = captchaService.generate();
         CreateUserRequest request = new CreateUserRequest();
@@ -49,6 +51,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         request.captchaResponse = captcha.getResponse();
         request.nickname = "testuser";
         request.passwordClear = "Ue4nI92Rw";
+        request.naturalLanguageCode = "en";
 
         // ------------------------------------
         CreateUserResult result = userApi.createUser(request);
@@ -61,6 +64,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(userOptional.get().getActive()).isTrue();
         Assertions.assertThat(userOptional.get().getIsRoot()).isFalse();
         Assertions.assertThat(userOptional.get().getNickname()).isEqualTo("testuser");
+        Assertions.assertThat(userOptional.get().getNaturalLanguage().getCode()).isEqualTo("en");
 
         Assertions.assertThat(authenticationService.authenticate("testuser","Ue4nI92Rw").get()).isEqualTo(userOptional.get().getObjectId());
     }

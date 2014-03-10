@@ -18,6 +18,13 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 public interface PkgApi {
 
     /**
+     * <p>This method will ensure that the categories configured on the nominated package are as per the list of
+     * packages.</p>
+     */
+
+    UpdatePkgCategoriesResult updatePkgCategories(UpdatePkgCategoriesRequest updatePkgCategoriesRequest) throws ObjectNotFoundException;
+
+    /**
      * <p>This method can be invoked to get a list of all of the packages that match some search critera in the
      * request.</p>
      */

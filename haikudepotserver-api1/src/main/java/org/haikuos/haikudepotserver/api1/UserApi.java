@@ -20,10 +20,12 @@ public interface UserApi {
 
     /**
      * <p>This method will create a user in the system.  It is identified by a username
-     * and authenticated by a password.  The password is supplied in the clear.</p>
+     * and authenticated by a password.  The password is supplied in the clear.  This
+     * method will throw {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}
+     * in the case that the referenced 'natural language' is not able to be found.</p>
      */
 
-    CreateUserResult createUser(CreateUserRequest createUserRequest);
+    CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException;
 
     /**
      * <p>This method will get the user identified by the nickname in the request object.

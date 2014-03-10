@@ -26,4 +26,11 @@ public class CreateUserRequest {
 
     public String captchaResponse;
 
+    /**
+     * <p>This code comes from the {@link org.haikuos.haikudepotserver.api1.model.miscellaneous.GetAllNaturalLanguagesResult.NaturalLanguage}
+     * entity.</p>
+     */
+
+    public String naturalLanguageCode;
+
 }

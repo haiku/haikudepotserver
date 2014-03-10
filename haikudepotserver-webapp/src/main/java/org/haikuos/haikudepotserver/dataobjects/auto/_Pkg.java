@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
+import org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.Publisher;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -21,6 +22,7 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NAME_PROPERTY = "name";
     public static final String PKG_ICONS_PROPERTY = "pkgIcons";
+    public static final String PKG_PKG_CATEGORIES_PROPERTY = "pkgPkgCategories";
     public static final String PKG_SCREENSHOTS_PROPERTY = "pkgScreenshots";
     public static final String PUBLISHER_PROPERTY = "publisher";
 
@@ -63,6 +65,18 @@ public abstract class _Pkg extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PkgIcon> getPkgIcons() {
         return (List<PkgIcon>)readProperty(PKG_ICONS_PROPERTY);
+    }
+
+
+    public void addToPkgPkgCategories(PkgPkgCategory obj) {
+        addToManyTarget(PKG_PKG_CATEGORIES_PROPERTY, obj, true);
+    }
+    public void removeFromPkgPkgCategories(PkgPkgCategory obj) {
+        removeToManyTarget(PKG_PKG_CATEGORIES_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PkgPkgCategory> getPkgPkgCategories() {
+        return (List<PkgPkgCategory>)readProperty(PKG_PKG_CATEGORIES_PROPERTY);
     }
 
 

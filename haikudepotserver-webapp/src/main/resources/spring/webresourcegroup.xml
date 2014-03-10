@@ -76,6 +76,7 @@
                             <value>/js/app/controller/viewrepositorycontroller.js</value>
                             <value>/js/app/controller/addeditrepositorycontroller.js</value>
                             <value>/js/app/controller/editpkgscreenshotscontroller.js</value>
+                            <value>/js/app/controller/editpkgcategoriescontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>

@@ -1,5 +1,6 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -13,6 +14,7 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
 
     public static final String DESCRIPTION_PROPERTY = "description";
     public static final String SUMMARY_PROPERTY = "summary";
+    public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
     public static final String PKG_VERSION_PROPERTY = "pkgVersion";
 
     public static final String ID_PK_COLUMN = "id";
@@ -30,6 +32,15 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
     public String getSummary() {
         return (String)readProperty(SUMMARY_PROPERTY);
     }
+
+    public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
+        setToOneTarget(NATURAL_LANGUAGE_PROPERTY, naturalLanguage, true);
+    }
+
+    public NaturalLanguage getNaturalLanguage() {
+        return (NaturalLanguage)readProperty(NATURAL_LANGUAGE_PROPERTY);
+    }
+
 
     public void setPkgVersion(PkgVersion pkgVersion) {
         setToOneTarget(PKG_VERSION_PROPERTY, pkgVersion, true);

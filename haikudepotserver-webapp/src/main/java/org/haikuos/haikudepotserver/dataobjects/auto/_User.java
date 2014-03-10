@@ -1,5 +1,6 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -16,6 +17,7 @@ public abstract class _User extends AbstractDataObject {
     public static final String NICKNAME_PROPERTY = "nickname";
     public static final String PASSWORD_HASH_PROPERTY = "passwordHash";
     public static final String PASSWORD_SALT_PROPERTY = "passwordSalt";
+    public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
 
     public static final String ID_PK_COLUMN = "id";
 
@@ -60,6 +62,15 @@ public abstract class _User extends AbstractDataObject {
     public String getPasswordSalt() {
         return (String)readProperty(PASSWORD_SALT_PROPERTY);
     }
+
+    public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
+        setToOneTarget(NATURAL_LANGUAGE_PROPERTY, naturalLanguage, true);
+    }
+
+    public NaturalLanguage getNaturalLanguage() {
+        return (NaturalLanguage)readProperty(NATURAL_LANGUAGE_PROPERTY);
+    }
+
 
     protected abstract void onPostAdd();
 

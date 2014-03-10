@@ -150,6 +150,7 @@ public class AuthorizationService {
 
             case PKG_EDITICON:
             case PKG_EDITSCREENSHOT:
+            case PKG_EDITCATEGORIES:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             default:

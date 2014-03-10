@@ -66,19 +66,31 @@
             <h2 ng-show="pkg.versions[0].summary" class="lead">{{pkg.versions[0].summary}}</h2>
             <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
 
+            <p>
+                Categories;
+                <span ng-show="!pkgCategories">...</span>
+                <span ng-show="pkgCategories && !pkgCategories.length"><em>None</em></span>
+                <span ng-show="pkgCategories.length">
+                    <span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span><em>{{pkgCategory.name}}</em></span>
+                </span>
+            </p>
+
             <ul>
                 <li><a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">Visit web site</a></li>
                 <li ng-show="canRemoveIcon()" pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
                     <a href="" ng-click="goRemoveIcon()">Remove icon</a>
                 </li>
-                <li ng-show="canEditIcon()" pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
-                    <a href="" ng-click="goEditIcon()">Edit icons</a>
+                <li pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
+                    <a href="" ng-click="goEditIcon()">Edit icon</a>
                 </li>
                 <li ng-show="pkgIconHvifUrl">
                     <a href="{{pkgIconHvifUrl}}">Download icon in 'hvif' format</a>
                 </li>
-                <li ng-show="canEditScreenshots()" pkg="pkg" show-if-pkg-permission="'PKG_EDITSCREENSHOT'">
+                <li pkg="pkg" show-if-pkg-permission="'PKG_EDITSCREENSHOT'">
                     <a href="" ng-click="goEditScreenshots()">Edit screenshots</a>
+                </li>
+                <li pkg="pkg" show-if-pkg-permission="'PKG_EDITCATEGORIES'">
+                    <a href="" ng-click="goEditPkgCategories()">Edit categories</a>
                 </li>
             </ul>
         </div>

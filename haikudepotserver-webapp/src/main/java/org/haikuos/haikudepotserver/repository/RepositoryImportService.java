@@ -9,23 +9,22 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
+import com.google.common.util.concurrent.AbstractService;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.pkg.PkgIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -43,8 +42,7 @@ import java.util.concurrent.TimeUnit;
  * will undertake the import process.</p>
  */
 
-@Service
-public class RepositoryImportService {
+public class RepositoryImportService extends AbstractService {
 
     protected static Logger logger = LoggerFactory.getLogger(RepositoryImportService.class);
 
@@ -60,8 +58,11 @@ public class RepositoryImportService {
 
     private ArrayBlockingQueue<Runnable> runnables = Queues.newArrayBlockingQueue(SIZE_QUEUE);
 
-    private ThreadPoolExecutor getExecutor() {
-        if(null==executor) {
+    @Override
+    public void doStart() {
+        try {
+            Preconditions.checkState(null==executor);
+
             executor = new ThreadPoolExecutor(
                     0, // core pool size
                     1, // max pool size
@@ -69,9 +70,44 @@ public class RepositoryImportService {
                     TimeUnit.MINUTES,
                     runnables,
                     new ThreadPoolExecutor.AbortPolicy());
-        }
 
-        return executor;
+            notifyStarted();
+        }
+        catch(Throwable th) {
+            notifyFailed(th);
+        }
+    }
+
+    @Override
+    public void doStop() {
+        try {
+            Preconditions.checkNotNull(executor);
+            executor.shutdown();
+            executor.awaitTermination(2, TimeUnit.MINUTES);
+            executor = null;
+            notifyStopped();
+        }
+        catch(Throwable th) {
+            notifyFailed(th);
+        }
+    }
+
+    public void startAsyncAndAwaitRunning() {
+        startAsync();
+        awaitRunning();
+    }
+
+    public void stopAsyncAndAwaitTerminated() {
+        stopAsync();
+        awaitTerminated();
+    }
+
+    /**
+     * <p>Returns true if the service is actively working on a job.</p>
+     */
+
+    public boolean isProcessingSubmittedJobs() {
+        return null!=executor && executor.getActiveCount() > 0;
     }
 
     /**
@@ -82,6 +118,7 @@ public class RepositoryImportService {
 
     public void submit(final PkgRepositoryImportJob job) {
         Preconditions.checkNotNull(job);
+        Preconditions.checkState(null!=executor, "the service is not running, but a job is being submitted");
 
         // first thing to do is to validate the request; does the repository exist and what is it's URL?
         Optional<Repository> repositoryOptional = Repository.getByCode(serverRuntime.getContext(), job.getCode());
@@ -90,19 +127,20 @@ public class RepositoryImportService {
             throw new RuntimeException("unable to import repository data because repository was not able to be found for code; "+job.getCode());
         }
 
-        if(!Iterables.tryFind(runnables, new Predicate<Runnable>() {
-            @Override
-            public boolean apply(java.lang.Runnable input) {
-                ImportRepositoryDataJobRunnable importRepositoryDataJobRunnable = (ImportRepositoryDataJobRunnable) input;
-                return importRepositoryDataJobRunnable.equals(job);
-            }
-        }).isPresent()) {
-            getExecutor().submit(new ImportRepositoryDataJobRunnable(this,job));
+        if(!Iterables.tryFind(
+                Lists.newArrayList(runnables),
+                new Predicate<Runnable>() {
+                    @Override
+                    public boolean apply(java.lang.Runnable input) {
+                        ImportRepositoryDataJobRunnable importRepositoryDataJobRunnable = (ImportRepositoryDataJobRunnable) input;
+                        return importRepositoryDataJobRunnable.equals(job);
+                    }
+                }).isPresent()) {
+            executor.submit(new ImportRepositoryDataJobRunnable(this, job));
             logger.info("have submitted job to import repository data; {}", job.toString());
         }
         else {
             logger.info("ignoring job to import repository data as there is already one waiting; {}", job.toString());
-
         }
     }
 
@@ -122,22 +160,10 @@ public class RepositoryImportService {
         // now shift the URL's data into a temporary file and then process it.
 
         File temporaryFile = null;
-        InputStream urlInputStream = null;
 
         try {
-
-            urlInputStream = url.openStream();
             temporaryFile = File.createTempFile(job.getCode()+"__import",".hpkr");
-            final InputStream finalUrlInputStream = urlInputStream;
-
-            com.google.common.io.Files.copy(
-                    new InputSupplier<InputStream>() {
-                        @Override
-                        public InputStream getInput() throws IOException {
-                            return finalUrlInputStream;
-                        }
-                    },
-                    temporaryFile);
+            Resources.asByteSource(url).copyTo(Files.asByteSink(temporaryFile));
 
             logger.info("did copy data for repository {} ({}) to temporary file",job.getCode(),url.toString());
 
@@ -160,8 +186,6 @@ public class RepositoryImportService {
             logger.error("a problem has arisen processing a repository file for repository "+job.getCode()+" from url '"+url.toString()+"'",th);
         }
         finally {
-            Closeables.closeQuietly(urlInputStream);
-
             if(null!=temporaryFile && temporaryFile.exists()) {
                 temporaryFile.delete();
             }

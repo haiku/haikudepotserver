@@ -12,6 +12,18 @@ import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 public interface MiscellaneousApi {
 
     /**
+     * <p>Returns a list of all of the categories.</p>
+     */
+
+    GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest);
+
+    /**
+     * <p>Returns a list of all of the natural languages.</p>
+     */
+
+    GetAllNaturalLanguagesResult getAllNaturalLanguages(GetAllNaturalLanguagesRequest getAllNaturalLanguagesRequest);
+
+    /**
      * <p>This method will take in a list of permissions with targets and will return the list of those that
      * pass authorization checks against the presently authenticated user.</p>
      */
