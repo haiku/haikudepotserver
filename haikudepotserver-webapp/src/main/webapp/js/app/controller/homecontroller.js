@@ -115,6 +115,8 @@ angular.module('haikudepotserver').controller(
 
                     switch(newValue.code) {
 
+                        case ViewCriteriaTypes.MOSTRECENT:
+                        case ViewCriteriaTypes.MOSTVIEWED:
                         case ViewCriteriaTypes.ALL:
                             refetchPkgsAtFirstPage();
                             break;
@@ -127,10 +129,6 @@ angular.module('haikudepotserver').controller(
                                 refetchPkgCategories();
                             }
                             refetchPkgsAtFirstPage();
-                            break;
-
-                        case ViewCriteriaTypes.MOSTRECENT: // TODO
-                        case ViewCriteriaTypes.MOSTVIEWED: // TODO
                             break;
 
                     }
@@ -234,11 +232,17 @@ angular.module('haikudepotserver').controller(
                             amFetchingPkgs = false;
                             return;
                         }
-                        req.pkgCategoryCodes = [ $scope.selectedPkgCategory.code ];
+                        req.pkgCategoryCode = $scope.selectedPkgCategory.code;
                         break;
 
-                    case ViewCriteriaTypes.MOSTRECENT: // TODO
-                    case ViewCriteriaTypes.MOSTVIEWED: // TODO
+                    case ViewCriteriaTypes.MOSTRECENT:
+                        req.daysSinceLatestVersion = constants.RECENT_DAYS;
+                        req.sortOrdering = 'VERSIONCREATETIMESTAMP';
+                        break;
+
+                    case ViewCriteriaTypes.MOSTVIEWED:
+                        req.daysSinceLatestVersion = constants.RECENT_DAYS;
+                        req.sortOrdering = 'VERSIONCREATETIMESTAMP'; // TODO; ORDERING
                         break;
 
                 }

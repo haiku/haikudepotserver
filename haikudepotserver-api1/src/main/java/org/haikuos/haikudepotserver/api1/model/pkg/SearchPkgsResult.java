@@ -21,6 +21,7 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public String micro;
         public String preRelease;
         public Integer revision;
+        public Long createTimestamp;
     }
 
 }

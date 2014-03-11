@@ -15,8 +15,21 @@ import java.util.List;
 
 public class SearchPkgsRequest extends AbstractSearchRequest {
 
+    public enum SortOrdering {
+        NAME,
+        VERSIONCREATETIMESTAMP
+    }
+
     public String architectureCode;
 
-    public List<String> pkgCategoryCodes;
+    public String pkgCategoryCode;
+
+    public SortOrdering sortOrdering;
+
+    /**
+     * <p>This will only return data where the latest version is newer than the number of days indicated.</p>
+     */
+
+    public Number daysSinceLatestVersion;
 
 }

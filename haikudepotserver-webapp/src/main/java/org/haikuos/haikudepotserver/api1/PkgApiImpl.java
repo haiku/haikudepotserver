@@ -144,6 +144,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.architectureCode));
 
+        if(null==request.sortOrdering) {
+            request.sortOrdering = SearchPkgsRequest.SortOrdering.NAME;
+        }
+
         final ObjectContext context = serverRuntime.getContext();
 
         PkgSearchSpecification specification = new PkgSearchSpecification();
@@ -156,8 +160,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         specification.setExpression(exp);
 
-        if(null!=request.pkgCategoryCodes) {
-            specification.setPkgCategories(PkgCategory.getByCodes(context, request.pkgCategoryCodes));
+        if(null!=request.pkgCategoryCode) {
+            specification.setPkgCategory(PkgCategory.getByCode(context, request.pkgCategoryCode).get());
         }
 
         if(null!=request.expressionType) {
@@ -165,60 +169,49 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     PkgSearchSpecification.ExpressionType.valueOf(request.expressionType.name()));
         }
 
+        specification.setDaysSinceLatestVersion(request.daysSinceLatestVersion);
+        specification.setSortOrdering(PkgSearchSpecification.SortOrdering.valueOf(request.sortOrdering.name()));
+
         final Optional<Architecture> architectureOptional = Architecture.getByCode(context,request.architectureCode);
 
         if(!architectureOptional.isPresent()) {
             throw new IllegalStateException("the architecture specified is not able to be found; "+request.architectureCode);
         }
 
-        specification.setArchitectures(Sets.newHashSet(
-                architectureOptional.get()
-                ,
-                Architecture.getByCode(context,Architecture.CODE_ANY).get()
-//                ,
-//                Architecture.getByCode(context,Architecture.CODE_SOURCE).get()
-        ));
+        specification.setArchitecture(architectureOptional.get());
 
         specification.setLimit(request.limit+1); // get +1 to see if there are any more.
         specification.setOffset(request.offset);
 
         SearchPkgsResult result = new SearchPkgsResult();
-        List<Pkg> searchedPkgs = pkgService.search(context,specification);
+        List<PkgVersion> searchedPkgVersions = pkgService.search(context,specification);
 
         // if there are more than we asked for then there must be more available.
 
-        result.hasMore = new Boolean(searchedPkgs.size() > request.limit);
+        result.hasMore = new Boolean(searchedPkgVersions.size() > request.limit);
 
         if(result.hasMore) {
-            searchedPkgs = searchedPkgs.subList(0,request.limit);
+            searchedPkgVersions = searchedPkgVersions.subList(0,request.limit);
         }
 
         result.items = Lists.newArrayList(Iterables.transform(
-                searchedPkgs,
-                new Function<Pkg, SearchPkgsResult.Pkg>() {
+                searchedPkgVersions,
+                new Function<PkgVersion, SearchPkgsResult.Pkg>() {
                     @Override
-                    public SearchPkgsResult.Pkg apply(org.haikuos.haikudepotserver.dataobjects.Pkg input) {
+                    public SearchPkgsResult.Pkg apply(org.haikuos.haikudepotserver.dataobjects.PkgVersion input) {
+
                         SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
-                        resultPkg.name = input.getName();
-                        resultPkg.modifyTimestamp = input.getModifyTimestamp().getTime();
+                        resultPkg.name = input.getPkg().getName();
+                        resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
 
-                        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
-                                context,
-                                input,
-                                Lists.newArrayList(
-                                        architectureOptional.get(),
-                                        Architecture.getByCode(context, Architecture.CODE_ANY).get(),
-                                        Architecture.getByCode(context, Architecture.CODE_SOURCE).get()));
-
-                        if(pkgVersionOptional.isPresent()) {
-                            SearchPkgsResult.Version resultVersion = new SearchPkgsResult.Version();
-                            resultVersion.major = pkgVersionOptional.get().getMajor();
-                            resultVersion.minor = pkgVersionOptional.get().getMinor();
-                            resultVersion.micro = pkgVersionOptional.get().getMicro();
-                            resultVersion.preRelease = pkgVersionOptional.get().getPreRelease();
-                            resultVersion.revision = pkgVersionOptional.get().getRevision();
-                            resultPkg.version = resultVersion;
-                        }
+                        SearchPkgsResult.Version resultVersion = new SearchPkgsResult.Version();
+                        resultVersion.major = input.getMajor();
+                        resultVersion.minor = input.getMinor();
+                        resultVersion.micro = input.getMicro();
+                        resultVersion.preRelease = input.getPreRelease();
+                        resultVersion.revision = input.getRevision();
+                        resultVersion.createTimestamp = input.getCreateTimestamp().getTime();
+                        resultPkg.version = resultVersion;
 
                         return resultPkg;
                     }

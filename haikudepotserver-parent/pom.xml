@@ -51,11 +51,16 @@
                 <version>1.7.5</version>
             </dependency>
 
-            <!-- general -->
+            <!-- GENERAL -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>16.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.3</version>
             </dependency>
 
             <!-- WEB / API -->

@@ -11,17 +11,13 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
-import com.google.common.net.*;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.dataobjects.MediaType;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -30,13 +26,20 @@ import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.ImageHelper;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
 import org.imgscalr.Scalr;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
+import javax.sql.DataSource;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -60,6 +63,9 @@ public class PkgService {
     protected static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
     private ImageHelper imageHelper = new ImageHelper();
+
+    @Resource
+    DataSource dataSource;
 
     // ------------------------------
     // HELP
@@ -92,142 +98,171 @@ public class PkgService {
     // ------------------------------
     // SEARCH
 
-    public List<Pkg> search(ObjectContext context, PkgSearchSpecification search) {
+    public List<PkgVersion> search(ObjectContext context, PkgSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
-        Preconditions.checkNotNull(search.getArchitectures());
-        Preconditions.checkState(!search.getArchitectures().isEmpty());
+        Preconditions.checkNotNull(search.getArchitecture());
+        Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
 
-        if(null!=search.getPkgCategories() && search.getPkgCategories().isEmpty()) {
-            return Collections.emptyList();
-        }
+        // unfortunately this one became too complex to get working properly in JPQL; had to resort
+        // to using raw SQL.
 
-        List<String> pkgNames;
-
-        // using jpql because of need to get out raw rows for the pkg name.
+        StringBuilder queryBuilder = new StringBuilder();
+        List<Object> parameters = Lists.newArrayList();
 
         {
-            StringBuilder queryBuilder = new StringBuilder();
-            List<Object> parameters = Lists.newArrayList();
-            List<Architecture> architecturesList = Lists.newArrayList(search.getArchitectures());
+            queryBuilder.append("SELECT pv.id FROM haikudepot.pkg p");
+            queryBuilder.append(" JOIN haikudepot.pkg_version pv ON pv.pkg_id = p.id");
+            queryBuilder.append(" JOIN haikudepot.architecture a ON pv.architecture_id = a.id");
 
-            queryBuilder.append("SELECT DISTINCT pv.pkg.name FROM PkgVersion pv WHERE");
-
-            queryBuilder.append(" (");
-
-            for(int i=0; i < architecturesList.size(); i++) {
-                if(0!=i) {
-                    queryBuilder.append(" OR");
-                }
-
-                queryBuilder.append(String.format(" pv.architecture.code = ?%d",parameters.size()+1));
-                parameters.add(architecturesList.get(i).getCode());
+            if(null!=search.getPkgCategory()) {
+                queryBuilder.append(" JOIN haikudepot.pkg_pkg_category ppc ON p.id = ppc.pkg_id");
+                queryBuilder.append(" JOIN haikudepot.pkg_category pc ON pc.id=ppc.pkg_category_id");
             }
 
-            queryBuilder.append(")");
+            queryBuilder.append(" WHERE");
+
+            // make sure that we are hitting the architecture that we want.
+
+            queryBuilder.append(" (a.code = ? OR a.code = ?)");
+            parameters.add(search.getArchitecture().getCode());
+            parameters.add(Architecture.CODE_ANY);
+
+            // make sure that we are dealing only with active packages.
 
             if(!search.getIncludeInactive()) {
-                queryBuilder.append(" AND");
-                queryBuilder.append(" pv.active = true");
-                queryBuilder.append(" AND");
-                queryBuilder.append(" pv.pkg.active = true");
+                queryBuilder.append(" AND p.active = true");
+                queryBuilder.append(" AND pv.active = true");
+            }
+
+            if(null!=search.getDaysSinceLatestVersion()) {
+                queryBuilder.append(" AND pv.create_timestamp > ?");
+                parameters.add(new java.sql.Timestamp(DateTime.now().minusDays(search.getDaysSinceLatestVersion().intValue()).getMillis()));
             }
 
             if(!Strings.isNullOrEmpty(search.getExpression())) {
-                queryBuilder.append(" AND");
-                queryBuilder.append(String.format(" pv.pkg.name LIKE ?%d",parameters.size()+1));
+                queryBuilder.append(" AND p.name LIKE ?");
                 parameters.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
             }
 
-            if(null!=search.getPkgCategories()) {
-                List<PkgCategory> pkgCategoryList = Lists.newArrayList(search.getPkgCategories());
-
-                queryBuilder.append(" AND EXISTS(SELECT pcc1 FROM " + PkgPkgCategory.class.getSimpleName() + " pcc1 WHERE pcc1.pkg=pv.pkg AND (");
-
-                for(int i=0; i < pkgCategoryList.size(); i++) {
-                   if(0!=i) {
-                       queryBuilder.append(" OR");
-                   }
-
-                    queryBuilder.append(String.format(" pcc1.pkgCategory=?%d",parameters.size()+1));
-                    parameters.add(pkgCategoryList.get(i));
-                }
-
-                queryBuilder.append("))");
+            if(null!=search.getPkgCategory()) {
+                queryBuilder.append(" AND pc.code = ?");
+                parameters.add(search.getPkgCategory().getCode());
             }
 
-            queryBuilder.append(" ORDER BY pv.pkg.name ASC");
+            // make sure that we are dealing with the latest version in the package.
 
-            EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
+            queryBuilder.append(" AND pv.id = (");
+            queryBuilder.append(" SELECT pv2.id FROM haikudepot.pkg_version pv2 WHERE");
+            queryBuilder.append(" pv2.pkg_id = pv.pkg_id");
+            queryBuilder.append(" AND pv2.architecture_id = pv.architecture_id");
 
-            for(int i=0;i<parameters.size();i++) {
-                query.setParameter(i+1,parameters.get(i));
+            if(!search.getIncludeInactive()) {
+                queryBuilder.append(" AND pv2.active = true");
             }
 
-            // [apl 13.nov.2013]
-            // There seems to be a problem with the resolution of "IN" parameters; it doesn't seem to handle
-            // the collection in the parameter very well.  See EJBQLConditionTranslator.processParameter(..)
-            // Seems to be a problem if it is a data object or a scalar.
+            queryBuilder.append(" ORDER BY");
+            queryBuilder.append(" pv2.major DESC NULLS LAST");
+            queryBuilder.append(" ,pv2.minor DESC NULLS LAST");
+            queryBuilder.append(" ,pv2.micro DESC NULLS LAST");
+            queryBuilder.append(" ,pv2.pre_release DESC NULLS LAST");
+            queryBuilder.append(" ,pv2.revision DESC NULLS LAST");
+            queryBuilder.append(" LIMIT 1");
+            queryBuilder.append(")");
+            queryBuilder.append(" ORDER BY");
 
-//            queryBuilder.append("SELECT DISTINCT pv.pkg.name FROM PkgVersion pv WHERE");
-//            //queryBuilder.append(" pv.architecture IN (:architectures)");
-//            queryBuilder.append(" pv.architecture.code IN (:architectureCodes)");
-//            queryBuilder.append(" AND");
-//            queryBuilder.append(" pv.active=true");
-//            queryBuilder.append(" AND");
-//            queryBuilder.append(" pv.pkg.active=true");
-//
-//            if(!Strings.isNullOrEmpty(search.getExpression())) {
-//                queryBuilder.append(" AND");
-//                queryBuilder.append(" pv.pkg.name LIKE :pkgNameLikeExpression");
-//            }
-//
-//            queryBuilder.append(" ORDER BY pv.pkg.name ASC");
-//
-//            EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-//
-//            //query.setParameter("architectures", search.getArchitectures());
-//            query.setParameter("architectureCodes", Iterables.transform(
-//                    search.getArchitectures(),
-//                    new Function<Architecture, String>() {
-//                        @Override
-//                        public String apply(Architecture architecture) {
-//                            return architecture.getCode();
-//                        }
-//                    }
-//            ));
-//
-//            if(!Strings.isNullOrEmpty(search.getExpression())) {
-//                query.setParameter("pkgNameLikeExpression", "%" + LikeHelper.escapeExpression(search.getExpression()) + "%");
-//            }
+            switch(search.getSortOrdering()) {
 
-            query.setFetchOffset(search.getOffset());
-            query.setFetchLimit(search.getLimit());
+                case VERSIONCREATETIMESTAMP:
+                    queryBuilder.append(" pv.create_timestamp DESC");
+                    break;
 
-            pkgNames = (List<String>) context.performQuery(query);
+                case NAME:
+                    queryBuilder.append(" p.name ASC");
+                    break;
+
+                default:
+                    throw new IllegalStateException("unhandled sort ordering; " + search.getSortOrdering());
+
+            }
+
+            queryBuilder.append(" LIMIT ?");
+            parameters.add(search.getLimit());
+
+            queryBuilder.append(" OFFSET ?");
+            parameters.add(search.getOffset());
         }
 
-        List<Pkg> pkgs = Collections.emptyList();
+        // now run the raw database query to get the primary keys and then we will haul in the data using Cayenne
+        // as a separate query which should be quite fast.
 
-        if(0!=pkgNames.size()) {
+        final List<Long> pkgVersionIds = Lists.newArrayList();
 
-            SelectQuery query = new SelectQuery(Pkg.class, ExpressionFactory.inExp(Pkg.NAME_PROPERTY, pkgNames));
+        {
+            PreparedStatement preparedStatement = null;
+            ResultSet resultSet = null;
+            Connection connection = null;
 
-            pkgs = Lists.newArrayList(context.performQuery(query));
+            try {
+                connection = dataSource.getConnection();
+                connection.setAutoCommit(false);
 
-            // repeat the sort of the main query to get the packages back into order again.
+                preparedStatement = connection.prepareStatement(queryBuilder.toString());
 
-            Collections.sort(pkgs, new Comparator<Pkg>() {
-                @Override
-                public int compare(Pkg o1, Pkg o2) {
-                    return o1.getName().compareTo(o2.getName());
+                for(int i=0;i<parameters.size();i++) {
+                    preparedStatement.setObject(i+1, parameters.get(i));
                 }
-            });
+
+                resultSet = preparedStatement.executeQuery();
+
+                while(resultSet.next()) {
+                    pkgVersionIds.add(resultSet.getLong(1));
+                }
+            }
+            catch(SQLException se) {
+                throw new RuntimeException("unable to search the packages from the search specification", se);
+            }
+            finally {
+                Closeables.closeQuietly(resultSet);
+                Closeables.closeQuietly(preparedStatement);
+                Closeables.closeQuietly(connection);
+            }
         }
 
-        return pkgs;
+        // now get the actual data objects which might be in the wrong order.  Use a pre-fetch here to pick up the
+        // package as well.  We do this to avoid the extra fault that will come in producing the output.
+
+        SelectQuery query = new SelectQuery(
+                PkgVersion.class,
+                ExpressionFactory.inDbExp(PkgVersion.ID_PK_COLUMN, pkgVersionIds));
+
+        PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
+        prefetchTreeNode.addPath(PkgVersion.PKG_PROPERTY);
+        query.setPrefetchTree(prefetchTreeNode);
+
+        List<PkgVersion> pkgVersions = context.performQuery(query);
+
+        // repeat the sort of the main query to get the packages back into order again.
+
+        Collections.sort(pkgVersions, new Comparator<PkgVersion>() {
+            @Override
+            public int compare(PkgVersion o1, PkgVersion o2) {
+                Long i1 = (Long) o1.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
+                Long i2 = (Long) o2.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
+                int offset1 = pkgVersionIds.indexOf(i1);
+                int offset2 = pkgVersionIds.indexOf(i2);
+
+                if(-1==offset1 || -1==offset2) {
+                    throw new IllegalStateException("a pkg version being sorted was not able to be found in the original list of id-s to be fetched");
+                }
+
+                return Integer.compare(offset1,offset2);
+            }
+        });
+
+        return pkgVersions;
     }
 
     // ------------------------------
@@ -312,7 +347,7 @@ public class PkgService {
                 if(!imageHelper.looksLikeHaikuVectorIconFormat(imageData)) {
                     logger.warn("attempt to set the vector (hvif) package icon for package {}, but the data does not look like hvif",pkg.getName());
                     throw new BadPkgIconException();
-                } 
+                }
                 pkgIconOptional = pkg.getPkgIcon(mediaType, null);
             }
             else {

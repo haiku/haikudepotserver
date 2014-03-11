@@ -14,7 +14,7 @@
 
     <dependencies>
 
-        <!-- haikudepot -->
+        <!-- HAIKUDEPOT -->
         <dependency>
             <groupId>org.haikuos</groupId>
             <artifactId>haikudepotserver-packagefile</artifactId>
@@ -26,10 +26,14 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- general -->
+        <!-- GENERAL -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
         </dependency>
 
         <!-- logging -->

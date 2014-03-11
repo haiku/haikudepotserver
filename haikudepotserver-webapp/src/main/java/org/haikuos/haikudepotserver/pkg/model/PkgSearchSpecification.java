@@ -10,6 +10,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>This model object specifies the parameters of a search into the system for packages.  See the
@@ -18,23 +19,49 @@ import java.util.Collection;
 
 public class PkgSearchSpecification extends AbstractSearchSpecification {
 
-    private Collection<Architecture> architectures;
-
-    private Collection<PkgCategory> pkgCategories;
-
-    public Collection<Architecture> getArchitectures() {
-        return architectures;
+    public enum SortOrdering {
+        NAME,
+        VERSIONCREATETIMESTAMP
     }
 
-    public void setArchitectures(Collection<Architecture> architectures) {
-        this.architectures = architectures;
+    private Architecture architecture;
+
+    private PkgCategory pkgCategory;
+
+    private Number daysSinceLatestVersion;
+
+    private SortOrdering sortOrdering;
+
+    public Architecture getArchitecture() {
+        return architecture;
     }
 
-    public Collection<PkgCategory> getPkgCategories() {
-        return pkgCategories;
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
     }
 
-    public void setPkgCategories(Collection<PkgCategory> pkgCategories) {
-        this.pkgCategories = pkgCategories;
+    public PkgCategory getPkgCategory() {
+        return pkgCategory;
     }
+
+    public void setPkgCategory(PkgCategory pkgCategory) {
+        this.pkgCategory = pkgCategory;
+    }
+
+    public SortOrdering getSortOrdering() {
+        return sortOrdering;
+    }
+
+    public void setSortOrdering(SortOrdering sortOrdering) {
+        this.sortOrdering = sortOrdering;
+    }
+
+    public Number getDaysSinceLatestVersion() {
+        return daysSinceLatestVersion;
+    }
+
+    public void setDaysSinceLatestVersion(Number daysSinceLatestVersion) {
+        this.daysSinceLatestVersion = daysSinceLatestVersion;
+    }
+
 }
