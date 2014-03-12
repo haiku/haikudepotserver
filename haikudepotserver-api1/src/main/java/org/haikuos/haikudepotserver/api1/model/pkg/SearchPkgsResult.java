@@ -22,6 +22,7 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public String preRelease;
         public Integer revision;
         public Long createTimestamp;
+        public Long viewCounter;
     }
 
 }

@@ -1,5 +1,5 @@
 % -----------
-% Copyright 2013, Andrew Lindesay
+% Copyright 2013-2014, Andrew Lindesay
 % Distributed under the terms of the MIT License.
 % -----------
 
@@ -17,6 +17,12 @@ key2=value2
 \end{verbatim}
 
 There are a number of keys which are described below.
+
+\subsection{General}
+
+\subsubsection{\tt pkgversion.viewcounter.protectrecurringincrementfromsameclient}
+
+This value can have a value of ``true'' or ``false''.  When true (the default), the system will make basic efforts to protect against one client repeatedly incrementing a package version's view counter.  This might happen when a user navigates to view a package and then navigates away and back again.  With this value set as true, within a window of time, these two visits would be considered to be the same in terms of incrementing the view counter.
 
 \subsection{Database-Related}
 

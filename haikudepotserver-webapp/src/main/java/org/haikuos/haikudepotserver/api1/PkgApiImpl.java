@@ -6,26 +6,27 @@
 package org.haikuos.haikudepotserver.api1;
 
 import com.google.common.base.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.net.*;
+import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haikuos.haikudepotserver.dataobjects.MediaType;
-import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
-import com.googlecode.jsonrpc4j.Base64;
+import org.haikuos.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>See {@link PkgApi} for details on the methods this API affords.</p>
@@ -54,6 +56,20 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     @Resource
     PkgService pkgService;
+
+    @Value("${pkgversion.viewcounter.protectrecurringincrementfromsameclient:true}")
+    Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient;
+
+    /**
+     * <p>This cache is used to keep track (in memory) of who has viewed a package so that repeat increments of the
+     * viewing of the package counter can be avoided.</p>
+     */
+
+    private Cache<String,Boolean> remoteIdentifierToPkgView = CacheBuilder
+            .newBuilder()
+            .maximumSize(2048)
+            .expireAfterAccess(2, TimeUnit.DAYS)
+            .build();
 
     private Pkg getPkg(ObjectContext context, String pkgName) throws ObjectNotFoundException {
         Preconditions.checkNotNull(context);
@@ -211,6 +227,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.preRelease = input.getPreRelease();
                         resultVersion.revision = input.getRevision();
                         resultVersion.createTimestamp = input.getCreateTimestamp().getTime();
+                        resultVersion.viewCounter = input.getViewCounter();
+
                         resultPkg.version = resultVersion;
 
                         return resultPkg;
@@ -326,9 +344,38 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
 
                 if(null!=request.incrementViewCounter && request.incrementViewCounter) {
-                    pkgVersionOptional.get().incrementViewCounter();
-                    context.commitChanges();
-                    logger.info("did increment the view counter for {}",pkg.toString());
+
+                    String cacheKey = null;
+                    String remoteIdentifier = getRemoteIdentifier();
+                    boolean shouldIncrement = false;
+
+                    if(shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient && !Strings.isNullOrEmpty(remoteIdentifier)) {
+                        Long pkgVersionId = (Long) pkgVersionOptional.get().getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
+                        cacheKey = Long.toString(pkgVersionId) + "@" + remoteIdentifier;
+                    }
+
+                    if(null==cacheKey) {
+                        shouldIncrement = true;
+                    }
+                    else {
+                        Boolean previouslyIncremented = remoteIdentifierToPkgView.getIfPresent(cacheKey);
+                        shouldIncrement = null==previouslyIncremented;
+
+                        if(!shouldIncrement) {
+                            logger.info("would have incremented the view counter for '{}', but the client '{}' already did this recently", pkg.toString(), remoteIdentifier);
+                        }
+                    }
+
+                    if(shouldIncrement) {
+                        pkgVersionOptional.get().incrementViewCounter();
+                        context.commitChanges();
+                        logger.info("did increment the view counter for '{}'",pkg.toString());
+                    }
+
+                    if(null!=cacheKey) {
+                        remoteIdentifierToPkgView.put(cacheKey, Boolean.TRUE);
+                    }
+
                 }
 
                 result.versions = Collections.singletonList(createVersion(pkgVersionOptional.get()));

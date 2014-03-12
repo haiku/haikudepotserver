@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -156,6 +155,11 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             PkgScreenshot pkgScreenshot = screenshots.get(i);
             pkgScreenshot.setOrdering(i+1);
         }
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 
 }

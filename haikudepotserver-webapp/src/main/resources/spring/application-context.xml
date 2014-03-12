@@ -14,18 +14,7 @@
         <context:exclude-filter type="regex" expression="org\.haikuos\.haikudepotserver\.api.*"/>
     </context:component-scan>
 
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="ignoreResourceNotFound" value="true"/>
-        <property name="locations">
-            <list>
-                <value>classpath:webjars.properties</value>
-                <value>classpath:local.properties</value>
-                <value>${config.properties}</value>
-            </list>
-        </property>
-        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
-    </bean>
-
+    <import resource="properties.xml"/>
     <import resource="persistence.xml"/>
     <import resource="webresourcegroup.xml"/>
 

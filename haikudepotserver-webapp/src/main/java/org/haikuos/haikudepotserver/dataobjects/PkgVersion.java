@@ -73,6 +73,16 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     }
 
     @Override
+    public void validateForInsert(ValidationResult validationResult) {
+
+        if(null==getViewCounter()) {
+            setViewCounter(0l);
+        }
+
+        super.validateForInsert(validationResult);
+    }
+
+    @Override
     protected void validateForSave(ValidationResult validationResult) {
         super.validateForSave(validationResult);
 
@@ -104,10 +114,6 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             if(getRevision().intValue() <= 0) {
                 validationResult.addFailure(new BeanValidationFailure(this,REVISION_PROPERTY,"lessThanEqualZero"));
             }
-        }
-
-        if(null==getViewCounter()) {
-            setViewCounter(0l);
         }
 
         if(getViewCounter().longValue() < 0) {
