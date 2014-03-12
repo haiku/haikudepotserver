@@ -66,9 +66,10 @@ angular.module('haikudepotserver').controller(
                         constants.ENDPOINT_API_V1_PKG,
                         "getPkg",
                         [{
-                            name: $routeParams.name,
-                            versionType: 'LATEST',
-                            architectureCode: $routeParams.architectureCode
+                            name : $routeParams.name,
+                            versionType : 'LATEST',
+                            incrementViewCounter : true,
+                            architectureCode : $routeParams.architectureCode
                         }]
                     ).then(
                     function(result) {

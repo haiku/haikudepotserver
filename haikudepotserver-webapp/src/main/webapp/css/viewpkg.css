@@ -19,6 +19,19 @@
     margin-right: 500px;
 }
 
+#pkg-info-container dl {
+    font-size: 12px;
+}
+
+#pkg-info-container dl dt {
+    margin-right:0px;
+    width:96px;
+}
+
+#pkg-info-container dl dd {
+    margin-left: 100px;
+}
+
 #pkg-screenshot-container {
     float: right;
     width: 480px;
@@ -86,3 +99,4 @@ for this package.
     color: rgba(0, 0, 0, 0.30);
     text-decoration: none;
 }
+

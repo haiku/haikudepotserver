@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,6 +22,16 @@ public class GetPkgRequest {
      */
 
     public String name;
+
+    /**
+     * <p>If this is true then the counter on the version is incremented; indicating that the package has been
+     * seen.  Do not use this unless the user is being displayed a user-interface of the package so that they
+     * have <em>really</em> seen it.  This value may be supplied as null.  This only applies when the
+     * {@link org.haikuos.haikudepotserver.api1.model.pkg.GetPkgRequest.VersionType#LATEST} version type is
+     * being requested.</p>
+     */
+
+    public Boolean incrementViewCounter;
 
     /**
      * <P>Only a version of the package for this architecture will be returned.  Note that this also

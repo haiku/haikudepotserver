@@ -28,6 +28,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String PRE_RELEASE_PROPERTY = "preRelease";
     public static final String REVISION_PROPERTY = "revision";
+    public static final String VIEW_COUNTER_PROPERTY = "viewCounter";
     public static final String ARCHITECTURE_PROPERTY = "architecture";
     public static final String PKG_PROPERTY = "pkg";
     public static final String PKG_VERSION_COPYRIGHTS_PROPERTY = "pkgVersionCopyrights";
@@ -92,6 +93,13 @@ public abstract class _PkgVersion extends AbstractDataObject {
     }
     public Integer getRevision() {
         return (Integer)readProperty(REVISION_PROPERTY);
+    }
+
+    public void setViewCounter(Long viewCounter) {
+        writeProperty(VIEW_COUNTER_PROPERTY, viewCounter);
+    }
+    public Long getViewCounter() {
+        return (Long)readProperty(VIEW_COUNTER_PROPERTY);
     }
 
     public void setArchitecture(Architecture architecture) {

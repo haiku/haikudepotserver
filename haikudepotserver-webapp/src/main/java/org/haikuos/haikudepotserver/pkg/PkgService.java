@@ -175,6 +175,10 @@ public class PkgService {
 
             switch(search.getSortOrdering()) {
 
+                case VERSIONVIEWCOUNTER:
+                    queryBuilder.append(" pv.view_counter DESC, p.name ASC");
+                    break;
+
                 case VERSIONCREATETIMESTAMP:
                     queryBuilder.append(" pv.create_timestamp DESC");
                     break;

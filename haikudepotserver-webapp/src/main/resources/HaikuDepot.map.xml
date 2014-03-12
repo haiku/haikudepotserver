@@ -138,6 +138,7 @@
 		<db-attribute name="pre_release" type="VARCHAR" length="255"/>
 		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="revision" type="INTEGER"/>
+		<db-attribute name="view_counter" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_seq</db-generator-name>
@@ -318,6 +319,7 @@
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="preRelease" type="java.lang.String" lock="true" db-attribute-path="pre_release"/>
 		<obj-attribute name="revision" type="java.lang.Integer" lock="true" db-attribute-path="revision"/>
+		<obj-attribute name="viewCounter" type="java.lang.Long" lock="true" db-attribute-path="view_counter"/>
 		<entity-listener class="org.haikuos.haikudepotserver.support.cayenne.PostAddCreateAndModifyTimestampListener">
 			<post-add method-name="onPostAdd"/>
 			<pre-update method-name="onPreUpdate"/>

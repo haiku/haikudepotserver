@@ -17,7 +17,8 @@ public class SearchPkgsRequest extends AbstractSearchRequest {
 
     public enum SortOrdering {
         NAME,
-        VERSIONCREATETIMESTAMP
+        VERSIONCREATETIMESTAMP,
+        VERSIONVIEWCOUNTER
     }
 
     public String architectureCode;

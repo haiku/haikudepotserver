@@ -56,15 +56,23 @@ angular.module('haikudepotserver').controller(
 
                     function(result) {
 
-                        var options = [];
+                        // the options should be in a sensible order; not just alphabetical.
 
-                        _.map(result, function(v,k) {
-                            options.push({ code: k, name: v });
-                        });
-
-                        options = _.sortBy(options, function(o) {
-                            return o.name;
-                        })
+                        var options = _.map(
+                            [
+                                ViewCriteriaTypes.ALL,
+                                ViewCriteriaTypes.SEARCH,
+                                ViewCriteriaTypes.CATEGORIES,
+                                ViewCriteriaTypes.MOSTRECENT,
+                                ViewCriteriaTypes.MOSTVIEWED
+                            ],
+                            function(k) {
+                                return {
+                                    code : k,
+                                    name : result[k]
+                                };
+                            }
+                        );
 
                         $scope.selectedViewCriteriaTypeOption = _.find(options, function(o) {
                             return o.code == ViewCriteriaTypes.ALL;
@@ -242,7 +250,7 @@ angular.module('haikudepotserver').controller(
 
                     case ViewCriteriaTypes.MOSTVIEWED:
                         req.daysSinceLatestVersion = constants.RECENT_DAYS;
-                        req.sortOrdering = 'VERSIONCREATETIMESTAMP'; // TODO; ORDERING
+                        req.sortOrdering = 'VERSIONVIEWCOUNTER';
                         break;
 
                 }

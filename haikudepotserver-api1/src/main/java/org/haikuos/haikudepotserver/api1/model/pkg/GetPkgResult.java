@@ -43,6 +43,8 @@ public class GetPkgResult {
         public List<String> copyrights;
         public List<Url> urls;
 
+        public Long viewCounter;
+
     }
 
     public static class Url {

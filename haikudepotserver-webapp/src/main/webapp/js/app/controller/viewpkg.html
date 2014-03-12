@@ -66,14 +66,22 @@
             <h2 ng-show="pkg.versions[0].summary" class="lead">{{pkg.versions[0].summary}}</h2>
             <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
 
-            <p>
-                Categories;
+            <dl>
+                <dt>Categories</dt>
+                <dd>
                 <span ng-show="!pkgCategories">...</span>
-                <span ng-show="pkgCategories && !pkgCategories.length"><em>None</em></span>
+                <span ng-show="pkgCategories && !pkgCategories.length">None</span>
                 <span ng-show="pkgCategories.length">
-                    <span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span><em>{{pkgCategory.name}}</em></span>
+                    <span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span>{{pkgCategory.name}}</span>
                 </span>
-            </p>
+                </dd>
+                <dt>Version Views</dt>
+                <dd>{{pkg.versions[0].viewCounter}}</dd>
+            </dl>
+
+            <div style="clear:both;"></div>
+
+            <hr/>
 
             <ul>
                 <li><a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">Visit web site</a></li>

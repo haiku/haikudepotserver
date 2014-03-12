@@ -256,6 +256,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     }
                 });
 
+        version.viewCounter = pkgVersion.getViewCounter();
+
         // TODO - languages
         if(!pkgVersion.getPkgVersionLocalizations().isEmpty()) {
             PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizations().get(0);
@@ -323,7 +325,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), request.name);
                 }
 
+                if(null!=request.incrementViewCounter && request.incrementViewCounter) {
+                    pkgVersionOptional.get().incrementViewCounter();
+                    context.commitChanges();
+                    logger.info("did increment the view counter for {}",pkg.toString());
+                }
+
                 result.versions = Collections.singletonList(createVersion(pkgVersionOptional.get()));
+
                 break;
 
             case NONE: // no version is actually required.

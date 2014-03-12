@@ -106,6 +106,18 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             }
         }
 
+        if(null==getViewCounter()) {
+            setViewCounter(0l);
+        }
+
+        if(getViewCounter().longValue() < 0) {
+            validationResult.addFailure(new BeanValidationFailure(this,VIEW_COUNTER_PROPERTY,"min"));
+        }
+
+    }
+
+    public void incrementViewCounter() {
+        setViewCounter(getViewCounter()+1);
     }
 
 }

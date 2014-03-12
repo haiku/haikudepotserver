@@ -9,9 +9,6 @@ import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
 
-import java.util.Collection;
-import java.util.List;
-
 /**
  * <p>This model object specifies the parameters of a search into the system for packages.  See the
  * {@link org.haikuos.haikudepotserver.pkg.PkgService} for further detail on this.</p>
@@ -21,7 +18,8 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     public enum SortOrdering {
         NAME,
-        VERSIONCREATETIMESTAMP
+        VERSIONCREATETIMESTAMP,
+        VERSIONVIEWCOUNTER
     }
 
     private Architecture architecture;

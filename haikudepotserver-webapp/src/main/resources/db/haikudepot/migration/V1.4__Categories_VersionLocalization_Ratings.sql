@@ -88,3 +88,11 @@ ALTER TABLE haikudepot.user_rating ADD FOREIGN KEY (pkg_version_id) REFERENCES h
 ALTER TABLE haikudepot.user_rating ADD FOREIGN KEY (user_id) REFERENCES haikudepot.user (id);
 ALTER TABLE haikudepot.user_rating ADD FOREIGN KEY (user_rating_stability_id) REFERENCES haikudepot.user_rating_stability (id);
 ALTER TABLE haikudepot.user_rating ADD FOREIGN KEY (natural_language_id) REFERENCES haikudepot.natural_language (id);
+
+-- ------------------------------------------------------
+-- PACKAGE VIEW COUNTER
+-- ------------------------------------------------------
+
+ALTER TABLE haikudepot.pkg_version ADD COLUMN view_counter BIGINT;
+UPDATE haikudepot.pkg_version SET view_counter=0;
+ALTER TABLE haikudepot.pkg_version ALTER COLUMN view_counter SET NOT NULL;
