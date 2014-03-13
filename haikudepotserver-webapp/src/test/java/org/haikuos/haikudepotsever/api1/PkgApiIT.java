@@ -22,13 +22,11 @@ import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgService;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
 import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
-import java.io.InputStream;
 import java.util.List;
 
 public class PkgApiIT extends AbstractIntegrationTest {

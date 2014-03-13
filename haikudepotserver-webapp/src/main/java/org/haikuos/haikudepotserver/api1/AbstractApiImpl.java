@@ -9,8 +9,6 @@ import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import org.haikuos.haikudepotserver.security.AbstractUserAuthenticationAware;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -13,10 +13,10 @@
         <spring.version>3.2.4.RELEASE</spring.version>
         <postgresql.version>9.3-1100-jdbc41</postgresql.version>
 
-        <web-angularjs.version>1.2.13</web-angularjs.version>
+        <web-angularjs.version>1.2.14</web-angularjs.version>
         <web-angular-ui.version>0.4.0-1</web-angular-ui.version>
-        <web-underscorejs.version>1.5.2-2</web-underscorejs.version>
-        <web-momentjs.version>2.5.0</web-momentjs.version>
+        <web-underscorejs.version>1.6.0-1</web-underscorejs.version>
+        <web-momentjs.version>2.5.1</web-momentjs.version>
 
     </properties>
 
@@ -89,7 +89,7 @@
             <dependency>
                 <groupId>com.googlecode.flyway</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>2.2.1</version>
+                <version>2.3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cayenne</groupId>
