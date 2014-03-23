@@ -45,6 +45,16 @@
             <error-messages key-prefix="createUser.passwordClearRepeated" error="createUserForm.passwordClearRepeated.$error"></error-messages>
         </div>
 
+        <label for="natural-language">Language</label>
+        <div class="form-control-group">
+            <select
+                    id="natural-language"
+                    required="true"
+                    ng-model="newUser.naturalLanguageOption"
+                    ng-options="aNaturalLanguageOption.title for aNaturalLanguageOption in naturalLanguageOptions">
+            </select>
+        </div>
+
         <label for="captcha-response-input">Check for a Person</label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('captchaResponse')">
             <img style="vertical-align:middle;" src="{{captchaImageUrl}}"></img>
