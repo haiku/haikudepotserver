@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.api1;
 
 import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
+import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 
 @JsonRpcService("/api/v1/miscellaneous")
 public interface MiscellaneousApi {
@@ -45,10 +46,12 @@ public interface MiscellaneousApi {
 
     /**
      * <p>This method will return all of the localization messages that might be able to be displayed
-     * to the user from the result of validation problems and so on.</p>
+     * to the user from the result of validation problems and so on.  This method will throw an instance of
+     * {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException} if the natural language
+     * specified in the request does not exist.</p>
      */
 
-    GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest);
+    GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest) throws ObjectNotFoundException;
 
     /**
      * <P>This method will return a list of all of the possible architectures in the system such as x86 or arm.

@@ -42,6 +42,21 @@ small {
 }
 
 /*
+This class is used for the spinner as well as the modal dialog.  It will fill a backdrop with a dark colour and then
+the spinner or the modal dialog can be shown over the top.
+*/
+
+.modal-backdrop-container {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1050;
+}
+
+/*
 ==================================
 PAGE STRUCTURE
 */
@@ -275,6 +290,36 @@ ANGULARJS
 
 /*
 ==================================
+MODAL DIALOG
+*/
+
+.modal-container > div {
+    width: 120px;
+    margin: 0 auto;
+    margin-top: 72px;
+    padding: 16px;
+    border: 1px black solid;
+    background-color: white;
+    position: relative;
+}
+
+.modal-container > div > .modal-container-controls {
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:4px;
+    padding-right:4px;
+    position: absolute; /* assumes that this is inside a '.modal-container > div' */
+    top: 0px;
+    right: 0px;
+    background-color: rgb(253,207,49);
+    border-bottom-left-radius: 4px;
+    display: inline;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+/*
+==================================
 SPINNER
 */
 
@@ -282,16 +327,6 @@ SPINNER
 This material is for the spinner; it will fill the screen will white and then put a small animation on top for
 a moment.
 */
-
-#spinner-container {
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    bottom: 0px;
-    right: 0px;
-    background-color: rgba(255, 255, 255, 0.90);
-    z-index: 1050;
-}
 
 #spinner-container > div {
     width: 120px;

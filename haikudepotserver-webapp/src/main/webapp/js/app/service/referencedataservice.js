@@ -15,8 +15,37 @@ angular.module('haikudepotserver').factory('referenceData',
 
             var architectures = undefined;
             var pkgCategories = undefined;
+            var naturalLanguages = undefined;
 
             var ReferenceData = {
+
+                naturalLanguages : function() {
+
+                    var deferred = $q.defer();
+
+                    if(naturalLanguages) {
+                        deferred.resolve(naturalLanguages);
+                    }
+                    else {
+                        jsonRpc
+                            .call(
+                                constants.ENDPOINT_API_V1_MISCELLANEOUS,'getAllNaturalLanguages',[{}]
+                            )
+                            .then(
+                            function(data) {
+                                naturalLanguages = data.naturalLanguages;
+                                deferred.resolve(naturalLanguages);
+                            },
+                            function(err) {
+                                errorHandling.logJsonRpcError(err,'issue obtaining the list of natural languages');
+                                deferred.reject(err);
+                            }
+                        );
+                    }
+
+                    return deferred.promise;
+
+                },
 
                 pkgCategories : function() {
 

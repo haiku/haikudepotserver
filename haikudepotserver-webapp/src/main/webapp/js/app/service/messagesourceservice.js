@@ -9,40 +9,101 @@
 
 angular.module('haikudepotserver').factory('messageSource',
     [
-        '$log','$q','constants','jsonRpc',
-        function($log,$q,constants,jsonRpc) {
+        '$log','$q','constants','jsonRpc','errorHandling',
+        function($log,$q,constants,jsonRpc,errorHandling) {
 
-            var MessageSource = {
+            /**
+             * <p>This ends up being a mapping between the natural language code and a mapping of codes to
+             * the messages.</p>
+             */
 
-                messages : undefined,
+            var naturalLanguagesMessages = {};
 
-                get : function(key) {
+            /**
+             * <p>This method will go off to the server and pull back the messages for the identified natural language
+             * code.  It will return a promise that resolves to the messages as an object.</p>
+             */
 
-                    var deferred = $q.defer();
-
-                    if(MessageSource.messages) {
-                        deferred.resolve(MessageSource.messages[key]);
-                    }
-                    else {
-                        jsonRpc.call(
-                                constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                                'getAllMessages',
-                                [{}]
-                            ).then(
-                            function(data) {
-                                MessageSource.messages = data.messages;
-                                deferred.resolve(MessageSource.messages[key] ? MessageSource.messages[key] : key);
-                            },
-                            function(err) {
-                                $log.warn('unable to get the messages from the server');
-                                deferred.reject(null);
-                            }
-                        );
-                    }
-
-                    return deferred.promise;
+            function getMessages(naturalLanguageCode) {
+                if(!naturalLanguageCode || !naturalLanguageCode.length) {
+                    throw 'the natural language code should be supplied to get messages';
                 }
 
+                var deferred = $q.defer();
+
+                if(naturalLanguagesMessages[naturalLanguageCode]) {
+                    deferred.resolve(naturalLanguagesMessages[naturalLanguageCode]);
+                }
+                else {
+                    jsonRpc.call(
+                            constants.ENDPOINT_API_V1_MISCELLANEOUS,
+                            'getAllMessages',
+                            [{ naturalLanguageCode : naturalLanguageCode }]
+                        ).then(
+                        function(data) {
+                            naturalLanguagesMessages[naturalLanguageCode] = data.messages;
+                            deferred.resolve(naturalLanguagesMessages[naturalLanguageCode]);
+                        },
+                        function(err) {
+                            $log.warn('unable to get the messages from the server for natural language; '+naturalLanguageCode);
+                            errorHandling.logJsonRpcError(err);
+                            deferred.reject(null);
+                        }
+                    );
+                }
+
+                return deferred.promise;
+            }
+
+            /**
+             * <p>Given the natural language code and key, this method will return a promise that resolves to the value
+             * of the key.  If there is no such value then the key itself will be returned.</p>
+             */
+
+            function getMessage(naturalLanguageCode, key) {
+                if(!naturalLanguageCode || !naturalLanguageCode.length) {
+                    throw 'the natural language code should be supplied to get a message';
+                }
+
+                if(!key || !key.length) {
+                    throw 'a key must be supplied to get a message';
+                }
+
+                var deferred = $q.defer();
+
+                getMessages(naturalLanguageCode).then(
+                    function(messages) {
+
+                        // if it cannot be found in the requested language then it may be possible to fall back to
+                        // looking up the key in english.
+
+                        if(!messages[key] && naturalLanguageCode != constants.NATURALLANGUAGECODE_ENGLISH) {
+                            getMessage(constants.NATURALLANGUAGECODE_ENGLISH, key)
+                                .then(
+                                    function(value) {
+                                        deferred.resolve(value);
+                                    },
+                                    function() {
+                                        deferred.reject();
+                                    }
+                                );
+                        }
+                        else {
+                            deferred.resolve(messages[key] ? messages[key] : key);
+                        }
+                    },
+                    function() {
+                        deferred.reject(null);
+                    }
+                );
+
+                return deferred.promise;
+            }
+
+            var MessageSource = {
+                get : function(naturalLanguageCode, key) {
+                    return getMessage(naturalLanguageCode, key);
+                }
             };
 
             return MessageSource;

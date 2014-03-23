@@ -5,6 +5,8 @@
 
 angular.module('haikudepotserver').constant('constants', {
 
+        NATURALLANGUAGECODE_ENGLISH : 'en',
+
         // used for search constraint on the 'home' page.
 
         RECENT_DAYS : 90,

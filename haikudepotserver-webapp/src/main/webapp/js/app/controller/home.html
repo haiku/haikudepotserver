@@ -10,7 +10,7 @@
         <div>
             <select
                     ng-model="selectedViewCriteriaTypeOption"
-                    ng-options="aViewCriteriaTypeOptions.name for aViewCriteriaTypeOptions in viewCriteriaTypeOptions">
+                    ng-options="aViewCriteriaTypeOptions.title for aViewCriteriaTypeOptions in viewCriteriaTypeOptions">
             </select>
         </div>
         <div ng-show="'SEARCH'==selectedViewCriteriaTypeOption.code">
@@ -18,11 +18,11 @@
                     ng-model="searchExpression"
                     autocomplete="off"
                     ui-keypress="{enter:'goSearch()'}"
-                    placeholder="Search..."></input>
+                    placeholder="zlib"></input>
             <button
                     ng-disabled="!searchExpression || !searchExpression.length"
                     ng-click="goSearch()">
-                Go
+                <message key="home.searchButton.title"></message>
             </button>
         </div>
         <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
@@ -54,10 +54,10 @@
             <table class="table-general">
                 <thead>
                 <th></th>
-                <th>Package</th>
-                <th>Version</th>
-                <th ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code">Approx. Version Date</th>
-                <th ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code">Version View Counter</th>
+                <th><message key="home.table.package.title"></message></th>
+                <th><message key="home.table.version.title"></message></th>
+                <th ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><message key="home.table.approximateVersionDate.title"></message></th>
+                <th ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><message key="home.table.versionViewCounter.title"></message></th>
                 </thead>
                 <tbody>
                 <tr ng-repeat="pkg in pkgs">

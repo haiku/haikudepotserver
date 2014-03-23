@@ -61,6 +61,7 @@
                             <value>/js/app/directive/showifpermissiondirective.js</value>
                             <value>/js/app/directive/paginationarrowdirective.js</value>
                             <value>/js/app/directive/autofillfixdirective.js</value>
+                            <value>/js/app/directive/modalcontainerdirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>

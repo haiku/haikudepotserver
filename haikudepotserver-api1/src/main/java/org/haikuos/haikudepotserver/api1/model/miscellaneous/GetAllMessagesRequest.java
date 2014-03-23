@@ -7,6 +7,13 @@ package org.haikuos.haikudepotserver.api1.model.miscellaneous;
 
 public class GetAllMessagesRequest {
 
-    // add locale here?
+    public String naturalLanguageCode;
+
+    public GetAllMessagesRequest() {
+    }
+
+    public GetAllMessagesRequest(String naturalLanguageCode) {
+        this.naturalLanguageCode = naturalLanguageCode;
+    }
 
 }

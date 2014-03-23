@@ -14,16 +14,88 @@
 angular.module('haikudepotserver').factory('userState',
     [
         '$log','$q','$rootScope','jsonRpc',
-        'pkgIcon','pkgScreenshot','errorHandling','constants',
+        'pkgIcon','pkgScreenshot','errorHandling','constants','referenceData',
         function(
             $log,$q,$rootScope,jsonRpc,
-            pkgIcon,pkgScreenshot,errorHandling,constants) {
+            pkgIcon,pkgScreenshot,errorHandling,constants,referenceData) {
 
             const SIZE_CHECKED_PERMISSION_CACHE = 25;
 
-            var user = undefined;
-            var checkedPermissionCache = [];
-            var checkQueue = [];
+            var userStateData = {};
+            userStateData.naturalLanguageCode = 'en';
+            userStateData.user = undefined;
+
+            // ------------------------------
+            // USER
+
+            function setUser(value) {
+
+                $rootScope.$broadcast('userChangeStart',value);
+
+                resetAuthorization();
+
+                if(null==value) {
+                    userStateData.user = undefined;
+
+                    // remove the Authorization header for HTTP transport
+                    jsonRpc.setHeader('Authorization');
+                    pkgScreenshot.setHeader('Authorization');
+                }
+                else {
+
+                    if(!value.nickname) {
+                        throw 'the nickname is required when setting a user';
+                    }
+
+                    if(!value.passwordClear) {
+                        throw 'the password clear is required when setting a user';
+                    }
+
+                    var basic = 'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear);
+
+                    jsonRpc.setHeader('Authorization',basic);
+                    pkgScreenshot.setHeader('Authorization',basic);
+
+                    userStateData.user = {
+                        nickname : value.nickname,
+                        passwordClear : value.passwordClear,
+                        naturalLanguageCode : naturalLanguageCode() // maintain the current setting in the meantime
+                    }
+
+                    // now pull back to the server to incorporate other data about the user.  This may not be
+                    // required for a desktop application, but is necessary here in order to obtain the
+                    // natural language of the user.  Note that owing to the async communication going on here,
+                    // the change of the natural language may happen some time after the user has actually changed.
+
+                    jsonRpc.call(
+                        constants.ENDPOINT_API_V1_USER,
+                        "getUser",
+                        [ { nickname : value.nickname }]).then(
+                        function(data) {
+                            var u = userStateData.user;
+
+                            if(u && u.naturalLanguageCode && u.naturalLanguageCode != data.naturalLanguageCode) {
+                                userStateData.user.naturalLanguageCode = data.naturalLanguageCode;
+                                userStateData.naturalLanguageCode = data.naturalLanguageCode;
+                                $rootScope.$broadcast('naturalLanguageChange',value);
+                            }
+                        },
+                        function(e) {
+                            errorHandling.handleJsonRpcError(e);
+                        }
+                    )
+
+                    $log.info('have set user; '+userStateData.user.nickname);
+                }
+
+                $rootScope.$broadcast('userChangeSuccess',value);
+            }
+
+            // ------------------------------
+            // AUTHORIZATION
+
+            userStateData.checkedPermissionCache = [];
+            userStateData.checkQueue = [];
 
             function validateTargetAndPermissions(targetAndPermissions) {
                 _.each(targetAndPermissions, function(targetAndPermission) {
@@ -42,8 +114,8 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             function resetAuthorization() {
-                checkedPermissionCache = [];
-                checkQueue = [];
+                userStateData.checkedPermissionCache = [];
+                userStateData.checkQueue = [];
             }
 
             function check(targetAndPermissions) {
@@ -58,7 +130,7 @@ angular.module('haikudepotserver').factory('userState',
                         return null;
                     }
 
-                    if(!checkedPermissionCache.length) {
+                    if(!userStateData.checkedPermissionCache.length) {
                         return null;
                     }
 
@@ -66,7 +138,7 @@ angular.module('haikudepotserver').factory('userState',
 
                     for(var i=0;i<targetAndPermissionsToCheckAgainstCache.length;i++) {
                         var cachedTargetAndPermission = _.findWhere(
-                            checkedPermissionCache,
+                            userStateData.checkedPermissionCache,
                             targetAndPermissionsToCheckAgainstCache[i]);
 
                         if(!cachedTargetAndPermission) {
@@ -84,13 +156,13 @@ angular.module('haikudepotserver').factory('userState',
                 // local cache or by talking to the remote application server.
 
                 function handleNextInCheckQueue() {
-                    if(checkQueue.length) {
-                        var request = checkQueue[0];
+                    if(userStateData.checkQueue.length) {
+                        var request = userStateData.checkQueue[0];
                         var result = tryDeriveFromCache(request.targetAndPermissions);
 
                         if(null!=result) {
                             request.deferred.resolve(result);
-                            checkQueue.shift();
+                            userStateData.checkQueue.shift();
                             handleNextInCheckQueue();
                         }
                         else {
@@ -100,7 +172,7 @@ angular.module('haikudepotserver').factory('userState',
                             var uncachedTargetAndPermissions = _.filter(
                                 request.targetAndPermissions,
                                 function(targetAndPermission) {
-                                    return !_.findWhere(checkedPermissionCache, targetAndPermission);
+                                    return !_.findWhere(userStateData.checkedPermissionCache, targetAndPermission);
                                 }
                             );
 
@@ -114,15 +186,15 @@ angular.module('haikudepotserver').factory('userState',
                             }
 
                             jsonRpc.call(
-                                    constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                                    'checkAuthorization',
-                                    [{ targetAndPermissions : uncachedTargetAndPermissions }]
-                                ).then(
+                                constants.ENDPOINT_API_V1_MISCELLANEOUS,
+                                'checkAuthorization',
+                                [{ targetAndPermissions : uncachedTargetAndPermissions }]
+                            ).then(
                                 function(data) {
 
                                     // blend the new material into the cache.
 
-                                    checkedPermissionCache = data.targetAndPermissions.concat(checkedPermissionCache);
+                                    userStateData.checkedPermissionCache = data.targetAndPermissions.concat(userStateData.checkedPermissionCache);
 
                                     // we should now be in a position to resolve the permission from the cache.
 
@@ -137,16 +209,16 @@ angular.module('haikudepotserver').factory('userState',
                                     // now cull the cache so that we're not storing too much material.  This is very
                                     // simplistic; no LRU or anything.
 
-                                    if(checkedPermissionCache.length > SIZE_CHECKED_PERMISSION_CACHE) {
-                                        checkedPermissionCache.splice(
+                                    if(userStateData.checkedPermissionCache.length > SIZE_CHECKED_PERMISSION_CACHE) {
+                                        userStateData.checkedPermissionCache.splice(
                                             SIZE_CHECKED_PERMISSION_CACHE,
-                                            checkedPermissionCache.length-SIZE_CHECKED_PERMISSION_CACHE);
+                                                userStateData.checkedPermissionCache.length-SIZE_CHECKED_PERMISSION_CACHE);
                                     }
 
                                     // drop this request now that it has been dealt with and move onto checking the
                                     // next one.
 
-                                    checkQueue.shift();
+                                    userStateData.checkQueue.shift();
                                     handleNextInCheckQueue();
                                 },
                                 function(err) {
@@ -177,12 +249,12 @@ angular.module('haikudepotserver').factory('userState',
 
                     // push this request to the queue.
 
-                    checkQueue.push( {
+                    userStateData.checkQueue.push( {
                         deferred : deferred,
                         targetAndPermissions : targetAndPermissions
                     });
 
-                    if(1==checkQueue.length) {
+                    if(1==userStateData.checkQueue.length) {
                         handleNextInCheckQueue();
                     }
                 }
@@ -190,7 +262,70 @@ angular.module('haikudepotserver').factory('userState',
                 return deferred.promise;
             }
 
+            // ------------------------------
+            // NATURAL LANGUAGE HANDLING
+
+            function naturalLanguageCode(value) {
+                if(undefined !== value) {
+                    if(userStateData.user) {
+                        throw 'it is not possible to configure the natural language code when there is a user authenticated';
+                    }
+
+                    if(!value || !value.match(/^[a-z]{2}$/)) {
+                        throw 'the value \''+value+'\' is not a valid natural language code';
+                    }
+
+                    if(userStateData.naturalLanguageCode != value) {
+                        userStateData.naturalLanguageCode = value;
+                        $rootScope.$broadcast('naturalLanguageChange',value);
+                    }
+                }
+
+                if(userStateData.user) {
+                    return userStateData.user.naturalLanguageCode;
+                }
+
+                return userStateData.naturalLanguageCode;
+            }
+
+            /**
+             * <p>This function will take a guess at the default natural language by looking at those languages that
+             * are to be found in the browser's own list of languages.</p>
+             */
+
+            function initNaturalLanguageCode() {
+                if(window && window.navigator && window.navigator.language) {
+
+                    var languageMatch = window.navigator.language.match(/^([a-z]{2})($|-.*$)/);
+
+                    if(languageMatch) {
+                        var language = languageMatch[1];
+
+                        referenceData.naturalLanguages().then(
+                            function(naturalLanguages) {
+                                if(_.findWhere(naturalLanguages, { code : language })) {
+                                    naturalLanguageCode(language);
+                                }
+                            }
+                        );
+                    }
+                }
+            }
+
+            initNaturalLanguageCode();
+
             var UserState = {
+
+                /**
+                 * <p>This is the natural language code for the user.  If there is an authenticated user then this
+                 * value will be derived from the user details.  If there is no user presently authenticated then
+                 * this function will maintain state of the natural language choice itself.</p>
+                 * @param value
+                 */
+
+                naturalLanguageCode : function(value) {
+                    return naturalLanguageCode(value)
+                },
 
                 /**
                  * <p>Invoked with no argument, this function will return the user.  If it is supplied with null then
@@ -200,46 +335,11 @@ angular.module('haikudepotserver').factory('userState',
 
                 user : function(value) {
                     if(undefined !== value) {
-
-                        $rootScope.$broadcast('userChangeStart',value);
-
-                        resetAuthorization();
-
-                        if(null==value) {
-                            user = undefined;
-
-                            // remove the Authorization header for HTTP transport
-                            jsonRpc.setHeader('Authorization');
-                            pkgScreenshot.setHeader('Authorization');
-                        }
-                        else {
-
-                            if(!value.nickname) {
-                                throw 'the nickname is required when setting a user';
-                            }
-
-                            if(!value.passwordClear) {
-                                throw 'the password clear is required when setting a user';
-                            }
-
-                            var basic = 'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear);
-
-                            jsonRpc.setHeader('Authorization',basic);
-                            pkgScreenshot.setHeader('Authorization',basic);
-
-                            user = value;
-
-                            $log.info('have set user; '+user.nickname);
-                        }
-
-                        $rootScope.$broadcast('userChangeSuccess',value);
+                        setUser(value);
                     }
 
-                    return user;
+                    return userStateData.user;
                 },
-
-                // ---------------------
-                // AUTHORIZATION
 
                 /**
                  * <p>This function will check to make sure that the target and permissions supplied are authorized.

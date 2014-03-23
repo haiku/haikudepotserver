@@ -6,11 +6,11 @@
 angular.module('haikudepotserver').controller(
     'HomeController',
     [
-        '$log','$scope','$q','$log','$location',
+        '$log','$scope','$rootScope','$q','$log','$location',
         'jsonRpc','constants','userState','architectures','messageSource','errorHandling',
         'referenceData',
         function(
-            $log,$scope,$q,$log,$location,
+            $log,$scope,$rootScope,$q,$log,$location,
             jsonRpc,constants,userState,architectures,messageSource,errorHandling,
             referenceData) {
 
@@ -35,61 +35,64 @@ angular.module('haikudepotserver').controller(
             $scope.selectedArchitecture = $scope.architectures[0];
             $scope.pkgCategories = undefined;
             $scope.selectedPkgCategory = undefined;
+            $scope.viewCriteriaTypeOptions = _.map(
+                [
+                    ViewCriteriaTypes.ALL,
+                    ViewCriteriaTypes.SEARCH,
+                    ViewCriteriaTypes.CATEGORIES,
+                    ViewCriteriaTypes.MOSTRECENT,
+                    ViewCriteriaTypes.MOSTVIEWED
+                ],
+                function(k) {
+                    return {
+                        code : k,
+                        titleKey : 'home.viewCriteriaType.' + k.toLowerCase(),
+                        title : 'home.viewCriteriaType.' + k.toLowerCase()
+                    };
+                }
+            );
+            $scope.selectedViewCriteriaTypeOption = _.find(
+                $scope.viewCriteriaTypeOptions,
+                function(o) {
+                    return o.code == ViewCriteriaTypes.ALL;
+                }
+            );
 
+            // pagination
             $scope.pkgs = undefined;
             $scope.hasMore = undefined;
             $scope.offset = 0;
 
-            // get the localized view criteria type names.
+            // update the localized names on the options
 
-            function deriveViewCriteriaTypeOptions() {
-
-                var promises = {}
-
-                for(var key in ViewCriteriaTypes) {
-                    if(ViewCriteriaTypes.hasOwnProperty(key)) {
-                        promises[key] = messageSource.get('home.viewCriteriaType.' + key.toLowerCase());
-                    }
-                }
-
-                $q.all(promises).then(
-
-                    function(result) {
-
-                        // the options should be in a sensible order; not just alphabetical.
-
-                        var options = _.map(
-                            [
-                                ViewCriteriaTypes.ALL,
-                                ViewCriteriaTypes.SEARCH,
-                                ViewCriteriaTypes.CATEGORIES,
-                                ViewCriteriaTypes.MOSTRECENT,
-                                ViewCriteriaTypes.MOSTVIEWED
-                            ],
-                            function(k) {
-                                return {
-                                    code : k,
-                                    name : result[k]
-                                };
+            function updateViewCriteriaTypeOptionsTitles() {
+                _.each(
+                    $scope.viewCriteriaTypeOptions,
+                    function(o) {
+                        messageSource
+                            .get(
+                                userState.naturalLanguageCode(),
+                                o.titleKey)
+                            .then(
+                            function(value) {
+                                o.title = value;
+                            },
+                            function() { // error already logged
+                                o.title = '???';
                             }
                         );
-
-                        $scope.selectedViewCriteriaTypeOption = _.find(options, function(o) {
-                            return o.code == ViewCriteriaTypes.ALL;
-                        });
-
-                        $scope.viewCriteriaTypeOptions = options;
-
-                    },
-                    function() {
-                        $log.error('a problem has arisen getting the view criteria types');
-                        $location.path("/error").search({});
                     }
                 );
-
             }
 
-            deriveViewCriteriaTypeOptions();
+            updateViewCriteriaTypeOptionsTitles();
+
+            $rootScope.$on(
+                "naturalLanguageChange",
+                function() {
+                    updateViewCriteriaTypeOptionsTitles();
+                }
+            );
 
             $scope.$watch('selectedPkgCategory', function(newValue) {
                 var option = $scope.selectedViewCriteriaTypeOption;

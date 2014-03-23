@@ -34,7 +34,7 @@ as well as the status of the authenticated user.
 
 #banner-actions {
     position: absolute;
-    top: 12px;
+    top: 6px;
     right: 0px;
     overflow: hidden;
     padding-right: 32px;
@@ -42,6 +42,25 @@ as well as the status of the authenticated user.
     overflow: hidden;
 }
 
+#banner-actions > .banner-actions-state-container {
+    margin-right: 6px;
+    display: inline-block;
+}
+
+#banner-actions > .banner-actions-state-container > span {
+   line-height: 18px;
+   vertial-align: middle;
+}
+
 #banner-container a {
     color: white;
+}
+
+#banner-actions button {
+    background-color: transparent;
+    border-color: white;
+    border-width: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    vertical-align: middle;
 }

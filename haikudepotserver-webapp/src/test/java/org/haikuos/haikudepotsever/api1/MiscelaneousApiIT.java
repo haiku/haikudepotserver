@@ -157,10 +157,10 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetAllMessages() {
+    public void testGetAllMessages() throws Exception {
 
         // ------------------------------------
-        GetAllMessagesResult result = miscellaneousApi.getAllMessages(new GetAllMessagesRequest());
+        GetAllMessagesResult result = miscellaneousApi.getAllMessages(new GetAllMessagesRequest(NaturalLanguage.CODE_ENGLISH));
         // ------------------------------------
 
         Assertions.assertThat(result.messages.get("test.it")).isEqualTo("Test line for integration testing");

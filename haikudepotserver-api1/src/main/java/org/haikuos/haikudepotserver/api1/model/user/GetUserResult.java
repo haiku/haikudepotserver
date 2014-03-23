@@ -11,4 +11,6 @@ public class GetUserResult {
 
     public Boolean isRoot;
 
+    public String naturalLanguageCode;
+
 }

@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.security.model.Permission;
@@ -29,6 +30,7 @@ import javax.annotation.Resource;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Properties;
 
@@ -37,7 +39,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
     protected static Logger logger = LoggerFactory.getLogger(PkgApiImpl.class);
 
-    public final static String RESOURCE_MESSAGES = "/messages.properties";
+    public final static String RESOURCE_MESSAGES = "/messages%s.properties";
 
     @Resource
     ServerRuntime serverRuntime;
@@ -188,20 +190,38 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     }
 
     @Override
-    public GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest) {
+    public GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(getAllMessagesRequest);
+        Preconditions.checkNotNull(getAllMessagesRequest.naturalLanguageCode);
+
+        ObjectContext context = serverRuntime.getContext();
+
+        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, getAllMessagesRequest.naturalLanguageCode);
+
+        if(!naturalLanguageOptional.isPresent()) {
+            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), getAllMessagesRequest.naturalLanguageCode);
+        }
+
+        boolean isEnglish = naturalLanguageOptional.get().getCode().equals(NaturalLanguage.CODE_ENGLISH);
+
+        String resourcePath = String.format(
+                RESOURCE_MESSAGES,
+                !isEnglish ? "_" + naturalLanguageOptional.get().getCode() : "");
 
         InputStream inputStream = null;
+        InputStreamReader reader = null;
 
         try {
-            inputStream = getClass().getResourceAsStream(RESOURCE_MESSAGES);
+            inputStream = getClass().getResourceAsStream(resourcePath);
 
             if(null==inputStream) {
-                throw new FileNotFoundException(RESOURCE_MESSAGES);
+                throw new FileNotFoundException(resourcePath);
             }
 
+            reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+
             Properties properties = new Properties();
-            properties.load(inputStream);
+            properties.load(reader);
             Map<String,String> map = Maps.newHashMap();
 
             for(String propertyName : properties.stringPropertyNames()) {
@@ -213,9 +233,10 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             return getAllMessagesResult;
         }
         catch(IOException ioe) {
-            throw new RuntimeException("unable to assemble the messages to send for api1",ioe);
+            throw new RuntimeException("unable to assemble the messages to send for api1 from; "+resourcePath,ioe);
         }
         finally {
+            Closeables.closeQuietly(reader);
             Closeables.closeQuietly(inputStream);
         }
     }

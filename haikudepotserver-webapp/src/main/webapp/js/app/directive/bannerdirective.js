@@ -16,33 +16,26 @@ angular.module('haikudepotserver').directive('banner',function() {
         controller:
             [
                 '$rootScope','$scope','$log','$location','$route',
-                'userState',
+                'userState','referenceData','messageSource',
                 function(
                     $rootScope,$scope,$log,$location,$route,
-                    userState) {
+                    userState,referenceData,messageSource) {
 
-                    $scope.actions = [];
-                    refreshActions(); // not direct assignment in case it later has to be a promise.
+                    $scope.showActions = false;
+                    $scope.userNickname = undefined;
+                    $scope.naturalLanguageData = {
+                        naturalLanguageCode : userState.naturalLanguageCode(),
+                        naturalLanguageOptions : undefined,
+                        selectedNaturalLanguageOption : undefined
+                    };
 
-                    // when the page changes, the actions may change; for example, it is not appropriate to
-                    // show the 'login' option when the user is presently logging in.
+                    function isLocationPathDisablingUserState() {
+                        var p = $location.path();
+                        return '/error' == p || '/authenticateuser' == p || '/createuser' == p;
+                    }
 
-                    $rootScope.$on(
-                        "$locationChangeSuccess",
-                        function(event, next, current) {
-                            refreshActions();
-                        }
-                    );
-
-                    // when the user logs in or out then the actions may also change; for example, it makes
-                    // no sense to show the logout button if nobody is presently logged in.
-
-                    $rootScope.$on(
-                        "userChangeSuccess",
-                        function(event, next, current) {
-                            refreshActions();
-                        }
-                    );
+                    // -----------------
+                    // GENERAL
 
                     // This will take the user back to the home page.
 
@@ -51,75 +44,162 @@ angular.module('haikudepotserver').directive('banner',function() {
                         return false;
                     }
 
-                    function canGoMore() {
+                    $scope.canGoMore = function() {
                         var p = $location.path();
                         return '/error' != p && '/more' != p;
                     }
 
-                    function isLocationPathDisablingUserState() {
-                        var p = $location.path();
-                        return '/error' == p || '/authenticateuser' == p || '/createuser' == p;
+                    // This will take the user to a page about the application.
+
+                    $scope.goMore = function() {
+                        $location.path('/more').search({});
+                        $scope.showActions = false;
+                        return false;
                     }
 
-                    function canAuthenticateOrCreate() {
+                    // -----------------
+                    // NATURAL LANGUAGES
+
+                    /**
+                     * <p>This gets hit when the user chooses a language from the user interface's drop-down.</p>
+                     */
+
+                    $scope.$watch(
+                        'naturalLanguageData.selectedNaturalLanguageOption',
+                        function(newValue) {
+                            if(!!newValue && !userState.user()) {
+                                userState.naturalLanguageCode(newValue.code);
+                            }
+                        }
+                    );
+
+                    /**
+                     * <p>This function will get the natural language code chosen in the user state and will make sure
+                     * that the selected language option reflects this.</p>
+                     */
+
+                    function updateSelectedNaturalLanguageOption() {
+                        $scope.naturalLanguageData.selectedNaturalLanguageOption = _.findWhere(
+                            $scope.naturalLanguageData.naturalLanguageOptions,
+                            { code : userState.naturalLanguageCode() }
+                        );
+                    }
+
+                    function updateNaturalLanguageOptionsTitles() {
+                        _.each($scope.naturalLanguageData.naturalLanguageOptions, function(nl) {
+                            messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
+                                function(value) {
+                                    nl.title = value;
+                                },
+                                function() {
+                                    $log.error('unable to get the localized name for the natural language \''+nl.code+'\'');
+                                }
+                            );
+                        });
+                    }
+
+                    referenceData.naturalLanguages().then(
+                        function(data) {
+                            $scope.naturalLanguageData.naturalLanguageOptions = _.map(data, function(d) {
+                                return {
+                                    code : d.code,
+                                    title : d.name
+                                };
+                            });
+
+                            updateNaturalLanguageOptionsTitles();
+                            updateSelectedNaturalLanguageOption();
+                        },
+                        function() {
+                            $location.path('/error').search({});
+                        }
+                    );
+
+                    // -----------------
+                    // HIDE AND SHOW ACTIONS
+
+                    $scope.goHideActions = function() {
+                        $scope.showActions = false;
+                    }
+
+                    $scope.goShowActions = function() {
+                        $scope.showActions = true;
+                    }
+
+                    // -----------------
+                    // AUTHENTICATED USER RELATED
+
+                    $scope.hasAuthenticatedUser = function() {
+                        return !!userState.user();
+                    }
+
+                    $scope.canShowAuthenticatedUser = function() {
+                        return !isLocationPathDisablingUserState() && $scope.hasAuthenticatedUser();
+                    }
+
+                    $scope.goViewUser = function() {
+                        $location.path('/viewuser/'+userState.user().nickname).search({});
+                        $scope.showActions = false;
+                    }
+
+                    $scope.goLogout = function() {
+                        userState.user(null);
+                        $location.path('/').search({});
+                        $scope.showActions = false;
+                    }
+
+                    // -----------------
+                    // USER RELATED, BUT NOT CURRENTLY AUTHENTICATED
+
+                    $scope.canAuthenticateOrCreate = function() {
                         return !isLocationPathDisablingUserState() && !userState.user();
                     }
 
-                    function canShowAuthenticated() {
-                        return !isLocationPathDisablingUserState() && userState.user()
+                    $scope.goAuthenticate = function() {
+                        var p = $location.path();
+                        $location.path('/authenticateuser').search(
+                            _.extend($location.search(), { destination: p }));
+                        $scope.showActions = false;
                     }
 
-                    function refreshActions() {
-                        var a = [];
-
-                        if(canGoMore()) {
-                            a.push({
-                                title : 'more',
-                                action: function() {
-                                    $location.path('/more').search({});
-                                }
-                            });
-                        }
-
-                        if(canAuthenticateOrCreate()) {
-                            a.push({
-                                title : 'login',
-                                action: function() {
-                                    var p = $location.path();
-                                    $location.path('/authenticateuser').search(
-                                        _.extend($location.search(), { destination: p }));
-                                }
-                            });
-
-                            a.push({
-                                title : 'register',
-                                action: function() {
-                                    $location.path('/createuser').search({});
-                                }
-                            });
-                        }
-
-                        if(canShowAuthenticated()) {
-
-                            a.push({
-                                title : userState.user().nickname,
-                                action: function() {
-                                    $location.path('/viewuser/'+userState.user().nickname).search({});
-                                }
-                            });
-
-                            a.push({
-                                title : 'logout',
-                                action: function() {
-                                    userState.user(null);
-                                    $location.path('/').search({});
-                                }
-                            });
-
-                        }
-
-                        $scope.actions = a;
+                    $scope.goCreateUser = function() {
+                        $location.path('/createuser').search({});
+                        $scope.showActions = false;
                     }
+
+                    // -----------------
+                    // EVENT HANDLING
+
+                    // when the page changes, the actions may change; for example, it is not appropriate to
+                    // show the 'login' option when the user is presently logging in.
+
+//                    $rootScope.$on(
+//                        "$locationChangeSuccess",
+//                        function(event, next, current) {
+//                        }
+//                    );
+
+                    // when the user logs in or out then the actions may also change; for example, it makes
+                    // no sense to show the logout button if nobody is presently logged in.
+
+                    $rootScope.$on(
+                        "userChangeSuccess",
+                        function(event, next, current) {
+                            $scope.userNickname = userState.user() ? userState.user().nickname : undefined;
+                        }
+                    );
+
+                    // when the natural language changes; maybe because of user choice, default or the user
+                    // login | logout, we need to reflect this change in the banner indicator.
+
+                    $rootScope.$on(
+                        "naturalLanguageChange",
+                        function(event, next, current) {
+                            $scope.naturalLanguageData.naturalLanguageCode = userState.naturalLanguageCode();
+                            updateNaturalLanguageOptionsTitles();
+                            updateSelectedNaturalLanguageOption();
+                        }
+                    );
 
                 }
             ]

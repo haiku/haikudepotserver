@@ -5,43 +5,82 @@
 
 /**
  * <p>This directive is able to display an error message that is provided from the application using the 'misc' API.
- * The specific error message is indicated by providing a 'key' value.</p>
+ * The specific error message is indicated by providing a 'key' value.  Parameter values such as {0} can be provided
+ * by an expression that is supplied on the attribute 'parameters'.
+ * </p>
  */
 
-angular.module('haikudepotserver').directive('message',function() {
+angular.module('haikudepotserver').directive('message',[
+    '$log','$rootScope','messageSource','userState',
+    function($log,$rootScope,messageSource,userState) {
         return {
             restrict: 'E',
-            template:'<span>{{messageValue}}</span>',
-            replace: true,
-            scope: {
-                key:'@'
-            },
-            controller:
-                ['$scope','$log','messageSource',
-                    function($scope,$log,messageSource) {
+            link : function($scope,element,attributes) {
 
-                        $scope.messageValue = '...';
+                var parametersExpr = attributes['parameters'];
 
-                        $scope.$watch('key',function() {
-                            if($scope.key) {
-                                messageSource.get($scope.key).then(
-                                    function(value) {
-                                        if(null==value) {
-                                            $log.warn('undefined message key; '+$scope.key);
-                                            $scope.messageValue=$scope.key;
-                                        }
-                                        else {
-                                            $scope.messageValue = value;
-                                        }
-                                    },
-                                    function() {
-                                        $scope.messageValue = '???';
-                                    });
+                function setValue(value) {
+                    var valueAssembled = value ? value : '';
+                    var parameters = undefined;
+
+                    if(parametersExpr && parametersExpr.length && -1!=valueAssembled.indexOf('{')) {
+                        parameters = $scope.$eval(parametersExpr);
+
+                        if(null!=parameters && undefined!=parameters) {
+
+                            if(!_.isArray(parameters)) {
+                                parameters = [ parameters ];
                             }
-                        });
 
+                            for(var i=0;i<parameters.length;i++) {
+                                valueAssembled = valueAssembled.replace('{'+i+'}',''+parameters[i]);
+                            }
+
+                        }
                     }
-                ]
+
+                    element.text(valueAssembled);
+                }
+
+                function updateValue(key) {
+                    messageSource.get(userState.naturalLanguageCode(), key).then(
+                        function(value) {
+                            if(!value) {
+                                $log.warn('undefined message key; '+key);
+                                setValue(key);
+                            }
+                            else {
+                                setValue(value);
+                            }
+                        },
+                        function() { // error already logged
+                            setValue('???');
+                        });
+                }
+
+                setValue('...');
+                updateValue(attributes['key']);
+
+                $rootScope.$on(
+                    "naturalLanguageChange",
+                    function() {
+                        updateValue(attributes['key']);
+                    }
+                );
+
+                // when the input parameters for localized strings containing {0}, {1} etc... change then we need to
+                // know about this so that the message can also change.
+
+                if(parametersExpr) {
+                    $scope.$watchCollection(
+                        parametersExpr,
+                        function(newValue) {
+                            updateValue(attributes['key']);
+                        }
+                    );
+                }
+            }
         };
     }
+]
 );
