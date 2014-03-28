@@ -4,13 +4,16 @@
 
     <div class="onelineform-container">
         <form name="addPkgScreenshotForm" novalidate="novalidate">
-            PNG Image File :
+            <message key="addPkgScreenshot.file.title"></message>
+            :
             <input name="file" type="file" ng-model="addPkgScreenshot.file" file-supply required></input>
             <button
                     ng-disabled="addPkgScreenshotForm.$invalid"
                     ng-click="goAddPkgScreenshot()"
                     type="submit"
-                    class="main-action">Add</button>
+                    class="main-action">
+                <message key="addPkgScreenshot.action.title"></message>
+            </button>
 
             <error-messages key-prefix="addPkgScreenshot.file" error="addPkgScreenshotForm.file.$error" ng-show="!addPkgScreenshotForm.$pristine"></error-messages>
 
@@ -30,8 +33,8 @@
                 <div><strong>#{{$index+1}}</strong> - ({{pkgScreenshot.width}} x {{pkgScreenshot.height}}), {{pkgScreenshot.length|dataLength}}</div>
 
                 <ul>
-                    <li><a href="" ng-click="goRemovePkgScreenshot(pkgScreenshot)">Remove</a></li>
-                    <li><a href="{{pkgScreenshot.imageDownloadUrl}}">Download</a></li>
+                    <li><a href="" ng-click="goRemovePkgScreenshot(pkgScreenshot)"><message key="editPkgScreenshots.remove.title"></message></a></li>
+                    <li><a href="{{pkgScreenshot.imageDownloadUrl}}"><message key="editPkgScreenshots.download.title"></message></a></li>
                 </ul>
             </div>
             <div style="clear: both;"></div>

@@ -42,20 +42,20 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $scope.goHome = function() {
                         $location.path('/').search({});
                         return false;
-                    }
+                    };
 
                     $scope.canGoMore = function() {
                         var p = $location.path();
-                        return '/error' != p && '/more' != p;
-                    }
+                        return '/error' != p && '/about' != p;
+                    };
 
                     // This will take the user to a page about the application.
 
                     $scope.goMore = function() {
-                        $location.path('/more').search({});
+                        $location.path('/about').search({});
                         $scope.showActions = false;
                         return false;
-                    }
+                    };
 
                     // -----------------
                     // NATURAL LANGUAGES
@@ -69,6 +69,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                         function(newValue) {
                             if(!!newValue && !userState.user()) {
                                 userState.naturalLanguageCode(newValue.code);
+                                $scope.showActions = false;
                             }
                         }
                     );
@@ -120,10 +121,25 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.goHideActions = function() {
                         $scope.showActions = false;
-                    }
+                    };
 
                     $scope.goShowActions = function() {
                         $scope.showActions = true;
+                    };
+
+                    // -----------------
+                    // REPOSITORY
+
+                    // note that this is also protected by a permission which is enforced in the template.
+
+                    $scope.canShowRepository = function() {
+                        var p = $location.path();
+                        return '/error' != p && '/repositories' != p;
+                    }
+
+                    $scope.goListRepositories = function() {
+                        $location.path('/repositories').search({});
+                        $scope.showActions = false;
                     }
 
                     // -----------------
@@ -131,41 +147,41 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.hasAuthenticatedUser = function() {
                         return !!userState.user();
-                    }
+                    };
 
                     $scope.canShowAuthenticatedUser = function() {
                         return !isLocationPathDisablingUserState() && $scope.hasAuthenticatedUser();
-                    }
+                    };
 
                     $scope.goViewUser = function() {
-                        $location.path('/viewuser/'+userState.user().nickname).search({});
+                        $location.path('/user/'+userState.user().nickname).search({});
                         $scope.showActions = false;
-                    }
+                    };
 
                     $scope.goLogout = function() {
                         userState.user(null);
                         $location.path('/').search({});
                         $scope.showActions = false;
-                    }
+                    };
 
                     // -----------------
                     // USER RELATED, BUT NOT CURRENTLY AUTHENTICATED
 
                     $scope.canAuthenticateOrCreate = function() {
                         return !isLocationPathDisablingUserState() && !userState.user();
-                    }
+                    };
 
                     $scope.goAuthenticate = function() {
                         var p = $location.path();
                         $location.path('/authenticateuser').search(
                             _.extend($location.search(), { destination: p }));
                         $scope.showActions = false;
-                    }
+                    };
 
                     $scope.goCreateUser = function() {
-                        $location.path('/createuser').search({});
+                        $location.path('/users/add').search({});
                         $scope.showActions = false;
-                    }
+                    };
 
                     // -----------------
                     // EVENT HANDLING
@@ -184,7 +200,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $rootScope.$on(
                         "userChangeSuccess",
-                        function(event, next, current) {
+                        function() {
                             $scope.userNickname = userState.user() ? userState.user().nickname : undefined;
                         }
                     );
@@ -194,7 +210,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $rootScope.$on(
                         "naturalLanguageChange",
-                        function(event, next, current) {
+                        function() {
                             $scope.naturalLanguageData.naturalLanguageCode = userState.naturalLanguageCode();
                             updateNaturalLanguageOptionsTitles();
                             updateSelectedNaturalLanguageOption();

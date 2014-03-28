@@ -58,32 +58,8 @@ angular.module('haikudepotserver').factory('userState',
 
                     userStateData.user = {
                         nickname : value.nickname,
-                        passwordClear : value.passwordClear,
-                        naturalLanguageCode : naturalLanguageCode() // maintain the current setting in the meantime
-                    }
-
-                    // now pull back to the server to incorporate other data about the user.  This may not be
-                    // required for a desktop application, but is necessary here in order to obtain the
-                    // natural language of the user.  Note that owing to the async communication going on here,
-                    // the change of the natural language may happen some time after the user has actually changed.
-
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_USER,
-                        "getUser",
-                        [ { nickname : value.nickname }]).then(
-                        function(data) {
-                            var u = userStateData.user;
-
-                            if(u && u.naturalLanguageCode && u.naturalLanguageCode != data.naturalLanguageCode) {
-                                userStateData.user.naturalLanguageCode = data.naturalLanguageCode;
-                                userStateData.naturalLanguageCode = data.naturalLanguageCode;
-                                $rootScope.$broadcast('naturalLanguageChange',value);
-                            }
-                        },
-                        function(e) {
-                            errorHandling.handleJsonRpcError(e);
-                        }
-                    )
+                        passwordClear : value.passwordClear
+                    };
 
                     $log.info('have set user; '+userStateData.user.nickname);
                 }
@@ -266,10 +242,8 @@ angular.module('haikudepotserver').factory('userState',
             // NATURAL LANGUAGE HANDLING
 
             function naturalLanguageCode(value) {
+
                 if(undefined !== value) {
-                    if(userStateData.user) {
-                        throw 'it is not possible to configure the natural language code when there is a user authenticated';
-                    }
 
                     if(!value || !value.match(/^[a-z]{2}$/)) {
                         throw 'the value \''+value+'\' is not a valid natural language code';
@@ -279,10 +253,6 @@ angular.module('haikudepotserver').factory('userState',
                         userStateData.naturalLanguageCode = value;
                         $rootScope.$broadcast('naturalLanguageChange',value);
                     }
-                }
-
-                if(userStateData.user) {
-                    return userStateData.user.naturalLanguageCode;
                 }
 
                 return userStateData.naturalLanguageCode;
@@ -314,7 +284,7 @@ angular.module('haikudepotserver').factory('userState',
 
             initNaturalLanguageCode();
 
-            var UserState = {
+            return {
 
                 /**
                  * <p>This is the natural language code for the user.  If there is an authenticated user then this
@@ -384,8 +354,6 @@ angular.module('haikudepotserver').factory('userState',
 
 
             };
-
-            return UserState;
 
         }
     ]

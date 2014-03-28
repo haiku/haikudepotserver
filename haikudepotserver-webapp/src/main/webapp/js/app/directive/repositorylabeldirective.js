@@ -21,7 +21,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',function() {
 
                     $scope.canView = false;
 
-                    $scope.$watch('repository',function(newValue,oldValue) {
+                    $scope.$watch('repository',function(newValue) {
                         if(!newValue) {
                             $scope.canView = false;
                         }
@@ -34,10 +34,10 @@ angular.module('haikudepotserver').directive('repositoryLabel',function() {
                                 $scope.canView = flag;
                             });
                         }
-                    })
+                    });
 
                     $scope.goView = function() {
-                        $location.path('/viewrepository/'+$scope.repository.code).search({});
+                        $location.path('/repository/'+$scope.repository.code).search({});
                     }
                 }
             ]

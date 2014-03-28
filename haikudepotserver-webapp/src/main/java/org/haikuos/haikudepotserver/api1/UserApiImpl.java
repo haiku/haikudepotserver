@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.api1.model.repository.UpdateRepositoryRequest;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.*;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
@@ -44,14 +45,74 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     AuthenticationService authenticationService;
 
     @Override
+    public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException {
+
+        Preconditions.checkNotNull(updateUserRequest);
+        Preconditions.checkState(!Strings.isNullOrEmpty(updateUserRequest.nickname));
+        Preconditions.checkNotNull(updateUserRequest.filter);
+
+        final ObjectContext context = serverRuntime.getContext();
+        User authUser = obtainAuthenticatedUser(context);
+
+        Optional<User> user = User.getByNickname(context, updateUserRequest.nickname);
+
+        if (!user.isPresent()) {
+            throw new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY);
+        }
+
+        if (!authorizationService.check(context, authUser, user.get(), Permission.USER_EDIT)) {
+            throw new AuthorizationFailureException();
+        }
+
+        for (UpdateUserRequest.Filter filter : updateUserRequest.filter) {
+
+            switch (filter) {
+                case NATURALLANGUAGE:
+
+                    if(Strings.isNullOrEmpty(updateUserRequest.naturalLanguageCode)) {
+                        throw new IllegalStateException("the natural language code is required to update the natural language on a user");
+                    }
+
+                    Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(
+                            context,
+                            updateUserRequest.naturalLanguageCode);
+
+                    if(!naturalLanguageOptional.isPresent()) {
+                        throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), updateUserRequest.naturalLanguageCode);
+                    }
+
+                    user.get().setNaturalLanguage(naturalLanguageOptional.get());
+
+                    logger.info("will update the natural language on the user {} to {}", user.get().toString(), naturalLanguageOptional.get().toString());
+
+                    break;
+
+                default:
+                    throw new IllegalStateException("unknown filter in edit user; " + filter.name());
+            }
+
+        }
+
+        if(context.hasChanges()) {
+            context.commitChanges();
+            logger.info("did update the user {}", user.get().toString());
+        }
+        else {
+            logger.info("no changes in updating the user {}", user.get().toString());
+        }
+
+        return new UpdateUserResult();
+    }
+
+    @Override
     public CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException {
 
         Preconditions.checkNotNull(createUserRequest);
-        Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.nickname));
-        Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.passwordClear));
-        Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.captchaToken));
-        Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.captchaResponse));
-        Preconditions.checkNotNull(!Strings.isNullOrEmpty(createUserRequest.naturalLanguageCode));
+        Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.nickname));
+        Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.passwordClear));
+        Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.captchaToken));
+        Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.captchaResponse));
+        Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.naturalLanguageCode));
 
         if(!authenticationService.validatePassword(createUserRequest.passwordClear)) {
             throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
@@ -127,6 +188,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         GetUserResult result = new GetUserResult();
         result.nickname = user.get().getNickname();
         result.isRoot = user.get().getIsRoot();
+        result.active = user.get().getActive();
         result.naturalLanguageCode = user.get().getNaturalLanguage().getCode();
         return result;
     }

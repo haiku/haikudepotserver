@@ -82,7 +82,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
 
                             deferred.resolve(code);
                         })
-                        .error(function(data,status,header,config) {
+                        .error(function(data,status) {
                             switch(status) {
                                 case 200:
                                     deferred.resolve();

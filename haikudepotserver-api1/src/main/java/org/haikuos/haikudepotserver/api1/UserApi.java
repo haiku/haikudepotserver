@@ -19,6 +19,13 @@ import org.haikuos.haikudepotserver.api1.support.ValidationException;
 public interface UserApi {
 
     /**
+     * <p>This method will update the user based on the data in the request.  Only the data which is included
+     * in the filter will be updated.</p>
+     */
+
+    UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException;
+
+    /**
      * <p>This method will create a user in the system.  It is identified by a username
      * and authenticated by a password.  The password is supplied in the clear.  This
      * method will throw {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}

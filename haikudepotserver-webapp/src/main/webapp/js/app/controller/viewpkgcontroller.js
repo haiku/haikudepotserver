@@ -31,11 +31,11 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.pkg;
-            }
+            };
 
             $scope.canRemoveIcon = function() {
                 return $scope.pkg && hasPkgIcons;
-            }
+            };
 
             $scope.homePageLink = function() {
                 var u = undefined;
@@ -49,7 +49,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return u ? u.url : undefined;
-            }
+            };
 
             function refreshBreadcrumbItems() {
                 $scope.breadcrumbItems = [{
@@ -139,18 +139,18 @@ angular.module('haikudepotserver').controller(
                     $scope.pkgScreenshotOffset--;
                 }
                 return false;
-            }
+            };
 
             $scope.goNextScreenshot = function() {
                 if($scope.pkgScreenshots && $scope.pkgScreenshotOffset < ($scope.pkgScreenshots.length-1)) {
                     $scope.pkgScreenshotOffset++;
                 }
                 return false;
-            }
+            };
 
             $scope.currentPkgScreenshot = function() {
                 return $scope.pkgScreenshots ? $scope.pkgScreenshots[$scope.pkgScreenshotOffset] : null;
-            }
+            };
 
             function refetchPkgScreenshots() {
 
@@ -198,15 +198,15 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEditIcon = function() {
                 $location.path($location.path() + '/editicon').search({});
-            }
+            };
 
             $scope.goEditScreenshots = function() {
                 $location.path($location.path() + '/editscreenshots').search({});
-            }
+            };
 
             $scope.goEditPkgCategories = function() {
                 $location.path($location.path() + '/editcategories').search({});
-            }
+            };
 
             $scope.goRemoveIcon = function() {
                 jsonRpc.call(
@@ -214,7 +214,7 @@ angular.module('haikudepotserver').controller(
                         "removePkgIcon",
                         [{ pkgName: $routeParams.name }]
                     ).then(
-                    function(result) {
+                    function() {
                         $log.info('removed icons for '+$routeParams.name+' pkg');
                         refetchPkgIconMetaData();
                         $scope.pkg.modifyTimestamp = new Date().getTime();

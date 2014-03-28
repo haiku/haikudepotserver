@@ -6,15 +6,15 @@
 angular.module('haikudepotserver').controller(
     'HomeController',
     [
-        '$log','$scope','$rootScope','$q','$log','$location',
-        'jsonRpc','constants','userState','architectures','messageSource','errorHandling',
+        '$log','$scope','$rootScope','$q','$location',
+        'jsonRpc','constants','userState','messageSource','errorHandling',
         'referenceData',
         function(
-            $log,$scope,$rootScope,$q,$log,$location,
-            jsonRpc,constants,userState,architectures,messageSource,errorHandling,
+            $log,$scope,$rootScope,$q,$location,
+            jsonRpc,constants,userState,messageSource,errorHandling,
             referenceData) {
 
-            const PAGESIZE = 14;
+            const PAGESIZE = 50;
 
             var ViewCriteriaTypes = {
                 ALL : 'ALL',
@@ -31,8 +31,8 @@ angular.module('haikudepotserver').controller(
             $scope.selectedViewCriteriaTypeOption = undefined;
             $scope.searchExpression = '';
             $scope.lastRefetchPkgsSearchExpression = '';
-            $scope.architectures = architectures;
-            $scope.selectedArchitecture = $scope.architectures[0];
+            $scope.architectures = undefined; // pulled in with a promise.
+            $scope.selectedArchitecture = undefined;
             $scope.pkgCategories = undefined;
             $scope.selectedPkgCategory = undefined;
             $scope.viewCriteriaTypeOptions = _.map(
@@ -94,7 +94,7 @@ angular.module('haikudepotserver').controller(
                 }
             );
 
-            $scope.$watch('selectedPkgCategory', function(newValue) {
+            $scope.$watch('selectedPkgCategory', function() {
                 var option = $scope.selectedViewCriteriaTypeOption;
 
                 if(option && option.code == ViewCriteriaTypes.CATEGORIES) {
@@ -147,8 +147,31 @@ angular.module('haikudepotserver').controller(
             });
 
             $scope.shouldSpin = function() {
-                return amFetchingPkgs;
+                return amFetchingPkgs || !$scope.architectures;
+            };
+
+            // ---- ARCHITECTURES
+
+            function refetchArchitectures() {
+                referenceData.architectures().then(
+                    function(data) {
+                        $scope.architectures = data;
+                        $scope.selectedArchitecture = $scope.architectures[0];
+
+                        // it would not have been possible to fetch the packages' list without having the architecture
+                        // defined.  For this reason, we should now attempt to trigger the fetch of the architectures.
+
+                        if(undefined==$scope.pkgs) {
+                            refetchPkgs();
+                        }
+                    },
+                    function() { // error logged already
+                        $location.path("/error").search({});
+                    }
+                );
             }
+
+            refetchArchitectures();
 
             // ---- CATEGORIES
 
@@ -181,7 +204,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return false;
-            }
+            };
 
             $scope.goNextPage = function() {
                 if($scope.hasMore) {
@@ -190,14 +213,14 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return false;
-            }
+            };
 
             // ---- VIEW PKG + VERSION
 
             $scope.goViewPkg = function(pkg) {
-                $location.path('/viewpkg/'+pkg.name+'/latest/'+$scope.selectedArchitecture.code);
+                $location.path('/pkg/'+pkg.name+'/latest/'+$scope.selectedArchitecture.code);
                 return false;
-            }
+            };
 
             // ---- UPDATE THE RESULTS LOGIC
 
@@ -206,7 +229,7 @@ angular.module('haikudepotserver').controller(
                     $scope.pkgs = undefined;
                     refetchPkgsAtFirstPage();
                 }
-            }
+            };
 
             function refetchPkgsAtFirstPage() {
                 $scope.offset = 0;
@@ -218,59 +241,66 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkgs() {
 
-                amFetchingPkgs = true;
-                $scope.pkgs = undefined;
-                $scope.hasMore = false;
+                // it is not possible to fetch packages if there is no architecture selected.  This should be OK to
+                // stop via a conditional because when the architecture is selected (fetched itself) then it will
+                // automatically attempt this refetch again.
 
-                var req = {
-                    architectureCode : $scope.selectedArchitecture.code,
-                    offset : $scope.offset,
-                    limit : PAGESIZE
-                }
+                if($scope.selectedArchitecture) {
 
-                switch($scope.selectedViewCriteriaTypeOption.code) {
+                    amFetchingPkgs = true;
+                    $scope.pkgs = undefined;
+                    $scope.hasMore = false;
 
-                    case ViewCriteriaTypes.ALL:
-                        break;
+                    var req = {
+                        architectureCode: $scope.selectedArchitecture.code,
+                        offset: $scope.offset,
+                        limit: PAGESIZE
+                    };
 
-                    case ViewCriteriaTypes.SEARCH:
-                        req.expression = $scope.searchExpression;
-                        req.expressionType = 'CONTAINS';
-                        break;
+                    switch ($scope.selectedViewCriteriaTypeOption.code) {
 
-                    case ViewCriteriaTypes.CATEGORIES:
-                        if(!$scope.selectedPkgCategory) {
-                            amFetchingPkgs = false;
-                            return;
-                        }
-                        req.pkgCategoryCode = $scope.selectedPkgCategory.code;
-                        break;
+                        case ViewCriteriaTypes.ALL:
+                            break;
 
-                    case ViewCriteriaTypes.MOSTRECENT:
-                        req.daysSinceLatestVersion = constants.RECENT_DAYS;
-                        req.sortOrdering = 'VERSIONCREATETIMESTAMP';
-                        break;
+                        case ViewCriteriaTypes.SEARCH:
+                            req.expression = $scope.searchExpression;
+                            req.expressionType = 'CONTAINS';
+                            break;
 
-                    case ViewCriteriaTypes.MOSTVIEWED:
-                        req.daysSinceLatestVersion = constants.RECENT_DAYS;
-                        req.sortOrdering = 'VERSIONVIEWCOUNTER';
-                        break;
+                        case ViewCriteriaTypes.CATEGORIES:
+                            if (!$scope.selectedPkgCategory) {
+                                amFetchingPkgs = false;
+                                return;
+                            }
+                            req.pkgCategoryCode = $scope.selectedPkgCategory.code;
+                            break;
 
-                }
+                        case ViewCriteriaTypes.MOSTRECENT:
+                            req.daysSinceLatestVersion = constants.RECENT_DAYS;
+                            req.sortOrdering = 'VERSIONCREATETIMESTAMP';
+                            break;
 
-                $scope.lastRefetchPkgsSearchExpression = $scope.searchExpression;
+                        case ViewCriteriaTypes.MOSTVIEWED:
+                            req.daysSinceLatestVersion = constants.RECENT_DAYS;
+                            req.sortOrdering = 'VERSIONVIEWCOUNTER';
+                            break;
 
-                jsonRpc.call(constants.ENDPOINT_API_V1_PKG,"searchPkgs",[req]).then(
-                    function(result) {
-                        $scope.pkgs = result.items;
-                        $scope.hasMore = result.hasMore;
-                        $log.info('found '+result.items.length+' packages');
-                        amFetchingPkgs = false;
-                    },
-                    function(err) {
-                        errorHandling.handleJsonRpcError(err);
                     }
-                );
+
+                    $scope.lastRefetchPkgsSearchExpression = $scope.searchExpression;
+
+                    jsonRpc.call(constants.ENDPOINT_API_V1_PKG, "searchPkgs", [req]).then(
+                        function (result) {
+                            $scope.pkgs = result.items;
+                            $scope.hasMore = result.hasMore;
+                            $log.info('found ' + result.items.length + ' packages');
+                            amFetchingPkgs = false;
+                        },
+                        function (err) {
+                            errorHandling.handleJsonRpcError(err);
+                        }
+                    );
+                }
 
             }
         }

@@ -20,9 +20,9 @@ angular.module('haikudepotserver').factory('errorHandling',
                         $log.error(prefix+'cause is unknown as no error was available in the envelope');
                     }
                     else {
-                        var code = jsonRpcErrorEnvelope.code ? jsonRpcErrorEnvelope.code : '?';
-                        var message = jsonRpcErrorEnvelope.message ? jsonRpcErrorEnvelope.message : '?';
-                        $log.error(prefix+'code:'+code+", msg:"+message);
+                        var logCode = jsonRpcErrorEnvelope.code ? jsonRpcErrorEnvelope.code : '?';
+                        var logMessage = jsonRpcErrorEnvelope.message ? jsonRpcErrorEnvelope.message : '?';
+                        $log.error(prefix+'code:'+logCode+", msg:"+logMessage);
                     }
                 },
 

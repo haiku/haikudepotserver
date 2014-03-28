@@ -123,7 +123,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
                             id : id
                         }
                     })
-                    .success(function(data,status,header,config) {
+                    .success(function(data,status) {
                         if(200!=status) {
                             deferred.reject(mkTransportErr(status));
                         }
@@ -142,7 +142,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
                             }
                         }
                     })
-                    .error(function(data,status,header,config) {
+                    .error(function(data,status) {
                         deferred.reject(mkTransportErr(status));
                     });
 

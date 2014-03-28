@@ -66,7 +66,7 @@ angular.module('haikudepotserver').controller(
                         );
 
                     },
-                    function(e) { // already logged.
+                    function() { // already logged.
                         $location.path("/error").search({});
                     }
                 )
@@ -78,11 +78,11 @@ angular.module('haikudepotserver').controller(
                 return undefined == $scope.captchaToken ||
                     $scope.amSaving ||
                     undefined == $scope.naturalLanguageOptions; // have to be async loaded
-            }
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.createUserForm[name].$invalid ? ['form-control-group-error'] : [];
-            }
+            };
 
             function refreshBreadcrumbItems() {
                 $scope.breadcrumbItems = [{
@@ -120,11 +120,11 @@ angular.module('haikudepotserver').controller(
 
             $scope.captchaResponseDidChange = function() {
                 $scope.createUserForm.captchaResponse.$setValidity('badresponse',true);
-            }
+            };
 
             $scope.nicknameDidChange = function() {
                 $scope.createUserForm.nickname.$setValidity('notunique',true);
-            }
+            };
 
             $scope.passwordsChanged = function() {
                 $scope.createUserForm.passwordClearRepeated.$setValidity(
@@ -132,7 +132,7 @@ angular.module('haikudepotserver').controller(
                     !$scope.newUser.passwordClear
                     || !$scope.newUser.passwordClearRepeated
                     || $scope.newUser.passwordClear == $scope.newUser.passwordClearRepeated);
-            }
+            };
 
             // This function will take the data from the form and will create the user from this data.
 
@@ -155,7 +155,7 @@ angular.module('haikudepotserver').controller(
                             naturalLanguageCode : $scope.newUser.naturalLanguageOption.code
                         }]
                     ).then(
-                    function(result) {
+                    function() {
                         $log.info('created new user; '+$scope.newUser.nickname);
                         $location.path('/authenticateuser').search({
                             nickname : $scope.newUser.nickname,

@@ -6,10 +6,31 @@
         {{user.nickname}}
     </h1>
 
-    <h2>Actions</h2>
+    <dl>
+        <dt><message key="viewUser.active.title"></message></dt>
+        <dd><active-indicator state="user.active"></active-indicator>&nbsp;</dd>
+        <dt><message key="viewUser.naturalLanguage.title"></message></dt>
+        <dd><message key="{{'naturalLanguage.' + user.naturalLanguageCode}}"></message></dd>
+    </dl>
+
+    <h2><message key="gen.actions.title"></message></h2>
 
     <ul>
-        <li><a href="" ng-click="goChangePassword()">Change password</a></li>
+        <li user="user" show-if-user-permission="'USER_CHANGEPASSWORD'">
+            <a href="" ng-click="goChangePassword()">
+                <message key="viewUser.changePaswordAction.title"></message>
+            </a>
+        </li>
+        <li user="user" show-if-user-permission="'USER_EDIT'">
+            <a href="" ng-click="goEdit()">
+                <message key="viewUser.editAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="canLogout()">
+            <a href="" ng-click="goLogout()">
+                <message key="viewUser.logoutAction.title"></message>
+            </a>
+        </li>
     </ul>
 
 </div>

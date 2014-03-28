@@ -11,33 +11,33 @@ angular.module('haikudepotserver').factory('breadcrumbs',
     [
         function() {
 
-            var BreadcrumbsService = {
+            return {
 
                 createEditRepository : function(repository) {
                     return {
                         title : 'Edit ' + repository.code,
-                        path : '/editrepository/' + repository.code
+                        path : '/repository/' + repository.code + '/edit'
                     }
                 },
 
-                createAddRepository : function(repository) {
+                createAddRepository : function() {
                     return {
                         title : 'Add Repository',
-                        path : '/addrepository'
+                        path : '/repositories/add'
                     }
                 },
 
                 createViewRepository : function(repository) {
                   return {
                       title : repository.code,
-                      path : '/viewrepository/' + repository.code
+                      path : '/repository/' + repository.code
                   }
                 },
 
                 createListRepositories : function() {
                     return {
                         title : 'List Repositories',
-                        path : '/listrepositories'
+                        path : '/repositories'
                     };
                 },
 
@@ -50,8 +50,8 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
                 createMore : function() {
                   return {
-                      title : 'More',
-                      path : '/more'
+                      title : 'About',
+                      path : '/about'
                   };
                 },
 
@@ -71,26 +71,24 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
                     return {
                         title : pkg.name,
-                        path : '/viewpkg/' + pkg.name + '/' + versionType + '/' + architectureCode
+                        path : '/pkg/' + pkg.name + '/' + versionType + '/' + architectureCode
                     };
                 },
 
                 createViewUser : function(user) {
                     return {
                         title : user.nickname,
-                        path : '/viewuser/' + user.nickname
+                        path : '/user/' + user.nickname
                     };
                 },
 
                 createChangePassword : function(user) {
                     return {
                         title : 'Change Password',
-                        path : '/changepassword/' + user.nickname
+                        path : '/user/' + user.nickname + '/changepassword'
                     };
                 }
             };
-
-            return BreadcrumbsService;
 
         }
     ]

@@ -3,7 +3,7 @@
 <div class="content-container">
     <form name="addEditRepositoryForm" novalidate="novalidate">
 
-        <label for="code">Code</label>
+        <label for="code"><message key="gen.code.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('code')">
             <div ng-show="amEditing" class="form-control-group-static">
                 <code>{{workingRepository.code}}</code>
@@ -21,7 +21,7 @@
             <error-messages key-prefix="addEditRepository.code" error="addEditRepositoryForm.code.$error"></error-messages>
         </div>
 
-        <label for="code">Architecture</label>
+        <label for="code"><message key="gen.architecture.title"></message></label>
         <div class="form-control-group">
             <div ng-show="amEditing" class="form-control-group-static">
                 <code>{{workingRepository.architecture.code}}</code>
@@ -33,7 +33,7 @@
             </select>
         </div>
 
-        <label for="url">URL</label>
+        <label for="url"><message key="addEditRepository.url.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('url')">
             <input
                     id="url"
@@ -53,8 +53,8 @@
                     ng-click="goSave()"
                     type="submit"
                     class="main-action">
-                <span ng-show="amEditing">Save Changes</span>
-                <span ng-show="!amEditing">Add</span>
+                <span ng-show="amEditing"><message key="addEditRepository.saveChangesAction.title"></message></span>
+                <span ng-show="!amEditing"><message key="addEditRepository.addAction.title"></message></span>
             </button>
         </div>
 

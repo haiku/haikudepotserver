@@ -97,7 +97,7 @@ angular.module('haikudepotserver').factory('referenceData',
                         function() {
                             deferred.reject();
                         }
-                    )
+                    );
 
                     return deferred.promise;
                 },

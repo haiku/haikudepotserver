@@ -15,7 +15,6 @@ angular.module('haikudepotserver').controller(
             breadcrumbs,errorHandling) {
 
             $scope.breadcrumbItems = [
-                breadcrumbs.createMore(),
                 breadcrumbs.createListRepositories()
             ];
 
@@ -31,19 +30,19 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return amFetchingRepositories;
-            }
+            };
 
             $scope.goShowInactive = function() {
                 $scope.amShowingInactive = true;
                 refetchRepositoriesAtFirstPage();
-            }
+            };
 
             // ---- PAGINATION
 
             $scope.goSearch = function() {
                     $scope.repositories = undefined;
                 refetchRepositoriesAtFirstPage();
-            }
+            };
 
             function refetchRepositoriesAtFirstPage() {
                 $scope.offset = 0;
@@ -87,7 +86,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return false;
-            }
+            };
 
             $scope.goNextPage = function() {
                 if($scope.hasMore) {
@@ -96,19 +95,19 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return false;
-            }
+            };
 
             $scope.classPreviousPage = function() {
                 return $scope.offset > 0 ? [] : ['disabled'];
-            }
+            };
 
             $scope.classNextPage = function() {
                 return $scope.hasMore ? [] : ['disabled'];
-            }
+            };
 
             $scope.goAdd = function() {
-                $location.path('/addrepository').search({});
-            }
+                $location.path('/repositories/add').search({});
+            };
 
         }
     ]

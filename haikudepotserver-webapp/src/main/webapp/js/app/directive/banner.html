@@ -43,44 +43,53 @@
 
     <modal-container show="showActions" width="248px" close="goHideActions()">
 
-        <div ng-show="canGoMore()">
-            <a href="" ng-click="goMore()">
-                <message key="banner.action.more"></message>
-            </a>
-        </div>
+        <ul class="context-menu-container">
+            <li ng-show="canGoMore()">
+                <a href="" ng-click="goMore()">
+                    <message key="banner.action.more"></message>
+                </a>
+            </li>
 
-        <div ng-show="canAuthenticateOrCreate()">
-            <a href="" ng-click="goAuthenticate()">
-                <message key="banner.action.authenticate"></message>
-            </a>
-        </div>
+            <li ng-show="canAuthenticateOrCreate()">
+                <a href="" ng-click="goAuthenticate()">
+                    <message key="banner.action.authenticate"></message>
+                </a>
+            </li>
 
-        <div ng-show="canAuthenticateOrCreate()">
-            <a href="" ng-click="goCreateUser()">
-                <message key="banner.action.createUser"></message>
-            </a>
-        </div>
+            <li ng-show="canAuthenticateOrCreate()">
+                <a href="" ng-click="goCreateUser()">
+                    <message key="banner.action.createUser"></message>
+                </a>
+            </li>
 
-        <div ng-show="canShowAuthenticatedUser()">
-            <a href="" ng-click="goViewUser()">
-                <message key="banner.action.user" parameters="[userNickname]"></message>
-            </a>
-        </div>
+            <li ng-show="canShowAuthenticatedUser()">
+                <a href="" ng-click="goViewUser()">
+                    <message key="banner.action.user" parameters="[userNickname]"></message>
+                </a>
+            </li>
 
-        <div ng-show="canShowAuthenticatedUser()">
-            <a href="" ng-click="goLogout()">
-                <message key="banner.action.logout" parameters="[userNickname]"></message>
-            </a>
-        </div>
+            <li ng-show="canShowAuthenticatedUser()">
+                <a href="" ng-click="goLogout()">
+                    <message key="banner.action.logout" parameters="[userNickname]"></message>
+                </a>
+            </li>
 
-        <div ng-show="!hasAuthenticatedUser() && naturalLanguageData.naturalLanguageOptions">
-            <message key="banner.action.naturalLanguagePrefix"></message>
+            <li ng-show="!hasAuthenticatedUser() && naturalLanguageData.naturalLanguageOptions">
+                <message key="banner.action.naturalLanguagePrefix"></message>
                 <select
                         required="true"
                         ng-model="naturalLanguageData.selectedNaturalLanguageOption"
                         ng-options="aNaturalLanguageOption.title for aNaturalLanguageOption in naturalLanguageData.naturalLanguageOptions">
                 </select>
-        </div>
+            </li>
+
+            <li ng-show="canShowRepository()" show-if-permission="'REPOSITORY_LIST'">
+                <a href="" ng-click="goListRepositories()">
+                    <message key="banner.action.repositories"></message>
+                </a>
+            </li>
+
+        </ul>
 
     </modal-container>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,7 +49,7 @@ angular.module('haikudepotserver').directive('pkgIcon',function() {
 
                         $scope.$watch('pkg.modifyTimestamp', function() {
                             refreshImgUrl();
-                        })
+                        });
 
                         refreshImgUrl();
                     }

@@ -1,0 +1,36 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+    <form name="editUserForm" novalidate="novalidate">
+
+        <label><message key="gen.nickname.title"></message></label>
+        <div class="form-control-group">
+            <code>{{workingUser.nickname}}</code>
+        </div>
+
+        <label for="natural-language"><message key="editUser.naturalLanguage.title"></message></label>
+        <div class="form-control-group">
+            <select
+                    id="natural-language"
+                    required="true"
+                    ng-model="workingUser.naturalLanguageOption"
+                    ng-options="aNaturalLanguageOption.title for aNaturalLanguageOption in naturalLanguageOptions">
+            </select>
+        </div>
+
+        <div class="form-action-container">
+            <button
+                    ng-disabled="editUserForm.$invalid"
+                    ng-click="goSave()"
+                    type="submit"
+                    class="main-action">
+                <message key="editUser.action.title"></message>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

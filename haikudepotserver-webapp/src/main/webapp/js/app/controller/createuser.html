@@ -3,7 +3,7 @@
 <div class="content-container">
     <form name="createUserForm" novalidate="novalidate">
 
-        <label for="nickname">Nickname</label>
+        <label for="nickname"><message key="gen.nickname.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('nickname')">
             <input
                     id="nickname"
@@ -18,7 +18,7 @@
             <error-messages key-prefix="createUser.nickname" error="createUserForm.nickname.$error"></error-messages>
         </div>
 
-        <label for="password-clear">Password</label>
+        <label for="password-clear"><message key="createUser.passwordClear.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClear')">
             <input
                     id="password-clear"
@@ -32,7 +32,7 @@
             <error-messages key-prefix="createUser.passwordClear" error="createUserForm.passwordClear.$error"></error-messages>
         </div>
 
-        <label for="password-clear-repeated">Password Repeated</label>
+        <label for="password-clear-repeated"><message key="createUser.passwordClearRepeated.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClearRepeated')">
             <input
                     id="password-clear-repeated"
@@ -45,7 +45,7 @@
             <error-messages key-prefix="createUser.passwordClearRepeated" error="createUserForm.passwordClearRepeated.$error"></error-messages>
         </div>
 
-        <label for="natural-language">Language</label>
+        <label for="natural-language"><message key="createUser.naturalLanguage.title"></message></label>
         <div class="form-control-group">
             <select
                     id="natural-language"
@@ -55,7 +55,7 @@
             </select>
         </div>
 
-        <label for="captcha-response-input">Check for a Person</label>
+        <label for="captcha-response-input"><message key="createUser.captchaResponse.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('captchaResponse')">
             <img style="vertical-align:middle;" src="{{captchaImageUrl}}"></img>
             =
@@ -76,7 +76,7 @@
                     ng-disabled="createUserForm.$invalid"
                     ng-click="goCreateUser()"
                     type="submit"
-                    class="main-action">Create</button>
+                    class="main-action"><message key="createUser.action.title"></message></button>
         </div>
 
     </form>

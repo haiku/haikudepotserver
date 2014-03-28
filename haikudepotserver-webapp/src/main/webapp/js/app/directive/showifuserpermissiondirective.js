@@ -5,18 +5,18 @@
 
 /**
  * <p>This directive is able to display the transcluded (material inside the element) if the permission holds against
- * the nominated package.</p>
+ * the nominated user.</p>
  */
 
-angular.module('haikudepotserver').directive('showIfPkgPermission',[
+angular.module('haikudepotserver').directive('showIfUserPermission',[
     'userState', function(userState) {
         return {
             restrict: 'A',
             link : function($scope,element,attributes) {
 
-                var pkgExpression = attributes['pkg'];
-                var permissionCodeExpression = attributes['showIfPkgPermission'];
-                var pkg = $scope.$eval(pkgExpression);
+                var userExpression = attributes['user'];
+                var permissionCodeExpression = attributes['showIfUserPermission'];
+                var user = $scope.$eval(userExpression);
                 var permissionCode = $scope.$eval(permissionCodeExpression);
 
                 // by default we will hide it.
@@ -24,8 +24,8 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                 element.addClass('app-hide');
                 check();
 
-                $scope.$watch(pkgExpression, function(newValue) {
-                   pkg = newValue;
+                $scope.$watch(userExpression, function(newValue) {
+                    user = newValue;
                     check();
                 });
 
@@ -35,7 +35,7 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                 });
 
                 function check() {
-                    if(!permissionCode || !pkg) {
+                    if(!permissionCode || !user) {
                         element.addClass('app-hide');
                     }
                     else {
@@ -44,16 +44,16 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                         if(angular.isArray(permissionCode)) {
                             _.each(permissionCode, function(item) {
                                 targetAndPermissions.push({
-                                    targetType: 'PKG',
-                                    targetIdentifier : pkg.name,
+                                    targetType: 'USER',
+                                    targetIdentifier : user.nickname,
                                     permissionCode : item
                                 });
                             });
                         }
                         else {
                             targetAndPermissions.push({
-                                targetType: 'PKG',
-                                targetIdentifier : pkg.name,
+                                targetType: 'USER',
+                                targetIdentifier : user.nickname,
                                 permissionCode : permissionCode
                             });
                         }

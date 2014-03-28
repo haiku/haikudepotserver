@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -42,9 +42,9 @@ angular.module('haikudepotserver').directive('paginationArrow',function() {
                 if(active && onPageExpression) {
                     $scope.$apply(onPageExpression);
                 }
-            })
+            });
 
-            $scope.$watch(activeExpression,function(newValue,oldValue) {
+            $scope.$watch(activeExpression,function(newValue) {
                 if(newValue) {
                     svgElement.children().attr('fill-opacity','1.0');
                 }

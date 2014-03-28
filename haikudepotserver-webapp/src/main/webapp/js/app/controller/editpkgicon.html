@@ -4,30 +4,30 @@
 
     <form name="editPkgIconForm" novalidate="novalidate">
 
-        <label>Package</label>
+        <label><message key="gen.pkg.title"></message></label>
         <div class="form-control-group">
             <div class="form-control-group-static">
                 <pkg-label pkg="pkg"></pkg-label>
             </div>
         </div>
 
-        <label for="icon-bitmap-16-file">Icon 16x16px</label>
+        <label for="icon-bitmap-16-file"><message key="editPkgIcon.iconBitmap16File.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconBitmap16File')">
             <input id="icon-bitmap-16-file" name="iconBitmap16File" type="file" ng-model="editPkgIcon.iconBitmap16File" file-supply required></input>
             <error-messages key-prefix="editPkgIcon.iconBitmap16File" error="editPkgIconForm.iconBitmap16File.$error"></error-messages>
         </div>
 
-        <label for="icon-bitmap-32-file">Icon 32x32px</label>
+        <label for="icon-bitmap-32-file"><message key="editPkgIcon.iconBitmap32File.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconBitmap32File')">
             <input id="icon-bitmap-32-file" name="iconBitmap32File" type="file" ng-model="editPkgIcon.iconBitmap32File" file-supply required></input>
             <error-messages key-prefix="editPkgIcon.iconBitmap32File" error="editPkgIconForm.iconBitmap32File.$error"></error-messages>
         </div>
 
-        <label for="icon-hvif-file">Icon Hvif</label>
+        <label for="icon-hvif-file"><message key="editPkgIcon.iconHvifFile.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconHvifFile')">
             <input id="icon-hvif-file" name="iconHvifFile" type="file" ng-model="editPkgIcon.iconHvifFile" file-supply></input>
             <span ng-show="editPkgIcon.iconHvifFile">
-                (<a href="" ng-click="goClearIconHvifFile()">Clear</a>)
+                (<a href="" ng-click="goClearIconHvifFile()"><message key="editPkgIcon.iconHvifFile.clearAction.title"></message></a>)
             </span>
             <error-messages key-prefix="editPkgIcon.iconHvifFile" error="editPkgIconForm.iconHvifFile.$error"></error-messages>
         </div>
@@ -37,7 +37,9 @@
                     ng-disabled="editPkgIconForm.$invalid"
                     ng-click="goStorePkgIcons()"
                     type="submit"
-                    class="main-action">Store Icons</button>
+                    class="main-action">
+                <message key="editPkgIcon.action.title"></message>
+            </button>
         </div>
 
     </form>

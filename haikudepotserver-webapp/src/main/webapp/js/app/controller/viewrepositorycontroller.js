@@ -21,7 +21,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.repository;
-            }
+            };
 
             function updateActive(flag) {
 
@@ -36,7 +36,7 @@ angular.module('haikudepotserver').controller(
                             filter : [ 'ACTIVE' ]
                         }]
                     ).then(
-                    function(result) {
+                    function() {
                         amUpdatingActive = false;
                         $scope.repository.active = flag;
                         $log.info('did set the active flag on '+$scope.repository.code+' to '+flag);
@@ -49,23 +49,23 @@ angular.module('haikudepotserver').controller(
 
             $scope.canActivate = function() {
                 return $scope.repository && !$scope.repository.active && !amUpdatingActive;
-            }
+            };
 
             $scope.canDeactivate = function() {
                 return $scope.repository && $scope.repository.active && !amUpdatingActive;
-            }
+            };
 
             $scope.goActivate = function() {
                 updateActive(true);
-            }
+            };
 
             $scope.goDeactivate = function() {
                 updateActive(false);
-            }
+            };
 
             $scope.goEdit = function() {
-                $location.path('/editrepository/' + $scope.repository.code);
-            }
+                $location.path('/repository/' + $scope.repository.code + '/edit');
+            };
 
             /**
              * <p>This function will initiate an import of a repository.  These run sequentially so it may not happen
@@ -78,7 +78,7 @@ angular.module('haikudepotserver').controller(
                         "triggerImportRepository",
                         [{ code: $routeParams.code }]
                     ).then(
-                    function(result) {
+                    function() {
                         $log.info('triggered import for repository; '+$scope.repository.code);
                         $scope.didTriggerImportRepository = true;
                         $timeout(function() {
@@ -90,7 +90,7 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-            }
+            };
 
             function refreshBreadcrumbItems() {
                 $scope.breadcrumbItems = [

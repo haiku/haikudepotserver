@@ -12,7 +12,7 @@ angular.module('haikudepotserver').factory('pkgIcon',
         '$log','$q','$http','constants',
         function($log,$q,$http,constants) {
 
-            var PkgIcon = {
+            return {
 
                 /**
                  * <p>This function will provide a URL to the packages' icon.</p>
@@ -57,8 +57,6 @@ angular.module('haikudepotserver').factory('pkgIcon',
                 }
 
             };
-
-            return PkgIcon;
 
         }
     ]

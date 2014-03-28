@@ -9,6 +9,8 @@ public class GetUserResult {
 
     public String nickname;
 
+    public Boolean active;
+
     public Boolean isRoot;
 
     public String naturalLanguageCode;

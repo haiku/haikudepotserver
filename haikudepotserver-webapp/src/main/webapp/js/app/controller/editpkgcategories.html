@@ -4,14 +4,14 @@
 
     <form name="editPkgCategoriesForm" novalidate="novalidate">
 
-        <label>Package</label>
+        <label><message key="gen.pkg.title"></message></label>
         <div class="form-control-group">
             <div class="form-control-group-static">
                 <pkg-label pkg="pkg"></pkg-label>
             </div>
         </div>
 
-        <label>Categories</label>
+        <label><message key="editPkgCategories.categories.title"></message></label>
         <div class="form-control-group">
             <div ng-repeat="pkgCategory in pkgCategories" ng-class="pkgCategory.disabled ? 'muted' : ''">
                 <input
@@ -20,7 +20,7 @@
                         ng-disabled="pkgCategory.disabled"
                         ng-model="pkgCategory.selected">{{pkgCategory.name}}
             </div>
-            <p class="muted">A maximum of three package categories is allowed.</p>
+            <p class="muted"><message key="editPkgCategories.categories.maximumThreeNote"></message></p>
         </div>
 
         <div class="form-action-container">
@@ -28,7 +28,9 @@
                     ng-disabled="editPkgCategoriesForm.$invalid"
                     ng-click="goStorePkgCategories()"
                     type="submit"
-                    class="main-action">Save</button>
+                    class="main-action">
+                <message key="editPkgCategories.action.title"></message>
+            </button>
         </div>
 
     </form>

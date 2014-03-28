@@ -22,7 +22,7 @@ angular.module('haikudepotserver').directive('showIfPermission',[
                 element.addClass('app-hide');
                 check();
 
-                $scope.$watch(permissionCodeExpression, function(newValue,oldValue) {
+                $scope.$watch(permissionCodeExpression, function(newValue) {
                     permissionCode = newValue;
                     check();
                 });

@@ -32,11 +32,11 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.pkg || undefined == $scope.pkgScreenshots || $scope.amCommunicating;
-            }
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.addPkgScreenshotForm[name].$invalid ? ['form-control-group-error'] : [];
-            }
+            };
 
             // pulls back the list of package screenshots so that they can be displayed
             // in a list.
@@ -57,7 +57,7 @@ angular.module('haikudepotserver').controller(
                                 imageThumbnailUrl : pkgScreenshot.url($scope.pkg,item.code,THUMBNAIL_TARGETWIDTH,THUMBNAIL_TARGETHEIGHT),
                                 imageDownloadUrl : pkgScreenshot.rawUrl($scope.pkg,item.code)
                             };
-                        })
+                        });
 
                         $log.info('found '+result.items.length+' screenshots for pkg '+result.name);
                     },
@@ -116,9 +116,9 @@ angular.module('haikudepotserver').controller(
             // the server because the user will not know if an updated file is also bad until the server has seen it;
             // ie: the validation is happening server-side rather than client-side.
 
-            $scope.$watch('addPkgScreenshot.file', function(newValue) {
+            $scope.$watch('addPkgScreenshot.file', function() {
                 var file = $scope.addPkgScreenshot.file;
-                var model = $scope.addPkgScreenshotForm['file']
+                var model = $scope.addPkgScreenshotForm['file'];
                 model.$setValidity('badformatorsize',true);
                 model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < SCREENSHOT_SIZE_LIMIT));
             });
@@ -176,7 +176,7 @@ angular.module('haikudepotserver').controller(
 
                     }
                 );
-            }
+            };
 
             // -------------------------
             // REMOVE A SCREENSHOT
@@ -197,7 +197,7 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-            }
+            };
 
             // -------------------------
             // ORDERING
@@ -243,7 +243,7 @@ angular.module('haikudepotserver').controller(
                         storeOrdering();
                         break;
                 }
-            }
+            };
 
             $scope.goOrderDown = function(pkgScreenshot) {
                 var i = _.indexOf($scope.pkgScreenshots, pkgScreenshot);

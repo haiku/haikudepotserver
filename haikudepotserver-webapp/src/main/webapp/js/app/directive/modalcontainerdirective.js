@@ -31,7 +31,7 @@ angular.module('haikudepotserver').directive('modalContainer',function() {
 
                     $scope.$watch('show', function() {
                         updateShowModal();
-                    })
+                    });
 
                     $scope.$watch('width', function(newValue) {
                         $scope.style['width'] = newValue;

@@ -35,11 +35,11 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return $scope.amAuthenticating;
-            }
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.authenticateUserForm[name].$invalid ? ['form-control-group-error'] : [];
-            }
+            };
 
             // This function will take the data from the form and will authenticate
             // the user from this data.
@@ -67,23 +67,46 @@ angular.module('haikudepotserver').controller(
                             userState.user({
                                 nickname : $scope.authenticationDetails.nickname,
                                 passwordClear : $scope.authenticationDetails.passwordClear
-                            })
+                            });
 
                             $log.info('successful authentication; '+$scope.authenticationDetails.nickname);
 
-                            // either the user specified where they want to return to
-                            // of we just take them back to their home page.
+                            // now pull back to the server to incorporate other data about the user.  This is necessary
+                            // here in order to obtain the natural language of the user.  Note that owing to the async
+                            // communication going on here, the change of the natural language may happen some time
+                            // after the user has actually changed.
 
-                            var destination = $location.search()['destination'];
+                            jsonRpc.call(
+                                constants.ENDPOINT_API_V1_USER,
+                                "getUser",
+                                [ {
+                                    nickname : $scope.authenticationDetails.nickname
+                                }]).then(
+                                function(userData) {
 
-                            if(destination && 0!=destination.length) {
-                                var s = angular.copy($location.search());
-                                delete s['destination'];
-                                $location.path(destination).search(s);
-                            }
-                            else {
-                                $location.path('/').search({});
-                            }
+                                    userState.naturalLanguageCode(userData.naturalLanguageCode);
+
+                                    // Finally take the user somewhere post-login.
+                                    // Either the user specified where they want to return to
+                                    // of we just take them back to their home page.
+
+                                    var destination = $location.search()['destination'];
+
+                                    if(destination && 0!=destination.length) {
+                                        var s = angular.copy($location.search());
+                                        delete s['destination'];
+                                        $location.path(destination).search(s);
+                                    }
+                                    else {
+                                        $location.path('/').search({});
+                                    }
+
+                                },
+                                function(e) {
+                                    $log.error('unable to get the natural language of the newly authenticated user');
+                                    errorHandling.handleJsonRpcError(e);
+                                }
+                            );
                         }
                         else {
                             $log.info('failed authentication; '+$scope.authenticationDetails.nickname);
@@ -98,7 +121,6 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-
 
             }
 

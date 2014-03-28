@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -100,13 +100,11 @@ angular.module('haikudepotserver').factory('messageSource',
                 return deferred.promise;
             }
 
-            var MessageSource = {
+            return {
                 get : function(naturalLanguageCode, key) {
                     return getMessage(naturalLanguageCode, key);
                 }
             };
-
-            return MessageSource;
 
         }
     ]

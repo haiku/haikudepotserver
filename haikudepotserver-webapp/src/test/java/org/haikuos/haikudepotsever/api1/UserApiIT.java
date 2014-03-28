@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotsever.api1;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.UserApi;
@@ -20,6 +21,7 @@ import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 
 public class UserApiIT extends AbstractIntegrationTest {
 
@@ -40,6 +42,32 @@ public class UserApiIT extends AbstractIntegrationTest {
         user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
         context.commitChanges();
         return user;
+    }
+
+    @Test
+    public void testUpdateUser() throws Exception {
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            User user = createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
+            setAuthenticatedUser("testuser");
+        }
+
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.nickname = "testuser";
+        request.filter = Collections.singletonList(UpdateUserRequest.Filter.NATURALLANGUAGE);
+        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
+
+        // ------------------------------------
+        userApi.updateUser(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Optional<User> user = User.getByNickname(context, "testuser");
+            Assertions.assertThat(user.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
+        }
+
     }
 
     @Test

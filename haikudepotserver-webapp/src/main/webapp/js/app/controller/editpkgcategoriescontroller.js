@@ -26,7 +26,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.pkg || undefined == $scope.pkgCategories || $scope.amSaving;
-            }
+            };
 
             // pulls the pkg data back from the server so that it can be used to
             // display the form.
@@ -61,7 +61,7 @@ angular.module('haikudepotserver').controller(
 
                                 updateDisablementOnPkgCategories();
                             },
-                            function(err) {
+                            function() {
                                 // logging happens inside
                                 $location.path("/error").search({});
                             }
@@ -101,9 +101,9 @@ angular.module('haikudepotserver').controller(
 
             // this gets fired when somebody selects or deselects a category.
 
-            $scope.didChangePkgCategorySelection = function(pkgCategory) {
+            $scope.didChangePkgCategorySelection = function() {
                 updateDisablementOnPkgCategories();
-            }
+            };
 
             // stores the categories back to the server for this package.  When it has done this, it will return to
             // view the pkg again.
@@ -127,7 +127,7 @@ angular.module('haikudepotserver').controller(
                 ).then(
                     function() {
                         $log.info('have updated the pkg categories for pkg '+$scope.pkg.name);
-                        $location.path('/viewpkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
+                        $location.path('/pkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
                     },
                     function(err) {
                         $log.error('unable to update pkg categories');

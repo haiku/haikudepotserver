@@ -4,7 +4,7 @@
  */
 
 angular.module('haikudepotserver').controller(
-    'MoreController',
+    'AboutController',
     [
         '$scope','$log','$location',
         'jsonRpc','constants','userState',
@@ -20,18 +20,10 @@ angular.module('haikudepotserver').controller(
 
             $scope.goHome = function() {
                 $location.path("/").search({});
-            }
+            };
 
             // -------------------
             // USER
-
-            $scope.canViewUser = function() {
-                return !!userState.user();
-            }
-
-            $scope.goViewUser = function() {
-                $location.path('/viewuser/'+userState.user().nickname).search({});
-            }
 
             function refreshAuthorization() {
 
@@ -65,13 +57,6 @@ angular.module('haikudepotserver').controller(
             }
 
             refreshAuthorization();
-
-            // -------------------
-            // REPOSITORIES
-
-            $scope.goListRepositories = function() {
-                $location.path('/listrepositories').search({});
-            }
 
             // -------------------
             // RUNTIME INFORMATION

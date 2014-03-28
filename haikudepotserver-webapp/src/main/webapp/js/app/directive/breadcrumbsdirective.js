@@ -42,9 +42,9 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
 
                     $scope.shouldShowItems = function() {
                         return $scope.items;
-                    }
+                    };
 
-                    $scope.$watch('items', function(newValue) {
+                    $scope.$watch('items', function() {
                         deriveItems();
                     });
 
@@ -56,11 +56,11 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
                         }
 
                         return false;
-                    }
+                    };
 
                     $scope.isItemActive = function(item) {
                         return isItemActive(item);
-                    }
+                    };
 
                     $scope.listItemClass = function(item) {
                         if(isItemActive(item)) {

@@ -11,7 +11,7 @@
 
 angular.module('haikudepotserver').directive(
     'fileSupply',
-    function($parse) {
+    function() {
         return {
             require: 'ngModel',
             restrict: 'A',

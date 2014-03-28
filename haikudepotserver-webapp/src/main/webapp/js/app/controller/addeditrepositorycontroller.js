@@ -7,24 +7,24 @@ angular.module('haikudepotserver').controller(
     'AddEditRepositoryController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','userState','errorHandling','architectures',
+        'jsonRpc','constants','breadcrumbs','userState','errorHandling','referenceData',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,userState,errorHandling,architectures) {
+            jsonRpc,constants,breadcrumbs,userState,errorHandling,referenceData) {
 
             $scope.breadcrumbItems = undefined;
             $scope.workingRepository = undefined;
-            $scope.architectures = architectures;
+            $scope.architectures = undefined;
             $scope.amEditing = !!$routeParams.code;
             var amSaving = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.workingRepository || amSaving;
-            }
+                return undefined == $scope.architectures || undefined == $scope.workingRepository || amSaving;
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.addEditRepositoryForm[name].$invalid ? ['form-control-group-error'] : [];
-            }
+            };
 
             // the validity of this field may have been set to false because of the
             // attempt to save it on the server-side.  This function will be hit when
@@ -32,17 +32,14 @@ angular.module('haikudepotserver').controller(
 
             $scope.codeChanged = function() {
                 $scope.addEditRepositoryForm.code.$setValidity('unique',true);
-            }
+            };
 
             $scope.urlChanged = function() {
                 $scope.addEditRepositoryForm.url.$setValidity('malformed',true);
-            }
-
-            refreshRepository();
+            };
 
             function refreshBreadcrumbItems() {
                 var b = [
-                    breadcrumbs.createMore(),
                     breadcrumbs.createListRepositories()
                 ];
 
@@ -58,34 +55,53 @@ angular.module('haikudepotserver').controller(
 
             function refreshRepository() {
                 if($routeParams.code) {
-                jsonRpc.call(
+                    jsonRpc.call(
                         constants.ENDPOINT_API_V1_REPOSITORY,
                         "getRepository",
                         [{ code : $routeParams.code }]
                     ).then(
-                    function(result) {
-                        $scope.workingRepository = {
-                            code : result.code,
-                            url : result.url,
-                            architecture : _.find(architectures, function(a) {
-                                return a.code == result.architectureCode;
-                            })
+                        function(result) {
+                            $scope.workingRepository = {
+                                code : result.code,
+                                url : result.url,
+                                architecture : _.find(
+                                    $scope.architectures, function(a) {
+                                        return a.code == result.architectureCode;
+                                    })
+                            };
+                            refreshBreadcrumbItems();
+                            $log.info('fetched repository; '+result.code);
+                        },
+                        function(err) {
+                            errorHandling.handleJsonRpcError(err);
                         }
-                        refreshBreadcrumbItems();
-                        $log.info('fetched repository; '+result.code);
-                    },
-                    function(err) {
-                        errorHandling.handleJsonRpcError(err);
-                    }
-                );
+                    );
                 }
                 else {
                     $scope.workingRepository = {
-                        architecture : architectures[0]
+                        architecture : $scope.architectures[0]
                     };
                     refreshBreadcrumbItems();
                 }
-            };
+            }
+
+            function refreshArchitectures() {
+                referenceData.architectures().then(
+                    function(data) {
+                        $scope.architectures = data;
+                        refreshRepository();
+                    },
+                    function() { // error logged already
+                        $location.path("/error").search({});
+                    }
+                );
+            }
+
+            function refreshData() {
+                refreshArchitectures();
+            }
+
+            refreshData();
 
             $scope.goSave = function() {
 
@@ -105,9 +121,9 @@ angular.module('haikudepotserver').controller(
                                 code : $scope.workingRepository.code
                             }]
                         ).then(
-                        function(result) {
+                        function() {
                             $log.info('did update repository; '+$scope.workingRepository.code);
-                            $location.path('/viewrepository/'+$scope.workingRepository.code).search({});
+                            $location.path('/repository/'+$scope.workingRepository.code).search({});
                         },
                         function(err) {
 
@@ -137,9 +153,9 @@ angular.module('haikudepotserver').controller(
                                 code : $scope.workingRepository.code
                             }]
                         ).then(
-                        function(result) {
+                        function() {
                             $log.info('did create repository; '+$scope.workingRepository.code);
-                            $location.path('/viewrepository/'+$scope.workingRepository.code).search({});
+                            $location.path('/repository/'+$scope.workingRepository.code).search({});
                         },
                         function(err) {
 

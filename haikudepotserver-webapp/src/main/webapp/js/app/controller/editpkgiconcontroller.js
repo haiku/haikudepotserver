@@ -27,11 +27,11 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.pkg || $scope.amSaving;
-            }
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.editPkgIconForm[name].$invalid ? ['form-control-group-error'] : [];
-            }
+            };
 
             // pulls the pkg data back from the server so that it can be used to
             // display the form.
@@ -96,21 +96,21 @@ angular.module('haikudepotserver').controller(
                 validateBitmapIconFile($scope.editPkgIcon.iconBitmap16File, $scope.editPkgIconForm['iconBitmap16File']);
             }
 
-            $scope.$watch('editPkgIcon.iconBitmap32File', function(newValue) {
+            $scope.$watch('editPkgIcon.iconBitmap32File', function() {
                 iconBitmap32FileDidChange();
             });
 
-            $scope.$watch('editPkgIcon.iconBitmap16File', function(newValue) {
+            $scope.$watch('editPkgIcon.iconBitmap16File', function() {
                 iconBitmap16FileDidChange();
             });
 
-            $scope.$watch('editPkgIcon.iconHvifFile', function(newValue) {
+            $scope.$watch('editPkgIcon.iconHvifFile', function() {
                 validateHvifIconFile($scope.editPkgIcon.iconHvifFile, $scope.editPkgIconForm['iconHvifFile']);
             });
 
             $scope.goClearIconHvifFile = function() {
                 $scope.editPkgIcon.iconHvifFile = undefined;
-            }
+            };
 
             // This function will take the data from the form and load in the new pkg icons
 
@@ -152,9 +152,9 @@ angular.module('haikudepotserver').controller(
                                 pkgIcons: pkgIcons
                             }]
                         ).then(
-                        function(result) {
+                        function() {
                             $log.info('have updated the pkg icons for pkg '+$scope.pkg.name);
-                            $location.path('/viewpkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
+                            $location.path('/pkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
                             $scope.amSaving = false;
                         },
                         function(err) {
@@ -260,13 +260,13 @@ angular.module('haikudepotserver').controller(
 
                 readerIconBitmap16.onloadend = function() {
                     checkHasCompletedFileReaderProcessing();
-                }
+                };
 
                 readerIconBitmap16.readAsDataURL($scope.editPkgIcon.iconBitmap16File);
 
                 readerIconBitmap32.onloadend = function() {
                     checkHasCompletedFileReaderProcessing();
-                }
+                };
 
                 readerIconBitmap32.readAsDataURL($scope.editPkgIcon.iconBitmap32File);
 
@@ -274,12 +274,12 @@ angular.module('haikudepotserver').controller(
 
                     readerHvif.onloadend = function() {
                         checkHasCompletedFileReaderProcessing();
-                    }
+                    };
 
                     readerHvif.readAsDataURL($scope.editPkgIcon.iconHvifFile);
                 }
 
-            } // goStorePkgIcons
+            }; // goStorePkgIcons
 
         }
     ]

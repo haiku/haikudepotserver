@@ -58,6 +58,7 @@
                             <value>/js/app/directive/activeindicatordirective.js</value>
                             <value>/js/app/directive/showifpkgpermissiondirective.js</value>
                             <value>/js/app/directive/showifrepositorypermissiondirective.js</value>
+                            <value>/js/app/directive/showifuserpermissiondirective.js</value>
                             <value>/js/app/directive/showifpermissiondirective.js</value>
                             <value>/js/app/directive/paginationarrowdirective.js</value>
                             <value>/js/app/directive/autofillfixdirective.js</value>
@@ -71,13 +72,14 @@
                             <value>/js/app/controller/authenticateusercontroller.js</value>
                             <value>/js/app/controller/editpkgiconcontroller.js</value>
                             <value>/js/app/controller/changepasswordcontroller.js</value>
-                            <value>/js/app/controller/morecontroller.js</value>
+                            <value>/js/app/controller/aboutcontroller.js</value>
                             <value>/js/app/controller/runtimeinformationcontroller.js</value>
                             <value>/js/app/controller/listrepositoriescontroller.js</value>
                             <value>/js/app/controller/viewrepositorycontroller.js</value>
                             <value>/js/app/controller/addeditrepositorycontroller.js</value>
                             <value>/js/app/controller/editpkgscreenshotscontroller.js</value>
                             <value>/js/app/controller/editpkgcategoriescontroller.js</value>
+                            <value>/js/app/controller/editusercontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>

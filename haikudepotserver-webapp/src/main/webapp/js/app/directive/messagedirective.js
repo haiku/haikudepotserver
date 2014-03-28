@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -45,12 +45,19 @@ angular.module('haikudepotserver').directive('message',[
                 function updateValue(key) {
                     messageSource.get(userState.naturalLanguageCode(), key).then(
                         function(value) {
-                            if(!value) {
-                                $log.warn('undefined message key; '+key);
-                                setValue(key);
-                            }
-                            else {
-                                setValue(value);
+
+                            // We need to re-check against the key because the key may have changed in the interim
+                            // and the inbound promise fulfillment may not match what is actually presently required.
+                            // Essentially this is a race condition.
+
+                            if(key == attributes['key']) {
+                                if (!value) {
+                                    $log.warn('undefined message key; ' + key);
+                                    setValue(key);
+                                }
+                                else {
+                                    setValue(value);
+                                }
                             }
                         },
                         function() { // error already logged
@@ -60,6 +67,15 @@ angular.module('haikudepotserver').directive('message',[
 
                 setValue('...');
                 updateValue(attributes['key']);
+
+                // keeps track of when the key changes.
+
+                attributes.$observe(
+                    'key',
+                    function() {
+                        updateValue(attributes['key']);
+                    }
+                );
 
                 $rootScope.$on(
                     "naturalLanguageChange",
@@ -74,7 +90,7 @@ angular.module('haikudepotserver').directive('message',[
                 if(parametersExpr) {
                     $scope.$watchCollection(
                         parametersExpr,
-                        function(newValue) {
+                        function() {
                             updateValue(attributes['key']);
                         }
                     );

@@ -3,37 +3,43 @@
 <div class="content-container">
 
     <div class="info-container" ng-show="didTriggerImportRepository">
-        <strong>Import triggered -</strong> the application will import the repository's data
-        soon.
+        <strong><message key="viewRepository.importTriggered.title"></message> :</strong>
+        <message key="viewRepository.importTriggered.description"></message>
     </div>
 
     <dl>
-        <dt>Code</dt>
+        <dt><message key="gen.code.title"></message></dt>
         <dd><code>{{repository.code}}</code>&nbsp;</dd>
-        <dt>Active</dt>
-        <dd><active-indicator state="repository.active"></active-indicator></dd>
-        <dt>URL</dt>
+        <dt><message key="viewRepository.active.title"></message></dt>
+        <dd><active-indicator state="repository.active"></active-indicator>&nbsp;</dd>
+        <dt><message key="viewRepository.url.title"></message></dt>
         <dd><a href="{{repository.code}}">{{repository.url}}</a></dd>
-        <dt>Architecture</dt>
+        <dt><message key="gen.architecture.title"></message></dt>
         <dd>{{repository.architectureCode}}</dd>
-        <dt>Created</dt>
+        <dt><message key="gen.created.title"></message></dt>
         <dd>{{repository.createTimestamp|timestamp}}</dd>
-        <dt>Modified</dt>
+        <dt><message key="gen.modified.title"></message></dt>
         <dd>{{repository.modifyTimestamp|timestamp}}</dd>
     </dl>
 
     <ul>
         <li ng-show="canDeactivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
-            <a href="" ng-click="goDeactivate()">Deactivate</a>
+            <a href="" ng-click="goDeactivate()">
+                <message key="viewRepository.deactiveAction.title"></message>
+            </a>
         </li>
         <li ng-show="canActivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
-            <a href="" ng-click="goActivate()">Reactivate</a>
+            <a href="" ng-click="goActivate()">
+                <message key="viewRepository.reactiveAction.title"></message>
+            </a>
         </li>
         <li ng-show="repository.active" repository="repository" show-if-repository-permission="'REPOSITORY_IMPORT'">
-            <a href="" ng-click="goTriggerImport()">Trigger import</a>
+            <a href="" ng-click="goTriggerImport()">
+                <message key="viewRepository.triggerImportAction.title"></message>
+            </a>
         </li>
         <li repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
-            <a href="" ng-click="goEdit()">Edit</a>
+            <a href="" ng-click="goEdit()"><message key="viewRepository.editAction.title"></message></a>
         </li>
     </ul>
 

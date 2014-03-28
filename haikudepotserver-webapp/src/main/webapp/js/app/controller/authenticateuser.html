@@ -3,20 +3,20 @@
 <div class="content-container">
 
     <div class="form-info-container" ng-show="didChangePassword">
-        The password was changed; you can now re-authenticate with the new password.
+        <message key="authenticateUser.info.changePassword"></message>
     </div>
 
     <div class="form-info-container" ng-show="didCreate">
-        The new account was created; you can now login and use it.
+        <message key="authenticateUser.info.createdAccount"></message>
     </div>
 
     <div class="form-alert-container" ng-show="didFailAuthentication">
-        Your login attempt has failed; try again.
+        <message key="authenticateUser.info.failedAuthentication"></message>
     </div>
 
     <form name="authenticateUserForm" novalidate="novalidate">
 
-        <label for="nickname">Nickname</label>
+        <label for="nickname"><message key="authenticateUser.nickname.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('nickname')">
                 <input
                         autofill-fix=""
@@ -29,7 +29,7 @@
                 <error-messages key-prefix="authenticateUser.nickname" error="authenticateUserForm.nickname.$error"></error-messages>
         </div>
 
-        <label for="password-clear">Password</label>
+        <label for="password-clear"><message key="authenticateUser.passwordClear.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClear')">
                 <input
                         autofill-fix=""
@@ -48,7 +48,9 @@
                         ng-disabled="authenticateUserForm.$invalid"
                         ng-click="goAuthenticate()"
                         type="submit"
-                        class="main-action">Login</button>
+                        class="main-action">
+                    <message key="authenticateUser.action.title"></message>
+                </button>
         </div>
 
     </form>

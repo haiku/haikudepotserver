@@ -8,52 +8,23 @@ angular.module('haikudepotserver').config(
         '$routeProvider',
         function($routeProvider) {
             $routeProvider
-                .when('/addrepository',{
-                    controller:'AddEditRepositoryController',
-                    templateUrl:'/js/app/controller/addeditrepository.html',
-                    resolve: {
-                        'architectures':[
-                            'referenceData', function(referenceData) {
-                                return referenceData.architectures();
-                            }
-                        ]
-                    }
-                })
-                .when('/editrepository/:code',{
-                    controller:'AddEditRepositoryController',
-                    templateUrl:'/js/app/controller/addeditrepository.html',
-                    resolve: {
-                        'architectures':[
-                            'referenceData', function(referenceData) {
-                                return referenceData.architectures();
-                            }
-                        ]
-                    }
-                })
-                .when('/viewrepository/:code',{controller:'ViewRepositoryController', templateUrl:'/js/app/controller/viewrepository.html'})
-                .when('/listrepositories',{controller:'ListRepositoriesController', templateUrl:'/js/app/controller/listrepositories.html'})
+                .when('/repositories/add',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})
+                .when('/repository/:code/edit',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})
+                .when('/repository/:code',{controller:'ViewRepositoryController', templateUrl:'/js/app/controller/viewrepository.html'})
+                .when('/repositories',{controller:'ListRepositoriesController', templateUrl:'/js/app/controller/listrepositories.html'})
                 .when('/runtimeinformation',{controller:'RuntimeInformationController', templateUrl:'/js/app/controller/runtimeinformation.html'})
-                .when('/more',{controller:'MoreController', templateUrl:'/js/app/controller/more.html'})
+                .when('/about',{controller:'AboutController', templateUrl:'/js/app/controller/about.html'})
                 .when('/authenticateuser',{controller:'AuthenticateUserController', templateUrl:'/js/app/controller/authenticateuser.html'})
-                .when('/createuser',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
-                .when('/changepassword/:nickname',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})
-                .when('/viewuser/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
-                .when('/viewpkg/:name/:version/:architectureCode',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
-                .when('/viewpkg/:name/:version/:architectureCode/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
-                .when('/viewpkg/:name/:version/:architectureCode/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
-                .when('/viewpkg/:name/:version/:architectureCode/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
+                .when('/users/add',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
+                .when('/user/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
+                .when('/user/:nickname/edit',{controller:'EditUserController', templateUrl:'/js/app/controller/edituser.html'})
+                .when('/user/:nickname/changepassword',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})
+                .when('/pkg/:name/:version/:architectureCode',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
+                .when('/pkg/:name/:version/:architectureCode/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
+                .when('/pkg/:name/:version/:architectureCode/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
+                .when('/pkg/:name/:version/:architectureCode/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
-                .when('/',{
-                    controller:'HomeController',
-                    templateUrl:'/js/app/controller/home.html',
-                    resolve: {
-                        'architectures':[
-                            'referenceData', function(referenceData) {
-                                return referenceData.architectures();
-                            }
-                        ]
-                    }
-                })
+                .when('/',{controller:'HomeController',templateUrl:'/js/app/controller/home.html'})
                 .otherwise({controller:'OtherwiseController', template: '<div></div>'});
         }
     ]

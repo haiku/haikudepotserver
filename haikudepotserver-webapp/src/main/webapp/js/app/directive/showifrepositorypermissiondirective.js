@@ -24,12 +24,12 @@ angular.module('haikudepotserver').directive('showIfRepositoryPermission',[
                 element.addClass('app-hide');
                 check();
 
-                $scope.$watch(repositoryExpression, function(newValue,oldValue) {
+                $scope.$watch(repositoryExpression, function(newValue) {
                     repository = newValue;
                     check();
                 });
 
-                $scope.$watch(permissionCodeExpression, function(newValue,oldValue) {
+                $scope.$watch(permissionCodeExpression, function(newValue) {
                     permissionCode = newValue;
                     check();
                 });

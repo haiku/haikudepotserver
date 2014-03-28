@@ -22,7 +22,7 @@ angular.module('haikudepotserver').directive('activeIndicator',function() {
 
                     $scope.classes = ['active-indicator'];
 
-                    $scope.$watch('state',function(newValue, oldValue) {
+                    $scope.$watch('state',function(newValue) {
                         $scope.classes = [
                             'active-indicator',
                             newValue ? 'active-indicator-true' : 'active-indicator-false'

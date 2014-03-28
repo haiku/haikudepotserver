@@ -27,11 +27,11 @@ angular.module('haikudepotserver').controller(
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.user || amChangingPassword;
-            }
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.changePasswordForm[name].$invalid ? ['form-control-group-error'] : [];
-            }
+            };
 
             refreshUser();
             regenerateCaptcha();
@@ -58,7 +58,7 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-            };
+            }
 
             function regenerateCaptcha() {
 
@@ -89,7 +89,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.captchaResponseDidChange = function() {
                 $scope.changePasswordForm.captchaResponse.$setValidity('badresponse',true);
-            }
+            };
 
             $scope.newPasswordsChanged = function() {
                 $scope.changePasswordForm.newPasswordClearRepeated.$setValidity(
@@ -97,11 +97,11 @@ angular.module('haikudepotserver').controller(
                     !$scope.changePasswordData.newPasswordClear
                         || !$scope.changePasswordData.newPasswordClearRepeated
                         || $scope.changePasswordData.newPasswordClear == $scope.changePasswordData.newPasswordClearRepeated);
-            }
+            };
 
             $scope.oldPasswordChanged = function() {
                 $scope.changePasswordForm.oldPasswordClear.$setValidity('mismatched',true);
-            }
+            };
 
             $scope.goChangePassword = function() {
 
@@ -122,7 +122,7 @@ angular.module('haikudepotserver').controller(
                             captchaResponse : $scope.changePasswordData.captchaResponse
                         }]
                     ).then(
-                    function(result) {
+                    function() {
                         $log.info('did change password for user; '+$scope.user.nickname);
                         userState.user(null); // logout
                         $location.path('/authenticateuser').search({

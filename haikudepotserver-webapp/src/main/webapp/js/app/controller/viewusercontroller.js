@@ -7,17 +7,17 @@ angular.module('haikudepotserver').controller(
     'ViewUserController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','errorHandling',
+        'jsonRpc','constants','errorHandling','messageSource','userState',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling) {
+            jsonRpc,constants,errorHandling,messageSource,userState) {
 
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.user;
-            }
+            };
 
             refreshUser();
 
@@ -47,8 +47,23 @@ angular.module('haikudepotserver').controller(
                 );
             };
 
+            $scope.canLogout = function() {
+                return userState.user() &&
+                    $scope.user &&
+                    userState.user().nickname == $scope.user.nickname;
+            }
+
             $scope.goChangePassword = function() {
-                $location.path('/changepassword/' + $scope.user.nickname);
+                $location.path('/user/' + $scope.user.nickname + '/changepassword').search({});
+            }
+
+            $scope.goEdit = function() {
+                $location.path($location.path()+"/edit").search({});
+            }
+
+            $scope.goLogout = function() {
+                userState.user(null);
+                $location.path('/').search({});
             }
 
         }

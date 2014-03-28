@@ -48,17 +48,23 @@
             </div>
 
             <div id="pkg-screenshot-title">
-                <span ng-show="!pkgScreenshots.length">Screenshots</span>
+                <span ng-show="!pkgScreenshots.length">
+                    <message key="viewPkg.screenshots.none.title"></message>
+                </span>
                 <span ng-show="pkgScreenshots.length">
-                    Screenshot {{pkgScreenshotOffset+1}} <span class="muted">of {{pkgScreenshots.length}}</span>
+                    <message key="viewPkg.screenshots.exists.title" parameters="[pkgScreenshotOffset+1,pkgScreenshots.length]"></message>
                 </span>
             </div>
 
             <img ng-show="pkgScreenshots.length" ng-src="{{currentPkgScreenshot().imageThumbnailUrl}}">
 
             <div id="pkg-screenshot-status" ng-show="!pkgScreenshots.length">
-                <span ng-show="undefined==pkgScreenshots">Loading...</span>
-                <span ng-show="pkgScreenshots && !pkgScreenshots.length">No screenshots available</span>
+                <span ng-show="undefined==pkgScreenshots">
+                    <message key="viewPkg.screenshots.loading"></message>
+                </span>
+                <span ng-show="pkgScreenshots && !pkgScreenshots.length">
+                    <message key="viewPkg.screenshots.none.description"></message>
+                </span>
             </div>
         </div>
 
@@ -67,36 +73,52 @@
             <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
 
             <dl>
-                <dt>Categories</dt>
+                <dt><message key="viewPkg.categories.title"></message></dt>
                 <dd>
-                <span ng-show="!pkgCategories">...</span>
-                <span ng-show="pkgCategories && !pkgCategories.length">None</span>
+                    <span ng-show="!pkgCategories">...</span>
+                <span ng-show="pkgCategories && !pkgCategories.length">
+                    <message key="viewPkg.categories.none"></message>
+                </span>
                 <span ng-show="pkgCategories.length">
                     <span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span>{{pkgCategory.name}}</span>
                 </span>
                 </dd>
-                <dt>Version Views</dt>
+                <dt><message key="viewPkg.versionViews.title"></message></dt>
                 <dd>{{pkg.versions[0].viewCounter}}</dd>
             </dl>
 
             <hr/>
 
             <ul>
-                <li><a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">Visit web site</a></li>
+                <li>
+                    <a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">
+                        <message key="viewPkg.visitWebSiteAction.title"></message>
+                    </a>
+                </li>
                 <li ng-show="canRemoveIcon()" pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
-                    <a href="" ng-click="goRemoveIcon()">Remove icon</a>
+                    <a href="" ng-click="goRemoveIcon()">
+                        <message key="viewPkg.removeIconAction.title"></message>
+                    </a>
                 </li>
                 <li pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
-                    <a href="" ng-click="goEditIcon()">Edit icon</a>
+                    <a href="" ng-click="goEditIcon()">
+                        <message key="viewPkg.editIconAction.title"></message>
+                    </a>
                 </li>
                 <li ng-show="pkgIconHvifUrl">
-                    <a href="{{pkgIconHvifUrl}}">Download icon in 'hvif' format</a>
+                    <a href="{{pkgIconHvifUrl}}">
+                        <message key="viewPkg.downloadIconHvifAction.title"></message>
+                    </a>
                 </li>
                 <li pkg="pkg" show-if-pkg-permission="'PKG_EDITSCREENSHOT'">
-                    <a href="" ng-click="goEditScreenshots()">Edit screenshots</a>
+                    <a href="" ng-click="goEditScreenshots()">
+                        <message key="viewPkg.editScreenshotsAction.title"></message>
+                    </a>
                 </li>
                 <li pkg="pkg" show-if-pkg-permission="'PKG_EDITCATEGORIES'">
-                    <a href="" ng-click="goEditPkgCategories()">Edit categories</a>
+                    <a href="" ng-click="goEditPkgCategories()">
+                        <message key="viewPkg.editPkgCategoriesAction.title"></message>
+                    </a>
                 </li>
             </ul>
         </div>

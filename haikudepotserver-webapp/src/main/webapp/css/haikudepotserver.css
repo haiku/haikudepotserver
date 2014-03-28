@@ -116,14 +116,14 @@ label {
     color: gray;
     line-height: 100%;
     vertical-align: top;
-    margin-top:3px;
+    margin-top:5px;
+    font-weight: lighter;
 }
 
-input, textarea {
-    font-size: 14px;
+input, textarea, select {
+    font-size: 16px;
     border: 1px solid darkgray;
     padding: 2px;
-    border-radius: 3px;
 }
 
 button {
@@ -151,6 +151,7 @@ button.main-action[disabled] {
 
 .form-error-container {
     padding-top: 4px;
+    color: red;
 }
 
 .form-control-group {
@@ -348,6 +349,10 @@ SEARCH BAR
     font-size: 10px;
 }
 
+#search-criteria-container select {
+    font-size: 10px;
+}
+
 #search-criteria-container button {
     font-size: 10px;
     background-color: rgb(253,207,49);
@@ -421,4 +426,24 @@ HIDE / SHOW FOR OWN DIRECTIVES
 
 .app-hide {
     display: none;
+}
+
+/*
+==================================
+CONTEXT-MENU
+This is where the user is presented with a pop-up modal that contains some options to choose from.
+*/
+
+ul.context-menu-container {
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+ul.context-menu-container li {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    list-style: none;
+    background-color: #eeeeee;
+    padding: 4px;
 }

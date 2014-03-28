@@ -101,6 +101,7 @@ public abstract class AbstractIntegrationTest {
         for(ManagedDatabase managedDatabase : managedDatabases.values()) {
 
             Connection connection = null;
+            PreparedStatement statement = null;
 
             try {
                 connection = managedDatabase.getDataSource().getConnection();
@@ -117,7 +118,7 @@ public abstract class AbstractIntegrationTest {
 
                 {
                     String statementString = "DROP SCHEMA "+managedDatabase.getSchema()+" CASCADE";
-                    PreparedStatement statement = connection.prepareStatement(statementString);
+                    statement = connection.prepareStatement(statementString);
                     statement.execute();
                 }
             }
@@ -125,6 +126,7 @@ public abstract class AbstractIntegrationTest {
                 throw new IllegalStateException("a database problem has arisen in preparing for an integration test",se);
             }
             finally {
+                Closeables.closeQuietly(statement);
                 Closeables.closeQuietly(connection);
             }
 

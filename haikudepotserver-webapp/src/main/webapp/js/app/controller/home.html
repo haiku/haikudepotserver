@@ -40,8 +40,8 @@
     <div id="search-results-container">
 
         <div ng-show="pkgs && 0==pkgs.length" class="info-container">
-            <strong>No results; </strong>
-            There were no packages able to be found from your search criteria.
+            <strong><message key="home.noResults.title"></message>;</strong>
+            <message key="home.noResults.description"></message>
         </div>
 
         <div ng-show="pkgs && pkgs.length" class="table-general-container">
@@ -54,7 +54,7 @@
             <table class="table-general">
                 <thead>
                 <th></th>
-                <th><message key="home.table.package.title"></message></th>
+                <th><message key="gen.pkg.title"></message></th>
                 <th><message key="home.table.version.title"></message></th>
                 <th ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><message key="home.table.approximateVersionDate.title"></message></th>
                 <th ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><message key="home.table.versionViewCounter.title"></message></th>

@@ -51,7 +51,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goRaiseExceptionInLocalRuntime = function() {
                 throw 'test exception in javascript environment';
-            }
+            };
 
             $scope.goRaiseExceptionInServerRuntime = function() {
                 jsonRpc.call(
@@ -59,7 +59,7 @@ angular.module('haikudepotserver').controller(
                         "raiseException",
                         [{}]
                     ).then(
-                    function(result) {
+                    function() {
                         $log.error('the exception raised on the server runtime -> should not have reached this point');
                     },
                     function(err) {
