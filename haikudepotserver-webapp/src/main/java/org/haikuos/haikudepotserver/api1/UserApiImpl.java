@@ -190,6 +190,8 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         result.isRoot = user.get().getIsRoot();
         result.active = user.get().getActive();
         result.naturalLanguageCode = user.get().getNaturalLanguage().getCode();
+        result.createTimestamp = user.get().getCreateTimestamp().getTime();
+        result.modifyTimestamp = user.get().getModifyTimestamp().getTime();
         return result;
     }
 

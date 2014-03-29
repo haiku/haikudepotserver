@@ -14,6 +14,10 @@ import org.haikuos.haikudepotserver.dataobjects.auto._Response;
 
 import java.util.List;
 
+/**
+ * <p>This is part of the captcha system.</p>
+ */
+
 public class Response extends _Response {
 
     public static Optional<Response> getByToken(ObjectContext context, String token) {

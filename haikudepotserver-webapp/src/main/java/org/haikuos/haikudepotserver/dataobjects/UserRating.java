@@ -8,8 +8,9 @@ package org.haikuos.haikudepotserver.dataobjects;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._UserRating;
+import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
-public class UserRating extends _UserRating {
+public class UserRating extends _UserRating implements CreateAndModifyTimestamped {
 
     @Override
     protected void validateForSave(ValidationResult validationResult) {

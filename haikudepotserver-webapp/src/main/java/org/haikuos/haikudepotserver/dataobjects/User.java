@@ -14,12 +14,14 @@ import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._User;
+import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class User extends _User {
+public class User extends _User implements CreateAndModifyTimestamped {
 
     public final static Pattern NICKNAME_PATTERN = Pattern.compile("^[\\w]{4,16}$");
     public final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
@@ -53,6 +55,7 @@ public class User extends _User {
             setPasswordSalt(UUID.randomUUID().toString());
         }
 
+        // create and modify timestamp handled by listener.
     }
 
     @Override

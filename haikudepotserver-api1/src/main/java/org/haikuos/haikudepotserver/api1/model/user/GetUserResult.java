@@ -13,6 +13,10 @@ public class GetUserResult {
 
     public Boolean isRoot;
 
+    public Long createTimestamp;
+
+    public Long modifyTimestamp;
+
     public String naturalLanguageCode;
 
 }

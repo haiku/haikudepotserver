@@ -1,5 +1,7 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
+import java.util.Date;
+
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -13,7 +15,9 @@ public abstract class _User extends AbstractDataObject {
 
     public static final String ACTIVE_PROPERTY = "active";
     public static final String CAN_MANAGE_USERS_PROPERTY = "canManageUsers";
+    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
     public static final String IS_ROOT_PROPERTY = "isRoot";
+    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NICKNAME_PROPERTY = "nickname";
     public static final String PASSWORD_HASH_PROPERTY = "passwordHash";
     public static final String PASSWORD_SALT_PROPERTY = "passwordSalt";
@@ -35,11 +39,25 @@ public abstract class _User extends AbstractDataObject {
         return (Boolean)readProperty(CAN_MANAGE_USERS_PROPERTY);
     }
 
+    public void setCreateTimestamp(Date createTimestamp) {
+        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+    }
+    public Date getCreateTimestamp() {
+        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
+
     public void setIsRoot(Boolean isRoot) {
         writeProperty(IS_ROOT_PROPERTY, isRoot);
     }
     public Boolean getIsRoot() {
         return (Boolean)readProperty(IS_ROOT_PROPERTY);
+    }
+
+    public void setModifyTimestamp(Date modifyTimestamp) {
+        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+    }
+    public Date getModifyTimestamp() {
+        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
     }
 
     public void setNickname(String nickname) {

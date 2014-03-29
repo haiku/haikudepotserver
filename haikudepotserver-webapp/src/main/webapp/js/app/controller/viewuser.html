@@ -11,6 +11,10 @@
         <dd><active-indicator state="user.active"></active-indicator>&nbsp;</dd>
         <dt><message key="viewUser.naturalLanguage.title"></message></dt>
         <dd><message key="{{'naturalLanguage.' + user.naturalLanguageCode}}"></message></dd>
+        <dt><message key="gen.created.title"></message></dt>
+        <dd>{{user.createTimestamp|timestamp}}</dd>
+        <dt><message key="gen.modified.title"></message></dt>
+        <dd>{{user.modifyTimestamp|timestamp}}</dd>
     </dl>
 
     <h2><message key="gen.actions.title"></message></h2>
