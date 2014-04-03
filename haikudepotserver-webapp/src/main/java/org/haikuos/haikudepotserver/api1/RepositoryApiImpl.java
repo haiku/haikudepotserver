@@ -23,7 +23,7 @@ import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.repository.RepositoryImportService;
-import org.haikuos.haikudepotserver.repository.RepositoryService;
+import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haikuos.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
@@ -46,7 +46,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     AuthorizationService authorizationService;
 
     @Resource
-    RepositoryService repositoryService;
+    RepositoryOrchestrationService repositoryService;
 
     @Resource
     RepositoryImportService repositoryImportService;

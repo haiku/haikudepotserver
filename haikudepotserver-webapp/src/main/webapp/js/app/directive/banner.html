@@ -1,9 +1,11 @@
 <div>
     <div id="banner-container">
+
     <span id="banner-title" ng-click="goHome()">
         <div>Haiku Depot Server</div>
     </span>
-    <span id="banner-actions">
+
+    <span id="banner-actions" ng-show="canShowBannerActions()">
 
         <div class="banner-actions-state-container">
             <svg width="15" height="16">
@@ -74,7 +76,7 @@
                 </a>
             </li>
 
-            <li ng-show="!hasAuthenticatedUser() && naturalLanguageData.naturalLanguageOptions">
+            <li ng-show="canChooseNaturalLanguage()">
                 <message key="banner.action.naturalLanguagePrefix"></message>
                 <select
                         required="true"

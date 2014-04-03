@@ -22,7 +22,6 @@ angular.module('haikudepotserver').controller(
             var THUMBNAIL_TARGETWIDTH = 180;
             var THUMBNAIL_TARGETHEIGHT = 180;
 
-            $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
             $scope.pkgScreenshots = undefined;
             $scope.amCommunicating = false;
@@ -95,16 +94,17 @@ angular.module('haikudepotserver').controller(
             refetchPkg();
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
                     breadcrumbs.createViewPkg(
                         $scope.pkg,
                         $routeParams.version,
                         $routeParams.architectureCode),
                     {
-                        title : 'Edit Screenshots',
+                        titleKey : 'breadcrumb.editPkgScreenshots.title',
                         path : $location.path()
                     }
-                ];
+                ]);
             }
 
             // -------------------------
@@ -169,7 +169,7 @@ angular.module('haikudepotserver').controller(
                         }
                         else {
                             $log.error('unable to add the screenshot for; '+$scope.pkg.name);
-                            $location.path('/error').search({});
+                            errorHandling.navigateToError();
                         }
 
                         $scope.amCommunicating = false;

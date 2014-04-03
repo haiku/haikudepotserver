@@ -5,18 +5,15 @@
 
 package org.haikuos.haikudepotsever.api1.support;
 
-import com.google.common.net.*;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.MediaType;
-import org.haikuos.haikudepotserver.pkg.PkgService;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.support.Closeables;
-import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import sun.util.logging.resources.logging;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
@@ -34,7 +31,7 @@ public class IntegrationTestSupportService {
     ServerRuntime serverRuntime;
 
     @Resource
-    PkgService pkgService;
+    PkgOrchestrationService pkgService;
 
     private ObjectContext objectContext = null;
 

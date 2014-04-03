@@ -19,7 +19,8 @@ as well as the status of the authenticated user.
     left: 0px;
     padding-left: 68px;
     height: 40px;
-    background: url('/img/haikudepot32.png') no-repeat 32px 4px transparent;
+    background: url('/img/haikudepot.svg') no-repeat 32px 4px transparent;
+    background-size: 32px 32px;
 }
 
 #banner-title div {

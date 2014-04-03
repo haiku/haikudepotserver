@@ -14,7 +14,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.User;
-import org.haikuos.haikudepotserver.pkg.PkgService;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
@@ -54,7 +54,7 @@ public class PkgScreenshotController extends AbstractController {
     ServerRuntime serverRuntime;
 
     @Resource
-    PkgService pkgService;
+    PkgOrchestrationService pkgService;
 
     @Resource
     AuthorizationService authorizationService;

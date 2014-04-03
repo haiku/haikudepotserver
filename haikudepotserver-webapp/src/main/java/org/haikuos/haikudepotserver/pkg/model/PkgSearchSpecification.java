@@ -11,7 +11,7 @@ import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
 
 /**
  * <p>This model object specifies the parameters of a search into the system for packages.  See the
- * {@link org.haikuos.haikudepotserver.pkg.PkgService} for further detail on this.</p>
+ * {@link org.haikuos.haikudepotserver.pkg.PkgOrchestrationService} for further detail on this.</p>
  */
 
 public class PkgSearchSpecification extends AbstractSearchSpecification {

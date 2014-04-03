@@ -12,7 +12,6 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,breadcrumbs,userState,errorHandling) {
 
-            $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
             $scope.captchaToken = undefined;
             $scope.captchaImageUrl = undefined;
@@ -37,18 +36,19 @@ angular.module('haikudepotserver').controller(
             regenerateCaptcha();
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
                     breadcrumbs.createViewUser($scope.user),
                     breadcrumbs.createChangePassword($scope.user)
-                ];
+                ]);
             }
 
             function refreshUser() {
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_USER,
-                        "getUser",
-                        [{ nickname : $routeParams.nickname }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_USER,
+                    "getUser",
+                    [{ nickname : $routeParams.nickname }]
+                ).then(
                     function(result) {
                         $scope.user = result;
                         refreshBreadcrumbItems();
@@ -67,10 +67,10 @@ angular.module('haikudepotserver').controller(
                 $scope.changePasswordData.captchaResponse = undefined;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_CAPTCHA,
-                        "generateCaptcha",
-                        [{}]
-                    ).then(
+                    constants.ENDPOINT_API_V1_CAPTCHA,
+                    "generateCaptcha",
+                    [{}]
+                ).then(
                     function(result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
@@ -94,7 +94,7 @@ angular.module('haikudepotserver').controller(
             $scope.newPasswordsChanged = function() {
                 $scope.changePasswordForm.newPasswordClearRepeated.$setValidity(
                     'repeat',
-                    !$scope.changePasswordData.newPasswordClear
+                        !$scope.changePasswordData.newPasswordClear
                         || !$scope.changePasswordData.newPasswordClearRepeated
                         || $scope.changePasswordData.newPasswordClear == $scope.changePasswordData.newPasswordClearRepeated);
             };
@@ -112,19 +112,20 @@ angular.module('haikudepotserver').controller(
                 $scope.amChangingPassword = true;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_USER,
-                        "changePassword",
-                        [{
-                            nickname : $scope.user.nickname,
-                            oldPasswordClear : $scope.changePasswordData.oldPasswordClear,
-                            newPasswordClear : $scope.changePasswordData.newPasswordClear,
-                            captchaToken : $scope.captchaToken,
-                            captchaResponse : $scope.changePasswordData.captchaResponse
-                        }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_USER,
+                    "changePassword",
+                    [{
+                        nickname : $scope.user.nickname,
+                        oldPasswordClear : $scope.changePasswordData.oldPasswordClear,
+                        newPasswordClear : $scope.changePasswordData.newPasswordClear,
+                        captchaToken : $scope.captchaToken,
+                        captchaResponse : $scope.changePasswordData.captchaResponse
+                    }]
+                ).then(
                     function() {
                         $log.info('did change password for user; '+$scope.user.nickname);
                         userState.user(null); // logout
+                        breadcrumbs.reset();
                         $location.path('/authenticateuser').search({
                             nickname : $scope.user.nickname,
                             didChangePassword : 'true'
@@ -149,7 +150,7 @@ angular.module('haikudepotserver').controller(
                                         var model = $scope.changePasswordForm[vf.property];
 
                                         if(model) {
-                                             model.$setValidity(vf.message, false);
+                                            model.$setValidity(vf.message, false);
                                         }
                                         else {
                                             $log.error('other validation failures exist; will invoke default handling');

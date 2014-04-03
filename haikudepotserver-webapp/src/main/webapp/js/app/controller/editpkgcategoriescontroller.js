@@ -19,7 +19,6 @@ angular.module('haikudepotserver').controller(
 
             var CATEGORIES_LIMIT = 3;
 
-            $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.pkgCategories = undefined;
@@ -33,14 +32,14 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkg() {
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "getPkg",
-                        [{
-                            name: $routeParams.name,
-                            versionType: 'NONE',
-                            architectureCode: undefined // not required if we don't need the version
-                        }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_PKG,
+                    "getPkg",
+                    [{
+                        name: $routeParams.name,
+                        versionType: 'NONE',
+                        architectureCode: undefined // not required if we don't need the version
+                    }]
+                ).then(
                     function(result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
@@ -63,7 +62,7 @@ angular.module('haikudepotserver').controller(
                             },
                             function() {
                                 // logging happens inside
-                                $location.path("/error").search({});
+                                errorHandling.navigateToError();
                             }
                         )
                     },
@@ -76,16 +75,17 @@ angular.module('haikudepotserver').controller(
             refetchPkg();
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
                     breadcrumbs.createViewPkg(
                         $scope.pkg,
                         $routeParams.version,
                         $routeParams.architectureCode),
                     {
-                        title : 'Edit Categories',
+                        titleKey : 'breadcrumb.editPkgCategories.title',
                         path : $location.path()
                     }
-                ];
+                ]);
             }
 
             // only a certain number of categories can be chosen for a package.  This function will mark the categories
@@ -127,7 +127,7 @@ angular.module('haikudepotserver').controller(
                 ).then(
                     function() {
                         $log.info('have updated the pkg categories for pkg '+$scope.pkg.name);
-                        $location.path('/pkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
+                        breadcrumbs.popAndNavigate();
                     },
                     function(err) {
                         $log.error('unable to update pkg categories');

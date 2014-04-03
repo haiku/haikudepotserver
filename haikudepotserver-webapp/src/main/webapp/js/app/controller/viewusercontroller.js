@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'ViewUserController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','errorHandling','messageSource','userState',
+        'jsonRpc','constants','errorHandling','messageSource','userState','breadcrumbs',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling,messageSource,userState) {
+            jsonRpc,constants,errorHandling,messageSource,userState,breadcrumbs) {
 
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
@@ -22,10 +22,10 @@ angular.module('haikudepotserver').controller(
             refreshUser();
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [{
-                    title : $scope.user.nickname,
-                    path : $location.path()
-                }];
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
+                    breadcrumbs.createViewUser($scope.user)
+                ]);
             }
 
             function refreshUser() {
@@ -63,6 +63,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goLogout = function() {
                 userState.user(null);
+                breadcrumbs.reset();
                 $location.path('/').search({});
             }
 

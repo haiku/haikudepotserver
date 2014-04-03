@@ -17,7 +17,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
-import org.haikuos.haikudepotserver.pkg.PkgService;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
 import org.haikuos.haikudepotserver.support.Closeables;
@@ -57,7 +57,7 @@ public class PkgIconController extends AbstractController {
     ServerRuntime serverRuntime;
 
     @Resource
-    PkgService pkgService;
+    PkgOrchestrationService pkgService;
 
     @Resource
     AuthorizationService authorizationService;

@@ -50,9 +50,9 @@ import java.util.UUID;
  */
 
 @Service
-public class PkgService {
+public class PkgOrchestrationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgService.class);
+    protected static Logger logger = LoggerFactory.getLogger(PkgOrchestrationService.class);
 
     protected static int SCREENSHOT_SIDE_LIMIT = 1500;
 

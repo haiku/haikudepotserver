@@ -27,9 +27,9 @@ import java.util.List;
  */
 
 @Service
-public class RepositoryService {
+public class RepositoryOrchestrationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(RepositoryService.class);
+    protected static Logger logger = LoggerFactory.getLogger(RepositoryOrchestrationService.class);
 
     // ------------------------------
     // SEARCH

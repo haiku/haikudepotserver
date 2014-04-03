@@ -14,13 +14,9 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,userState,
             breadcrumbs,errorHandling) {
 
-            $scope.breadcrumbItems = [ breadcrumbs.createMore() ];
+            breadcrumbs.mergeCompleteStack([ breadcrumbs.createHome(), breadcrumbs.createAbout() ]);
             $scope.serverStartTimestamp = undefined;
             $scope.serverProjectVersion = '...';
-
-            $scope.goHome = function() {
-                $location.path("/").search({});
-            };
 
             // -------------------
             // USER

@@ -8,10 +8,19 @@
  */
 
 angular.module('haikudepotserver').factory('errorHandling',
-    [ '$log','$location',
-        function($log,$location) {
+    [ '$log','$location','breadcrumbs',
+        function($log,$location,breadcrumbs) {
+
+            function navigateToError() {
+                breadcrumbs.reset();
+                $location.path('/error').search({});
+            }
 
             var ErrorHandlingService = {
+
+                navigateToError : function() {
+                    navigateToError();
+                },
 
                 logJsonRpcError : function(jsonRpcErrorEnvelope, message) {
                     var prefix = message ? message + ' - json-rpc error; ' : 'json-rpc error; ';
@@ -33,7 +42,7 @@ angular.module('haikudepotserver').factory('errorHandling',
 
                 handleJsonRpcError : function(jsonRpcErrorEnvelope) {
                     ErrorHandlingService.logJsonRpcError(jsonRpcErrorEnvelope);
-                    $location.path("/error").search({});
+                    navigateToError();
                 },
 
                 /**
@@ -42,7 +51,7 @@ angular.module('haikudepotserver').factory('errorHandling',
 
                 handleUnknownLocation : function() {
                     $log.error('unknown location; ' + $location.path());
-                    $location.path("/error").search({});
+                    navigateToError();
                 },
 
                 /**
@@ -91,7 +100,9 @@ angular.module('haikudepotserver').config([
             function($delegate, $injector) {
                 return function(exception, cause) {
                     var $location = $injector.get('$location');
+                    var breadcrumbs = $injector.get('breadcrumbs');
                     $delegate(exception,cause);
+                    breadcrumbs.reset();
                     $location.path("/error").search({});
                 }
             }

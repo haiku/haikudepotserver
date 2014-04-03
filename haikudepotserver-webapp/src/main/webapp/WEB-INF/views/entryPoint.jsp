@@ -15,7 +15,9 @@ web-resources and then this starts the java-script single page environment drive
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/png" href="/img/haikudepot16.png" >
+    <link rel="icon" type="image/png" href="/img/haikudepot16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/img/haikudepot32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/img/haikudepot64.png" sizes="64x64">
 
     <hds:webresourcegroup code="libScripts"/>
     <hds:webresourcegroup code="appScripts"/>

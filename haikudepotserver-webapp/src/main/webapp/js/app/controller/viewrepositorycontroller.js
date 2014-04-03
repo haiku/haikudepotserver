@@ -12,7 +12,6 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$location,$routeParams,$timeout,
             jsonRpc,constants,userState,errorHandling,breadcrumbs) {
 
-            $scope.breadcrumbItems = undefined;
             $scope.repository = undefined;
             $scope.didTriggerImportRepository = false;
             var amUpdatingActive = false;
@@ -93,11 +92,11 @@ angular.module('haikudepotserver').controller(
             };
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [
-                    breadcrumbs.createMore(),
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
                     breadcrumbs.createListRepositories(),
                     breadcrumbs.createViewRepository($scope.repository)
-                ];
+                ]);
             }
 
             function refetchRepository() {

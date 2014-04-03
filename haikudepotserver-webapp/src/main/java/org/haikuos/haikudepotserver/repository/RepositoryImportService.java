@@ -17,7 +17,7 @@ import com.google.common.util.concurrent.AbstractService;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
-import org.haikuos.haikudepotserver.pkg.PkgService;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
 import org.haikuos.pkg.PkgIterator;
 import org.slf4j.Logger;
@@ -52,7 +52,7 @@ public class RepositoryImportService extends AbstractService {
     ServerRuntime serverRuntime;
 
     @Resource
-    PkgService pkgService;
+    PkgOrchestrationService pkgService;
 
     private ThreadPoolExecutor executor = null;
 

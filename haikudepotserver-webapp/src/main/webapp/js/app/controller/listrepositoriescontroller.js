@@ -14,13 +14,13 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,
             breadcrumbs,errorHandling) {
 
-            $scope.breadcrumbItems = [
+            breadcrumbs.mergeCompleteStack([
+                breadcrumbs.createHome(),
                 breadcrumbs.createListRepositories()
-            ];
+            ]);
 
             const PAGESIZE = 14;
 
-            $scope.repositories = undefined;
             $scope.hasMore = undefined;
             $scope.offset = 0;
             $scope.amShowingInactive = false;

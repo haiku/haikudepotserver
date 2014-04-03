@@ -21,7 +21,7 @@ import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.pkg.PkgService;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
 import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     PkgApi pkgApi;
 
     @Resource
-    PkgService pkgService;
+    PkgOrchestrationService pkgService;
 
     @Test
     public void testUpdatePkgCategories() throws Exception {

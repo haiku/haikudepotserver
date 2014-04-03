@@ -20,7 +20,7 @@ import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.pkg.PkgService;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
@@ -55,7 +55,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     AuthorizationService authorizationService;
 
     @Resource
-    PkgService pkgService;
+    PkgOrchestrationService pkgService;
 
     @Value("${pkgversion.viewcounter.protectrecurringincrementfromsameclient:true}")
     Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient;

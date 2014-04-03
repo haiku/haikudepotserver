@@ -18,7 +18,6 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,breadcrumbs,userState,errorHandling,
             referenceData,messageSource) {
 
-            $scope.breadcrumbItems = undefined;
             $scope.workingUser = undefined;
             $scope.naturalLanguageOptions = undefined;
             var amSaving = false;
@@ -32,13 +31,14 @@ angular.module('haikudepotserver').controller(
             };
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
                     breadcrumbs.createViewUser($scope.workingUser),
                     {
-                        title : 'Edit',
+                        titleKey : 'breadcrumb.editUser.title',
                         path : $location.path()
                     }
-                ];
+                ]);
             }
 
             function refreshUser() {
@@ -95,7 +95,7 @@ angular.module('haikudepotserver').controller(
 
                             },
                             function() { // already logged.
-                                $location.path("/error").search({});
+                                errorHandling.navigateToError();
                             }
                         );
                     },
@@ -134,7 +134,7 @@ angular.module('haikudepotserver').controller(
                             userState.naturalLanguageCode($scope.workingUser.naturalLanguageOption.code);
                         }
 
-                        $location.path('/user/'+$scope.workingUser.nickname).search({});
+                        breadcrumbs.popAndNavigate();
                     },
                     function(err) {
 

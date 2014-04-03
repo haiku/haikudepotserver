@@ -7,12 +7,11 @@ angular.module('haikudepotserver').controller(
     'CreateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','errorHandling','referenceData','userState','messageSource',
+        'jsonRpc','constants','errorHandling','referenceData','userState','messageSource','breadcrumbs',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,errorHandling,referenceData,userState,messageSource) {
+            jsonRpc,constants,errorHandling,referenceData,userState,messageSource,breadcrumbs) {
 
-            $scope.breadcrumbItems = undefined;
             $scope.captchaToken = undefined;
             $scope.captchaImageUrl = undefined;
             $scope.amSaving = false;
@@ -50,10 +49,10 @@ angular.module('haikudepotserver').controller(
                     function(data) {
 
                         $scope.naturalLanguageOptions = _.map(data, function(nl) {
-                           return {
-                               code : nl.code,
-                               title : nl.name
-                           }
+                            return {
+                                code : nl.code,
+                                title : nl.name
+                            }
                         });
 
                         updateNaturalLanguageOptionsTitles();
@@ -67,7 +66,7 @@ angular.module('haikudepotserver').controller(
 
                     },
                     function() { // already logged.
-                        $location.path("/error").search({});
+                        errorHandling.navigateToError();
                     }
                 )
             }
@@ -85,10 +84,13 @@ angular.module('haikudepotserver').controller(
             };
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [{
-                    title : 'Register User',
-                    path : $location.path()
-                }];
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
+                    {
+                        titleKey : 'breadcrumb.createUser.title',
+                        path : $location.path()
+                    }
+                ]);
             }
 
             function regenerateCaptcha() {
@@ -98,10 +100,10 @@ angular.module('haikudepotserver').controller(
                 $scope.newUser.captchaResponse = undefined;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_CAPTCHA,
-                        "generateCaptcha",
-                        [{}]
-                    ).then(
+                    constants.ENDPOINT_API_V1_CAPTCHA,
+                    "generateCaptcha",
+                    [{}]
+                ).then(
                     function(result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
@@ -129,9 +131,9 @@ angular.module('haikudepotserver').controller(
             $scope.passwordsChanged = function() {
                 $scope.createUserForm.passwordClearRepeated.$setValidity(
                     'repeat',
-                    !$scope.newUser.passwordClear
-                    || !$scope.newUser.passwordClearRepeated
-                    || $scope.newUser.passwordClear == $scope.newUser.passwordClearRepeated);
+                        !$scope.newUser.passwordClear
+                        || !$scope.newUser.passwordClearRepeated
+                        || $scope.newUser.passwordClear == $scope.newUser.passwordClearRepeated);
             };
 
             // This function will take the data from the form and will create the user from this data.
@@ -145,18 +147,24 @@ angular.module('haikudepotserver').controller(
                 $scope.amSaving = true;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_USER,
-                        "createUser",
-                        [{
-                            nickname : $scope.newUser.nickname,
-                            passwordClear : $scope.newUser.passwordClear,
-                            captchaToken : $scope.captchaToken,
-                            captchaResponse : $scope.newUser.captchaResponse,
-                            naturalLanguageCode : $scope.newUser.naturalLanguageOption.code
-                        }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_USER,
+                    "createUser",
+                    [{
+                        nickname : $scope.newUser.nickname,
+                        passwordClear : $scope.newUser.passwordClear,
+                        captchaToken : $scope.captchaToken,
+                        captchaResponse : $scope.newUser.captchaResponse,
+                        naturalLanguageCode : $scope.newUser.naturalLanguageOption.code
+                    }]
+                ).then(
                     function() {
                         $log.info('created new user; '+$scope.newUser.nickname);
+
+                        // get rid of the breadcrumb for creating the user as there is no sense in that any more
+                        // and push the authenticate user so the user can then login with their nickname and
+                        // password that they have just nominated.
+
+                        breadcrumbs.reset();
                         $location.path('/authenticateuser').search({
                             nickname : $scope.newUser.nickname,
                             didCreate : true

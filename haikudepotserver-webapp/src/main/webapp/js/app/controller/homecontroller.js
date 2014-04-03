@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$log','$scope','$rootScope','$q','$location',
         'jsonRpc','constants','userState','messageSource','errorHandling',
-        'referenceData',
+        'referenceData','breadcrumbs',
         function(
             $log,$scope,$rootScope,$q,$location,
             jsonRpc,constants,userState,messageSource,errorHandling,
-            referenceData) {
+            referenceData,breadcrumbs) {
 
             const PAGESIZE = 50;
 
@@ -150,6 +150,8 @@ angular.module('haikudepotserver').controller(
                 return amFetchingPkgs || !$scope.architectures;
             };
 
+            breadcrumbs.mergeCompleteStack([ breadcrumbs.createHome() ]);
+
             // ---- ARCHITECTURES
 
             function refetchArchitectures() {
@@ -166,7 +168,7 @@ angular.module('haikudepotserver').controller(
                         }
                     },
                     function() { // error logged already
-                        $location.path("/error").search({});
+                        errorHandling.navigateToError();
                     }
                 );
             }
@@ -190,7 +192,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function() {
                         $log.error('unable to obtain the list of pkg categories');
-                        $location.path("/error").search({});
+                        errorHandling.navigateToError();
                     }
                 );
             }

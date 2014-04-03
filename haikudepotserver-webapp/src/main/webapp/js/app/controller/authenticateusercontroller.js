@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'AuthenticateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','userState','errorHandling',
+        'jsonRpc','constants','userState','errorHandling','breadcrumbs',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,userState,errorHandling) {
+            jsonRpc,constants,userState,errorHandling,breadcrumbs) {
 
             if(userState.user()) {
                 throw 'it is not possible to enter the authenticate user controller with a currently authenticated user';
@@ -24,10 +24,14 @@ angular.module('haikudepotserver').controller(
                 nickname : undefined,
                 passwordClear : undefined
             };
-            $scope.breadcrumbItems = [{
-                title : 'Login',
-                path : $location.path()
-            }];
+
+            breadcrumbs.mergeCompleteStack([
+                breadcrumbs.createHome(),
+                {
+                    titleKey : 'breadcrumb.authenticateUser.title',
+                    path : $location.path()
+                }
+            ]);
 
             if($location.search()['nickname']) {
                 $scope.authenticationDetails.nickname = $location.search()['nickname'];
@@ -54,13 +58,13 @@ angular.module('haikudepotserver').controller(
                 $scope.amAuthenticating = true;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_USER,
-                        "authenticateUser",
-                        [{
-                            nickname : $scope.authenticationDetails.nickname,
-                            passwordClear : $scope.authenticationDetails.passwordClear
-                        }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_USER,
+                    "authenticateUser",
+                    [{
+                        nickname : $scope.authenticationDetails.nickname,
+                        passwordClear : $scope.authenticationDetails.passwordClear
+                    }]
+                ).then(
                     function(result) {
                         if(result.authenticated) {
 
@@ -83,24 +87,8 @@ angular.module('haikudepotserver').controller(
                                     nickname : $scope.authenticationDetails.nickname
                                 }]).then(
                                 function(userData) {
-
                                     userState.naturalLanguageCode(userData.naturalLanguageCode);
-
-                                    // Finally take the user somewhere post-login.
-                                    // Either the user specified where they want to return to
-                                    // of we just take them back to their home page.
-
-                                    var destination = $location.search()['destination'];
-
-                                    if(destination && 0!=destination.length) {
-                                        var s = angular.copy($location.search());
-                                        delete s['destination'];
-                                        $location.path(destination).search(s);
-                                    }
-                                    else {
-                                        $location.path('/').search({});
-                                    }
-
+                                    breadcrumbs.popAndNavigate();
                                 },
                                 function(e) {
                                     $log.error('unable to get the natural language of the newly authenticated user');

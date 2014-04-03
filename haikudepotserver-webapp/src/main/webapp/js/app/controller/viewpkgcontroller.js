@@ -8,17 +8,16 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','userState','errorHandling',
-        'pkgScreenshot','pkgIcon','referenceData',
+        'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,userState,errorHandling,
-            pkgScreenshot,pkgIcon,referenceData) {
+            pkgScreenshot,pkgIcon,referenceData,breadcrumbs) {
 
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 480;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 320;
             var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
 
-            $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
             $scope.pkgScreenshots = undefined;
             $scope.pkgScreenshotOffset = 0;
@@ -52,10 +51,13 @@ angular.module('haikudepotserver').controller(
             };
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [{
-                    title : $scope.pkg.name,
-                    path : $location.path()
-                }];
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
+                    breadcrumbs.createViewPkg(
+                        $scope.pkg,
+                        $routeParams.version,
+                        $routeParams.architectureCode)
+                ]);
             }
 
             function refetchPkg() {
@@ -97,7 +99,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function() {
                         $log.error('unable to obtain the list of categories');
-                        $location.path("/error").search({});
+                        errorHandling.navigateToError();
                     }
                 );
 
@@ -184,7 +186,6 @@ angular.module('haikudepotserver').controller(
                         $scope.pkgScreenshotOffset = 0;
 
                         $log.info('found '+result.items.length+' screenshots for pkg '+$routeParams.name);
-                        refreshBreadcrumbItems();
                     },
                     function(err) {
                         errorHandling.handleJsonRpcError(err);

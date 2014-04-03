@@ -16,7 +16,6 @@ angular.module('haikudepotserver').controller(
 
             var ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
-            $scope.breadcrumbItems = undefined;
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.editPkgIcon = {
@@ -60,16 +59,17 @@ angular.module('haikudepotserver').controller(
             refetchPkg();
 
             function refreshBreadcrumbItems() {
-                $scope.breadcrumbItems = [
+                breadcrumbs.mergeCompleteStack([
+                    breadcrumbs.createHome(),
                     breadcrumbs.createViewPkg(
                         $scope.pkg,
                         $routeParams.version,
                         $routeParams.architectureCode),
                     {
-                        title : 'Edit Icon',
+                        titleKey : 'breadcrumb.editPkgIcon.title',
                         path : $location.path()
                     }
-                ];
+                ]);
             }
 
             // This function will check to make sure that the file is not too large or too small to be a valid PNG.
@@ -154,7 +154,7 @@ angular.module('haikudepotserver').controller(
                         ).then(
                         function() {
                             $log.info('have updated the pkg icons for pkg '+$scope.pkg.name);
-                            $location.path('/pkg/'+$routeParams.name+'/'+$routeParams.version+'/'+$routeParams.architectureCode).search({});
+                            breadcrumbs.popAndNavigate();
                             $scope.amSaving = false;
                         },
                         function(err) {

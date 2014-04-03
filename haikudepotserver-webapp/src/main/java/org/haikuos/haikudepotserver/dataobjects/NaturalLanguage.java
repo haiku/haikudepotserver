@@ -18,6 +18,11 @@ import org.haikuos.haikudepotserver.dataobjects.auto._NaturalLanguage;
 
 import java.util.List;
 
+/**
+ * <P>This describes a spoken or "natural" language that can be used for localization of the application.  These are
+ * referenced by <a href="https://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a> values such as "en", "de" etc...</P>
+ */
+
 public class NaturalLanguage extends _NaturalLanguage {
 
     public final static String CODE_ENGLISH = "en";

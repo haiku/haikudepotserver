@@ -16,10 +16,10 @@ angular.module('haikudepotserver').directive('banner',function() {
         controller:
             [
                 '$rootScope','$scope','$log','$location','$route',
-                'userState','referenceData','messageSource',
+                'userState','referenceData','messageSource','breadcrumbs',
                 function(
                     $rootScope,$scope,$log,$location,$route,
-                    userState,referenceData,messageSource) {
+                    userState,referenceData,messageSource,breadcrumbs) {
 
                     $scope.showActions = false;
                     $scope.userNickname = undefined;
@@ -34,12 +34,18 @@ angular.module('haikudepotserver').directive('banner',function() {
                         return '/error' == p || '/authenticateuser' == p || '/createuser' == p;
                     }
 
+                    $scope.canShowBannerActions = function() {
+                        var p = $location.path();
+                        return '/error' != p;
+                    }
+
                     // -----------------
                     // GENERAL
 
                     // This will take the user back to the home page.
 
                     $scope.goHome = function() {
+                        breadcrumbs.reset();
                         $location.path('/').search({});
                         return false;
                     };
@@ -52,6 +58,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // This will take the user to a page about the application.
 
                     $scope.goMore = function() {
+                        breadcrumbs.reset();
                         $location.path('/about').search({});
                         $scope.showActions = false;
                         return false;
@@ -60,6 +67,12 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // -----------------
                     // NATURAL LANGUAGES
 
+                    $scope.canChooseNaturalLanguage = function() {
+                        var p = $location.path();
+                        return !!$scope.naturalLanguageData.naturalLanguageOptions &&
+                            '/error' != p;
+                    }
+
                     /**
                      * <p>This gets hit when the user chooses a language from the user interface's drop-down.</p>
                      */
@@ -67,7 +80,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $scope.$watch(
                         'naturalLanguageData.selectedNaturalLanguageOption',
                         function(newValue) {
-                            if(!!newValue && !userState.user()) {
+                            if(!!newValue) {
                                 userState.naturalLanguageCode(newValue.code);
                                 $scope.showActions = false;
                             }
@@ -138,6 +151,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     }
 
                     $scope.goListRepositories = function() {
+                        breadcrumbs.reset();
                         $location.path('/repositories').search({});
                         $scope.showActions = false;
                     }
@@ -154,12 +168,14 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     $scope.goViewUser = function() {
+                        breadcrumbs.reset();
                         $location.path('/user/'+userState.user().nickname).search({});
                         $scope.showActions = false;
                     };
 
                     $scope.goLogout = function() {
                         userState.user(null);
+                        breadcrumbs.reset();
                         $location.path('/').search({});
                         $scope.showActions = false;
                     };
@@ -172,28 +188,18 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     $scope.goAuthenticate = function() {
-                        var p = $location.path();
-                        $location.path('/authenticateuser').search(
-                            _.extend($location.search(), { destination: p }));
+                        $location.path('/authenticateuser');
                         $scope.showActions = false;
                     };
 
                     $scope.goCreateUser = function() {
+                        breadcrumbs.reset();
                         $location.path('/users/add').search({});
                         $scope.showActions = false;
                     };
 
                     // -----------------
                     // EVENT HANDLING
-
-                    // when the page changes, the actions may change; for example, it is not appropriate to
-                    // show the 'login' option when the user is presently logging in.
-
-//                    $rootScope.$on(
-//                        "$locationChangeSuccess",
-//                        function(event, next, current) {
-//                        }
-//                    );
 
                     // when the user logs in or out then the actions may also change; for example, it makes
                     // no sense to show the logout button if nobody is presently logged in.

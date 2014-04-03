@@ -12,7 +12,6 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,breadcrumbs,userState,errorHandling,referenceData) {
 
-            $scope.breadcrumbItems = undefined;
             $scope.workingRepository = undefined;
             $scope.architectures = undefined;
             $scope.amEditing = !!$routeParams.code;
@@ -39,7 +38,9 @@ angular.module('haikudepotserver').controller(
             };
 
             function refreshBreadcrumbItems() {
+
                 var b = [
+                    breadcrumbs.createHome(),
                     breadcrumbs.createListRepositories()
                 ];
 
@@ -50,7 +51,7 @@ angular.module('haikudepotserver').controller(
                     b.push(breadcrumbs.createAddRepository());
                 }
 
-                $scope.breadcrumbItems = b;
+                breadcrumbs.mergeCompleteStack(b);
             }
 
             function refreshRepository() {
@@ -123,7 +124,7 @@ angular.module('haikudepotserver').controller(
                         ).then(
                         function() {
                             $log.info('did update repository; '+$scope.workingRepository.code);
-                            $location.path('/repository/'+$scope.workingRepository.code).search({});
+                            breadcrumbs.popAndNavigate();
                         },
                         function(err) {
 
@@ -155,6 +156,7 @@ angular.module('haikudepotserver').controller(
                         ).then(
                         function() {
                             $log.info('did create repository; '+$scope.workingRepository.code);
+                            breadcrumbs.pop();
                             $location.path('/repository/'+$scope.workingRepository.code).search({});
                         },
                         function(err) {
