@@ -66,12 +66,13 @@ angular.module('haikudepotserver').controller(
 
                 jsonRpc.call(
                         constants.ENDPOINT_API_V1_PKG,
-                        "getPkg",
+                        'getPkg',
                         [{
                             name : $routeParams.name,
                             versionType : 'LATEST',
                             incrementViewCounter : true,
-                            architectureCode : $routeParams.architectureCode
+                            architectureCode : $routeParams.architectureCode,
+                            naturalLanguageCode: userState.naturalLanguageCode()
                         }]
                     ).then(
                     function(result) {

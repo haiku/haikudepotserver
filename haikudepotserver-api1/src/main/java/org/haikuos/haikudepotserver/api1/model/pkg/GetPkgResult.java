@@ -37,6 +37,15 @@ public class GetPkgResult {
         public String architectureCode;
         public String summary;
         public String description;
+
+        /**
+         * <p>In the request the client may have requested a specific natural language, but that may not have been
+         * available.  This code indicates the natural language code that was <em>actually</em> used to obtain
+         * material such as the summary and the description.</p>
+         */
+
+        public String naturalLanguageCode;
+
         public String repositoryCode;
 
         public List<String> licenses;

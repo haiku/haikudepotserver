@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
-        'breadcrumbs',
+        'breadcrumbs','userState',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgIcon,errorHandling,
-            breadcrumbs) {
+            breadcrumbs,userState) {
 
             var ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
@@ -38,11 +38,12 @@ angular.module('haikudepotserver').controller(
             function refetchPkg() {
                 jsonRpc.call(
                         constants.ENDPOINT_API_V1_PKG,
-                        "getPkg",
+                        'getPkg',
                         [{
                             name: $routeParams.name,
                             versionType: 'NONE',
-                            architectureCode: undefined // not required if we don't need the version
+                            architectureCode: undefined, // not required if we don't need the version
+                            naturalLanguageCode: userState.naturalLanguageCode()
                         }]
                     ).then(
                     function(result) {

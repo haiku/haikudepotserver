@@ -27,6 +27,7 @@ public class NaturalLanguage extends _NaturalLanguage {
 
     public final static String CODE_ENGLISH = "en";
     public final static String CODE_GERMAN = "de";
+    public final static String CODE_SPANISH = "es";
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkNotNull(context);

@@ -204,7 +204,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         // if there are more than we asked for then there must be more available.
 
-        result.hasMore = new Boolean(searchedPkgVersions.size() > request.limit);
+        result.hasMore = searchedPkgVersions.size() > request.limit;
 
         if(result.hasMore) {
             searchedPkgVersions = searchedPkgVersions.subList(0,request.limit);
@@ -245,7 +245,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
      * <p>Given the persistence model object, this method will construct the DTO to be sent back over the wire.</p>
      */
 
-    private GetPkgResult.Version createVersion(PkgVersion pkgVersion) {
+    private GetPkgResult.Version createVersion(PkgVersion pkgVersion, NaturalLanguage naturalLanguage) {
         GetPkgResult.Version version = new GetPkgResult.Version();
 
         version.major = pkgVersion.getMajor();
@@ -276,11 +276,18 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         version.viewCounter = pkgVersion.getViewCounter();
 
-        // TODO - languages
-        if(!pkgVersion.getPkgVersionLocalizations().isEmpty()) {
-            PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizations().get(0);
-            version.description = pkgVersionLocalization.getDescription();
-            version.summary = pkgVersionLocalization.getSummary();
+        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersion.getPkgVersionLocalization(naturalLanguage);
+
+        if(!pkgVersionLocalizationOptional.isPresent()) {
+            if(!naturalLanguage.getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
+                pkgVersionLocalizationOptional = pkgVersion.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
+            }
+        }
+
+        if(pkgVersionLocalizationOptional.isPresent()) {
+            version.description = pkgVersionLocalizationOptional.get().getDescription();
+            version.summary = pkgVersionLocalizationOptional.get().getSummary();
+            version.naturalLanguageCode = pkgVersionLocalizationOptional.get().getNaturalLanguage().getCode();
         }
 
         version.urls = Lists.transform(
@@ -304,6 +311,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.name));
         Preconditions.checkNotNull(request.versionType);
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
 
         final ObjectContext context = serverRuntime.getContext();
 
@@ -311,6 +319,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         if(!Strings.isNullOrEmpty(request.architectureCode)) {
             architectureOptional = Architecture.getByCode(context, request.architectureCode);
+        }
+
+        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, request.naturalLanguageCode);
+
+        if(!naturalLanguageOptional.isPresent()) {
+            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), request.naturalLanguageCode);
         }
 
         GetPkgResult result = new GetPkgResult();
@@ -334,20 +348,23 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
                         context,
                         pkg,
-                        Lists.newArrayList(
+                        ImmutableList.of(
                                 architectureOptional.get(),
                                 Architecture.getByCode(context, Architecture.CODE_ANY).get(),
-                                Architecture.getByCode(context, Architecture.CODE_SOURCE).get()));
+                                Architecture.getByCode(context, Architecture.CODE_SOURCE).get())
+                );
 
                 if(!pkgVersionOptional.isPresent()) {
-                    throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), request.name);
+                    throw new ObjectNotFoundException(
+                            PkgVersion.class.getSimpleName(),
+                            request.name);
                 }
 
                 if(null!=request.incrementViewCounter && request.incrementViewCounter) {
 
                     String cacheKey = null;
                     String remoteIdentifier = getRemoteIdentifier();
-                    boolean shouldIncrement = false;
+                    boolean shouldIncrement;
 
                     if(shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient && !Strings.isNullOrEmpty(remoteIdentifier)) {
                         Long pkgVersionId = (Long) pkgVersionOptional.get().getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
@@ -378,7 +395,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
                 }
 
-                result.versions = Collections.singletonList(createVersion(pkgVersionOptional.get()));
+                result.versions = Collections.singletonList(createVersion(
+                        pkgVersionOptional.get(),
+                        naturalLanguageOptional.get()));
 
                 break;
 
@@ -671,4 +690,60 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         return new ReorderPkgScreenshotsResult();
     }
+
+    @Override
+    public UpdatePkgVersionLocalizationResult updatePkgVersionLocalization(
+            UpdatePkgVersionLocalizationRequest updatePkgVersionLocalizationRequest) throws ObjectNotFoundException {
+
+        Preconditions.checkNotNull(updatePkgVersionLocalizationRequest);
+        Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgVersionLocalizationRequest.description));
+        Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgVersionLocalizationRequest.naturalLanguageCode));
+        Preconditions.checkState(!updatePkgVersionLocalizationRequest.naturalLanguageCode.equals(NaturalLanguage.CODE_ENGLISH));
+        Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgVersionLocalizationRequest.pkgName));
+        Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgVersionLocalizationRequest.summary));
+
+        final ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = getPkg(context, updatePkgVersionLocalizationRequest.pkgName);
+
+        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, updatePkgVersionLocalizationRequest.naturalLanguageCode);
+
+        if(!naturalLanguageOptional.isPresent()) {
+            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), updatePkgVersionLocalizationRequest.naturalLanguageCode);
+        }
+
+        Optional<Architecture> architectureOptional = Architecture.getByCode(context, updatePkgVersionLocalizationRequest.architectureCode);
+
+        if(!architectureOptional.isPresent()) {
+            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), updatePkgVersionLocalizationRequest.architectureCode);
+        }
+
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(architectureOptional.get()));
+
+        if(!pkgVersionOptional.isPresent()) {
+            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architectureOptional.get().getCode());
+        }
+
+        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageOptional.get());
+
+        if(!pkgVersionLocalizationOptional.isPresent()) {
+            PkgVersionLocalization newPkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
+            newPkgVersionLocalization.setNaturalLanguage(naturalLanguageOptional.get());
+            pkgVersionOptional.get().addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, newPkgVersionLocalization, true);
+            pkgVersionLocalizationOptional = Optional.of(newPkgVersionLocalization);
+        }
+
+        pkgVersionLocalizationOptional.get().setSummary(updatePkgVersionLocalizationRequest.summary);
+        pkgVersionLocalizationOptional.get().setDescription(updatePkgVersionLocalizationRequest.description);
+
+        context.commitChanges();
+
+        logger.info("did update the localization for pkg {} in architecture {} for natural language {}",new Object[] {
+                pkg.getName(),
+                architectureOptional.get().getCode(),
+                naturalLanguageOptional.get().getCode()
+        });
+
+        return new UpdatePkgVersionLocalizationResult();
+    }
+
 }

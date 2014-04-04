@@ -28,7 +28,8 @@ public class GetPkgRequest {
      * seen.  Do not use this unless the user is being displayed a user-interface of the package so that they
      * have <em>really</em> seen it.  This value may be supplied as null.  This only applies when the
      * {@link org.haikuos.haikudepotserver.api1.model.pkg.GetPkgRequest.VersionType#LATEST} version type is
-     * being requested.</p>
+     * being requested.  Also note that the system has a feature to avoid double counting from the same address in
+     * quick succession.</p>
      */
 
     public Boolean incrementViewCounter;
@@ -42,6 +43,6 @@ public class GetPkgRequest {
 
     public VersionType versionType;
 
-    // TODO - natural language
+    public String naturalLanguageCode;
 
 }

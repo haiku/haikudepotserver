@@ -27,6 +27,7 @@ import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 
 public class PkgApiIT extends AbstractIntegrationTest {
@@ -118,6 +119,11 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");
     }
 
+    /**
+     * <p>In this test, an German localization is requested, but there is no localization present for German so it will
+     * fall back English.</p>
+     */
+
     @Test
     public void testGetPkg_found() throws ObjectNotFoundException {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
@@ -126,6 +132,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.architectureCode = "x86";
         request.name = "pkg1";
         request.versionType = GetPkgRequest.VersionType.LATEST;
+        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
 
         // ------------------------------------
         GetPkgResult result = pkgApi.getPkg(request);
@@ -137,6 +144,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");
         Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
+        Assertions.assertThat(result.versions.get(0).naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
+        Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
+        Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
     }
 
     @Test
@@ -147,6 +157,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.architectureCode = "x86";
         request.name = "pkg9";
         request.versionType = GetPkgRequest.VersionType.LATEST;
+        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
 
         try {
 
@@ -423,12 +434,51 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         ObjectContext context = serverRuntime.getContext();
         Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
-        List<PkgScreenshot> sortedScreenshotsAfter = data.pkg1.getSortedPkgScreenshots();
+        List<PkgScreenshot> sortedScreenshotsAfter = pkgOptional.get().getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(3);
         Assertions.assertThat(sortedScreenshotsAfter.get(0).getCode()).isEqualTo(sortedScreenshotsBefore.get(2).getCode());
         Assertions.assertThat(sortedScreenshotsAfter.get(1).getCode()).isEqualTo(sortedScreenshotsBefore.get(0).getCode());
         Assertions.assertThat(sortedScreenshotsAfter.get(2).getCode()).isEqualTo(sortedScreenshotsBefore.get(1).getCode());
+    }
+
+    private void testUpdatePkgVersionLocalization(String naturalLanguageCode) throws Exception {
+        setAuthenticatedUserToRoot();
+
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+
+        UpdatePkgVersionLocalizationRequest request = new UpdatePkgVersionLocalizationRequest();
+        request.pkgName = data.pkg1.getName();
+        request.architectureCode = "x86";
+        request.description = "testDescription";
+        request.naturalLanguageCode = naturalLanguageCode;
+        request.summary = "testSummary";
+
+        // ------------------------------------
+        pkgApi.updatePkgVersionLocalization(request);
+        // ------------------------------------
+
+        ObjectContext context = serverRuntime.getContext();
+        Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
+                context,
+                pkgOptional.get(),
+                Collections.singletonList(Architecture.getByCode(context,"x86").get()));
+
+        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
+
+        Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
+        Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");
+    }
+
+    @Test
+    public void testUpdatePkgVersionLocalization_existingNaturalLanguage() throws Exception {
+        testUpdatePkgVersionLocalization(NaturalLanguage.CODE_SPANISH);
+    }
+
+    @Test
+    public void testUpdatePkgVersionLocalization_newNaturalLanguage() throws Exception {
+        testUpdatePkgVersionLocalization(NaturalLanguage.CODE_GERMAN);
     }
 
 }

@@ -89,4 +89,14 @@ public interface PkgApi {
 
     ReorderPkgScreenshotsResult reorderPkgScreenshots(ReorderPkgScreenshotsRequest reorderPkgScreenshotsRequest) throws ObjectNotFoundException;
 
+    /**
+     * <p>This method will set the localized text stored against the <strong>latest</strong> version of the nominated
+     * package.  If the package cannot be found then this method will throw an instance of
+     * {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}.  It is not possible to update the
+     * localization on an older version and all fields are required.  It is not possible to edit the English
+     * localization.</p>
+     */
+
+    UpdatePkgVersionLocalizationResult updatePkgVersionLocalization(UpdatePkgVersionLocalizationRequest updatePkgVersionLocalizationRequest) throws ObjectNotFoundException;
+
 }

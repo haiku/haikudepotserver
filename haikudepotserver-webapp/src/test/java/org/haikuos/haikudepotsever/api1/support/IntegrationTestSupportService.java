@@ -125,6 +125,22 @@ public class IntegrationTestSupportService {
         result.pkg1Version2.setPkg(result.pkg1);
         result.pkg1Version2.setRepository(result.repository);
 
+        {
+            PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
+            pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish");
+            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish");
+            result.pkg1Version2.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+        }
+
+        {
+            PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
+            pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
+            pkgVersionLocalization.setDescription("pkg1Version2DescriptionSpanish");
+            pkgVersionLocalization.setSummary("pkg1Version2SummarySpanish");
+            result.pkg1Version2.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+        }
+
         result.pkg2 = context.newObject(Pkg.class);
         result.pkg2.setActive(true);
         result.pkg2.setName("pkg2");

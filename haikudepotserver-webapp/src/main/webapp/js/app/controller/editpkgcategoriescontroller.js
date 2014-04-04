@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','errorHandling',
-        'breadcrumbs','referenceData',
+        'breadcrumbs','referenceData','userState',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,errorHandling,
-            breadcrumbs,referenceData) {
+            breadcrumbs,referenceData,userState) {
 
             // this is the maximum number of categories in which a package may be registered.  This
             // is just enforced in the user interface for practicalities sake.
@@ -33,11 +33,12 @@ angular.module('haikudepotserver').controller(
             function refetchPkg() {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_PKG,
-                    "getPkg",
+                    'getPkg',
                     [{
                         name: $routeParams.name,
                         versionType: 'NONE',
-                        architectureCode: undefined // not required if we don't need the version
+                        architectureCode: undefined, // not required if we don't need the version
+                        naturalLanguageCode: userState.naturalLanguageCode()
                     }]
                 ).then(
                     function(result) {

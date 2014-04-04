@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgScreenshot','errorHandling',
-        'breadcrumbs',
+        'breadcrumbs','userState',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgScreenshot,errorHandling,
-            breadcrumbs) {
+            breadcrumbs,userState) {
 
             // the upload size must be less than this or it is too big for the
             // far end to process.
@@ -72,11 +72,12 @@ angular.module('haikudepotserver').controller(
             function refetchPkg() {
                 jsonRpc.call(
                         constants.ENDPOINT_API_V1_PKG,
-                        "getPkg",
+                        'getPkg',
                         [{
                             name: $routeParams.name,
                             versionType: 'NONE',
-                            architectureCode: undefined // not required if we don't need the version
+                            architectureCode: undefined, // not required if we don't need the version
+                            naturalLanguageCode: userState.naturalLanguageCode()
                         }]
                     ).then(
                     function(result) {

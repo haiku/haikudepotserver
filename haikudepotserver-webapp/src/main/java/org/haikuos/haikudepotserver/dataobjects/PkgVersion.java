@@ -7,6 +7,8 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
@@ -124,6 +126,34 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     public void incrementViewCounter() {
         setViewCounter(getViewCounter()+1);
+    }
+
+    /**
+     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
+     * English language data is hard-coded into the package payload, english will always be available.</p>
+     */
+
+    public Optional<PkgVersionLocalization> getPkgVersionLocalization(final NaturalLanguage naturalLanguage) {
+        return getPkgVersionLocalization(naturalLanguage.getCode());
+    }
+
+    /**
+     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
+     * English language data is hard-coded into the package payload, english will always be available.</p>
+     */
+
+    public Optional<PkgVersionLocalization> getPkgVersionLocalization(final String naturalLanguageCode) {
+        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
+
+        return Iterables.tryFind(
+                getPkgVersionLocalizations(),
+                new Predicate<PkgVersionLocalization>() {
+                    @Override
+                    public boolean apply(PkgVersionLocalization input) {
+                        return input.getNaturalLanguage().getCode().equals(naturalLanguageCode);
+                    }
+                }
+        );
     }
 
 }
