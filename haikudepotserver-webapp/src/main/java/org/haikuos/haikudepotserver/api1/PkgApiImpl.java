@@ -84,6 +84,32 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return pkgOptional.get();
     }
 
+    private Architecture getArchitecture(ObjectContext context, String architectureCode) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkState(!Strings.isNullOrEmpty(architectureCode));
+
+        Optional<Architecture> architectureOptional = Architecture.getByCode(context,architectureCode);
+
+        if(!architectureOptional.isPresent()) {
+            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode);
+        }
+
+        return architectureOptional.get();
+    }
+
+    private NaturalLanguage getNaturalLanguage(ObjectContext context, String naturalLanguageCode) throws ObjectNotFoundException  {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
+
+        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, naturalLanguageCode);
+
+        if(!naturalLanguageOptional.isPresent()) {
+            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), naturalLanguageCode);
+        }
+
+        return naturalLanguageOptional.get();
+    }
+
     @Override
     public UpdatePkgCategoriesResult updatePkgCategories(UpdatePkgCategoriesRequest updatePkgCategoriesRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(updatePkgCategoriesRequest);
@@ -321,11 +347,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             architectureOptional = Architecture.getByCode(context, request.architectureCode);
         }
 
-        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, request.naturalLanguageCode);
-
-        if(!naturalLanguageOptional.isPresent()) {
-            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), request.naturalLanguageCode);
-        }
+        NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
 
         GetPkgResult result = new GetPkgResult();
         Pkg pkg = getPkg(context, request.name);
@@ -397,7 +419,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
                 result.versions = Collections.singletonList(createVersion(
                         pkgVersionOptional.get(),
-                        naturalLanguageOptional.get()));
+                        naturalLanguage));
 
                 break;
 
@@ -705,29 +727,26 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.getContext();
         Pkg pkg = getPkg(context, updatePkgVersionLocalizationRequest.pkgName);
 
-        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, updatePkgVersionLocalizationRequest.naturalLanguageCode);
+        User authUser = obtainAuthenticatedUser(context);
 
-        if(!naturalLanguageOptional.isPresent()) {
-            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), updatePkgVersionLocalizationRequest.naturalLanguageCode);
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITLOCALIZATION)) {
+            throw new AuthorizationFailureException();
         }
 
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context, updatePkgVersionLocalizationRequest.architectureCode);
+        Architecture architecture = getArchitecture(context, updatePkgVersionLocalizationRequest.architectureCode);
+        NaturalLanguage naturalLanguage = getNaturalLanguage(context, updatePkgVersionLocalizationRequest.naturalLanguageCode);
 
-        if(!architectureOptional.isPresent()) {
-            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), updatePkgVersionLocalizationRequest.architectureCode);
-        }
-
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(architectureOptional.get()));
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(architecture));
 
         if(!pkgVersionOptional.isPresent()) {
-            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architectureOptional.get().getCode());
+            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());
         }
 
-        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageOptional.get());
+        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguage);
 
         if(!pkgVersionLocalizationOptional.isPresent()) {
             PkgVersionLocalization newPkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-            newPkgVersionLocalization.setNaturalLanguage(naturalLanguageOptional.get());
+            newPkgVersionLocalization.setNaturalLanguage(naturalLanguage);
             pkgVersionOptional.get().addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, newPkgVersionLocalization, true);
             pkgVersionLocalizationOptional = Optional.of(newPkgVersionLocalization);
         }
@@ -739,11 +758,46 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         logger.info("did update the localization for pkg {} in architecture {} for natural language {}",new Object[] {
                 pkg.getName(),
-                architectureOptional.get().getCode(),
-                naturalLanguageOptional.get().getCode()
+                architecture.getCode(),
+                naturalLanguage.getCode()
         });
 
         return new UpdatePkgVersionLocalizationResult();
+    }
+
+    @Override
+    public GetPkgVersionLocalizationsResult getPkgVersionLocalizations(GetPkgVersionLocalizationsRequest getPkgVersionLocalizationsRequest) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(getPkgVersionLocalizationsRequest);
+        Preconditions.checkState(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.architectureCode));
+        Preconditions.checkState(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.pkgName));
+        Preconditions.checkNotNull(getPkgVersionLocalizationsRequest.naturalLanguageCodes);
+
+        final ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = getPkg(context, getPkgVersionLocalizationsRequest.pkgName);
+        Architecture architecture = getArchitecture(context, getPkgVersionLocalizationsRequest.architectureCode);
+
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(architecture));
+
+        if(!pkgVersionOptional.isPresent()) {
+            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());
+        }
+
+        GetPkgVersionLocalizationsResult result = new GetPkgVersionLocalizationsResult();
+        result.pkgVersionLocalizations = Lists.newArrayList();
+
+        for(String naturalLanguageCode : getPkgVersionLocalizationsRequest.naturalLanguageCodes) {
+            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
+
+            if(pkgVersionLocalizationOptional.isPresent()) {
+                GetPkgVersionLocalizationsResult.PkgVersionLocalization resultPkgVersionLocalization = new GetPkgVersionLocalizationsResult.PkgVersionLocalization();
+                resultPkgVersionLocalization.naturalLanguageCode = naturalLanguageCode;
+                resultPkgVersionLocalization.description = pkgVersionLocalizationOptional.get().getDescription();
+                resultPkgVersionLocalization.summary = pkgVersionLocalizationOptional.get().getSummary();
+                result.pkgVersionLocalizations.add(resultPkgVersionLocalization);
+            }
+        }
+
+        return result;
     }
 
 }

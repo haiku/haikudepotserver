@@ -100,7 +100,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
     @Test
     public void searchPkgsTest() {
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
         request.architectureCode = "x86";
@@ -126,7 +126,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
     @Test
     public void testGetPkg_found() throws ObjectNotFoundException {
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();
         request.architectureCode = "x86";
@@ -151,7 +151,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
     @Test
     public void testGetPkg_notFound() {
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();
         request.architectureCode = "x86";
@@ -162,7 +162,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         try {
 
             // ------------------------------------
-            GetPkgResult result = pkgApi.getPkg(request);
+            pkgApi.getPkg(request);
             // ------------------------------------
 
             Assert.fail("expected an instance of "+ObjectNotFoundException.class.getSimpleName()+" to be thrown, but was not");
@@ -179,7 +179,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     @Test
     public void testGetPkgIcons() throws Exception {
 
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
 
         // ------------------------------------
         GetPkgIconsResult result = pkgApi.getPkgIcons(new GetPkgIconsRequest("pkg1"));
@@ -198,9 +198,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
     public void testConfigurePkgIcon_badData() throws Exception {
 
         setAuthenticatedUserToRoot();
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        byte[] sample16 = getResourceData("/sample-16x16.png");
-        byte[] sample32 = getResourceData("/sample-32x32.png");
+        integrationTestSupportService.createStandardTestData();
+
         byte[] sampleHvif = getResourceData("/sample.hvif");
 
         ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
@@ -247,7 +246,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
     public void testConfigurePkgIcon_ok() throws Exception {
 
         setAuthenticatedUserToRoot();
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
+
         byte[] sample16 = getResourceData("/sample-16x16.png");
         byte[] sample32 = getResourceData("/sample-32x32.png");
         byte[] sampleHvif = getResourceData("/sample.hvif");
@@ -309,7 +309,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         setAuthenticatedUserToRoot();
 
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
 
         {
             ObjectContext objectContext = serverRuntime.getContext();
@@ -395,7 +395,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         ObjectContext context = serverRuntime.getContext();
         Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
-        List<PkgScreenshot> sortedScreenshotsAfter = data.pkg1.getSortedPkgScreenshots();
+        List<PkgScreenshot> sortedScreenshotsAfter = pkgOptional.get().getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(sortedScreenshotsBefore.size()-1);
 
@@ -479,6 +479,31 @@ public class PkgApiIT extends AbstractIntegrationTest {
     @Test
     public void testUpdatePkgVersionLocalization_newNaturalLanguage() throws Exception {
         testUpdatePkgVersionLocalization(NaturalLanguage.CODE_GERMAN);
+    }
+
+    /**
+     * <p>This test requests german and english, but only english ispresent so needs to check that the output
+     * contains only the english data.</p>
+     */
+
+    @Test
+    public void testGetPkgVersionLocalizations() throws Exception {
+        setAuthenticatedUserToRoot();
+
+        integrationTestSupportService.createStandardTestData();
+
+        GetPkgVersionLocalizationsRequest request = new GetPkgVersionLocalizationsRequest();
+        request.architectureCode = "x86";
+        request.naturalLanguageCodes = ImmutableList.of(NaturalLanguage.CODE_ENGLISH, NaturalLanguage.CODE_GERMAN);
+        request.pkgName = "pkg1";
+
+        // ------------------------------------
+        GetPkgVersionLocalizationsResult result = pkgApi.getPkgVersionLocalizations(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.pkgVersionLocalizations.size()).isEqualTo(1);
+        Assertions.assertThat(result.pkgVersionLocalizations.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
+        Assertions.assertThat(result.pkgVersionLocalizations.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
     }
 
 }

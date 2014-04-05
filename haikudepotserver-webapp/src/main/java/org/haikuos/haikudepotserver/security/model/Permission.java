@@ -21,7 +21,8 @@ public enum Permission {
 
     PKG_EDITICON(TargetType.PKG),
     PKG_EDITSCREENSHOT(TargetType.PKG),
-    PKG_EDITCATEGORIES(TargetType.PKG);
+    PKG_EDITCATEGORIES(TargetType.PKG),
+    PKG_EDITLOCALIZATION(TargetType.PKG);
 
     private TargetType requiredTargetType;
 
