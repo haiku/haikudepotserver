@@ -22,8 +22,8 @@ import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
+import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -453,22 +453,43 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.description = "testDescription";
         request.naturalLanguageCode = naturalLanguageCode;
         request.summary = "testSummary";
+        request.replicateToOtherArchitecturesWithSameEnglishContent = Boolean.TRUE;
 
         // ------------------------------------
         pkgApi.updatePkgVersionLocalization(request);
         // ------------------------------------
 
-        ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
-                context,
-                pkgOptional.get(),
-                Collections.singletonList(Architecture.getByCode(context,"x86").get()));
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
+            Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
+                    context,
+                    pkgOptional.get(),
+                    Collections.singletonList(Architecture.getByCode(context, "x86").get()));
 
-        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
+            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
 
-        Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
-        Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");
+            Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
+            Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");
+        }
+
+        // check that the data is copied to other architecture.  A x86_gcc2 package version is known to be
+        // present in the test data.
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
+            Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
+                    context,
+                    pkgOptional.get(),
+                    Collections.singletonList(Architecture.getByCode(context, "x86_gcc2").get()));
+
+            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
+
+            Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
+            Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");
+        }
+
     }
 
     @Test

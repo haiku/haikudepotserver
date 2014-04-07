@@ -531,15 +531,20 @@ public class PkgOrchestrationService {
 
         Optional<org.haikuos.haikudepotserver.dataobjects.Pkg> persistedPkgOptional = org.haikuos.haikudepotserver.dataobjects.Pkg.getByName(objectContext, pkg.getName());
         org.haikuos.haikudepotserver.dataobjects.Pkg persistedPkg;
+        Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersion> persistedLatestExistingPkgVersion = Optional.absent();
+        Architecture architecture = Architecture.getByCode(objectContext, pkg.getArchitecture().name().toLowerCase()).get();
         org.haikuos.haikudepotserver.dataobjects.PkgVersion persistedPkgVersion = null;
 
         if(!persistedPkgOptional.isPresent()) {
+
             persistedPkg = objectContext.newObject(org.haikuos.haikudepotserver.dataobjects.Pkg.class);
             persistedPkg.setName(pkg.getName());
             persistedPkg.setActive(Boolean.TRUE);
+
             logger.info("the package {} did not exist; will create",pkg.getName());
         }
         else {
+
             persistedPkg = persistedPkgOptional.get();
 
             // if we know that the package exists then we should look for the version.
@@ -554,6 +559,11 @@ public class PkgOrchestrationService {
             persistedPkgVersion = Iterables.getOnlyElement(
                     (List<org.haikuos.haikudepotserver.dataobjects.PkgVersion>) objectContext.performQuery(selectQuery),
                     null);
+
+            persistedLatestExistingPkgVersion = PkgVersion.getLatestForPkg(
+                    objectContext,
+                    persistedPkg,
+                    Collections.singletonList(architecture));
         }
 
         if(null==persistedPkgVersion) {
@@ -566,9 +576,7 @@ public class PkgOrchestrationService {
             persistedPkgVersion.setPreRelease(pkg.getVersion().getPreRelease());
             persistedPkgVersion.setRevision(pkg.getVersion().getRevision());
             persistedPkgVersion.setRepository(repository);
-            persistedPkgVersion.setArchitecture(Architecture.getByCode(
-                    objectContext,
-                    pkg.getArchitecture().name().toLowerCase()).get());
+            persistedPkgVersion.setArchitecture(architecture);
             persistedPkgVersion.setPkg(persistedPkg);
 
             // now add the copyrights
@@ -595,20 +603,145 @@ public class PkgOrchestrationService {
             }
 
             if(!Strings.isNullOrEmpty(pkg.getSummary()) || !Strings.isNullOrEmpty(pkg.getDescription())) {
-                Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(objectContext, NaturalLanguage.CODE_ENGLISH);
-                PkgVersionLocalization persistedPkgVersionLocalization = objectContext.newObject(PkgVersionLocalization.class);
-                persistedPkgVersionLocalization.setDescription(pkg.getDescription());
-                persistedPkgVersionLocalization.setSummary(pkg.getSummary());
-                persistedPkgVersionLocalization.setPkgVersion(persistedPkgVersion);
-                persistedPkgVersionLocalization.setNaturalLanguage(naturalLanguageOptional.get());
+                updatePkgVersionLocalization(
+                        objectContext,
+                        persistedPkgVersion,
+                        NaturalLanguage.getByCode(objectContext, NaturalLanguage.CODE_ENGLISH).get(),
+                        pkg.getSummary(),
+                        pkg.getDescription());
             }
 
-            logger.info("the version {} of package {} did not exist; will create", pkg.getVersion().toString(), pkg.getName());
+            // look back at the previous version of the same package and see if there are localizations.  If there
+            // are then replicate those into this version as well, but only if the english variant exists.
+
+            if(persistedLatestExistingPkgVersion.isPresent()) {
+                int naturalLanguagesReplicated = replicateLocalizationIfEnglishMatches(
+                        objectContext,
+                        persistedLatestExistingPkgVersion.get(),
+                        persistedPkgVersion,
+                        NaturalLanguage.getAllExceptEnglish(objectContext),
+                        false).size();
+
+                logger.info(
+                        "replicated {} natural language localizations when creating new version of package {}",
+                        naturalLanguagesReplicated,
+                        pkg.getName());
+            }
+
+            logger.info(
+                    "the version {} of package {} did not exist; will create",
+                    pkg.getVersion().toString(),
+                    pkg.getName());
         }
 
         logger.info("have processed package {}",pkg.toString());
 
     }
 
+    // -------------------------------------
+    // LOCALIZATION
+
+    /**
+     * <p>This method will either find the existing localization or create a new one.  It will then set the localized
+     * values for the package.</p>
+     */
+
+    public PkgVersionLocalization updatePkgVersionLocalization(
+            ObjectContext context,
+            PkgVersion pkgVersion,
+            NaturalLanguage naturalLanguage,
+            String summary,
+            String description) {
+
+        Preconditions.checkNotNull(naturalLanguage);
+        Preconditions.checkState(!Strings.isNullOrEmpty(summary));
+        Preconditions.checkState(!Strings.isNullOrEmpty(description));
+
+        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional =
+                pkgVersion.getPkgVersionLocalization(naturalLanguage);
+        PkgVersionLocalization pkgVersionLocalization;
+
+        if(!pkgVersionLocalizationOptional.isPresent()) {
+            pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
+            pkgVersionLocalization.setNaturalLanguage(naturalLanguage);
+            pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+        }
+        else {
+            pkgVersionLocalization = pkgVersionLocalizationOptional.get();
+        }
+
+        pkgVersionLocalization.setDescription(description);
+        pkgVersionLocalization.setSummary(summary);
+
+        return pkgVersionLocalization;
+    }
+
+    /**
+     * <p>This method will replicate the localization of specific natural languages if and only if the english
+     * language variant is the same.  It will return the natural languages for which the operation was performed.</p>
+     */
+
+    public List<NaturalLanguage> replicateLocalizationIfEnglishMatches(
+            ObjectContext context,
+            PkgVersion pkgVersionSource,
+            PkgVersion pkgVersionDestination,
+            List<NaturalLanguage> naturalLanguages,
+            boolean allowOverrideDestination) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkgVersionSource);
+        Preconditions.checkNotNull(pkgVersionDestination);
+        Preconditions.checkNotNull(naturalLanguages);
+
+        // check that english is not in the destination languages.
+
+        for(NaturalLanguage naturalLanguage : naturalLanguages) {
+            if(naturalLanguage.getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
+                throw new IllegalStateException("it is not possible to replicate to the english language");
+            }
+        }
+
+        Optional<PkgVersionLocalization> sourceEn = pkgVersionSource.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
+        Optional<PkgVersionLocalization> destinationEn = pkgVersionSource.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
+
+        if(
+                sourceEn.isPresent()
+                && destinationEn.isPresent()
+                && sourceEn.get().equalsForContent(destinationEn.get()) ) {
+
+            List<NaturalLanguage> naturalLanguagesEffected = Lists.newArrayList();
+
+            for(NaturalLanguage naturalLanguage : naturalLanguages) {
+
+                Optional<PkgVersionLocalization> sourceOther = pkgVersionSource.getPkgVersionLocalization(naturalLanguage.getCode());
+
+                // if there is no record of the source language then there's nothing to copy so no point in copying.
+
+                if(sourceOther.isPresent()) {
+
+                    Optional<PkgVersionLocalization> destinationOther = pkgVersionDestination.getPkgVersionLocalization(naturalLanguage.getCode());
+
+                    // if there is already a destination language then don't override it unless the client actually
+                    // wants to explicitly override the destination.
+
+                    if(!destinationOther.isPresent() || allowOverrideDestination) {
+
+                        updatePkgVersionLocalization(
+                                context,
+                                pkgVersionDestination,
+                                naturalLanguage,
+                                sourceOther.get().getSummary(),
+                                sourceOther.get().getDescription());
+
+                        naturalLanguagesEffected.add(naturalLanguage);
+                    }
+                }
+            }
+
+            return naturalLanguagesEffected;
+        }
+
+        return Collections.emptyList();
+    }
 
 }

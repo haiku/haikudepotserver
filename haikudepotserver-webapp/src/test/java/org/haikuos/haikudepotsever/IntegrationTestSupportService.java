@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.api1.support;
+package org.haikuos.haikudepotsever;
 
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -91,6 +91,7 @@ public class IntegrationTestSupportService {
         StandardTestData result = new StandardTestData();
 
         Architecture x86 = Architecture.getByCode(context, "x86").get();
+        Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2").get();
 
         result.repository = context.newObject(Repository.class);
         result.repository.setActive(Boolean.TRUE);
@@ -116,21 +117,21 @@ public class IntegrationTestSupportService {
         result.pkg1Version1.setPkg(result.pkg1);
         result.pkg1Version1.setRepository(result.repository);
 
-        result.pkg1Version2 = context.newObject(PkgVersion.class);
-        result.pkg1Version2.setActive(Boolean.TRUE);
-        result.pkg1Version2.setArchitecture(x86);
-        result.pkg1Version2.setMajor("1");
-        result.pkg1Version2.setMicro("2");
-        result.pkg1Version2.setRevision(4);
-        result.pkg1Version2.setPkg(result.pkg1);
-        result.pkg1Version2.setRepository(result.repository);
+        result.pkg1Version2x86 = context.newObject(PkgVersion.class);
+        result.pkg1Version2x86.setActive(Boolean.TRUE);
+        result.pkg1Version2x86.setArchitecture(x86);
+        result.pkg1Version2x86.setMajor("1");
+        result.pkg1Version2x86.setMicro("2");
+        result.pkg1Version2x86.setRevision(4);
+        result.pkg1Version2x86.setPkg(result.pkg1);
+        result.pkg1Version2x86.setRepository(result.repository);
 
         {
             PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
             pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
             pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish");
             pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish");
-            result.pkg1Version2.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+            result.pkg1Version2x86.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
         }
 
         {
@@ -138,7 +139,26 @@ public class IntegrationTestSupportService {
             pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
             pkgVersionLocalization.setDescription("pkg1Version2DescriptionSpanish");
             pkgVersionLocalization.setSummary("pkg1Version2SummarySpanish");
-            result.pkg1Version2.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+            result.pkg1Version2x86.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+        }
+
+        result.pkg1Version2x86_gcc2 = context.newObject(PkgVersion.class);
+        result.pkg1Version2x86_gcc2.setActive(Boolean.TRUE);
+        result.pkg1Version2x86_gcc2.setArchitecture(x86_gcc2);
+        result.pkg1Version2x86_gcc2.setMajor("1");
+        result.pkg1Version2x86_gcc2.setMicro("2");
+        result.pkg1Version2x86_gcc2.setRevision(4);
+        result.pkg1Version2x86_gcc2.setPkg(result.pkg1);
+        result.pkg1Version2x86_gcc2.setRepository(result.repository);
+
+        // this is the same as the x86 version so that comparisons with English will happen.
+
+        {
+            PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
+            pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish");
+            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish");
+            result.pkg1Version2x86_gcc2.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
         }
 
         result.pkg2 = context.newObject(Pkg.class);
@@ -184,7 +204,8 @@ public class IntegrationTestSupportService {
 
         public Pkg pkg1;
         public PkgVersion pkg1Version1;
-        public PkgVersion pkg1Version2;
+        public PkgVersion pkg1Version2x86;
+        public PkgVersion pkg1Version2x86_gcc2;
 
         public Pkg pkg2;
         public PkgVersion pkg2Version1;

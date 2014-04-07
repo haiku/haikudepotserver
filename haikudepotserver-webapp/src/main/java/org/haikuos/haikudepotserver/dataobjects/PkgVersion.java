@@ -21,6 +21,8 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haikuos.haikudepotserver.support.VersionCoordinates;
+import sun.tools.tree.AndExpression;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -32,14 +34,44 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public final static Pattern MICRO_PATTERN = Pattern.compile("^[\\w_.]+$");
     public final static Pattern PRE_RELEASE_PATTERN = Pattern.compile("^[\\w_.]+$");
 
+    // TODO; could there be a problem here with alpha ordering of version numbers???
     public static List<Ordering> versionOrdering() {
         List<Ordering> result = Lists.newArrayList();
         result.add(new Ordering(PkgVersion.MAJOR_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
         result.add(new Ordering(PkgVersion.MINOR_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
         result.add(new Ordering(PkgVersion.MICRO_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
         result.add(new Ordering(PkgVersion.PRE_RELEASE_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
-        result.add(new Ordering(PkgVersion.REVISION_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
+        result.add(new Ordering(PkgVersion.REVISION_PROPERTY, SortOrder.DESCENDING));
         return result;
+    }
+
+    public static Optional<PkgVersion> getForPkg(
+            ObjectContext context,
+            Pkg pkg,
+            Architecture architecture,
+            VersionCoordinates versionCoordinates) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(architecture);
+        Preconditions.checkNotNull(versionCoordinates);
+
+        SelectQuery query = new SelectQuery(
+                PkgVersion.class,
+                ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE)).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture)).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.MAJOR_PROPERTY, versionCoordinates.getMajor())).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.MINOR_PROPERTY, versionCoordinates.getMinor())).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.MICRO_PROPERTY, versionCoordinates.getMicro())).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.PRE_RELEASE_PROPERTY, versionCoordinates.getPreRelease())).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.REVISION_PROPERTY, versionCoordinates.getRevision()))
+        );
+
+        query.addOrderings(versionOrdering());
+
+        return Optional.fromNullable(Iterables.getOnlyElement(
+                (List<PkgVersion>) context.performQuery(query),
+                null));
     }
 
     public static Optional<PkgVersion> getLatestForPkg(
@@ -68,6 +100,9 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                 ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg).andExp(
                         ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE)).andExp(
                         architectureExpression));
+
+        query.setFetchLimit(1);
+        query.addOrderings(versionOrdering());
 
         return Optional.fromNullable(Iterables.getOnlyElement(
                 (List<PkgVersion>) context.performQuery(query),
@@ -154,6 +189,20 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                     }
                 }
         );
+    }
+
+    public VersionCoordinates toVersionCoordinates() {
+        return new VersionCoordinates(
+                getMajor(),
+                getMinor(),
+                getMicro(),
+                getPreRelease(),
+                getRevision());
+    }
+
+    @Override
+    public String toString() {
+        return toVersionCoordinates().toString();
     }
 
 }

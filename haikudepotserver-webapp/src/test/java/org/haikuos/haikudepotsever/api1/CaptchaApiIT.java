@@ -10,7 +10,7 @@ import org.haikuos.haikudepotserver.api1.CaptchaApi;
 import org.haikuos.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haikuos.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
 import org.haikuos.haikudepotserver.captcha.model.CaptchaRepository;
-import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.AbstractIntegrationTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;

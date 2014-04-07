@@ -723,6 +723,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!updatePkgVersionLocalizationRequest.naturalLanguageCode.equals(NaturalLanguage.CODE_ENGLISH));
         Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgVersionLocalizationRequest.pkgName));
         Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgVersionLocalizationRequest.summary));
+        Preconditions.checkNotNull(updatePkgVersionLocalizationRequest.replicateToOtherArchitecturesWithSameEnglishContent);
 
         final ObjectContext context = serverRuntime.getContext();
         Pkg pkg = getPkg(context, updatePkgVersionLocalizationRequest.pkgName);
@@ -742,17 +743,38 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());
         }
 
-        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguage);
+        pkgService.updatePkgVersionLocalization(
+                context,
+                pkgVersionOptional.get(),
+                naturalLanguage,
+                updatePkgVersionLocalizationRequest.summary,
+                updatePkgVersionLocalizationRequest.description);
 
-        if(!pkgVersionLocalizationOptional.isPresent()) {
-            PkgVersionLocalization newPkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-            newPkgVersionLocalization.setNaturalLanguage(naturalLanguage);
-            pkgVersionOptional.get().addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, newPkgVersionLocalization, true);
-            pkgVersionLocalizationOptional = Optional.of(newPkgVersionLocalization);
+        if(updatePkgVersionLocalizationRequest.replicateToOtherArchitecturesWithSameEnglishContent) {
+
+            for(Architecture architectureToCopyTo : Architecture.getAll(context)) {
+
+                if(!architectureToCopyTo.equals(architecture)) { // don't copy the source to the destination.
+
+                    Optional<PkgVersion> pkgVersionOptionalToCopyTo = PkgVersion.getForPkg(
+                            context,
+                            pkg,
+                            architectureToCopyTo,
+                            pkgVersionOptional.get().toVersionCoordinates());
+
+                    if(pkgVersionOptionalToCopyTo.isPresent()) {
+                        pkgService.replicateLocalizationIfEnglishMatches(
+                                context,
+                                pkgVersionOptional.get(),
+                                pkgVersionOptionalToCopyTo.get(),
+                                Collections.singletonList(naturalLanguage),
+                                true // override any destination localization already present
+                        );
+                    }
+                }
+            }
+
         }
-
-        pkgVersionLocalizationOptional.get().setSummary(updatePkgVersionLocalizationRequest.summary);
-        pkgVersionLocalizationOptional.get().setDescription(updatePkgVersionLocalizationRequest.description);
 
         context.commitChanges();
 

@@ -6,23 +6,20 @@
 package org.haikuos.haikudepotsever.pkg.controller;
 
 import com.google.common.base.Optional;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.pkg.controller.PkgScreenshotController;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.ImageHelper;
-import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
+import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.IntegrationTestSupportService;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
 

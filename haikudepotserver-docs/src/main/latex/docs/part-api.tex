@@ -86,6 +86,8 @@ The invocation is made using the HTTP protocol to such a URL with the method POS
 }
 \end{verbatim}
 
+The ``id'' value here can be anything.  It must be supplied and is used to correlate a request with a response; the same ``id'' value that arrives in the request is relayed back in the response.  If a client were using the API in an asynchronous manner then being able to correlate the request and the response is very important.
+
 All going well, the following (abridged) form of response would be sent back to the client;
 
 \begin{verbatim}

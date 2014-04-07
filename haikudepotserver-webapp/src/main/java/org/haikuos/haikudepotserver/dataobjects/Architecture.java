@@ -38,4 +38,9 @@ public class Architecture extends _Architecture {
                 null));
     }
 
+    @Override
+    public String toString() {
+        return "arch;"+getCode();
+    }
+
 }

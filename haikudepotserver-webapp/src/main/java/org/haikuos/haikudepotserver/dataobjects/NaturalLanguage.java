@@ -36,6 +36,15 @@ public class NaturalLanguage extends _NaturalLanguage {
         return (List<NaturalLanguage>) context.performQuery(query);
     }
 
+    public static List<NaturalLanguage> getAllExceptEnglish(ObjectContext context) {
+        Preconditions.checkNotNull(context);
+        SelectQuery query = new SelectQuery(
+                NaturalLanguage.class,
+                ExpressionFactory.noMatchExp(NaturalLanguage.CODE_PROPERTY, CODE_ENGLISH));
+        query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
+        return (List<NaturalLanguage>) context.performQuery(query);
+    }
+
     public static Optional<NaturalLanguage> getByCode(ObjectContext context, String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
@@ -44,6 +53,11 @@ public class NaturalLanguage extends _NaturalLanguage {
                         NaturalLanguage.class,
                         ExpressionFactory.matchExp(MediaType.CODE_PROPERTY, code))),
                 null));
+    }
+
+    @Override
+    public String toString() {
+        return "nat-lang;"+getCode();
     }
 
 }

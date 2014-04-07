@@ -14,7 +14,7 @@ import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.repository.RepositoryImportService;
-import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.AbstractIntegrationTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;

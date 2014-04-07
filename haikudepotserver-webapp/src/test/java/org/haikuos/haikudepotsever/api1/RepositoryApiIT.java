@@ -15,8 +15,8 @@ import org.haikuos.haikudepotserver.api1.model.repository.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.api1.support.ValidationException;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
-import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
+import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;

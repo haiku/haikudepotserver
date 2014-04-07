@@ -5,16 +5,12 @@
 
 package org.haikuos.haikudepotsever.pkg.controller;
 
-import com.google.common.base.Optional;
 import com.google.common.net.MediaType;
-import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.pkg.controller.PkgIconController;
-import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
+import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.IntegrationTestSupportService;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import javax.annotation.Resource;

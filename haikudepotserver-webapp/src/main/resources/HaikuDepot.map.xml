@@ -152,7 +152,7 @@
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_copyright_seq</db-generator-name>
-			<db-key-cache-size>10</db-key-cache-size>
+			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_version_license" schema="haikudepot">
@@ -162,7 +162,7 @@
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_license_seq</db-generator-name>
-			<db-key-cache-size>10</db-key-cache-size>
+			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_version_localization" schema="haikudepot">
@@ -174,7 +174,7 @@
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_localization_seq</db-generator-name>
-			<db-key-cache-size>10</db-key-cache-size>
+			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_version_url" schema="haikudepot">
@@ -185,7 +185,7 @@
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_url_seq</db-generator-name>
-			<db-key-cache-size>10</db-key-cache-size>
+			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="publisher" schema="haikudepot">

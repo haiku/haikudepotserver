@@ -103,11 +103,14 @@ public class RepositoryImportService extends AbstractService {
     }
 
     /**
-     * <p>Returns true if the service is actively working on a job.</p>
+     * <p>Returns true if the service is actively working on a job or it has a job submitted which has not yet
+     * been dequeued and run.</p>
      */
 
     public boolean isProcessingSubmittedJobs() {
-        return null!=executor && executor.getActiveCount() > 0;
+        return
+                null!=executor
+                        && (executor.getActiveCount() > 0 || !executor.getQueue().isEmpty());
     }
 
     /**

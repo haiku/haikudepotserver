@@ -18,8 +18,8 @@ import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
-import org.haikuos.haikudepotsever.api1.support.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.api1.support.IntegrationTestSupportService;
+import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotsever.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
