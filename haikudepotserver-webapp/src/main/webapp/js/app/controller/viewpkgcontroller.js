@@ -206,6 +206,10 @@ angular.module('haikudepotserver').controller(
                 $location.path($location.path() + '/editscreenshots').search({});
             };
 
+            $scope.goEditVersionLocalization = function() {
+                $location.path($location.path() + '/editversionlocalizations').search({});
+            }
+
             $scope.goEditPkgCategories = function() {
                 $location.path($location.path() + '/editcategories').search({});
             };

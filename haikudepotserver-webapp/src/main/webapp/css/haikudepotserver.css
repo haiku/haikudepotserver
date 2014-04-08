@@ -58,6 +58,23 @@ the spinner or the modal dialog can be shown over the top.
 
 /*
 ==================================
+TEXT STYLING
+*/
+
+.text-error {
+    color: red;
+}
+
+.text-warning {
+    color: darkorange;
+}
+
+.text-success {
+    color: darkgreen;
+}
+
+/*
+==================================
 PAGE STRUCTURE
 */
 

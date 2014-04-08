@@ -730,7 +730,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITLOCALIZATION)) {
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITVERSIONLOCALIZATION)) {
             throw new AuthorizationFailureException();
         }
 

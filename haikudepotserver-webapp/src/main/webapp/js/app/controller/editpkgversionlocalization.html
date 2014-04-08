@@ -1,0 +1,52 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <form name="editPkgVersionLocalizationForm" novalidate="novalidate">
+
+        <table id="edit-pkg-version-localization-container">
+            <tr>
+                <td id="natural-translations-cell">
+                    <div ng-repeat="translation in translations">
+                        <span ng-show="isTranslationSelected(translation)">
+                            &#8594;
+                        </span>
+                        <a
+                                ng-class="classesForTranslation(translation)"
+                                ng-click="goChooseTranslation(translation)">
+                            <message key="{{'naturalLanguage.' + translation.naturalLanguage.code}}"></message>
+                        </a>
+                        ({{translation.naturalLanguage.code}})
+                    </div>
+                </td>
+                <td id="translation-cell">
+                    <H1>WORK IN PROGRESS</H1>
+                    <p>Lorem ipsum dolor sit amet, no dolore persecuti necessitatibus sed, eruditi mnesarchum eloquentiam pri in. Te sit lobortis eleifend, aperiam nominavi maluisset vel ut. Ex vim docendi expetendis voluptatum. Partem aliquam pro te, no doctus prompta repudiandae eum. No vix veniam aperiri, detraxit referrentur reprehendunt in duo.</p>
+                </td>
+                <td id="english-original-cell">
+                    <h1>English Original</h1>
+                    <h2>Summary</h2>
+                    <p>{{pkg.versions[0].summary}}</p>
+                    <h2>Description</h2>
+                    <p>{{pkg.versions[0].description}}</p>
+                </td>
+            </tr>
+        </table>
+
+        <div id="edit-pkg-version-localization-actions-container">
+            <button
+                    ng-disabled="editPkgVersionLocalizationForm.$invalid"
+                    ng-click="goStorePkgVersionLocalizations()"
+                    type="submit"
+                    class="main-action">
+                <message key="editPkgVersionLocalization.action.title"></message>
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

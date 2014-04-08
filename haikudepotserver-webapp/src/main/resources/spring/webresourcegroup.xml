@@ -80,6 +80,7 @@
                             <value>/js/app/controller/editpkgscreenshotscontroller.js</value>
                             <value>/js/app/controller/editpkgcategoriescontroller.js</value>
                             <value>/js/app/controller/editusercontroller.js</value>
+                            <value>/js/app/controller/editpkgversionlocalizationcontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
@@ -116,6 +117,7 @@
                             <value>/css/banner.css</value>
                             <value>/css/breadcrumbs.css</value>
                             <value>/css/editpkgscreenshots.css</value>
+                            <value>/css/editpkgversionlocalization.css</value>
                         </list>
                     </property>
                 </bean>

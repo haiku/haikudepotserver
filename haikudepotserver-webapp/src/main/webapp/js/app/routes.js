@@ -23,6 +23,7 @@ angular.module('haikudepotserver').config(
                 .when('/pkg/:name/:version/:architectureCode/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
                 .when('/pkg/:name/:version/:architectureCode/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
                 .when('/pkg/:name/:version/:architectureCode/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
+                .when('/pkg/:name/:version/:architectureCode/editversionlocalizations',{controller:'EditPkgVersionLocalizationController', templateUrl:'/js/app/controller/editpkgversionlocalization.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
                 .when('/',{controller:'HomeController',templateUrl:'/js/app/controller/home.html'})
                 .otherwise({controller:'OtherwiseController', template: '<div></div>'});
