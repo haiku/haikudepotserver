@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.api1;
+package org.haikuos.haikudepotserver.api1;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -17,7 +17,6 @@ import com.googlecode.jsonrpc4j.Base64;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haikuos.haikudepotserver.api1.PkgApi;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
@@ -25,8 +24,8 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haikuos.haikudepotsever.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.IntegrationTestSupportService;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;

@@ -3,11 +3,9 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.support;
+package org.haikuos.haikudepotserver.support;
 
 import com.google.common.io.ByteStreams;
-import org.haikuos.haikudepotserver.support.Closeables;
-import org.haikuos.haikudepotserver.support.ImageHelper;
 import org.junit.Test;
 import static org.fest.assertions.Assertions.assertThat;
 

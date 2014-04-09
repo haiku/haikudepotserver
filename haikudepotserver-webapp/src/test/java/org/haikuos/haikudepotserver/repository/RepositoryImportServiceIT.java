@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.repository;
+package org.haikuos.haikudepotserver.repository;
 
 import com.google.common.base.Optional;
 import com.google.common.io.Files;
@@ -13,8 +13,7 @@ import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
-import org.haikuos.haikudepotserver.repository.RepositoryImportService;
-import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;

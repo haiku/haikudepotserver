@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever;
+package org.haikuos.haikudepotserver;
 
 import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;

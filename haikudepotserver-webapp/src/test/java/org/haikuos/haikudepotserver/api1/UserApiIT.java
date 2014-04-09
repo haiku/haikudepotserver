@@ -3,12 +3,11 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.api1;
+package org.haikuos.haikudepotserver.api1;
 
 import com.google.common.base.Optional;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haikuos.haikudepotserver.api1.UserApi;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
@@ -16,7 +15,7 @@ import org.haikuos.haikudepotserver.captcha.model.Captcha;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
-import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;

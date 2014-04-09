@@ -3,14 +3,13 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.api1;
+package org.haikuos.haikudepotserver.api1;
 
 import org.fest.assertions.Assertions;
-import org.haikuos.haikudepotserver.api1.CaptchaApi;
 import org.haikuos.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haikuos.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
 import org.haikuos.haikudepotserver.captcha.model.CaptchaRepository;
-import org.haikuos.haikudepotsever.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;

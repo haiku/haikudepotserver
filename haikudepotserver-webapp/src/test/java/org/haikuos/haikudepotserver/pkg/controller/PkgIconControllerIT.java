@@ -3,13 +3,12 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.pkg.controller;
+package org.haikuos.haikudepotserver.pkg.controller;
 
 import com.google.common.net.MediaType;
 import org.fest.assertions.Assertions;
-import org.haikuos.haikudepotserver.pkg.controller.PkgIconController;
-import org.haikuos.haikudepotsever.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.IntegrationTestSupportService;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 

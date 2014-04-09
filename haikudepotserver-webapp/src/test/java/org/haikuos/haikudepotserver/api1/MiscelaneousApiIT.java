@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotsever.api1;
+package org.haikuos.haikudepotserver.api1;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -11,15 +11,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haikuos.haikudepotserver.api1.MiscellaneousApi;
 import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
-import org.haikuos.haikudepotsever.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.IntegrationTestSupportService;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;

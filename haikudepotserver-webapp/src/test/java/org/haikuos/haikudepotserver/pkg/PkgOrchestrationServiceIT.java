@@ -1,16 +1,13 @@
-package org.haikuos.haikudepotsever.pkg;
+package org.haikuos.haikudepotserver.pkg;
 
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
-import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
-import org.haikuos.haikudepotsever.AbstractIntegrationTest;
-import org.haikuos.haikudepotsever.IntegrationTestSupportService;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.haikuos.pkg.model.Pkg;
 import org.haikuos.pkg.model.PkgArchitecture;
 import org.haikuos.pkg.model.PkgVersion;
