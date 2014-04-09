@@ -5,6 +5,7 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -98,13 +99,22 @@ public class PkgOrchestrationService {
     // ------------------------------
     // SEARCH
 
-    public List<PkgVersion> search(ObjectContext context, PkgSearchSpecification search) {
+    /**
+     * <p>This performs a search on the packages.  Note that the prefetch tree node that is supplied is relative to
+     * the package version.</p>
+     */
+
+    public List<PkgVersion> search(ObjectContext context, PkgSearchSpecification search, PrefetchTreeNode prefetchTreeNode) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
         Preconditions.checkNotNull(search.getArchitecture());
         Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
+
+        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+            return Collections.emptyList();
+        }
 
         // unfortunately this one became too complex to get working properly in JPQL; had to resort
         // to using raw SQL.
@@ -152,6 +162,22 @@ public class PkgOrchestrationService {
                 parameters.add(search.getPkgCategory().getCode());
             }
 
+            if(null!=search.getPkgNames()) {
+                List<String> pn = search.getPkgNames();
+
+                queryBuilder.append(" AND p.name IN (");
+
+                for(int i=0;i<pn.size();i++) {
+                    if(0!=i) {
+                        queryBuilder.append(',');
+                    }
+                    queryBuilder.append('?');
+                    parameters.add(pn.get(i));
+                }
+
+                queryBuilder.append(")");
+            }
+
             // make sure that we are dealing with the latest version in the package.
 
             queryBuilder.append(" AND pv.id = (");
@@ -171,25 +197,28 @@ public class PkgOrchestrationService {
             queryBuilder.append(" ,pv2.revision DESC NULLS LAST");
             queryBuilder.append(" LIMIT 1");
             queryBuilder.append(")");
-            queryBuilder.append(" ORDER BY");
 
-            switch(search.getSortOrdering()) {
+            if(null!=search.getSortOrdering()) {
+                queryBuilder.append(" ORDER BY");
 
-                case VERSIONVIEWCOUNTER:
-                    queryBuilder.append(" pv.view_counter DESC, p.name ASC");
-                    break;
+                switch (search.getSortOrdering()) {
 
-                case VERSIONCREATETIMESTAMP:
-                    queryBuilder.append(" pv.create_timestamp DESC");
-                    break;
+                    case VERSIONVIEWCOUNTER:
+                        queryBuilder.append(" pv.view_counter DESC, p.name ASC");
+                        break;
 
-                case NAME:
-                    queryBuilder.append(" p.name ASC");
-                    break;
+                    case VERSIONCREATETIMESTAMP:
+                        queryBuilder.append(" pv.create_timestamp DESC");
+                        break;
 
-                default:
-                    throw new IllegalStateException("unhandled sort ordering; " + search.getSortOrdering());
+                    case NAME:
+                        queryBuilder.append(" p.name ASC");
+                        break;
 
+                    default:
+                        throw new IllegalStateException("unhandled sort ordering; " + search.getSortOrdering());
+
+                }
             }
 
             queryBuilder.append(" LIMIT ?");
@@ -242,8 +271,13 @@ public class PkgOrchestrationService {
                 PkgVersion.class,
                 ExpressionFactory.inDbExp(PkgVersion.ID_PK_COLUMN, pkgVersionIds));
 
-        PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
+        if(null==prefetchTreeNode) {
+            prefetchTreeNode = new PrefetchTreeNode();
+        }
+
+        // we always want to get the package for a given version
         prefetchTreeNode.addPath(PkgVersion.PKG_PROPERTY);
+
         query.setPrefetchTree(prefetchTreeNode);
 
         List<PkgVersion> pkgVersions = context.performQuery(query);

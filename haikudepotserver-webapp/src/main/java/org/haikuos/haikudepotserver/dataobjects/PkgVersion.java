@@ -22,7 +22,6 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
-import sun.tools.tree.AndExpression;
 
 import java.util.List;
 import java.util.regex.Pattern;

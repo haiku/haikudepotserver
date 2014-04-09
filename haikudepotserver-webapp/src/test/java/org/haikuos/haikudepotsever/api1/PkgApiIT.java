@@ -11,6 +11,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import com.googlecode.jsonrpc4j.Base64;
 import junit.framework.Assert;
@@ -19,8 +20,10 @@ import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.PkgApi;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
+import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotsever.AbstractIntegrationTest;
 import org.haikuos.haikudepotsever.IntegrationTestSupportService;
@@ -131,7 +134,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgRequest request = new GetPkgRequest();
         request.architectureCode = "x86";
         request.name = "pkg1";
-        request.versionType = GetPkgRequest.VersionType.LATEST;
+        request.versionType = PkgVersionType.LATEST;
         request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
 
         // ------------------------------------
@@ -156,7 +159,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgRequest request = new GetPkgRequest();
         request.architectureCode = "x86";
         request.name = "pkg9";
-        request.versionType = GetPkgRequest.VersionType.LATEST;
+        request.versionType = PkgVersionType.LATEST;
         request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
 
         try {
@@ -185,7 +188,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgIconsResult result = pkgApi.getPkgIcons(new GetPkgIconsRequest("pkg1"));
         // ------------------------------------
 
-        Assertions.assertThat(result.pkgIcons.size()).isEqualTo(2);
+        Assertions.assertThat(result.pkgIcons.size()).isEqualTo(3);
         // check more stuff...
 
     }
@@ -289,13 +292,13 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
             Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(3);
 
-            Optional<PkgIcon> pkgIcon16Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 16);
+            Optional<org.haikuos.haikudepotserver.dataobjects.PkgIcon> pkgIcon16Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 16);
             Assertions.assertThat(pkgIcon16Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample16);
 
-            Optional<PkgIcon> pkgIcon32Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 32);
+            Optional<org.haikuos.haikudepotserver.dataobjects.PkgIcon> pkgIcon32Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 32);
             Assertions.assertThat(pkgIcon32Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample32);
 
-            Optional<PkgIcon> pkgIconHvifOptional = pkgOptionalafter.get().getPkgIcon(mediaTypeHvif, null);
+            Optional<org.haikuos.haikudepotserver.dataobjects.PkgIcon> pkgIconHvifOptional = pkgOptionalafter.get().getPkgIcon(mediaTypeHvif, null);
             Assertions.assertThat(pkgIconHvifOptional.get().getPkgIconImage().get().getData()).isEqualTo(sampleHvif);
         }
     }
@@ -314,7 +317,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext objectContext = serverRuntime.getContext();
             Optional<Pkg> pkgOptionalBefore = Pkg.getByName(objectContext, "pkg1");
-            Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(2); // 16 and 32 px sizes
+            Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(3); // 16 and 32 px sizes + hvif
         }
 
         // ------------------------------------
@@ -345,7 +348,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         for(int i=0;i<sortedScreenshots.size();i++) {
             PkgScreenshot pkgScreenshot = sortedScreenshots.get(i);
-            GetPkgScreenshotsResult.PkgScreenshot apiPkgScreenshot = result.items.get(i);
+            org.haikuos.haikudepotserver.api1.model.pkg.PkgScreenshot apiPkgScreenshot = result.items.get(i);
             Assertions.assertThat(pkgScreenshot.getCode()).isEqualTo(apiPkgScreenshot.code);
             Assertions.assertThat(pkgScreenshot.getWidth()).isEqualTo(320);
             Assertions.assertThat(pkgScreenshot.getHeight()).isEqualTo(240);
@@ -525,6 +528,104 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.pkgVersionLocalizations.size()).isEqualTo(1);
         Assertions.assertThat(result.pkgVersionLocalizations.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
         Assertions.assertThat(result.pkgVersionLocalizations.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
+    }
+
+    /**
+     * <p>This test is just checking that if too many packages are requested that it throws the right
+     * sort of exception.</p>
+     */
+
+    @Test
+    public void testGetBulkPkg__limitExceeded() throws Exception {
+
+        GetBulkPkgRequest request = new GetBulkPkgRequest();
+        request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
+        request.versionType = PkgVersionType.LATEST;
+        request.architectureCode = "x86";
+        request.naturalLanguageCode = "en";
+        request.pkgNames = Lists.newArrayList();
+
+        while(request.pkgNames.size() < PkgApi.GETBULKPKG_LIMIT + 1) {
+            request.pkgNames.add("pkg");
+        }
+
+        try {
+            // ------------------------------------
+            pkgApi.getBulkPkg(request);
+            // ------------------------------------
+            Assert.fail("expected an instance of "+ LimitExceededException.class.getSimpleName()+" to be thrown");
+        }
+        catch(LimitExceededException lee) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testGetBulkPkg__ok() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+
+        GetBulkPkgRequest request = new GetBulkPkgRequest();
+        request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
+        request.versionType = PkgVersionType.LATEST;
+        request.architectureCode = "x86";
+        request.naturalLanguageCode = "en";
+        request.pkgNames = ImmutableList.of("pkg1","pkg2","pkg3");
+
+        // ------------------------------------
+        GetBulkPkgResult result = pkgApi.getBulkPkg(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.pkgs.size()).isEqualTo(3);
+
+        // now check pkg1 because it has some in-depth data on it.
+
+        GetBulkPkgResult.Pkg pkg1 = Iterables.tryFind(result.pkgs, new Predicate<GetBulkPkgResult.Pkg>() {
+            @Override
+            public boolean apply(GetBulkPkgResult.Pkg input) {
+                return input.name.equals("pkg1");
+            }
+        }).get();
+
+        Assertions.assertThat(pkg1.name).isEqualTo("pkg1");
+        Assertions.assertThat(pkg1.modifyTimestamp).isNotNull();
+
+        Assertions.assertThat(pkg1.pkgCategoryCodes.size()).isEqualTo(1);
+        Assertions.assertThat(pkg1.pkgCategoryCodes.get(0)).isEqualTo("GRAPHICS");
+
+        Assertions.assertThat(pkg1.userRatingAverage).isNotNull();
+        Assertions.assertThat(pkg1.userRatingAverage).isGreaterThanOrEqualTo(0.0f);
+        Assertions.assertThat(pkg1.userRatingAverage).isLessThanOrEqualTo(5.0f);
+
+        // there are three screen-shots loaded, but they are all the same so we can just check that the first
+        // one is correct.
+        Assertions.assertThat(pkg1.pkgScreenshots.size()).isEqualTo(3);
+        Assertions.assertThat(pkg1.pkgScreenshots.get(0).code).isNotNull();
+        Assertions.assertThat(pkg1.pkgScreenshots.get(0).width).isEqualTo(320);
+        Assertions.assertThat(pkg1.pkgScreenshots.get(0).height).isEqualTo(240);
+
+        // basic check here to make sure that the HPKR data is able to be flagged as being there.
+        Assertions.assertThat(pkg1.pkgIcons.size()).isEqualTo(3);
+        Assertions.assertThat(
+                Iterables.tryFind(pkg1.pkgIcons, new Predicate<org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon>() {
+            @Override
+            public boolean apply(org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon input) {
+                return input.mediaTypeCode.equals(org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
+            }
+        }).isPresent()).isTrue();
+
+        Assertions.assertThat(pkg1.versions.size()).isEqualTo(1);
+        Assertions.assertThat(pkg1.versions.get(0).naturalLanguageCode).isEqualTo("en");
+        Assertions.assertThat(pkg1.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
+        Assertions.assertThat(pkg1.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
+        Assertions.assertThat(pkg1.versions.get(0).userRatingAverage).isNotNull();
+        Assertions.assertThat(pkg1.versions.get(0).userRatingAverage).isGreaterThanOrEqualTo(0.0f);
+        Assertions.assertThat(pkg1.versions.get(0).userRatingAverage).isLessThanOrEqualTo(5.0f);
+        Assertions.assertThat(pkg1.versions.get(0).major).isEqualTo("1");
+        Assertions.assertThat(pkg1.versions.get(0).micro).isEqualTo("2");
+        Assertions.assertThat(pkg1.versions.get(0).revision).isEqualTo(4);
+        Assertions.assertThat(pkg1.versions.get(0).preRelease).isNull();
+        Assertions.assertThat(pkg1.versions.get(0).minor).isNull();
+
     }
 
 }

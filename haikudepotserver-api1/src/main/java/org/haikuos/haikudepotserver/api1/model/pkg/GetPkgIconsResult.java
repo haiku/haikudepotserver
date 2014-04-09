@@ -9,13 +9,6 @@ import java.util.List;
 
 public class GetPkgIconsResult {
 
-    public List<GetPkgIconsResult.PkgIcon> pkgIcons;
-
-    public static class PkgIcon {
-
-        public String mediaTypeCode;
-        public Integer size;
-
-    }
+    public List<PkgIcon> pkgIcons;
 
 }

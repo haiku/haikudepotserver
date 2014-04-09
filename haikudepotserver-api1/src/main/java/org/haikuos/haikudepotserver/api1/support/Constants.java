@@ -12,5 +12,6 @@ public interface Constants {
     public final static int ERROR_CODE_CAPTCHABADRESPONSE = -32802;
     public final static int ERROR_CODE_AUTHORIZATIONFAILURE = -32803;
     public final static int ERROR_CODE_BADPKGICON = -32804;
+    public final static int ERROR_CODE_LIMITEXCEEDED = -32805;
 
 }

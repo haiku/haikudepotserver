@@ -12,10 +12,10 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
     public static class Pkg {
         public String name;
         public Long modifyTimestamp;
-        public Version version;
+        public SearchPkgsResult.PkgVersion version;
     }
 
-    public static class Version {
+    public static class PkgVersion {
         public String major;
         public String minor;
         public String micro;

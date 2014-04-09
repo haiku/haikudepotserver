@@ -13,4 +13,6 @@ public class GetRuntimeInformationResult {
 
     public Long startTimestamp;
 
+    public Integer getBulkPkgRequestLimit;
+
 }

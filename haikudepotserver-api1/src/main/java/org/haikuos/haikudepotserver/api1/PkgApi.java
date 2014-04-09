@@ -8,6 +8,7 @@ package org.haikuos.haikudepotserver.api1;
 import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
+import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 
 /**
@@ -16,6 +17,8 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 
 @JsonRpcService("/api/v1/pkg")
 public interface PkgApi {
+
+    public final static Integer GETBULKPKG_LIMIT = 50;
 
     /**
      * <p>This method will ensure that the categories configured on the nominated package are as per the list of
@@ -105,5 +108,28 @@ public interface PkgApi {
      */
 
     GetPkgVersionLocalizationsResult getPkgVersionLocalizations(GetPkgVersionLocalizationsRequest getPkgVersionLocalizationsRequest) throws ObjectNotFoundException;
+
+    /**
+     * <p>This method will obtain data about some named packages.  Note that the quantity of packages requested should
+     * not exceed {@link #GETBULKPKG_LIMIT}; if it does exceed this limit then an instance of
+     * {@link org.haikuos.haikudepotserver.api1.support.LimitExceededException} will be thrown.</p>
+     *
+     * <p>This limit can be obtained from the
+     * {@link org.haikuos.haikudepotserver.api1.MiscellaneousApi#getRuntimeInformation(org.haikuos.haikudepotserver.api1.model.miscellaneous.GetRuntimeInformationRequest)}
+     * method.
+     * </p>
+     *
+     * <p>If a package was not able to be found then it will simply not appear in the results.  If reference data
+     * objects such as the architecture was unable to be found then this method will throw an instance of
+     * {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}.</p>
+     *
+     * <p>The definition of architecture on this method is strict; will only return data for which there is
+     * a version on that architecture.</p>
+     *
+     * <p>Various elements of the response can be filtered in or out by using the filter attribute on the request
+     * object.</p>
+     */
+
+    GetBulkPkgResult getBulkPkg(GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException;
 
 }

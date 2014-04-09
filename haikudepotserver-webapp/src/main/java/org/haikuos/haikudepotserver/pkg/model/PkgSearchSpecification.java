@@ -9,6 +9,8 @@ import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
 
+import java.util.List;
+
 /**
  * <p>This model object specifies the parameters of a search into the system for packages.  See the
  * {@link org.haikuos.haikudepotserver.pkg.PkgOrchestrationService} for further detail on this.</p>
@@ -22,6 +24,8 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
         VERSIONVIEWCOUNTER
     }
 
+    private List<String> pkgNames;
+
     private Architecture architecture;
 
     private PkgCategory pkgCategory;
@@ -29,6 +33,14 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
     private Number daysSinceLatestVersion;
 
     private SortOrdering sortOrdering;
+
+    public List<String> getPkgNames() {
+        return pkgNames;
+    }
+
+    public void setPkgNames(List<String> pkgNames) {
+        this.pkgNames = pkgNames;
+    }
 
     public Architecture getArchitecture() {
         return architecture;

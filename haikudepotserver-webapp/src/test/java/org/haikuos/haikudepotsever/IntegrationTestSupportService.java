@@ -58,7 +58,7 @@ public class IntegrationTestSupportService {
         }
     }
 
-    private void addPkgIcon(ObjectContext objectContext, Pkg pkg, int size) {
+    private void addPngPkgIcon(ObjectContext objectContext, Pkg pkg, int size) {
         InputStream inputStream = null;
 
         try {
@@ -78,9 +78,30 @@ public class IntegrationTestSupportService {
         }
     }
 
+    private void addHvifPkgIcon(ObjectContext objectContext, Pkg pkg) {
+        InputStream inputStream = null;
+
+        try {
+            inputStream = this.getClass().getResourceAsStream("/sample.hvif");
+            pkgService.storePkgIconImage(
+                    inputStream,
+                    MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get(),
+                    null,
+                    objectContext,
+                    pkg);
+        }
+        catch(Exception e) {
+            throw new IllegalStateException("an issue has arisen loading an icon",e);
+        }
+        finally {
+            Closeables.closeQuietly(inputStream);
+        }
+    }
+
     private void addPkgIcons(ObjectContext objectContext, Pkg pkg) {
-        addPkgIcon(objectContext, pkg, 16);
-        addPkgIcon(objectContext, pkg, 32);
+        addPngPkgIcon(objectContext, pkg, 16);
+        addPngPkgIcon(objectContext, pkg, 32);
+        addHvifPkgIcon(objectContext, pkg);
     }
 
     public StandardTestData createStandardTestData() {
@@ -103,19 +124,25 @@ public class IntegrationTestSupportService {
         result.pkg1.setActive(true);
         result.pkg1.setName("pkg1");
 
+        {
+            PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
+            result.pkg1.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+            pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "GRAPHICS").get());
+        }
+
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
         addPkgIcons(context, result.pkg1);
 
-        result.pkg1Version1 = context.newObject(PkgVersion.class);
-        result.pkg1Version1.setActive(Boolean.FALSE);
-        result.pkg1Version1.setArchitecture(x86);
-        result.pkg1Version1.setMajor("1");
-        result.pkg1Version1.setMicro("2");
-        result.pkg1Version1.setRevision(3);
-        result.pkg1Version1.setPkg(result.pkg1);
-        result.pkg1Version1.setRepository(result.repository);
+        result.pkg1Version1x86 = context.newObject(PkgVersion.class);
+        result.pkg1Version1x86.setActive(Boolean.FALSE);
+        result.pkg1Version1x86.setArchitecture(x86);
+        result.pkg1Version1x86.setMajor("1");
+        result.pkg1Version1x86.setMicro("2");
+        result.pkg1Version1x86.setRevision(3);
+        result.pkg1Version1x86.setPkg(result.pkg1);
+        result.pkg1Version1x86.setRepository(result.repository);
 
         result.pkg1Version2x86 = context.newObject(PkgVersion.class);
         result.pkg1Version2x86.setActive(Boolean.TRUE);
@@ -203,7 +230,7 @@ public class IntegrationTestSupportService {
         public Repository repository;
 
         public Pkg pkg1;
-        public PkgVersion pkg1Version1;
+        public PkgVersion pkg1Version1x86;
         public PkgVersion pkg1Version2x86;
         public PkgVersion pkg1Version2x86_gcc2;
 

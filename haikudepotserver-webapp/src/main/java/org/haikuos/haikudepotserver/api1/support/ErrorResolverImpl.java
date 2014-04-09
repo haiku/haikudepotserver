@@ -29,6 +29,13 @@ public class ErrorResolverImpl implements ErrorResolver {
     @Override
     public JsonError resolveError(Throwable t, Method method, List<JsonNode> arguments) {
 
+        if(LimitExceededException.class.isAssignableFrom(t.getClass())) {
+            return new JsonError(
+                    Constants.ERROR_CODE_LIMITEXCEEDED,
+                    "limitexceeded",
+                    null);
+        }
+
         // output for authorization failure.
 
         if(AuthorizationFailureException.class.isAssignableFrom(t.getClass())) {

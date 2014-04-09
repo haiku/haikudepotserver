@@ -22,11 +22,11 @@ public class GetPkgResult {
 
     public Long modifyTimestamp;
 
-    public List<Version> versions;
+    public List<GetPkgResult.PkgVersion> versions;
 
     public List<String> pkgCategoryCodes;
 
-    public static class Version {
+    public static class PkgVersion {
 
         public String major;
         public String minor;
@@ -50,16 +50,11 @@ public class GetPkgResult {
 
         public List<String> licenses;
         public List<String> copyrights;
-        public List<Url> urls;
+        public List<PkgVersionUrl> urls;
 
         public Long viewCounter;
 
-    }
-
-    public static class Url {
-
-        public String url;
-        public String urlTypeCode;
+        public Float userRatingAverage;
 
     }
 
