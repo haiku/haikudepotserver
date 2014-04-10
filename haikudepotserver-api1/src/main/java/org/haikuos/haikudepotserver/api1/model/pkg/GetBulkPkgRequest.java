@@ -14,6 +14,7 @@ public class GetBulkPkgRequest {
         PKGCATEGORIES,
         PKGICONS,
         USERRATINGAVERAGES,
+        PKGVERSIONLOCALIZATIONDESCRIPTIONS,
     };
 
     public List<String> pkgNames;

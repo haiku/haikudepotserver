@@ -846,7 +846,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     private GetBulkPkgResult.PkgVersion createGetBulkPkgResultPkgVersion(
             PkgVersion pkgVersion,
-            NaturalLanguage naturalLanguage) {
+            NaturalLanguage naturalLanguage,
+            boolean includeDescription) {
 
         Preconditions.checkNotNull(pkgVersion);
         Preconditions.checkNotNull(naturalLanguage);
@@ -868,7 +869,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         if(pkgVersionLocalizationOptional.isPresent()) {
-            version.description = pkgVersionLocalizationOptional.get().getDescription();
+
+            if(includeDescription) {
+                version.description = pkgVersionLocalizationOptional.get().getDescription();
+            }
+
             version.summary = pkgVersionLocalizationOptional.get().getSummary();
             version.naturalLanguageCode = pkgVersionLocalizationOptional.get().getNaturalLanguage().getCode();
         }
@@ -996,7 +1001,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                             switch(getBulkPkgRequest.versionType) {
                                 case LATEST:
                                 {
-                                    GetBulkPkgResult.PkgVersion resultPkgVersion = createGetBulkPkgResultPkgVersion(input, naturalLanguage);
+                                    GetBulkPkgResult.PkgVersion resultPkgVersion = createGetBulkPkgResultPkgVersion(
+                                            input,
+                                            naturalLanguage,
+                                            getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGVERSIONLOCALIZATIONDESCRIPTIONS)
+                                    );
 
                                     // TODO; put real values in once they are available.
                                     if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.USERRATINGAVERAGES)) {
