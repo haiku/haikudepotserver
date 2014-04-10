@@ -18,6 +18,7 @@ import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
+import org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
@@ -449,13 +450,16 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
 
-        UpdatePkgVersionLocalizationRequest request = new UpdatePkgVersionLocalizationRequest();
+        UpdatePkgVersionLocalizationsRequest request = new UpdatePkgVersionLocalizationsRequest();
         request.pkgName = data.pkg1.getName();
         request.architectureCode = "x86";
-        request.description = "testDescription";
-        request.naturalLanguageCode = naturalLanguageCode;
-        request.summary = "testSummary";
         request.replicateToOtherArchitecturesWithSameEnglishContent = Boolean.TRUE;
+        request.pkgVersionLocalizations = Collections.singletonList(
+                new PkgVersionLocalization(
+                        naturalLanguageCode,
+                        "testSummary",
+                        "testDescription")
+        );
 
         // ------------------------------------
         pkgApi.updatePkgVersionLocalization(request);
@@ -469,7 +473,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
                     pkgOptional.get(),
                     Collections.singletonList(Architecture.getByCode(context, "x86").get()));
 
-            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
+            Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization> pkgVersionLocalizationOptional =
+                    pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
 
             Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
             Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");
@@ -486,7 +491,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
                     pkgOptional.get(),
                     Collections.singletonList(Architecture.getByCode(context, "x86_gcc2").get()));
 
-            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
+            Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization> pkgVersionLocalizationOptional =
+                    pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
 
             Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
             Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");

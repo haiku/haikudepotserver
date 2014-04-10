@@ -677,7 +677,9 @@ public class PkgOrchestrationService {
 
     /**
      * <p>This method will either find the existing localization or create a new one.  It will then set the localized
-     * values for the package.</p>
+     * values for the package.  Note that null or empty values will be treated the same and these values will be
+     * trimmed.  Note that if the summary and description are null or empty string then if there is an existing
+     * localization value, that this localization value will be deleted.</p>
      */
 
     public PkgVersionLocalization updatePkgVersionLocalization(
@@ -688,26 +690,57 @@ public class PkgOrchestrationService {
             String description) {
 
         Preconditions.checkNotNull(naturalLanguage);
-        Preconditions.checkState(!Strings.isNullOrEmpty(summary));
-        Preconditions.checkState(!Strings.isNullOrEmpty(description));
+
+        if(null!=summary) {
+            summary = summary.trim();
+        }
+
+        if(null!=description) {
+            description = description.trim();
+        }
+
+        boolean summaryNullOrEmpty = Strings.isNullOrEmpty(summary);
+        boolean descriptionNullOrEmpty = Strings.isNullOrEmpty(description);
 
         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional =
                 pkgVersion.getPkgVersionLocalization(naturalLanguage);
-        PkgVersionLocalization pkgVersionLocalization;
 
-        if(!pkgVersionLocalizationOptional.isPresent()) {
-            pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-            pkgVersionLocalization.setNaturalLanguage(naturalLanguage);
-            pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+        if(summaryNullOrEmpty != descriptionNullOrEmpty) {
+            throw new IllegalStateException("it is not possible to store a pkg version localization if either of the summary or description are missing");
+        }
+
+        if(summaryNullOrEmpty && descriptionNullOrEmpty) {
+
+            if(pkgVersionLocalizationOptional.isPresent()) {
+                pkgVersion.removeToManyTarget(
+                        PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY,
+                        pkgVersionLocalizationOptional.get(),
+                        true);
+
+                context.deleteObjects(pkgVersionLocalizationOptional.get());
+            }
+
+            return null;
+
         }
         else {
-            pkgVersionLocalization = pkgVersionLocalizationOptional.get();
+
+            PkgVersionLocalization pkgVersionLocalization;
+
+            if (!pkgVersionLocalizationOptional.isPresent()) {
+                pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
+                pkgVersionLocalization.setNaturalLanguage(naturalLanguage);
+                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+            } else {
+                pkgVersionLocalization = pkgVersionLocalizationOptional.get();
+            }
+
+            pkgVersionLocalization.setDescription(description);
+            pkgVersionLocalization.setSummary(summary);
+
+            return pkgVersionLocalization;
         }
 
-        pkgVersionLocalization.setDescription(description);
-        pkgVersionLocalization.setSummary(summary);
-
-        return pkgVersionLocalization;
     }
 
     /**

@@ -160,6 +160,7 @@ button.main-action {
 
 button[disabled] {
     border: 1px solid darkgray;
+    color: darkgray;
 }
 
 button.main-action[disabled] {

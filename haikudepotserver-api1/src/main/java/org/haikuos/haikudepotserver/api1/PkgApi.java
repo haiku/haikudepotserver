@@ -100,7 +100,7 @@ public interface PkgApi {
      * localization.</p>
      */
 
-    UpdatePkgVersionLocalizationResult updatePkgVersionLocalization(UpdatePkgVersionLocalizationRequest updatePkgVersionLocalizationRequest) throws ObjectNotFoundException;
+    UpdatePkgVersionLocalizationsResult updatePkgVersionLocalization(UpdatePkgVersionLocalizationsRequest updatePkgVersionLocalizationRequest) throws ObjectNotFoundException;
 
     /**
      * <p>This method will return the package version localizations for the nominated package.  It will only return

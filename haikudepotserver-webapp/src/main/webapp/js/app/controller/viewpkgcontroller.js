@@ -6,11 +6,11 @@
 angular.module('haikudepotserver').controller(
     'ViewPkgController',
     [
-        '$scope','$log','$location','$routeParams',
+        '$scope','$log','$location','$routeParams','$rootScope',
         'jsonRpc','constants','userState','errorHandling',
         'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
         function(
-            $scope,$log,$location,$routeParams,
+            $scope,$log,$location,$routeParams,$rootScope,
             jsonRpc,constants,userState,errorHandling,
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs) {
 
@@ -232,6 +232,16 @@ angular.module('haikudepotserver').controller(
                 );
 
             }
+
+            // ---------------------
+            // EVENTS
+
+            $rootScope.$on(
+                "naturalLanguageChange",
+                function() {
+                    refetchPkg();
+                }
+            );
 
         }
     ]

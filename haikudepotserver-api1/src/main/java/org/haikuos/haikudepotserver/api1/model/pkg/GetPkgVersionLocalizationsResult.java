@@ -11,14 +11,4 @@ public class GetPkgVersionLocalizationsResult {
 
     public List<PkgVersionLocalization> pkgVersionLocalizations;
 
-    public static class PkgVersionLocalization {
-
-        public String naturalLanguageCode;
-
-        public String summary;
-
-        public String description;
-
-    }
-
 }

@@ -14,12 +14,16 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,pkgIcon,errorHandling,
             breadcrumbs,userState,referenceData) {
 
+            var ARCHITECTUREAPPLICABILITY_ALL = '__all';
+
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.translations = undefined;
+            $scope.architectureCode = $routeParams.architectureCode;
+            $scope.selectedArchitectureApplicability = ARCHITECTUREAPPLICABILITY_ALL;
+            $scope.originalTranslations = undefined;
             $scope.selectedTranslation = undefined;
-            $scope.editPkgVersionLocalizations = {
-            };
+            $scope.editPkgVersionLocalizations = { };
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.pkg || $scope.amSaving || undefined == $scope.translations;
@@ -27,7 +31,38 @@ angular.module('haikudepotserver').controller(
 
             $scope.isTranslationSelected = function(translation) {
                 return $scope.selectedTranslation.naturalLanguage.code == translation.naturalLanguage.code;
+            };
+
+            function findOriginalTranslation(naturalLanguageCode) {
+                var result = _.find(
+                    $scope.originalTranslations,
+                    function(t) {
+                        return t.naturalLanguage.code == naturalLanguageCode;
+                    }
+                );
+
+                if(!result) {
+                    throw 'was not able to find the original translation';
+                }
+
+                return result;
             }
+
+            /**
+             * <p>The only requirement for a translation to be valid is that if the description and the summary
+             * are either present or not present.  It is not possible to have a summary and not a description
+             * and vica-versa.</p>
+             */
+
+            $scope.isTranslationValid = function(translation) {
+                if(translation) {
+                    var hasSummary = translation.summary && translation.summary.length;
+                    var hasDescription = translation.description && translation.description.length;
+                    return !!hasDescription == !!hasSummary;
+                }
+
+                return true;
+            };
 
             /**
              * <p>This colours the text of the language to indicate if the translation is missing, invalid or
@@ -56,7 +91,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return classes;
-            }
+            };
 
             $scope.goChooseTranslation = function(translation) {
                 if(!translation) {
@@ -64,7 +99,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 $scope.selectedTranslation = translation;
-            }
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.editPkgIconForm[name].$invalid ? ['form-control-group-error'] : [];
@@ -86,27 +121,68 @@ angular.module('haikudepotserver').controller(
 
             function setupTranslations() {
                 referenceData.naturalLanguages().then(
-                    function(data) {
-                        $scope.translations = _.map(
-                            _.reject(
-                                data,
-                                function(d) {
-                                    return d.code == constants.NATURALLANGUAGECODE_ENGLISH;
-                                }
-                            ),
-                            function(d) {
-                                return {
-                                    naturalLanguage:d,
-                                    summary:'',
-                                    description:'',
-                                    wasEdited:false
-                                };
+                    function(naturalLanguageData) {
+
+                        // now we need to get the _existing_ translations for the package.
+
+                        jsonRpc.call(
+                            constants.ENDPOINT_API_V1_PKG,
+                            'getPkgVersionLocalizations',
+                            [{
+                                pkgName: $routeParams.name,
+                                naturalLanguageCodes : _.map(
+                                    naturalLanguageData,
+                                    function(d) {
+                                        return d.code;
+                                    }
+                                ),
+                                architectureCode : $routeParams.architectureCode
+                            }]
+                        )
+                        .then(
+                            function(pkgVersionLocalizationsData) {
+
+                                // now merge the data about the various natural languages together with the data about
+                                // the packages existing localizations and we should have enough working data to setup
+                                // an internal data model.
+
+                                $scope.translations = _.map(
+
+                                    // don't include English as a localization target because the English language will
+                                    // have been included in the hpkg data from the repository.
+
+                                    _.reject(
+                                        naturalLanguageData,
+                                        function(d) {
+                                            return d.code == constants.NATURALLANGUAGECODE_ENGLISH;
+                                        }
+                                    ),
+                                    function(d) {
+
+                                        var pkgVersionLocalizationData = _.findWhere(
+                                            pkgVersionLocalizationsData.pkgVersionLocalizations,
+                                            { naturalLanguageCode : d.code }
+                                        );
+
+                                        return {
+                                            naturalLanguage:d,
+                                            summary: pkgVersionLocalizationData ? pkgVersionLocalizationData.summary : '',
+                                            description: pkgVersionLocalizationData ? pkgVersionLocalizationData.description : '',
+                                            wasEdited:false
+                                        };
+                                    }
+                                );
+
+                                $scope.originalTranslations = angular.copy($scope.translations);
+                                $scope.selectedTranslation = $scope.translations[0];
+
+                                $log.info('did setup translations');
+
+                            },
+                            function(jsonRpcEnvelope) {
+                                errorHandling.handleJsonRpcError(jsonRpcEnvelope);
                             }
                         );
-
-                        $scope.selectedTranslation = $scope.translations[0];
-
-                        $log.info('did setup translations');
                     },
                     function() {
                         errorHandling.navigateToError();
@@ -140,8 +216,98 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
+            // --------------------------
+            // SAVE CHANGES
+
+            /**
+             * <p>It is possible to save the translations if something has been edited and if there are no validity
+             * problems with the translations.</p>
+             */
+
+            $scope.canSave = function() {
+                return !!_.findWhere(
+                    $scope.translations,
+                    { wasEdited : true }
+                ) &&
+                    !_.find(
+                        $scope.translations,
+                        function(t) {
+                            return !$scope.isTranslationValid(t);
+                        }
+                    );
+            };
+
+            /**
+             * <p>This method will persist those changes to the translations back into the server.</p>
+             */
+
+            $scope.saveEditedLocalizations = function() {
+
+                 if(!$scope.canSave()) {
+                     throw 'not possible to save edited localizations';
+                 }
+
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_PKG,
+                    'updatePkgVersionLocalization',
+                    [{
+                        pkgName: $routeParams.name,
+                        architectureCode: $routeParams.architectureCode,
+                        replicateToOtherArchitecturesWithSameEnglishContent: !!$scope.selectedArchitectureApplicability == ARCHITECTUREAPPLICABILITY_ALL,
+                        pkgVersionLocalizations: _.map(
+                            _.filter(
+                                $scope.translations,
+                                function(t) { return t.wasEdited; }
+                            ),
+                            function(t) {
+                                return {
+                                    naturalLanguageCode : t.naturalLanguage.code,
+                                    summary : t.summary,
+                                    description : t.description
+                                };
+                            }
+                        )
+                    }]
+                ).then(
+                    function() {
+                        $log.info('updated localization on '+$routeParams.name+' pkg');
+                        breadcrumbs.popAndNavigate();
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+
+            }
+
+            // --------------------------
+            // INIT
+
             refetchPkg();
             setupTranslations();
+
+            // --------------------------
+            // EVENT HANDLING
+
+            // this watch will keep an eye on the summary and description.  If they have changed in isolation (ie;
+            // the selected translation has not changed, then we can mark the translation as edited.
+
+            $scope.$watch(
+                'selectedTranslation',
+                function(newValue, oldValue) {
+                    if(null!=oldValue) {
+                        if(oldValue.naturalLanguage.code == newValue.naturalLanguage.code &&
+                            (oldValue.summary != newValue.summary || oldValue.description != newValue.description) ) {
+
+                            // quick check to see if the new values equal the original values.
+
+                            var originalTranslation = findOriginalTranslation(newValue.naturalLanguage.code);
+                            $scope.selectedTranslation.wasEdited = (originalTranslation.summary != newValue.summary) ||
+                                (originalTranslation.description != newValue.description);
+                        }
+                    }
+                },
+                true);
 
         }
     ]

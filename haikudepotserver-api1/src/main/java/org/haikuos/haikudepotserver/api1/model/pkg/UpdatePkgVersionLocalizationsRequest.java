@@ -5,11 +5,11 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class UpdatePkgVersionLocalizationRequest {
+import java.util.List;
+
+public class UpdatePkgVersionLocalizationsRequest {
 
     public String pkgName;
-
-    public String naturalLanguageCode;
 
     public String architectureCode;
 
@@ -22,8 +22,6 @@ public class UpdatePkgVersionLocalizationRequest {
 
     public Boolean replicateToOtherArchitecturesWithSameEnglishContent;
 
-    public String description;
-
-    public String summary;
+    public List<PkgVersionLocalization> pkgVersionLocalizations;
 
 }

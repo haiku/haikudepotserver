@@ -29,6 +29,10 @@
     padding: 4px;
 }
 
+#natural-translations-cell .selected-translation {
+    font-weight: bold;
+}
+
 #english-original-cell {
     width: 30%;
     border-left : 1px solid black;
@@ -37,6 +41,16 @@
 }
 
 #translation-cell {
+}
+
+#translation-cell-summary {
+    width: 100%;
+    height: 64px;
+}
+
+#translation-cell-description {
+    width: 100%;
+    height: 200px;
 }
 
 #english-original-cell h1 {
@@ -60,8 +74,4 @@
 #edit-pkg-version-localization-actions-container {
     margin-top: 16px;
     margin-left: 16%
-}
-
-.selected-translation {
-    font-weight: bold;
 }

@@ -17,30 +17,52 @@
                             <message key="{{'naturalLanguage.' + translation.naturalLanguage.code}}"></message>
                         </a>
                         ({{translation.naturalLanguage.code}})
+                        <span ng-show="translation.wasEdited" class="muted">*</span>
                     </div>
                 </td>
                 <td id="translation-cell">
-                    <H1>WORK IN PROGRESS</H1>
-                    <p>Lorem ipsum dolor sit amet, no dolore persecuti necessitatibus sed, eruditi mnesarchum eloquentiam pri in. Te sit lobortis eleifend, aperiam nominavi maluisset vel ut. Ex vim docendi expetendis voluptatum. Partem aliquam pro te, no doctus prompta repudiandae eum. No vix veniam aperiri, detraxit referrentur reprehendunt in duo.</p>
+
+                    <div ng-show="!isTranslationValid(selectedTranslation)" class="alert-container">
+                        <message key="editPkgVersionLocalization.summaryAndDescription.required"></message>
+                    </div>
+
+                    <h2><message key="editPkgVersionLocalization.summary.title"></message></h2>
+                    <textarea ng-model="selectedTranslation.summary" id="translation-cell-summary"></textarea>
+
+                    <h2><message key="editPkgVersionLocalization.description.title"></message></h2>
+                    <textarea ng-model="selectedTranslation.description" id="translation-cell-description"></textarea>
+
                 </td>
                 <td id="english-original-cell">
-                    <h1>English Original</h1>
-                    <h2>Summary</h2>
+                    <h1><message key="editPkgVersionLocalization.englishOriginal.title"></message></h1>
+                    <h2><message key="editPkgVersionLocalization.summary.title"></message></h2>
                     <p>{{pkg.versions[0].summary}}</p>
-                    <h2>Description</h2>
+                    <h2><message key="editPkgVersionLocalization.description.title"></message></h2>
                     <p>{{pkg.versions[0].description}}</p>
                 </td>
             </tr>
         </table>
 
         <div id="edit-pkg-version-localization-actions-container">
-            <button
-                    ng-disabled="editPkgVersionLocalizationForm.$invalid"
-                    ng-click="goStorePkgVersionLocalizations()"
-                    type="submit"
-                    class="main-action">
-                <message key="editPkgVersionLocalization.action.title"></message>
-            </button>
+            <p>
+                <em>Effects:</em>
+                &nbsp;&nbsp;
+                <input type="radio" name="selectedArchitectureApplicability" value="{{architectureCode}}" ng-model="selectedArchitectureApplicability">
+                <message key="editPkgVersionLocalization.selectedArchitectureApplicability.singleArchitecture.title" parameters="[architectureCode]"></message>
+                &nbsp;&nbsp;
+                <input type="radio" name="selectedArchitectureApplicability" value="__all" ng-model="selectedArchitectureApplicability">
+                <message key="editPkgVersionLocalization.selectedArchitectureApplicability.allArchitectures.title" parameters="[pkg.name]"></message>
+            </p>
+
+            <div>
+                <button
+                        ng-disabled="!canSave()"
+                        ng-click="saveEditedLocalizations()"
+                        type="submit"
+                        class="main-action">
+                    <message key="editPkgVersionLocalization.action.title"></message>
+                </button>
+            </div>
         </div>
 
     </form>
