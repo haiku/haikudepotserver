@@ -253,7 +253,7 @@ angular.module('haikudepotserver').controller(
                     [{
                         pkgName: $routeParams.name,
                         architectureCode: $routeParams.architectureCode,
-                        replicateToOtherArchitecturesWithSameEnglishContent: !!$scope.selectedArchitectureApplicability == ARCHITECTUREAPPLICABILITY_ALL,
+                        replicateToOtherArchitecturesWithSameEnglishContent: $scope.selectedArchitectureApplicability == ARCHITECTUREAPPLICABILITY_ALL,
                         pkgVersionLocalizations: _.map(
                             _.filter(
                                 $scope.translations,

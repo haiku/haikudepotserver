@@ -79,9 +79,7 @@
                 <span ng-show="pkgCategories && !pkgCategories.length">
                     <message key="viewPkg.categories.none"></message>
                 </span>
-                <span ng-show="pkgCategories.length">
-                    <span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span>{{pkgCategory.name}}</span>
-                </span>
+                <span ng-show="pkgCategories.length"><span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span><pkg-category-label pkg-category="pkgCategory"></pkg-category-label></span>
                 </dd>
                 <dt><message key="viewPkg.versionViews.title"></message></dt>
                 <dd>{{pkg.versions[0].viewCounter}}</dd>

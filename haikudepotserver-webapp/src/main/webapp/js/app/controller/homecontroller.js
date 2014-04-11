@@ -71,8 +71,8 @@ angular.module('haikudepotserver').controller(
                     function(o) {
                         messageSource
                             .get(
-                                userState.naturalLanguageCode(),
-                                o.titleKey)
+                            userState.naturalLanguageCode(),
+                            o.titleKey)
                             .then(
                             function(value) {
                                 o.title = value;
@@ -86,13 +86,6 @@ angular.module('haikudepotserver').controller(
             }
 
             updateViewCriteriaTypeOptionsTitles();
-
-            $rootScope.$on(
-                "naturalLanguageChange",
-                function() {
-                    updateViewCriteriaTypeOptionsTitles();
-                }
-            );
 
             $scope.$watch('selectedPkgCategory', function() {
                 var option = $scope.selectedViewCriteriaTypeOption;
@@ -187,12 +180,44 @@ angular.module('haikudepotserver').controller(
 
                 referenceData.pkgCategories().then(
                     function(data) {
-                        $scope.pkgCategories = data;
-                        $scope.selectedPkgCategory = data[0]; // will trigger refetch of packages if required.
+                        $scope.pkgCategories = _.map(
+                            data,
+                            function(c) {
+                                return {
+                                    code : c.code,
+                                    titleKey : 'pkgCategory.' + c.code.toLowerCase() + '.title',
+                                    title : c.name // temporary.
+                                }
+                            }
+                        );
+
+                        $scope.selectedPkgCategory = $scope.pkgCategories[0]; // will trigger refetch of packages if required.
+
+                        updatePkgCategoryTitles();
                     },
                     function() {
                         $log.error('unable to obtain the list of pkg categories');
                         errorHandling.navigateToError();
+                    }
+                );
+            }
+
+            function updatePkgCategoryTitles() {
+                _.each(
+                    $scope.pkgCategories,
+                    function(c) {
+                        messageSource.get(
+                            userState.naturalLanguageCode(),
+                            c.titleKey
+                        )
+                            .then(
+                            function(value) {
+                                c.title = value;
+                            },
+                            function() { // error already logged
+                                c.title = '???';
+                            }
+                        );
                     }
                 );
             }
@@ -305,6 +330,18 @@ angular.module('haikudepotserver').controller(
                 }
 
             }
+
+            // ---- EVENT HANDLING
+
+            $rootScope.$on(
+                "naturalLanguageChange",
+                function() {
+                    updateViewCriteriaTypeOptionsTitles();
+                    updatePkgCategoryTitles();
+                }
+            );
+
+
         }
     ]
 );
