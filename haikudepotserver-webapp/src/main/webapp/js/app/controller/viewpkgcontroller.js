@@ -236,7 +236,7 @@ angular.module('haikudepotserver').controller(
             // ---------------------
             // EVENTS
 
-            $rootScope.$on(
+            $scope.$on(
                 "naturalLanguageChange",
                 function() {
                     refetchPkg();

@@ -53,7 +53,7 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
                         return [];
                     }
 
-                    $rootScope.$on(
+                    $scope.$on(
                         "breadcrumbChangeSuccess",
                         function(stack) {
                             $scope.stack = breadcrumbs.stack();

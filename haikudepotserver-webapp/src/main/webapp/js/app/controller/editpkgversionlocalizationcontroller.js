@@ -247,6 +247,8 @@ angular.module('haikudepotserver').controller(
                      throw 'not possible to save edited localizations';
                  }
 
+                $scope.amSaving = true;
+
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_PKG,
                     'updatePkgVersionLocalization',

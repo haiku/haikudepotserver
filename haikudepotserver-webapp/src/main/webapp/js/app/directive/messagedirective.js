@@ -77,7 +77,7 @@ angular.module('haikudepotserver').directive('message',[
                     }
                 );
 
-                $rootScope.$on(
+                $scope.$on(
                     "naturalLanguageChange",
                     function() {
                         updateValue(attributes['key']);

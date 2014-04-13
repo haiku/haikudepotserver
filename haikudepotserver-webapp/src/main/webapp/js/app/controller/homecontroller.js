@@ -333,7 +333,7 @@ angular.module('haikudepotserver').controller(
 
             // ---- EVENT HANDLING
 
-            $rootScope.$on(
+            $scope.$on(
                 "naturalLanguageChange",
                 function() {
                     updateViewCriteriaTypeOptionsTitles();
