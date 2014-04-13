@@ -20,6 +20,15 @@ angular.module('haikudepotserver').factory('messageSource',
             var naturalLanguagesMessages = {};
 
             /**
+             * <p>When multiple requests come in for the same natural language, they may come in concurrently.  If this
+             * is the case then it would be inefficient to go and haul back the same data multiple times.  To avoid
+             * this problem, a queue is maintained that keeps track of clients that have asked for the messages and
+             * will then service those promises in the queue when the actual data comes in.</p>
+             */
+
+            var naturalLanguagesMessagesQueue = {};
+
+            /**
              * <p>This method will go off to the server and pull back the messages for the identified natural language
              * code.  It will return a promise that resolves to the messages as an object.</p>
              */
@@ -35,21 +44,43 @@ angular.module('haikudepotserver').factory('messageSource',
                     deferred.resolve(naturalLanguagesMessages[naturalLanguageCode]);
                 }
                 else {
-                    jsonRpc.call(
+
+                    var queue = naturalLanguagesMessagesQueue[naturalLanguageCode];
+
+                    if(!queue) {
+                        queue = [];
+                        naturalLanguagesMessagesQueue[naturalLanguageCode] = queue;
+                    }
+
+                    queue.push(deferred);
+
+                    if(1==queue.length) {
+                        jsonRpc.call(
                             constants.ENDPOINT_API_V1_MISCELLANEOUS,
                             'getAllMessages',
-                            [{ naturalLanguageCode : naturalLanguageCode }]
+                            [
+                                { naturalLanguageCode: naturalLanguageCode }
+                            ]
                         ).then(
-                        function(data) {
-                            naturalLanguagesMessages[naturalLanguageCode] = data.messages;
-                            deferred.resolve(naturalLanguagesMessages[naturalLanguageCode]);
-                        },
-                        function(err) {
-                            $log.warn('unable to get the messages from the server for natural language; '+naturalLanguageCode);
-                            errorHandling.logJsonRpcError(err);
-                            deferred.reject(null);
-                        }
-                    );
+                            function (data) {
+                                naturalLanguagesMessages[naturalLanguageCode] = data.messages;
+
+                                _.each(
+                                    queue,
+                                    function(d) {
+                                        d.resolve(naturalLanguagesMessages[naturalLanguageCode]);
+                                    }
+                                );
+
+                                delete naturalLanguagesMessagesQueue[naturalLanguageCode];
+                            },
+                            function (err) {
+                                $log.warn('unable to get the messages from the server for natural language; ' + naturalLanguageCode);
+                                errorHandling.logJsonRpcError(err);
+                                deferred.reject(null);
+                            }
+                        );
+                    }
                 }
 
                 return deferred.promise;

@@ -13,82 +13,100 @@ angular.module('haikudepotserver').factory('referenceData',
         '$log','$q','jsonRpc','constants','errorHandling',
         function($log, $q, jsonRpc,constants,errorHandling) {
 
-            var architectures = undefined;
-            var pkgCategories = undefined;
-            var naturalLanguages = undefined;
+            /**
+             * <p>This variable holds a cache of the reference data by method name.</p>
+             */
 
-            var ReferenceData = {
+            var repository = {};
+
+            var queues = {};
+
+            /**
+             * <p>This method will get the data requested by deriving a method name on the misc api.  The 'what' value
+             * has a "getAll..." prefixed and this forms the correct method name to use.  A system using a queue of
+             * promises is used to avoid two concurrent requests being made for the same data.  A list of data found in
+             * the response object can be found by using the 'what' value for a key.</p>
+             */
+
+            function getData(what) {
+
+                if(!what || !what.length) {
+                    throw 'the method name is expected in order to get reference data';
+                }
+
+                var deferred = $q.defer();
+
+                if(repository[what]) {
+                    deferred.resolve(repository[what]);
+                }
+                else {
+
+                    var queue = queues[what];
+
+                    if(!queue) {
+                        queue = [];
+                        queues[what] = queue;
+                    }
+
+                    queue.push(deferred);
+
+                    jsonRpc
+                        .call(
+                        constants.ENDPOINT_API_V1_MISCELLANEOUS,
+                        'getAll' + what.charAt(0).toUpperCase() + what.substring(1),
+                        [{}]
+                    ).then(
+                        function(data) {
+
+                            var list = data[what];
+
+                            repository[what] = list;
+
+                            _.each(
+                                queues[what],
+                                function(queueItem) {
+                                    queueItem.resolve(list);
+                                }
+                            );
+
+                            delete queues[what];
+                        },
+                        function(err) {
+                            errorHandling.logJsonRpcError(err,'issue obtaining data for the misc method; '+what);
+                            deferred.reject(err);
+                        }
+                    );
+
+                }
+
+                return deferred.promise;
+            }
+
+            return {
 
                 naturalLanguages : function() {
-
-                    var deferred = $q.defer();
-
-                    if(naturalLanguages) {
-                        deferred.resolve(naturalLanguages);
-                    }
-                    else {
-                        jsonRpc
-                            .call(
-                                constants.ENDPOINT_API_V1_MISCELLANEOUS,'getAllNaturalLanguages',[{}]
-                            )
-                            .then(
-                            function(data) {
-                                naturalLanguages = data.naturalLanguages;
-                                deferred.resolve(naturalLanguages);
-                            },
-                            function(err) {
-                                errorHandling.logJsonRpcError(err,'issue obtaining the list of natural languages');
-                                deferred.reject(err);
-                            }
-                        );
-                    }
-
-                    return deferred.promise;
-
+                    return getData('naturalLanguages');
                 },
 
                 pkgCategories : function() {
-
-                    var deferred = $q.defer();
-
-                    if(pkgCategories) {
-                        deferred.resolve(pkgCategories);
-                    }
-                    else {
-                        jsonRpc
-                            .call(
-                                constants.ENDPOINT_API_V1_MISCELLANEOUS,'getAllPkgCategories',[{}]
-                            )
-                            .then(
-                            function(data) {
-                                pkgCategories = data.pkgCategories;
-                                deferred.resolve(pkgCategories);
-                            },
-                            function(err) {
-                                errorHandling.logJsonRpcError(err,'issue obtaining the list of pkg categories');
-                                deferred.reject(err);
-                            }
-                        );
-                    }
-
-                    return deferred.promise;
+                    return getData('pkgCategories');
                 },
 
-                /**
-                 * <p>This function returns a promise to return the architecture identified by the code.</p>
-                 */
+                architectures : function() {
+                    return getData('architectures');
+                },
 
                 architecture : function(code) {
                     var deferred = $q.defer();
 
-                    ReferenceData.architectures().then(
-                        function(data) {
-                            var a = _.find(data, function(item) {
-                                return item.code == code;
+                    getData('architectures').then(
+                        function(allArchitectures) {
+                            var theArchitecture = _.find(allArchitectures, function(anArchitecture) {
+                                return anArchitecture.code == code;
                             });
 
-                            if(a) {
-                                deferred.resolve(a);
+                            if(theArchitecture) {
+                                deferred.resolve(theArchitecture);
                             }
                             else {
                                 deferred.reject();
@@ -100,44 +118,9 @@ angular.module('haikudepotserver').factory('referenceData',
                     );
 
                     return deferred.promise;
-                },
-
-                /**
-                 * <p>This function will return all of the architectures that are available.  It will return a
-                 * promise.</p>
-                 * @returns {*}
-                 */
-
-                architectures : function() {
-
-                    var deferred = $q.defer();
-
-                    if(architectures) {
-                        deferred.resolve(architectures);
-                    }
-                    else {
-                        jsonRpc
-                            .call(
-                                constants.ENDPOINT_API_V1_MISCELLANEOUS,'getAllArchitectures',[{}]
-                            )
-                            .then(
-                            function(data) {
-                                architectures = data.architectures;
-                                deferred.resolve(architectures);
-                            },
-                            function(err) {
-                                errorHandling.logJsonRpcError(err,'issue obtaining the list of architectures');
-                                deferred.reject(null);
-                            }
-                        );
-                    }
-
-                    return deferred.promise;
                 }
 
             };
-
-            return ReferenceData;
 
         }
     ]
