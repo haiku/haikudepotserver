@@ -10,6 +10,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.MediaType;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,9 @@ public class IntegrationTestSupportService {
 
     @Resource
     PkgOrchestrationService pkgService;
+
+    @Resource
+    protected AuthenticationService authenticationService;
 
     private ObjectContext objectContext = null;
 
@@ -219,6 +223,16 @@ public class IntegrationTestSupportService {
         logger.info("did create standard test data");
 
         return result;
+    }
+
+    public User createBasicUser(ObjectContext context, String nickname, String password) {
+        User user = context.newObject(User.class);
+        user.setNickname(nickname);
+        user.setPasswordSalt(); // random
+        user.setPasswordHash(authenticationService.hashPassword(user, password));
+        user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+        context.commitChanges();
+        return user;
     }
 
     /**

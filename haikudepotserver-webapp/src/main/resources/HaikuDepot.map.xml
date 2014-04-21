@@ -236,6 +236,7 @@
 	</db-entity>
 	<db-entity name="user_rating" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="36"/>
 		<db-attribute name="comment" type="VARCHAR" length="4096"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
@@ -247,7 +248,7 @@
 		<db-attribute name="user_rating_stability_id" type="BIGINT"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>user_rating_seq</db-generator-name>
+			<db-generator-name>haikudepot.user_rating_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -257,7 +258,7 @@
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>user_rating_stability_seq</db-generator-name>
+			<db-generator-name>haikudepot.user_rating_stability_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -380,15 +381,17 @@
 		<post-add method-name="onPostAdd"/>
 	</obj-entity>
 	<obj-entity name="UserRating" className="org.haikuos.haikudepotserver.dataobjects.UserRating" lock-type="optimistic" dbEntityName="user_rating" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="active" type="java.lang.Boolean" db-attribute-path="active"/>
+		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
+		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 		<obj-attribute name="comment" type="java.lang.String" db-attribute-path="comment"/>
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
-		<obj-attribute name="rating" type="java.lang.Short" db-attribute-path="rating"/>
+		<obj-attribute name="rating" type="java.lang.Short" lock="true" db-attribute-path="rating"/>
 		<entity-listener class="org.haikuos.haikudepotserver.support.cayenne.PostAddCreateAndModifyTimestampListener">
 			<post-add method-name="onPostAdd"/>
 			<pre-update method-name="onPreUpdate"/>
 		</entity-listener>
+		<post-add method-name="onPostAdd"/>
 	</obj-entity>
 	<obj-entity name="UserRatingStability" className="org.haikuos.haikudepotserver.dataobjects.UserRatingStability" readOnly="true" lock-type="optimistic" dbEntityName="user_rating_stability" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>

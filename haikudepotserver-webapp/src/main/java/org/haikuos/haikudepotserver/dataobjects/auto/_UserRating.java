@@ -17,6 +17,7 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 public abstract class _UserRating extends AbstractDataObject {
 
     public static final String ACTIVE_PROPERTY = "active";
+    public static final String CODE_PROPERTY = "code";
     public static final String COMMENT_PROPERTY = "comment";
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
@@ -33,6 +34,13 @@ public abstract class _UserRating extends AbstractDataObject {
     }
     public Boolean getActive() {
         return (Boolean)readProperty(ACTIVE_PROPERTY);
+    }
+
+    public void setCode(String code) {
+        writeProperty(CODE_PROPERTY, code);
+    }
+    public String getCode() {
+        return (String)readProperty(CODE_PROPERTY);
     }
 
     public void setComment(String comment) {

@@ -17,6 +17,7 @@ import com.googlecode.jsonrpc4j.Base64;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
+import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
@@ -34,9 +35,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class PkgApiIT extends AbstractIntegrationTest {
-
-    @Resource
-    IntegrationTestSupportService integrationTestSupportService;
 
     @Resource
     PkgApi pkgApi;
@@ -122,13 +120,43 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");
     }
 
+    @Test
+    public void testGetPkg_found_specific() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+
+        GetPkgRequest request = new GetPkgRequest();
+        request.architectureCode = "x86";
+        request.name = "pkg1";
+        request.versionType = PkgVersionType.SPECIFIC;
+        request.naturalLanguageCode = NaturalLanguage.CODE_ENGLISH;
+        request.major = "1";
+        request.micro = "2";
+        request.minor = null;
+        request.preRelease = null;
+        request.revision = 4;
+
+        // ------------------------------------
+        GetPkgResult result = pkgApi.getPkg(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.name).isEqualTo("pkg1");
+        Assertions.assertThat(result.versions.size()).isEqualTo(1);
+        Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
+        Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");
+        Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
+        Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
+        Assertions.assertThat(result.versions.get(0).naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
+        Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
+        Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
+    }
+
     /**
      * <p>In this test, an German localization is requested, but there is no localization present for German so it will
      * fall back English.</p>
      */
 
     @Test
-    public void testGetPkg_found() throws ObjectNotFoundException {
+    public void testGetPkg_found_latest() throws ObjectNotFoundException {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();

@@ -1,0 +1,176 @@
+/*
+* Copyright 2014, Andrew Lindesay
+* Distributed under the terms of the MIT License.
+*/
+
+package org.haikuos.haikudepotserver.api1;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import org.apache.cayenne.ObjectContext;
+import org.fest.assertions.Assertions;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
+import org.haikuos.haikudepotserver.api1.model.userrating.*;
+import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haikuos.haikudepotserver.dataobjects.*;
+import org.junit.Test;
+
+import javax.annotation.Resource;
+import java.util.Collections;
+
+public class UserRatingApiIT extends AbstractIntegrationTest {
+
+    @Resource
+    UserRatingApi userRatingApi;
+
+    private String createTestUserAndSampleUserRating() {
+        ObjectContext context = serverRuntime.getContext();
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "password");
+
+        UserRating userRating = context.newObject(UserRating.class);
+        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
+        userRating.setComment("How now brown cow");
+        userRating.setPkgVersion(PkgVersion.getLatestForPkg(
+                context,
+                Pkg.getByName(context, "pkg1").get(),
+                Collections.singletonList(Architecture.getByCode(context, "x86").get())).get());
+        userRating.setRating((short) 3);
+        userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_VERYUNSTABLE).get());
+        userRating.setUser(user);
+        context.commitChanges();
+
+        return userRating.getCode();
+    }
+
+    private void checkAssertionsOnAbstractGetUserRatingResult(AbstractGetUserRatingResult result) {
+        Assertions.assertThat(result.active).isTrue();
+        Assertions.assertThat(Strings.isNullOrEmpty(result.code)).isFalse();
+        Assertions.assertThat(result.comment).isEqualTo("How now brown cow");
+        Assertions.assertThat(result.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_SPANISH);
+        Assertions.assertThat(result.createTimestamp).isNotNull();
+        Assertions.assertThat(result.modifyTimestamp).isNotNull();
+        Assertions.assertThat(result.rating).isEqualTo((short) 3);
+        Assertions.assertThat(result.userNickname).isEqualTo("testuser");
+        Assertions.assertThat(result.userRatingStabilityCode).isEqualTo(UserRatingStability.CODE_VERYUNSTABLE);
+        Assertions.assertThat(result.pkgName).isEqualTo("pkg1");
+        Assertions.assertThat(result.pkgVersionArchitectureCode).isEqualTo("x86");
+        Assertions.assertThat(result.pkgVersionMajor).isEqualTo("1");
+        Assertions.assertThat(result.pkgVersionMicro).isEqualTo("2");
+        Assertions.assertThat(result.pkgVersionMinor).isNull();
+        Assertions.assertThat(result.pkgVersionRevision).isEqualTo(4);
+        Assertions.assertThat(result.pkgVersionPreRelease).isNull();
+    }
+
+    @Test
+    public void testUpdateUserRating() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+        String userRatingCode = createTestUserAndSampleUserRating();
+
+        UpdateUserRatingRequest request = new UpdateUserRatingRequest();
+        request.rating = (short) 1;
+        request.comment = "Highlighter orange";
+        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
+        request.code = userRatingCode;
+        request.userRatingStabilityCode = UserRatingStability.CODE_MOSTLYSTABLE;
+        request.filter = ImmutableList.copyOf(UpdateUserRatingRequest.Filter.values());
+
+        // ------------------------------------
+        userRatingApi.updateUserRating(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Optional<UserRating> userRatingOptional = UserRating.getByCode(context, userRatingCode);
+            Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 1);
+            Assertions.assertThat(userRatingOptional.get().getComment()).isEqualTo("Highlighter orange");
+            Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
+            Assertions.assertThat(userRatingOptional.get().getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_MOSTLYSTABLE);
+        }
+    }
+
+    @Test
+    public void testGetUserRating() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+        String userRatingCode = createTestUserAndSampleUserRating();
+
+        // ------------------------------------
+        GetUserRatingResult result = userRatingApi.getUserRating(new GetUserRatingRequest(userRatingCode));
+        // ------------------------------------
+
+        checkAssertionsOnAbstractGetUserRatingResult(result);
+    }
+
+    @Test
+    public void testGetUserRatingByUserAndPkgVersion() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+
+        String userRatingCode = createTestUserAndSampleUserRating();
+
+        GetUserRatingByUserAndPkgVersionRequest request = new GetUserRatingByUserAndPkgVersionRequest();
+        request.pkgName = "pkg1";
+        request.userNickname = "testuser";
+        request.pkgVersionArchitectureCode = "x86";
+        request.pkgVersionMajor = "1";
+        request.pkgVersionMicro = "2";
+        request.pkgVersionMinor = null;
+        request.pkgVersionRevision = 4;
+        request.pkgVersionPreRelease = null;
+
+        // ------------------------------------
+        GetUserRatingByUserAndPkgVersionResult result = userRatingApi.getUserRatingByUserAndPkgVersion(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.code).isEqualTo(userRatingCode);
+        checkAssertionsOnAbstractGetUserRatingResult(result);
+    }
+
+
+    @Test
+    public void testCreateUserRating() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            integrationTestSupportService.createBasicUser(context, "testuser", "password");
+        }
+
+        setAuthenticatedUser("testuser");
+
+        CreateUserRatingRequest request = new CreateUserRatingRequest();
+        request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
+        request.userNickname = "testuser";
+        request.userRatingStabilityCode = UserRatingStability.CODE_VERYUNSTABLE;
+        request.comment = "The supermarket has gone crazy";
+        request.rating = (short) 5;
+        request.pkgName = "pkg1";
+        request.pkgVersionArchitectureCode = "x86";
+        request.pkgVersionType = PkgVersionType.LATEST;
+
+        // ------------------------------------
+        String code = userRatingApi.createUserRating(request).code;
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Optional<UserRating> userRatingOptional = UserRating.getByCode(context, code);
+
+            Assertions.assertThat(userRatingOptional.isPresent()).isTrue();
+            Assertions.assertThat(userRatingOptional.get().getActive()).isTrue();
+            Assertions.assertThat(userRatingOptional.get().getComment()).isEqualTo("The supermarket has gone crazy");
+            Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_SPANISH);
+            Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 5);
+            Assertions.assertThat(userRatingOptional.get().getUser().getNickname()).isEqualTo("testuser");
+            Assertions.assertThat(userRatingOptional.get().getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_VERYUNSTABLE);
+            Assertions.assertThat(userRatingOptional.get().getPkgVersion().getPkg().getName()).isEqualTo("pkg1");
+            Assertions.assertThat(userRatingOptional.get().getPkgVersion().getMajor()).isEqualTo("1");
+            Assertions.assertThat(userRatingOptional.get().getPkgVersion().getMinor()).isNull();
+            Assertions.assertThat(userRatingOptional.get().getPkgVersion().getMicro()).isEqualTo("2");
+            Assertions.assertThat(userRatingOptional.get().getPkgVersion().getPreRelease()).isNull();
+            Assertions.assertThat(userRatingOptional.get().getPkgVersion().getRevision()).isEqualTo(4);
+        }
+
+    }
+
+}

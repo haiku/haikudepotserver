@@ -96,6 +96,10 @@ angular.module('haikudepotserver').factory('referenceData',
                     return getData('architectures');
                 },
 
+                userRatingStabilities : function() {
+                    return getData('userRatingStabilities');
+                },
+
                 architecture : function(code) {
                     var deferred = $q.defer();
 

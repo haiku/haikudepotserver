@@ -5,6 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
+import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
+
 import java.util.List;
 
 public class GetBulkPkgRequest {

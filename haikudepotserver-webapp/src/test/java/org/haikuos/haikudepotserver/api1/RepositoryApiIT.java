@@ -24,9 +24,6 @@ import java.util.Collections;
 public class RepositoryApiIT extends AbstractIntegrationTest {
 
     @Resource
-    IntegrationTestSupportService integrationTestSupportService;
-
-    @Resource
     RepositoryApi repositoryApi;
 
     @Test

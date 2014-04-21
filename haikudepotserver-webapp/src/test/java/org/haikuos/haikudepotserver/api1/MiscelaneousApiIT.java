@@ -32,9 +32,6 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
     @Resource
     RuntimeInformationService runtimeInformationService;
 
-    @Resource
-    IntegrationTestSupportService integrationTestSupportService;
-
     private void assertTargetAndPermission(
             IntegrationTestSupportService.StandardTestData data,
             CheckAuthorizationResult.AuthorizationTargetAndPermission targetAndPermission,

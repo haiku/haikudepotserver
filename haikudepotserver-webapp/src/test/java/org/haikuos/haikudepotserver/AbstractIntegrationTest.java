@@ -9,6 +9,7 @@ import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationHelper;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
@@ -52,13 +53,16 @@ public abstract class AbstractIntegrationTest {
     private final static String DATABASEPRODUCTNAME_POSTGRES = "PostgreSQL";
 
     @Resource
-    ApplicationContext applicationContext;
+    protected ApplicationContext applicationContext;
 
     @Resource
     protected ServerRuntime serverRuntime;
 
     @Resource
-    AuthenticationService authenticationService;
+    protected AuthenticationService authenticationService;
+
+    @Resource
+    protected IntegrationTestSupportService integrationTestSupportService;
 
     protected byte[] getResourceData(String path) throws IOException {
         InputStream inputStream = null;

@@ -3,7 +3,7 @@
 * Distributed under the terms of the MIT License.
 */
 
-package org.haikuos.haikudepotserver.api1.model.pkg;
+package org.haikuos.haikudepotserver.api1.model;
 
 /**
  * <p>This type defines the versions that should be sent back in the result.  If the client were
@@ -12,5 +12,6 @@ package org.haikuos.haikudepotserver.api1.model.pkg;
 
 public enum PkgVersionType {
     LATEST,
-    NONE
+    NONE,
+    SPECIFIC
 }

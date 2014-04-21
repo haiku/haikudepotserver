@@ -12,12 +12,9 @@ import com.google.common.collect.Maps;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.TargetType;
 import org.haikuos.haikudepotserver.support.Closeables;
@@ -241,4 +238,26 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             Closeables.closeQuietly(inputStream);
         }
     }
+
+    @Override
+    public GetAllUserRatingStabilitiesResult getAllUserRatingStabilities(GetAllUserRatingStabilitiesRequest getAllUserRatingStabilitiesRequest) {
+        Preconditions.checkNotNull(getAllUserRatingStabilitiesRequest);
+        final ObjectContext context = serverRuntime.getContext();
+
+        return new GetAllUserRatingStabilitiesResult(
+                Lists.transform(
+                        UserRatingStability.getAll(context),
+                        new Function<UserRatingStability, GetAllUserRatingStabilitiesResult.UserRatingStability>() {
+                            @Override
+                            public GetAllUserRatingStabilitiesResult.UserRatingStability apply(UserRatingStability input) {
+                                return new GetAllUserRatingStabilitiesResult.UserRatingStability(
+                                        input.getCode(),
+                                        input.getName());
+                            }
+                        }
+                )
+        );
+    }
+
+
 }

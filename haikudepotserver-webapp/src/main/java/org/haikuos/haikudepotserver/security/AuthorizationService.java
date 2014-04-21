@@ -148,6 +148,9 @@ public class AuthorizationService {
             case USER_LIST:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
+            case PKG_CREATERATING:
+                return true;
+
             case PKG_EDITICON:
             case PKG_EDITSCREENSHOT:
             case PKG_EDITCATEGORIES:

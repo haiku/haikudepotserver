@@ -60,4 +60,11 @@ public interface MiscellaneousApi {
 
     GetAllArchitecturesResult getAllArchitectures(GetAllArchitecturesRequest getAllArchitecturesRequest);
 
+    /**
+     * <p>This method will return all of the possible user rating stabilities that can be used when the user
+     * rates a package version.</p>
+     */
+
+    GetAllUserRatingStabilitiesResult getAllUserRatingStabilities(GetAllUserRatingStabilitiesRequest getAllUserRatingStabilitiesRequest);
+
 }

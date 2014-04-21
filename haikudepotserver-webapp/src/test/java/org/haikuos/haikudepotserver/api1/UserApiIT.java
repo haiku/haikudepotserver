@@ -29,25 +29,12 @@ public class UserApiIT extends AbstractIntegrationTest {
     @Resource
     CaptchaService captchaService;
 
-    @Resource
-    AuthenticationService authenticationService;
-
-    private User createBasicUser(ObjectContext context, String nickname, String password) {
-        User user = context.newObject(User.class);
-        user.setNickname(nickname);
-        user.setPasswordSalt(); // random
-        user.setPasswordHash(authenticationService.hashPassword(user, password));
-        user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
-        context.commitChanges();
-        return user;
-    }
-
     @Test
     public void testUpdateUser() throws Exception {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            User user = createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
+            User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
             setAuthenticatedUser("testuser");
         }
 
@@ -99,7 +86,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     public void testGetUser_found() throws ObjectNotFoundException {
 
         ObjectContext context = serverRuntime.getContext();
-        User user = createBasicUser(context,"testuser","yUe4o2Nwe009");
+        User user = integrationTestSupportService.createBasicUser(context,"testuser","yUe4o2Nwe009");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
@@ -115,7 +102,7 @@ public class UserApiIT extends AbstractIntegrationTest {
          public void testAuthenticateUser_succcess() {
 
         ObjectContext context = serverRuntime.getContext();
-        User user = createBasicUser(context, "testuser", "U7vqpsu6BB");
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
@@ -130,7 +117,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     public void testAuthenticateUser_fail() {
 
         ObjectContext context = serverRuntime.getContext();
-        User user = createBasicUser(context,"testuser","U7vqpsu6BB");
+        User user = integrationTestSupportService.createBasicUser(context,"testuser","U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
@@ -145,7 +132,7 @@ public class UserApiIT extends AbstractIntegrationTest {
 
         Captcha captcha = captchaService.generate();
         ObjectContext context = serverRuntime.getContext();
-        User user = createBasicUser(context,"testuser","U7vqpsu6BB");
+        User user = integrationTestSupportService.createBasicUser(context,"testuser","U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // check that the password is correctly configured.

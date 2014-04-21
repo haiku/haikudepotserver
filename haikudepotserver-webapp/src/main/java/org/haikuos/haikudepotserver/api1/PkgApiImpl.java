@@ -30,6 +30,7 @@ import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,32 +90,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         return pkgOptional.get();
-    }
-
-    private Architecture getArchitecture(ObjectContext context, String architectureCode) throws ObjectNotFoundException {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(architectureCode));
-
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context,architectureCode);
-
-        if(!architectureOptional.isPresent()) {
-            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode);
-        }
-
-        return architectureOptional.get();
-    }
-
-    private NaturalLanguage getNaturalLanguage(ObjectContext context, String naturalLanguageCode) throws ObjectNotFoundException  {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-
-        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, naturalLanguageCode);
-
-        if(!naturalLanguageOptional.isPresent()) {
-            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), naturalLanguageCode);
-        }
-
-        return naturalLanguageOptional.get();
     }
 
     @Override
@@ -342,6 +317,42 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return version;
     }
 
+    private void incrementCounter(final ObjectContext context, PkgVersion pkgVersion) {
+        String cacheKey = null;
+        String remoteIdentifier = getRemoteIdentifier();
+        boolean shouldIncrement;
+
+        if(shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient && !Strings.isNullOrEmpty(remoteIdentifier)) {
+            Long pkgVersionId = (Long) pkgVersion.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
+            cacheKey = Long.toString(pkgVersionId) + "@" + remoteIdentifier;
+        }
+
+        if(null==cacheKey) {
+            shouldIncrement = true;
+        }
+        else {
+            Boolean previouslyIncremented = remoteIdentifierToPkgView.getIfPresent(cacheKey);
+            shouldIncrement = null==previouslyIncremented;
+
+            if(!shouldIncrement) {
+                logger.info(
+                        "would have incremented the view counter for '{}', but the client '{}' already did this recently",
+                        pkgVersion.getPkg().toString(),
+                        remoteIdentifier);
+            }
+        }
+
+        if(shouldIncrement) {
+            pkgVersion.incrementViewCounter();
+            context.commitChanges();
+            logger.info("did increment the view counter for '{}'", pkgVersion.getPkg().toString());
+        }
+
+        if(null!=cacheKey) {
+            remoteIdentifierToPkgView.put(cacheKey, Boolean.TRUE);
+        }
+    }
+
     @Override
     public GetPkgResult getPkg(GetPkgRequest request) throws ObjectNotFoundException {
 
@@ -373,9 +384,41 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         });
 
         switch(request.versionType) {
-            case LATEST:
-                if(!architectureOptional.isPresent()) {
-                    throw new IllegalStateException("the specified architecture was not able to be found; "+request.architectureCode);
+
+            case SPECIFIC: {
+                if (!architectureOptional.isPresent()) {
+                    throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
+                }
+
+                VersionCoordinates coordinates = new VersionCoordinates(
+                        request.major, request.minor, request.micro,
+                        request.preRelease, request.revision);
+
+                Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
+                        context,
+                        pkg,
+                        architectureOptional.get(),
+                        coordinates);
+
+                if (!pkgVersionOptional.isPresent()) {
+                    throw new ObjectNotFoundException(
+                            PkgVersion.class.getSimpleName(),
+                            "");
+                }
+
+                if (null != request.incrementViewCounter && request.incrementViewCounter) {
+                    incrementCounter(context, pkgVersionOptional.get());
+                }
+
+                result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
+                        pkgVersionOptional.get(),
+                        naturalLanguage));
+            }
+            break;
+
+            case LATEST: {
+                if (!architectureOptional.isPresent()) {
+                    throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
                 }
 
                 Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
@@ -387,52 +430,21 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                                 Architecture.getByCode(context, Architecture.CODE_SOURCE).get())
                 );
 
-                if(!pkgVersionOptional.isPresent()) {
+                if (!pkgVersionOptional.isPresent()) {
                     throw new ObjectNotFoundException(
                             PkgVersion.class.getSimpleName(),
                             request.name);
                 }
 
-                if(null!=request.incrementViewCounter && request.incrementViewCounter) {
-
-                    String cacheKey = null;
-                    String remoteIdentifier = getRemoteIdentifier();
-                    boolean shouldIncrement;
-
-                    if(shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient && !Strings.isNullOrEmpty(remoteIdentifier)) {
-                        Long pkgVersionId = (Long) pkgVersionOptional.get().getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
-                        cacheKey = Long.toString(pkgVersionId) + "@" + remoteIdentifier;
-                    }
-
-                    if(null==cacheKey) {
-                        shouldIncrement = true;
-                    }
-                    else {
-                        Boolean previouslyIncremented = remoteIdentifierToPkgView.getIfPresent(cacheKey);
-                        shouldIncrement = null==previouslyIncremented;
-
-                        if(!shouldIncrement) {
-                            logger.info("would have incremented the view counter for '{}', but the client '{}' already did this recently", pkg.toString(), remoteIdentifier);
-                        }
-                    }
-
-                    if(shouldIncrement) {
-                        pkgVersionOptional.get().incrementViewCounter();
-                        context.commitChanges();
-                        logger.info("did increment the view counter for '{}'",pkg.toString());
-                    }
-
-                    if(null!=cacheKey) {
-                        remoteIdentifierToPkgView.put(cacheKey, Boolean.TRUE);
-                    }
-
+                if (null != request.incrementViewCounter && request.incrementViewCounter) {
+                    incrementCounter(context, pkgVersionOptional.get());
                 }
 
                 result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
                         pkgVersionOptional.get(),
                         naturalLanguage));
-
-                break;
+            }
+            break;
 
             case NONE: // no version is actually required.
                 break;
