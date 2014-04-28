@@ -90,6 +90,7 @@
                             <value>/js/app/service/referencedataservice.js</value>
                             <value>/js/app/service/pkgiconservice.js</value>
                             <value>/js/app/service/pkgscreenshotservice.js</value>
+                            <value>/js/app/service/pkgservice.js</value>
                             <value>/js/app/service/breadcrumbsservice.js</value>
                             <value>/js/app/service/errorhandlingservice.js</value>
 

@@ -245,7 +245,18 @@ angular.module('haikudepotserver').controller(
             // ---- VIEW PKG + VERSION
 
             $scope.goViewPkg = function(pkg) {
-                $location.path('/pkg/'+pkg.name+'/latest/'+$scope.selectedArchitecture.code);
+                var parts = [
+                    'pkg',
+                    pkg.name,
+                    pkg.version.major,
+                    pkg.version.minor,
+                    pkg.version.micro,
+                    pkg.version.preRelease,
+                    pkg.version.revision,
+                    $scope.selectedArchitecture.code
+                ];
+
+                $location.path('/' + parts.join('/'));
                 return false;
             };
 

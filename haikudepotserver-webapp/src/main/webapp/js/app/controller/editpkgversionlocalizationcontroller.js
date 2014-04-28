@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
-        'breadcrumbs','userState','referenceData',
+        'breadcrumbs','userState','referenceData','pkg',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgIcon,errorHandling,
-            breadcrumbs,userState,referenceData) {
+            breadcrumbs,userState,referenceData,pkg) {
 
             var ARCHITECTUREAPPLICABILITY_ALL = '__all';
 
@@ -108,10 +108,7 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkg(
-                        $scope.pkg,
-                        $routeParams.version,
-                        $routeParams.architectureCode),
+                    breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
                     {
                         titleKey : 'breadcrumb.editPkgVersionLocalizations.title',
                         path : $location.path()
@@ -194,17 +191,7 @@ angular.module('haikudepotserver').controller(
             // display the form.
 
             function refetchPkg() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    'getPkg',
-                    [{
-                        name: $routeParams.name,
-                        versionType : 'LATEST',
-                        incrementViewCounter : false,
-                        architectureCode : $routeParams.architectureCode,
-                        naturalLanguageCode: constants.NATURALLANGUAGECODE_ENGLISH
-                    }]
-                ).then(
+                pkg.getPkgWithSpecificVersionFromRouteParams(routeParams, false).then(
                     function(result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');

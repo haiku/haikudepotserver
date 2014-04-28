@@ -6,8 +6,10 @@
 package org.haikuos.haikudepotserver.api1;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
@@ -171,6 +173,73 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRatingOptional.get().getPkgVersion().getRevision()).isEqualTo(4);
         }
 
+    }
+
+    /**
+     * <p>This will just do a very basic search test; can add others later if/when problems arise.</p>
+     */
+
+    @Test
+    public void testSearchUserRatings() throws ObjectNotFoundException {
+
+        integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createUserRatings();
+
+        SearchUserRatingsRequest request = new SearchUserRatingsRequest();
+        request.pkgName = "pkg3";
+        request.offset = 0;
+        request.limit = Integer.MAX_VALUE;
+        request.daysSinceCreated = 10;
+
+        // ------------------------------------
+        SearchUserRatingsResult result = userRatingApi.searchUserRatings(request);
+        // ------------------------------------
+
+        // there are three user ratings, but one is disabled so we will not see that one.
+        Assertions.assertThat(result.items.size()).isEqualTo(2);
+
+        {
+            SearchUserRatingsResult.UserRating userRating = Iterables.find(result.items, new ResultUserRatingFunction("ABCDEF"));
+            Assertions.assertThat(userRating.active).isTrue();
+            Assertions.assertThat(userRating.comment).isEqualTo("Southern hemisphere winter");
+            Assertions.assertThat(userRating.createTimestamp).isNotNull();
+            Assertions.assertThat(userRating.modifyTimestamp).isNotNull();
+            Assertions.assertThat(userRating.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
+            Assertions.assertThat(userRating.pkgName).isEqualTo("pkg3");
+            Assertions.assertThat(userRating.pkgVersionArchitectureCode).isEqualTo("x86");
+            Assertions.assertThat(userRating.pkgVersionMajor).isEqualTo("1");
+            Assertions.assertThat(userRating.pkgVersionMicro).isEqualTo("2");
+            Assertions.assertThat(userRating.pkgVersionRevision).isEqualTo(3);
+            Assertions.assertThat(userRating.pkgVersionMinor).isNull();
+            Assertions.assertThat(userRating.pkgVersionPreRelease).isNull();
+            Assertions.assertThat(userRating.rating).isEqualTo((short) 5);
+            Assertions.assertThat(userRating.userNickname).isEqualTo("urtest1");
+            Assertions.assertThat(userRating.userRatingStabilityCode).isNull();
+        }
+
+        {
+            SearchUserRatingsResult.UserRating userRating = Iterables.find(result.items, new ResultUserRatingFunction("GHIJKL"));
+            Assertions.assertThat(userRating.active).isTrue();
+            Assertions.assertThat(userRating.comment).isEqualTo("Winter banana apples");
+            Assertions.assertThat(userRating.userNickname).isEqualTo("urtest2");
+            Assertions.assertThat(userRating.userRatingStabilityCode).isEqualTo(UserRatingStability.CODE_UNSTABLEBUTUSABLE);
+        }
+
+    }
+
+    public static class ResultUserRatingFunction implements Predicate<SearchUserRatingsResult.UserRating> {
+
+        private String code;
+
+        public ResultUserRatingFunction(String code) {
+            super();
+            this.code = code;
+        }
+
+        @Override
+        public boolean apply(SearchUserRatingsResult.UserRating input) {
+            return input.code.equals(code);
+        }
     }
 
 }

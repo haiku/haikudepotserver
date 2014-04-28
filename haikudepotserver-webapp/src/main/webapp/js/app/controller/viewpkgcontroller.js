@@ -9,10 +9,12 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location','$routeParams','$rootScope',
         'jsonRpc','constants','userState','errorHandling',
         'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
+        'pkg',
         function(
             $scope,$log,$location,$routeParams,$rootScope,
             jsonRpc,constants,userState,errorHandling,
-            pkgScreenshot,pkgIcon,referenceData,breadcrumbs) {
+            pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
+            pkg) {
 
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 480;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 320;
@@ -53,10 +55,7 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkg(
-                        $scope.pkg,
-                        $routeParams.version,
-                        $routeParams.architectureCode)
+                    breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams)
                 ]);
             }
 
@@ -64,17 +63,7 @@ angular.module('haikudepotserver').controller(
 
                 $scope.pkg = undefined;
 
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        'getPkg',
-                        [{
-                            name : $routeParams.name,
-                            versionType : 'LATEST',
-                            incrementViewCounter : true,
-                            architectureCode : $routeParams.architectureCode,
-                            naturalLanguageCode: userState.naturalLanguageCode()
-                        }]
-                    ).then(
+                pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, true).then(
                     function(result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
@@ -83,10 +72,11 @@ angular.module('haikudepotserver').controller(
                         refetchPkgIconMetaData();
                         refetchPkgCategories();
                     },
-                    function(err) {
-                        errorHandling.handleJsonRpcError(err);
+                    function() {
+                        errorHandling.navigateToError(); // already logged
                     }
                 );
+
             }
 
             function refetchPkgCategories() {

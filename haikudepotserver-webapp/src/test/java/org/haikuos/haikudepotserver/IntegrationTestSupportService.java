@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
+import java.util.Collections;
 
 /**
  * <p>This class is designed to help out with creating some common test data that can be re-used between tests.</p>
@@ -66,7 +67,7 @@ public class IntegrationTestSupportService {
         InputStream inputStream = null;
 
         try {
-            inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png",size,size));
+            inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png", size, size));
             pkgService.storePkgIconImage(
                     inputStream,
                     MediaType.getByCode(objectContext, com.google.common.net.MediaType.PNG.toString()).get(),
@@ -233,6 +234,67 @@ public class IntegrationTestSupportService {
         user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
         context.commitChanges();
         return user;
+    }
+
+    /**
+     * <p>This will create a known user and a known set of user ratings that can be tested against.
+     * This method expected that the standard test data has already been introduced into the
+     * environment prior.</p>
+     */
+
+    public void createUserRatings() {
+
+        ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = Pkg.getByName(context, "pkg3").get();
+        Architecture x86 = Architecture.getByCode(context, "x86").get();
+        PkgVersion pkgVersion = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(x86)).get();
+        NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get();
+
+        {
+            User user = createBasicUser(context, "urtest1", "password");
+
+            {
+                UserRating userRating = context.newObject(UserRating.class);
+                userRating.setRating((short) 5);
+                userRating.setUser(user);
+                userRating.setNaturalLanguage(english);
+                userRating.setPkgVersion(pkgVersion);
+                userRating.setComment("Southern hemisphere winter");
+                userRating.setCode("ABCDEF"); // known code that can be used for reference later
+            }
+        }
+
+        {
+            User user = createBasicUser(context, "urtest2", "password");
+
+            {
+                UserRating userRating = context.newObject(UserRating.class);
+                userRating.setRating((short) 3);
+                userRating.setUser(user);
+                userRating.setNaturalLanguage(english);
+                userRating.setPkgVersion(pkgVersion);
+                userRating.setComment("Winter banana apples");
+                userRating.setCode("GHIJKL"); // known code that can be used for reference later
+                userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_UNSTABLEBUTUSABLE).get());
+            }
+        }
+
+        {
+            User user = createBasicUser(context, "urtest3", "password");
+
+            {
+                UserRating userRating = context.newObject(UserRating.class);
+                userRating.setRating((short) 1);
+                userRating.setUser(user);
+                userRating.setActive(false);
+                userRating.setNaturalLanguage(english);
+                userRating.setPkgVersion(pkgVersion);
+                userRating.setComment("Kingston black apples");
+                userRating.setCode("MNOPQR"); // known code that can be used for reference later
+            }
+        }
+
+        context.commitChanges();
     }
 
     /**

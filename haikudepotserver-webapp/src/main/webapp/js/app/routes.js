@@ -7,6 +7,9 @@ angular.module('haikudepotserver').config(
     [
         '$routeProvider',
         function($routeProvider) {
+            // eg; '/pkg/apr/1/4/6/3/7/x86'
+            var pkgVersionPrefix = '/pkg/:name/:major/:minor?/:micro?/:preRelease?/:revision?/:architectureCode';
+
             $routeProvider
                 .when('/repositories/add',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})
                 .when('/repository/:code/edit',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})
@@ -19,11 +22,11 @@ angular.module('haikudepotserver').config(
                 .when('/user/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
                 .when('/user/:nickname/edit',{controller:'EditUserController', templateUrl:'/js/app/controller/edituser.html'})
                 .when('/user/:nickname/changepassword',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})
-                .when('/pkg/:name/:version/:architectureCode',{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
-                .when('/pkg/:name/:version/:architectureCode/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
-                .when('/pkg/:name/:version/:architectureCode/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
-                .when('/pkg/:name/:version/:architectureCode/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
-                .when('/pkg/:name/:version/:architectureCode/editversionlocalizations',{controller:'EditPkgVersionLocalizationController', templateUrl:'/js/app/controller/editpkgversionlocalization.html'})
+                .when(pkgVersionPrefix,{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
+                .when(pkgVersionPrefix+'/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
+                .when(pkgVersionPrefix+'/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
+                .when(pkgVersionPrefix+'/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
+                .when(pkgVersionPrefix+'/editversionlocalizations',{controller:'EditPkgVersionLocalizationController', templateUrl:'/js/app/controller/editpkgversionlocalization.html'})
                 .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
                 .when('/',{controller:'HomeController',templateUrl:'/js/app/controller/home.html'})
                 .otherwise({controller:'OtherwiseController', template: '<div></div>'});

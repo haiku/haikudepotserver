@@ -167,6 +167,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public SearchPkgsResult searchPkgs(SearchPkgsRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.architectureCode));
+        Preconditions.checkNotNull(request.limit);
+        Preconditions.checkState(request.limit > 0);
 
         if(null==request.sortOrdering) {
             request.sortOrdering = SearchPkgsRequest.SortOrdering.NAME;

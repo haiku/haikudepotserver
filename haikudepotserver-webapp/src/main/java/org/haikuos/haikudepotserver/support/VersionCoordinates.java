@@ -1,7 +1,15 @@
+/*
+ * Copyright 2014, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haikuos.haikudepotserver.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import org.apache.cayenne.exp.Expression;
+import org.apache.cayenne.exp.ExpressionFactory;
+import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 
 public class VersionCoordinates {
 
@@ -66,6 +74,7 @@ public class VersionCoordinates {
         return result;
     }
 
+    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(getMajor());

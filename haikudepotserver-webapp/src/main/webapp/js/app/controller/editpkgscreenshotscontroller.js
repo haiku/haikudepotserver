@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgScreenshot','errorHandling',
-        'breadcrumbs','userState',
+        'breadcrumbs','userState','pkg',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgScreenshot,errorHandling,
-            breadcrumbs,userState) {
+            breadcrumbs,userState,pkg) {
 
             // the upload size must be less than this or it is too big for the
             // far end to process.
@@ -70,24 +70,15 @@ angular.module('haikudepotserver').controller(
             // display the form.
 
             function refetchPkg() {
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        'getPkg',
-                        [{
-                            name: $routeParams.name,
-                            versionType: 'NONE',
-                            architectureCode: undefined, // not required if we don't need the version
-                            naturalLanguageCode: userState.naturalLanguageCode()
-                        }]
-                    ).then(
+                pkg.getPkgWithSpecificVersionFromRouteParams(routeParams, false).then(
                     function(result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
                         refetchPkgScreenshots();
                     },
-                    function(err) {
-                        errorHandling.handleJsonRpcError(err);
+                    function() {
+                        errorHandling.navigateToError();
                     }
                 );
             }
@@ -97,10 +88,7 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkg(
-                        $scope.pkg,
-                        $routeParams.version,
-                        $routeParams.architectureCode),
+                    breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
                     {
                         titleKey : 'breadcrumb.editPkgScreenshots.title',
                         path : $location.path()

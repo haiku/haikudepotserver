@@ -189,6 +189,42 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                 }
             }
 
+            /**
+             * <p>The creation of a view pkg breadcrumb is a bit complex.  This function will take care of it
+             * based on the details provided.</p>
+             */
+
+            function createViewPkgBreadcrumbItem(pkgName,versionCoordinates,architectureCode) {
+                if(!pkgName||!pkgName.length) {
+                    throw 'the package name must be supplied';
+                }
+
+                if(!versionCoordinates||!versionCoordinates.major) {
+                    throw 'version coordinates must be supplied';
+                }
+
+                if(!architectureCode||!architectureCode.length) {
+                    throw 'the architectureCode must be supplied to create a view pkg';
+                }
+
+                var parts = [
+                    'pkg',
+                    pkgName,
+                    versionCoordinates.major,
+                    versionCoordinates.minor ? versionCoordinates.minor : '',
+                    versionCoordinates.micro ? versionCoordinates.micro : '',
+                    versionCoordinates.preRelease ? versionCoordinates.preRelease : '',
+                    versionCoordinates.revision ? versionCoordinates.revision : '',
+                    architectureCode
+                ];
+
+                return {
+                    titleKey : 'breadcrumb.viewPkg.title',
+                    titleParameters : [ pkgName ],
+                    path : '/' + parts.join('/')
+                };
+            }
+
             return {
 
                 // -----------------
@@ -282,25 +318,22 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     };
                 },
 
-                createViewPkg : function(pkg,versionType,architectureCode) {
+                createViewPkgWithSpecificVersionFromRouteParams : function(routeParams) {
 
-                    if(!pkg||!pkg.name||!pkg.name.length) {
-                        throw 'the package must be supplied to create a view pkg and must have a name';
+                    if(!routeParams||!routeParams.major) {
+                        throw 'route params are expected';
                     }
 
-                    if(!versionType||!versionType.length) {
-                        throw 'the versionType must be supplied to create a view pkg';
-                    }
-
-                    if(!architectureCode||!architectureCode.length) {
-                        throw 'the architectureCode must be supplied to create a view pkg';
-                    }
-
-                    return {
-                        titleKey : 'breadcrumb.viewPkg.title',
-                        titleParameters : [ pkg.name ],
-                        path : '/pkg/' + pkg.name + '/' + versionType + '/' + architectureCode
-                    };
+                    return createViewPkgBreadcrumbItem(
+                        routeParams.name,
+                        {
+                            major : routeParams.major,
+                            minor : routeParams.minor,
+                            micro : routeParams.micro,
+                            preRelease : routeParams.preRelease,
+                            revision : routeParams.revision
+                        },
+                        routeParams.architectureCode);
                 },
 
                 createViewUser : function(user) {

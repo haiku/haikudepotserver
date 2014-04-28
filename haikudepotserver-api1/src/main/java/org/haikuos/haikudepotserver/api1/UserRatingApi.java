@@ -46,4 +46,10 @@ public interface UserRatingApi {
 
     UpdateUserRatingResult updateUserRating(UpdateUserRatingRequest request) throws ObjectNotFoundException;
 
+    /**
+     * <p>This method will return user rating search results based on the criteria supplied in the request.</p>
+     */
+
+    SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequest request) throws ObjectNotFoundException;
+
 }

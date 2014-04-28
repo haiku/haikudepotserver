@@ -22,6 +22,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
+import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -59,11 +60,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                 ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg).andExp(
                         ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE)).andExp(
                         ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture)).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.MAJOR_PROPERTY, versionCoordinates.getMajor())).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.MINOR_PROPERTY, versionCoordinates.getMinor())).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.MICRO_PROPERTY, versionCoordinates.getMicro())).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.PRE_RELEASE_PROPERTY, versionCoordinates.getPreRelease())).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.REVISION_PROPERTY, versionCoordinates.getRevision()))
+                        ExpressionHelper.toExpression(versionCoordinates))
         );
 
         query.addOrderings(versionOrdering());
