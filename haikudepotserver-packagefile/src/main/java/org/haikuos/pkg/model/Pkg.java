@@ -113,6 +113,7 @@ public class Pkg {
         this.homePageUrl = homePageUrl;
     }
 
+    @SuppressWarnings("StringBufferReplaceableByString")
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

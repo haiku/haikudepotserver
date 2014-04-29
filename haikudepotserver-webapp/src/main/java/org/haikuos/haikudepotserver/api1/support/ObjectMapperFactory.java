@@ -7,7 +7,6 @@ package org.haikuos.haikudepotserver.api1.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**

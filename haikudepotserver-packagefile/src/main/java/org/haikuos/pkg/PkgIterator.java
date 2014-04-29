@@ -32,7 +32,6 @@ public class PkgIterator {
 
     /**
      * <p>This method will return true if there are more packages to be obtained from the attributes iterator.</p>
-     * @return
      */
 
     public boolean hasNext() {

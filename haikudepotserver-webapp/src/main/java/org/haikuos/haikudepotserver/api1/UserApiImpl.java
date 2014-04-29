@@ -11,7 +11,6 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.api1.model.repository.UpdateRepositoryRequest;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.*;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;

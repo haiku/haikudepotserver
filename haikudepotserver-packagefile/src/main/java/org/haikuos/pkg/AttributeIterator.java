@@ -268,6 +268,7 @@ public class AttributeIterator {
                                             rawOffset.longValue(),
                                             rawLength.longValue()));
                         }
+                        break;
 
                         default:
                             throw new HpkException("unknown raw encoding; "+encoding);

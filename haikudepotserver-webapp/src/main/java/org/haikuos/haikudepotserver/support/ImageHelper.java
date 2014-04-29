@@ -39,7 +39,7 @@ public class ImageHelper {
         }
 
         for(int i=0;i< HVIF_MAGIC.length;i++) {
-            if((int) (0xff & data[i]) != HVIF_MAGIC[i]) {
+            if((0xff & data[i]) != HVIF_MAGIC[i]) {
                 logger.trace("the magic header is not present in the hvif data");
                 return false;
             }
@@ -63,20 +63,20 @@ public class ImageHelper {
         // check for the magic header.
 
         for(int i=0;i< PNG_MAGIC.length;i++) {
-            if((int) (0xff & data[i]) != PNG_MAGIC[i]) {
+            if((0xff & data[i]) != PNG_MAGIC[i]) {
                 logger.trace("the magic header is not present in the png data");
                 return null;
             }
         }
 
-        //check the lenth.
+        //check the length.
 
-        int length = parseInt32(data, 8);
+        parseInt32(data, 8); // length
 
         // check for the expected first chunk header.
 
         for(int i=0;i<PNG_IHDR.length;i++) {
-            if((int) (0xff & data[12+i]) != PNG_IHDR[i]) {
+            if((0xff & data[12+i]) != PNG_IHDR[i]) {
                 logger.trace("the IHDR chunk is not present in the png data");
                 return null;
             }
@@ -93,10 +93,10 @@ public class ImageHelper {
 
     private int parseInt32(byte[] data, int offset) {
         return
-                ((int) (0xff & data[offset])) << 24
-                        | ((int) (0xff & data[offset+1])) << 16
-                        | ((int) (0xff & data[offset+2])) << 8
-                        | ((int) (0xff & data[offset+3]));
+                (0xff & data[offset]) << 24
+                        | (0xff & data[offset+1]) << 16
+                        | (0xff & data[offset+2]) << 8
+                        | (0xff & data[offset+3]);
     }
 
     public static class Size {

@@ -116,7 +116,6 @@ public class RepositoryImportService extends AbstractService {
     /**
      * <p>This method will check that there is not already a job in the queue for this repository and then will
      * add it to the queue so that it is run at some time in the future.</p>
-     * @param job
      */
 
     public void submit(final PkgRepositoryImportJob job) {
@@ -130,13 +129,15 @@ public class RepositoryImportService extends AbstractService {
             throw new RuntimeException("unable to import repository data because repository was not able to be found for code; "+job.getCode());
         }
 
+        // make sure that we do not enqueue a job for the repository import twice.
+
         if(!Iterables.tryFind(
                 Lists.newArrayList(runnables),
                 new Predicate<Runnable>() {
                     @Override
                     public boolean apply(java.lang.Runnable input) {
                         ImportRepositoryDataJobRunnable importRepositoryDataJobRunnable = (ImportRepositoryDataJobRunnable) input;
-                        return importRepositoryDataJobRunnable.equals(job);
+                        return importRepositoryDataJobRunnable.getJob().equals(job);
                     }
                 }).isPresent()) {
             executor.submit(new ImportRepositoryDataJobRunnable(this, job));
@@ -190,7 +191,9 @@ public class RepositoryImportService extends AbstractService {
         }
         finally {
             if(null!=temporaryFile && temporaryFile.exists()) {
-                temporaryFile.delete();
+                if(!temporaryFile.delete()) {
+                    logger.error("unable to delete the file; {}"+temporaryFile.getAbsolutePath());
+                }
             }
         }
 
@@ -213,6 +216,10 @@ public class RepositoryImportService extends AbstractService {
             Preconditions.checkNotNull(job);
             this.service = service;
             this.job = job;
+        }
+
+        public PkgRepositoryImportJob getJob() {
+            return job;
         }
 
         @Override

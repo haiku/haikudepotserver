@@ -9,8 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 /**
- * <p>This object models the request to pull a repository's data into the database locally.  See
- * {@link org.haikuos.haikudepotserver.pkg.PkgImportService} for further detail on this.
+ * <p>This object models the request to pull a repository's data into the database locally.
  * </p>
  */
 

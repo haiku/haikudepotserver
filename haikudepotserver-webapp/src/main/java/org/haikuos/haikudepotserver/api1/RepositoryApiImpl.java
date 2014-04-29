@@ -129,7 +129,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         // if there are more than we asked for then there must be more available.
 
-        result.hasMore = new Boolean(searchedRepositories.size() > request.limit);
+        result.hasMore = searchedRepositories.size() > request.limit;
 
         if(result.hasMore) {
             searchedRepositories = searchedRepositories.subList(0,request.limit);

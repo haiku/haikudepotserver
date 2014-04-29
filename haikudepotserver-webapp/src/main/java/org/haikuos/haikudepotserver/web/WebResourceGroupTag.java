@@ -14,7 +14,6 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.tags.form.AbstractHtmlElementTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import java.io.IOException;
@@ -46,7 +45,6 @@ public class WebResourceGroupTag extends AbstractHtmlElementTag {
     @Override
     protected int writeTagContent(TagWriter tagWriter) throws JspException {
 
-        ServletContext servletContext = pageContext.getServletContext();
         HttpServletResponse response = (HttpServletResponse) pageContext.getResponse();
 
         ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(pageContext.getServletContext());

@@ -41,10 +41,6 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
         this.serverRuntime = serverRuntime;
     }
 
-    public Long getExpirySeconds() {
-        return expirySeconds;
-    }
-
     public void setExpirySeconds(Long expirySeconds) {
         this.expirySeconds = expirySeconds;
     }

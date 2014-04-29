@@ -25,6 +25,7 @@ public class RawHeapAttribute extends RawAttribute {
         this.heapCoordinates = heapCoordinates;
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -19,9 +19,7 @@ import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
-import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
 import org.haikuos.haikudepotserver.support.Closeables;
-import org.haikuos.haikudepotserver.support.NoOpOutputStream;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
 import org.slf4j.Logger;
@@ -66,7 +64,7 @@ public class PkgIconController extends AbstractController {
             .maximumSize(10)
             .build(
                     new CacheLoader<Integer, byte[]>() {
-                        public byte[] load(Integer size) {
+                        public byte[] load(@SuppressWarnings("NullableProblems") Integer size) {
                             String resource = String.format("/img/generic/generic%d.png", size);
                             InputStream inputStream = null;
 
@@ -118,7 +116,6 @@ public class PkgIconController extends AbstractController {
             throw new PkgNotFound();
         }
 
-        ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
         Optional<PkgIcon> pkgIconOptional = pkg.get().getPkgIcon(mediaTypeOptional.get(), size);
 
         if(!pkgIconOptional.isPresent()) {
@@ -127,7 +124,7 @@ public class PkgIconController extends AbstractController {
 
             if(
                     (null!=fallback)
-                            && fallback.booleanValue()
+                            && fallback
                             && mediaTypeOptional.get().getCode().equals(MediaType.PNG.toString())
                             && (null!=size)
                             && (16==size || 32==size)) {
@@ -195,9 +192,6 @@ public class PkgIconController extends AbstractController {
     }
 
     // these are the various errors that can arise in supplying or providing a package icon.
-
-    @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the size must be 16 or 32")
-    public class BadSize extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the package name must be supplied")
     public class MissingPkgName extends RuntimeException {}

@@ -27,8 +27,6 @@ import java.util.zip.Inflater;
 
 public class HpkHeapReader implements Closeable, HeapReader {
 
-    private File file;
-
     private HeapCompression compression;
 
     private long heapOffset;
@@ -64,7 +62,6 @@ public class HpkHeapReader implements Closeable, HeapReader {
         Preconditions.checkState(compressedSize >= 0 && compressedSize < Integer.MAX_VALUE);
         Preconditions.checkState(uncompressedSize >= 0 && compressedSize < Integer.MAX_VALUE);
 
-        this.file = file;
         this.compression = compression;
         this.heapOffset = heapOffset;
         this.chunkSize = chunkSize;
@@ -82,7 +79,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
                     .maximumSize(3)
                     .build(new CacheLoader<Integer, byte[]>() {
                         @Override
-                        public byte[] load(Integer key) throws Exception {
+                        public byte[] load(@SuppressWarnings("NullableProblems") Integer key) throws Exception {
                             Preconditions.checkNotNull(key);
 
                             // TODO: best to avoid continuously allocating new byte buffers
@@ -117,7 +114,6 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
     /**
      * <p>This gives the quantity of chunks that are in the heap.</p>
-     * @return
      */
 
     private int getHeapChunkCount() {
@@ -181,7 +177,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
                             lengths[count-1]));
         }
 
-        totalCompressedLength += lengths[count-1];
+        //totalCompressedLength += lengths[count-1];
     }
 
     private boolean isHeapChunkCompressed(int index) throws IOException, HpkException {
@@ -236,7 +232,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
                 case ZLIB:
                 {
-                    byte[] deflatedBuffer = new byte[(int) getHeapChunkCompressedLength(index)];
+                    byte[] deflatedBuffer = new byte[getHeapChunkCompressedLength(index)];
                     readFully(deflatedBuffer);
 
                     Inflater inflater = new Inflater();
@@ -318,7 +314,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
         int chunkUncompressedLength = getHeapChunkUncompressedLength(chunkIndex);
 
         if(chunkOffset + coordinates.getLength() > chunkUncompressedLength) {
-            chunkLength = (int) (chunkUncompressedLength - chunkOffset);
+            chunkLength = (chunkUncompressedLength - chunkOffset);
         }
         else {
             chunkLength = (int) coordinates.getLength();

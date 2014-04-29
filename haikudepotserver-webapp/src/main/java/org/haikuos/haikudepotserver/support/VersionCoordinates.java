@@ -7,9 +7,6 @@ package org.haikuos.haikudepotserver.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 
 public class VersionCoordinates {
 
@@ -48,6 +45,7 @@ public class VersionCoordinates {
         return revision;
     }
 
+    @SuppressWarnings("RedundantIfStatement") // was auto generated!
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,17 +74,7 @@ public class VersionCoordinates {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(getMajor());
-        stringBuilder.append('.');
-        stringBuilder.append(getMinor());
-        stringBuilder.append('.');
-        stringBuilder.append(getMicro());
-        stringBuilder.append('.');
-        stringBuilder.append(getPreRelease());
-        stringBuilder.append('.');
-        stringBuilder.append(getRevision());
-        return stringBuilder.toString();
+        return getMajor() + '.' + getMinor() + '.' + getMicro() + '.' + getPreRelease() + '.' + getRevision();
     }
 
 }

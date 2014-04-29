@@ -21,16 +21,8 @@ public class CaptchaService {
     private CaptchaAlgorithm captchaAlgorithm;
     private CaptchaRepository captchaRepository;
 
-    public CaptchaAlgorithm getCaptchaAlgorithm() {
-        return captchaAlgorithm;
-    }
-
     public void setCaptchaAlgorithm(CaptchaAlgorithm captchaAlgorithm) {
         this.captchaAlgorithm = captchaAlgorithm;
-    }
-
-    public CaptchaRepository getCaptchaRepository() {
-        return captchaRepository;
     }
 
     public void setCaptchaRepository(CaptchaRepository captchaRepository) {
@@ -40,7 +32,6 @@ public class CaptchaService {
     /**
      * <p>This method will generate a captcha, returning all of the details of the captcha.  Note that the captcha is
      * stored so that it can be validated within some time-frame.</p>
-     * @return
      */
 
     public Captcha generate() {
@@ -75,7 +66,7 @@ public class CaptchaService {
             databaseResponse = databaseResponse.trim();
         }
 
-        response.trim();
+        response = response.trim();
 
         if(null!=databaseResponse) {
             captchaRepository.delete(token);

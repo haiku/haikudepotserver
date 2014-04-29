@@ -65,7 +65,7 @@ public class PkgFactory {
         Integer revision = null;
 
         if(revisionAttribute.isPresent()) {
-            revision = ((BigInteger) ((IntAttribute) revisionAttribute.get()).getValue(attributeContext)).intValue();
+            revision = ((IntAttribute) revisionAttribute.get()).getValue(attributeContext).intValue();
         }
 
         return new PkgVersion(

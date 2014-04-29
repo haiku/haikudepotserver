@@ -45,7 +45,7 @@ public class PkgDumpTool {
     }
 
     public void run() {
-        CmdLineParser parser = new CmdLineParser(this);
+        new CmdLineParser(this);
 
         HpkrFileExtractor hpkrFileExtractor = null;
 

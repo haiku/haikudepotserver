@@ -5,8 +5,6 @@
 
 package org.haikuos.haikudepotserver.web.model;
 
-import com.google.common.net.MediaType;
-
 import java.util.List;
 
 /**

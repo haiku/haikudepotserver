@@ -22,6 +22,7 @@ public class RawInlineAttribute extends RawAttribute {
         this.rawValue = rawValue;
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

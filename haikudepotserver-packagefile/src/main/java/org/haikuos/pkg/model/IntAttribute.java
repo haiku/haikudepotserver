@@ -31,6 +31,7 @@ public class IntAttribute extends Attribute {
         return numericValue;
     }
 
+    @SuppressWarnings("RedundantIfStatement") // was auto generated
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

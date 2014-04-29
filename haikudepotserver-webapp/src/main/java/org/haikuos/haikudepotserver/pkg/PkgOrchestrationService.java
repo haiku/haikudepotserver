@@ -5,13 +5,11 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
@@ -76,7 +74,7 @@ public class PkgOrchestrationService {
      * reached, the method will throw {@link org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException}.</p>
      */
 
-    public static byte[] toByteArray(InputStream inputStream, int sizeLimit) throws IOException {
+    private static byte[] toByteArray(InputStream inputStream, int sizeLimit) throws IOException {
         Preconditions.checkNotNull(inputStream);
         Preconditions.checkState(sizeLimit > 0);
 
@@ -280,6 +278,7 @@ public class PkgOrchestrationService {
 
         query.setPrefetchTree(prefetchTreeNode);
 
+        @SuppressWarnings("unchecked")
         List<PkgVersion> pkgVersions = context.performQuery(query);
 
         // repeat the sort of the main query to get the packages back into order again.
@@ -307,35 +306,6 @@ public class PkgOrchestrationService {
     // ICONS
 
     /**
-     * <p>This will output a bitmap image for a generic icon.</p>
-     */
-
-    public void writeGenericIconImage(
-            OutputStream output,
-            int size) throws IOException {
-
-        Preconditions.checkNotNull(output);
-        Preconditions.checkState(16==size||32==size);
-
-        String resource = String.format("/img/generic/generic%d.png", size);
-        InputStream inputStream = null;
-
-        try {
-            inputStream = this.getClass().getResourceAsStream(resource);
-
-            if(null==inputStream) {
-                throw new IllegalStateException(String.format("the resource; %s was not able to be found, but should be in the application build product", resource));
-            }
-            else {
-                ByteStreams.copy(inputStream, output);
-            }
-        }
-        finally {
-            Closeables.closeQuietly(inputStream);
-        }
-    }
-
-    /**
      * <p>This method will write the icon data supplied in the input to the package as its icon.  Note that the icon
      * must comply with necessary characteristics; for example it must be either 16 or 32 pixels along both its sides
      * if it is a PNG.  If it is non-compliant then an instance of
@@ -355,7 +325,7 @@ public class PkgOrchestrationService {
         Preconditions.checkNotNull(pkg);
 
         byte[] imageData = toByteArray(input, ICON_SIZE_LIMIT);
-        Optional<PkgIcon> pkgIconOptional = null;
+        Optional<PkgIcon> pkgIconOptional;
         Integer size = null;
 
         if(com.google.common.net.MediaType.PNG.toString().equals(mediaType.getCode())) {
@@ -393,7 +363,7 @@ public class PkgOrchestrationService {
             }
         }
 
-        PkgIconImage pkgIconImage = null;
+        PkgIconImage pkgIconImage;
 
         if(pkgIconOptional.isPresent()) {
             pkgIconImage = pkgIconOptional.get().getPkgIconImage().get();
@@ -507,12 +477,12 @@ public class PkgOrchestrationService {
         Optional<Integer> highestExistingScreenshotOrdering = pkg.getHighestPkgScreenshotOrdering();
 
         if(highestExistingScreenshotOrdering.isPresent()) {
-            ordering = highestExistingScreenshotOrdering.get().intValue() + 1;
+            ordering = highestExistingScreenshotOrdering.get() + 1;
         }
 
         PkgScreenshot screenshot = context.newObject(PkgScreenshot.class);
         screenshot.setCode(UUID.randomUUID().toString());
-        screenshot.setOrdering(new Integer(ordering));
+        screenshot.setOrdering(ordering);
         screenshot.setHeight(size.height);
         screenshot.setWidth(size.width);
         screenshot.setLength(pngData.length);
@@ -547,8 +517,9 @@ public class PkgOrchestrationService {
     }
 
     /**
-     * <p>This method will import the package described by the {@paramref pkg} parameter by locating the package and
+     * <p>This method will import the package described by the 'pkg' parameter by locating the package and
      * either creating it or updating it as necessary.</p>
+     * @param pkg imports into the local database from this package model.
      */
 
     public void importFrom(
@@ -590,6 +561,7 @@ public class PkgOrchestrationService {
                             persistedPkg)
                             .andExp(toExpression(pkg.getVersion())));
 
+            //noinspection unchecked
             persistedPkgVersion = Iterables.getOnlyElement(
                     (List<org.haikuos.haikudepotserver.dataobjects.PkgVersion>) objectContext.performQuery(selectQuery),
                     null);
@@ -709,7 +681,7 @@ public class PkgOrchestrationService {
             throw new IllegalStateException("it is not possible to store a pkg version localization if either of the summary or description are missing");
         }
 
-        if(summaryNullOrEmpty && descriptionNullOrEmpty) {
+        if(summaryNullOrEmpty) {
 
             if(pkgVersionLocalizationOptional.isPresent()) {
                 pkgVersion.removeToManyTarget(

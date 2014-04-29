@@ -46,10 +46,6 @@ public class ManagedDatabase {
         this.dataSource = dataSource;
     }
 
-    public boolean isMigrate() {
-        return migrate;
-    }
-
     public void setMigrate(boolean migrate) {
         this.migrate = migrate;
     }

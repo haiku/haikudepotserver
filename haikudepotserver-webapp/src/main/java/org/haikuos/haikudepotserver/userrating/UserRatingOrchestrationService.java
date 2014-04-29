@@ -47,7 +47,7 @@ public class UserRatingOrchestrationService {
         if (null != search.getDaysSinceCreated()) {
             expressions.add(ExpressionFactory.greaterExp(
                     UserRating.CREATE_TIMESTAMP_PROPERTY,
-                    now.minusDays(search.getDaysSinceCreated().intValue()).toDate()));
+                    now.minusDays(search.getDaysSinceCreated()).toDate()));
         }
 
         if (null != search.getPkg() && null == search.getPkgVersion()) {
@@ -79,6 +79,7 @@ public class UserRatingOrchestrationService {
         selectQuery.setFetchLimit(search.getLimit());
         selectQuery.addOrdering(new Ordering(UserRating.CREATE_TIMESTAMP_PROPERTY, SortOrder.DESCENDING));
 
+        //noinspection unchecked
         return context.performQuery(selectQuery);
     }
 

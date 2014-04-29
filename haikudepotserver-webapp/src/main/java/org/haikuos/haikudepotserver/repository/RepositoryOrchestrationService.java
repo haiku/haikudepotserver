@@ -75,6 +75,7 @@ public class RepositoryOrchestrationService {
         selectQuery.setFetchOffset(search.getOffset());
         selectQuery.addOrdering(new Ordering(Repository.CODE_PROPERTY, SortOrder.ASCENDING));
 
+        //noinspection unchecked
         return (List<Repository>) context.performQuery(selectQuery);
     }
 

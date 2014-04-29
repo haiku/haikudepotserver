@@ -36,6 +36,7 @@ public class HeapCoordinates {
         return length;
     }
 
+    @SuppressWarnings("RedundantIfStatement") // was auto-generated!
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
