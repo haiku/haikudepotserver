@@ -16,13 +16,12 @@ angular.module('haikudepotserver').controller(
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
             pkg) {
 
-            var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 480;
-            var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 320;
+            var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 320;
+            var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 240;
             var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
 
             $scope.pkg = undefined;
             $scope.pkgScreenshots = undefined;
-            $scope.pkgScreenshotOffset = 0;
             $scope.pkgIconHvifUrl = undefined;
             $scope.pkgCategories = undefined;
 
@@ -127,24 +126,6 @@ angular.module('haikudepotserver').controller(
             // ------------------------
             // SCREENSHOTS
 
-            $scope.goPreviousScreenshot = function() {
-                if($scope.pkgScreenshots && $scope.pkgScreenshotOffset > 0) {
-                    $scope.pkgScreenshotOffset--;
-                }
-                return false;
-            };
-
-            $scope.goNextScreenshot = function() {
-                if($scope.pkgScreenshots && $scope.pkgScreenshotOffset < ($scope.pkgScreenshots.length-1)) {
-                    $scope.pkgScreenshotOffset++;
-                }
-                return false;
-            };
-
-            $scope.currentPkgScreenshot = function() {
-                return $scope.pkgScreenshots ? $scope.pkgScreenshots[$scope.pkgScreenshotOffset] : null;
-            };
-
             function refetchPkgScreenshots() {
 
                 $scope.pkgScreenshots = undefined;
@@ -173,8 +154,6 @@ angular.module('haikudepotserver').controller(
                                     SCREENSHOT_MAX_TARGETHEIGHT)
                             };
                         });
-
-                        $scope.pkgScreenshotOffset = 0;
 
                         $log.info('found '+result.items.length+' screenshots for pkg '+$routeParams.name);
                     },
