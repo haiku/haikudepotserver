@@ -465,3 +465,13 @@ ul.context-menu-container li {
     background-color: #eeeeee;
     padding: 4px;
 }
+
+/*
+==================================
+RATINGS
+*/
+
+.rating-indicator {
+    display: inline-block;
+    vertical-align: middle;
+}

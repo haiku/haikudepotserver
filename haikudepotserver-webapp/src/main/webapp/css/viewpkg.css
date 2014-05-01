@@ -1,5 +1,5 @@
 #pkg-title {
-    margin-bottom: 16px;
+    margin-bottom: 6px;
 }
 
 #pkg-title-icon {
@@ -13,6 +13,21 @@
 
 #pkg-title-text h1 {
     margin: 0;
+}
+
+/*
+---------------------
+DESCRIPTION / META-DATA
+*/
+
+#pkg-rating-indicator-container {
+    margin-top: 6px;
+    margin-bottom: 8px;
+}
+
+#pkg-rating-indicator-container .pkg-ratings-indicator-sample {
+    margin-left: 12px;
+    color: gray;
 }
 
 /*
