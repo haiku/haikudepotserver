@@ -33,6 +33,9 @@ public class IntegrationTestSupportService {
     ServerRuntime serverRuntime;
 
     @Resource
+    PkgOrchestrationService pkgOrchestrationService;
+
+    @Resource
     PkgOrchestrationService pkgService;
 
     @Resource
@@ -146,6 +149,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version1x86.setMajor("1");
         result.pkg1Version1x86.setMicro("2");
         result.pkg1Version1x86.setRevision(3);
+        result.pkg1Version1x86.setIsLatest(false);
         result.pkg1Version1x86.setPkg(result.pkg1);
         result.pkg1Version1x86.setRepository(result.repository);
 
@@ -155,6 +159,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86.setMajor("1");
         result.pkg1Version2x86.setMicro("2");
         result.pkg1Version2x86.setRevision(4);
+        result.pkg1Version2x86.setIsLatest(true);
         result.pkg1Version2x86.setPkg(result.pkg1);
         result.pkg1Version2x86.setRepository(result.repository);
 
@@ -180,6 +185,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86_gcc2.setMajor("1");
         result.pkg1Version2x86_gcc2.setMicro("2");
         result.pkg1Version2x86_gcc2.setRevision(4);
+        result.pkg1Version2x86_gcc2.setIsLatest(true);
         result.pkg1Version2x86_gcc2.setPkg(result.pkg1);
         result.pkg1Version2x86_gcc2.setRepository(result.repository);
 
@@ -203,6 +209,7 @@ public class IntegrationTestSupportService {
         result.pkg2Version1.setMajor("1");
         result.pkg2Version1.setMicro("2");
         result.pkg2Version1.setRevision(3);
+        result.pkg2Version1.setIsLatest(true);
         result.pkg2Version1.setPkg(result.pkg2);
         result.pkg2Version1.setRepository(result.repository);
 
@@ -216,6 +223,7 @@ public class IntegrationTestSupportService {
         result.pkg3Version1.setMajor("1");
         result.pkg3Version1.setMicro("2");
         result.pkg3Version1.setRevision(3);
+        result.pkg3Version1.setIsLatest(true);
         result.pkg3Version1.setPkg(result.pkg3);
         result.pkg3Version1.setRepository(result.repository);
 
@@ -247,7 +255,7 @@ public class IntegrationTestSupportService {
         ObjectContext context = serverRuntime.getContext();
         Pkg pkg = Pkg.getByName(context, "pkg3").get();
         Architecture x86 = Architecture.getByCode(context, "x86").get();
-        PkgVersion pkgVersion = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(x86)).get();
+        PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(context, pkg, Collections.singletonList(x86)).get();
         NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get();
 
         {

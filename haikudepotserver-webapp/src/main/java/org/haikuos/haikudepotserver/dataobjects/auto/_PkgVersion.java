@@ -22,6 +22,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
 
     public static final String ACTIVE_PROPERTY = "active";
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
+    public static final String IS_LATEST_PROPERTY = "isLatest";
     public static final String MAJOR_PROPERTY = "major";
     public static final String MICRO_PROPERTY = "micro";
     public static final String MINOR_PROPERTY = "minor";
@@ -51,6 +52,13 @@ public abstract class _PkgVersion extends AbstractDataObject {
     }
     public Date getCreateTimestamp() {
         return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
+
+    public void setIsLatest(Boolean isLatest) {
+        writeProperty(IS_LATEST_PROPERTY, isLatest);
+    }
+    public Boolean getIsLatest() {
+        return (Boolean)readProperty(IS_LATEST_PROPERTY);
     }
 
     public void setMajor(String major) {

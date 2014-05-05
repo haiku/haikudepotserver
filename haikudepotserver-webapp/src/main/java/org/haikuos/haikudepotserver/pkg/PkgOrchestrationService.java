@@ -14,15 +14,19 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.ImageHelper;
+import org.haikuos.haikudepotserver.support.VersionCoordinates;
+import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
 import org.imgscalr.Scalr;
 import org.joda.time.DateTime;
@@ -35,12 +39,7 @@ import javax.imageio.ImageIO;
 import javax.sql.DataSource;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -95,6 +94,50 @@ public class PkgOrchestrationService {
     }
 
     // ------------------------------
+    // QUERY
+
+    /**
+     * <p>This method will return the latest PkgVersion for the supplied package.  The version sorting logic to compare
+     * version is quite complex.  For this reason it is basically implemented in java code.  An initial SQL statement
+     * is executed to get meta-data for all of the possible versions.  This meta data then drives a sort and the sort
+     * is able to provide the primary key for the latest version which is then faulted as a data object.</p>
+     */
+
+    public Optional<PkgVersion> getLatestPkgVersionForPkg(
+            ObjectContext context,
+            Pkg pkg,
+            final List<Architecture> architectures) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(architectures);
+        Preconditions.checkState(!architectures.isEmpty());
+
+        SelectQuery query = new SelectQuery(
+                PkgVersion.class,
+                ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg)
+                        .andExp(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE))
+                        .andExp(ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE))
+                        .andExp(ExpressionFactory.inExp(PkgVersion.ARCHITECTURE_PROPERTY, architectures))
+        );
+
+        @SuppressWarnings("unchecked") List<PkgVersion> pkgVersions = (List<PkgVersion>) context.performQuery(query);
+
+        switch(pkgVersions.size()) {
+
+            case 0:
+                return Optional.absent();
+
+            case 1:
+                return Optional.of(Iterables.getOnlyElement(pkgVersions));
+
+            default:
+                throw new IllegalStateException("more than one latest version found for pkg '"+pkg.getName()+"'");
+
+        }
+    }
+
+    // ------------------------------
     // SEARCH
 
     /**
@@ -102,7 +145,11 @@ public class PkgOrchestrationService {
      * the package version.</p>
      */
 
-    public List<PkgVersion> search(ObjectContext context, PkgSearchSpecification search, PrefetchTreeNode prefetchTreeNode) {
+    public List<PkgVersion> search(
+            ObjectContext context,
+            PkgSearchSpecification search,
+            PrefetchTreeNode prefetchTreeNode) {
+
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
         Preconditions.checkState(search.getOffset() >= 0);
@@ -114,160 +161,70 @@ public class PkgOrchestrationService {
             return Collections.emptyList();
         }
 
-        // unfortunately this one became too complex to get working properly in JPQL; had to resort
-        // to using raw SQL.
+        List<Expression> expressions = Lists.newArrayList();
 
-        StringBuilder queryBuilder = new StringBuilder();
-        List<Object> parameters = Lists.newArrayList();
+        expressions.add(ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE));
 
-        {
-            queryBuilder.append("SELECT pv.id FROM haikudepot.pkg p");
-            queryBuilder.append(" JOIN haikudepot.pkg_version pv ON pv.pkg_id = p.id");
-            queryBuilder.append(" JOIN haikudepot.architecture a ON pv.architecture_id = a.id");
+        expressions.add(
+                ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, search.getArchitecture())
+                        .orExp(ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, Architecture.getByCode(context, Architecture.CODE_ANY).get())));
 
-            if(null!=search.getPkgCategory()) {
-                queryBuilder.append(" JOIN haikudepot.pkg_pkg_category ppc ON p.id = ppc.pkg_id");
-                queryBuilder.append(" JOIN haikudepot.pkg_category pc ON pc.id=ppc.pkg_category_id");
-            }
-
-            queryBuilder.append(" WHERE");
-
-            // make sure that we are hitting the architecture that we want.
-
-            queryBuilder.append(" (a.code = ? OR a.code = ?)");
-            parameters.add(search.getArchitecture().getCode());
-            parameters.add(Architecture.CODE_ANY);
-
-            // make sure that we are dealing only with active packages.
-
-            if(!search.getIncludeInactive()) {
-                queryBuilder.append(" AND p.active = true");
-                queryBuilder.append(" AND pv.active = true");
-            }
-
-            if(null!=search.getDaysSinceLatestVersion()) {
-                queryBuilder.append(" AND pv.create_timestamp > ?");
-                parameters.add(new java.sql.Timestamp(DateTime.now().minusDays(search.getDaysSinceLatestVersion().intValue()).getMillis()));
-            }
-
-            if(!Strings.isNullOrEmpty(search.getExpression())) {
-                queryBuilder.append(" AND p.name LIKE ?");
-                parameters.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-            }
-
-            if(null!=search.getPkgCategory()) {
-                queryBuilder.append(" AND pc.code = ?");
-                parameters.add(search.getPkgCategory().getCode());
-            }
-
-            if(null!=search.getPkgNames()) {
-                List<String> pn = search.getPkgNames();
-
-                queryBuilder.append(" AND p.name IN (");
-
-                for(int i=0;i<pn.size();i++) {
-                    if(0!=i) {
-                        queryBuilder.append(',');
-                    }
-                    queryBuilder.append('?');
-                    parameters.add(pn.get(i));
-                }
-
-                queryBuilder.append(")");
-            }
-
-            // make sure that we are dealing with the latest version in the package.
-
-            queryBuilder.append(" AND pv.id = (");
-            queryBuilder.append(" SELECT pv2.id FROM haikudepot.pkg_version pv2 WHERE");
-            queryBuilder.append(" pv2.pkg_id = pv.pkg_id");
-            queryBuilder.append(" AND pv2.architecture_id = pv.architecture_id");
-
-            if(!search.getIncludeInactive()) {
-                queryBuilder.append(" AND pv2.active = true");
-            }
-
-            queryBuilder.append(" ORDER BY");
-            queryBuilder.append(" pv2.major DESC NULLS LAST");
-            queryBuilder.append(" ,pv2.minor DESC NULLS LAST");
-            queryBuilder.append(" ,pv2.micro DESC NULLS LAST");
-            queryBuilder.append(" ,pv2.pre_release DESC NULLS LAST");
-            queryBuilder.append(" ,pv2.revision DESC NULLS LAST");
-            queryBuilder.append(" LIMIT 1");
-            queryBuilder.append(")");
-
-            if(null!=search.getSortOrdering()) {
-                queryBuilder.append(" ORDER BY");
-
-                switch (search.getSortOrdering()) {
-
-                    case VERSIONVIEWCOUNTER:
-                        queryBuilder.append(" pv.view_counter DESC, p.name ASC");
-                        break;
-
-                    case VERSIONCREATETIMESTAMP:
-                        queryBuilder.append(" pv.create_timestamp DESC");
-                        break;
-
-                    case NAME:
-                        queryBuilder.append(" p.name ASC");
-                        break;
-
-                    default:
-                        throw new IllegalStateException("unhandled sort ordering; " + search.getSortOrdering());
-
-                }
-            }
-
-            queryBuilder.append(" LIMIT ?");
-            parameters.add(search.getLimit());
-
-            queryBuilder.append(" OFFSET ?");
-            parameters.add(search.getOffset());
+        if(!search.getIncludeInactive()) {
+            expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
+            expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY, Boolean.TRUE));
         }
 
-        // now run the raw database query to get the primary keys and then we will haul in the data using Cayenne
-        // as a separate query which should be quite fast.
+        if(null!=search.getDaysSinceLatestVersion()) {
+            expressions.add(ExpressionFactory.greaterOrEqualExp(
+                    PkgVersion.CREATE_TIMESTAMP_PROPERTY,
+                    DateTime.now().minusDays(search.getDaysSinceLatestVersion().intValue()).toDate()));
+        }
 
-        final List<Long> pkgVersionIds = Lists.newArrayList();
+        if(!Strings.isNullOrEmpty(search.getExpression())) {
+            expressions.add(ExpressionFactory.likeExp(
+                    PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
+                    "%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%"));
+        }
 
-        {
-            PreparedStatement preparedStatement = null;
-            ResultSet resultSet = null;
-            Connection connection = null;
+        if(null!=search.getPkgCategory()) {
+            expressions.add(ExpressionFactory.likeExp(
+                    PkgVersion.PKG_PROPERTY + "." + Pkg.PKG_PKG_CATEGORIES_PROPERTY + "." + PkgPkgCategory.PKG_CATEGORY_PROPERTY,
+                    search.getPkgCategory()));
+        }
 
-            try {
-                connection = dataSource.getConnection();
-                connection.setAutoCommit(false);
+        if(null!=search.getPkgNames()) {
+            expressions.add(ExpressionFactory.inExp(
+                    PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
+                    search.getPkgNames()));
+        }
 
-                preparedStatement = connection.prepareStatement(queryBuilder.toString());
+        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
 
-                for(int i=0;i<parameters.size();i++) {
-                    preparedStatement.setObject(i+1, parameters.get(i));
-                }
+        if(null!=search.getSortOrdering()) {
 
-                resultSet = preparedStatement.executeQuery();
+            switch (search.getSortOrdering()) {
 
-                while(resultSet.next()) {
-                    pkgVersionIds.add(resultSet.getLong(1));
-                }
-            }
-            catch(SQLException se) {
-                throw new RuntimeException("unable to search the packages from the search specification", se);
-            }
-            finally {
-                Closeables.closeQuietly(resultSet);
-                Closeables.closeQuietly(preparedStatement);
-                Closeables.closeQuietly(connection);
+                case VERSIONVIEWCOUNTER:
+                    query.addOrdering(new Ordering(PkgVersion.VIEW_COUNTER_PROPERTY, SortOrder.DESCENDING));
+                    break;
+
+                case VERSIONCREATETIMESTAMP:
+                    query.addOrdering(new Ordering(PkgVersion.CREATE_TIMESTAMP_PROPERTY, SortOrder.DESCENDING));
+                    break;
+
+                case NAME: // gets added anyway...
+                    break;
+
+                default:
+                    throw new IllegalStateException("unhandled sort ordering; " + search.getSortOrdering());
+
             }
         }
 
-        // now get the actual data objects which might be in the wrong order.  Use a pre-fetch here to pick up the
-        // package as well.  We do this to avoid the extra fault that will come in producing the output.
+        query.addOrdering(new Ordering(PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY, SortOrder.ASCENDING));
 
-        SelectQuery query = new SelectQuery(
-                PkgVersion.class,
-                ExpressionFactory.inDbExp(PkgVersion.ID_PK_COLUMN, pkgVersionIds));
+        query.setFetchLimit(search.getLimit());
+        query.setFetchOffset(search.getOffset());
 
         if(null==prefetchTreeNode) {
             prefetchTreeNode = new PrefetchTreeNode();
@@ -278,28 +235,8 @@ public class PkgOrchestrationService {
 
         query.setPrefetchTree(prefetchTreeNode);
 
-        @SuppressWarnings("unchecked")
-        List<PkgVersion> pkgVersions = context.performQuery(query);
-
-        // repeat the sort of the main query to get the packages back into order again.
-
-        Collections.sort(pkgVersions, new Comparator<PkgVersion>() {
-            @Override
-            public int compare(PkgVersion o1, PkgVersion o2) {
-                Long i1 = (Long) o1.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
-                Long i2 = (Long) o2.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
-                int offset1 = pkgVersionIds.indexOf(i1);
-                int offset2 = pkgVersionIds.indexOf(i2);
-
-                if(-1==offset1 || -1==offset2) {
-                    throw new IllegalStateException("a pkg version being sorted was not able to be found in the original list of id-s to be fetched");
-                }
-
-                return Integer.compare(offset1,offset2);
-            }
-        });
-
-        return pkgVersions;
+        //noinspection unchecked
+        return (List<PkgVersion>) context.performQuery(query);
     }
 
     // ------------------------------
@@ -503,17 +440,13 @@ public class PkgOrchestrationService {
     // ------------------------------
     // IMPORT
 
-    private Expression toExpression(org.haikuos.pkg.model.PkgVersion version) {
-        return ExpressionFactory.matchExp(
-                org.haikuos.haikudepotserver.dataobjects.PkgVersion.MAJOR_PROPERTY, version.getMajor())
-                .andExp(ExpressionFactory.matchExp(
-                        org.haikuos.haikudepotserver.dataobjects.PkgVersion.MINOR_PROPERTY, version.getMinor()))
-                .andExp(ExpressionFactory.matchExp(
-                        org.haikuos.haikudepotserver.dataobjects.PkgVersion.MICRO_PROPERTY, version.getMicro()))
-                .andExp(ExpressionFactory.matchExp(
-                        org.haikuos.haikudepotserver.dataobjects.PkgVersion.PRE_RELEASE_PROPERTY, version.getPreRelease()))
-                .andExp(ExpressionFactory.matchExp(
-                        org.haikuos.haikudepotserver.dataobjects.PkgVersion.REVISION_PROPERTY, version.getRevision()));
+    private VersionCoordinates toVersionCoordinates(org.haikuos.pkg.model.PkgVersion version) {
+        return new VersionCoordinates(
+                version.getMajor(),
+                version.getMinor(),
+                version.getMicro(),
+                version.getPreRelease(),
+                version.getRevision());
     }
 
     /**
@@ -559,14 +492,15 @@ public class PkgOrchestrationService {
                     ExpressionFactory.matchExp(
                             org.haikuos.haikudepotserver.dataobjects.PkgVersion.PKG_PROPERTY,
                             persistedPkg)
-                            .andExp(toExpression(pkg.getVersion())));
+                            .andExp(ExpressionHelper.toExpression(toVersionCoordinates(pkg.getVersion())))
+            );
 
             //noinspection unchecked
             persistedPkgVersion = Iterables.getOnlyElement(
                     (List<org.haikuos.haikudepotserver.dataobjects.PkgVersion>) objectContext.performQuery(selectQuery),
                     null);
 
-            persistedLatestExistingPkgVersion = PkgVersion.getLatestForPkg(
+            persistedLatestExistingPkgVersion = getLatestPkgVersionForPkg(
                     objectContext,
                     persistedPkg,
                     Collections.singletonList(architecture));
@@ -632,6 +566,30 @@ public class PkgOrchestrationService {
                         "replicated {} natural language localizations when creating new version of package {}",
                         naturalLanguagesReplicated,
                         pkg.getName());
+            }
+
+            // now possibly switch the latest flag over to the new one from the old one.
+
+            if(persistedLatestExistingPkgVersion.isPresent()) {
+                VersionCoordinatesComparator versionCoordinatesComparator = new VersionCoordinatesComparator();
+                VersionCoordinates persistedPkgVersionCoords = persistedPkgVersion.toVersionCoordinates();
+                VersionCoordinates persistedLatestExistingPkgVersionCoords = persistedLatestExistingPkgVersion.get().toVersionCoordinates();
+
+                if(versionCoordinatesComparator.compare(
+                        persistedPkgVersionCoords,
+                        persistedLatestExistingPkgVersionCoords) > 0) {
+                    persistedPkgVersion.setIsLatest(true);
+                    persistedLatestExistingPkgVersion.get().setIsLatest(false);
+                }
+                else {
+                    logger.warn(
+                            "imported a package version {} which is older or the same as the existing {}",
+                            persistedPkgVersionCoords,
+                            persistedLatestExistingPkgVersionCoords);
+                }
+            }
+            else {
+                persistedPkgVersion.setIsLatest(true);
             }
 
             logger.info(
@@ -745,8 +703,8 @@ public class PkgOrchestrationService {
 
         if(
                 sourceEn.isPresent()
-                && destinationEn.isPresent()
-                && sourceEn.get().equalsForContent(destinationEn.get()) ) {
+                        && destinationEn.isPresent()
+                        && sourceEn.get().equalsForContent(destinationEn.get()) ) {
 
             List<NaturalLanguage> naturalLanguagesEffected = Lists.newArrayList();
 
@@ -782,5 +740,6 @@ public class PkgOrchestrationService {
 
         return Collections.emptyList();
     }
+
 
 }

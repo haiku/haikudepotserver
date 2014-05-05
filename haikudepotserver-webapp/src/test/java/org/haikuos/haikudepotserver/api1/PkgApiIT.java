@@ -40,6 +40,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
     PkgApi pkgApi;
 
     @Resource
+    PkgOrchestrationService pkgOrchestrationService;
+
+    @Resource
     PkgOrchestrationService pkgService;
 
     @Test
@@ -496,7 +499,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
-            Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
+            Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
                     context,
                     pkgOptional.get(),
                     Collections.singletonList(Architecture.getByCode(context, "x86").get()));
@@ -514,7 +517,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
-            Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
+            Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
                     context,
                     pkgOptional.get(),
                     Collections.singletonList(Architecture.getByCode(context, "x86_gcc2").get()));

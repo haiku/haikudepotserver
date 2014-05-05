@@ -22,7 +22,7 @@ public class NaturalStringComparatorTest {
         Assertions.assertThat(naturalStringComparator.compare("0000","0000")).isEqualTo(0);
         Assertions.assertThat(naturalStringComparator.compare("0000","456")).isLessThan(0);
         Assertions.assertThat(naturalStringComparator.compare("123","00")).isGreaterThan(0);
-        Assertions.assertThat(naturalStringComparator.compare("123  ","123 ")).isGreaterThan(0);
+        Assertions.assertThat(naturalStringComparator.compare("123  ","123 ")).isEqualTo(0);
     }
 
     @Test

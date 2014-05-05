@@ -63,6 +63,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     AuthorizationService authorizationService;
 
     @Resource
+    PkgOrchestrationService pkgOrchestrationService;
+
+    @Resource
     PkgOrchestrationService pkgService;
 
     @Value("${pkgversion.viewcounter.protectrecurringincrementfromsameclient:true}")
@@ -423,7 +426,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
                 }
 
-                Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(
+                Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
                         context,
                         pkg,
                         ImmutableList.of(
@@ -760,7 +763,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         Architecture architecture = getArchitecture(context, updatePkgVersionLocalizationRequest.architectureCode);
 
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(architecture));
+        Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                context,
+                pkg,
+                Collections.singletonList(architecture));
 
         if(!pkgVersionOptional.isPresent()) {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());
@@ -832,7 +838,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Pkg pkg = getPkg(context, getPkgVersionLocalizationsRequest.pkgName);
         Architecture architecture = getArchitecture(context, getPkgVersionLocalizationsRequest.architectureCode);
 
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getLatestForPkg(context, pkg, Collections.singletonList(architecture));
+        Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                context,
+                pkg,
+                Collections.singletonList(architecture));
 
         if(!pkgVersionOptional.isPresent()) {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());

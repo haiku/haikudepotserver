@@ -64,7 +64,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             org.haikuos.haikudepotserver.dataobjects.Pkg pkg = org.haikuos.haikudepotserver.dataobjects.Pkg.getByName(context,"testpkg").get();
-            org.haikuos.haikudepotserver.dataobjects.PkgVersion pkgVersion = org.haikuos.haikudepotserver.dataobjects.PkgVersion.getLatestForPkg(
+            org.haikuos.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
                     context,
                     pkg,
                     Collections.singletonList(
@@ -90,7 +90,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             org.haikuos.haikudepotserver.dataobjects.Pkg pkg = org.haikuos.haikudepotserver.dataobjects.Pkg.getByName(context,"testpkg").get();
-            org.haikuos.haikudepotserver.dataobjects.PkgVersion pkgVersion = org.haikuos.haikudepotserver.dataobjects.PkgVersion.getLatestForPkg(
+            org.haikuos.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
                     context,
                     pkg,
                     Collections.singletonList(

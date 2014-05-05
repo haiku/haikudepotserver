@@ -17,6 +17,7 @@ import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
 import org.haikuos.haikudepotserver.api1.model.userrating.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -27,6 +28,9 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     @Resource
     UserRatingApi userRatingApi;
 
+    @Resource
+    PkgOrchestrationService pkgOrchestrationService;
+
     private String createTestUserAndSampleUserRating() {
         ObjectContext context = serverRuntime.getContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "password");
@@ -34,7 +38,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
         userRating.setComment("How now brown cow");
-        userRating.setPkgVersion(PkgVersion.getLatestForPkg(
+        userRating.setPkgVersion(pkgOrchestrationService.getLatestPkgVersionForPkg(
                 context,
                 Pkg.getByName(context, "pkg1").get(),
                 Collections.singletonList(Architecture.getByCode(context, "x86").get())).get());

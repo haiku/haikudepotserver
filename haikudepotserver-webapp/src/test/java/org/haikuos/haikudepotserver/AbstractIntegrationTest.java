@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotserver;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -81,6 +83,28 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
+    private String getDatabaseName(Connection connection) throws SQLException {
+        Preconditions.checkNotNull(connection);
+
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            preparedStatement = connection.prepareStatement("SELECT current_database()");
+            resultSet = preparedStatement.executeQuery();
+
+            if(!resultSet.next()) {
+                throw new IllegalStateException("unable to get the current database name");
+            }
+
+            return resultSet.getString(1);
+        }
+        finally {
+            Closeables.closeQuietly(resultSet);
+            Closeables.closeQuietly(preparedStatement);
+        }
+    }
+
     /**
      * <p>Before each test is run, we want to remove all of the database objects and then re-populate
      * them back again.</p>
@@ -118,6 +142,10 @@ public abstract class AbstractIntegrationTest {
                             "the system is designed to be tested against %s database product, but is '%s'",
                             DATABASEPRODUCTNAME_POSTGRES,
                             databaseProductName));
+                }
+
+                if(!getDatabaseName(connection).endsWith("_integrationtest")) {
+                    throw new IllegalStateException("unable to proceed with integration tests against a database which is not an integration test database");
                 }
 
                 {

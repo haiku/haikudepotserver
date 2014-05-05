@@ -10,13 +10,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersion;
@@ -33,17 +29,6 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public final static Pattern MINOR_PATTERN = Pattern.compile("^[\\w_]+$");
     public final static Pattern MICRO_PATTERN = Pattern.compile("^[\\w_.]+$");
     public final static Pattern PRE_RELEASE_PATTERN = Pattern.compile("^[\\w_.]+$");
-
-    // TODO; could there be a problem here with alpha ordering of version numbers???
-    public static List<Ordering> versionOrdering() {
-        List<Ordering> result = Lists.newArrayList();
-        result.add(new Ordering(PkgVersion.MAJOR_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
-        result.add(new Ordering(PkgVersion.MINOR_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
-        result.add(new Ordering(PkgVersion.MICRO_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
-        result.add(new Ordering(PkgVersion.PRE_RELEASE_PROPERTY, SortOrder.DESCENDING_INSENSITIVE));
-        result.add(new Ordering(PkgVersion.REVISION_PROPERTY, SortOrder.DESCENDING));
-        return result;
-    }
 
     public static Optional<PkgVersion> getForPkg(
             ObjectContext context,
@@ -63,43 +48,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                         ExpressionHelper.toExpression(versionCoordinates))
         );
 
-        query.addOrderings(versionOrdering());
-
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<PkgVersion>) context.performQuery(query),
-                null));
-    }
-
-    public static Optional<PkgVersion> getLatestForPkg(
-            ObjectContext context,
-            Pkg pkg,
-            List<Architecture> architectures) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(architectures);
-        Preconditions.checkState(!architectures.isEmpty());
-
-        Expression architectureExpression = null;
-
-        for(Architecture architecture : architectures) {
-            if(null==architectureExpression) {
-                architectureExpression = ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture);
-            }
-            else {
-                architectureExpression = architectureExpression.orExp(
-                        ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture));
-            }
-        }
-
-        SelectQuery query = new SelectQuery(
-                PkgVersion.class,
-                ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE)).andExp(
-                        architectureExpression));
-
-        query.setFetchLimit(1);
-        query.addOrderings(versionOrdering());
-
+        //noinspection unchecked
         return Optional.fromNullable(Iterables.getOnlyElement(
                 (List<PkgVersion>) context.performQuery(query),
                 null));
@@ -110,6 +59,10 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
         if(null==getViewCounter()) {
             setViewCounter(0l);
+        }
+
+        if(null==getIsLatest()) {
+            setIsLatest(false);
         }
 
         super.validateForInsert(validationResult);
@@ -144,12 +97,12 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         }
 
         if(null != getRevision()) {
-            if(getRevision().intValue() <= 0) {
+            if(getRevision() <= 0) {
                 validationResult.addFailure(new BeanValidationFailure(this,REVISION_PROPERTY,"lessThanEqualZero"));
             }
         }
 
-        if(getViewCounter().longValue() < 0) {
+        if(getViewCounter() < 0) {
             validationResult.addFailure(new BeanValidationFailure(this,VIEW_COUNTER_PROPERTY,"min"));
         }
 

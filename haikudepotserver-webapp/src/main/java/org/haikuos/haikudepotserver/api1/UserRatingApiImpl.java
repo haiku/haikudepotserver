@@ -16,6 +16,7 @@ import org.haikuos.haikudepotserver.api1.model.userrating.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
@@ -43,6 +44,9 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
     @Resource
     UserRatingOrchestrationService userRatingOrchestrationService;
+
+    @Resource
+    PkgOrchestrationService pkgOrchestrationService;
 
     /**
      * <p>Some of the result subclass from this abstract one.  This convenience method will full the
@@ -212,7 +216,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         switch(request.pkgVersionType) {
             case LATEST:
-                pkgVersionOptional = PkgVersion.getLatestForPkg(
+                pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
                         Collections.singletonList(architecture));

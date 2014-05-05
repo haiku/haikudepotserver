@@ -130,6 +130,7 @@
 		<db-attribute name="architecture_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="is_latest" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="major" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="micro" type="VARCHAR" length="255"/>
 		<db-attribute name="minor" type="VARCHAR" length="255"/>
@@ -316,6 +317,7 @@
 	<obj-entity name="PkgVersion" className="org.haikuos.haikudepotserver.dataobjects.PkgVersion" lock-type="optimistic" dbEntityName="pkg_version" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="isLatest" type="java.lang.Boolean" lock="true" db-attribute-path="is_latest"/>
 		<obj-attribute name="major" type="java.lang.String" lock="true" db-attribute-path="major"/>
 		<obj-attribute name="micro" type="java.lang.String" lock="true" db-attribute-path="micro"/>
 		<obj-attribute name="minor" type="java.lang.String" lock="true" db-attribute-path="minor"/>
