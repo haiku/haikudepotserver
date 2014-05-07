@@ -209,7 +209,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         specification.setArchitecture(architectureOptional.get());
 
-        specification.setLimit(request.limit+1); // get +1 to see if there are any more.
+        specification.setLimit(request.limit);
         specification.setOffset(request.offset);
 
         SearchPkgsResult result = new SearchPkgsResult();
@@ -218,12 +218,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         // if there are more than we asked for then there must be more available.
 
-        result.hasMore = searchedPkgVersions.size() > request.limit;
-
-        if(result.hasMore) {
-            searchedPkgVersions = searchedPkgVersions.subList(0,request.limit);
-        }
-
+        result.total = pkgService.total(context, specification);
         result.items = Lists.newArrayList(Iterables.transform(
                 searchedPkgVersions,
                 new Function<PkgVersion, SearchPkgsResult.Pkg>() {

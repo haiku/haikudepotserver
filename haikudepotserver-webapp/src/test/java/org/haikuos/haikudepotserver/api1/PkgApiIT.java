@@ -117,7 +117,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         SearchPkgsResult result = pkgApi.searchPkgs(request);
         // ------------------------------------
 
-        Assertions.assertThat(result.hasMore).isTrue();
+        Assertions.assertThat(result.total).isEqualTo(3);
         Assertions.assertThat(result.items.size()).isEqualTo(2);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
         Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");

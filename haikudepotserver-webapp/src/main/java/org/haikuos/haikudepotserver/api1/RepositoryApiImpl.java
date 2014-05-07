@@ -120,21 +120,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     PkgSearchSpecification.ExpressionType.valueOf(request.expressionType.name()));
         }
 
-        specification.setLimit(request.limit+1); // get +1 to see if there are any more.
+        specification.setLimit(request.limit);
         specification.setOffset(request.offset);
         specification.setIncludeInactive(null!=request.includeInactive && request.includeInactive);
 
         SearchRepositoriesResult result = new SearchRepositoriesResult();
         List<Repository> searchedRepositories = repositoryService.search(context,specification);
 
-        // if there are more than we asked for then there must be more available.
-
-        result.hasMore = searchedRepositories.size() > request.limit;
-
-        if(result.hasMore) {
-            searchedRepositories = searchedRepositories.subList(0,request.limit);
-        }
-
+        result.total = repositoryService.total(context,specification);
         result.items = Lists.newArrayList(Iterables.transform(
                 searchedRepositories,
                 new Function<Repository, SearchRepositoriesResult.Repository>() {

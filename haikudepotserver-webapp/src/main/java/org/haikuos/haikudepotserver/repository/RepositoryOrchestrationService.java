@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
@@ -34,11 +35,9 @@ public class RepositoryOrchestrationService {
     // ------------------------------
     // SEARCH
 
-    public List<Repository> search(ObjectContext context, RepositorySearchSpecification search) {
+    private SelectQuery prepare(ObjectContext context, RepositorySearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-        Preconditions.checkState(search.getOffset() >= 0);
-        Preconditions.checkState(search.getLimit() > 0);
 
         List<Expression> expressions = Lists.newArrayList();
 
@@ -70,7 +69,16 @@ public class RepositoryOrchestrationService {
             }
         }
 
-        SelectQuery selectQuery = new SelectQuery(Repository.class, expression);
+        return new SelectQuery(Repository.class, expression);
+    }
+
+    public List<Repository> search(ObjectContext context, RepositorySearchSpecification search) {
+        Preconditions.checkNotNull(search);
+        Preconditions.checkNotNull(context);
+        Preconditions.checkState(search.getOffset() >= 0);
+        Preconditions.checkState(search.getLimit() > 0);
+
+        SelectQuery selectQuery = prepare(context,search);
         selectQuery.setFetchLimit(search.getLimit());
         selectQuery.setFetchOffset(search.getOffset());
         selectQuery.addOrdering(new Ordering(Repository.CODE_PROPERTY, SortOrder.ASCENDING));
@@ -79,5 +87,27 @@ public class RepositoryOrchestrationService {
         return (List<Repository>) context.performQuery(selectQuery);
     }
 
+    public long total(ObjectContext context, RepositorySearchSpecification search) {
+        Preconditions.checkNotNull(search);
+        Preconditions.checkNotNull(context);
+
+        SelectQuery selectQuery = prepare(context,search);
+        List<Object> parameters = Lists.newArrayList();
+        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(r) FROM Repository AS r WHERE " + selectQuery.getQualifier().toEJBQL(parameters,"r"));
+
+        for(int i=0;i<parameters.size();i++) {
+            ejbQuery.setParameter(i+1, parameters.get(i));
+        }
+
+        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
+
+        switch(result.size()) {
+            case 1:
+                return result.get(0).longValue();
+
+            default:
+                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+        }
+    }
 
 }

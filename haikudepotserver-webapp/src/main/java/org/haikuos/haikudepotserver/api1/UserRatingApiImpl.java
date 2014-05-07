@@ -395,13 +395,13 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             searchSpecification.setUser(userOptional.get());
         }
 
-        searchSpecification.setLimit(request.limit + 1);
+        searchSpecification.setLimit(request.limit);
         searchSpecification.setOffset(request.offset);
 
         List<UserRating> foundUserRatings = userRatingOrchestrationService.search(context, searchSpecification);
 
         final SearchUserRatingsResult result = new SearchUserRatingsResult();
-        result.hasMore = foundUserRatings.size() > request.limit;
+        result.total = userRatingOrchestrationService.total(context, searchSpecification);
         result.items = Lists.transform(
                 foundUserRatings,
                 new Function<UserRating, SearchUserRatingsResult.UserRating>() {

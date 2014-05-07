@@ -14,10 +14,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.PrefetchTreeNode;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
+import org.apache.cayenne.query.*;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
@@ -139,16 +136,9 @@ public class PkgOrchestrationService {
 
     // ------------------------------
     // SEARCH
-
-    /**
-     * <p>This performs a search on the packages.  Note that the prefetch tree node that is supplied is relative to
-     * the package version.</p>
-     */
-
-    public List<PkgVersion> search(
+    private SelectQuery prepare(
             ObjectContext context,
-            PkgSearchSpecification search,
-            PrefetchTreeNode prefetchTreeNode) {
+            PkgSearchSpecification search) {
 
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
@@ -156,10 +146,6 @@ public class PkgOrchestrationService {
         Preconditions.checkState(search.getLimit() > 0);
         Preconditions.checkNotNull(search.getArchitecture());
         Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
-
-        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
-            return Collections.emptyList();
-        }
 
         List<Expression> expressions = Lists.newArrayList();
 
@@ -198,7 +184,24 @@ public class PkgOrchestrationService {
                     search.getPkgNames()));
         }
 
-        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
+        return new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
+    }
+
+    /**
+     * <p>This performs a search on the packages.  Note that the prefetch tree node that is supplied is relative to
+     * the package version.</p>
+     */
+
+    public List<PkgVersion> search(
+            ObjectContext context,
+            PkgSearchSpecification search,
+            PrefetchTreeNode prefetchTreeNode) {
+
+        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        SelectQuery query = prepare(context, search);
 
         if(null!=search.getSortOrdering()) {
 
@@ -237,6 +240,40 @@ public class PkgOrchestrationService {
 
         //noinspection unchecked
         return (List<PkgVersion>) context.performQuery(query);
+    }
+
+    /**
+     * <p>This returns the total that would be returned from the search specification ignoring offset and max.  It
+     * is a bit awful that the {@link org.apache.cayenne.query.SelectQuery} has no native mechanic to get the
+     * count for a query, but the EJBQL does and it seems to be relatively easy to get from the Expression of a
+     * to EJBQL statements.</p>
+     */
+
+    public long total(
+            ObjectContext context,
+            PkgSearchSpecification search) {
+
+        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+            return 0L;
+        }
+
+        SelectQuery query = prepare(context, search);
+        List<Object> parameters = Lists.newArrayList();
+        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(pv) FROM PkgVersion AS pv WHERE " + query.getQualifier().toEJBQL(parameters,"pv"));
+
+        for(int i=0;i<parameters.size();i++) {
+            ejbQuery.setParameter(i+1, parameters.get(i));
+        }
+
+        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
+
+        switch(result.size()) {
+            case 1:
+                return result.get(0).longValue();
+
+            default:
+                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+        }
     }
 
     // ------------------------------

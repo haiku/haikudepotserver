@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
@@ -20,6 +21,8 @@ import org.haikuos.haikudepotserver.userrating.model.UserRatingSearchSpecificati
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 /**
@@ -29,7 +32,7 @@ import java.util.List;
 @Service
 public class UserRatingOrchestrationService {
 
-    public List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search) {
+    public SelectQuery prepare(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
         DateTime now = new DateTime();
@@ -47,7 +50,7 @@ public class UserRatingOrchestrationService {
         if (null != search.getDaysSinceCreated()) {
             expressions.add(ExpressionFactory.greaterExp(
                     UserRating.CREATE_TIMESTAMP_PROPERTY,
-                    now.minusDays(search.getDaysSinceCreated()).toDate()));
+                    new java.sql.Timestamp(now.minusDays(search.getDaysSinceCreated()).getMillis())));
         }
 
         if (null != search.getPkg() && null == search.getPkgVersion()) {
@@ -74,13 +77,49 @@ public class UserRatingOrchestrationService {
                     search.getUser()));
         }
 
-        SelectQuery selectQuery = new SelectQuery(UserRating.class, ExpressionHelper.andAll(expressions));
+        return new SelectQuery(UserRating.class, ExpressionHelper.andAll(expressions));
+    }
+
+    public List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search) {
+        Preconditions.checkNotNull(search);
+        Preconditions.checkNotNull(context);
+
+        SelectQuery selectQuery = prepare(context, search);
         selectQuery.setFetchOffset(search.getOffset());
         selectQuery.setFetchLimit(search.getLimit());
         selectQuery.addOrdering(new Ordering(UserRating.CREATE_TIMESTAMP_PROPERTY, SortOrder.DESCENDING));
 
         //noinspection unchecked
         return context.performQuery(selectQuery);
+    }
+
+    public long total(ObjectContext context, UserRatingSearchSpecification search) {
+        Preconditions.checkNotNull(search);
+        Preconditions.checkNotNull(context);
+
+        SelectQuery selectQuery = prepare(context, search);
+        List<Object> parameters = Lists.newArrayList();
+        StringWriter buffer = new StringWriter();
+        PrintWriter pw = new PrintWriter(buffer);
+        selectQuery.getQualifier().encodeAsEJBQL(parameters, pw, "ur");
+        pw.close();
+        buffer.flush();
+
+        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(ur) FROM UserRating AS ur WHERE " + buffer.toString());
+
+        for(int i=0;i<parameters.size();i++) {
+            ejbQuery.setParameter(i+1,parameters.get(i));
+        }
+
+        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
+
+        switch(result.size()) {
+            case 1:
+                return result.get(0).longValue();
+
+            default:
+                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+        }
     }
 
 }

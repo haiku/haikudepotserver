@@ -61,7 +61,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         SearchRepositoriesResult result = repositoryApi.searchRepositories(request);
         // ------------------------------------
 
-        Assertions.assertThat(result.hasMore).isFalse();
+        Assertions.assertThat(result.total).isEqualTo(1);
         Assertions.assertThat(result.items.size()).isEqualTo(1);
         Assertions.assertThat(result.items.get(0).code).isEqualTo("testrepository");
     }

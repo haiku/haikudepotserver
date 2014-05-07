@@ -21,10 +21,10 @@ public abstract class AbstractSearchResult<T> {
     public List<T> items;
 
     /**
-     * <p>If this is returned true then there are more results that could be obtained by increasing the limit of the
-     * number of results in the request.</p>
+     * <p>Ignoring the offset and the max, this value is the total number of objects that could have been
+     * returned.</p>
      */
 
-    public Boolean hasMore;
+    public Long total;
 
 }
