@@ -14,7 +14,7 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,userState,messageSource,errorHandling,
             referenceData,breadcrumbs) {
 
-            const PAGESIZE = 50;
+            const PAGESIZE = 15;
 
             var ViewCriteriaTypes = {
                 ALL : 'ALL',
@@ -59,9 +59,17 @@ angular.module('haikudepotserver').controller(
             );
 
             // pagination
-            $scope.pkgs = undefined;
-            $scope.hasMore = undefined;
-            $scope.offset = 0;
+            $scope.pkgs = {
+                items : undefined,
+                offset : 0,
+                max : PAGESIZE,
+                total : undefined
+            };
+
+            function clearPkgs() {
+                $scope.pkgs.items = undefined;
+                $scope.pkgs.total = undefined;
+            }
 
             // update the localized names on the options
 
@@ -99,7 +107,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.$watch('selectedArchitecture', function() {
 
-                if(undefined != $scope.pkgs) {
+                if(undefined != $scope.pkgs.items) {
                     refetchPkgsAtFirstPage();
                 }
 
@@ -108,7 +116,7 @@ angular.module('haikudepotserver').controller(
             // this gets hit when the user chooses between the various options such as "all", "search" etc...
 
             $scope.$watch('selectedViewCriteriaTypeOption', function(newValue) {
-                $scope.pkgs = undefined;
+                clearPkgs();
 
                 if(newValue) { // will initially be undefined.
 
@@ -156,7 +164,7 @@ angular.module('haikudepotserver').controller(
                         // it would not have been possible to fetch the packages' list without having the architecture
                         // defined.  For this reason, we should now attempt to trigger the fetch of the architectures.
 
-                        if(undefined==$scope.pkgs) {
+                        if(undefined==$scope.pkgs.items) {
                             refetchPkgs();
                         }
                     },
@@ -222,26 +230,6 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
-            // ---- PAGINATION
-
-            $scope.goPreviousPage = function() {
-                if($scope.offset > 0) {
-                    $scope.offset -= PAGESIZE;
-                    refetchPkgs();
-                }
-
-                return false;
-            };
-
-            $scope.goNextPage = function() {
-                if($scope.hasMore) {
-                    $scope.offset += PAGESIZE;
-                    refetchPkgs();
-                }
-
-                return false;
-            };
-
             // ---- VIEW PKG + VERSION
 
             $scope.goViewPkg = function(pkg) {
@@ -264,13 +252,13 @@ angular.module('haikudepotserver').controller(
 
             $scope.goSearch = function() {
                 if($scope.lastRefetchPkgsSearchExpression != $scope.searchExpression) {
-                    $scope.pkgs = undefined;
+                    clearPkgs();
                     refetchPkgsAtFirstPage();
                 }
             };
 
             function refetchPkgsAtFirstPage() {
-                $scope.offset = 0;
+                $scope.pkgs.offset = 0;
                 refetchPkgs();
             }
 
@@ -286,12 +274,10 @@ angular.module('haikudepotserver').controller(
                 if($scope.selectedArchitecture) {
 
                     amFetchingPkgs = true;
-                    $scope.pkgs = undefined;
-                    $scope.hasMore = false;
 
                     var req = {
                         architectureCode: $scope.selectedArchitecture.code,
-                        offset: $scope.offset,
+                        offset: $scope.pkgs.offset,
                         limit: PAGESIZE
                     };
 
@@ -329,9 +315,9 @@ angular.module('haikudepotserver').controller(
 
                     jsonRpc.call(constants.ENDPOINT_API_V1_PKG, "searchPkgs", [req]).then(
                         function (result) {
-                            $scope.pkgs = result.items;
-                            $scope.hasMore = result.hasMore;
-                            $log.info('found ' + result.items.length + ' packages');
+                            $scope.pkgs.items = result.items;
+                            $scope.pkgs.total = result.total;
+                            $log.info('found ' + result.items.length + ' packages from a total of '+result.total);
                             amFetchingPkgs = false;
                         },
                         function (err) {
@@ -352,6 +338,9 @@ angular.module('haikudepotserver').controller(
                 }
             );
 
+            $scope.$watch('pkgs.offset', function() {
+                refetchPkgs();
+            });
 
         }
     ]

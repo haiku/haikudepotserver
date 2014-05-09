@@ -19,10 +19,21 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.createListRepositories()
             ]);
 
-            const PAGESIZE = 14;
+            var PAGESIZE = 15;
 
-            $scope.hasMore = undefined;
-            $scope.offset = 0;
+            $scope.repositories = {
+                items: undefined,
+                offset: 0,
+                max: PAGESIZE,
+                total: undefined
+            };
+
+            function clearRepositories() {
+                $scope.repositories.items = undefined;
+                $scope.repositories.total = undefined;
+                $scope.repositories.offset = 0;
+            }
+
             $scope.amShowingInactive = false;
             var amFetchingRepositories = false;
 
@@ -37,15 +48,15 @@ angular.module('haikudepotserver').controller(
                 refetchRepositoriesAtFirstPage();
             };
 
-            // ---- PAGINATION
+            // ---- LIST MANAGEMENT
 
             $scope.goSearch = function() {
-                    $scope.repositories = undefined;
+                clearRepositories();
                 refetchRepositoriesAtFirstPage();
             };
 
             function refetchRepositoriesAtFirstPage() {
-                $scope.offset = 0;
+                $scope.repositories.offset = 0;
                 refetchRepositories();
             }
 
@@ -60,13 +71,13 @@ angular.module('haikudepotserver').controller(
                             expression : $scope.searchExpression,
                             expressionType : 'CONTAINS',
                             includeInactive : $scope.amShowingInactive,
-                            offset : $scope.offset,
-                            limit : PAGESIZE
+                            offset : $scope.repositories.offset,
+                            limit : $scope.repositories.max
                         }]
                     ).then(
                     function(result) {
-                        $scope.repositories = result.items;
-                        $scope.hasMore = result.hasMore;
+                        $scope.repositories.items = result.items;
+                        $scope.repositories.total = result.total;
                         $log.info('found '+result.items.length+' repositories');
                         amFetchingRepositories = false;
                     },
@@ -77,37 +88,15 @@ angular.module('haikudepotserver').controller(
 
             }
 
-            // ---- PAGINATION
-
-            $scope.goPreviousPage = function() {
-                if($scope.offset > 0) {
-                    $scope.offset -= PAGESIZE;
-                    refetchPkgs();
-                }
-
-                return false;
-            };
-
-            $scope.goNextPage = function() {
-                if($scope.hasMore) {
-                    $scope.offset += PAGESIZE;
-                    refetchPkgs();
-                }
-
-                return false;
-            };
-
-            $scope.classPreviousPage = function() {
-                return $scope.offset > 0 ? [] : ['disabled'];
-            };
-
-            $scope.classNextPage = function() {
-                return $scope.hasMore ? [] : ['disabled'];
-            };
-
             $scope.goAdd = function() {
                 $location.path('/repositories/add').search({});
             };
+
+            // ---- EVENTS
+
+            $scope.$watch('repositories.offset', function() {
+                refetchRepositories();
+            });
 
         }
     ]

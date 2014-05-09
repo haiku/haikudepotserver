@@ -1,0 +1,53 @@
+<div class="content-container">
+
+    <p>This page is designed to help with development / debugging around the pagination controls.</p>
+
+    <hr/>
+
+    <pagination-control
+            link-count="9"
+            max="actualValues.max"
+            total="actualValues.total"
+            offset="actualValues.offset"></pagination-control>
+
+    <dl>
+        <dt>Max</dt>
+        <dd>{{actualValues.max}}</dd>
+        <dt>Total</dt>
+        <dd>{{actualValues.total}}</dd>
+        <dt>Offset</dt>
+        <dd>{{actualValues.offset}}</dd>
+    </dl>
+
+    <hr/>
+
+    <form name="paginationControlPlaygroundForm" novalidate="novalidate">
+
+        <label for="total">Total</label>
+        <div class="form-control-group">
+            <input id="total" ng-model="editingValues.total"></input>
+        </div>
+
+        <label for="offset">Offset</label>
+        <div class="form-control-group">
+            <input id="offset" ng-model="editingValues.offset"></input>
+        </div>
+
+        <label for="max">Max (per page)</label>
+        <div class="form-control-group">
+            <input id="max" ng-model="editingValues.max"></input>
+        </div>
+
+        <div class="form-action-container">
+            <button
+                    ng-click="goSetValues()"
+                    type="submit"
+                    class="main-action">
+                Set
+            </button>
+        </div>
+
+    </form>
+
+</div>
+<div class="footer"></div>

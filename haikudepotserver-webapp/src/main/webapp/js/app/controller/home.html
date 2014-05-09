@@ -39,16 +39,19 @@
 
     <div id="search-results-container">
 
-        <div ng-show="pkgs && 0==pkgs.length" class="info-container">
+        <div ng-show="pkgs.items && 0==pkgs.items.length" class="info-container">
             <strong><message key="home.noResults.title"></message>;</strong>
             <message key="home.noResults.description"></message>
         </div>
 
-        <div ng-show="pkgs && pkgs.length" class="table-general-container">
+        <div ng-show="pkgs.items && pkgs.items.length" class="table-general-container">
 
             <div class="table-general-pagination-container">
-                <pagination-arrow active="0!=offset" page-click="goPreviousPage()" direction="left"></pagination-arrow>
-                <pagination-arrow active="hasMore" page-click="goNextPage()" direction="right"></pagination-arrow>
+                <pagination-control
+                        link-count="9"
+                        max="pkgs.max"
+                        total="pkgs.total"
+                        offset="pkgs.offset"></pagination-control>
             </div>
 
             <table class="table-general">
@@ -60,7 +63,7 @@
                 <th ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><message key="home.table.versionViewCounter.title"></message></th>
                 </thead>
                 <tbody>
-                <tr ng-repeat="pkg in pkgs">
+                <tr ng-repeat="pkg in pkgs.items">
                     <td><pkg-icon size="16" pkg="pkg"></pkg-icon></td>
                     <td>
                         <a href="" ng-click="goViewPkg(pkg)">{{pkg.name}}</a>

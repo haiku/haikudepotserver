@@ -205,7 +205,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // no sense to show the logout button if nobody is presently logged in.
 
                     $scope.$on(
-                        "userChangeSuccess",
+                        'userChangeSuccess',
                         function() {
                             $scope.userNickname = userState.user() ? userState.user().nickname : undefined;
                         }
@@ -215,7 +215,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // login | logout, we need to reflect this change in the banner indicator.
 
                     $scope.$on(
-                        "naturalLanguageChange",
+                        'naturalLanguageChange',
                         function() {
                             $scope.naturalLanguageData.naturalLanguageCode = userState.naturalLanguageCode();
                             updateNaturalLanguageOptionsTitles();

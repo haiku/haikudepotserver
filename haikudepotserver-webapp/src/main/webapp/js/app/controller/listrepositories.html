@@ -19,16 +19,19 @@
 
     <div id="search-results-container">
 
-        <div ng-show="repositories && 0==repositories.length" class="info-container">
+        <div ng-show="repositories.items && 0==repositories.items.length" class="info-container">
             <strong><message key="listRepositories.noResults.title"></message>; </strong>
             <message key="listRepositories.noResults.description"></message>
         </div>
 
-        <div ng-show="repositories && repositories.length" class="table-general-container">
+        <div ng-show="repositories.items && repositories.items.length" class="table-general-container">
 
             <div class="table-general-pagination-container">
-                <pagination-arrow active="0!=offset" page-click="goPreviousPage()" direction="left"></pagination-arrow>
-                <pagination-arrow active="hasMore" page-click="goNextPage()" direction="right"></pagination-arrow>
+                <pagination-control
+                        link-count="9"
+                        max="repositories.max"
+                        total="repositories.total"
+                        offset="repositories.offset"></pagination-control>
             </div>
 
             <table class="table-general">
@@ -38,7 +41,7 @@
                 <th><message key="gen.architecture.title"></message></th>
                 </thead>
                 <tbody>
-                <tr ng-repeat="repository in repositories">
+                <tr ng-repeat="repository in repositories.items">
                     <td><active-indicator state="repository.active"></active-indicator></td>
                     <td><repository-label repository="repository"></repository-label></td>
                     <td><code>{{repository.architectureCode}}</code></td>

@@ -238,6 +238,7 @@ table.table-general {
     width: 100%;
     border: 1px solid black;
     border-collapse: collapse;
+    clear: both;
 }
 
 table.table-general thead th {
@@ -272,30 +273,12 @@ table.table-general tbody tr td.selectioncell {
 }
 
 .table-general-container {
-    position: relative;
 }
 
 .table-general-pagination-container {
-    padding-top:3px;
-    padding-bottom:0px;
-    padding-left:4px;
-    padding-right:4px;
-    position: absolute; /* assumes that this is inside a 'table-general-container' */
-    top: 1px;
-    right: 1px;
-    background-color: rgb(253,207,49);
-    border-bottom-left-radius: 4px;
-    display: inline;
-}
-
-.table-general-pagination-container a {
-    color: black;
-    text-decoration: none;
-}
-
-.table-general-pagination-container span {
-    color: rgba(0, 0, 0, 0.30);
-    text-decoration: none;
+    float: right;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 /*
@@ -443,7 +426,44 @@ HIDE / SHOW FOR OWN DIRECTIVES
 */
 
 .app-hide {
-    display: none;
+    display: none !important;
+}
+
+/*
+==================================
+PAGINATION CONTROLS
+*/
+
+.pagination-control-container {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+.pagination-control-container.pagination-control-on-first a.pagination-control-left > svg {
+    fill-opacity: 0.25;
+}
+
+.pagination-control-container.pagination-control-on-last a.pagination-control-right > svg {
+    fill-opacity: 0.25;
+}
+
+.pagination-control-container li {
+    min-width: 1.75em;
+    text-align: center;
+    display: inline-block;
+    padding: 0;
+}
+
+.pagination-control-container > li > a,svg {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.pagination-control-container > li > a.pagination-control-currentpage {
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
 }
 
 /*

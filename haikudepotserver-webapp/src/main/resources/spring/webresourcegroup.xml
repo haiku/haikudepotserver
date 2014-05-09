@@ -65,6 +65,7 @@
                             <value>/js/app/directive/modalcontainerdirective.js</value>
                             <value>/js/app/directive/pkgcategorylabeldirective.js</value>
                             <value>/js/app/directive/ratingindicatordirective.js</value>
+                            <value>/js/app/directive/paginationcontroldirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>
@@ -84,6 +85,7 @@
                             <value>/js/app/controller/editusercontroller.js</value>
                             <value>/js/app/controller/editpkgversionlocalizationcontroller.js</value>
                             <!--<value>/js/app/controller/addedituserratingcontroller.js</value>-->
+                            <value>/js/app/controller/paginationcontrolplaygroundcontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
