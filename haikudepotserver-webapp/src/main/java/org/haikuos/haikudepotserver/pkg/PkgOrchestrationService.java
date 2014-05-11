@@ -5,6 +5,7 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -12,9 +13,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.*;
+import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.PrefetchTreeNode;
+import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
@@ -136,10 +138,19 @@ public class PkgOrchestrationService {
 
     // ------------------------------
     // SEARCH
-    private SelectQuery prepare(
+
+    // [apl 11.may.2014]
+    // SelectQuery has no means of getting a count.  This is a bit of an annoying limitation, but can be worked around
+    // by using EJBQL.  However converting from an Expression to EJBQL has a problem (see CAY-1932) so for the time
+    // being, just use EJBQL directly by assembling strings and convert back later.
+
+    // NOTE; raw EJBQL can be replaced with Expressions once CAY-1932 is fixed.
+    private String prepareWhereClause(
+            List<Object> parameterAccumulator,
             ObjectContext context,
             PkgSearchSpecification search) {
 
+        Preconditions.checkNotNull(parameterAccumulator);
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
         Preconditions.checkState(search.getOffset() >= 0);
@@ -147,72 +158,79 @@ public class PkgOrchestrationService {
         Preconditions.checkNotNull(search.getArchitecture());
         Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
 
-        List<Expression> expressions = Lists.newArrayList();
+        List<String> whereExpressions = Lists.newArrayList();
 
-        expressions.add(ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE));
+        whereExpressions.add("pv." + PkgVersion.IS_LATEST_PROPERTY + " = true");
 
-        expressions.add(
-                ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, search.getArchitecture())
-                        .orExp(ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, Architecture.getByCode(context, Architecture.CODE_ANY).get())));
+        whereExpressions.add("(pv." + PkgVersion.ARCHITECTURE_PROPERTY + " = ?" + (parameterAccumulator.size() + 1) + " OR pv." + PkgVersion.ARCHITECTURE_PROPERTY + " = ?" + (parameterAccumulator.size() + 2) + ")");
+        parameterAccumulator.add(search.getArchitecture());
+        parameterAccumulator.add(Architecture.getByCode(context, Architecture.CODE_ANY).get());
 
         if(!search.getIncludeInactive()) {
-            expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
-            expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY, Boolean.TRUE));
+            whereExpressions.add("pv." + PkgVersion.ACTIVE_PROPERTY + " = true");
+            whereExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY + " = true");
         }
 
         if(null!=search.getDaysSinceLatestVersion()) {
-            expressions.add(ExpressionFactory.greaterOrEqualExp(
-                    PkgVersion.CREATE_TIMESTAMP_PROPERTY,
-                    DateTime.now().minusDays(search.getDaysSinceLatestVersion().intValue()).toDate()));
+            parameterAccumulator.add(DateTime.now().minusDays(search.getDaysSinceLatestVersion().intValue()).toDate());
+            whereExpressions.add("pv." + PkgVersion.CREATE_TIMESTAMP_PROPERTY + " >= ?" + parameterAccumulator.size());
         }
 
         if(!Strings.isNullOrEmpty(search.getExpression())) {
-            expressions.add(ExpressionFactory.likeExp(
-                    PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
-                    "%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%"));
+
+            switch(search.getExpressionType()) {
+
+                case CONTAINS:
+                    parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
+                    whereExpressions.add("LOWER(pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
+                    break;
+
+                default:
+                    throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
+
+            }
         }
 
         if(null!=search.getPkgCategory()) {
-            expressions.add(ExpressionFactory.likeExp(
-                    PkgVersion.PKG_PROPERTY + "." + Pkg.PKG_PKG_CATEGORIES_PROPERTY + "." + PkgPkgCategory.PKG_CATEGORY_PROPERTY,
-                    search.getPkgCategory()));
+            parameterAccumulator.add(search.getPkgCategory());
+            whereExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.PKG_PKG_CATEGORIES_PROPERTY + "." + PkgPkgCategory.PKG_CATEGORY_PROPERTY + " = ?" + parameterAccumulator.size());
         }
 
         if(null!=search.getPkgNames()) {
-            expressions.add(ExpressionFactory.inExp(
-                    PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
-                    search.getPkgNames()));
+            if(search.getPkgNames().isEmpty()) {
+                throw new IllegalStateException("list of pkg names is empty; not able to produce ejbql expression");
+            }
+
+            List<String> inParameterList = Lists.newArrayList();
+
+            for(int j=0;j<search.getPkgNames().size();j++) {
+                parameterAccumulator.add(search.getPkgNames().get(j));
+                inParameterList.add("?" + parameterAccumulator.size());
+            }
+
+            whereExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY + " IN (" + Joiner.on(",").join(inParameterList) + ")");
         }
 
-        return new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
+        return Joiner.on(" AND ").join(whereExpressions);
     }
 
-    /**
-     * <p>This performs a search on the packages.  Note that the prefetch tree node that is supplied is relative to
-     * the package version.</p>
-     */
-
-    public List<PkgVersion> search(
+    // NOTE; raw EJBQL can be replaced with Expressions once CAY-1932 is fixed.
+    private String prepareOrderClause(
             ObjectContext context,
-            PkgSearchSpecification search,
-            PrefetchTreeNode prefetchTreeNode) {
+            PkgSearchSpecification search) {
 
-        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        SelectQuery query = prepare(context, search);
+        List<String> orderExpressions = Lists.newArrayList();
 
         if(null!=search.getSortOrdering()) {
 
             switch (search.getSortOrdering()) {
 
                 case VERSIONVIEWCOUNTER:
-                    query.addOrdering(new Ordering(PkgVersion.VIEW_COUNTER_PROPERTY, SortOrder.DESCENDING));
+                    orderExpressions.add("pv." + PkgVersion.VIEW_COUNTER_PROPERTY + " DESC");
                     break;
 
                 case VERSIONCREATETIMESTAMP:
-                    query.addOrdering(new Ordering(PkgVersion.CREATE_TIMESTAMP_PROPERTY, SortOrder.DESCENDING));
+                    orderExpressions.add("pv." + PkgVersion.CREATE_TIMESTAMP_PROPERTY + " DESC");
                     break;
 
                 case NAME: // gets added anyway...
@@ -224,31 +242,40 @@ public class PkgOrchestrationService {
             }
         }
 
-        query.addOrdering(new Ordering(PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY, SortOrder.ASCENDING));
+        orderExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY + " ASC");
+
+        return Joiner.on(",").join(orderExpressions);
+    }
+
+    // NOTE; raw EJBQL can be replaced with Expressions once CAY-1932 is fixed.  Until then, the prefetch node
+    // tree will be ignored.
+    public List<PkgVersion> search(
+            ObjectContext context,
+            PkgSearchSpecification search,
+            PrefetchTreeNode prefetchTreeNode) {
+
+        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Object> parameterAccumulator = Lists.newArrayList();
+        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
+        String orderClause = prepareOrderClause(context, search);
+
+        EJBQLQuery query = new EJBQLQuery("SELECT pv FROM " + PkgVersion.class.getSimpleName() + " AS pv WHERE " + whereClause + " ORDER BY " + orderClause);
+
+        for(int i=0;i<parameterAccumulator.size();i++) {
+            query.setParameter(i+1,parameterAccumulator.get(i));
+        }
 
         query.setFetchLimit(search.getLimit());
         query.setFetchOffset(search.getOffset());
-
-        if(null==prefetchTreeNode) {
-            prefetchTreeNode = new PrefetchTreeNode();
-        }
-
-        // we always want to get the package for a given version
-        prefetchTreeNode.addPath(PkgVersion.PKG_PROPERTY);
-
-        query.setPrefetchTree(prefetchTreeNode);
 
         //noinspection unchecked
         return (List<PkgVersion>) context.performQuery(query);
     }
 
-    /**
-     * <p>This returns the total that would be returned from the search specification ignoring offset and max.  It
-     * is a bit awful that the {@link org.apache.cayenne.query.SelectQuery} has no native mechanic to get the
-     * count for a query, but the EJBQL does and it seems to be relatively easy to get from the Expression of a
-     * to EJBQL statements.</p>
-     */
-
+    // NOTE; raw EJBQL can be replaced with Expressions once CAY-1932 is fixed.
     public long total(
             ObjectContext context,
             PkgSearchSpecification search) {
@@ -257,12 +284,12 @@ public class PkgOrchestrationService {
             return 0L;
         }
 
-        SelectQuery query = prepare(context, search);
-        List<Object> parameters = Lists.newArrayList();
-        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(pv) FROM PkgVersion AS pv WHERE " + query.getQualifier().toEJBQL(parameters,"pv"));
+        List<Object> parameterAccumulator = Lists.newArrayList();
+        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
+        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(pv) FROM PkgVersion AS pv WHERE " + whereClause);
 
-        for(int i=0;i<parameters.size();i++) {
-            ejbQuery.setParameter(i+1, parameters.get(i));
+        for(int i=0;i<parameterAccumulator.size();i++) {
+            ejbQuery.setParameter(i+1, parameterAccumulator.get(i));
         }
 
         @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
@@ -275,6 +302,149 @@ public class PkgOrchestrationService {
                 throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
         }
     }
+
+
+// WILL WORK AFTER CAY-1932 IS IMPLEMENTED!
+//    private SelectQuery prepare(
+//            ObjectContext context,
+//            PkgSearchSpecification search) {
+//
+//        Preconditions.checkNotNull(search);
+//        Preconditions.checkNotNull(context);
+//        Preconditions.checkState(search.getOffset() >= 0);
+//        Preconditions.checkState(search.getLimit() > 0);
+//        Preconditions.checkNotNull(search.getArchitecture());
+//        Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
+//
+//        List<Expression> expressions = Lists.newArrayList();
+//
+//        expressions.add(ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE));
+//
+//        expressions.add(
+//                ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, search.getArchitecture())
+//                        .orExp(ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, Architecture.getByCode(context, Architecture.CODE_ANY).get())));
+//
+//        if(!search.getIncludeInactive()) {
+//            expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
+//            expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY, Boolean.TRUE));
+//        }
+//
+//        if(null!=search.getDaysSinceLatestVersion()) {
+//            expressions.add(ExpressionFactory.greaterOrEqualExp(
+//                    PkgVersion.CREATE_TIMESTAMP_PROPERTY,
+//                    DateTime.now().minusDays(search.getDaysSinceLatestVersion().intValue()).toDate()));
+//        }
+//
+//        if(!Strings.isNullOrEmpty(search.getExpression())) {
+//     switch(search.getExpressionType()) { // TODO!
+//            expressions.add(ExpressionFactory.likeIgnoreCaseExp(
+//                    PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
+//                    "%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%"));
+//        }
+//
+//        if(null!=search.getPkgCategory()) {
+//            expressions.add(ExpressionFactory.likeExp(
+//                    PkgVersion.PKG_PROPERTY + "." + Pkg.PKG_PKG_CATEGORIES_PROPERTY + "." + PkgPkgCategory.PKG_CATEGORY_PROPERTY,
+//                    search.getPkgCategory()));
+//        }
+//
+//        if(null!=search.getPkgNames()) {
+//            expressions.add(ExpressionFactory.inExp(
+//                    PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
+//                    search.getPkgNames()));
+//        }
+//
+//        return new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
+//    }
+//
+//    /**
+//     * <p>This performs a search on the packages.  Note that the prefetch tree node that is supplied is relative to
+//     * the package version.</p>
+//     */
+//
+//    public List<PkgVersion> search(
+//            ObjectContext context,
+//            PkgSearchSpecification search,
+//            PrefetchTreeNode prefetchTreeNode) {
+//
+//        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        SelectQuery query = prepare(context, search);
+//
+//        if(null!=search.getSortOrdering()) {
+//
+//            switch (search.getSortOrdering()) {
+//
+//                case VERSIONVIEWCOUNTER:
+//                    query.addOrdering(new Ordering(PkgVersion.VIEW_COUNTER_PROPERTY, SortOrder.DESCENDING));
+//                    break;
+//
+//                case VERSIONCREATETIMESTAMP:
+//                    query.addOrdering(new Ordering(PkgVersion.CREATE_TIMESTAMP_PROPERTY, SortOrder.DESCENDING));
+//                    break;
+//
+//                case NAME: // gets added anyway...
+//                    break;
+//
+//                default:
+//                    throw new IllegalStateException("unhandled sort ordering; " + search.getSortOrdering());
+//
+//            }
+//        }
+//
+//        query.addOrdering(new Ordering(PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY, SortOrder.ASCENDING));
+//
+//        query.setFetchLimit(search.getLimit());
+//        query.setFetchOffset(search.getOffset());
+//
+//        if(null==prefetchTreeNode) {
+//            prefetchTreeNode = new PrefetchTreeNode();
+//        }
+//
+//        // we always want to get the package for a given version
+//        prefetchTreeNode.addPath(PkgVersion.PKG_PROPERTY);
+//
+//        query.setPrefetchTree(prefetchTreeNode);
+//
+//        //noinspection unchecked
+//        return (List<PkgVersion>) context.performQuery(query);
+//    }
+//
+//    /**
+//     * <p>This returns the total that would be returned from the search specification ignoring offset and max.  It
+//     * is a bit awful that the {@link org.apache.cayenne.query.SelectQuery} has no native mechanic to get the
+//     * count for a query, but the EJBQL does and it seems to be relatively easy to get from the Expression of a
+//     * to EJBQL statements.</p>
+//     */
+//
+//    public long total(
+//            ObjectContext context,
+//            PkgSearchSpecification search) {
+//
+//        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+//            return 0L;
+//        }
+//
+//        SelectQuery query = prepare(context, search);
+//        List<Object> parameters = Lists.newArrayList();
+//        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(pv) FROM PkgVersion AS pv WHERE " + query.getQualifier().toEJBQL(parameters,"pv"));
+//
+//        for(int i=0;i<parameters.size();i++) {
+//            ejbQuery.setParameter(i+1, parameters.get(i));
+//        }
+//
+//        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
+//
+//        switch(result.size()) {
+//            case 1:
+//                return result.get(0).longValue();
+//
+//            default:
+//                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+//        }
+//    }
 
     // ------------------------------
     // ICONS
