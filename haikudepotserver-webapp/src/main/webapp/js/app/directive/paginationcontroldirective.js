@@ -286,7 +286,10 @@ angular.module('haikudepotserver').directive('paginationControl',[
                         var offset = $scope.$eval(offsetExpression);
                         var max = $scope.$eval(maxExpression);
 
-                        if(!angular.isUndefined(total) && !angular.isUndefined(offset) && !angular.isUndefined(max)) {
+                        if(!angular.isUndefined(total) &&
+                            !angular.isUndefined(offset) &&
+                            !angular.isUndefined(max) &&
+                            total > 0) {
                             refreshPageControlsWithValues(total,offset,max);
                         }
                         else {
