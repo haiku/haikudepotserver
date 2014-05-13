@@ -204,7 +204,6 @@ angular.module('haikudepotserver').directive('paginationControl',[
                         // and passes through 1 when p=1
 
                         function ramp(p) {
-//                            return (0==p) ? 0 : 1 + (Math.log(p)/2);
                             return p*p;
                         }
 

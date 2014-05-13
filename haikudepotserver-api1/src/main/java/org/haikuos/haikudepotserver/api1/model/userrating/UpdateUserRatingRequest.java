@@ -5,8 +5,6 @@
 
 package org.haikuos.haikudepotserver.api1.model.userrating;
 
-import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
-
 import java.util.List;
 
 public class UpdateUserRatingRequest {
