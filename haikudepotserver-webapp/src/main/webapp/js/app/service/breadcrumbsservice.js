@@ -318,6 +318,23 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     };
                 },
 
+                /**
+                 * <p>This function will return a breadcrumb for viewing a specific package.  It expects
+                 * a data structure similar to the API return data from "GetPkgResult" where only the
+                 * first version is considered.</p>
+                 */
+
+                createViewPkgWithSpecificVersionFromPkg : function(pkg) {
+                    if(!pkg || !pkg.versions.length) {
+                        throw 'a package and a package version are required to form a breadcrumb';
+                    }
+
+                    return createViewPkgBreadcrumbItem(
+                        pkg.name,
+                        pkg.versions[0],
+                        pkg.versions[0].architectureCode);
+                },
+
                 createViewPkgWithSpecificVersionFromRouteParams : function(routeParams) {
 
                     if(!routeParams||!routeParams.major) {

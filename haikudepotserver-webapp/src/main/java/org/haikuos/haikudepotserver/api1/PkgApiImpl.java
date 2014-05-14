@@ -237,6 +237,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.revision = input.getRevision();
                         resultVersion.createTimestamp = input.getCreateTimestamp().getTime();
                         resultVersion.viewCounter = input.getViewCounter();
+                        resultVersion.architectureCode = input.getArchitecture().getCode();
 
                         resultPkg.version = resultVersion;
 
@@ -259,6 +260,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(naturalLanguage);
 
         GetPkgResult.PkgVersion version = new GetPkgResult.PkgVersion();
+
+        version.isLatest = pkgVersion.getIsLatest();
 
         version.major = pkgVersion.getMajor();
         version.minor = pkgVersion.getMinor();

@@ -56,6 +56,8 @@ public class GetPkgResult {
 
         public Float userRatingAverage;
 
+        public Boolean isLatest;
+
     }
 
 }

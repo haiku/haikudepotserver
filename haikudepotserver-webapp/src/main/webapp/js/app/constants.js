@@ -18,6 +18,7 @@ angular.module('haikudepotserver').constant('constants', {
         ENDPOINT_API_V1_CAPTCHA : '/api/v1/captcha',
         ENDPOINT_API_V1_MISCELLANEOUS : '/api/v1/miscellaneous',
         ENDPOINT_API_V1_USER : '/api/v1/user',
+        ENDPOINT_API_V1_USERRATING : '/api/v1/userrating',
 
         MEDIATYPE_PNG : 'image/png',
         MEDIATYPE_HAIKUVECTORICONFILE : 'application/x-vnd.haiku-icon',

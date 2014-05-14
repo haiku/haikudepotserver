@@ -241,7 +241,7 @@ angular.module('haikudepotserver').controller(
                     pkg.version.micro,
                     pkg.version.preRelease,
                     pkg.version.revision,
-                    $scope.selectedArchitecture.code
+                    pkg.version.architectureCode
                 ];
 
                 $location.path('/' + parts.join('/'));
