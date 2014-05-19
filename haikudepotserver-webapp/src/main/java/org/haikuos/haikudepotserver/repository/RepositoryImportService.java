@@ -15,6 +15,8 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.AbstractService;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.access.DataDomain;
+import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
@@ -33,9 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * <p>This object is responsible for migrating a HPKR file from a remote repository into the Haiku Depot Server
- * database.  It will copy the data into a local file and then work through it there.  Note that this does
- * not run the entire process in a single transaction; it will execute one transaction per package.  So if the
- * process fails, a repository update is likely to be partially imported.</p>
+ * database.  It will copy the data into a local file and then work through it there.</p>
  *
  * <p>The system works by the caller lodging a request to update from a remote repository.  The request may be
  * later superceeded by another request for the same repository.  When the import process has capacity then it
@@ -162,8 +162,11 @@ public class RepositoryImportService extends AbstractService {
         }
 
         // now shift the URL's data into a temporary file and then process it.
-
         File temporaryFile = null;
+
+        // start a cayenne long-running txn
+        Transaction transaction = serverRuntime.getDataDomain().createTransaction();
+        Transaction.bindThreadTransaction(transaction);
 
         try {
             temporaryFile = File.createTempFile(job.getCode()+"__import",".hpkr");
@@ -177,7 +180,7 @@ public class RepositoryImportService extends AbstractService {
             long startTimeMs = System.currentTimeMillis();
             logger.info("will process data for repository {}",job.getCode());
 
-            while(pkgIterator.hasNext()) {
+            while (pkgIterator.hasNext()) {
                 ObjectContext pkgImportContext = serverRuntime.getContext();
                 pkgService.importFrom(pkgImportContext, repository.getObjectId(), pkgIterator.next());
                 pkgImportContext.commitChanges();
@@ -185,16 +188,33 @@ public class RepositoryImportService extends AbstractService {
 
             logger.info("did process data for repository {} in {}ms",job.getCode(),System.currentTimeMillis()-startTimeMs);
 
+            transaction.commit();
         }
         catch(Throwable th) {
+
+            transaction.setRollbackOnly();
             logger.error("a problem has arisen processing a repository file for repository "+job.getCode()+" from url '"+url.toString()+"'",th);
+
         }
         finally {
+
             if(null!=temporaryFile && temporaryFile.exists()) {
                 if(!temporaryFile.delete()) {
                     logger.error("unable to delete the file; {}"+temporaryFile.getAbsolutePath());
                 }
             }
+
+            Transaction.bindThreadTransaction(null);
+
+            if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
+                try {
+                    transaction.rollback();
+                }
+                catch(Exception e) {
+                    // ignore
+                }
+            }
+
         }
 
     }

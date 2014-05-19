@@ -72,7 +72,7 @@
                         <mapping>
                             <directory>/etc/logrotate.d</directory>
                             <directoryIncluded>false</directoryIncluded>
-                            <filemode>700</filemode>
+                            <filemode>644</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
                             <sources>
