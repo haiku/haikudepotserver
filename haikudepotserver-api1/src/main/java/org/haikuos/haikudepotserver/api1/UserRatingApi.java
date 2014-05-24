@@ -5,6 +5,7 @@
 
 package org.haikuos.haikudepotserver.api1;
 
+import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haikuos.haikudepotserver.api1.model.userrating.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 
@@ -12,6 +13,7 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
  * <p>This API interface covers all aspects of user ratings of packages.</p>
  */
 
+@JsonRpcService("/api/v1/userrating")
 public interface UserRatingApi {
 
     /**

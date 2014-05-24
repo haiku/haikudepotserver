@@ -1,1 +1,87 @@
-<!-- WORK IN PROGRESS! -->
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <div ng-show="didAttemptToSaveWithEmptyWorkingUserRating" class="form-alert-container">
+        <message key="addEditUserRating.empty"></message>
+    </div>
+
+    <form name="addEditUserRatingForm" novalidate="novalidate">
+
+        <label><message key="gen.pkg.title"></message></label>
+        <div class="form-control-group">
+            <div class="form-control-group-static">
+                <pkg-label pkg="workingUserRating.pkg"></pkg-label>
+            </div>
+        </div>
+
+        <label><message key="addEditUserRating.user.title"></message></label>
+        <div class="form-control-group">
+            <div class="form-control-group-static">
+                <user-label user="workingUserRating.user"></user-label>
+            </div>
+        </div>
+
+        <label for="natural-language"><message key="addEditUserRating.naturalLanguage.title"></message></label>
+        <div class="form-control-group">
+            <select
+                    name="naturalLanguage"
+                    id="natural-language"
+                    required="true"
+                    ng-model="workingUserRating.naturalLanguageOption"
+                    ng-options="aNaturalLanguageOption.title for aNaturalLanguageOption in naturalLanguageOptions">
+            </select>
+        </div>
+
+        <label for="comment"><message key="addEditUserRating.comment.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('comment')">
+            <textarea
+                    id="comment"
+                    name="comment"
+                ng-model="workingUserRating.comment"
+                autocomplete="off"
+                ng-maxlength="4096"
+                rows="5"></textarea>
+            <error-messages key-prefix="addEditUserRating.comment" error="addEditUserRatingForm.comment.$error"></error-messages>
+        </div>
+
+        <label for="stability"><message key="addEditUserRating.stability.title"></message></label>
+        <div class="form-control-group">
+            <select
+                    id="stability"
+                    ng-model="workingUserRating.userRatingStabilityOption"
+                    ng-options="aUserRatingStabilityOption.title for aUserRatingStabilityOption in userRatingStabilityOptions">
+            </select>
+        </div>
+
+        <label><message key="addEditUserRating.rating.title"></message></label>
+        <div class="form-control-group">
+
+            <div>
+                <input type="radio" ng-value="null" name="{{userRatingPickerInputName}}" ng-model="workingUserRating.rating"></input>
+                <span class="muted"><em><message key="rating.none"></message></em></span>
+            </div>
+            <div ng-repeat="possibleValue in userRatingPickerPossibleValues">
+                <input type="radio" ng-value="possibleValue" name="{{userRatingPickerInputName}}" ng-model="workingUserRating.rating"></input>
+                <rating-indicator rating="possibleValue"></rating-indicator>
+            </div>
+
+        </div>
+
+        <div class="form-action-container">
+            <button
+                    ng-disabled="addEditRatingForm.$invalid"
+                    ng-click="goSave()"
+                    type="submit"
+                    class="main-action">
+                <span ng-show="workingUserRating.code"><message key="addEditUserRating.saveChangesAction.title"></message></span>
+                <span ng-show="!workingUserRating.code"><message key="addEditUserRating.addAction.title"></message></span>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

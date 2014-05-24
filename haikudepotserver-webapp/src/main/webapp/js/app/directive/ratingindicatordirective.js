@@ -33,32 +33,40 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
 
                     function refreshStars(rating) {
 
-                        if(!angular.isNumber(rating)) {
-                            throw 'the value supplied is not a number';
+                        if(undefined==rating || null==rating) {
+                            topLevelE.addClass('app-hide');
                         }
+                        else {
 
-                        if(rating < 0) {
-                            throw 'the value supplied for a rating indicator is less than zero';
-                        }
+                            topLevelE.removeClass('app-hide');
 
-                        if(rating > 5) {
-                            throw 'the value supplied for a rating indicator is more than five';
-                        }
-
-                        rating *= 2;
-
-                        for(var i=2;i<=10;i+=2) {
-                            var starE = starEs[(i/2)-1];
-
-                            if(rating >= i) {
-                                starE.attr('src','/img/staron.svg');
+                            if (!angular.isNumber(rating)) {
+                                throw 'the value supplied is not a number';
                             }
-                            else {
-                                if (rating >= i - 1) {
-                                    starE.attr('src','/img/starhalf.svg');
+
+                            if (rating < 0) {
+                                throw 'the value supplied for a rating indicator is less than zero';
+                            }
+
+                            if (rating > 5) {
+                                throw 'the value supplied for a rating indicator is more than five';
+                            }
+
+                            rating *= 2;
+
+                            for (var i = 2; i <= 10; i += 2) {
+                                var starE = starEs[(i / 2) - 1];
+
+                                if (rating >= i) {
+                                    starE.attr('src', '/img/staron.svg');
                                 }
                                 else {
-                                    starE.attr('src','/img/staroff.svg');
+                                    if (rating >= i - 1) {
+                                        starE.attr('src', '/img/starhalf.svg');
+                                    }
+                                    else {
+                                        starE.attr('src', '/img/staroff.svg');
+                                    }
                                 }
                             }
                         }

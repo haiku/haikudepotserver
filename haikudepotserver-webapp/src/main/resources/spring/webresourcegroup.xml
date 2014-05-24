@@ -59,6 +59,7 @@
                             <value>/js/app/directive/showifpkgpermissiondirective.js</value>
                             <value>/js/app/directive/showifrepositorypermissiondirective.js</value>
                             <value>/js/app/directive/showifuserpermissiondirective.js</value>
+                            <value>/js/app/directive/showifuserratingpermissiondirective.js</value>
                             <value>/js/app/directive/showifpermissiondirective.js</value>
                             <value>/js/app/directive/paginationarrowdirective.js</value>
                             <value>/js/app/directive/autofillfixdirective.js</value>
@@ -66,6 +67,7 @@
                             <value>/js/app/directive/pkgcategorylabeldirective.js</value>
                             <value>/js/app/directive/ratingindicatordirective.js</value>
                             <value>/js/app/directive/paginationcontroldirective.js</value>
+                            <value>/js/app/directive/plaintextcontentdirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>
@@ -84,8 +86,9 @@
                             <value>/js/app/controller/editpkgcategoriescontroller.js</value>
                             <value>/js/app/controller/editusercontroller.js</value>
                             <value>/js/app/controller/editpkgversionlocalizationcontroller.js</value>
-                            <!--<value>/js/app/controller/addedituserratingcontroller.js</value>-->
+                            <value>/js/app/controller/addedituserratingcontroller.js</value>
                             <value>/js/app/controller/paginationcontrolplaygroundcontroller.js</value>
+                            <value>/js/app/controller/viewuserratingcontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
@@ -124,6 +127,7 @@
                             <value>/css/breadcrumbs.css</value>
                             <value>/css/editpkgscreenshots.css</value>
                             <value>/css/editpkgversionlocalization.css</value>
+                            <value>/css/addedituserrating.css</value>
                         </list>
                     </property>
                 </bean>

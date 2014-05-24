@@ -3,6 +3,5 @@
     size 10M
     compress
     su haikudepotserver haikudepotserver
-    endscript
     copytruncate
 }

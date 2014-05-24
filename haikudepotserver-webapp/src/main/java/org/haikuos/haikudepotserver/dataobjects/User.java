@@ -98,4 +98,9 @@ public class User extends _User implements CreateAndModifyTimestamped {
         return getCanManageUsers() || getIsRoot();
     }
 
+    @Override
+    public String toString() {
+        return "user;"+getNickname();
+    }
+
 }

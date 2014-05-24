@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectContext;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.dataobjects.UserRating;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.security.model.TargetType;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,10 @@ public class AuthorizationService {
 
         if(Repository.class.isAssignableFrom(dataObject.getClass())) {
             return TargetType.REPOSITORY;
+        }
+
+        if(UserRating.class.isAssignableFrom(dataObject.getClass())) {
+            return TargetType.USERRATING;
         }
 
         throw new IllegalStateException("the data object type '"+dataObject.getClass().getSimpleName()+"' is not handled");
@@ -74,6 +79,10 @@ public class AuthorizationService {
 
                 case USER:
                     targetOptional = User.getByNickname(objectContext, targetIdentifier);
+                    break;
+
+                case USERRATING:
+                    targetOptional = UserRating.getByCode(objectContext, targetIdentifier);
                     break;
 
                 default:
@@ -156,6 +165,10 @@ public class AuthorizationService {
             case PKG_EDITCATEGORIES:
             case PKG_EDITVERSIONLOCALIZATION:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
+
+            case USERRATING_EDIT:
+                UserRating userRating = (UserRating) target;
+                return null!=authenticatedUser && (userRating.getUser().equals(authenticatedUser) || authenticatedUser.getIsRoot());
 
             default:
                 throw new IllegalStateException("unhandled permission; "+permission.name());

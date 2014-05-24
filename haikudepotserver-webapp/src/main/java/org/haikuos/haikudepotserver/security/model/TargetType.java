@@ -12,5 +12,6 @@ package org.haikuos.haikudepotserver.security.model;
 public enum TargetType {
     PKG,
     USER,
-    REPOSITORY
+    REPOSITORY,
+    USERRATING
 }

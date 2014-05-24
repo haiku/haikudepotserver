@@ -10,6 +10,7 @@ import java.util.List;
 public class UpdateUserRatingRequest {
 
     public enum Filter {
+        ACTIVE,
         NATURALLANGUAGE,
         USERRATINGSTABILITY,
         COMMENT,
@@ -17,6 +18,8 @@ public class UpdateUserRatingRequest {
     };
 
     public String code;
+
+    public Boolean active;
 
     public String naturalLanguageCode;
 

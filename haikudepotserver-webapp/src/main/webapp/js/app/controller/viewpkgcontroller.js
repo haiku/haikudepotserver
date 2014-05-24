@@ -165,7 +165,18 @@ angular.module('haikudepotserver').controller(
             }
 
             // ---------------------
+            // RATINGS
+
+            $scope.goAddUserRating = function() {
+                $location.path($location.path() + '/adduserrating').search({});
+            }
+
+            // ---------------------
             // ACTIONS FOR PACKAGE
+
+            $scope.goEdit = function() {
+
+            }
 
             $scope.goEditIcon = function() {
                 $location.path($location.path() + '/editicon').search({});

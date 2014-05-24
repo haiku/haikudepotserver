@@ -289,6 +289,20 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     }
                 },
 
+                createViewUserRating : function(userRating) {
+                    return {
+                        titleKey : 'breadcrumb.viewUserRating.title',
+                        path : '/userrating/' + userRating.code
+                    }
+                },
+
+                createEditUserRating : function(userRating) {
+                    return {
+                        titleKey : 'breadcrumb.editUserRating.title',
+                        path : '/userrating/' + userRating.code + '/edit'
+                    }
+                },
+
                 createViewRepository : function(repository) {
                     return {
                         titleKey : 'breadcrumb.viewRepository.title',
@@ -316,6 +330,22 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                         titleKey : 'breadcrumb.about.title',
                         path : '/about'
                     };
+                },
+
+                /**
+                 * <p>This function will take the package version (containing the package) and will
+                 * return the breadcrumb for it.</p>
+                 */
+
+                createViewPkgWithSpecificVersionFromPkgVersion : function(pkgVersion) {
+                    if(!pkgVersion || !pkgVersion.pkg) {
+                        throw 'a package and a package version are required to form a breadcrumb';
+                    }
+
+                    return createViewPkgBreadcrumbItem(
+                        pkgVersion.pkg.name,
+                        pkgVersion,
+                        pkgVersion.architectureCode);
                 },
 
                 /**

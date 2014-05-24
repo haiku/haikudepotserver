@@ -158,6 +158,24 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     @Override
     public CreateUserRatingResult createUserRating(CreateUserRatingRequest request) throws ObjectNotFoundException {
         Preconditions.checkNotNull(request);
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode));
+        Preconditions.checkNotNull(null!=request.pkgVersionType);
+
+        if(null!=request.comment) {
+            request.comment = Strings.emptyToNull(request.comment.trim());
+        }
+
+        // check to see that the user has not tried to create a user rating with essentially nothing
+        // in it.
+
+        if(
+                Strings.isNullOrEmpty(request.comment)
+                        && null==request.userRatingStabilityCode
+                        && null==request.rating) {
+            throw new IllegalStateException("it is not possible to create a user rating with no meaningful rating data");
+        }
 
         final ObjectContext context = serverRuntime.getContext();
 
@@ -230,6 +248,31 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkgOptional.get().getName()+"_"+request.pkgVersionType.name());
         }
 
+        if(!pkgVersionOptional.get().getIsLatest()) {
+            throw new IllegalStateException("it is not possible to add a user rating to a version other than the latest version.");
+        }
+
+        // if we are adding a new rating then ratings for versions prior to this one need to be disabled.  Note that it
+        // ~is~ allowed to have multiple user ratings for the same architecture.
+
+        List<UserRating> legacyUserRatings = UserRating.findByUserAndPkg(context, userOptional.get(), pkgOptional.get());
+
+        if(!legacyUserRatings.isEmpty()) {
+            for(UserRating legacyUserRating : legacyUserRatings) {
+
+                if(legacyUserRating.getPkgVersion().equals(pkgVersionOptional.get())) {
+                    throw new IllegalStateException("an exisiting user rating '"+legacyUserRating.getCode()+"' already exists for this package version; it is not possible to add another one");
+                }
+
+                if(!legacyUserRating.getPkgVersion().toVersionCoordinates().equals(pkgVersionOptional.get().toVersionCoordinates())) {
+                    logger.info("disabling user rating on older pkg version; {}", legacyUserRating.getCode());
+                    legacyUserRating.setActive(Boolean.FALSE);
+                }
+            }
+        }
+
+        // now create the new user rating.
+
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setCode(UUID.randomUUID().toString());
         userRating.setUserRatingStability(userRatingStabilityOptional.orNull());
@@ -264,9 +307,28 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code);
         }
 
+        User authenticatedUser = obtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                authenticatedUser,
+                userRatingOptional.get(),
+                Permission.USERRATING_EDIT)) {
+            logger.error("unable to edit the userrating as {}", authenticatedUser.toString());
+            throw new AuthorizationFailureException();
+        }
+
         for(UpdateUserRatingRequest.Filter filter : request.filter) {
 
             switch(filter) {
+
+                case ACTIVE:
+                    if(null==request.active) {
+                        throw new IllegalStateException("the active flag must be supplied to configure this field");
+                    }
+
+                    userRatingOptional.get().setActive(request.active);
+                    break;
 
                 case COMMENT:
                     if(null!=request.comment) {
@@ -287,17 +349,22 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                     break;
 
                 case USERRATINGSTABILITY:
-                    Optional<UserRatingStability> userRatingStabilityOptional = UserRatingStability.getByCode(
-                            context,
-                            request.userRatingStabilityCode);
-
-                    if(!userRatingStabilityOptional.isPresent()) {
-                        throw new ObjectNotFoundException(
-                                UserRatingStability.class.getSimpleName(),
-                                request.userRatingStabilityCode);
+                    if(null==request.userRatingStabilityCode) {
+                        userRatingOptional.get().setUserRatingStability(null);
                     }
+                    else {
+                        Optional<UserRatingStability> userRatingStabilityOptional = UserRatingStability.getByCode(
+                                context,
+                                request.userRatingStabilityCode);
 
-                    userRatingOptional.get().setUserRatingStability(userRatingStabilityOptional.get());
+                        if (!userRatingStabilityOptional.isPresent()) {
+                            throw new ObjectNotFoundException(
+                                    UserRatingStability.class.getSimpleName(),
+                                    request.userRatingStabilityCode);
+                        }
+
+                        userRatingOptional.get().setUserRatingStability(userRatingStabilityOptional.get());
+                    }
                     break;
 
                 default:

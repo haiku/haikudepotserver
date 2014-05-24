@@ -159,7 +159,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     @Override
     public String toString() {
-        return getName();
+        return "pkg;"+getName();
     }
 
 }

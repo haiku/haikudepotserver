@@ -12,5 +12,6 @@ package org.haikuos.haikudepotserver.api1.model;
 public enum AuthorizationTargetType {
     PKG,
     USER,
-    REPOSITORY
+    REPOSITORY,
+    USERRATING
 }

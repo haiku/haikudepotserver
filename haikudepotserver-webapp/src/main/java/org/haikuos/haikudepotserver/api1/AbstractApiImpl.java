@@ -31,7 +31,7 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
 
     protected Architecture getArchitecture(ObjectContext context, String architectureCode) throws ObjectNotFoundException {
         Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(architectureCode));
+        Preconditions.checkState(!Strings.isNullOrEmpty(architectureCode), "an architecture code is required to get the architecture");
 
         Optional<Architecture> architectureOptional = Architecture.getByCode(context,architectureCode);
 

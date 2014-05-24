@@ -17,7 +17,7 @@
 
 /*
 ---------------------
-DESCRIPTION / META-DATA
+USER RATINGS
 */
 
 #pkg-rating-indicator-container {
@@ -42,6 +42,24 @@ DESCRIPTION / META-DATA
 #pkg-description-container {
 
 }
+
+/*
+---------------------
+USER-RATINGS
+*/
+
+#pkg-userratings-container {
+    border-top: 1px lightgray solid;
+}
+
+#pkg-userratings-container .pkg-userrating {
+    display: inline-block;
+}
+
+/*
+---------------------
+ACTIONS
+*/
 
 #pkg-actions-container {
     border-top: 1px lightgray solid;

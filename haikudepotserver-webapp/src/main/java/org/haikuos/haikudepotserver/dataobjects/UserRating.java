@@ -33,6 +33,18 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
         ));
     }
 
+    public static List<UserRating> findByUserAndPkg(ObjectContext context, User user, Pkg pkg) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(user);
+        Preconditions.checkNotNull(pkg);
+
+        return context.performQuery(new SelectQuery(
+                UserRating.class,
+                ExpressionFactory.matchExp(UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY, pkg)
+                .andExp(ExpressionFactory.matchExp(UserRating.USER_PROPERTY, user))
+                .andExp(ExpressionFactory.matchExp(UserRating.ACTIVE_PROPERTY, Boolean.TRUE))));
+    }
+
     public static Optional<UserRating> getByUserAndPkgVersion(ObjectContext context, User user, PkgVersion pkgVersion) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(user);
@@ -74,6 +86,11 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
                 validationResult.addFailure(new BeanValidationFailure(this,RATING_PROPERTY,"max"));
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "userrating; " + getCode();
     }
 
 }

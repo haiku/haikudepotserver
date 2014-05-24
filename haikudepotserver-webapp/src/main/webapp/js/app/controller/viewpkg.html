@@ -44,8 +44,10 @@
 
     </div>
 
-    <div id="pkg-description-container">
-        <p ng-show="pkg.versions[0].description">{{pkg.versions[0].description}}</p>
+    <div id="pkg-description-container" ng-show="pkg.versions[0].description">
+        <p>
+            <plain-text-content value="pkg.versions[0].description"></plain-text-content>
+        </p>
     </div>
 
     <div id="pkg-metadata-container">
@@ -62,6 +64,16 @@
             <dt><message key="viewPkg.versionViews.title"></message></dt>
             <dd>{{pkg.versions[0].viewCounter}}</dd>
         </dl>
+
+    </div>
+
+    <div id="pkg-userratings-container">
+
+        <h2>User Ratings</h2>
+
+        <ul>
+            <li><a href="" ng-click="goAddUserRating()">Add user rating</a></li>
+        </ul>
 
     </div>
 

@@ -75,7 +75,7 @@ angular.module('haikudepotserver').factory('userState',
 
             function validateTargetAndPermissions(targetAndPermissions) {
                 _.each(targetAndPermissions, function(targetAndPermission) {
-                    if(undefined === targetAndPermission.targetType || !_.contains(['PKG','USER','REPOSITORY',null],targetAndPermission.targetType)) {
+                    if(undefined === targetAndPermission.targetType || !_.contains(['PKG','USER','REPOSITORY','USERRATING',null],targetAndPermission.targetType)) {
                         throw 'illegal argument; bad targetType supplied';
                     }
 

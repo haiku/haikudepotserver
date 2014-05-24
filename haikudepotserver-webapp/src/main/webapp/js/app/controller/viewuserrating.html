@@ -1,0 +1,56 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <dl>
+        <dt><message key="viewUserRating.active.title"></message></dt>
+        <dd><active-indicator state="userRating.active"></active-indicator>&nbsp;</dd>
+        <dt><message key="gen.pkg.title"></message></dt>
+        <dd>
+            <pkg-label pkg="userRating.pkgVersion.pkg"></pkg-label>
+            -
+            <version-label version="userRating.pkgVersion"></version-label>
+            -
+            {{userRating.pkgVersion.architectureCode}}
+        </dd>
+        <dt><message key="viewUserRating.user.title"></message></dt>
+        <dd><user-label user="userRating.user"></user-label></dd>
+        <dt><message key="viewUserRating.naturalLanguage.title"></message></dt>
+        <dd><message key="{{'naturalLanguage.' + userRating.naturalLanguageCode}}"></message></dd>
+        <dt><message key="gen.created.title"></message></dt>
+        <dd>{{userRating.createTimestamp|timestamp}}</dd>
+        <dt><message key="gen.modified.title"></message></dt>
+        <dd>{{userRating.modifyTimestamp|timestamp}}</dd>
+        <dt ng-show="userRating.comment"><message key="viewUserRating.comment.title"></message></dt>
+        <dd ng-show="userRating.comment"><plain-text-content value="userRating.comment"></plain-text-content></dd>
+        <dt ng-show="hasRating()"><message key="viewUserRating.rating.title"></message></dt>
+        <dd ng-show="hasRating()"><rating-indicator rating="userRating.rating"></rating-indicator></dd>
+        <dt ng-show="userRating.userRatingStabilityCode"><message key="viewUserRating.stability.title"></message></dt>
+        <dd ng-show="userRating.userRatingStabilityCode"><message key="{{'userRatingStability.' + userRating.userRatingStabilityCode + '.title'}}"></message></rating-indicator></dd>
+    </dl>
+
+    <h2><message key="gen.actions.title"></message></h2>
+
+    <ul>
+        <li ng-show="canDeactivate()" user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
+            <a href="" ng-click="goDeactivate()">
+                <message key="viewUserRating.deactiveAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="canActivate()" user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
+            <a href="" ng-click="goActivate()">
+                <message key="viewUserRating.reactiveAction.title"></message>
+            </a>
+        </li>
+        <li user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
+            <a href="" ng-click="goEdit()">
+                <message key="viewUserRating.editAction.title"></message>
+            </a>
+        </li>
+    </ul>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+
