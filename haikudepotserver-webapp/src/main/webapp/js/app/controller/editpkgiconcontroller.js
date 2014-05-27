@@ -36,7 +36,7 @@ angular.module('haikudepotserver').controller(
             // display the form.
 
             function refetchPkg() {
-                pkg.getPkgWithSpecificVersionFromRouteParams(routeParams, false).then(
+                pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
                     function(result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
