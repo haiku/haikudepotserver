@@ -67,13 +67,69 @@
 
     </div>
 
-    <div id="pkg-userratings-container">
+    <div id="pkg-userratings-container" ng-show="undefined != userRatings.items">
 
-        <h2>User Ratings</h2>
+        <div ng-show="!userRatings.items.length">
+            <h2><message key="viewPkg.userRating.title"></message></h2>
+            <p>
+                <message key="viewPkg.userRating.noResults"></message>
 
-        <ul>
-            <li><a href="" ng-click="goAddUserRating()">Add user rating</a></li>
-        </ul>
+                <span ng-show="isAuthenticated()">
+                    <a href="" ng-click="goAddUserRating()">
+                        <message key="viewPkg.userRating.noResults.addAction"></message>
+                    </a>
+                </span>
+                <span ng-show="!isAuthenticated()">
+                    <a href="" ng-click="goAuthenticate()">
+                        <message key="viewPkg.userRating.noResults.authenticateAction"></message>
+                    </a>
+                </span>
+            </p>
+        </div>
+        <div ng-show="userRatings.items.length">
+            <h2>
+                {{userRatings.total}}
+                <span ng-switch="userRatings.total">
+                    <span ng-switch-when="1"><message key="viewPkg.userRating.title"></message></span>
+                    <span ng-switch-default=""><message key="viewPkg.userRating.title.plural"></message></span>
+                </span>
+            </h2>
+
+            <div class="pkg-userratings-pagination">
+                <pagination-control
+                        link-count="9"
+                        max="userRatings.max"
+                        total="userRatings.total"
+                        offset="userRatings.offset"></pagination-control>
+            </div>
+
+            <div class="pkg-userrating" ng-repeat="userRating in userRatings.items">
+                <div class="pkg-userrating-meta">
+                    <span class="muted">{{userRating.createTimestamp|date}}</span>
+                    |
+                    <a href="" ng-click="goViewUserRating(userRating)">
+                        <message key="viewPkg.userRating.moreAction.title"></message>
+                    </a>
+                </div>
+                <div class="pkg-userrating-indicatoranduser">
+                    <rating-indicator rating="userRating.rating"></rating-indicator>
+                    by <user-label user="viewPkg.user"></user-label>
+                </div>
+                <div class="pkg-userrating-comment" ng-show="userRating.comment">
+                    <plain-text-content value="userRating.comment"></plain-text-content>
+                </div>
+            </div>
+            <ul>
+                <li>
+                    <a ng-show="isAuthenticated()" href="" ng-click="goAddUserRating()">
+                        <message key="viewPkg.userRating.addAction.title"></message>
+                    </a>
+                    <span ng-show="!isAuthenticated()">
+                        <message key="viewPkg.userRating.addAction.unauthenticated"></message>
+                    </span>
+                </li>
+            </ul>
+        </div>
 
     </div>
 

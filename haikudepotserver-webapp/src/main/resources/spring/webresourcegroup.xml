@@ -14,8 +14,8 @@
                 -->
 
                 <bean class="org.haikuos.haikudepotserver.web.model.WebResourceGroup">
-                    <property name="code" value="libScripts"></property>
-                    <property name="separated" value="${webresourcegroup.separated:false}"></property>
+                    <property name="code" value="libScripts"/>
+                    <property name="separated" value="${webresourcegroup.separated:false}"/>
                     <property name="mimeType" value="application/javascript"/>
                     <property name="resources">
                         <list>
@@ -34,8 +34,8 @@
                 -->
 
                 <bean class="org.haikuos.haikudepotserver.web.model.WebResourceGroup">
-                    <property name="code" value="appScripts"></property>
-                    <property name="separated" value="${webresourcegroup.separated:false}"></property>
+                    <property name="code" value="appScripts"/>
+                    <property name="separated" value="${webresourcegroup.separated:false}"/>
                     <property name="mimeType" value="application/javascript"/>
                     <property name="resources">
                         <list>
@@ -68,6 +68,7 @@
                             <value>/js/app/directive/ratingindicatordirective.js</value>
                             <value>/js/app/directive/paginationcontroldirective.js</value>
                             <value>/js/app/directive/plaintextcontentdirective.js</value>
+                            <value>/js/app/directive/pkgversionlabeldirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>
@@ -113,8 +114,8 @@
                 -->
 
                 <bean class="org.haikuos.haikudepotserver.web.model.WebResourceGroup">
-                    <property name="code" value="appStylesheets"></property>
-                    <property name="separated" value="${webresourcegroup.separated:false}"></property>
+                    <property name="code" value="appStylesheets"/>
+                    <property name="separated" value="${webresourcegroup.separated:false}"/>
                     <property name="mimeType" value="text/css"/>
                     <property name="resources">
                         <list>

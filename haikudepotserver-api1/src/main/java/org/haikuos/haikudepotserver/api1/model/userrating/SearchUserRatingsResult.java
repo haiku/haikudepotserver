@@ -15,7 +15,7 @@ public class SearchUserRatingsResult extends AbstractSearchResult<SearchUserRati
 
         public String naturalLanguageCode;
 
-        public String userNickname;
+        public AbstractUserRatingResult.User user;
 
         public String userRatingStabilityCode;
 
@@ -29,19 +29,7 @@ public class SearchUserRatingsResult extends AbstractSearchResult<SearchUserRati
 
         public Short rating;
 
-        public String pkgName;
-
-        public String pkgVersionArchitectureCode;
-
-        public String pkgVersionMajor;
-
-        public String pkgVersionMinor;
-
-        public String pkgVersionMicro;
-
-        public String pkgVersionPreRelease;
-
-        public Integer pkgVersionRevision;
+        public AbstractUserRatingResult.PkgVersion pkgVersion;
 
     }
 

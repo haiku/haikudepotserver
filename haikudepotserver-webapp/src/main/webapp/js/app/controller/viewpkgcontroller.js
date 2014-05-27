@@ -16,6 +16,8 @@ angular.module('haikudepotserver').controller(
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
             pkg) {
 
+            var MAX_USERRATING_COMMENT = 512;
+            var PAGESIZE_USERRATING = 12;
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 320;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 240;
             var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
@@ -24,10 +26,20 @@ angular.module('haikudepotserver').controller(
             $scope.pkgScreenshots = undefined;
             $scope.pkgIconHvifUrl = undefined;
             $scope.pkgCategories = undefined;
+            $scope.userRatings = {
+                items : undefined,
+                offset : 0,
+                max : PAGESIZE_USERRATING,
+                total : undefined
+            };
 
             var hasPkgIcons = undefined;
 
             refetchPkg();
+
+            $scope.isAuthenticated = function() {
+                return !!userState.user();
+            };
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.pkg;
@@ -41,9 +53,11 @@ angular.module('haikudepotserver').controller(
                 var u = undefined;
 
                 if($scope.pkg) {
+                    //noinspection JSUnresolvedVariable
                     u = _.find(
                         $scope.pkg.versions[0].urls,
                         function(url) {
+                            //noinspection JSUnresolvedVariable
                             return url.urlTypeCode == 'homepage';
                         });
                 }
@@ -70,6 +84,7 @@ angular.module('haikudepotserver').controller(
                         refetchPkgScreenshots();
                         refetchPkgIconMetaData();
                         refetchPkgCategories();
+                        refetchUserRatings();
                     },
                     function() {
                         errorHandling.navigateToError(); // already logged
@@ -123,6 +138,52 @@ angular.module('haikudepotserver').controller(
 
             }
 
+            /**
+             * <p>The user ratings are paginated so this refetch maintains a list of those as well as the
+             * offset into the list derived from the database.</p>
+             */
+
+            function refetchUserRatings() {
+
+                if($scope.pkg) {
+                    jsonRpc.call(
+                        constants.ENDPOINT_API_V1_USERRATING,
+                        "searchUserRatings",
+                        [
+                            {
+                                offset: $scope.userRatings.offset,
+                                limit: $scope.userRatings.max,
+                                pkgName: $scope.pkg.name
+                            }
+                        ]
+                    ).then(
+                        function (searchUserRatingsData) {
+
+                            // quite a high level of detail comes back, but we actually only want to get a few things
+                            // out to display here.
+
+                            $scope.userRatings.items = searchUserRatingsData.items;
+                            $scope.userRatings.total = searchUserRatingsData.total;
+
+                            // trim the comments down a bit if necessary.
+
+                            _.each($scope.userRatings.items, function(ur) {
+                                 if(ur.comment) {
+                                     if(ur.comment.length > MAX_USERRATING_COMMENT) {
+                                         ur.comment = ur.comment.substring(0,MAX_USERRATING_COMMENT) + '...';
+                                     }
+                                 }
+                            })
+
+                        },
+                        function (jsonRpcEnvelope) {
+                            $log.info('unable to get the user ratings for the package');
+                            errorHandling.handleJsonRpcError(jsonRpcEnvelope);
+                        }
+                    );
+                }
+            }
+
             // ------------------------
             // SCREENSHOTS
 
@@ -169,14 +230,19 @@ angular.module('haikudepotserver').controller(
 
             $scope.goAddUserRating = function() {
                 $location.path($location.path() + '/adduserrating').search({});
-            }
+            };
+
+            $scope.goViewUserRating = function(userRating) {
+                $location.path(breadcrumbs.createViewUserRating(userRating).path).search({});
+            };
 
             // ---------------------
             // ACTIONS FOR PACKAGE
 
-            $scope.goEdit = function() {
-
-            }
+            // this is used to cause an authentication in relation to adding a user rating
+            $scope.goAuthenticate = function() {
+                $location.path('/authenticateuser');
+            };
 
             $scope.goEditIcon = function() {
                 $location.path($location.path() + '/editicon').search({});
@@ -188,7 +254,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEditVersionLocalization = function() {
                 $location.path($location.path() + '/editversionlocalizations').search({});
-            }
+            };
 
             $scope.goEditPkgCategories = function() {
                 $location.path($location.path() + '/editcategories').search({});
@@ -211,7 +277,7 @@ angular.module('haikudepotserver').controller(
                     }
                 );
 
-            }
+            };
 
             // ---------------------
             // EVENTS
@@ -222,6 +288,13 @@ angular.module('haikudepotserver').controller(
                     refetchPkg();
                 }
             );
+
+            // the pagination for the user ratings will cause the 'offset' value here to be changed.  This logic will
+            // pick this up and will pull an updated page of user ratings back down from the server.
+
+            $scope.$watch('userRatings.offset', function() {
+                refetchUserRatings();
+            });
 
         }
     ]

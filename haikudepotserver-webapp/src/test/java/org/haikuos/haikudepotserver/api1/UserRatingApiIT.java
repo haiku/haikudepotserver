@@ -58,23 +58,27 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.createTimestamp).isNotNull();
         Assertions.assertThat(result.modifyTimestamp).isNotNull();
         Assertions.assertThat(result.rating).isEqualTo((short) 3);
-        Assertions.assertThat(result.userNickname).isEqualTo("testuser");
+        Assertions.assertThat(result.user.nickname).isEqualTo("testuser");
         Assertions.assertThat(result.userRatingStabilityCode).isEqualTo(UserRatingStability.CODE_VERYUNSTABLE);
-        Assertions.assertThat(result.pkgName).isEqualTo("pkg1");
-        Assertions.assertThat(result.pkgVersionArchitectureCode).isEqualTo("x86");
-        Assertions.assertThat(result.pkgVersionMajor).isEqualTo("1");
-        Assertions.assertThat(result.pkgVersionMicro).isEqualTo("2");
-        Assertions.assertThat(result.pkgVersionMinor).isNull();
-        Assertions.assertThat(result.pkgVersionRevision).isEqualTo(4);
-        Assertions.assertThat(result.pkgVersionPreRelease).isNull();
+        Assertions.assertThat(result.pkgVersion.pkg.name).isEqualTo("pkg1");
+        Assertions.assertThat(result.pkgVersion.architectureCode).isEqualTo("x86");
+        Assertions.assertThat(result.pkgVersion.major).isEqualTo("1");
+        Assertions.assertThat(result.pkgVersion.micro).isEqualTo("2");
+        Assertions.assertThat(result.pkgVersion.minor).isNull();
+        Assertions.assertThat(result.pkgVersion.revision).isEqualTo(4);
+        Assertions.assertThat(result.pkgVersion.preRelease).isNull();
     }
 
     @Test
     public void testUpdateUserRating() throws Exception {
+
         integrationTestSupportService.createStandardTestData();
         String userRatingCode = createTestUserAndSampleUserRating();
 
+        setAuthenticatedUser("testuser");
+
         UpdateUserRatingRequest request = new UpdateUserRatingRequest();
+        request.active = false;
         request.rating = (short) 1;
         request.comment = "Highlighter orange";
         request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
@@ -89,6 +93,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             Optional<UserRating> userRatingOptional = UserRating.getByCode(context, userRatingCode);
+            Assertions.assertThat(userRatingOptional.get().getActive()).isFalse();
             Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 1);
             Assertions.assertThat(userRatingOptional.get().getComment()).isEqualTo("Highlighter orange");
             Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
@@ -209,15 +214,15 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.createTimestamp).isNotNull();
             Assertions.assertThat(userRating.modifyTimestamp).isNotNull();
             Assertions.assertThat(userRating.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
-            Assertions.assertThat(userRating.pkgName).isEqualTo("pkg3");
-            Assertions.assertThat(userRating.pkgVersionArchitectureCode).isEqualTo("x86");
-            Assertions.assertThat(userRating.pkgVersionMajor).isEqualTo("1");
-            Assertions.assertThat(userRating.pkgVersionMicro).isEqualTo("2");
-            Assertions.assertThat(userRating.pkgVersionRevision).isEqualTo(3);
-            Assertions.assertThat(userRating.pkgVersionMinor).isNull();
-            Assertions.assertThat(userRating.pkgVersionPreRelease).isNull();
+            Assertions.assertThat(userRating.pkgVersion.pkg.name).isEqualTo("pkg3");
+            Assertions.assertThat(userRating.pkgVersion.architectureCode).isEqualTo("x86");
+            Assertions.assertThat(userRating.pkgVersion.major).isEqualTo("1");
+            Assertions.assertThat(userRating.pkgVersion.micro).isEqualTo("2");
+            Assertions.assertThat(userRating.pkgVersion.revision).isEqualTo(3);
+            Assertions.assertThat(userRating.pkgVersion.minor).isNull();
+            Assertions.assertThat(userRating.pkgVersion.preRelease).isNull();
             Assertions.assertThat(userRating.rating).isEqualTo((short) 5);
-            Assertions.assertThat(userRating.userNickname).isEqualTo("urtest1");
+            Assertions.assertThat(userRating.user.nickname).isEqualTo("urtest1");
             Assertions.assertThat(userRating.userRatingStabilityCode).isNull();
         }
 
@@ -225,7 +230,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             SearchUserRatingsResult.UserRating userRating = Iterables.find(result.items, new ResultUserRatingFunction("GHIJKL"));
             Assertions.assertThat(userRating.active).isTrue();
             Assertions.assertThat(userRating.comment).isEqualTo("Winter banana apples");
-            Assertions.assertThat(userRating.userNickname).isEqualTo("urtest2");
+            Assertions.assertThat(userRating.user.nickname).isEqualTo("urtest2");
             Assertions.assertThat(userRating.userRatingStabilityCode).isEqualTo(UserRatingStability.CODE_UNSTABLEBUTUSABLE);
         }
 

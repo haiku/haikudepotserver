@@ -339,7 +339,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
                 createViewPkgWithSpecificVersionFromPkgVersion : function(pkgVersion) {
                     if(!pkgVersion || !pkgVersion.pkg) {
-                        throw 'a package and a package version are required to form a breadcrumb';
+                        throw 'a package version is required to form a breadcrumb';
                     }
 
                     return createViewPkgBreadcrumbItem(
@@ -356,7 +356,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
                 createViewPkgWithSpecificVersionFromPkg : function(pkg) {
                     if(!pkg || !pkg.versions.length) {
-                        throw 'a package and a package version are required to form a breadcrumb';
+                        throw 'a package with a package version are required to form a breadcrumb';
                     }
 
                     return createViewPkgBreadcrumbItem(

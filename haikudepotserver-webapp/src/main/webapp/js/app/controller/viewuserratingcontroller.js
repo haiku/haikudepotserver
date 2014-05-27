@@ -23,7 +23,7 @@ angular.module('haikudepotserver').controller(
             $scope.hasRating = function() {
                 return $scope.userRating &&
                     angular.isNumber($scope.userRating.rating);
-            }
+            };
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
@@ -40,33 +40,7 @@ angular.module('haikudepotserver').controller(
                     [{ code : $routeParams.code }]
                 ).then(
                     function(userRatingData) {
-
-                        // re-package the data into a structure that is more ameniable to display
-                        // purposes.
-
-                        $scope.userRating = {
-                            code : userRatingData.code,
-                            naturalLanguageCode : userRatingData.naturalLanguageCode,
-                            user : { nickname : userRatingData.userNickname },
-                            userRatingStabilityCode : userRatingData.userRatingStabilityCode,
-                            active: userRatingData.active,
-                            comment : userRatingData.comment,
-                            modifyTimestamp : userRatingData.modifyTimestamp,
-                            createTimestamp : userRatingData.createTimestamp,
-                            rating : userRatingData.rating,
-                            pkgVersion : {
-                                pkg : {
-                                    name : userRatingData.pkgName
-                                },
-                                architectureCode : userRatingData.pkgVersionArchitectureCode,
-                                major : userRatingData.pkgVersionMajor,
-                                minor : userRatingData.pkgVersionMinor,
-                                micro : userRatingData.pkgVersionMicro,
-                                preRelease : userRatingData.pkgVersionPreRelease,
-                                revision : userRatingData.pkgVersionRevision
-                            }
-                        };
-
+                        $scope.userRating = userRatingData;
                         refreshBreadcrumbItems();
                         $log.info('fetched user rating; '+userRatingData.code);
                     },
@@ -74,7 +48,7 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-            };
+            }
 
             refreshUserRating();
 
@@ -83,23 +57,23 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEdit = function() {
                 $location.path(breadcrumbs.createEditUserRating($scope.userRating).path).search({});
-            }
+            };
 
             $scope.canDeactivate = function() {
                 return $scope.userRating && $scope.userRating.active;
-            }
+            };
 
             $scope.canActivate = function() {
                 return $scope.userRating && !$scope.userRating.active;
-            }
+            };
 
             $scope.goActivate = function() {
                 setActive(true);
-            }
+            };
 
             $scope.goDeactivate = function() {
                 setActive(false);
-            }
+            };
 
             /**
              * <P>This function will configure the user rating to be either active or inactive.</p>

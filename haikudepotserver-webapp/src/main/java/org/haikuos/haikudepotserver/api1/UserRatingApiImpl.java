@@ -48,6 +48,27 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     @Resource
     PkgOrchestrationService pkgOrchestrationService;
 
+    private AbstractGetUserRatingResult.User createUser(User user) {
+        Preconditions.checkNotNull(user);
+        AbstractGetUserRatingResult.User result = new AbstractUserRatingResult.User();
+        result.nickname = user.getNickname();
+        return result;
+    }
+
+    private AbstractUserRatingResult.PkgVersion createPkgVersion(PkgVersion pkgVersion) {
+        Preconditions.checkNotNull(pkgVersion);
+        AbstractUserRatingResult.PkgVersion result = new AbstractUserRatingResult.PkgVersion();
+        result.architectureCode = pkgVersion.getArchitecture().getCode();
+        result.major = pkgVersion.getMajor();
+        result.minor = pkgVersion.getMinor();
+        result.micro = pkgVersion.getMicro();
+        result.preRelease = pkgVersion.getPreRelease();
+        result.revision = pkgVersion.getRevision();
+        result.pkg = new AbstractUserRatingResult.Pkg();
+        result.pkg.name = pkgVersion.getPkg().getName();
+        return result;
+    }
+
     /**
      * <p>Some of the result subclass from this abstract one.  This convenience method will full the
      * abstract result with the data from the user rating so that this code does not need to be
@@ -61,18 +82,12 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         result.active = userRating.getActive();
         result.code = userRating.getCode();
         result.naturalLanguageCode = userRating.getNaturalLanguage().getCode();
-        result.userNickname = userRating.getUser().getNickname();
+        result.user = createUser(userRating.getUser());
         result.rating = userRating.getRating();
         result.comment = userRating.getComment();
         result.modifyTimestamp = userRating.getModifyTimestamp().getTime();
         result.createTimestamp = userRating.getCreateTimestamp().getTime();
-        result.pkgName = userRating.getPkgVersion().getPkg().getName();
-        result.pkgVersionArchitectureCode = userRating.getPkgVersion().getArchitecture().getCode();
-        result.pkgVersionMajor = userRating.getPkgVersion().getMajor();
-        result.pkgVersionMinor = userRating.getPkgVersion().getMinor();
-        result.pkgVersionMicro = userRating.getPkgVersion().getMicro();
-        result.pkgVersionPreRelease = userRating.getPkgVersion().getPreRelease();
-        result.pkgVersionRevision = userRating.getPkgVersion().getRevision();
+        result.pkgVersion = createPkgVersion(userRating.getPkgVersion());
 
         if(null!=userRating.getUserRatingStability()) {
             result.userRatingStabilityCode = userRating.getUserRatingStability().getCode();
@@ -277,7 +292,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         userRating.setCode(UUID.randomUUID().toString());
         userRating.setUserRatingStability(userRatingStabilityOptional.orNull());
         userRating.setUser(userOptional.get());
-        userRating.setComment(Strings.emptyToNull(request.comment.trim()));
+        userRating.setComment(Strings.emptyToNull(Strings.nullToEmpty(request.comment).trim()));
         userRating.setPkgVersion(pkgVersionOptional.get());
         userRating.setNaturalLanguage(naturalLanguage);
         userRating.setRating(request.rating);
@@ -482,15 +497,9 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                         resultUserRating.modifyTimestamp = input.getModifyTimestamp().getTime();
                         resultUserRating.userRatingStabilityCode = null!=input.getUserRatingStability() ? input.getUserRatingStability().getCode() : null;
                         resultUserRating.naturalLanguageCode = input.getNaturalLanguage().getCode();
-                        resultUserRating.pkgName = input.getPkgVersion().getPkg().getName();
-                        resultUserRating.pkgVersionArchitectureCode = input.getPkgVersion().getArchitecture().getCode();
-                        resultUserRating.pkgVersionMajor = input.getPkgVersion().getMajor();
-                        resultUserRating.pkgVersionMinor = input.getPkgVersion().getMinor();
-                        resultUserRating.pkgVersionMicro = input.getPkgVersion().getMicro();
-                        resultUserRating.pkgVersionPreRelease = input.getPkgVersion().getPreRelease();
-                        resultUserRating.pkgVersionRevision = input.getPkgVersion().getRevision();
+                        resultUserRating.pkgVersion = createPkgVersion(input.getPkgVersion());
                         resultUserRating.rating = input.getRating();
-                        resultUserRating.userNickname = input.getUser().getNickname();
+                        resultUserRating.user = createUser(input.getUser());
                         return resultUserRating;
                     }
                 }

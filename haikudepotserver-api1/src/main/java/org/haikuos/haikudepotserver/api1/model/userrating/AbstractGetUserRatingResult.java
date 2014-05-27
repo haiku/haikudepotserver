@@ -5,13 +5,13 @@
 
 package org.haikuos.haikudepotserver.api1.model.userrating;
 
-public abstract class AbstractGetUserRatingResult {
+public abstract class AbstractGetUserRatingResult extends AbstractUserRatingResult {
 
     public String code;
 
     public String naturalLanguageCode;
 
-    public String userNickname;
+    public User user;
 
     public String userRatingStabilityCode;
 
@@ -25,18 +25,6 @@ public abstract class AbstractGetUserRatingResult {
 
     public Short rating;
 
-    public String pkgName;
-
-    public String pkgVersionArchitectureCode;
-
-    public String pkgVersionMajor;
-
-    public String pkgVersionMinor;
-
-    public String pkgVersionMicro;
-
-    public String pkgVersionPreRelease;
-
-    public Integer pkgVersionRevision;
+    public PkgVersion pkgVersion;
 
 }

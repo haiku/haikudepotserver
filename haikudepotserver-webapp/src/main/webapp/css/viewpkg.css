@@ -52,8 +52,42 @@ USER-RATINGS
     border-top: 1px lightgray solid;
 }
 
+#pkg-userratings-container .pkg-userratings-pagination {
+    float: right;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
 #pkg-userratings-container .pkg-userrating {
     display: inline-block;
+    width: 360px;
+    height: 64px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+    margin-right: 2px;
+    border: 1px solid gray;
+    vertical-align: top;
+}
+
+#pkg-userratings-container .pkg-userrating-indicatoranduser {
+    color: gray;
+    height: 20px;
+}
+
+#pkg-userratings-container .pkg-userrating-meta {
+    float: right;
+    font-size: 10px;
+}
+
+#pkg-userratings-container .pkg-userrating-comment {
+    clear: both;
+    font-size: 10px;
+    overflow-y: scroll;
+    text-overflow: ellipsis;
+    height: 42px;
 }
 
 /*

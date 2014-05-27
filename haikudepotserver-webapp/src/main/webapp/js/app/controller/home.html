@@ -54,6 +54,14 @@
                         offset="pkgs.offset"></pagination-control>
             </div>
 
+            <div class="muted">
+                {{pkgs.total}}
+                <span ng-switch="pkgs.total">
+                    <span ng-switch-when="1"><message key="gen.pkg.title"></message></span>
+                    <span ng-switch-default=""><message key="gen.pkg.title.plural"></message></span>
+                </span>
+            </div>
+
             <table class="table-general">
                 <thead>
                 <th></th>

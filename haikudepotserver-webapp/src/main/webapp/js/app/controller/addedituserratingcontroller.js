@@ -325,7 +325,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.$watchCollection('workingUserRating', function() {
                 $scope.didAttemptToSaveWithEmptyWorkingUserRating = false;
-            })
+            });
 
             function isEmptyWorkingUserRating() {
                 return (!$scope.workingUserRating.comment || !$scope.workingUserRating.comment.length) &&
@@ -402,7 +402,8 @@ angular.module('haikudepotserver').controller(
                         ).then(
                             function (data) {
                                 $log.info('did create user rating; ' + data.code);
-                                throw 'TODO; now view the user rating';
+                                breadcrumbs.pop();
+                                $location.path(breadcrumbs.createViewUserRating(data).path).search({}); // just needs the code
                             },
                             function (err) {
                                 errorHandling.handleJsonRpcError(err);
