@@ -254,13 +254,17 @@ angular.module('haikudepotserver').controller(
                                                 throw 'it is only possible to add a user rating to the latest version of a package.';
                                             }
 
+                                            // turn the package data inside out so that we have a pkgVersion data structure.
+                                            var assembledPkgVersion = pkg.versions[0];
+                                            assembledPkgVersion.pkg = { name : pkg.name };
+
                                             $scope.workingUserRating = {
                                                 userRatingStabilityOption: findUserRatingStabilityOptionByCode(null),
                                                 naturalLanguageOption: findNaturalLanguageOptionByCode(userState.naturalLanguageCode()),
                                                 user: userState.user(),
                                                 userRatingStability: null,
                                                 rating: null,
-                                                pkg: pkg
+                                                pkgVersion: assembledPkgVersion
                                             };
 
                                             fnChain(chain);
@@ -382,9 +386,9 @@ angular.module('haikudepotserver').controller(
                                     userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
                                     comment: $scope.workingUserRating.comment,
                                     rating: $scope.workingUserRating.rating,
-                                    pkgName: $scope.workingUserRating.pkg.name,
+                                    pkgName: $scope.workingUserRating.pkgVersion.pkg.name,
                                     pkgVersionType: 'LATEST',
-                                    pkgVersionArchitectureCode: $scope.workingUserRating.pkg.versions[0].architectureCode
+                                    pkgVersionArchitectureCode: $scope.workingUserRating.pkgVersion.architectureCode
                                 }
                             ]
                         ).then(

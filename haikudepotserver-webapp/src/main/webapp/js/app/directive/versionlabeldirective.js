@@ -13,10 +13,14 @@
 angular.module('haikudepotserver').directive(
     'versionLabel',
     [
-        function() {
+        'standardDirectiveMixins',
+        function(standardDirectiveMixins) {
             return {
                 restrict: 'E',
                 link : function($scope,element,attributes) {
+
+                    // apply a mixin for standard directive mixins.
+                    angular.extend(this,standardDirectiveMixins);
 
                     var versionExpression = attributes['version'];
 
@@ -28,30 +32,7 @@ angular.module('haikudepotserver').directive(
                     element.replaceWith(containerEl);
 
                     function refresh(version) {
-
-                        function versionElementsToString() {
-                            var parts = [ version.major ];
-
-                            if (version.minor) {
-                                parts.push(version.minor);
-                            }
-
-                            if (version.micro) {
-                                parts.push(version.micro);
-                            }
-
-                            if (version.preRelease) {
-                                parts.push(version.preRelease);
-                            }
-
-                            if (version.revision) {
-                                parts.push('' + version.revision);
-                            }
-
-                            return parts.join('.');
-                        }
-
-                        containerEl.text(version ? versionElementsToString(version) : '');
+                        containerEl.text(version ? pkgVersionElementsToString(version) : '');
                     }
 
                     $scope.$watch(versionExpression, function(newValue) {

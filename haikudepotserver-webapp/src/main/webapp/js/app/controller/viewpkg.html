@@ -126,6 +126,10 @@
                 <div class="pkg-userrating-comment" ng-show="userRating.comment">
                     <plain-text-content value="userRating.comment" rows="3"></plain-text-content>
                 </div>
+
+                <div class="pkg-userrating-differentversion" ng-show="userRating.isOtherVersion">
+                    <pkg-version-label pkg-version="userRating.pkgVersion" should-link="false"></pkg-version-label>
+                </div>
             </div>
             </div>
 

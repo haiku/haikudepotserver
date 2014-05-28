@@ -10,15 +10,28 @@
 angular.module('haikudepotserver').directive('userLabel',function() {
     return {
         restrict: 'E',
-        template:'<span>{{user.nickname}}</span>',
-        replace: true,
-        scope: {
-            user: '='
-        },
-        controller:
-            ['$scope',
-                function($scope) {
-                }
-            ]
+        link : function($scope,element,attributes) {
+
+            var userExpression = attributes['user'];
+
+            if(!userExpression || !userExpression.length) {
+                throw 'expected expression for "user"';
+            }
+
+            var containerEl = angular.element('<span></span>');
+            element.replaceWith(containerEl);
+
+            function refresh(user) {
+                containerEl.text(user ? user.nickname : '');
+            }
+
+            $scope.$watch(userExpression, function(newValue) {
+                refresh(newValue);
+            });
+
+            refresh($scope.$eval(userExpression));
+
+        }
     };
+
 });

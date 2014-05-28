@@ -71,6 +71,7 @@ USER-RATINGS
     vertical-align: top;
     background-color: #f4f4f4;
     border-left: 2px solid gray;
+    position: relative;
 }
 
 #pkg-userratings-container .pkg-userrating-indicatoranduser {
@@ -89,6 +90,20 @@ USER-RATINGS
     overflow: hidden;
     text-overflow: ellipsis;
     height: 48px;
+}
+
+#pkg-userratings-container .pkg-userrating-differentversion {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    background-color: rgba(255,0,0,0.5);
+    font-size: 10px;
+    color: white;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-top-left-radius: 3px;
 }
 
 /*

@@ -13,7 +13,7 @@
         <spring.version>3.2.4.RELEASE</spring.version>
         <postgresql.version>9.3-1100-jdbc41</postgresql.version>
 
-        <web-angularjs.version>1.2.15</web-angularjs.version>
+        <web-angularjs.version>1.2.16</web-angularjs.version>
         <web-angular-ui.version>0.4.0-2</web-angular-ui.version>
         <web-underscorejs.version>1.6.0-1</web-underscorejs.version>
         <web-momentjs.version>2.5.1</web-momentjs.version>
@@ -101,7 +101,7 @@
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-jdbc</artifactId>
-                <version>7.0.39</version>
+                <version>7.0.54</version>
             </dependency>
 
             <!-- MEDIA -->

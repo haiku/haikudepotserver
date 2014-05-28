@@ -267,22 +267,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new IllegalStateException("it is not possible to add a user rating to a version other than the latest version.");
         }
 
-        // if we are adding a new rating then ratings for versions prior to this one need to be disabled.  Note that it
-        // ~is~ allowed to have multiple user ratings for the same architecture.
-
         List<UserRating> legacyUserRatings = UserRating.findByUserAndPkg(context, userOptional.get(), pkgOptional.get());
 
-        if(!legacyUserRatings.isEmpty()) {
-            for(UserRating legacyUserRating : legacyUserRatings) {
-
-                if(legacyUserRating.getPkgVersion().equals(pkgVersionOptional.get())) {
-                    throw new IllegalStateException("an exisiting user rating '"+legacyUserRating.getCode()+"' already exists for this package version; it is not possible to add another one");
-                }
-
-                if(!legacyUserRating.getPkgVersion().toVersionCoordinates().equals(pkgVersionOptional.get().toVersionCoordinates())) {
-                    logger.info("disabling user rating on older pkg version; {}", legacyUserRating.getCode());
-                    legacyUserRating.setActive(Boolean.FALSE);
-                }
+        for(UserRating legacyUserRating : legacyUserRatings) {
+            if(legacyUserRating.getPkgVersion().equals(pkgVersionOptional.get())) {
+                throw new IllegalStateException("an exisiting user rating '"+legacyUserRating.getCode()+"' already exists for this package version; it is not possible to add another one");
             }
         }
 

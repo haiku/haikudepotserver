@@ -191,6 +191,23 @@ angular.module('haikudepotserver').controller(
                                 }
                             });
 
+                            // see if the version number differs from that currently being viewed.
+
+                            _.each($scope.userRatings.items, function(ur) {
+                                var v0 = $scope.pkg.versions[0];
+
+                                if(ur.pkgVersion.pkg.name != $scope.pkg.name) {
+                                    throw 'illegal; a user rating is being shown for another package';
+                                }
+
+                                ur.isOtherVersion = ur.pkgVersion.major != v0.major ||
+                                    ur.pkgVersion.minor != v0.minor ||
+                                    ur.pkgVersion.micro != v0.micro ||
+                                    ur.pkgVersion.preRelease != v0.preRelease ||
+                                    ur.pkgVersion.revision != v0.revision ||
+                                    ur.pkgVersion.architectureCode != v0.architectureCode;
+                            });
+
                         },
                         function (jsonRpcEnvelope) {
                             $log.info('unable to get the user ratings for the package');

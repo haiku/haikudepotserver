@@ -29,6 +29,7 @@ angular.module('haikudepotserver').directive(
                     angular.extend(this,standardDirectiveMixins);
 
                     var pkgVersionExpression = attributes['pkgVersion'];
+                    var shouldLink = attributes['shouldLink'];
                     var pkgVersionHyperlinkPath = undefined;
 
                     if(!pkgVersionExpression || !pkgVersionExpression.length) {
@@ -39,7 +40,7 @@ angular.module('haikudepotserver').directive(
                     var textTargetEl = containerEl;
                     element.replaceWith(containerEl);
 
-                    if(!isChildOfForm(containerEl)) {
+                    if((undefined == shouldLink || 'true' == shouldLink) && !isChildOfForm(containerEl)) {
                         var hyperlinkEl = angular.element('<a href=""></a>');
                         containerEl.append(hyperlinkEl);
                         textTargetEl = hyperlinkEl;
