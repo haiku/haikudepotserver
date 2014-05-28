@@ -95,6 +95,12 @@
                 </span>
             </h2>
 
+            <div class="muted" ng-show="!isAuthenticated()">
+                <small>
+                    <message key="viewPkg.userRating.addAction.unauthenticated"></message>
+                </small>
+            </div>
+
             <div class="pkg-userratings-pagination">
                 <pagination-control
                         link-count="9"
@@ -103,6 +109,7 @@
                         offset="userRatings.offset"></pagination-control>
             </div>
 
+            <div style="clear:both;">
             <div class="pkg-userrating" ng-repeat="userRating in userRatings.items">
                 <div class="pkg-userrating-meta">
                     <span class="muted">{{userRating.createTimestamp|date}}</span>
@@ -113,20 +120,20 @@
                 </div>
                 <div class="pkg-userrating-indicatoranduser">
                     <rating-indicator rating="userRating.rating"></rating-indicator>
-                    by <user-label user="viewPkg.user"></user-label>
+                    <message key="viewPkg.userRating.user.by"></message>
+                    <user-label user="userRating.user"></user-label>
                 </div>
                 <div class="pkg-userrating-comment" ng-show="userRating.comment">
-                    <plain-text-content value="userRating.comment"></plain-text-content>
+                    <plain-text-content value="userRating.comment" rows="3"></plain-text-content>
                 </div>
             </div>
+            </div>
+
             <ul>
-                <li>
-                    <a ng-show="isAuthenticated()" href="" ng-click="goAddUserRating()">
+                <li ng-show="isAuthenticated()">
+                    <a href="" ng-click="goAddUserRating()">
                         <message key="viewPkg.userRating.addAction.title"></message>
                     </a>
-                    <span ng-show="!isAuthenticated()">
-                        <message key="viewPkg.userRating.addAction.unauthenticated"></message>
-                    </span>
                 </li>
             </ul>
         </div>

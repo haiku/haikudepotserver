@@ -183,22 +183,10 @@ angular.module('haikudepotserver').controller(
                             code: userRatingData.code,
                             userRatingStabilityOption: findUserRatingStabilityOptionByCode(userRatingData.userRatingStabilityCode),
                             naturalLanguageOption: findNaturalLanguageOptionByCode(userRatingData.naturalLanguageCode),
-                            user: { nickname: userRatingData.userNickname },
+                            user: userRatingData.user,
                             comment: userRatingData.comment,
                             rating: userRatingData.rating,
-                            pkg: {
-                                name: userRatingData.pkgName,
-                                versions: [
-                                    {
-                                        architectureCode: userRatingData.pkgVersionArchitectureCode,
-                                        major: userRatingData.pkgVersionMajor,
-                                        minor: userRatingData.pkgVersionMinor,
-                                        micro: userRatingData.pkgVersionMicro,
-                                        preRelease: userRatingData.pkgVersionPreRelease,
-                                        revision: userRatingData.pkgVersionRevision
-                                    }
-                                ]
-                            }
+                            pkgVersion: userRatingData.pkgVersion
                         };
                     }
 
@@ -296,7 +284,7 @@ angular.module('haikudepotserver').controller(
                 function(chain) {
                     var b = [
                         breadcrumbs.createHome(),
-                        breadcrumbs.createViewPkgWithSpecificVersionFromPkg($scope.workingUserRating.pkg)
+                        breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion($scope.workingUserRating.pkgVersion)
                     ];
 
                     if($scope.workingUserRating.code) {

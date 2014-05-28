@@ -19,11 +19,14 @@
 
 angular.module('haikudepotserver').directive(
     'pkgVersionLabel',
-    ['breadcrumbs','$location',
-        function(breadcrumbs,$location) {
+    ['breadcrumbs','$location','standardDirectiveMixins',
+        function(breadcrumbs,$location,standardDirectiveMixins) {
             return {
                 restrict: 'E',
                 link : function($scope,element,attributes) {
+
+                    // apply a mixin for standard directive mixins.
+                    angular.extend(this,standardDirectiveMixins);
 
                     var pkgVersionExpression = attributes['pkgVersion'];
                     var pkgVersionHyperlinkPath = undefined;
@@ -33,52 +36,35 @@ angular.module('haikudepotserver').directive(
                     }
 
                     var containerEl = angular.element('<span></span>');
-                    var hyperlinkEl = angular.element('<a href=""></a>');
+                    var textTargetEl = containerEl;
                     element.replaceWith(containerEl);
-                    containerEl.append(hyperlinkEl);
 
-                    hyperlinkEl.on('click', function(el) {
-                        if(pkgVersionHyperlinkPath) {
-                            $scope.$apply(function() {
-                                $location.path(pkgVersionHyperlinkPath).search({});
-                            });
-                        }
-                        el.preventDefault();
-                    });
+                    if(!isChildOfForm(containerEl)) {
+                        var hyperlinkEl = angular.element('<a href=""></a>');
+                        containerEl.append(hyperlinkEl);
+                        textTargetEl = hyperlinkEl;
+
+                        hyperlinkEl.on('click', function(el) {
+                            if(pkgVersionHyperlinkPath) {
+                                $scope.$apply(function() {
+                                    $location.path(pkgVersionHyperlinkPath).search({});
+                                });
+                            }
+                            el.preventDefault();
+                        });
+                    }
 
                     function refresh(pkgVersion) {
 
-                        function pkgVersionElementsToString() {
-                            var parts = [ pkgVersion.major ];
-
-                            if (pkgVersion.minor) {
-                                parts.push(pkgVersion.minor);
-                            }
-
-                            if (pkgVersion.micro) {
-                                parts.push(pkgVersion.micro);
-                            }
-
-                            if (pkgVersion.preRelease) {
-                                parts.push(pkgVersion.preRelease);
-                            }
-
-                            if (pkgVersion.revision) {
-                                parts.push('' + pkgVersion.revision);
-                            }
-
-                            return parts.join('.');
-                        }
-
                         if (!pkgVersion) {
-                            hyperlinkEl.text('');
+                            textTargetEl.text('');
                             pkgVersionHyperlinkPath = undefined;
                         }
                         else {
 
                             pkgVersionHyperlinkPath = breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion(pkgVersion).path;
 
-                            hyperlinkEl.text(
+                            textTargetEl.text(
                                     pkgVersion.pkg.name +
                                     ' - ' +
                                     pkgVersionElementsToString(pkgVersion) +

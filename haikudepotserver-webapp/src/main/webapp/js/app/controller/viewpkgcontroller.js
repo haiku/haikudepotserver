@@ -16,8 +16,10 @@ angular.module('haikudepotserver').controller(
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
             pkg) {
 
-            var MAX_USERRATING_COMMENT = 512;
+            var MAXCHARS_USERRATING_COMMENT = 256;
+            var MAXLINES_USERRATING_COMMENT = 4;
             var PAGESIZE_USERRATING = 12;
+
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 320;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 240;
             var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
@@ -169,11 +171,25 @@ angular.module('haikudepotserver').controller(
 
                             _.each($scope.userRatings.items, function(ur) {
                                  if(ur.comment) {
-                                     if(ur.comment.length > MAX_USERRATING_COMMENT) {
-                                         ur.comment = ur.comment.substring(0,MAX_USERRATING_COMMENT) + '...';
+                                     if(ur.comment.length > MAXCHARS_USERRATING_COMMENT) {
+                                         ur.comment = ur.comment.substring(0,MAXCHARS_USERRATING_COMMENT) + '...';
                                      }
                                  }
-                            })
+                            });
+
+                            // trim down the number of lines in the comment if necessary.
+
+                            _.each($scope.userRatings.items, function(ur) {
+                                if(ur.comment) {
+                                    var lines = ur.comment.split(/\r\n|\n/);
+
+                                    if(lines.length > MAXLINES_USERRATING_COMMENT) {
+                                        lines = lines.slice(0,MAXLINES_USERRATING_COMMENT);
+                                        lines[lines.length-1] += '...';
+                                        ur.comment = lines.join('\n');
+                                    }
+                                }
+                            });
 
                         },
                         function (jsonRpcEnvelope) {

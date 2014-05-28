@@ -61,20 +61,20 @@ USER-RATINGS
 #pkg-userratings-container .pkg-userrating {
     display: inline-block;
     width: 360px;
-    height: 64px;
+    height: 82px;
     padding-left: 4px;
     padding-right: 4px;
     padding-top: 2px;
     padding-bottom: 2px;
-    margin-bottom: 2px;
-    margin-right: 2px;
-    border: 1px solid gray;
+    margin-bottom: 8px;
+    margin-right: 8px;
     vertical-align: top;
+    background-color: #f4f4f4;
+    border-left: 2px solid gray;
 }
 
 #pkg-userratings-container .pkg-userrating-indicatoranduser {
-    color: gray;
-    height: 20px;
+    height: 26px;
 }
 
 #pkg-userratings-container .pkg-userrating-meta {
@@ -83,11 +83,12 @@ USER-RATINGS
 }
 
 #pkg-userratings-container .pkg-userrating-comment {
-    clear: both;
+    /*clear: both;*/
     font-size: 10px;
-    overflow-y: scroll;
+    color: gray;
+    overflow: hidden;
     text-overflow: ellipsis;
-    height: 42px;
+    height: 48px;
 }
 
 /*
