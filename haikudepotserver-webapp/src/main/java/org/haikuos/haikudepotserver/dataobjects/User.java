@@ -16,7 +16,6 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._User;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;

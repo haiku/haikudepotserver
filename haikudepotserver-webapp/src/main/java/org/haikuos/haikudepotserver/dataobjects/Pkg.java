@@ -38,6 +38,16 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
     }
 
     @Override
+    public void validateForInsert(ValidationResult validationResult) {
+
+        if(null==getActive()) {
+            setActive(true);
+        }
+
+        super.validateForInsert(validationResult);
+    }
+
+    @Override
     protected void validateForSave(ValidationResult validationResult) {
         super.validateForSave(validationResult);
 

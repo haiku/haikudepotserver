@@ -17,7 +17,9 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._UserRating;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 public class UserRating extends _UserRating implements CreateAndModifyTimestamped {
@@ -43,6 +45,25 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
                 ExpressionFactory.matchExp(UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY, pkg)
                 .andExp(ExpressionFactory.matchExp(UserRating.USER_PROPERTY, user))
                 .andExp(ExpressionFactory.matchExp(UserRating.ACTIVE_PROPERTY, Boolean.TRUE))));
+    }
+
+    public static List<UserRating> getByUserAndPkgVersions(
+            ObjectContext context,
+            User user,
+            Collection<PkgVersion> pkgVersions) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(user);
+        Preconditions.checkNotNull(pkgVersions);
+
+        if(pkgVersions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return context.performQuery(new SelectQuery(
+                UserRating.class,
+                ExpressionFactory.inExp(UserRating.PKG_VERSION_PROPERTY, pkgVersions)
+                        .andExp(ExpressionFactory.matchExp(UserRating.USER_PROPERTY, user))
+                        .andExp(ExpressionFactory.matchExp(UserRating.ACTIVE_PROPERTY, Boolean.TRUE))));
     }
 
     public static Optional<UserRating> getByUserAndPkgVersion(ObjectContext context, User user, PkgVersion pkgVersion) {

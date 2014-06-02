@@ -36,7 +36,7 @@
                 <message key="viewUserRating.reactiveAction.title"></message>
             </a>
         </li>
-        <li user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
+        <li ng-show="userRating.active" user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
             <a href="" ng-click="goEdit()">
                 <message key="viewUserRating.editAction.title"></message>
             </a>

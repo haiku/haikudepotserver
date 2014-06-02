@@ -351,6 +351,7 @@ angular.module('haikudepotserver').controller(
                             'updateUserRating',
                             [
                                 {
+                                    active: true, // in case an older rating is being edited that was de-activated
                                     code: $scope.workingUserRating.code,
                                     naturalLanguageCode: $scope.workingUserRating.naturalLanguageOption.code,
                                     userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
@@ -360,7 +361,8 @@ angular.module('haikudepotserver').controller(
                                         'NATURALLANGUAGE',
                                         'USERRATINGSTABILITY',
                                         'COMMENT',
-                                        'RATING'
+                                        'RATING',
+                                        'ACTIVE'
                                     ]
                                 }
                             ]

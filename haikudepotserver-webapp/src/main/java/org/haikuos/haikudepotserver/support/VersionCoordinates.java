@@ -45,6 +45,20 @@ public class VersionCoordinates {
         return revision;
     }
 
+    /**
+     * <p>Sometimes it is handy to only compare the major, minor and micro portions of the version.  This
+     * method will clear those other parts so that they play no role in comparisons etc...</p>
+     */
+
+    public VersionCoordinates toVersionCoordinatesWithoutPreReleaseOrRevision() {
+        return new VersionCoordinates(
+                getMajor(),
+                getMinor(),
+                getMicro(),
+                null,
+                null);
+    }
+
     @SuppressWarnings("RedundantIfStatement") // was auto generated!
     @Override
     public boolean equals(Object o) {

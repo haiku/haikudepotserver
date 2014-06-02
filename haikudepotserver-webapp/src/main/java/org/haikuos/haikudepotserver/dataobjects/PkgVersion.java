@@ -30,6 +30,22 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public final static Pattern MICRO_PATTERN = Pattern.compile("^[\\w_.]+$");
     public final static Pattern PRE_RELEASE_PATTERN = Pattern.compile("^[\\w_.]+$");
 
+    public static List<PkgVersion> getForPkg(
+            ObjectContext context,
+            Pkg pkg) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+
+        SelectQuery query = new SelectQuery(
+                PkgVersion.class,
+                ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg).andExp(
+                        ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE))
+        );
+
+        //noinspection unchecked
+        return (List<PkgVersion>) context.performQuery(query);
+    }
+
     public static Optional<PkgVersion> getForPkg(
             ObjectContext context,
             Pkg pkg,
@@ -56,6 +72,10 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     @Override
     public void validateForInsert(ValidationResult validationResult) {
+
+        if(null==getActive()) {
+            setActive(true);
+        }
 
         if(null==getViewCounter()) {
             setViewCounter(0l);
