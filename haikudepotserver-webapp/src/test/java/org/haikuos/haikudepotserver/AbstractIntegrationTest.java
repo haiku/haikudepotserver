@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationHelper;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
@@ -45,7 +44,6 @@ import java.util.Map;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
-        "classpath:/spring/application-context.xml",
         "classpath:/spring/test.xml"
 })
 public abstract class AbstractIntegrationTest {

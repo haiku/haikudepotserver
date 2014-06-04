@@ -15,7 +15,6 @@ public class GetBulkPkgRequest {
         PKGSCREENSHOTS,
         PKGCATEGORIES,
         PKGICONS,
-        USERRATINGAVERAGES,
         PKGVERSIONLOCALIZATIONDESCRIPTIONS,
     };
 

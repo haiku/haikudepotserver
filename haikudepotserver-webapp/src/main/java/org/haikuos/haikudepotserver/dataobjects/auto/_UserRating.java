@@ -107,4 +107,6 @@ public abstract class _UserRating extends AbstractDataObject {
     }
 
 
+    protected abstract void onPostAdd();
+
 }

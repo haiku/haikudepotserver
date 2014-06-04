@@ -19,6 +19,8 @@ public abstract class _Pkg extends AbstractDataObject {
 
     public static final String ACTIVE_PROPERTY = "active";
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
+    public static final String DERIVED_RATING_PROPERTY = "derivedRating";
+    public static final String DERIVED_RATING_SAMPLE_SIZE_PROPERTY = "derivedRatingSampleSize";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NAME_PROPERTY = "name";
     public static final String PKG_ICONS_PROPERTY = "pkgIcons";
@@ -40,6 +42,20 @@ public abstract class _Pkg extends AbstractDataObject {
     }
     public Date getCreateTimestamp() {
         return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
+
+    public void setDerivedRating(Float derivedRating) {
+        writeProperty(DERIVED_RATING_PROPERTY, derivedRating);
+    }
+    public Float getDerivedRating() {
+        return (Float)readProperty(DERIVED_RATING_PROPERTY);
+    }
+
+    public void setDerivedRatingSampleSize(Integer derivedRatingSampleSize) {
+        writeProperty(DERIVED_RATING_SAMPLE_SIZE_PROPERTY, derivedRatingSampleSize);
+    }
+    public Integer getDerivedRatingSampleSize() {
+        return (Integer)readProperty(DERIVED_RATING_SAMPLE_SIZE_PROPERTY);
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {

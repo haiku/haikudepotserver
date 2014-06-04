@@ -13,7 +13,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.googlecode.jsonrpc4j.Base64;
-import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.Entity;
@@ -41,7 +40,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -228,6 +226,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
                         resultPkg.name = input.getPkg().getName();
                         resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
+                        resultPkg.derivedRating = input.getPkg().getDerivedRating();
 
                         SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
                         resultVersion.major = input.getMajor();
@@ -379,6 +378,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         result.name = pkg.getName();
         result.modifyTimestamp = pkg.getModifyTimestamp().getTime();
+        result.derivedRating = pkg.getDerivedRating();
+        result.derivedRatingSampleSize = pkg.getDerivedRatingSampleSize();
         result.pkgCategoryCodes = Lists.transform(pkg.getPkgPkgCategories(), new Function<PkgPkgCategory, String>() {
             @Override
             public String apply(PkgPkgCategory input) {
@@ -863,14 +864,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return result;
     }
 
-    // this is here temporarily until user ratings are actually implemented.
-    // TODO; REMOVE
-    private Float randomizedRatingAverage__temporary(CayenneDataObject dataObject) {
-        long pk = ((Number) dataObject.getObjectId().getIdSnapshot().get("id")).longValue();
-        Random random = new Random(pk);
-        return Math.abs(random.nextFloat() % 5);
-    }
-
     private GetBulkPkgResult.PkgVersion createGetBulkPkgResultPkgVersion(
             PkgVersion pkgVersion,
             NaturalLanguage naturalLanguage,
@@ -981,6 +974,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                             GetBulkPkgResult.Pkg resultPkg = new GetBulkPkgResult.Pkg();
                             resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
                             resultPkg.name = input.getPkg().getName();
+                            resultPkg.derivedRating = input.getPkg().getDerivedRating();
 
                             if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
                                 resultPkg.pkgIcons = Lists.transform(
@@ -1020,10 +1014,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                                 );
                             }
 
-                            // TODO; put real values in once they are available.
-                            if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.USERRATINGAVERAGES)) {
-                                resultPkg.userRatingAverage = randomizedRatingAverage__temporary(input.getPkg());
-                            }
+                            resultPkg.derivedRating = input.getPkg().getDerivedRating();
 
                             switch(getBulkPkgRequest.versionType) {
                                 case LATEST:
@@ -1033,11 +1024,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                                             naturalLanguage,
                                             getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGVERSIONLOCALIZATIONDESCRIPTIONS)
                                     );
-
-                                    // TODO; put real values in once they are available.
-                                    if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.USERRATINGAVERAGES)) {
-                                        resultPkgVersion.userRatingAverage = randomizedRatingAverage__temporary(input);
-                                    }
 
                                     resultPkg.versions = Collections.singletonList(resultPkgVersion);
                                 }

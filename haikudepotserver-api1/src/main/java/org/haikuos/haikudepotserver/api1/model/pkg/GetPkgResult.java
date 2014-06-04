@@ -26,6 +26,9 @@ public class GetPkgResult {
 
     public List<String> pkgCategoryCodes;
 
+    public Float derivedRating;
+    public Integer derivedRatingSampleSize;
+
     public static class PkgVersion {
 
         public String major;
@@ -53,8 +56,6 @@ public class GetPkgResult {
         public List<PkgVersionUrl> urls;
 
         public Long viewCounter;
-
-        public Float userRatingAverage;
 
         public Boolean isLatest;
 

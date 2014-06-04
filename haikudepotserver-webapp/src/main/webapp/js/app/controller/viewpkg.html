@@ -22,9 +22,15 @@
         </div>
     </div>
 
-    <div id="pkg-rating-indicator-container">
-        <rating-indicator rating="3.5"></rating-indicator>
-        <span class="pkg-ratings-indicator-sample"><small>Testing value</small></span>
+    <div ng-show="canShowDerivedRating()" id="pkg-rating-indicator-container">
+        <rating-indicator rating="pkg.derivedRating"></rating-indicator>
+        <span class="pkg-ratings-indicator-sample">
+            <small>
+                <message
+                        key="viewPkg.derivedUserRating.sampleSize"
+                        parameters="[pkg.derivedRatingSampleSize]"></message>
+            </small>
+        </span>
     </div>
 
     <div id="pkg-screenshot-container" ng-show="pkgScreenshots.length">

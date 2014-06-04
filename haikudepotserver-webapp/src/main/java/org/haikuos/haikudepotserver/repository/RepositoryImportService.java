@@ -10,17 +10,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Queues;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import com.google.common.util.concurrent.AbstractService;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.access.DataDomain;
 import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
+import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJob;
+import org.haikuos.haikudepotserver.support.AbstractLocalBackgroundProcessingService;
 import org.haikuos.pkg.PkgIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +27,6 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>This object is responsible for migrating a HPKR file from a remote repository into the Haiku Depot Server
@@ -42,76 +37,17 @@ import java.util.concurrent.TimeUnit;
  * will undertake the import process.</p>
  */
 
-public class RepositoryImportService extends AbstractService {
+// TODO; at some time in the future, when it is worthwhile, use a JMS broker to not loose jobs.
+
+public class RepositoryImportService extends AbstractLocalBackgroundProcessingService {
 
     protected static Logger logger = LoggerFactory.getLogger(RepositoryImportService.class);
-
-    public final static int SIZE_QUEUE = 10;
 
     @Resource
     ServerRuntime serverRuntime;
 
     @Resource
     PkgOrchestrationService pkgService;
-
-    private ThreadPoolExecutor executor = null;
-
-    private ArrayBlockingQueue<Runnable> runnables = Queues.newArrayBlockingQueue(SIZE_QUEUE);
-
-    @Override
-    public void doStart() {
-        try {
-            Preconditions.checkState(null==executor);
-
-            executor = new ThreadPoolExecutor(
-                    0, // core pool size
-                    1, // max pool size
-                    1l, // time to shutdown threads
-                    TimeUnit.MINUTES,
-                    runnables,
-                    new ThreadPoolExecutor.AbortPolicy());
-
-            notifyStarted();
-        }
-        catch(Throwable th) {
-            notifyFailed(th);
-        }
-    }
-
-    @Override
-    public void doStop() {
-        try {
-            Preconditions.checkNotNull(executor);
-            executor.shutdown();
-            executor.awaitTermination(2, TimeUnit.MINUTES);
-            executor = null;
-            notifyStopped();
-        }
-        catch(Throwable th) {
-            notifyFailed(th);
-        }
-    }
-
-    public void startAsyncAndAwaitRunning() {
-        startAsync();
-        awaitRunning();
-    }
-
-    public void stopAsyncAndAwaitTerminated() {
-        stopAsync();
-        awaitTerminated();
-    }
-
-    /**
-     * <p>Returns true if the service is actively working on a job or it has a job submitted which has not yet
-     * been dequeued and run.</p>
-     */
-
-    public boolean isProcessingSubmittedJobs() {
-        return
-                null!=executor
-                        && (executor.getActiveCount() > 0 || !executor.getQueue().isEmpty());
-    }
 
     /**
      * <p>This method will check that there is not already a job in the queue for this repository and then will

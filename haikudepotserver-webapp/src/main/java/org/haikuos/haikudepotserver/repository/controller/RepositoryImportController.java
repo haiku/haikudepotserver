@@ -9,7 +9,7 @@ import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.haikuos.haikudepotserver.repository.RepositoryImportService;
-import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
+import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;

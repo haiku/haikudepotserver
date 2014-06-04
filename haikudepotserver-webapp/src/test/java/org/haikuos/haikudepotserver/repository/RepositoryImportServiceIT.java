@@ -12,7 +12,7 @@ import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
-import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
+import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.junit.Test;
 

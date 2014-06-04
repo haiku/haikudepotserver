@@ -1,9 +1,9 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.pkg.model;
+package org.haikuos.haikudepotserver.repository.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;

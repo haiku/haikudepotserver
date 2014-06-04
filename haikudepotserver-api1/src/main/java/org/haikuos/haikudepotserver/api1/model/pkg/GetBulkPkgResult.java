@@ -30,7 +30,7 @@ public class GetBulkPkgResult {
 
         public List<PkgIcon> pkgIcons;
 
-        public Float userRatingAverage;
+        public Float derivedRating;
 
     }
 
@@ -52,8 +52,6 @@ public class GetBulkPkgResult {
 
         public String summary;
         public String description;
-
-        public Float userRatingAverage;
 
     }
 

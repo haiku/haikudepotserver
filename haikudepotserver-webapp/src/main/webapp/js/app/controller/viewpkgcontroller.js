@@ -51,6 +51,12 @@ angular.module('haikudepotserver').controller(
                 return $scope.pkg && hasPkgIcons;
             };
 
+            $scope.canShowDerivedRating = function() {
+                return $scope.pkg &&
+                    angular.isNumber($scope.pkg.derivedRating) &&
+                    $scope.pkg.versions[0].isLatest;
+            };
+
             $scope.homePageLink = function() {
                 var u = undefined;
 

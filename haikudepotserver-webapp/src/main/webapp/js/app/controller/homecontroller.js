@@ -51,12 +51,17 @@ angular.module('haikudepotserver').controller(
                     };
                 }
             );
+
             $scope.selectedViewCriteriaTypeOption = _.find(
                 $scope.viewCriteriaTypeOptions,
                 function(o) {
                     return o.code == ViewCriteriaTypes.ALL;
                 }
             );
+
+            $scope.shouldShowDerivedRating = function(pkg) {
+                return angular.isNumber(pkg.derivedRating);
+            }
 
             // pagination
             $scope.pkgs = {

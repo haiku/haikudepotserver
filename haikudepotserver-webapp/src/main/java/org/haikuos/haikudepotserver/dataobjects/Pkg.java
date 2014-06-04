@@ -44,6 +44,10 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             setActive(true);
         }
 
+        if(null==getDerivedRatingSampleSize()) {
+            setDerivedRatingSampleSize(0);
+        }
+
         super.validateForInsert(validationResult);
     }
 
@@ -55,6 +59,20 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             if(!NAME_PATTERN.matcher(getName()).matches()) {
                 validationResult.addFailure(new BeanValidationFailure(this,NAME_PROPERTY,"malformed"));
             }
+        }
+
+        if(null != getDerivedRating()) {
+            if(getDerivedRating() < 0f) {
+                validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_PROPERTY,"min"));
+            }
+
+            if(getDerivedRating() > 5f) {
+                validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_PROPERTY,"max"));
+            }
+        }
+
+        if(getDerivedRatingSampleSize() < 0) {
+            validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_SAMPLE_SIZE_PROPERTY,"min"));
         }
 
     }

@@ -66,6 +66,7 @@
                 <thead>
                 <th></th>
                 <th><message key="gen.pkg.title"></message></th>
+                <th><message key="home.table.rating.title"></message></th>
                 <th><message key="home.table.version.title"></message></th>
                 <th ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><message key="home.table.approximateVersionDate.title"></message></th>
                 <th ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><message key="home.table.versionViewCounter.title"></message></th>
@@ -75,6 +76,11 @@
                     <td><pkg-icon size="16" pkg="pkg"></pkg-icon></td>
                     <td>
                         <a href="" ng-click="goViewPkg(pkg)">{{pkg.name}}</a>
+                    </td>
+                    <td>
+                        <span ng-show="shouldShowDerivedRating(pkg)">
+                            <rating-indicator rating="{{pkg.derivedRating}}"></rating-indicator>
+                        </span>
                     </td>
                     <td><version-label version="pkg.version"></version-label></td>
                     <td ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.version.createTimestamp|timestamp}}</span></td>

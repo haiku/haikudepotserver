@@ -20,7 +20,7 @@ import org.haikuos.haikudepotserver.api1.support.ValidationException;
 import org.haikuos.haikudepotserver.api1.support.ValidationFailure;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
-import org.haikuos.haikudepotserver.pkg.model.PkgRepositoryImportJob;
+import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.repository.RepositoryImportService;
 import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;

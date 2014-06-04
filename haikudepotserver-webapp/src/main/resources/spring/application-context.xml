@@ -1,58 +1,28 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="
-        http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-        http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <context:annotation-config/>
+    <import resource="general.xml"/>
 
-    <context:component-scan base-package="org.haikuos.haikudepotserver">
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-        <context:exclude-filter type="regex" expression="org\.haikuos\.haikudepotserver\.api.*"/>
-    </context:component-scan>
-
-    <import resource="properties.xml"/>
-    <import resource="persistence.xml"/>
-    <import resource="webresourcegroup.xml"/>
-
-    <!-- CAPTCHA SUPPORT -->
+    <!-- RECALCULATE DERIVED USER RATINGS -->
 
     <!--
-    This should only need to be directly accessed for the purposes of integration testing.
+    Processes the user rating requests for a package and store them into the
+    package entity.
     -->
-    <bean id="captchaRepository" class="org.haikuos.haikudepotserver.captcha.DatabaseCaptchaRepository">
-        <property name="serverRuntime" ref="haikuDepotServerRuntime"/>
-        <property name="expirySeconds" value="${captcha.expiryseconds:120}"/>
-    </bean>
-
-    <bean class="org.haikuos.haikudepotserver.captcha.CaptchaService">
-        <property name="captchaAlgorithm">
-            <bean class="org.haikuos.haikudepotserver.captcha.SimpleMathProblemCaptchaAlgorithm"/>
-        </property>
-        <property name="captchaRepository" ref="captchaRepository"/>
-    </bean>
-
-    <!-- SECURITY -->
-
-    <bean id="authenticationFilter" class="org.haikuos.haikudepotserver.security.AuthenticationFilter"/>
-
-    <!-- LOGGING -->
-
-    <bean class="org.haikuos.haikudepotserver.support.logging.LoggingSetupOrchestration" init-method="init"/>
-
-    <!-- SUNDRY -->
-
-    <bean class="org.haikuos.haikudepotserver.support.RuntimeInformationService"></bean>
-
-    <!-- IMPORTING REPOSITORY FILES -->
 
     <bean
-            class="org.haikuos.haikudepotserver.repository.RepositoryImportService"
+            class="org.haikuos.haikudepotserver.userrating.UserRatingDerivationService"
             init-method="startAsyncAndAwaitRunning"
             destroy-method="stopAsyncAndAwaitTerminated">
     </bean>
+
+    <!--
+    Picks up on Cayenne ORM events around user ratings and triggers the background update
+    of the packages' user ratings.
+    -->
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.UserRatingDerivationTriggerListener"/>
 
 </beans>

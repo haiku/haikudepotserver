@@ -13,6 +13,7 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public String name;
         public Long modifyTimestamp;
         public SearchPkgsResult.PkgVersion version;
+        public Float derivedRating;
     }
 
     public static class PkgVersion {

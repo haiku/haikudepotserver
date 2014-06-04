@@ -628,9 +628,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(pkg1.pkgCategoryCodes.size()).isEqualTo(1);
         Assertions.assertThat(pkg1.pkgCategoryCodes.get(0)).isEqualTo("GRAPHICS");
 
-        Assertions.assertThat(pkg1.userRatingAverage).isNotNull();
-        Assertions.assertThat(pkg1.userRatingAverage).isGreaterThanOrEqualTo(0.0f);
-        Assertions.assertThat(pkg1.userRatingAverage).isLessThanOrEqualTo(5.0f);
+        Assertions.assertThat(pkg1.derivedRating).isNotNull();
+        Assertions.assertThat(pkg1.derivedRating).isGreaterThanOrEqualTo(0.0f);
+        Assertions.assertThat(pkg1.derivedRating).isLessThanOrEqualTo(5.0f);
 
         // there are three screen-shots loaded, but they are all the same so we can just check that the first
         // one is correct.
@@ -653,9 +653,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(pkg1.versions.get(0).naturalLanguageCode).isEqualTo("en");
         Assertions.assertThat(pkg1.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
         Assertions.assertThat(pkg1.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
-        Assertions.assertThat(pkg1.versions.get(0).userRatingAverage).isNotNull();
-        Assertions.assertThat(pkg1.versions.get(0).userRatingAverage).isGreaterThanOrEqualTo(0.0f);
-        Assertions.assertThat(pkg1.versions.get(0).userRatingAverage).isLessThanOrEqualTo(5.0f);
         Assertions.assertThat(pkg1.versions.get(0).major).isEqualTo("1");
         Assertions.assertThat(pkg1.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(pkg1.versions.get(0).revision).isEqualTo(4);

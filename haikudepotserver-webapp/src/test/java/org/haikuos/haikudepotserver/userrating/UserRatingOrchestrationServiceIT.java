@@ -16,10 +16,10 @@ import org.junit.Test;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
-public class UserRatingDerivationServiceIT extends AbstractIntegrationTest {
+public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
     @Resource
-    UserRatingDerivationService userRatingDerivationService;
+    UserRatingOrchestrationService userRatingOrchestrationService;
 
     // -------------------
     // SETUP
@@ -109,11 +109,12 @@ public class UserRatingDerivationServiceIT extends AbstractIntegrationTest {
         context.commitChanges();
 
         // ----------------------------
-        Optional<Float> result = userRatingDerivationService.userRatingDerivation(context, userRatingData.pkg);
+        Optional<UserRatingOrchestrationService.DerivedUserRating> result = userRatingOrchestrationService.userRatingDerivation(context, userRatingData.pkg);
         // ----------------------------
 
         Assertions.assertThat(result.isPresent()).isTrue();
-        Assertions.assertThat(result.get()).isEqualTo(1.75f);
+        Assertions.assertThat(result.get().getRating()).isEqualTo(1.75f);
+        Assertions.assertThat(result.get().getSampleSize()).isEqualTo(4);
 
     }
 
