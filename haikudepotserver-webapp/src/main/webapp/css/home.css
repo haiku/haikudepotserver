@@ -3,14 +3,14 @@ This specific layout works off the premise that there is only one table on this 
 */
 
 .home .table-general > tbody > tr > td:nth-child(1) {
-    width: 24px;
-}
-
-.home .table-general > tbody > tr > td:nth-child(1) {
     width:18px;
     text-align: center;
 }
 
-.home .table-general > tbody > tr > td:nth-child(2) {
+.home .table-general > tbody > tr > td:nth-child(3) {
+    width:160px;
+}
+
+.home .table-general > tbody > tr > td:nth-child(4) {
     width:50%;
 }
