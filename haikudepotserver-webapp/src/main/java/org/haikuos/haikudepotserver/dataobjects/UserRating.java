@@ -17,9 +17,9 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._UserRating;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Collection;
 import java.util.UUID;
 
 public class UserRating extends _UserRating implements CreateAndModifyTimestamped {
