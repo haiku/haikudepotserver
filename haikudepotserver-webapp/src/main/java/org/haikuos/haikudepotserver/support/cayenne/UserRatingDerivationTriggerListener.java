@@ -5,6 +5,7 @@
 
 package org.haikuos.haikudepotserver.support.cayenne;
 
+import com.google.common.base.Preconditions;
 import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
@@ -35,6 +36,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
     }
 
     private void triggerUpdateUserRatingDerivationForAssociatedPackage(Object entity) {
+        Preconditions.checkNotNull(entity);
         UserRating userRating = (UserRating) entity;
         String pkgName = userRating.getPkgVersion().getPkg().getName();
         userRatingDerivationService.submit(new UserRatingDerivationJob(pkgName));
@@ -42,7 +44,6 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postAdd(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
     }
 
     @Override
@@ -51,6 +52,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postPersist(Object entity) {
+        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
     }
 
     @Override
@@ -68,7 +70,6 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postUpdate(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
     }
 
     @Override

@@ -1,0 +1,88 @@
+% -----------
+% Copyright 2013, Andrew Lindesay
+% Distributed under the terms of the MIT License.
+% -----------
+
+\section{User Rating}
+\label{userrating}
+
+A {\it User rating} is an opinion given by a user of the application-server system about a particular version of a package.  The user rating contains optional details such as;
+
+\begin{itemize}
+\item A comment
+\item A rating from zero to five
+\item A stability value;
+\begin{itemize}
+\item Will not start up ({\tt nostart})
+\item Very unstable ({\tt veryunstable})
+\item Unstable but usable ({\tt unstablebutusable})
+\item Mostly stable ({\tt mostlystable})
+\item Stable ({\tt stable})
+\end{itemize}
+\end{itemize}
+
+The user rating is always given in the context of a specific package version even though, from the user's perspective, it may apply to the package as a whole.  This is important to give context to the user rating.  It is naturally still possible to view all of the user ratings for all or some package versions of a package.
+
+A user rating is also associated with a {\it natural language} such as English, German or Japanese so that the language of the comment (if present) can be know.
+
+\subsection{Package Rating Derivation}
+
+After some time, a number of users may have submitted user ratings.  After there are sufficient ratings to reach or exceed a sample size minimum, it is possible to derive a rating for the package as a whole --- an aggregate.  If the situation is such that there are an insufficient number of user ratings then the package does not have a rating.  In regard to API responses, this situation will yield a {\it null} value for a package's rating.  A minimum value can be configured (see \ref{config}) to define this minimum sample size.
+
+\subsubsection{Finding Ratings for the Derivation}
+
+User ratings are only considered for a ``number of versions back'' up to the present.  The number of versions back is able to be configured (see \ref{config}).  In deciding what constitutes a prior version only the following elements of the version identity are considered;
+
+\begin{itemize}
+\item major
+\item minor
+\item micro
+\end{itemize}
+
+There is also no consideration of architecture in relation to the ``numer of versions back''.
+
+For each user who has submitted a user rating, the user ratings are sorted by;
+
+\begin{enumerate}
+\item package version\footnote{The ordering semantics are the same as the C++ code in Haiku}
+\item create timestamp
+\item architecture
+\end{enumerate}
+
+This provides a total ordering on the user ratings.  Only the {\bf last} user rating is considered from this user.  All of the users' user ratings are collected in this way to provide a set of user ratings.
+
+Taking an example\footnote{Note that this data forms the basis for the main-flow automated testing.}, suppose that we have the following table of package versions (major . minor . micro . revision) and user ratings;
+
+\begin{tabular}{ | l | l | c | c | c | c | c | }
+\hline
+Version & Architecture & User 1 & User 2 & User 3 & User 4 & User 5 \\
+\hline
+%                 1   2   3   4   5
+0.0.9 & x86     &   &   &   &   & 2 \\
+1.0.0 & x86     &   &   & {\color{red} 2} &   &   \\
+1.0.1 & x86     &   &   &   & {\color{red} 1} &   \\
+1.0.1.1 & x86   & 3 &   &   &   &   \\
+1.0.2 & x86     & 4 & {\color{red} 3} &   &   &   \\
+1.0.2 & x86\_64 & {\color{red} 1} &   &   &   &   \\
+\hline
+\end{tabular}
+
+In the case of User 1 who has submitted multiple user ratings, the order of input is;
+
+\begin{enumerate}
+\item 1.0.1.1
+\item 1.0.2 (x86)
+\item 1.0.2 (x86\_64)
+\end{enumerate}
+
+In this case, with a ``versions back'' configured as 2, only user ratings that are associated with versions equal to or greater than 1.0.0 will be considered.  This is because, according to the algorithm, the prior versions are 1.0.2, 1.0.1 and 1.0.0 and two back from the current version of 1.0.2 yields 1.0.0.
+
+The rating values which are shown in {\color{red} red} are the set of rating values that will be used to aggregate a rating value for the package.  With the ``minimum number of ratings'' configured to 3, a rating could be derived for this package because there are enough samples; it would be 1.75.
+
+\subsubsection{Triggering Derived Rating Calculations}
+
+Each time a user rating is persisted, the derived rating for the package is calculated.  This mechanic utilizes the ORM's {\it listener} architecture and is driven by the class {\it UserRatingDerivationTriggerListener}.  In a situation of high-load, the system will prevent excess pressure by queuing the derivations.
+
+\subsubsection{Storage of the Sample Size}
+
+The number of user ratings used to derive a given rating for a package is stored as well as the rating on the {\it Pkg} entity.
