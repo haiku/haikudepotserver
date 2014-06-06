@@ -13,9 +13,9 @@
         <property name="url" value="${jdbc.url}" />
         <property name="username" value="${jdbc.username}" />
         <property name="password" value="${jdbc.password}" />
-        <property name="testOnBorrow" value="true"/>
-        <property name="validationQuery" value="SELECT 1"/>
-        <property name="validationQueryTimeout" value="10"/> <!-- seconds -->
+        <!--<property name="testOnBorrow" value="true"/>-->
+        <!--<property name="validationQuery" value="SELECT 1"/>-->
+        <!--<property name="validationQueryTimeout" value="10"/> &lt;!&ndash; seconds &ndash;&gt;-->
     </bean>
 
     <!--
