@@ -13,8 +13,9 @@
         <property name="url" value="${jdbc.url}" />
         <property name="username" value="${jdbc.username}" />
         <property name="password" value="${jdbc.password}" />
-        <!--<property name="testOnBorrow" value="true"/>-->
-        <!--<property name="validationQuery" value="SELECT 1"/>-->
+        <property name="testOnBorrow" value="true"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <!-- REINSTATE AFTER SHIFTING TO TOMCAT 2.3 MAVEN PLUGIN + NEWER TOMCAT-->
         <!--<property name="validationQueryTimeout" value="10"/> &lt;!&ndash; seconds &ndash;&gt;-->
     </bean>
 
