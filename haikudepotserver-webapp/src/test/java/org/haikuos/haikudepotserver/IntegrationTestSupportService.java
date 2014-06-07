@@ -131,6 +131,8 @@ public class IntegrationTestSupportService {
         result.pkg1 = context.newObject(Pkg.class);
         result.pkg1.setActive(true);
         result.pkg1.setName("pkg1");
+        result.pkg1.setDerivedRating(3.5f);
+        result.pkg1.setDerivedRatingSampleSize(4);
 
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
