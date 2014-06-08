@@ -11,25 +11,24 @@
 angular.module('haikudepotserver').directive('activeIndicator',function() {
     return {
         restrict: 'E',
-        templateUrl:'/js/app/directive/activeindicator.html',
-        replace: true,
-        scope: {
-            state: '='
-        },
-        controller:
-            ['$scope',
-                function($scope) {
+        link : function($scope,element,attributes) {
 
-                    $scope.classes = ['active-indicator'];
+            var stateExpression = attributes['state'];
 
-                    $scope.$watch('state',function(newValue) {
-                        $scope.classes = [
-                            'active-indicator',
-                            newValue ? 'active-indicator-true' : 'active-indicator-false'
-                        ];
-                    });
+            if(!stateExpression || !stateExpression.length) {
+                throw 'a value for the binding \'state\' was expected';
+            }
 
-                }
-            ]
+            var svgE = angular.element('<svg width="12px" height="12px"><circle cx="6px" cy="6px" r="5.5px" fill="gray"></circle></svg>');
+            element.replaceWith(svgE);
+
+            $scope.$watch(stateExpression, function(newValue) {
+                svgE.children().attr('class', [
+                        'active-indicator',
+                        newValue ? 'active-indicator-true' : 'active-indicator-false'
+                    ].join(' ')
+                );
+            });
+        }
     };
 });

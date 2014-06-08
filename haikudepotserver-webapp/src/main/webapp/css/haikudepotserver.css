@@ -391,12 +391,12 @@ between the sections.
 ACTIVE / INACTIVE INDICATORS -- SVG
 */
 
-.active-indicator.active-indicator-true {
-    fill: darkolivegreen;
+.active-indicator {
+    fill: firebrick;
 }
 
-.active-indicator.active-indicator-false {
-    fill: firebrick;
+.active-indicator.active-indicator-true {
+    fill: darkolivegreen;
 }
 
 /*
