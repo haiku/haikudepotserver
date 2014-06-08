@@ -8,19 +8,43 @@
  * consists of a localized name.</p>
  */
 
-angular.module('haikudepotserver').directive('pkgCategoryLabel',function() {
-    return {
-        restrict: 'E',
-        template:'<message key=\"pkgCategory.{{pkgCategory.code.toLowerCase()}}.title\"></message>',
-        replace: true,
-        scope: {
-            pkgCategory: '='
-        },
-        controller:
-            ['$scope',
-                function($scope) {
+angular.module('haikudepotserver').directive('pkgCategoryLabel',[
+    '$log',
+    'messageSource','userState',
+    function($log,messageSource,userState) {
+        return {
+            restrict: 'E',
+            link: function ($scope, element, attributes) {
 
+                var el = angular.element('<span></span>');
+                element.replaceWith(el);
+
+                var pkgCategoryExpression = attributes['pkgCategory'];
+
+                if (!pkgCategoryExpression || !pkgCategoryExpression.length) {
+                    throw 'expected expression for "pkgCategoryExpression"';
                 }
-            ]
-    };
-});
+
+                $scope.$watch(pkgCategoryExpression, function(newValue) {
+                    if(newValue) {
+                        messageSource.get(
+                            userState.naturalLanguageCode(),
+                            'pkgCategory.' + newValue.code.toLowerCase() + '.title').then(
+                            function (localizedString) {
+                                el.text(localizedString);
+                            },
+                            function () {
+                                el.text('???');
+                                $log.error('unable to render the pkg category label for; ' + newValue);
+                            }
+                        );
+                    }
+                    else {
+                        el.text('');
+                    }
+                });
+
+            }
+        };
+    }
+]);
