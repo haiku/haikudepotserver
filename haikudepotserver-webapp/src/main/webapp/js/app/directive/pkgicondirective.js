@@ -9,51 +9,48 @@
  * 'pkg' data structure is expected to have a 'name' property
  */
 
-angular.module('haikudepotserver').directive('pkgIcon',function() {
-        return {
-            restrict: 'E',
-            template:'<img width="{{size}}" height="{{size}}" ng-src="{{imgUrl}}"></img>',
-            replace: true,
-            scope: {
-                size:'@',
-                pkg:'='
-            },
-            controller:
-                ['$scope','pkgIcon','constants',
-                    function($scope,pkgIcon,constants) {
+angular.module('haikudepotserver').directive('pkgIcon',
+    ['pkgIcon','constants',
+        function(pkgIcon,constants) {
+            return {
+                restrict: 'E',
+                link: function ($scope, element, attributes) {
 
-                        $scope.imgUrl = '';
+                    var size = attributes['size'];
+                    var pkgExpression = attributes['pkg'];
 
-                        function refreshImgUrl() {
-                            if($scope.size && $scope.pkg) {
-                                if(!$scope.pkg.name) {
-                                    throw 'pkg does not contain a name to identify the pkg for the pkg-icon';
-                                }
-                                else {
-                                    $scope.imgUrl = pkgIcon.url($scope.pkg, constants.MEDIATYPE_PNG, $scope.size);
-                                }
+                    if (!pkgExpression || !pkgExpression.length) {
+                        throw 'the pkg binding must be an expression to a package';
+                    }
+
+                    if (!size) {
+                        throw 'the size binding must be supplied';
+                    }
+
+                    size = parseInt('' + size, 10);
+
+                    if (size < 1 || size > 1000) {
+                        throw 'preposterous value for size; ' + size;
+                    }
+
+                    var el = angular.element('<img src="" width="' + size + '" height="' + size + '"></img>');
+                    element.replaceWith(el);
+
+                    $scope.$watch(pkgExpression, function(pkg) {
+                        var url = '';
+
+                        if (pkg) {
+                            if (!pkg.name||!pkg.name.length) {
+                                throw 'the package is expected to have a name in order to derive an icon url';
                             }
+
+                            url = pkgIcon.url(pkg, constants.MEDIATYPE_PNG, size);
                         }
 
-                        $scope.$watch('size',function() {
-                            refreshImgUrl();
-                        });
-
-                        $scope.$watch('pkg',function() {
-                            refreshImgUrl();
-                        });
-
-                        // we keep an eye on the modify timestamp because if somebody changes the package then
-                        // it could be that the icon has been the thing that has changed; for example, somebody
-                        // may have opted to remove the package icon.
-
-                        $scope.$watch('pkg.modifyTimestamp', function() {
-                            refreshImgUrl();
-                        });
-
-                        refreshImgUrl();
-                    }
-                ]
-        };
-    }
+                        el.attr('src', url);
+                    });
+                }
+            }
+        }
+    ]
 );
