@@ -9,10 +9,14 @@
  */
 
 angular.module('haikudepotserver').directive('showIfPkgPermission',[
-    'userState', function(userState) {
+    'userState', 'standardDirectiveMixins',
+    function(userState,standardDirectiveMixins) {
         return {
             restrict: 'A',
             link : function($scope,element,attributes) {
+
+                // apply a mixin for standard directive mixins.
+                angular.extend(this,standardDirectiveMixins);
 
                 var pkgExpression = attributes['pkg'];
                 var permissionCodeExpression = attributes['showIfPkgPermission'];
@@ -34,40 +38,14 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                     check();
                 });
 
-                function check() {
-                    if(!permissionCode || !pkg) {
-                        element.addClass('app-hide');
+                    function check() {
+                        showOrHideElementAfterCheckPermission(
+                            userState,
+                            element,
+                            permissionCode,
+                            'PKG',
+                            pkg ? pkg.name : undefined);
                     }
-                    else {
-                        var targetAndPermissions = [];
-
-                        if(angular.isArray(permissionCode)) {
-                            _.each(permissionCode, function(item) {
-                                targetAndPermissions.push({
-                                    targetType: 'PKG',
-                                    targetIdentifier : pkg.name,
-                                    permissionCode : item
-                                });
-                            });
-                        }
-                        else {
-                            targetAndPermissions.push({
-                                targetType: 'PKG',
-                                targetIdentifier : pkg.name,
-                                permissionCode : permissionCode
-                            });
-                        }
-
-                        userState.areAuthorized(targetAndPermissions).then(function(flag) {
-                            if(flag) {
-                                element.removeClass('app-hide');
-                            }
-                            else {
-                                element.addClass('app-hide');
-                            }
-                        });
-                    }
-                }
 
             }
         }

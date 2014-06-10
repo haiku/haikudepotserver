@@ -9,10 +9,14 @@
  */
 
 angular.module('haikudepotserver').directive('showIfUserPermission',[
-    'userState', function(userState) {
+    'userState', 'standardDirectiveMixins',
+    function(userState,standardDirectiveMixins) {
         return {
             restrict: 'A',
             link : function($scope,element,attributes) {
+
+                // apply a mixin for standard directive mixins.
+                angular.extend(this,standardDirectiveMixins);
 
                 var userExpression = attributes['user'];
                 var permissionCodeExpression = attributes['showIfUserPermission'];
@@ -35,38 +39,12 @@ angular.module('haikudepotserver').directive('showIfUserPermission',[
                 });
 
                 function check() {
-                    if(!permissionCode || !user) {
-                        element.addClass('app-hide');
-                    }
-                    else {
-                        var targetAndPermissions = [];
-
-                        if(angular.isArray(permissionCode)) {
-                            _.each(permissionCode, function(item) {
-                                targetAndPermissions.push({
-                                    targetType: 'USER',
-                                    targetIdentifier : user.nickname,
-                                    permissionCode : item
-                                });
-                            });
-                        }
-                        else {
-                            targetAndPermissions.push({
-                                targetType: 'USER',
-                                targetIdentifier : user.nickname,
-                                permissionCode : permissionCode
-                            });
-                        }
-
-                        userState.areAuthorized(targetAndPermissions).then(function(flag) {
-                            if(flag) {
-                                element.removeClass('app-hide');
-                            }
-                            else {
-                                element.addClass('app-hide');
-                            }
-                        });
-                    }
+                    showOrHideElementAfterCheckPermission(
+                        userState,
+                        element,
+                        permissionCode,
+                        'USER',
+                        user ? user.nickname : undefined);
                 }
 
             }

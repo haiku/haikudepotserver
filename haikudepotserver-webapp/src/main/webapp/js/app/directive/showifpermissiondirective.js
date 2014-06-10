@@ -9,10 +9,14 @@
  */
 
 angular.module('haikudepotserver').directive('showIfPermission',[
-    'userState', function(userState) {
+    'userState','standardDirectiveMixins',
+    function(userState,standardDirectiveMixins) {
         return {
             restrict: 'A',
             link : function($scope,element,attributes) {
+
+                // apply a mixin for standard directive mixins.
+                angular.extend(this,standardDirectiveMixins);
 
                 var permissionCodeExpression = attributes['showIfPermission'];
                 var permissionCode = $scope.$eval(permissionCodeExpression);
@@ -28,38 +32,12 @@ angular.module('haikudepotserver').directive('showIfPermission',[
                 });
 
                 function check() {
-                    if(!permissionCode) {
-                        element.addClass('app-hide');
-                    }
-                    else {
-                        var targetAndPermissions = [];
-
-                        if(angular.isArray(permissionCode)) {
-                            _.each(permissionCode, function(item) {
-                                targetAndPermissions.push({
-                                    targetType: null,
-                                    targetIdentifier : null,
-                                    permissionCode : item
-                                });
-                            });
-                        }
-                        else {
-                            targetAndPermissions.push({
-                                targetType: null,
-                                targetIdentifier : null,
-                                permissionCode : ''+permissionCode
-                            });
-                        }
-
-                        userState.areAuthorized(targetAndPermissions).then(function(flag) {
-                            if(flag) {
-                                element.removeClass('app-hide');
-                            }
-                            else {
-                                element.addClass('app-hide');
-                            }
-                        });
-                    }
+                    showOrHideElementAfterCheckPermission(
+                        userState,
+                        element,
+                        permissionCode,
+                        null,
+                        null);
                 }
 
             }

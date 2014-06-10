@@ -8,6 +8,8 @@ angular.module('haikudepotserver')
 
         NATURALLANGUAGECODE_ENGLISH : 'en',
 
+        DELAY_SPINNER : 1000, // millis
+
         // used for search constraint on the 'home' page.
 
         RECENT_DAYS : 90,
@@ -32,6 +34,66 @@ angular.module('haikudepotserver')
     // has access to a cache of handy functions that can be re-used.
 
     .constant('standardDirectiveMixins', {
+
+        /**
+         * <p>This function is able to adjust the visibility of the element by adding or removing a class.  It
+         * will hide or show the element based on the results of a permissions check.  Either a single
+         * permissions can be supplied to check or the an array of permission codes.  If the target or the
+         * permissions are empty then the element will not be shown.</p>
+         *
+         * <p>Note that a null value for the targetIdentifier and the targetType means to evaluate the permissions
+         * against the currently authenticated principal.</p>
+         *
+         * @param permissionCode is either an array or a single permission represented as a string.
+         * @param targetType is the type of the target object against which the permission check is undertaken; eg "REPOSITORY"
+         * @param targetIdentifier is the identifier for the target; eg "erik" for a user
+         */
+
+        showOrHideElementAfterCheckPermission : function(
+            userState,
+            element,
+            permissionCode,
+            targetType,
+            targetIdentifier) {
+
+            if(null==targetType && targetIdentifier) {
+                throw 'if the target type is null (check on principal) then the target identifier is also expected to be null';
+            }
+
+            if(!permissionCode||(!targetIdentifier&&null!=targetType)) {
+                element.addClass('app-hide');
+            }
+            else {
+                var targetAndPermissions = [];
+
+                if(angular.isArray(permissionCode)) {
+                    _.each(permissionCode, function(item) {
+                        targetAndPermissions.push({
+                            targetType: targetType,
+                            targetIdentifier : targetIdentifier,
+                            permissionCode : '' + item
+                        });
+                    });
+                }
+                else {
+                    targetAndPermissions.push({
+                        targetType: targetType,
+                        targetIdentifier : targetIdentifier,
+                        permissionCode : '' + permissionCode
+                    });
+                }
+
+                userState.areAuthorized(targetAndPermissions).then(function(flag) {
+                    if(flag) {
+                        element.removeClass('app-hide');
+                    }
+                    else {
+                        element.addClass('app-hide');
+                    }
+                });
+            }
+
+        },
 
         /**
          * <p>This function will return true if the element supplied appears to be inside

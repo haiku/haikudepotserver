@@ -9,10 +9,14 @@
  */
 
 angular.module('haikudepotserver').directive('showIfRepositoryPermission',[
-    'userState', function(userState) {
+    'userState', 'standardDirectiveMixins',
+    function(userState,standardDirectiveMixins) {
         return {
             restrict: 'A',
             link : function($scope,element,attributes) {
+
+                // apply a mixin for standard directive mixins.
+                angular.extend(this,standardDirectiveMixins);
 
                 var repositoryExpression = attributes['repository'];
                 var permissionCodeExpression = attributes['showIfRepositoryPermission'];
@@ -35,38 +39,12 @@ angular.module('haikudepotserver').directive('showIfRepositoryPermission',[
                 });
 
                 function check() {
-                    if(!permissionCode || !repository) {
-                        element.addClass('app-hide');
-                    }
-                    else {
-                        var targetAndPermissions = [];
-
-                        if(angular.isArray(permissionCode)) {
-                            _.each(permissionCode, function(item) {
-                                targetAndPermissions.push({
-                                    targetType: 'REPOSITORY',
-                                    targetIdentifier : repository.code,
-                                    permissionCode : item
-                                });
-                            });
-                        }
-                        else {
-                            targetAndPermissions.push({
-                                targetType: 'REPOSITORY',
-                                targetIdentifier : repository.code,
-                                permissionCode : permissionCode
-                            });
-                        }
-
-                        userState.areAuthorized(targetAndPermissions).then(function(flag) {
-                            if(flag) {
-                                element.removeClass('app-hide');
-                            }
-                            else {
-                                element.addClass('app-hide');
-                            }
-                        });
-                    }
+                    showOrHideElementAfterCheckPermission(
+                        userState,
+                        element,
+                        permissionCode,
+                        'REPOSITORY',
+                        repository ? repository.code : undefined);
                 }
 
             }

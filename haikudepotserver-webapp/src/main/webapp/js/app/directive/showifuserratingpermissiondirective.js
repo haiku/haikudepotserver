@@ -9,10 +9,14 @@
  */
 
 angular.module('haikudepotserver').directive('showIfUserRatingPermission',[
-    'userState', function(userState) {
+    'userState', 'standardDirectiveMixins',
+    function(userState,standardDirectiveMixins) {
         return {
             restrict: 'A',
             link : function($scope,element,attributes) {
+
+                // apply a mixin for standard directive mixins.
+                angular.extend(this,standardDirectiveMixins);
 
                 var userRatingExpression = attributes['userRating'];
                 var permissionCodeExpression = attributes['showIfUserRatingPermission'];
@@ -35,38 +39,12 @@ angular.module('haikudepotserver').directive('showIfUserRatingPermission',[
                 });
 
                 function check() {
-                    if(!permissionCode || !userRating) {
-                        element.addClass('app-hide');
-                    }
-                    else {
-                        var targetAndPermissions = [];
-
-                        if(angular.isArray(permissionCode)) {
-                            _.each(permissionCode, function(item) {
-                                targetAndPermissions.push({
-                                    targetType: 'USERRATING',
-                                    targetIdentifier : userRating.code,
-                                    permissionCode : item
-                                });
-                            });
-                        }
-                        else {
-                            targetAndPermissions.push({
-                                targetType: 'USERRATING',
-                                targetIdentifier : userRating.code,
-                                permissionCode : permissionCode
-                            });
-                        }
-
-                        userState.areAuthorized(targetAndPermissions).then(function(flag) {
-                            if(flag) {
-                                element.removeClass('app-hide');
-                            }
-                            else {
-                                element.addClass('app-hide');
-                            }
-                        });
-                    }
+                    showOrHideElementAfterCheckPermission(
+                        userState,
+                        element,
+                        permissionCode,
+                        'USERRATING',
+                        userRating ? userRating.code : undefined);
                 }
 
             }

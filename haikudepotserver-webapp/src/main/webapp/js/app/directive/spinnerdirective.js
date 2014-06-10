@@ -19,27 +19,27 @@ angular.module('haikudepotserver').directive('spinner',function() {
             spin: '='
         },
         controller:
-            ['$scope','$timeout',
-                function($scope,$timeout) {
+            ['constants','$scope','$timeout',
+                function(constants,$scope,$timeout) {
 
-                    var t = undefined;
+                    var timeoutHandle = undefined;
 
                     $scope.delayedSpin = false;
 
                     $scope.$watch('spin', function(newSpin) {
-                        if(t) {
-                            $timeout.cancel(t);
-                            t = undefined;
+                        if(timeoutHandle) {
+                            $timeout.cancel(timeoutHandle);
+                            timeoutHandle = undefined;
                         }
 
                         if(!newSpin) {
                             $scope.delayedSpin = false;
                         }
                         else {
-                            t = $timeout(function() {
+                            timeoutHandle = $timeout(function() {
                                $scope.delayedSpin = true;
                             },
-                            250);
+                            constants.DELAY_SPINNER);
                         }
                     })
 
