@@ -293,31 +293,46 @@ ANGULARJS
 /*
 ==================================
 MODAL DIALOG
+Also see "modal-backdrop-container" class above.
 */
 
-.modal-container > div {
-    width: 120px;
-    margin: 0 auto;
-    margin-top: 72px;
-    padding: 16px;
+.modal-container {
+    width: 240px;
+    height: 320px;
     border: 1px black solid;
     background-color: white;
-    position: relative;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin-left: -120px;
+    margin-top: -160px;
 }
 
-.modal-container > div > .modal-container-controls {
-    padding-top:2px;
-    padding-bottom:2px;
-    padding-left:4px;
-    padding-right:4px;
-    position: absolute; /* assumes that this is inside a '.modal-container > div' */
-    top: 0px;
+.modal-container > .modal-content-container {
+    padding: 16px;
+    position: absolute;
+    top: 20px;
+    bottom: 0px;
+    left: 0px;
     right: 0px;
-    background-color: rgb(253,207,49);
-    border-bottom-left-radius: 4px;
-    display: inline;
-    border-left: 1px solid black;
-    border-bottom: 1px solid black;
+    overflow-y: auto;
+}
+
+.modal-container > .modal-banner-container {
+    background-color: #336698;
+    color: white;
+    height: 19px;
+    border-bottom: 1px solid rgba(0,0,0,0.6);
+    text-align: right;
+}
+
+/*
+This deals with the close icon in the banner.
+*/
+
+.modal-container > .modal-banner-container img {
+   margin-top: 3px;
+    margin-right: 3px;
 }
 
 /*

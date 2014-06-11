@@ -1,9 +1,14 @@
-<div class="modal-container modal-backdrop-container" ng-show="show">
-    <div ng-style="style">
-        <div class="modal-container-controls" ng-show="close && close.length" ng-click="goClose()">
-            <img src="/img/close.svg"/>
+<div class="modal-backdrop-container" ng-show="show">
+    <div class="modal-container" ng-style="style">
+
+        <div class="modal-banner-container" ng-show="close && close.length" ng-click="goClose()">
+            <img src="/img/modalclose.svg"/>
         </div>
-        <div ng-transclude>
+
+        <div class="modal-content-container" >
+            <div ng-transclude>
+            </div>
         </div>
+
     </div>
 </div>

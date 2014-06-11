@@ -34,7 +34,9 @@ angular.module('haikudepotserver').directive('modalContainer',function() {
                     });
 
                     $scope.$watch('width', function(newValue) {
-                        $scope.style['width'] = newValue;
+                        var width = parseInt(''+newValue,10);
+                        $scope.style['width'] = width + 'px';
+                        $scope.style['margin-left'] = '' + (width/-2.0) + 'px'; // centres it
                         updateShowModal();
                     });
 
