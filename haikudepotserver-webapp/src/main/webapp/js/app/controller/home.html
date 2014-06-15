@@ -17,7 +17,7 @@
             <input
                     ng-model="searchExpression"
                     autocomplete="off"
-                    ui-keypress="{enter:'goSearch()'}"
+                    return-key-press="goSearch()"
                     placeholder="zlib"></input>
             <button
                     ng-disabled="!searchExpression || !searchExpression.length"

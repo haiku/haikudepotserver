@@ -129,10 +129,6 @@
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
-            <artifactId>angular-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
             <artifactId>underscorejs</artifactId>
         </dependency>
         <dependency>

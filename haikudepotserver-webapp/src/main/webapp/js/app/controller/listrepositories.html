@@ -7,7 +7,7 @@
             <input
                     autocomplete="off"
                     ng-model="searchExpression"
-                    ui-keypress="{enter:'goSearch()'}"
+                    return-key-press="goSearch()"
                     placeholder="Filter by code..."></input>
             <button ng-click="goSearch()">
                 <message key="listRepositories.search.go.title"></message>

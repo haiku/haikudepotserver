@@ -14,7 +14,6 @@
         <postgresql.version>9.3-1101-jdbc41</postgresql.version>
 
         <web-angularjs.version>1.2.17</web-angularjs.version>
-        <web-angular-ui.version>0.4.0-2</web-angular-ui.version>
         <web-underscorejs.version>1.6.0-3</web-underscorejs.version>
         <web-momentjs.version>2.6.0-2</web-momentjs.version>
 
@@ -155,11 +154,6 @@
                 <groupId>org.webjars</groupId>
                 <artifactId>angularjs</artifactId>
                 <version>${web-angularjs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>angular-ui</artifactId>
-                <version>${web-angular-ui.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>

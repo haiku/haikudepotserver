@@ -6,6 +6,5 @@
 angular.module(
     'haikudepotserver',
     [
-        'ngRoute', // ability to route to different pages from the url
-        'ui.directives' // https://github.com/angular-ui/ui-utils
+        'ngRoute' // ability to route to different pages from the url
     ]);
