@@ -19,7 +19,7 @@
                     <property name="mimeType" value="application/javascript"/>
                     <property name="resources">
                         <list>
-                            <value>/webjars/momentjs/${web-momentjs.version}/min/moment.min.js</value>
+                            <value>/webjars/momentjs/#{'${web-momentjs.version}'.replaceAll('-[0-9]$','')}/min/moment.min.js</value>
                             <value>/webjars/underscorejs/#{'${web-underscorejs.version}'.replaceAll('-[0-9]$','')}/underscore-min.js</value>
                             <value>/webjars/angularjs/${web-angularjs.version}/angular.min.js</value>
                             <value>/webjars/angularjs/${web-angularjs.version}/angular-route.min.js</value>
