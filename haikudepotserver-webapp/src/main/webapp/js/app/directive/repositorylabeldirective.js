@@ -84,7 +84,6 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                         setupForNoHyperlink();
                     }
 
-
                 });
 
             }
