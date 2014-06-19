@@ -59,8 +59,10 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // This will take the user to a page about the application.
 
                     $scope.goMore = function() {
-                        breadcrumbs.reset();
-                        breadcrumbs.pushAndNavigate(breadcrumbs.createAbout());
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome(),
+                            breadcrumbs.createAbout()
+                        ]);
                         $scope.showActions = false;
                         return false;
                     };
