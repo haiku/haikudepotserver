@@ -89,10 +89,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
                     breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
-                    {
-                        titleKey : 'breadcrumb.editPkgScreenshots.title',
-                        path : $location.path()
-                    }
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createEditPkgScreenshots($scope.pkg))
                 ]);
             }
 

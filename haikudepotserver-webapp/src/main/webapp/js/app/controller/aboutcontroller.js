@@ -14,7 +14,11 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,userState,
             breadcrumbs,errorHandling) {
 
-            breadcrumbs.mergeCompleteStack([ breadcrumbs.createHome(), breadcrumbs.createAbout() ]);
+            breadcrumbs.mergeCompleteStack([
+                breadcrumbs.createHome(),
+                breadcrumbs.applyCurrentLocation(breadcrumbs.createAbout())
+            ]);
+
             $scope.serverStartTimestamp = undefined;
             $scope.serverProjectVersion = '...';
 
@@ -78,7 +82,7 @@ angular.module('haikudepotserver').controller(
             $scope.canGoRuntimeInformation = false;
 
             $scope.goRuntimeInformation = function() {
-                $location.path('/runtimeinformation').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createRuntimeInformation());
             }
 
         }

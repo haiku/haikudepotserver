@@ -45,10 +45,10 @@ angular.module('haikudepotserver').controller(
                 ];
 
                 if($scope.amEditing) {
-                    b.push(breadcrumbs.createEditRepository($scope.workingRepository));
+                    b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createEditRepository($scope.workingRepository)));
                 }
                 else {
-                    b.push(breadcrumbs.createAddRepository());
+                    b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createAddRepository()));
                 }
 
                 breadcrumbs.mergeCompleteStack(b);
@@ -93,7 +93,7 @@ angular.module('haikudepotserver').controller(
                         refreshRepository();
                     },
                     function() { // error logged already
-                        $location.path("/error").search({});
+                        errorHandling.navigateToError();
                     }
                 );
             }
@@ -157,7 +157,7 @@ angular.module('haikudepotserver').controller(
                         function() {
                             $log.info('did create repository; '+$scope.workingRepository.code);
                             breadcrumbs.pop();
-                            $location.path('/repository/'+$scope.workingRepository.code).search({});
+                            breadcrumbs.pushAndNavigate(breadcrumbs.createViewRepository($scope.workingRepository));
                         },
                         function(err) {
 

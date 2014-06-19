@@ -16,7 +16,7 @@ angular.module('haikudepotserver').controller(
 
             breadcrumbs.mergeCompleteStack([
                 breadcrumbs.createHome(),
-                breadcrumbs.createListRepositories()
+                breadcrumbs.applyCurrentLocation(breadcrumbs.createListRepositories())
             ]);
 
             var PAGESIZE = 15;
@@ -89,7 +89,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goAdd = function() {
-                $location.path('/repositories/add').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createAddRepository());
             };
 
             // ---- EVENTS

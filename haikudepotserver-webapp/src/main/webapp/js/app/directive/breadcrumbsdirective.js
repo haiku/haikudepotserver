@@ -32,12 +32,7 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
                     };
 
                     $scope.goItem = function(item) {
-                        breadcrumbs.popAndNavigateTo(item);
-
-                        if(item.search) {
-                            $location.search(item.search);
-                        }
-
+                        breadcrumbs.popToAndNavigate(item);
                         return false;
                     };
 

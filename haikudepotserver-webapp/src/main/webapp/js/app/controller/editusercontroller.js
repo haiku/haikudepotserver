@@ -34,10 +34,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
                     breadcrumbs.createViewUser($scope.workingUser),
-                    {
-                        titleKey : 'breadcrumb.editUser.title',
-                        path : $location.path()
-                    }
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createEditUser($scope.workingUser))
                 ]);
             }
 

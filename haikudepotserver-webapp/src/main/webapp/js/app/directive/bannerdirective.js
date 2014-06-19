@@ -15,10 +15,10 @@ angular.module('haikudepotserver').directive('banner',function() {
         replace: true,
         controller:
             [
-                '$rootScope','$scope','$log','$location','$route',
+                '$rootScope','$scope','$log','$location','$route','$window',
                 'userState','referenceData','messageSource','breadcrumbs',
                 function(
-                    $rootScope,$scope,$log,$location,$route,
+                    $rootScope,$scope,$log,$location,$route,$window,
                     userState,referenceData,messageSource,breadcrumbs) {
 
                     $scope.showActions = false;
@@ -45,8 +45,9 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // This will take the user back to the home page.
 
                     $scope.goHome = function() {
-                        breadcrumbs.reset();
-                        $location.path('/').search({});
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome()
+                        ]);
                         return false;
                     };
 
@@ -59,7 +60,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.goMore = function() {
                         breadcrumbs.reset();
-                        $location.path('/about').search({});
+                        breadcrumbs.pushAndNavigate(breadcrumbs.createAbout());
                         $scope.showActions = false;
                         return false;
                     };
@@ -151,8 +152,10 @@ angular.module('haikudepotserver').directive('banner',function() {
                     }
 
                     $scope.goListRepositories = function() {
-                        breadcrumbs.reset();
-                        $location.path('/repositories').search({});
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome(),
+                            breadcrumbs.createListRepositories()
+                        ]);
                         $scope.showActions = false;
                     }
 
@@ -168,15 +171,17 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     $scope.goViewUser = function() {
-                        breadcrumbs.reset();
-                        $location.path('/user/'+userState.user().nickname).search({});
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome(),
+                            breadcrumbs.createViewUser(userState.user())
+                        ]);
                         $scope.showActions = false;
                     };
 
                     $scope.goLogout = function() {
                         userState.user(null);
                         breadcrumbs.reset();
-                        $location.path('/').search({});
+                        $window.location.href='/';
                         $scope.showActions = false;
                     };
 
@@ -188,13 +193,15 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     $scope.goAuthenticate = function() {
-                        $location.path('/authenticateuser');
+                        breadcrumbs.pushAndNavigate(breadcrumbs.createAuthenticate());
                         $scope.showActions = false;
                     };
 
                     $scope.goCreateUser = function() {
-                        breadcrumbs.reset();
-                        $location.path('/users/add').search({});
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome(),
+                            breadcrumbs.createAddUser()
+                        ]);
                         $scope.showActions = false;
                     };
 

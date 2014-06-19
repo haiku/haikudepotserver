@@ -13,7 +13,15 @@
                     ng-options="aViewCriteriaTypeOptions.title for aViewCriteriaTypeOptions in viewCriteriaTypeOptions">
             </select>
         </div>
-        <div ng-show="'SEARCH'==selectedViewCriteriaTypeOption.code">
+        <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
+            <span ng-show="!pkgCategories">...</span>
+            <select
+                    ng-show="pkgCategories"
+                    ng-model="selectedPkgCategory"
+                    ng-options="aPkgCategory.title for aPkgCategory in pkgCategories">
+            </select>
+        </div>
+        <div>
             <input
                     ng-model="searchExpression"
                     autocomplete="off"
@@ -24,14 +32,6 @@
                     ng-click="goSearch()">
                 <message key="home.searchButton.title"></message>
             </button>
-        </div>
-        <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
-            <span ng-show="!pkgCategories">...</span>
-            <select
-                    ng-show="pkgCategories"
-                    ng-model="selectedPkgCategory"
-                    ng-options="aPkgCategory.title for aPkgCategory in pkgCategories">
-            </select>
         </div>
     </div>
 

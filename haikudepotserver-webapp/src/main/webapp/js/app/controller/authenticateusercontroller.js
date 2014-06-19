@@ -27,10 +27,7 @@ angular.module('haikudepotserver').controller(
 
             breadcrumbs.mergeCompleteStack([
                 breadcrumbs.createHome(),
-                {
-                    titleKey : 'breadcrumb.authenticateUser.title',
-                    path : $location.path()
-                }
+                breadcrumbs.applyCurrentLocation(breadcrumbs.createAuthenticate())
             ]);
 
             if($location.search()['nickname']) {

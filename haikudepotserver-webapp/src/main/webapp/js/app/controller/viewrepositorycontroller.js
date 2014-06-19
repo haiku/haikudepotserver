@@ -63,7 +63,7 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.goEdit = function() {
-                $location.path('/repository/' + $scope.repository.code + '/edit');
+                breadcrumbs.pushAndNavigate(breadcrumbs.createEditRepository($scope.repository));
             };
 
             /**
@@ -95,7 +95,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
                     breadcrumbs.createListRepositories(),
-                    breadcrumbs.createViewRepository($scope.repository)
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewRepository($scope.repository))
                 ]);
             }
 

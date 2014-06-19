@@ -39,7 +39,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
                     breadcrumbs.createViewUser($scope.user),
-                    breadcrumbs.createChangePassword($scope.user)
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createChangePassword($scope.user))
                 ]);
             }
 
@@ -125,11 +125,16 @@ angular.module('haikudepotserver').controller(
                     function() {
                         $log.info('did change password for user; '+$scope.user.nickname);
                         userState.user(null); // logout
-                        breadcrumbs.reset();
-                        $location.path('/authenticateuser').search({
-                            nickname : $scope.user.nickname,
-                            didChangePassword : 'true'
-                        });
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome(),
+                            breadcrumbs.applySearch(
+                                breadcrumbs.createAuthenticate(),
+                                {
+                                    nickname : $scope.user.nickname,
+                                    didChangePassword : 'true'
+                                }
+                            )
+                        ]);
                     },
                     function(err) {
                         regenerateCaptcha();

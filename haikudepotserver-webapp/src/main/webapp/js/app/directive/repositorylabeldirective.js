@@ -9,10 +9,10 @@
 
 angular.module('haikudepotserver').directive('repositoryLabel',[
     '$location',
-    'standardDirectiveMixins','userState',
+    'standardDirectiveMixins','userState','breadcrumbs',
     function(
         $location,
-        standardDirectiveMixins,userState) {
+        standardDirectiveMixins,userState,breadcrumbs) {
         return {
             restrict: 'E',
             link: function ($scope, element, attributes) {
@@ -21,7 +21,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                 angular.extend(this, standardDirectiveMixins);
 
                 var containerEl = angular.element('<span></span>');
-                var hyperlinkPath = undefined;
+                var breadcrumbItem = undefined;
                 element.replaceWith(containerEl);
 
                 var repositoryExpression = attributes['repository'];
@@ -40,7 +40,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                             containerEl = el;
                         }
 
-                        hyperlinkPath = undefined;
+                        breadcrumbItem = undefined;
                         containerEl.text(repository ? repository.code : '');
                     }
 
@@ -61,9 +61,9 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                                     containerEl = anchorEl;
 
                                     containerEl.on('click', function (el) {
-                                        if (hyperlinkPath) {
+                                        if (breadcrumbItem) {
                                             $scope.$apply(function () {
-                                                $location.path(hyperlinkPath).search({});
+                                                breadcrumbs.pushAndNavigate(breadcrumbItem);
                                             });
                                         }
                                         el.preventDefault();
@@ -72,7 +72,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                                     containerEl.text(repository ? repository.code : '');
                                 }
 
-                                hyperlinkPath = '/repository/' + repository.code;
+                                breadcrumbItem = breadcrumbs.createViewRepository(repository);
                             }
                             else {
                                 setupForNoHyperlink();

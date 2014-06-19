@@ -286,23 +286,22 @@ angular.module('haikudepotserver').controller(
                 // breadcrumbs
 
                 function(chain) {
+
                     var b = [
                         breadcrumbs.createHome(),
                         breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion($scope.workingUserRating.pkgVersion)
                     ];
 
                     if($scope.workingUserRating.code) {
-                        // TODO; push view
-                        b.push({
-                            titleKey : 'breadcrumb.editUserRating.title',
-                            path : $location.path()
-                        });
+                        b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createEditUserRating($scope.workingUserRating)));
                     }
                     else {
-                        b.push({
-                            titleKey : 'breadcrumb.addUserRating.title',
-                            path : $location.path()
-                        })
+                        b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createAddUserRating({
+                            name: $scope.workingUserRating.pkgVersion.pkg.name,
+                            versions: [
+                                $scope.workingUserRating.pkgVersion
+                            ]
+                        })));
                     }
 
                     breadcrumbs.mergeCompleteStack(b);
@@ -397,7 +396,7 @@ angular.module('haikudepotserver').controller(
                             function (data) {
                                 $log.info('did create user rating; ' + data.code);
                                 breadcrumbs.pop();
-                                $location.path(breadcrumbs.createViewUserRating(data).path).search({}); // just needs the code
+                                breadcrumbs.pushAndNavigate(breadcrumbs.createViewUserRating(data)); // just needs the code
                             },
                             function (err) {
                                 errorHandling.handleJsonRpcError(err);

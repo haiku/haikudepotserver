@@ -16,9 +16,15 @@ angular.module('haikudepotserver').controller(
 
             const PAGESIZE = 15;
 
+            // keys used in the search of the location
+            var KEY_OFFSET = 'o';
+            var KEY_ARCHITECTURECODE = 'arch';
+            var KEY_PKGCATEGORYCODE = 'pkgcat';
+            var KEY_SEARCHEXPRESSION = 'srchexpr';
+            var KEY_VIEWCRITERIATYPECODE = 'viewcrttyp';
+
             var ViewCriteriaTypes = {
                 ALL : 'ALL',
-                SEARCH : 'SEARCH',
                 MOSTVIEWED : 'MOSTVIEWED',
                 CATEGORIES : 'CATEGORIES',
                 MOSTRECENT : 'MOSTRECENT'
@@ -29,16 +35,15 @@ angular.module('haikudepotserver').controller(
             var amFetchingPkgs = false;
 
             $scope.selectedViewCriteriaTypeOption = undefined;
-            $scope.searchExpression = '';
+            $scope.searchExpression = $location.search()[KEY_SEARCHEXPRESSION] ? $location.search()[KEY_SEARCHEXPRESSION] : '';
             $scope.lastRefetchPkgsSearchExpression = '';
-            $scope.architectures = undefined; // pulled in with a promise.
+            $scope.architectures = undefined; // pulled in with a promise later...
             $scope.selectedArchitecture = undefined;
-            $scope.pkgCategories = undefined;
+            $scope.pkgCategories = undefined; // pulled in with a promise later...
             $scope.selectedPkgCategory = undefined;
             $scope.viewCriteriaTypeOptions = _.map(
                 [
                     ViewCriteriaTypes.ALL,
-                    ViewCriteriaTypes.SEARCH,
                     ViewCriteriaTypes.CATEGORIES,
                     ViewCriteriaTypes.MOSTRECENT,
                     ViewCriteriaTypes.MOSTVIEWED
@@ -52,10 +57,10 @@ angular.module('haikudepotserver').controller(
                 }
             );
 
-            $scope.selectedViewCriteriaTypeOption = _.find(
+            $scope.selectedViewCriteriaTypeOption = _.findWhere(
                 $scope.viewCriteriaTypeOptions,
-                function(o) {
-                    return o.code == ViewCriteriaTypes.ALL;
+                {
+                    code : $location.search()[KEY_VIEWCRITERIATYPECODE] ? $location.search()[KEY_VIEWCRITERIATYPECODE] : ViewCriteriaTypes.ALL
                 }
             );
 
@@ -66,7 +71,7 @@ angular.module('haikudepotserver').controller(
             // pagination
             $scope.pkgs = {
                 items : undefined,
-                offset : 0,
+                offset : $location.search()[KEY_OFFSET] ? parseInt($location.search()[KEY_OFFSET],10) : 0,
                 max : PAGESIZE,
                 total : undefined
             };
@@ -75,6 +80,14 @@ angular.module('haikudepotserver').controller(
                 $scope.pkgs.items = undefined;
                 $scope.pkgs.total = undefined;
             }
+
+            $scope.shouldSpin = function() {
+                return amFetchingPkgs || !$scope.architectures;
+            };
+
+            breadcrumbs.mergeCompleteStack([ breadcrumbs.applyCurrentLocation(breadcrumbs.createHome()) ]);
+
+            // ---- LOCALIZATION
 
             // update the localized names on the options
 
@@ -100,121 +113,7 @@ angular.module('haikudepotserver').controller(
 
             updateViewCriteriaTypeOptionsTitles();
 
-            $scope.$watch('selectedPkgCategory', function() {
-                var option = $scope.selectedViewCriteriaTypeOption;
-
-                if(option && option.code == ViewCriteriaTypes.CATEGORIES) {
-                    refetchPkgsAtFirstPage();
-                }
-            });
-
-            // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
-
-            $scope.$watch('selectedArchitecture', function() {
-
-                if(undefined != $scope.pkgs.items) {
-                    refetchPkgsAtFirstPage();
-                }
-
-            });
-
-            // this gets hit when the user chooses between the various options such as "all", "search" etc...
-
-            $scope.$watch('selectedViewCriteriaTypeOption', function(newValue) {
-                clearPkgs();
-
-                if(newValue) { // will initially be undefined.
-
-                    if(ViewCriteriaTypes.SEARCH != newValue.code) {
-                        $scope.searchExpression = '';
-                        $scope.lastRefetchPkgsSearchExpression = '';
-                    }
-
-                    switch(newValue.code) {
-
-                        case ViewCriteriaTypes.MOSTRECENT:
-                        case ViewCriteriaTypes.MOSTVIEWED:
-                        case ViewCriteriaTypes.ALL:
-                            refetchPkgsAtFirstPage();
-                            break;
-
-                        case ViewCriteriaTypes.SEARCH:
-                            break;
-
-                        case ViewCriteriaTypes.CATEGORIES:
-                            if(!$scope.pkgCategories) {
-                                refetchPkgCategories();
-                            }
-                            refetchPkgsAtFirstPage();
-                            break;
-
-                    }
-                }
-            });
-
-            $scope.shouldSpin = function() {
-                return amFetchingPkgs || !$scope.architectures;
-            };
-
-            breadcrumbs.mergeCompleteStack([ breadcrumbs.createHome() ]);
-
-            // ---- ARCHITECTURES
-
-            function refetchArchitectures() {
-                referenceData.architectures().then(
-                    function(data) {
-                        $scope.architectures = data;
-                        $scope.selectedArchitecture = $scope.architectures[0];
-
-                        // it would not have been possible to fetch the packages' list without having the architecture
-                        // defined.  For this reason, we should now attempt to trigger the fetch of the architectures.
-
-                        if(undefined==$scope.pkgs.items) {
-                            refetchPkgs();
-                        }
-                    },
-                    function() { // error logged already
-                        errorHandling.navigateToError();
-                    }
-                );
-            }
-
-            refetchArchitectures();
-
-            // ---- CATEGORIES
-
-            // if the user is searching by category; view only those packages in a given category then they will need
-            // to be presented with that list of categories.  This function will pull those categories into this page
-            // and setup the default selection.
-
-            function refetchPkgCategories() {
-                $scope.pkgCategories = undefined;
-                $scope.selectedPkgCategory = undefined;
-
-                referenceData.pkgCategories().then(
-                    function(data) {
-                        $scope.pkgCategories = _.map(
-                            data,
-                            function(c) {
-                                return {
-                                    code : c.code,
-                                    titleKey : 'pkgCategory.' + c.code.toLowerCase() + '.title',
-                                    title : c.name // temporary.
-                                }
-                            }
-                        );
-
-                        $scope.selectedPkgCategory = $scope.pkgCategories[0]; // will trigger refetch of packages if required.
-
-                        updatePkgCategoryTitles();
-                    },
-                    function() {
-                        $log.error('unable to obtain the list of pkg categories');
-                        errorHandling.navigateToError();
-                    }
-                );
-            }
-
+            // called from within the function chain below.
             function updatePkgCategoryTitles() {
                 _.each(
                     $scope.pkgCategories,
@@ -235,21 +134,149 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
+            // ---- INITIALIZATION FUNCTION CHAIN
+
+            function fnChain(chain) {
+                if(chain && chain.length) {
+                    chain.shift()(chain);
+                }
+            }
+
+            fnChain([
+
+                // fetch the architectures
+                function(chain) {
+                    referenceData.architectures().then(
+                        function(data) {
+                            $scope.architectures = data;
+
+                            if($location.search()[KEY_ARCHITECTURECODE]) {
+                                $scope.selectedArchitecture = _.findWhere(data,{ code : $location.search()[KEY_ARCHITECTURECODE] });
+                            }
+
+                            if(!$scope.selectedArchitecture) {
+                                $scope.selectedArchitecture = $scope.architectures[0];
+                            }
+
+                            fnChain(chain); // carry on...
+                        },
+                        function() { // error logged already
+                            errorHandling.navigateToError();
+                        }
+                    );
+                },
+
+                // fetch the pkg categories
+                function(chain) {
+
+                    referenceData.pkgCategories().then(
+                        function(data) {
+
+                            $scope.pkgCategories = _.map(
+                                data,
+                                function(c) {
+                                    return {
+                                        code : c.code,
+                                        titleKey : 'pkgCategory.' + c.code.toLowerCase() + '.title',
+                                        title : c.name // temporary.
+                                    }
+                                }
+                            );
+
+                            if($location.search()[KEY_PKGCATEGORYCODE]) {
+                                $scope.selectedPkgCategory = _.findWhere($scope.pkgCategories, { code : $location.search()[KEY_PKGCATEGORYCODE] });
+                            }
+
+                            if(!$scope.selectedPkgCategory) {
+                                $scope.selectedPkgCategory = $scope.pkgCategories[0];
+                            }
+
+                            updatePkgCategoryTitles();
+
+                            fnChain(chain); // carry on...
+                        },
+                        function() {
+                            $log.error('unable to obtain the list of pkg categories');
+                            errorHandling.navigateToError();
+                        }
+                    );
+                },
+
+                // make an initial fetch of packages
+                function(chain) {
+                    refetchPkgs();
+                    fnChain(chain); // carry on...
+                },
+
+                // register some event handlers that will then prompt re-loading of the package list
+                // as necessary.
+
+                function(chain) {
+
+                    $scope.$watch('pkgs.offset', function(newValue, oldValue) {
+                        refetchPkgs();
+                    });
+
+                    $scope.$watch('selectedPkgCategory', function(newValue, oldValue) {
+                        var option = $scope.selectedViewCriteriaTypeOption;
+
+                        if(option && option.code == ViewCriteriaTypes.CATEGORIES) {
+                            refetchPkgsAtFirstPage();
+                        }
+                    });
+
+                    // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
+
+                    $scope.$watch('selectedArchitecture', function(newValue, oldValue) {
+
+                        if(undefined != $scope.pkgs.items) {
+                            refetchPkgsAtFirstPage();
+                        }
+
+                    });
+
+                    // this gets hit when the user chooses between the various options such as "all", "search" etc...
+
+                    $scope.$watch('selectedViewCriteriaTypeOption', function(newValue, oldValue) {
+                        clearPkgs();
+
+                        if(newValue && (!oldValue || oldValue.code != newValue.code)) { // will initially be undefined.
+
+                            switch(newValue.code) {
+
+                                case ViewCriteriaTypes.MOSTRECENT:
+                                case ViewCriteriaTypes.MOSTVIEWED:
+                                case ViewCriteriaTypes.ALL:
+                                    refetchPkgsAtFirstPage();
+                                    break;
+
+                                case ViewCriteriaTypes.CATEGORIES:
+                                    if(!$scope.pkgCategories) {
+                                        refetchPkgCategories();
+                                    }
+                                    refetchPkgsAtFirstPage();
+                                    break;
+
+                            }
+                        }
+                    });
+
+                    fnChain(chain);
+                }
+
+            ]);
+
             // ---- VIEW PKG + VERSION
 
             $scope.goViewPkg = function(pkg) {
-                var parts = [
-                    'pkg',
-                    pkg.name,
-                    pkg.version.major,
-                    pkg.version.minor,
-                    pkg.version.micro,
-                    pkg.version.preRelease,
-                    pkg.version.revision,
-                    pkg.version.architectureCode
-                ];
 
-                $location.path('/' + parts.join('/'));
+                breadcrumbs.pushAndNavigate(
+                    breadcrumbs.createViewPkgWithSpecificVersionFromPkg({
+                        name: pkg.name,
+                        versions: [ pkg.version ]
+                    })
+                );
+
                 return false;
             };
 
@@ -278,6 +305,14 @@ angular.module('haikudepotserver').controller(
 
                 if($scope.selectedArchitecture) {
 
+                    // store the parameters for reproducing the page.
+                    $location.search(KEY_OFFSET,''+$scope.pkgs.offset);
+                    $location.search(KEY_ARCHITECTURECODE,$scope.selectedArchitecture.code);
+                    $location.search(KEY_PKGCATEGORYCODE,$scope.selectedPkgCategory.code);
+                    $location.search(KEY_SEARCHEXPRESSION,$scope.searchExpression);
+                    $location.search(KEY_VIEWCRITERIATYPECODE,$scope.selectedViewCriteriaTypeOption.code);
+                    breadcrumbs.peek().search = $location.search();
+
                     amFetchingPkgs = true;
 
                     var req = {
@@ -286,14 +321,16 @@ angular.module('haikudepotserver').controller(
                         limit: PAGESIZE
                     };
 
+                    var preparedSearchExpression = $scope.searchExpression ? $scope.searchExpression.trim() : null;
+
+                    if(preparedSearchExpression && preparedSearchExpression.length) {
+                        req.expression = preparedSearchExpression;
+                        req.expressionType = 'CONTAINS';
+                    }
+
                     switch ($scope.selectedViewCriteriaTypeOption.code) {
 
                         case ViewCriteriaTypes.ALL:
-                            break;
-
-                        case ViewCriteriaTypes.SEARCH:
-                            req.expression = $scope.searchExpression;
-                            req.expressionType = 'CONTAINS';
                             break;
 
                         case ViewCriteriaTypes.CATEGORIES:
@@ -333,7 +370,7 @@ angular.module('haikudepotserver').controller(
 
             }
 
-            // ---- EVENT HANDLING
+            // ---- SUNDRY EVENT HANDLING
 
             $scope.$on(
                 "naturalLanguageChange",
@@ -342,10 +379,6 @@ angular.module('haikudepotserver').controller(
                     updatePkgCategoryTitles();
                 }
             );
-
-            $scope.$watch('pkgs.offset', function() {
-                refetchPkgs();
-            });
 
         }
     ]

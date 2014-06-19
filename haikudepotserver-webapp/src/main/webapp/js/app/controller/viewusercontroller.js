@@ -6,10 +6,10 @@
 angular.module('haikudepotserver').controller(
     'ViewUserController',
     [
-        '$scope','$log','$location','$routeParams',
+        '$scope','$log','$location','$routeParams','$window',
         'jsonRpc','constants','errorHandling','messageSource','userState','breadcrumbs',
         function(
-            $scope,$log,$location,$routeParams,
+            $scope,$log,$location,$routeParams,$window,
             jsonRpc,constants,errorHandling,messageSource,userState,breadcrumbs) {
 
             $scope.breadcrumbItems = undefined;
@@ -24,7 +24,7 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
-                    breadcrumbs.createViewUser($scope.user)
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewUser($scope.user))
                 ]);
             }
 
@@ -54,17 +54,17 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goChangePassword = function() {
-                $location.path('/user/' + $scope.user.nickname + '/changepassword').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createChangePassword($scope.user));
             }
 
             $scope.goEdit = function() {
-                $location.path($location.path()+"/edit").search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createEditUser($scope.user));
             }
 
             $scope.goLogout = function() {
                 userState.user(null);
                 breadcrumbs.reset();
-                $location.path('/').search({});
+                $window.location.href = '/';
             }
 
         }

@@ -30,6 +30,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
             var stack = undefined;
 
             function verifyItem(item) {
+
                 if(!item) {
                     throw 'a breadcrumb item was expected';
                 }
@@ -40,6 +41,10 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
                 if(!item.path || !item.path.length) {
                     throw 'a breadcrumb item must have a path';
+                }
+
+                if(!item.search || !item.search.bcguid) {
+                    throw 'a "bcguid" is expected on a breadcrumb item';
                 }
             }
 
@@ -163,14 +168,38 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     stack = stackIn;
                 }
                 else {
-                    if(stack[stack.length-1].path == stackIn[stackIn.length-1].path) {
-//                        stack[stack.length-1].path = _.extend(
-//                            stack[stack.length-1].data,
-//                            stackIn[stackIn.length-1].data);
+
+                    // if the inbound top-of-stack is an existing item that is already on the stack
+                    // then we should pop down to that item.
+
+                    var peekStackIn = stackIn[stackIn.length - 1];
+                    var matchingStackItem = undefined;
+
+                    if(peekStackIn.search.bcguid) {
+                        matchingStackItem = _.find(stack, function(s) { return s.search.bcguid == peekStackIn.search.bcguid; });
                     }
-                    else {
-                        stack.push(stackIn[stackIn.length-1]);
+
+                    if(matchingStackItem) {
+                        popTo(matchingStackItem);
                     }
+                    else
+                    {
+                        // if the last item is not the same path, then stick that item at the top
+                        // of the stack.
+
+                        if (peek().path != peekStackIn.path) {
+                            stack.push(stackIn[stackIn.length - 1]);
+                        }
+                    }
+                }
+
+                // the breadcrumb being merged in may have more search items than are presently in the
+                // location - in this case those additional search items need to be merged in.
+
+                if(peek().search && $location.path() == peek().path) {
+                    _.each(peek().search, function(value,key) {
+                       $location.search(key,value);
+                    });
                 }
 
                 $rootScope.$broadcast('breadcrumbChangeSuccess',stack);
@@ -186,15 +215,19 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                 }
                 else {
                     $location.path(item.path);
+
+                    if(item.search) {
+                        $location.search(item.search);
+                    }
                 }
             }
 
             /**
-             * <p>The creation of a view pkg breadcrumb is a bit complex.  This function will take care of it
-             * based on the details provided.</p>
+             * <p>Many of the URLs related to packages stem from the same base URL.  This function
+             * will create that base URL.</p>
              */
 
-            function createViewPkgBreadcrumbItem(pkgName,versionCoordinates,architectureCode) {
+            function generateBaseUrlForPkg(pkgName,versionCoordinates,architectureCode) {
                 if(!pkgName||!pkgName.length) {
                     throw 'the package name must be supplied';
                 }
@@ -218,11 +251,76 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     architectureCode
                 ];
 
-                return {
+                return '/' + parts.join('/');
+            }
+
+            /**
+             * <p>The creation of a view pkg breadcrumb is a bit complex.  This function will take care of it
+             * based on the details provided.</p>
+             */
+
+            function createViewPkgBreadcrumbItem(pkgName,versionCoordinates,architectureCode) {
+                return applyDefaults({
                     titleKey : 'breadcrumb.viewPkg.title',
                     titleParameters : [ pkgName ],
-                    path : '/' + parts.join('/')
-                };
+                    path : generateBaseUrlForPkg(pkgName,versionCoordinates,architectureCode)
+                });
+            }
+
+            function createManipulatePkgBreadcrumbItem(pkgWithVersion0, pathSuffix, titlePortion) {
+                if(!pkgWithVersion0 || !pkgWithVersion0.versions || !pkgWithVersion0.versions.length) {
+                    throw 'a package version is required to form a breadcrumb';
+                }
+
+                return applyDefaults({
+                    titleKey : 'breadcrumb.'+titlePortion+'.title',
+                    path : generateBaseUrlForPkg(
+                        pkgWithVersion0.name,
+                        pkgWithVersion0.versions[0],
+                        pkgWithVersion0.versions[0].architectureCode) + '/' + pathSuffix
+                });
+            }
+
+            /**
+             * <p>When a new breadcrumb item is created, it should have a unique identifier in order that the user
+             * using a back-button is able to re-visit the URL and the system knows that actually the thing that
+             * we're going back to it is actually a prior value in the breadcrumbs and not a new URL being visited.
+             * </p>
+             */
+
+            function applyDefaults(item) {
+
+                function randomChars(acc, length) {
+                    var abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    return 0==length ? acc : randomChars(acc + abc[Math.floor(Math.random() * (abc.length-1))], length-1);
+                }
+
+                var guid = _.uniqueId('bc') + '-' + randomChars('',4);
+
+                if(item.search) {
+                    item.search.bcguid = guid;
+                }
+                else {
+                    item.search = { bcguid : guid };
+                }
+
+                return item;
+            }
+
+            /**
+             * <p>This will configure a breadcrumb item with the current location.  This will take-up the search
+             * and path so that it can be regurgitated later.</p>
+             */
+
+            function applyCurrentLocation(item) {
+                if(!item) {
+                    throw 'was expecting an item to be supplied to be augmented';
+                }
+
+                item.path = $location.path();
+                item.search = _.extend(item.search ? item.search : {}, $location.search());
+
+                return item;
             }
 
             return {
@@ -236,100 +334,223 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
                 reset : function(stackIn) {
                     reset(stackIn);
+                    return stack;
+                },
+
+                resetAndNavigate : function(stackIn) {
+                    reset(stackIn);
+                    navigateTo(peek());
+                    return stack;
                 },
 
                 pop : function() {
                     return pop();
                 },
 
+                /**
+                 * <p>Pop the next item off the stack and navigate to the next one on the stack.  Returns the next
+                 * one on the stack.</p>
+                 */
+
                 popAndNavigate: function() {
                     pop();
-                    navigateTo(peek());
+
+                    if(!stack.length) {
+                        throw 'have popped from the stack, but there is now nothing to navigate to';
+                    }
+
+                    var top = peek();
+                    navigateTo(top);
+                    return top;
                 },
 
                 peek : function() {
                     return peek();
                 },
 
-                popTo: function(item) {
-                    return popTo(item);
+                /**
+                 * <p>This will pop off items from the stack until it reaches this item.  It will then navigate
+                 * to the item and will return that item.</p>
+                 */
+
+                popToAndNavigate: function(item) {
+                    var result = popTo(item);
+
+                    if(!result) {
+                        throw 'unable to find the item on the stack';
+                    }
+
+                    navigateTo(result);
+
+                    return result;
                 },
 
-                popAndNavigateTo: function(item) {
-                    popTo(item);
-                   navigateTo(item);
-                },
+                /**
+                 * <p>This will look to see what is being supplied and compare it with what it has on the stack at
+                 * the moment.  It may be possible to just merge the inbound stack in or if the stack is presently
+                 * empty then it will just use the inbound stack.</p>
+                 */
 
                 mergeCompleteStack : function(stackIn) {
                     mergeCompleteStack(stackIn);
+                    return stack;
+                },
+
+                pushAndNavigate : function(item) {
+                    verifyItem(item);
+                    push(item);
+                    navigateTo(item);
+                    return item;
+                },
+
+                // -----------------
+                // MANIPULATE BREADCRUMB ITEMS
+
+                /**
+                 * <p>This function will blend in the current location (path and search) to the supplied item.  This
+                 * is useful to pickup search items that were already supplied on the path.  The item is
+                 * returned to provide for chained construction.</p>
+                 */
+
+                applyCurrentLocation: function(item) {
+                    return applyCurrentLocation(item);
+                },
+
+                /**
+                 * <p>This function will blend in the supplied search data into the item.</p>
+                 */
+
+                applySearch: function(item, search) {
+                    if(!item.search) {
+                        item.search = {};
+                    }
+
+                    item.search = _.extend(item.search,search);
+                    return item;
                 },
 
                 // -----------------
                 // CREATE STANDARD BREADCRUMB ITEMS
 
                 createHome : function() {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.home.title',
                         path : '/'
+                    });
+                },
+
+                createAuthenticate : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.authenticateUser.title',
+                        path : '/authenticateuser'
+                    });
+                },
+
+                createAddUser : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.createUser.title',
+                        path : '/users/add'
+                    });
+                },
+
+                createEditUser : function(user) {
+                    if(!user||!user.nickname) {
+                        throw 'user with nickname is required to make this breadcrumb';
                     }
+
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.editUser.title',
+                        path : '/user/'+user.nickname+'/edit'
+                    });
                 },
 
                 createEditRepository : function(repository) {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.editRepository.title',
                         titleParameters : [ repository.code ],
                         path : '/repository/' + repository.code + '/edit'
-                    }
+                    });
                 },
 
                 createAddRepository : function() {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.addRepository.title',
                         path : '/repositories/add'
-                    }
-                },
-
-                createViewUserRating : function(userRating) {
-                    return {
-                        titleKey : 'breadcrumb.viewUserRating.title',
-                        path : '/userrating/' + userRating.code
-                    }
+                    });
                 },
 
                 createEditUserRating : function(userRating) {
-                    return {
+                    if(!userRating || !userRating.code) {
+                        throw 'a user rating code is expected';
+                    }
+
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.editUserRating.title',
+                        path : '/userrating/'+userRating.code+'/edit'
+                    });
+                },
+
+                createEditPkgCategories : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'editcategories', 'editPkgCategories');
+                },
+
+                createEditPkgIcon : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'editicon', 'editPkgIcon');
+                },
+
+                createEditPkgScreenshots : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'editscreenshots', 'editPkgScreenshots');
+                },
+
+                createEditPkgVersionLocalization : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'editversionlocalizations', 'editPkgVersionLocalizations');
+                },
+
+                createAddUserRating : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'adduserrating', 'addUserRating');
+                },
+
+                createViewUserRating : function(userRating) {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.viewUserRating.title',
+                        path : '/userrating/' + userRating.code
+                    });
+                },
+
+                createEditUserRating : function(userRating) {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.editUserRating.title',
                         path : '/userrating/' + userRating.code + '/edit'
-                    }
+                    });
                 },
 
                 createViewRepository : function(repository) {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.viewRepository.title',
                         titleParameters : repository.code,
                         path : '/repository/' + repository.code
-                    }
+                    });
                 },
 
                 createListRepositories : function() {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.listRepositories.title',
                         path : '/repositories'
-                    };
+                    });
                 },
 
                 createRuntimeInformation : function() {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.runtimeInformation.title',
                         path : '/runtimeinformation'
-                    };
+                    });
                 },
 
                 createAbout : function() {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.about.title',
                         path : '/about'
-                    };
+                    });
                 },
 
                 /**
@@ -384,18 +605,18 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                 },
 
                 createViewUser : function(user) {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.viewUser.title',
                         titleParameters : [ user.nickname ],
                         path : '/user/' + user.nickname
-                    };
+                    });
                 },
 
                 createChangePassword : function(user) {
-                    return {
+                    return applyDefaults({
                         titleKey : 'breadcrumb.changePassword.title',
                         path : '/user/' + user.nickname + '/changepassword'
-                    };
+                    });
                 }
 
             };

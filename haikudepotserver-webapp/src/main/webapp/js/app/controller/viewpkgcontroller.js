@@ -76,7 +76,7 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams)
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams))
                 ]);
             }
 
@@ -268,11 +268,11 @@ angular.module('haikudepotserver').controller(
             // RATINGS
 
             $scope.goAddUserRating = function() {
-                $location.path($location.path() + '/adduserrating').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createAddUserRating($scope.pkg));
             };
 
             $scope.goViewUserRating = function(userRating) {
-                $location.path(breadcrumbs.createViewUserRating(userRating).path).search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createViewUserRating(userRating));
             };
 
             // ---------------------
@@ -280,23 +280,23 @@ angular.module('haikudepotserver').controller(
 
             // this is used to cause an authentication in relation to adding a user rating
             $scope.goAuthenticate = function() {
-                $location.path('/authenticateuser');
+                breadcrumbs.pushAndNavigate(breadcrumbs.createAuthenticate());
             };
 
             $scope.goEditIcon = function() {
-                $location.path($location.path() + '/editicon').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgIcon($scope.pkg));
             };
 
             $scope.goEditScreenshots = function() {
-                $location.path($location.path() + '/editscreenshots').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgScreenshots($scope.pkg));
             };
 
             $scope.goEditVersionLocalization = function() {
-                $location.path($location.path() + '/editversionlocalizations').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgVersionLocalization($scope.pkg));
             };
 
             $scope.goEditPkgCategories = function() {
-                $location.path($location.path() + '/editcategories').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgCategories($scope.pkg));
             };
 
             $scope.goRemoveIcon = function() {

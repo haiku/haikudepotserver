@@ -17,7 +17,7 @@ angular.module('haikudepotserver').controller(
             breadcrumbs.mergeCompleteStack([
                 breadcrumbs.createHome(),
                 breadcrumbs.createAbout(),
-                breadcrumbs.createRuntimeInformation()
+                breadcrumbs.applyCurrentLocation(breadcrumbs.createRuntimeInformation())
             ]);
 
             $scope.serverStartTimestamp = undefined;

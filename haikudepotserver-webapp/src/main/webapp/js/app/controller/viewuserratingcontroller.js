@@ -29,7 +29,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
                     breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion($scope.userRating.pkgVersion),
-                    breadcrumbs.createViewUserRating($scope.userRating)
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewUserRating($scope.userRating))
                 ]);
             }
 
@@ -56,7 +56,7 @@ angular.module('haikudepotserver').controller(
             // ACTIONS
 
             $scope.goEdit = function() {
-                $location.path(breadcrumbs.createEditUserRating($scope.userRating).path).search({});
+                breadcrumbs.pushAndNavigate(breadcrumbs.createEditUserRating($scope.userRating));
             };
 
             $scope.canDeactivate = function() {

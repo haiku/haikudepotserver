@@ -86,10 +86,7 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbs.createHome(),
-                    {
-                        titleKey : 'breadcrumb.createUser.title',
-                        path : $location.path()
-                    }
+                    breadcrumbs.applyCurrentLocation(breadcrumbs.createAddUser())
                 ]);
             }
 
@@ -164,11 +161,16 @@ angular.module('haikudepotserver').controller(
                         // and push the authenticate user so the user can then login with their nickname and
                         // password that they have just nominated.
 
-                        breadcrumbs.reset();
-                        $location.path('/authenticateuser').search({
-                            nickname : $scope.newUser.nickname,
-                            didCreate : true
-                        });
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome(),
+                            breadcrumbs.applySearch(
+                                breadcrumbs.createAuthenticate(),
+                                {
+                                    nickname : $scope.newUser.nickname,
+                                    didCreate : true
+                                }
+                            )
+                        ]);
                     },
                     function(err) {
 

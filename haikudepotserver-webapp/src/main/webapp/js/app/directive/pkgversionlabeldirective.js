@@ -30,7 +30,7 @@ angular.module('haikudepotserver').directive(
 
                     var pkgVersionExpression = attributes['pkgVersion'];
                     var shouldLink = attributes['shouldLink'];
-                    var pkgVersionHyperlinkPath = undefined;
+                    var pkgVersionBreadcrumbItem = undefined;
 
                     if(!pkgVersionExpression || !pkgVersionExpression.length) {
                         throw 'expected expression for "pkgVersion"';
@@ -46,9 +46,9 @@ angular.module('haikudepotserver').directive(
                         textTargetEl = hyperlinkEl;
 
                         hyperlinkEl.on('click', function(el) {
-                            if(pkgVersionHyperlinkPath) {
+                            if(pkgVersionBreadcrumbItem) {
                                 $scope.$apply(function() {
-                                    $location.path(pkgVersionHyperlinkPath).search({});
+                                    breadcrumbs.pushAndNavigate(pkgVersionBreadcrumbItem);
                                 });
                             }
                             el.preventDefault();
@@ -59,11 +59,11 @@ angular.module('haikudepotserver').directive(
 
                         if (!pkgVersion) {
                             textTargetEl.text('');
-                            pkgVersionHyperlinkPath = undefined;
+                            pkgVersionBreadcrumbItem = undefined;
                         }
                         else {
 
-                            pkgVersionHyperlinkPath = breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion(pkgVersion).path;
+                            pkgVersionBreadcrumbItem = breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion(pkgVersion);
 
                             textTargetEl.text(
                                     pkgVersion.pkg.name +
