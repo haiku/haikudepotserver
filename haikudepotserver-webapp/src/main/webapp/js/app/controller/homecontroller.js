@@ -271,10 +271,7 @@ angular.module('haikudepotserver').controller(
             $scope.goViewPkg = function(pkg) {
 
                 breadcrumbs.pushAndNavigate(
-                    breadcrumbs.createViewPkgWithSpecificVersionFromPkg({
-                        name: pkg.name,
-                        versions: [ pkg.version ]
-                    })
+                    breadcrumbs.createViewPkgWithSpecificVersionFromPkg(pkg)
                 );
 
                 return false;

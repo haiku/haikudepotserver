@@ -238,7 +238,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.viewCounter = input.getViewCounter();
                         resultVersion.architectureCode = input.getArchitecture().getCode();
 
-                        resultPkg.version = resultVersion;
+                        resultPkg.versions = Collections.singletonList(resultVersion);
 
                         return resultPkg;
                     }

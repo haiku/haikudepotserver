@@ -82,9 +82,9 @@
                             <rating-indicator rating="{{pkg.derivedRating}}"></rating-indicator>
                         </span>
                     </td>
-                    <td><version-label version="pkg.version"></version-label></td>
-                    <td ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.version.createTimestamp|timestamp}}</span></td>
-                    <td ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.version.viewCounter}}</span></td>
+                    <td><version-label version="pkg.version[0]"></version-label></td>
+                    <td ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.version[0].createTimestamp|timestamp}}</span></td>
+                    <td ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.version[0].viewCounter}}</span></td>
                 </tr>
                 </tbody>
             </table>

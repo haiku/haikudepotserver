@@ -7,12 +7,20 @@ package org.haikuos.haikudepotserver.api1.model.pkg;
 
 import org.haikuos.haikudepotserver.api1.support.AbstractSearchResult;
 
+import java.util.List;
+
 public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg> {
 
     public static class Pkg {
         public String name;
         public Long modifyTimestamp;
-        public SearchPkgsResult.PkgVersion version;
+
+        /**
+         * <p>This versions value should only contain the one item actually, but is
+         * provided in this form to retain consistency with other API.</p>
+         */
+
+        public List<PkgVersion> versions;
         public Float derivedRating;
     }
 
