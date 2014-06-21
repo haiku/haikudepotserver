@@ -278,6 +278,10 @@ angular.module('haikudepotserver').controller(
             // ---------------------
             // ACTIONS FOR PACKAGE
 
+            $scope.goListPkgVersions = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbs.createListPkgVersionsForPkg($scope.pkg));
+            }
+
             // this is used to cause an authentication in relation to adding a user rating
             $scope.goAuthenticate = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbs.createAuthenticate());

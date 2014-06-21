@@ -11,6 +11,7 @@ package org.haikuos.haikudepotserver.api1.model;
  */
 
 public enum PkgVersionType {
+    ALL,
     LATEST,
     NONE,
     SPECIFIC

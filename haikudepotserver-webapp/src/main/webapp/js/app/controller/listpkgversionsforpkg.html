@@ -1,0 +1,27 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <h1>
+        <span ng-show="pkg.versions.length > 1">
+            <message key="listPkgVersionsForPkg.title.plural" parameters="[pkg.versions.length,pkg.name]"></message>
+        </span>
+        <span ng-show="1==pkg.versions.length">
+            <message key="listPkgVersionsForPkg.title" parameters="[pkg.versions.length,pkg.name]"></message>
+        </span>
+    </h1>
+
+    <ul>
+        <li ng-repeat="pkgVersion in pkg.versions">
+            <pkg-version-label pkg-version="pkgVersion"></pkg-version-label>
+            <span class="muted" ng-show="pkgVersion.isLatest">
+                (<message key="listPkgVersionsForPkg.latest"></message>)
+            </span>
+        </li>
+    </ul>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

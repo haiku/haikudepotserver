@@ -30,6 +30,7 @@ import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
+import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,7 @@ import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -371,7 +373,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             architectureOptional = Architecture.getByCode(context, request.architectureCode);
         }
 
-        NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
+        final NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
 
         GetPkgResult result = new GetPkgResult();
         Pkg pkg = getPkg(context, request.name);
@@ -388,6 +390,55 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         });
 
         switch(request.versionType) {
+
+            // might be used to show a history of the versions.  If an architecture is present then it will
+            // only return versions for that architecture.  If no architecure is present then it will return
+            // versions for all architectures.
+
+            case ALL: {
+
+                List<PkgVersion> allVersions = PkgVersion.getForPkg(context, pkg);
+
+                if(architectureOptional.isPresent()) {
+                    final Architecture a = architectureOptional.get();
+
+                    allVersions = Lists.newArrayList(Iterables.filter(
+                            allVersions,
+                            new Predicate<PkgVersion>() {
+                                @Override
+                                public boolean apply(PkgVersion pkgVersion) {
+                                    return pkgVersion.getArchitecture().equals(a);
+                                }
+                            }
+                    ));
+                }
+
+                // now sort those.
+
+                final VersionCoordinatesComparator vcc = new VersionCoordinatesComparator();
+
+                Collections.sort(allVersions, new Comparator<PkgVersion>() {
+                    @Override
+                    public int compare(PkgVersion o1, PkgVersion o2) {
+                        int result = vcc.compare(o1.toVersionCoordinates(),o2.toVersionCoordinates());
+
+                        if(0==result) {
+                            result = o1.getArchitecture().getCode().compareTo(o2.getArchitecture().getCode());
+                        }
+
+                        return result;
+                    }
+                });
+
+                result.versions = Lists.transform(allVersions, new Function<PkgVersion, GetPkgResult.PkgVersion>() {
+                    @Override
+                    public GetPkgResult.PkgVersion apply(PkgVersion pkgVersion) {
+                        return createGetPkgResultPkgVersion(pkgVersion,naturalLanguage);
+                    }
+                });
+
+            }
+            break;
 
             case SPECIFIC: {
                 if (!architectureOptional.isPresent()) {

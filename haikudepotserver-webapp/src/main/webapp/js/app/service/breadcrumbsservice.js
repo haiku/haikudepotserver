@@ -198,7 +198,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
                 if(peek().search && $location.path() == peek().path) {
                     _.each(peek().search, function(value,key) {
-                       $location.search(key,value);
+                        $location.search(key,value);
                     });
                 }
 
@@ -267,17 +267,38 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                 });
             }
 
+            /**
+             * <p>From a list of pkg versions, tries to find the one that is identified as the
+             * latest.  If this is not possible then it will take the first one.</p>
+             */
+
+            function latestVersion(pkgVersions) {
+                if(!pkgVersions || !pkgVersions.length) {
+                    throw 'a package version is required to get the latest';
+                }
+
+                var pkgVersion = _.findWhere(pkgVersions, { isLatest : true } );
+
+                if(!pkgVersion) {
+                    pkgVersion = pkgVersions[0];
+                }
+
+                return pkgVersion;
+            }
+
             function createManipulatePkgBreadcrumbItem(pkgWithVersion0, pathSuffix, titlePortion) {
                 if(!pkgWithVersion0 || !pkgWithVersion0.versions || !pkgWithVersion0.versions.length) {
                     throw 'a package version is required to form a breadcrumb';
                 }
 
+                var pkgVersion = latestVersion(pkgWithVersion0.versions);
+
                 return applyDefaults({
                     titleKey : 'breadcrumb.'+titlePortion+'.title',
                     path : generateBaseUrlForPkg(
                         pkgWithVersion0.name,
-                        pkgWithVersion0.versions[0],
-                        pkgWithVersion0.versions[0].architectureCode) + '/' + pathSuffix
+                        pkgVersion,
+                        pkgVersion.architectureCode) + '/' + pathSuffix
                 });
             }
 
@@ -490,6 +511,13 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     });
                 },
 
+                createListPkgVersionsForPkg : function(pkg) {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.listPkgVersionsForPkg.title',
+                        path : '/pkg/'+pkg.name+'/listpkgversions'
+                    });
+                },
+
                 createEditPkgCategories : function(pkg) {
                     return createManipulatePkgBreadcrumbItem(pkg, 'editcategories', 'editPkgCategories');
                 },
@@ -580,10 +608,12 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                         throw 'a package with a package version are required to form a breadcrumb';
                     }
 
+                    var pkgVersion = latestVersion(pkg.versions);
+
                     return createViewPkgBreadcrumbItem(
                         pkg.name,
-                        pkg.versions[0],
-                        pkg.versions[0].architectureCode);
+                        pkgVersion,
+                        pkgVersion.architectureCode);
                 },
 
                 createViewPkgWithSpecificVersionFromRouteParams : function(routeParams) {

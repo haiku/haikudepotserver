@@ -25,6 +25,7 @@ angular.module('haikudepotserver').config(
                 .when('/user/:nickname/changepassword',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})
                 .when('/userrating/:code/edit',{controller:'AddEditUserRatingController', templateUrl:'/js/app/controller/addedituserrating.html'})
                 .when('/userrating/:code',{controller:'ViewUserRatingController', templateUrl:'/js/app/controller/viewuserrating.html'})
+                .when('/pkg/:name/listpkgversions',{controller:'ListPkgVersionsForPkgController', templateUrl:'/js/app/controller/listpkgversionsforpkg.html'})
                 .when(pkgVersionPrefix,{controller:'ViewPkgController', templateUrl:'/js/app/controller/viewpkg.html'})
                 .when(pkgVersionPrefix+'/editicon',{controller:'EditPkgIconController', templateUrl:'/js/app/controller/editpkgicon.html'})
                 .when(pkgVersionPrefix+'/editscreenshots',{controller:'EditPkgScreenshotsController', templateUrl:'/js/app/controller/editpkgscreenshots.html'})
