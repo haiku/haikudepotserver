@@ -10,12 +10,15 @@ import java.util.List;
 public class UpdateUserRequest {
 
     public enum Filter {
-        NATURALLANGUAGE
+        NATURALLANGUAGE,
+        ACTIVE
     };
 
     public String nickname;
 
     public String naturalLanguageCode;
+
+    public Boolean active;
 
     public List<Filter> filter;
 

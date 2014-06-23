@@ -56,4 +56,10 @@ public interface UserApi {
 
     ChangePasswordResult changePassword(ChangePasswordRequest changePasswordRequest) throws ObjectNotFoundException, AuthorizationFailureException, ValidationException;
 
+    /**
+     * <p>This method will allow a search for users.</p>
+     */
+
+    SearchUsersResult searchUsers(SearchUsersRequest searchUsersRequest);
+
 }

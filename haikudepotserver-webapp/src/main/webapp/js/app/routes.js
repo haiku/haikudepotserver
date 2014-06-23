@@ -19,6 +19,7 @@ angular.module('haikudepotserver').config(
                 .when('/runtimeinformation',{controller:'RuntimeInformationController', templateUrl:'/js/app/controller/runtimeinformation.html'})
                 .when('/about',{controller:'AboutController', templateUrl:'/js/app/controller/about.html'})
                 .when('/authenticateuser',{controller:'AuthenticateUserController', templateUrl:'/js/app/controller/authenticateuser.html'})
+                .when('/users',{controller:'ListUsersController', templateUrl:'/js/app/controller/listusers.html'})
                 .when('/users/add',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
                 .when('/user/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
                 .when('/user/:nickname/edit',{controller:'EditUserController', templateUrl:'/js/app/controller/edituser.html'})

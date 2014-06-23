@@ -642,6 +642,13 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     });
                 },
 
+                createListUsers : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.listUsers.title',
+                        path : '/users/'
+                    });
+                },
+
                 createChangePassword : function(user) {
                     return applyDefaults({
                         titleKey : 'breadcrumb.changePassword.title',

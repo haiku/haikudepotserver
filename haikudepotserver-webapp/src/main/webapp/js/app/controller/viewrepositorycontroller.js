@@ -46,7 +46,7 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
-            $scope.canActivate = function() {
+            $scope.canReactivate = function() {
                 return $scope.repository && !$scope.repository.active && !amUpdatingActive;
             };
 
@@ -54,7 +54,7 @@ angular.module('haikudepotserver').controller(
                 return $scope.repository && $scope.repository.active && !amUpdatingActive;
             };
 
-            $scope.goActivate = function() {
+            $scope.goReactivate = function() {
                 updateActive(true);
             };
 

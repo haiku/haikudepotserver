@@ -1,0 +1,12 @@
+/*
+This specific layout works off the premise that there is only one table on this page.
+*/
+
+.list-users .table-general > tbody > tr > td:nth-child(1) {
+    width: 10%;
+    text-align: center;
+}
+
+.list-users .table-general > tbody > tr > td:nth-child(2) {
+    width:90%;
+}

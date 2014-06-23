@@ -63,11 +63,11 @@ angular.module('haikudepotserver').controller(
                 return $scope.userRating && $scope.userRating.active;
             };
 
-            $scope.canActivate = function() {
+            $scope.canReactivate = function() {
                 return $scope.userRating && !$scope.userRating.active;
             };
 
-            $scope.goActivate = function() {
+            $scope.goReactivate = function() {
                 setActive(true);
             };
 

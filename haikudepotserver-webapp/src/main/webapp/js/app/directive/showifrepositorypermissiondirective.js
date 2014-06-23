@@ -47,6 +47,8 @@ angular.module('haikudepotserver').directive('showIfRepositoryPermission',[
                         repository ? repository.code : undefined);
                 }
 
+                $scope.$on('userChangeSuccess', function() { check(); });
+
             }
         }
     }

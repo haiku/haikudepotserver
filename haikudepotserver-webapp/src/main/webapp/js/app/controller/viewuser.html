@@ -20,6 +20,16 @@
     <h2><message key="gen.actions.title"></message></h2>
 
     <ul>
+        <li ng-show="canDeactivate()" user="user" show-if-user-permission="'USER_EDIT'">
+            <a href="" ng-click="goDeactivate()">
+                <message key="viewUser.deactivateAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="canReactivate()" user="user" show-if-user-permission="'USER_EDIT'">
+            <a href="" ng-click="goReactivate()">
+                <message key="viewUser.reactivateAction.title"></message>
+            </a>
+        </li>
         <li user="user" show-if-user-permission="'USER_CHANGEPASSWORD'">
             <a href="" ng-click="goChangePassword()">
                 <message key="viewUser.changePaswordAction.title"></message>

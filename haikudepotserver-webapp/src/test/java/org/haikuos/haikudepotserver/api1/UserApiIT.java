@@ -9,6 +9,7 @@ import com.google.common.base.Optional;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.model.user.*;
+import org.haikuos.haikudepotserver.api1.support.AbstractSearchRequest;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.captcha.model.Captcha;
@@ -34,7 +35,7 @@ public class UserApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
+            integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
             setAuthenticatedUser("testuser");
         }
 
@@ -153,6 +154,46 @@ public class UserApiIT extends AbstractIntegrationTest {
         // now check that the old authentication no longer works and the new one does work
         Assertions.assertThat(authenticationService.authenticate("testuser","U7vqpsu6BB").isPresent()).isFalse();
         Assertions.assertThat(authenticationService.authenticate("testuser","8R3nlp11gX").get()).isEqualTo(user.getObjectId());
+
+    }
+
+    @Test
+    public void testSearchUsers() {
+
+        setAuthenticatedUserToRoot();
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            integrationTestSupportService.createBasicUser(context, "onehunga", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "mangere", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "avondale", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "remuera", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "freemansbay", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "kohimarama", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "mtwellington", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "mtalbert", "U7vqpsu6BB");
+            integrationTestSupportService.createBasicUser(context, "kingsland", "U7vqpsu6BB");
+        }
+
+        SearchUsersRequest request = new SearchUsersRequest();
+        request.limit = 2;
+        request.offset = 0;
+        request.includeInactive = true;
+        request.expression = "er";
+        request.expressionType = AbstractSearchRequest.ExpressionType.CONTAINS;
+
+        // ------------------------------------
+        SearchUsersResult result = userApi.searchUsers(request);
+        // ------------------------------------
+
+        // we should select from mangere, remuera, mtalbert and only see
+        // mangere, mtalbert in that order.
+
+        Assertions.assertThat(result.total).isEqualTo(3);
+        Assertions.assertThat(result.items.size()).isEqualTo(2);
+        Assertions.assertThat(result.items.get(0).nickname).isEqualTo("mangere");
+        Assertions.assertThat(result.items.get(0).active).isEqualTo(Boolean.TRUE);
+        Assertions.assertThat(result.items.get(1).nickname).isEqualTo("mtalbert");
 
     }
 

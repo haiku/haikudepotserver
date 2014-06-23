@@ -9,4 +9,7 @@
     <bean class="org.haikuos.haikudepotserver.IntegrationTestSupportService">
     </bean>
 
+    <bean class="org.haikuos.haikudepotserver.userrating.NoopUserRatingDerviationService">
+    </bean>
+
 </beans>

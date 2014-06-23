@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -68,6 +69,8 @@ public class UserRatingOrchestrationService {
         DateTime now = new DateTime();
 
         List<String> whereExpressions = Lists.newArrayList();
+
+        whereExpressions.add("ur.user.active = true");
 
         if (!search.getIncludeInactive()) {
             whereExpressions.add("ur." + UserRating.ACTIVE_PROPERTY + " = true");
@@ -230,6 +233,21 @@ public class UserRatingOrchestrationService {
     // ------------------------------
     // DERIVATION ALGORITHM
 
+    /**
+     * <p>If a user has their active / inactive state swapped, it is possible that it may have some bearing
+     * on user ratings because user rating values from inactive users are not included.  The impact may be
+     * small, but may also be significant in cases where the package has few ratings anyway.  This method
+     * will return a list of package names for those packages that may be accordingly effected by a change
+     * in a user's active flag.</p>
+     */
+
+    public List<String> pkgNamesEffectedByUserActiveStateChange(ObjectContext context, User user) {
+        Preconditions.checkNotNull(user);
+        EJBQLQuery query = new EJBQLQuery("SELECT DISTINCT ur.pkgVersion.pkg.name FROM UserRating ur WHERE ur.user=?1");
+        query.setParameter(1,user);
+        return (List<String>) context.performQuery(query);
+    }
+
     private float averageAsFloat(Collection<Short> ratings) {
         Preconditions.checkNotNull(ratings);
 
@@ -303,7 +321,11 @@ public class UserRatingOrchestrationService {
             logger.info("unable to establish a user rating for {}", pkgOptional.get());
         }
         else {
-            logger.info("user rating established for {}; {}", pkgOptional.get(), rating.get());
+            logger.info(
+                    "user rating established for {}; {} (sample {})",
+                    pkgOptional.get(),
+                    rating.get().getRating(),
+                    rating.get().getSampleSize());
         }
 
         if(rating.isPresent()) {

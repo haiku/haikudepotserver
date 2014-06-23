@@ -91,6 +91,12 @@
                 </a>
             </li>
 
+            <li ng-show="canGoListUsers()" show-if-permission="'USER_LIST'">
+                <a href="" ng-click="goListUsers()">
+                    <message key="banner.action.users"></message>
+                </a>
+            </li>
+
         </ul>
 
     </modal-container>

@@ -67,6 +67,48 @@ angular.module('haikudepotserver').controller(
                 $window.location.href = '/';
             }
 
+            $scope.canDeactivate = function() {
+                return $scope.user &&
+                    $scope.user.active &&
+                    $scope.user.nickname != userState.user().nickname;
+            }
+
+            $scope.canReactivate = function() {
+                return $scope.user &&
+                    !$scope.user.active &&
+                    $scope.user.nickname != userState.user().nickname;
+            }
+
+            function setActive(flag) {
+                $log.info('will update user active flag; '+flag);
+
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_USER,
+                    "updateUser",
+                    [{
+                        filter : [ 'ACTIVE' ],
+                        nickname : $scope.user.nickname,
+                        active : flag
+                    }]
+                ).then(
+                    function(result) {
+                        $scope.user.active = flag;
+                        $log.info('did update user active flag; '+flag);
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+            }
+
+            $scope.goDeactivate = function() {
+                setActive(false);
+            }
+
+            $scope.goReactivate = function() {
+                setActive(true);
+            }
+
         }
     ]
 );

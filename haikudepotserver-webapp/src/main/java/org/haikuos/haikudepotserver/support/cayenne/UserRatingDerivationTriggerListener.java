@@ -70,6 +70,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postUpdate(Object entity) {
+        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
     }
 
     @Override

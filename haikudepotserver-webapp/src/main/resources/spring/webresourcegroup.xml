@@ -91,6 +91,7 @@
                             <value>/js/app/controller/paginationcontrolplaygroundcontroller.js</value>
                             <value>/js/app/controller/viewuserratingcontroller.js</value>
                             <value>/js/app/controller/listpkgversionsforpkgcontroller.js</value>
+                            <value>/js/app/controller/listuserscontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>
@@ -130,6 +131,7 @@
                             <value>/css/editpkgscreenshots.css</value>
                             <value>/css/editpkgversionlocalization.css</value>
                             <value>/css/addedituserrating.css</value>
+                            <value>/css/listusers.css</value>
                         </list>
                     </property>
                 </bean>

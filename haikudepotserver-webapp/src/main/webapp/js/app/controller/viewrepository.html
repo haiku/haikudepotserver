@@ -25,12 +25,12 @@
     <ul>
         <li ng-show="canDeactivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goDeactivate()">
-                <message key="viewRepository.deactiveAction.title"></message>
+                <message key="viewRepository.deactivateAction.title"></message>
             </a>
         </li>
-        <li ng-show="canActivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
-            <a href="" ng-click="goActivate()">
-                <message key="viewRepository.reactiveAction.title"></message>
+        <li ng-show="canReactivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goReactivate()">
+                <message key="viewRepository.reactivateAction.title"></message>
             </a>
         </li>
         <li ng-show="repository.active" repository="repository" show-if-repository-permission="'REPOSITORY_IMPORT'">

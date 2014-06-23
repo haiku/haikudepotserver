@@ -40,6 +40,8 @@ angular.module('haikudepotserver').directive('showIfPermission',[
                         null);
                 }
 
+                $scope.$on('userChangeSuccess', function() { check(); });
+
             }
         }
     }

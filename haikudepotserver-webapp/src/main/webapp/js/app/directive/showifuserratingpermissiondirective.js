@@ -47,6 +47,8 @@ angular.module('haikudepotserver').directive('showIfUserRatingPermission',[
                         userRating ? userRating.code : undefined);
                 }
 
+                $scope.$on('userChangeSuccess', function() { check(); });
+
             }
         }
     }

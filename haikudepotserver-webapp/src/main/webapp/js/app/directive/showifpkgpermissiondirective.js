@@ -47,6 +47,8 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                             pkg ? pkg.name : undefined);
                     }
 
+                $scope.$on('userChangeSuccess', function() { check(); });
+
             }
         }
     }

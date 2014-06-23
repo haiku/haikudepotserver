@@ -47,6 +47,8 @@ angular.module('haikudepotserver').directive('showIfUserPermission',[
                         user ? user.nickname : undefined);
                 }
 
+                $scope.$on('userChangeSuccess', function() { check(); });
+
             }
         }
     }

@@ -5,9 +5,12 @@
 
 package org.haikuos.haikudepotserver.api1;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -16,14 +19,21 @@ import org.haikuos.haikudepotserver.api1.support.*;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.user.UserOrchestrationService;
+import org.haikuos.haikudepotserver.user.model.UserSearchSpecification;
+import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
+import org.haikuos.haikudepotserver.userrating.UserRatingOrchestrationService;
+import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -43,6 +53,15 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     @Resource
     AuthenticationService authenticationService;
 
+    @Resource
+    UserOrchestrationService userOrchestrationService;
+
+    @Resource
+    UserRatingOrchestrationService userRatingOrchestrationService;
+
+    @Resource
+    UserRatingDerivationService userRatingDerivationService;
+
     @Override
     public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException {
 
@@ -52,6 +71,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         final ObjectContext context = serverRuntime.getContext();
         User authUser = obtainAuthenticatedUser(context);
+        boolean activeDidChange = false;
 
         Optional<User> user = User.getByNickname(context, updateUserRequest.nickname);
 
@@ -66,6 +86,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         for (UpdateUserRequest.Filter filter : updateUserRequest.filter) {
 
             switch (filter) {
+
                 case NATURALLANGUAGE:
 
                     if(Strings.isNullOrEmpty(updateUserRequest.naturalLanguageCode)) {
@@ -86,8 +107,19 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
                     break;
 
+                case ACTIVE:
+                    if(null==updateUserRequest.active) {
+                        throw new IllegalStateException("the 'active' attribute is required to configure active on the user.");
+                    }
+
+                    activeDidChange = user.get().getActive() != updateUserRequest.active;
+                    user.get().setActive(updateUserRequest.active);
+
+                    break;
+
                 default:
                     throw new IllegalStateException("unknown filter in edit user; " + filter.name());
+
             }
 
         }
@@ -95,6 +127,23 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         if(context.hasChanges()) {
             context.commitChanges();
             logger.info("did update the user {}", user.get().toString());
+
+            // if a user is made active or inactive will have some impact on the user-ratings.
+
+            if(activeDidChange) {
+                List<String> pkgNames = userRatingOrchestrationService.pkgNamesEffectedByUserActiveStateChange(
+                        context, user.get());
+
+                logger.info(
+                        "will update user rating derivation for {} packages owing to active state change on user {}",
+                        pkgNames.size(),
+                        user.get().toString());
+
+                for(String pkgName : pkgNames) {
+                    userRatingDerivationService.submit(new UserRatingDerivationJob(pkgName));
+                }
+            }
+
         }
         else {
             logger.info("no changes in updating the user {}", user.get().toString());
@@ -301,5 +350,57 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         return new ChangePasswordResult();
     }
 
+    @Override
+    public SearchUsersResult searchUsers(SearchUsersRequest searchUsersRequest) {
+        Preconditions.checkNotNull(searchUsersRequest);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orNull(),
+                null,
+                Permission.USER_LIST)) {
+            throw new AuthorizationFailureException();
+        }
+
+        UserSearchSpecification specification = new UserSearchSpecification();
+        String exp = searchUsersRequest.expression;
+
+        if(null!=exp) {
+            exp = Strings.emptyToNull(exp.trim().toLowerCase());
+        }
+
+        specification.setExpression(exp);
+
+        if(null!= searchUsersRequest.expressionType) {
+            specification.setExpressionType(
+                    PkgSearchSpecification.ExpressionType.valueOf(searchUsersRequest.expressionType.name()));
+        }
+
+        specification.setLimit(searchUsersRequest.limit);
+        specification.setOffset(searchUsersRequest.offset);
+        specification.setIncludeInactive(null!= searchUsersRequest.includeInactive && searchUsersRequest.includeInactive);
+
+        SearchUsersResult result = new SearchUsersResult();
+        List<User> searchedUsers = userOrchestrationService.search(context,specification);
+
+        result.total = userOrchestrationService.total(context,specification);
+        result.items = Lists.newArrayList(Iterables.transform(
+                searchedUsers,
+                new Function<User, SearchUsersResult.User>() {
+                    @Override
+                    public SearchUsersResult.User apply(User user) {
+                        SearchUsersResult.User resultUser = new SearchUsersResult.User();
+                        resultUser.active = user.getActive();
+                        resultUser.nickname = user.getNickname();
+                        return resultUser;
+                    }
+                }
+        ));
+
+        return result;
+
+    }
 
 }

@@ -33,9 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-import javax.sql.DataSource;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Collections;
@@ -60,9 +58,6 @@ public class PkgOrchestrationService {
     protected static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
     private ImageHelper imageHelper = new ImageHelper();
-
-    @Resource
-    DataSource dataSource;
 
     // ------------------------------
     // HELP

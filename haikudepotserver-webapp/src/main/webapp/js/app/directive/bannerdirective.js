@@ -207,6 +207,20 @@ angular.module('haikudepotserver').directive('banner',function() {
                         $scope.showActions = false;
                     };
 
+                    // not from a permissions perspective, but from a navigational perspective.
+                    $scope.canGoListUsers = function() {
+                        var p = $location.path();
+                        return '/users' != p;
+                    }
+
+                    $scope.goListUsers = function() {
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbs.createHome(),
+                            breadcrumbs.createListUsers()
+                        ]);
+                        $scope.showActions = false;
+                    }
+
                     // -----------------
                     // EVENT HANDLING
 

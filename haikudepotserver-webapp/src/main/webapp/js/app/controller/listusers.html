@@ -1,0 +1,64 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container list-users">
+
+    <div id="search-criteria-container">
+        <div>
+            <input
+                    autocomplete="off"
+                    ng-model="searchExpression"
+                    return-key-press="goSearch()"
+                    placeholder="Filter by code..."></input>
+            <button ng-click="goSearch()">
+                <message key="listUsers.search.go.title"></message>
+            </button>
+        </div>
+    </div>
+
+    <!-- RESULTS -->
+
+    <div id="search-results-container">
+
+        <div ng-show="users.items && 0==users.items.length" class="info-container">
+            <strong><message key="listUsers.noResults.title"></message>; </strong>
+            <message key="listUsers.noResults.description"></message>
+        </div>
+
+        <div ng-show="users.items && users.items.length" class="table-general-container">
+
+            <div class="table-general-pagination-container">
+                <pagination-control
+                        link-count="9"
+                        max="users.max"
+                        total="users.total"
+                        offset="users.offset"></pagination-control>
+            </div>
+
+            <table class="table-general">
+                <thead>
+                <th><message key="listUsers.table.active.title"></message></th>
+                <th><message key="listUsers.table.nickname.title"></message></th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="user in users.items">
+                    <td><active-indicator state="user.active"></active-indicator></td>
+                    <td><user-label user="user"></user-label></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <ul>
+        <li ng-show="!amShowingInactive">
+            <a href="" ng-click="goShowInactive()">
+                <message key="listUsers.showInactiveAction.title"></message>
+            </a>
+        </li>
+    </ul>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
