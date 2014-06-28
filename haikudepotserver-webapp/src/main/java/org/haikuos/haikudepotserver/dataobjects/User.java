@@ -6,10 +6,13 @@
 package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
@@ -25,6 +28,30 @@ public class User extends _User implements CreateAndModifyTimestamped {
     public final static Pattern NICKNAME_PATTERN = Pattern.compile("^[\\w]{4,16}$");
     public final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
     public final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
+
+    public static User getByObjectId(ObjectContext context, ObjectId objectId) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(objectId);
+        Preconditions.checkState(objectId.getEntityName().equals(User.class.getSimpleName()));
+
+        ObjectIdQuery objectIdQuery = new ObjectIdQuery(
+                objectId,
+                false, // fetching data rows
+                ObjectIdQuery.CACHE_NOREFRESH);
+
+        List result = context.performQuery(objectIdQuery);
+
+        switch(result.size()) {
+            case 0:
+                throw new IllegalStateException("unable to find the user from the objectid; " + objectId.toString());
+
+            case 1:
+                return (User) result.get(0);
+
+            default:
+                throw new IllegalStateException("more than one user returned from an objectid lookup");
+        }
+    }
 
     public static Optional<User> getByNickname(ObjectContext context, String nickname) {
         return Optional.fromNullable(Iterables.getOnlyElement(

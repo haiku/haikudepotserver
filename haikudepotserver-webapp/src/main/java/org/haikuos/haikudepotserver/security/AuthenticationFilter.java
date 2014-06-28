@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,6 +21,8 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>This authentication filter will catch authentication data on in-bound HTTP requests and will delegate the
@@ -38,6 +40,8 @@ public class AuthenticationFilter implements Filter {
 
     protected static Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
+    private static Pattern PATTERN_AUTHORIZATION_HEADER = Pattern.compile("^([A-Za-z0-9]+)\\s+(.+)$");
+
     @Resource
     AuthenticationService authenticationService;
 
@@ -53,25 +57,41 @@ public class AuthenticationFilter implements Filter {
         Optional<ObjectId> authenticatedUserObjectId = Optional.absent();
 
         if(!Strings.isNullOrEmpty(authorizationHeader)) {
-            if(authorizationHeader.startsWith("Basic ")) {
-                byte[] usernamePasswordBytes = Base64.decode(authorizationHeader.substring(6));
 
-                if(null!=usernamePasswordBytes && usernamePasswordBytes.length >= 3) {
-                    List<String> parts = Lists.newArrayList(Splitter.on(":").split(new String(usernamePasswordBytes, Charsets.UTF_8)));
+            Matcher authorizationMatcher = PATTERN_AUTHORIZATION_HEADER.matcher(authorizationHeader);
 
-                    if(2==parts.size()) {
-                        authenticatedUserObjectId = authenticationService.authenticate(parts.get(0), parts.get(1));
-                    }
-                    else {
-                        logger.warn("attempt to process an authorization header, but the username password is malformed; is not <username>:<password>");
-                    }
-                }
-                else {
-                    logger.warn("attempt to process an authorization header, but the username password is malformed; being decoded from base64");
+            if(authorizationMatcher.matches()) {
+
+                switch(authorizationMatcher.group(1)) {
+
+                    case "Basic":
+                        byte[] usernamePasswordBytes = Base64.decode(authorizationMatcher.group(2));
+
+                        if (null != usernamePasswordBytes && usernamePasswordBytes.length >= 3) {
+                            List<String> parts = Lists.newArrayList(Splitter.on(":").split(new String(usernamePasswordBytes, Charsets.UTF_8)));
+
+                            if (2 == parts.size()) {
+                                authenticatedUserObjectId = authenticationService.authenticateByNicknameAndPassword(parts.get(0), parts.get(1));
+                            } else {
+                                logger.warn("attempt to process an authorization header, but the username password is malformed; is not <username>:<password>");
+                            }
+                        } else {
+                            logger.warn("attempt to process an authorization header, but the username password is malformed; being decoded from base64");
+                        }
+                        break;
+
+                    case "Bearer":
+                        authenticatedUserObjectId = authenticationService.authenticateByToken(authorizationMatcher.group(2));
+                        break;
+
+                    default:
+                        logger.warn("attempt to process an authorization header, but the authorization method {} is unknown :. ignoring", authorizationMatcher.group(1));
+                        break;
+
                 }
             }
             else {
-                logger.warn("attempt to process an authorization header, but it is not basic authentication :. ignoring");
+                logger.warn("attempt to process an authorization header, but it is malformed :. ignoring");
             }
         }
 

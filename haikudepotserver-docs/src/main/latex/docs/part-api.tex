@@ -35,15 +35,30 @@ The term ``invocation'' refers to a request-response cycle from the client softw
 
 \subsubsection{Authentication}
 
-Authentication of invocations uses basic authentication for both REST and JSON-RPC.  This procedure involves an HTTP header being included in each invocation that identifies the user and also provides their password.  The value of the header includes a base-64 encoded string of the username and password, separated by a colon.  This is an example of such a header;
+\fcolorbox{red}{white}{\parbox{\textwidth}{\color{red} In a production environment, transport to and from the application server {\bf must} use the ``https'' protocol in order to ensure that the payloads are not transmitted over networks in the clear.  The payloads will contain sensitive authentication data.}}
+
+Authentication of invocations for both REST and JSON-RPC uses ``basic authentication'' or ``token bearer authentication''.  The application does not support cookie-based authentication.  As part of an API invocation, an HTTP status 401 or 403 response maybe returned should authorization checks fail.  If the authentication fails then the request will continue unauthenticated; there is no `challenge' necessarily returned back to the caller.  A special API exists to provide a means to test a username and password authentication for the purposes of a login panel or similar; {\it UserApi.authenticateUser(..)}.  This method will return a token if the authentication was successful.
+
+\paragraph{Basic Authentication}
+
+This approach involves an HTTP header being included in each invocation that identifies the user and also provides their password.  The value of the header includes a base-64 encoded string of the username and password, separated by a colon.  This is an example of such a header;
 
 \framebox{\tt Authorization: Basic dXNlcjpwYXNzd29yZA}
 
-If the authentication fails then the request will continue unauthenticated; there is no `challenge' returned back to the caller.  As part of the continuation of the invocation, an http 401 or 403 response maybe returned should authorization checks have failed.  A special API exists to provide a means to test an authentication for the purposes of a login panel or similar.
+\paragraph{Token Bearer}
+\label{token-bearer-authentication}
 
-The application does not support cookie-based authentication.
+This is a system of authentication that relies on a token being supplied with a client API invocation to the server.  The client will first use the API {\it UserApi.authenticateUser(..)} to initially authenticate and obtain a token.  This token can then be used to authenticate further API calls by including it in an HTTP header.  An (abbreviated) example of the header might be;
 
-In a production environment, it is important that the request and response payloads are transported over secure HTTP (https) in order to avoid the ``Authorization'' header from being intercepted.
+\framebox{\tt Authorization: Bearer eyJhbGciOiJIUzI.eyJleHAiOjE0MDM5NDY.1ifnDTLvX3A}
+
+The format and structure of the token conforms with the {\it json web token} standard.  These tokens are signed using a secret, will expire after a certain length of time and are specific to a given deployment environment.  The deployment environment is identified by configuring an ``issuer''.
+
+See \ref{config} for further details on configuration of these values.
+
+As the token has an expiry, an API method {\it UserApi.renewToken(..)} exists to obtain a fresh token before the existing token expires.  The expiry can be read from the token; read about {\it json web tokens} to find out how they work.
+
+The token bearer system of authentication has the advantage that a user's password is supplied by the user to the client software for the initial authentication, but subsequently the password does not need to reside in the client runtime for the remainder of that session.
 
 \subsection{JSON-RPC API}
 

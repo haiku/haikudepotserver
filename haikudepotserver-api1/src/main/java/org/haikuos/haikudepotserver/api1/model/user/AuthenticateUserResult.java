@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,11 @@ package org.haikuos.haikudepotserver.api1.model.user;
 
 public class AuthenticateUserResult {
 
-    public Boolean authenticated;
+    /**
+     * <p>In the case of a successful authentication, this field will be non-null and will contain a standard
+     * formatted json-web-token.  If the authentication had failed then this token will be null.</p>
+     */
+
+    public String token;
 
 }

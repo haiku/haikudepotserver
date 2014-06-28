@@ -13,17 +13,154 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log','$q','$rootScope','jsonRpc',
-        'pkgIcon','pkgScreenshot','errorHandling','constants','referenceData',
+        '$log','$q','$rootScope','$timeout','$window',
+        'jsonRpc','pkgScreenshot','errorHandling',
+        'constants','referenceData',
         function(
-            $log,$q,$rootScope,jsonRpc,
-            pkgIcon,pkgScreenshot,errorHandling,constants,referenceData) {
+            $log,$q,$rootScope,$timeout,$window,
+            jsonRpc,pkgScreenshot,errorHandling,
+            constants,referenceData) {
 
             const SIZE_CHECKED_PERMISSION_CACHE = 25;
 
-            var userStateData = {};
-            userStateData.naturalLanguageCode = 'en';
-            userStateData.user = undefined;
+            var tokenRenewalTimeoutPromise = undefined;
+
+            var userStateData = {
+                naturalLanguageCode : 'en',
+                user : undefined
+            };
+
+            // ------------------------------
+            // FOREGROUND / BACKGROUND JWT UPDATING
+            // The JWT will eventually expire.  This set of functions is for avoiding that in the case
+            // by always fetching a new one just before the old one expires.
+
+            function setToken(token) {
+
+                if(null==token) {
+                    if(userStateData.user) {
+                        userStateData.user.token = undefined;
+                    }
+
+                    // remove the Authorization header for HTTP transport
+                    jsonRpc.setHeader('Authorization');
+                    pkgScreenshot.setHeader('Authorization');
+                }
+                else {
+                    if (userStateData.user && userStateData.user.nickname == tokenNickname(token)) {
+                        userStateData.user.token = token;
+
+                        var authenticationContent = 'Bearer ' + token;
+
+                        jsonRpc.setHeader('Authorization', authenticationContent);
+                        pkgScreenshot.setHeader('Authorization', authenticationContent);
+                    }
+                    else {
+                       $log.info('cannot set the token because the user state is not compatible with the token');
+                    }
+                }
+
+            }
+
+            function cancelTokenRenewalTimeout() {
+                if(tokenRenewalTimeoutPromise) {
+                    $timeout.cancel(tokenRenewalTimeoutPromise);
+                    tokenRenewalTimeoutPromise = undefined;
+                }
+            }
+
+            function configureTokenRenewal() {
+                if(userStateData.user && userStateData.user.token) {
+                    function millisUntilExpiration() {
+                        var nowMs = new Date().getTime();
+                        var expMs = tokenExpirationDate(userStateData.user.token).getTime();
+                        return expMs - nowMs;
+                    }
+
+                    var millisUntilRenewal = _.max([0,millisUntilExpiration() * 0.75]);
+
+                    tokenRenewalTimeoutPromise = $timeout(function () {
+                            if(millisUntilExpiration() < 0) {
+                                $log.info('am going to renew token, but it has already expired');
+                                errorHandling.navigateToError(jsonRpc.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
+                            }
+                            else {
+                                jsonRpc.call(
+                                    constants.ENDPOINT_API_V1_USER,
+                                    'renewToken',
+                                    [
+                                        { token: userStateData.user.token }
+                                    ]
+                                ).then(
+                                    function (renewTokenResponse) {
+                                        if(renewTokenResponse.token) {
+                                            setToken(renewTokenResponse.token);
+                                            $log.info('did renew the authentication token');
+                                            configureTokenRenewal();
+                                        }
+                                        else {
+                                            $log.info('was not able to renew authentication token');
+                                            errorHandling.navigateToError(jsonRpc.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
+                                        }
+                                    },
+                                    function (err) {
+                                        $log.info('failure to renew the authentication token');
+                                        errorHandling.handleJsonRpcError(err);
+                                    }
+                                );
+                            }
+                        },
+                        millisUntilRenewal
+                    );
+                }
+            }
+
+            function tokenClaimSet(token) {
+                if(!token||!token.length) {
+                    throw 'missing json web token';
+                }
+
+                var parts = token.split('.');
+
+                if(3 != parts.length) {
+                    throw 'json web token should contain three dot-separated parts';
+                }
+
+                return angular.fromJson(window.atob(parts[1]));
+            }
+
+            /**
+             * <p>If a user is authenticated with the system then this will return a non-null value that
+             * represents the date at which the authentication will expire.</p>
+             */
+
+            function tokenExpirationDate(token) {
+                var claimSet = tokenClaimSet(token);
+
+                if(!claimSet || !claimSet.exp || !angular.isNumber(claimSet.exp)) {
+                    throw 'malformed claim set; unable to get the \'exp\' data';
+                }
+
+                return new Date(claimSet.exp * 1000);
+            }
+
+            function tokenNickname(token) {
+                var claimSet = tokenClaimSet(token);
+
+                if(!claimSet || !claimSet.sub) {
+                    throw 'malformed claim set; unable to get the \'sub\' data';
+                }
+
+                var sub = '' + claimSet.sub;
+                var suffixIndex = sub.indexOf('@hds');
+
+                if(-1==suffixIndex) {
+                    throw 'malformed nickname in token; missing suffix';
+                }
+
+                return sub.substring(0,suffixIndex);
+            }
+
 
             // ------------------------------
             // USER
@@ -36,10 +173,8 @@ angular.module('haikudepotserver').factory('userState',
 
                 if(null==value) {
                     userStateData.user = undefined;
-
-                    // remove the Authorization header for HTTP transport
-                    jsonRpc.setHeader('Authorization');
-                    pkgScreenshot.setHeader('Authorization');
+                    setToken(null);
+                    cancelTokenRenewalTimeout();
                 }
                 else {
 
@@ -47,19 +182,13 @@ angular.module('haikudepotserver').factory('userState',
                         throw 'the nickname is required when setting a user';
                     }
 
-                    if(!value.passwordClear) {
-                        throw 'the password clear is required when setting a user';
+                    if(!value.token) {
+                        throw 'the json web token is required when setting a user';
                     }
 
-                    var basic = 'Basic '+window.btoa(''+value.nickname+':'+value.passwordClear);
-
-                    jsonRpc.setHeader('Authorization',basic);
-                    pkgScreenshot.setHeader('Authorization',basic);
-
-                    userStateData.user = {
-                        nickname : value.nickname,
-                        passwordClear : value.passwordClear
-                    };
+                    userStateData.user = { nickname : value.nickname };
+                    setToken(value.token);
+                    configureTokenRenewal();
 
                     $log.info('have set user; '+userStateData.user.nickname);
                 }
@@ -300,7 +429,7 @@ angular.module('haikudepotserver').factory('userState',
                 /**
                  * <p>Invoked with no argument, this function will return the user.  If it is supplied with null then
                  * it will set the current user to empty.  If it is supplied with a user value, it will configure the
-                 * user.  The user should consist of the 'nickname' and the 'passwordClear'.</p>
+                 * user.  The user should consist of the 'nickname' and the 'token'.</p>
                  */
 
                 user : function(value) {

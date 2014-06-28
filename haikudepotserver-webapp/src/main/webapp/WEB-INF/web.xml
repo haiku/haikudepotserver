@@ -39,9 +39,19 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>errorFilter</filter-name>
+        <filter-class>org.haikuos.haikudepotserver.support.web.ErrorFilter</filter-class>
+    </filter>
+
     <filter-mapping>
         <filter-name>authenticationFilter</filter-name>
         <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>errorFilter</filter-name>
+        <url-pattern>/error</url-pattern>
     </filter-mapping>
 
 </web-app>

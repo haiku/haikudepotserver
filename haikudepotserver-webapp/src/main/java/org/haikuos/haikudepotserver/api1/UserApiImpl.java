@@ -13,6 +13,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.*;
@@ -249,29 +250,59 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     public AuthenticateUserResult authenticateUser(AuthenticateUserRequest authenticateUserRequest) {
         Preconditions.checkNotNull(authenticateUserRequest);
         AuthenticateUserResult authenticateUserResult = new AuthenticateUserResult();
-        authenticateUserResult.authenticated = false;
+        authenticateUserResult.token = null;
+        Optional<ObjectId> userOidOptional = Optional.absent();
 
-        if(null!=authenticateUserRequest.nickname) {
+        if (null != authenticateUserRequest.nickname) {
             authenticateUserRequest.nickname = authenticateUserRequest.nickname.trim();
         }
 
-        if(null!=authenticateUserRequest.passwordClear) {
+        if (null != authenticateUserRequest.passwordClear) {
             authenticateUserRequest.passwordClear = authenticateUserRequest.passwordClear.trim();
         }
 
-        authenticateUserResult.authenticated = authenticationService.authenticate(
+        userOidOptional = authenticationService.authenticateByNicknameAndPassword(
                 authenticateUserRequest.nickname,
-                authenticateUserRequest.passwordClear).isPresent();
+                authenticateUserRequest.passwordClear);
 
-        // if the authentication has failed then best to sleep for a moment
-        // to make brute forcing a bit more tricky.
+        if(!userOidOptional.isPresent()) {
 
-        if(!authenticateUserResult.authenticated) {
+            // if the authentication has failed then best to sleep for a moment
+            // to make brute forcing a bit more tricky.
+            // TODO; this will eat threads; any other way to do it?
+
             Uninterruptibles.sleepUninterruptibly(5,TimeUnit.SECONDS);
+        }
+        else {
+            ObjectContext context = serverRuntime.getContext();
+            User user = User.getByObjectId(context, userOidOptional.get());
+            authenticateUserResult.token = authenticationService.generateToken(user);
         }
 
         return authenticateUserResult;
     }
+
+    @Override
+    public RenewTokenResult renewToken(RenewTokenRequest renewTokenRequest) {
+        Preconditions.checkNotNull(renewTokenRequest);
+        Preconditions.checkState(!Strings.isNullOrEmpty(renewTokenRequest.token));
+        RenewTokenResult result = new RenewTokenResult();
+
+        Optional<ObjectId> userOidOptional = authenticationService.authenticateByToken(renewTokenRequest.token);
+
+        if(userOidOptional.isPresent()) {
+            ObjectContext context = serverRuntime.getContext();
+            User user = User.getByObjectId(context, userOidOptional.get());
+            result.token = authenticationService.generateToken(user);
+            logger.info("did renew token for user; {}", user.toString());
+        }
+        else {
+            logger.info("unable to renew token");
+        }
+
+        return result;
+    }
+
 
     @Override
     public ChangePasswordResult changePassword(
@@ -317,7 +348,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                 throw new IllegalStateException("the old password clear is required to change the password of a user unless the logged in user is root.");
             }
 
-            if(!authenticationService.authenticate(
+            if(!authenticationService.authenticateByNicknameAndPassword(
                     changePasswordRequest.nickname,
                     changePasswordRequest.oldPasswordClear).isPresent()) {
 

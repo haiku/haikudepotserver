@@ -33,7 +33,6 @@ angular.module('haikudepotserver').config(
                 .when(pkgVersionPrefix+'/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
                 .when(pkgVersionPrefix+'/editversionlocalizations',{controller:'EditPkgVersionLocalizationController', templateUrl:'/js/app/controller/editpkgversionlocalization.html'})
                 .when(pkgVersionPrefix+'/adduserrating',{controller:'AddEditUserRatingController', templateUrl:'/js/app/controller/addedituserrating.html'})
-                .when('/error',{controller:'ErrorController', templateUrl:'/js/app/controller/error.html'})
                 .when('/',{controller:'HomeController',templateUrl:'/js/app/controller/home.html',reloadOnSearch:false})
                 .otherwise({controller:'OtherwiseController', template: '<div></div>'});
         }

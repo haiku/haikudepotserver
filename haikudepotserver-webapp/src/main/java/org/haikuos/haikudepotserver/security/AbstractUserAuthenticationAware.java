@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,11 +9,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.query.ObjectIdQuery;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.dataobjects.User;
-
-import java.util.List;
 
 /**
  * <p>This class is the superclass for objects that are involved in the request response cycle that would like to
@@ -49,30 +46,7 @@ public abstract class AbstractUserAuthenticationAware {
         Optional<ObjectId> authenticatedUserObjectId = AuthenticationHelper.getAuthenticatedUserObjectId();
 
         if(authenticatedUserObjectId.isPresent()) {
-
-            ObjectId objectId = authenticatedUserObjectId.get();
-
-            if(!objectId.getEntityName().equals(User.class.getSimpleName())) {
-                throw new IllegalStateException("the object-id for the user authentication must be a user");
-            }
-
-            ObjectIdQuery objectIdQuery = new ObjectIdQuery(
-                    objectId,
-                    false, // fetching data rows
-                    ObjectIdQuery.CACHE_NOREFRESH);
-
-            List result = objectContext.performQuery(objectIdQuery);
-
-            switch(result.size()) {
-                case 0:
-                    break;
-
-                case 1:
-                    return Optional.of((User) result.get(0));
-
-                default:
-                    throw new IllegalStateException("more than one user returned from an objectid lookup");
-            }
+            return Optional.of(User.getByObjectId(objectContext, authenticatedUserObjectId.get()));
         }
 
         return Optional.absent();

@@ -7,7 +7,9 @@ package org.haikuos.haikudepotserver.api1;
 
 import com.google.common.base.Optional;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.api1.model.user.*;
 import org.haikuos.haikudepotserver.api1.support.AbstractSearchRequest;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
@@ -15,8 +17,6 @@ import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.captcha.model.Captcha;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
-import org.haikuos.haikudepotserver.security.AuthenticationService;
-import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -80,7 +80,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(userOptional.get().getNickname()).isEqualTo("testuser");
         Assertions.assertThat(userOptional.get().getNaturalLanguage().getCode()).isEqualTo("en");
 
-        Assertions.assertThat(authenticationService.authenticate("testuser","Ue4nI92Rw").get()).isEqualTo(userOptional.get().getObjectId());
+        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "Ue4nI92Rw").get()).isEqualTo(userOptional.get().getObjectId());
     }
 
     @Test
@@ -110,7 +110,8 @@ public class UserApiIT extends AbstractIntegrationTest {
         AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser","U7vqpsu6BB"));
         // ------------------------------------
 
-        Assertions.assertThat(result.authenticated).isTrue();
+        Assertions.assertThat(result.token).isNotNull();
+        Assertions.assertThat(authenticationService.authenticateByToken(result.token).isPresent()).isTrue();
 
     }
 
@@ -125,7 +126,34 @@ public class UserApiIT extends AbstractIntegrationTest {
         AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser","y63j20f22"));
         // ------------------------------------
 
-        Assertions.assertThat(result.authenticated).isFalse();
+        Assertions.assertThat(result.token).isNull();
+    }
+
+    @Test
+    public void testRenewToken() {
+
+        String token;
+        ObjectId userOid;
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
+            userOid = user.getObjectId();
+            token = authenticationService.generateToken(user);
+        }
+
+        RenewTokenRequest renewTokenRequest = new RenewTokenRequest();
+        renewTokenRequest.token = token;
+
+        // ------------------------------------
+        RenewTokenResult result = userApi.renewToken(renewTokenRequest);
+        // ------------------------------------
+
+        {
+            Optional<ObjectId> afterUserObjectId = authenticationService.authenticateByToken(result.token);
+            Assertions.assertThat(userOid).isEqualTo(afterUserObjectId.get());
+        }
+
     }
 
     @Test
@@ -137,7 +165,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         setAuthenticatedUser("testuser");
 
         // check that the password is correctly configured.
-        Assertions.assertThat(authenticationService.authenticate("testuser","U7vqpsu6BB").get()).isEqualTo(user.getObjectId());
+        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").get()).isEqualTo(user.getObjectId());
 
         // now change it.
         ChangePasswordRequest request = new ChangePasswordRequest();
@@ -152,8 +180,8 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         // now check that the old authentication no longer works and the new one does work
-        Assertions.assertThat(authenticationService.authenticate("testuser","U7vqpsu6BB").isPresent()).isFalse();
-        Assertions.assertThat(authenticationService.authenticate("testuser","8R3nlp11gX").get()).isEqualTo(user.getObjectId());
+        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").isPresent()).isFalse();
+        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "8R3nlp11gX").get()).isEqualTo(user.getObjectId());
 
     }
 

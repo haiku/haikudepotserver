@@ -9,12 +9,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationHelper;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -103,6 +105,11 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
+    @After
+    public void afterEachTest() {
+        setUnauthenticated();
+    }
+
     /**
      * <p>Before each test is run, we want to remove all of the database objects and then re-populate
      * them back again.</p>
@@ -182,6 +189,10 @@ public abstract class AbstractIntegrationTest {
 
     protected void setAuthenticatedUserToRoot() {
         setAuthenticatedUser("root");
+    }
+
+    protected void setUnauthenticated() {
+        AuthenticationHelper.setAuthenticatedUserObjectId(Optional.<ObjectId>absent());
     }
 
 }

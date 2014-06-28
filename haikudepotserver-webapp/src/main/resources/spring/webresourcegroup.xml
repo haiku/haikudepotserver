@@ -72,7 +72,6 @@
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>
-                            <value>/js/app/controller/errorcontroller.js</value>
                             <value>/js/app/controller/createusercontroller.js</value>
                             <value>/js/app/controller/viewusercontroller.js</value>
                             <value>/js/app/controller/authenticateusercontroller.js</value>

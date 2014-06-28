@@ -71,11 +71,11 @@ angular.module('haikudepotserver').controller(
                     }]
                 ).then(
                     function(result) {
-                        if(result.authenticated) {
+                        if(result.token && result.token.length) {
 
                             userState.user({
                                 nickname : $scope.authenticationDetails.nickname,
-                                passwordClear : $scope.authenticationDetails.passwordClear
+                                token : result.token
                             });
 
                             $log.info('successful authentication; '+$scope.authenticationDetails.nickname);

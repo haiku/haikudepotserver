@@ -63,3 +63,19 @@ Set this to {\tt true} if you would like database schema migrations to be applie
 \subsubsection{\tt webresourcegroup.separated}
 
 Some web resources such as javascript file can be concatenated for efficiency.  Setting this configuration key to {\tt true} will mean that such resources are delivered to browsers as separated files; less efficient, but easier to debug.
+
+\subsection{Token Bearer Authentication}
+
+See \ref{token-bearer-authentication} for details regarding this area.
+
+\subsubsection{\tt authentication.jws.sharedkey}
+
+This shared key is used to sign the authentication tokens transmitted between the server and the client.  This value is optional.  If it is not supplied then a random shared key will be used for each launch of the application server.  Non-configured keys will not work where two or more load-balanced application servers are employed.  Any random value can be used for this and a possible way to create values is to use the command {\tt uuidgen}.
+
+\subsubsection{\tt authentication.jws.issuer}
+
+This identifies the system that has produced a given token and is required.  It should be a string with the suffix ``.hds''.  For example ``{\tt staging.hds}''.
+
+\subsubsection{\tt authentication.jws.expiryseconds}
+
+This configuration value defines how many seconds a token will be able to be used before it expires.  This value is optional and a sensible default will be employed in its absence.

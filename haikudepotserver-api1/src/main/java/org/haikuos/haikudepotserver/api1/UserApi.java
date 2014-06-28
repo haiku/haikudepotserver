@@ -44,11 +44,19 @@ public interface UserApi {
 
     /**
      * <p>This method will allow a client to authenticate against the server.  If this is
-     * successful then the client will know that it is OK to use the authentication
-     * principal and credentials for further API calls.</p>
+     * successful then it will return a json web token that can be used for further API
+     * calls for some period of time.  If it is unsuccessful then it will return null.
+     * </p>
      */
 
     AuthenticateUserResult authenticateUser(AuthenticateUserRequest authenticateUserRequest);
+
+    /**
+     * <p>This method will renew the token supplied.  If the token has expired then this
+     * method will return a null value for the token.</p>
+     */
+
+    RenewTokenResult renewToken(RenewTokenRequest renewTokenRequest);
 
     /**
      * <p>This method will allow the client to modify the password of a user.</p>

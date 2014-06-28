@@ -11,15 +11,20 @@ angular.module('haikudepotserver').factory('errorHandling',
     [ '$log','$location','breadcrumbs',
         function($log,$location,breadcrumbs) {
 
-            function navigateToError() {
+            /**
+             * <p>This function will exit the AngularJS environment into vanilla HTML.</p>
+             */
+
+            function navigateToError(code) {
                 breadcrumbs.reset();
-                $location.path('/error').search({});
+                var query = code ? '?jrpcerrorcd=' + code : '';
+                window.location.href = '/error' + query;
             }
 
             var ErrorHandlingService = {
 
-                navigateToError : function() {
-                    navigateToError();
+                navigateToError : function(code) {
+                    navigateToError(code);
                 },
 
                 logJsonRpcError : function(jsonRpcErrorEnvelope, message) {
@@ -42,7 +47,8 @@ angular.module('haikudepotserver').factory('errorHandling',
 
                 handleJsonRpcError : function(jsonRpcErrorEnvelope) {
                     ErrorHandlingService.logJsonRpcError(jsonRpcErrorEnvelope);
-                    navigateToError();
+                    var code = jsonRpcErrorEnvelope ? jsonRpcErrorEnvelope.code : undefined;
+                    navigateToError(code);
                 },
 
                 /**
@@ -103,7 +109,7 @@ angular.module('haikudepotserver').config([
                     var breadcrumbs = $injector.get('breadcrumbs');
                     $delegate(exception,cause);
                     breadcrumbs.reset();
-                    $location.path("/error").search({});
+                    window.location.href = '/error';
                 }
             }
         ]);

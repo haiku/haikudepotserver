@@ -9,7 +9,7 @@ This section outlines the approximate steps to deploy the web application-server
 
 \fcolorbox{red}{white}{\parbox{\textwidth}{\color{red} The default database installs a user with the nickname of `root' with a known password of `p4mphl3t'.  This password {\bf must} be changed before the system is made available over a network.}}
 
-The API-related HTTP traffic into the application server uses basic-authentication.  This technique exposes the username and password as a base64 encoded string in the HTTP payload.  For this reason it is advised that HTTP traffic to and from the application server be transported as secure HTTP (https) in order to prevent a third party from reading the HTTP headers and extracting users' authentication details.
+\fcolorbox{red}{white}{\parbox{\textwidth}{\color{red}The API-related HTTP traffic into the application server uses basic or token bearer authentication.  Either technique exposes authentication details in the request and response.  For this reason it is advised that HTTP traffic to and from the application server be transported as secure HTTP (https) in order to prevent a third party from reading the HTTP headers and extracting this information.}}
 
 Please see \ref{prerequisites} for prerequisites required for running this software and \ref{buildandrelease} for information about obtaining a build product and possibly also creating a release version.  The build product that you will require for deployment can be found at;
 
