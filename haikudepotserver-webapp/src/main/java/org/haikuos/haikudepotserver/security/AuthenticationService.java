@@ -91,7 +91,7 @@ public class AuthenticationService {
             throw new IllegalStateException("the json web token issuer is malformed");
         }
 
-        if(null!=jsonWebTokenSharedKey) {
+        if(!Strings.isNullOrEmpty(jsonWebTokenSharedKey)) {
             jsonWebTokenSharedKey = jsonWebTokenSharedKey.trim();
 
             if(jsonWebTokenSharedKey.length() < 10) {
