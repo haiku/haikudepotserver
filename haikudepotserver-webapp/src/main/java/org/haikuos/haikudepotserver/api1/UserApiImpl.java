@@ -313,42 +313,54 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(changePasswordRequest.nickname));
         Preconditions.checkState(!Strings.isNullOrEmpty(changePasswordRequest.newPasswordClear));
 
-        if(!authenticationService.validatePassword(changePasswordRequest.newPasswordClear)) {
-            throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
-        }
+        // get the logged in and target user.
 
         final ObjectContext context = serverRuntime.getContext();
 
         User authUser = obtainAuthenticatedUser(context);
 
-        // if the logged in user is non-root then we need to make sure that the captcha
-        // is valid.
+        Optional<User> targetUserOptional = User.getByNickname(context, changePasswordRequest.nickname);
 
-        if(!authUser.getIsRoot()) {
-
-            if(Strings.isNullOrEmpty(changePasswordRequest.captchaToken)) {
-                throw new IllegalStateException("the captcha token must be supplied to change the password");
-            }
-
-            if(Strings.isNullOrEmpty(changePasswordRequest.captchaResponse)) {
-                throw new IllegalStateException("the captcha response must be supplied to change the password");
-            }
-
-            if(!captchaService.verify(changePasswordRequest.captchaToken, changePasswordRequest.captchaResponse)) {
-                throw new CaptchaBadResponseException();
-            }
+        if(!targetUserOptional.isPresent()) {
+            throw new ObjectNotFoundException(User.class.getSimpleName(), changePasswordRequest.nickname);
         }
 
-        // if the logged in user is non-root then we need to make sure that the old and new passwords
-        // match-up.
+        User targetUser = targetUserOptional.get();
 
-        if(!authUser.getIsRoot()) {
+        if(!authorizationService.check(context, authUser, targetUserOptional.get(), Permission.USER_CHANGEPASSWORD)) {
+            logger.info("the logged in user {} is not allowed to change the password of another user {}",authUser.getNickname(),changePasswordRequest.nickname);
+            throw new AuthorizationFailureException();
+        }
 
-            if(Strings.isNullOrEmpty(changePasswordRequest.oldPasswordClear)) {
+        // if the user is changing their own password then they need to know their existing password
+        // first.
+
+        if(!authenticationService.validatePassword(changePasswordRequest.newPasswordClear)) {
+            throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
+        }
+
+        // we need to make sure that the captcha is valid.
+
+        if(Strings.isNullOrEmpty(changePasswordRequest.captchaToken)) {
+            throw new IllegalStateException("the captcha token must be supplied to change the password");
+        }
+
+        if(Strings.isNullOrEmpty(changePasswordRequest.captchaResponse)) {
+            throw new IllegalStateException("the captcha response must be supplied to change the password");
+        }
+
+        if(!captchaService.verify(changePasswordRequest.captchaToken, changePasswordRequest.captchaResponse)) {
+            throw new CaptchaBadResponseException();
+        }
+
+        // we need to make sure that the old and new passwords match-up.
+
+        if(targetUser.getNickname().equals(authUser.getNickname())) {
+            if (Strings.isNullOrEmpty(changePasswordRequest.oldPasswordClear)) {
                 throw new IllegalStateException("the old password clear is required to change the password of a user unless the logged in user is root.");
             }
 
-            if(!authenticationService.authenticateByNicknameAndPassword(
+            if (!authenticationService.authenticateByNicknameAndPassword(
                     changePasswordRequest.nickname,
                     changePasswordRequest.oldPasswordClear).isPresent()) {
 
@@ -357,24 +369,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
                 logger.info("the supplied old password is invalid for the user {}", changePasswordRequest.nickname);
 
-                throw new ValidationException(new ValidationFailure("oldPasswordClear","mismatched"));
+                throw new ValidationException(new ValidationFailure("oldPasswordClear", "mismatched"));
             }
         }
 
-        Optional<User> userOptional = User.getByNickname(context, changePasswordRequest.nickname);
-
-        if(!userOptional.isPresent()) {
-            throw new ObjectNotFoundException(User.class.getSimpleName(), changePasswordRequest.nickname);
-        }
-
-        User user = userOptional.get();
-
-        if(!authorizationService.check(context, authUser, userOptional.get(), Permission.USER_CHANGEPASSWORD)) {
-            logger.info("the logged in user {} is not allowed to change the password of another user {}",authUser.getNickname(),changePasswordRequest.nickname);
-            throw new AuthorizationFailureException();
-        }
-
-        user.setPasswordHash(authenticationService.hashPassword(user, changePasswordRequest.newPasswordClear));
+        targetUser.setPasswordHash(authenticationService.hashPassword(targetUser, changePasswordRequest.newPasswordClear));
         context.commitChanges();
         logger.info("did change password for user {}", changePasswordRequest.nickname);
 

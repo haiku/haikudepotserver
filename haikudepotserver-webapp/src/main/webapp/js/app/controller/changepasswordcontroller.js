@@ -28,6 +28,10 @@ angular.module('haikudepotserver').controller(
                 return undefined == $scope.user || amChangingPassword;
             };
 
+            $scope.requiresOldPassword = function() {
+                return (!$scope.user || !userState.user() || $scope.user.nickname == userState.user().nickname);
+            }
+
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.changePasswordForm[name].$invalid ? ['form-control-group-error'] : [];
             };
@@ -123,18 +127,25 @@ angular.module('haikudepotserver').controller(
                     }]
                 ).then(
                     function() {
+
                         $log.info('did change password for user; '+$scope.user.nickname);
-                        userState.user(null); // logout
-                        breadcrumbs.resetAndNavigate([
-                            breadcrumbs.createHome(),
-                            breadcrumbs.applySearch(
-                                breadcrumbs.createAuthenticate(),
-                                {
-                                    nickname : $scope.user.nickname,
-                                    didChangePassword : 'true'
-                                }
-                            )
-                        ]);
+
+                        if(userState.user().nickname == $scope.user.nickname) {
+                            userState.user(null); // logout
+                            breadcrumbs.resetAndNavigate([
+                                breadcrumbs.createHome(),
+                                breadcrumbs.applySearch(
+                                    breadcrumbs.createAuthenticate(),
+                                    {
+                                        nickname: $scope.user.nickname,
+                                        didChangePassword: 'true'
+                                    }
+                                )
+                            ]);
+                        }
+                        else {
+                            breadcrumbs.popAndNavigate();
+                        }
                     },
                     function(err) {
                         regenerateCaptcha();

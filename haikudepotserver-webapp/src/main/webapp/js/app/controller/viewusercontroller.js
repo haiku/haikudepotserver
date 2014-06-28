@@ -67,17 +67,20 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goLogout = function() {
-                $window.location.href = '/';
+                userState.user(null);
+                breadcrumbs.resetAndNavigate([breadcrumbs.createHome()]);
             }
 
             $scope.canDeactivate = function() {
-                return $scope.user &&
+                return userState.user() &&
+                    $scope.user &&
                     $scope.user.active &&
                     $scope.user.nickname != userState.user().nickname;
             }
 
             $scope.canReactivate = function() {
-                return $scope.user &&
+                return userState.user() &&
+                    $scope.user &&
                     !$scope.user.active &&
                     $scope.user.nickname != userState.user().nickname;
             }
