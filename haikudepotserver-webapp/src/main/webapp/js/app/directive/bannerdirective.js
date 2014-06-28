@@ -180,11 +180,13 @@ angular.module('haikudepotserver').directive('banner',function() {
                         $scope.showActions = false;
                     };
 
+                    /**
+                     * <p>This method will logout the user; it will take them to the entry point for the application
+                     * and in doing so the page will be re-loaded and so their state will be removed.</p>
+                     */
+
                     $scope.goLogout = function() {
-                        userState.user(null);
-                        breadcrumbs.reset();
                         $window.location.href='/';
-                        $scope.showActions = false;
                     };
 
                     // -----------------
