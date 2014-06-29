@@ -3,6 +3,7 @@ package org.haikuos.haikudepotserver.dataobjects.auto;
 import java.util.Date;
 import java.util.List;
 
+import org.haikuos.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
@@ -23,6 +24,7 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final String DERIVED_RATING_SAMPLE_SIZE_PROPERTY = "derivedRatingSampleSize";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NAME_PROPERTY = "name";
+    public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
     public static final String PKG_ICONS_PROPERTY = "pkgIcons";
     public static final String PKG_PKG_CATEGORIES_PROPERTY = "pkgPkgCategories";
     public static final String PKG_SCREENSHOTS_PROPERTY = "pkgScreenshots";
@@ -71,6 +73,18 @@ public abstract class _Pkg extends AbstractDataObject {
     public String getName() {
         return (String)readProperty(NAME_PROPERTY);
     }
+
+    public void addToPermissionUserPkgs(PermissionUserPkg obj) {
+        addToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+    }
+    public void removeFromPermissionUserPkgs(PermissionUserPkg obj) {
+        removeToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PermissionUserPkg> getPermissionUserPkgs() {
+        return (List<PermissionUserPkg>)readProperty(PERMISSION_USER_PKGS_PROPERTY);
+    }
+
 
     public void addToPkgIcons(PkgIcon obj) {
         addToManyTarget(PKG_ICONS_PROPERTY, obj, true);

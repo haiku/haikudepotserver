@@ -33,6 +33,7 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public Long createTimestamp;
         public Long viewCounter;
         public String architectureCode;
+        public String summary;
     }
 
 }

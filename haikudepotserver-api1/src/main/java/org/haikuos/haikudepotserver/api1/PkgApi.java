@@ -32,7 +32,7 @@ public interface PkgApi {
      * request.</p>
      */
 
-    SearchPkgsResult searchPkgs(SearchPkgsRequest request);
+    SearchPkgsResult searchPkgs(SearchPkgsRequest request) throws ObjectNotFoundException;
 
     /**
      * <p>This method will return a package and the specified versions.  It will throw an

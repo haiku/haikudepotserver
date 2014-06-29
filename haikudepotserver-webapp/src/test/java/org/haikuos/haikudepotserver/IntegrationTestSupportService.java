@@ -168,16 +168,16 @@ public class IntegrationTestSupportService {
         {
             PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
             pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
-            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish");
-            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish");
+            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish_rockmelon");
+            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish_persimon");
             result.pkg1Version2x86.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
         }
 
         {
             PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
             pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
-            pkgVersionLocalization.setDescription("pkg1Version2DescriptionSpanish");
-            pkgVersionLocalization.setSummary("pkg1Version2SummarySpanish");
+            pkgVersionLocalization.setDescription("pkg1Version2DescriptionSpanish_mango");
+            pkgVersionLocalization.setSummary("pkg1Version2SummarySpanish_feijoa");
             result.pkg1Version2x86.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
         }
 
@@ -196,8 +196,8 @@ public class IntegrationTestSupportService {
         {
             PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
             pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
-            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish");
-            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish");
+            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish_guava");
+            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish_apple");
             result.pkg1Version2x86_gcc2.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
         }
 

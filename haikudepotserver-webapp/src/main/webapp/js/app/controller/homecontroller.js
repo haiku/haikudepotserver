@@ -8,11 +8,13 @@ angular.module('haikudepotserver').controller(
     [
         '$log','$scope','$rootScope','$q','$location',
         'jsonRpc','constants','userState','messageSource','errorHandling',
-        'referenceData','breadcrumbs',
+        'referenceData','breadcrumbs','searchMixins',
         function(
             $log,$scope,$rootScope,$q,$location,
             jsonRpc,constants,userState,messageSource,errorHandling,
-            referenceData,breadcrumbs) {
+            referenceData,breadcrumbs,searchMixins) {
+
+            angular.extend(this,searchMixins);
 
             const PAGESIZE = 15;
 
@@ -63,6 +65,22 @@ angular.module('haikudepotserver').controller(
                     code : $location.search()[KEY_VIEWCRITERIATYPECODE] ? $location.search()[KEY_VIEWCRITERIATYPECODE] : ViewCriteriaTypes.ALL
                 }
             );
+
+            // if the search criteria has an expression that has not hit the package name, but has
+            // hit the summary then we need to show the summary as well as the package name.
+
+            $scope.shouldShowSummary = function(pkg) {
+                return $scope.lastRefetchPkgsSearchExpression &&
+                    $scope.lastRefetchPkgsSearchExpression.length &&
+                    pkg.versions[0].summary &&
+                    pkg.versions[0].summary.length &&
+                    -1 == searchMixins.nextMatchSearchExpression(
+                        pkg.name,0,
+                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset &&
+                    -1 != searchMixins.nextMatchSearchExpression(
+                        pkg.versions[0].summary.toLowerCase(),0,
+                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset;
+            }
 
             $scope.shouldShowDerivedRating = function(pkg) {
                 return angular.isNumber(pkg.derivedRating);
@@ -314,6 +332,7 @@ angular.module('haikudepotserver').controller(
 
                     var req = {
                         architectureCode: $scope.selectedArchitecture.code,
+                        naturalLanguageCode : userState.naturalLanguageCode(),
                         offset: $scope.pkgs.offset,
                         limit: PAGESIZE
                     };

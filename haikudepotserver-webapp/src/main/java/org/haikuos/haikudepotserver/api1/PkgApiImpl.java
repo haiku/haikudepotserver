@@ -24,6 +24,7 @@ import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -167,9 +168,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public SearchPkgsResult searchPkgs(SearchPkgsRequest request) {
+    public SearchPkgsResult searchPkgs(final SearchPkgsRequest request) throws ObjectNotFoundException {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.architectureCode));
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkNotNull(request.limit);
         Preconditions.checkState(request.limit > 0);
 
@@ -198,6 +200,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     PkgSearchSpecification.ExpressionType.valueOf(request.expressionType.name()));
         }
 
+        specification.setNaturalLanguage(getNaturalLanguage(context, request.naturalLanguageCode));
         specification.setDaysSinceLatestVersion(request.daysSinceLatestVersion);
         specification.setSortOrdering(PkgSearchSpecification.SortOrdering.valueOf(request.sortOrdering.name()));
 
@@ -239,6 +242,16 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.createTimestamp = input.getCreateTimestamp().getTime();
                         resultVersion.viewCounter = input.getViewCounter();
                         resultVersion.architectureCode = input.getArchitecture().getCode();
+
+                        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = input.getPkgVersionLocalization(request.naturalLanguageCode);
+
+                        if(!pkgVersionLocalizationOptional.isPresent()) {
+                            pkgVersionLocalizationOptional = input.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
+                        }
+
+                        if(pkgVersionLocalizationOptional.isPresent()) {
+                            resultVersion.summary = pkgVersionLocalizationOptional.get().getSummary();
+                        }
 
                         resultPkg.versions = Collections.singletonList(resultVersion);
 
@@ -1008,6 +1021,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
             searchSpecification.setArchitecture(architecture);
             searchSpecification.setPkgNames(getBulkPkgRequest.pkgNames);
+            searchSpecification.setNaturalLanguage(getNaturalLanguage(context, getBulkPkgRequest.naturalLanguageCode));
             searchSpecification.setLimit(0);
             searchSpecification.setLimit(Integer.MAX_VALUE);
 

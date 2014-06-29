@@ -1,8 +1,12 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
+import java.util.List;
 
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haikuos.haikudepotserver.dataobjects.PermissionUserPkg;
+import org.haikuos.haikudepotserver.dataobjects.PermissionUserRepository;
+import org.haikuos.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -16,12 +20,16 @@ public abstract class _User extends AbstractDataObject {
     public static final String ACTIVE_PROPERTY = "active";
     public static final String CAN_MANAGE_USERS_PROPERTY = "canManageUsers";
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
+    public static final String EMAIL_PROPERTY = "email";
     public static final String IS_ROOT_PROPERTY = "isRoot";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NICKNAME_PROPERTY = "nickname";
     public static final String PASSWORD_HASH_PROPERTY = "passwordHash";
     public static final String PASSWORD_SALT_PROPERTY = "passwordSalt";
     public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
+    public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
+    public static final String PERMISSION_USER_REPOSITORIES_PROPERTY = "permissionUserRepositories";
+    public static final String USER_PASSWORD_RESET_TOKENS_PROPERTY = "userPasswordResetTokens";
 
     public static final String ID_PK_COLUMN = "id";
 
@@ -44,6 +52,13 @@ public abstract class _User extends AbstractDataObject {
     }
     public Date getCreateTimestamp() {
         return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
+
+    public void setEmail(String email) {
+        writeProperty(EMAIL_PROPERTY, email);
+    }
+    public String getEmail() {
+        return (String)readProperty(EMAIL_PROPERTY);
     }
 
     public void setIsRoot(Boolean isRoot) {
@@ -87,6 +102,42 @@ public abstract class _User extends AbstractDataObject {
 
     public NaturalLanguage getNaturalLanguage() {
         return (NaturalLanguage)readProperty(NATURAL_LANGUAGE_PROPERTY);
+    }
+
+
+    public void addToPermissionUserPkgs(PermissionUserPkg obj) {
+        addToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+    }
+    public void removeFromPermissionUserPkgs(PermissionUserPkg obj) {
+        removeToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PermissionUserPkg> getPermissionUserPkgs() {
+        return (List<PermissionUserPkg>)readProperty(PERMISSION_USER_PKGS_PROPERTY);
+    }
+
+
+    public void addToPermissionUserRepositories(PermissionUserRepository obj) {
+        addToManyTarget(PERMISSION_USER_REPOSITORIES_PROPERTY, obj, true);
+    }
+    public void removeFromPermissionUserRepositories(PermissionUserRepository obj) {
+        removeToManyTarget(PERMISSION_USER_REPOSITORIES_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PermissionUserRepository> getPermissionUserRepositories() {
+        return (List<PermissionUserRepository>)readProperty(PERMISSION_USER_REPOSITORIES_PROPERTY);
+    }
+
+
+    public void addToUserPasswordResetTokens(UserPasswordResetToken obj) {
+        addToManyTarget(USER_PASSWORD_RESET_TOKENS_PROPERTY, obj, true);
+    }
+    public void removeFromUserPasswordResetTokens(UserPasswordResetToken obj) {
+        removeToManyTarget(USER_PASSWORD_RESET_TOKENS_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<UserPasswordResetToken> getUserPasswordResetTokens() {
+        return (List<UserPasswordResetToken>)readProperty(USER_PASSWORD_RESET_TOKENS_PROPERTY);
     }
 
 

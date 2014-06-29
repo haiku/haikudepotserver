@@ -21,7 +21,7 @@ public enum Permission {
 
     USERRATING_EDIT(TargetType.USERRATING),
 
-    PKG_CREATERATING(TargetType.PKG),
+    PKG_CREATEUSERRATING(TargetType.PKG),
     PKG_EDITICON(TargetType.PKG),
     PKG_EDITSCREENSHOT(TargetType.PKG),
     PKG_EDITCATEGORIES(TargetType.PKG),

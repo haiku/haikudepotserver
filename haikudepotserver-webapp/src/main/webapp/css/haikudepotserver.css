@@ -37,6 +37,16 @@ h2 {
     color: gray;
 }
 
+/*
+Used by the 'highlighted-text' directive.
+*/
+.highlighted {
+    /*background-color: yellow;*/
+    /*border: 1px solid rgba(215, 215, 0, 1);*/
+    background-color: #ffc8fe;
+    border: 1px solid rgb(255, 149, 255);
+}
+
 small {
     font-size: 10px;
 }

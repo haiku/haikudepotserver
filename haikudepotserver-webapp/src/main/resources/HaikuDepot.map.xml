@@ -35,6 +35,47 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="permission" schema="haikudepot">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="permission_public_repository" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="permission_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="requires_user" type="BOOLEAN" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.permission_public_repository_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="permission_user_pkg" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="permission_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="user_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.permission_user_pkg_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="permission_user_repository" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="permission_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="user_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.permission_user_repository_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="pkg" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
@@ -224,6 +265,7 @@
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="can_manage_users" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="email" type="VARCHAR" length="255"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="is_root" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
@@ -234,6 +276,17 @@
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.user_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="user_password_reset_token" schema="haikudepot">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="user_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.user_password_reset_token_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -274,6 +327,17 @@
 	<obj-entity name="NaturalLanguage" className="org.haikuos.haikudepotserver.dataobjects.NaturalLanguage" readOnly="true" lock-type="optimistic" dbEntityName="natural_language" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+	</obj-entity>
+	<obj-entity name="Permission" className="org.haikuos.haikudepotserver.dataobjects.Permission" readOnly="true" dbEntityName="permission" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+	</obj-entity>
+	<obj-entity name="PermissionPublicRepository" className="org.haikuos.haikudepotserver.dataobjects.PermissionPublicRepository" lock-type="optimistic" dbEntityName="permission_public_repository" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="requiresUser" type="java.lang.Boolean" db-attribute-path="requires_user"/>
+	</obj-entity>
+	<obj-entity name="PermissionUserPkg" className="org.haikuos.haikudepotserver.dataobjects.PermissionUserPkg" lock-type="optimistic" dbEntityName="permission_user_pkg" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	</obj-entity>
+	<obj-entity name="PermissionUserRepository" className="org.haikuos.haikudepotserver.dataobjects.PermissionUserRepository" lock-type="optimistic" dbEntityName="permission_user_repository" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 	</obj-entity>
 	<obj-entity name="Pkg" className="org.haikuos.haikudepotserver.dataobjects.Pkg" lock-type="optimistic" dbEntityName="pkg" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
@@ -355,12 +419,17 @@
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="canManageUsers" type="java.lang.Boolean" lock="true" db-attribute-path="can_manage_users"/>
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="email" type="java.lang.String" lock="true" db-attribute-path="email"/>
 		<obj-attribute name="isRoot" type="java.lang.Boolean" lock="true" db-attribute-path="is_root"/>
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="nickname" type="java.lang.String" lock="true" db-attribute-path="nickname"/>
 		<obj-attribute name="passwordHash" type="java.lang.String" lock="true" db-attribute-path="password_hash"/>
 		<obj-attribute name="passwordSalt" type="java.lang.String" lock="true" db-attribute-path="password_salt"/>
 		<post-add method-name="onPostAdd"/>
+	</obj-entity>
+	<obj-entity name="UserPasswordResetToken" className="org.haikuos.haikudepotserver.dataobjects.UserPasswordResetToken" lock-type="optimistic" dbEntityName="user_password_reset_token" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
 	</obj-entity>
 	<obj-entity name="UserRating" className="org.haikuos.haikudepotserver.dataobjects.UserRating" lock-type="optimistic" dbEntityName="user_rating" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
@@ -390,6 +459,39 @@
 	<db-relationship name="users" source="natural_language" target="user" toMany="true">
 		<db-attribute-pair source="id" target="natural_language_id"/>
 	</db-relationship>
+	<db-relationship name="untitledRel" source="permission" target="permission_user_pkg" toMany="true">
+		<db-attribute-pair source="id" target="permission_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel1" source="permission" target="permission_user_repository" toMany="true">
+		<db-attribute-pair source="id" target="permission_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel2" source="permission" target="permission_public_repository" toMany="true">
+		<db-attribute-pair source="id" target="permission_id"/>
+	</db-relationship>
+	<db-relationship name="permission" source="permission_public_repository" target="permission" toMany="false">
+		<db-attribute-pair source="permission_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="repository" source="permission_public_repository" target="repository" toMany="false">
+		<db-attribute-pair source="repository_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="permission" source="permission_user_pkg" target="permission" toMany="false">
+		<db-attribute-pair source="permission_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg" source="permission_user_pkg" target="pkg" toMany="false">
+		<db-attribute-pair source="pkg_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="user" source="permission_user_pkg" target="user" toMany="false">
+		<db-attribute-pair source="user_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="permission" source="permission_user_repository" target="permission" toMany="false">
+		<db-attribute-pair source="permission_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="repository" source="permission_user_repository" target="repository" toMany="false">
+		<db-attribute-pair source="repository_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="user" source="permission_user_repository" target="user" toMany="false">
+		<db-attribute-pair source="user_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="pkg_icons" source="pkg" target="pkg_icon" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
@@ -401,6 +503,9 @@
 	</db-relationship>
 	<db-relationship name="publisher" source="pkg" target="publisher" toMany="false">
 		<db-attribute-pair source="publisher_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel" source="pkg" target="permission_user_pkg" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
 	<db-relationship name="pkg_pkg_categories" source="pkg_category" target="pkg_pkg_category" toMany="true">
 		<db-attribute-pair source="id" target="pkg_category_id"/>
@@ -486,11 +591,29 @@
 	<db-relationship name="pkg_versions" source="repository" target="pkg_version" toMany="true">
 		<db-attribute-pair source="id" target="repository_id"/>
 	</db-relationship>
+	<db-relationship name="untitledRel" source="repository" target="permission_user_repository" toMany="true">
+		<db-attribute-pair source="id" target="repository_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel1" source="repository" target="permission_public_repository" toMany="true">
+		<db-attribute-pair source="id" target="repository_id"/>
+	</db-relationship>
 	<db-relationship name="natural_language" source="user" target="natural_language" toMany="false">
 		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
+	<db-relationship name="untitledRel" source="user" target="user_password_reset_token" toMany="true">
+		<db-attribute-pair source="id" target="user_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel1" source="user" target="permission_user_pkg" toMany="true">
+		<db-attribute-pair source="id" target="user_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel2" source="user" target="permission_user_repository" toMany="true">
+		<db-attribute-pair source="id" target="user_id"/>
+	</db-relationship>
 	<db-relationship name="user_ratings" source="user" target="user_rating" toMany="true">
 		<db-attribute-pair source="id" target="user_id"/>
+	</db-relationship>
+	<db-relationship name="user" source="user_password_reset_token" target="user" toMany="false">
+		<db-attribute-pair source="user_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="natural_language" source="user_rating" target="natural_language" toMany="false">
 		<db-attribute-pair source="natural_language_id" target="id"/>
@@ -507,6 +630,15 @@
 	<db-relationship name="untitledRel" source="user_rating_stability" target="user_rating" toMany="true">
 		<db-attribute-pair source="id" target="user_rating_stability_id"/>
 	</db-relationship>
+	<obj-relationship name="permission" source="PermissionPublicRepository" target="Permission" deleteRule="Nullify" db-relationship-path="permission"/>
+	<obj-relationship name="repository" source="PermissionPublicRepository" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
+	<obj-relationship name="permission" source="PermissionUserPkg" target="Permission" deleteRule="Nullify" db-relationship-path="permission"/>
+	<obj-relationship name="pkg" source="PermissionUserPkg" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
+	<obj-relationship name="user" source="PermissionUserPkg" target="User" deleteRule="Nullify" db-relationship-path="user"/>
+	<obj-relationship name="permission" source="PermissionUserRepository" target="Permission" deleteRule="Nullify" db-relationship-path="permission"/>
+	<obj-relationship name="repository" source="PermissionUserRepository" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
+	<obj-relationship name="user" source="PermissionUserRepository" target="User" deleteRule="Nullify" db-relationship-path="user"/>
+	<obj-relationship name="permissionUserPkgs" source="Pkg" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="untitledRel"/>
 	<obj-relationship name="pkgIcons" source="Pkg" target="PkgIcon" deleteRule="Cascade" db-relationship-path="pkg_icons"/>
 	<obj-relationship name="pkgPkgCategories" source="Pkg" target="PkgPkgCategory" deleteRule="Cascade" db-relationship-path="pkg_pkg_categories"/>
 	<obj-relationship name="pkgScreenshots" source="Pkg" target="PkgScreenshot" deleteRule="Cascade" db-relationship-path="pkg_screenshots"/>
@@ -536,7 +668,13 @@
 	<obj-relationship name="pkgVersion" source="PkgVersionUrl" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="pkgs" source="Publisher" target="Pkg" deleteRule="Deny" db-relationship-path="pkgs"/>
 	<obj-relationship name="architecture" source="Repository" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>
+	<obj-relationship name="permissionPublicRepositories" source="Repository" target="PermissionPublicRepository" deleteRule="Cascade" db-relationship-path="untitledRel1"/>
+	<obj-relationship name="permissionUserRepositories" source="Repository" target="PermissionUserRepository" deleteRule="Cascade" db-relationship-path="untitledRel"/>
 	<obj-relationship name="naturalLanguage" source="User" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
+	<obj-relationship name="permissionUserPkgs" source="User" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="untitledRel1"/>
+	<obj-relationship name="permissionUserRepositories" source="User" target="PermissionUserRepository" deleteRule="Cascade" db-relationship-path="untitledRel2"/>
+	<obj-relationship name="userPasswordResetTokens" source="User" target="UserPasswordResetToken" deleteRule="Cascade" db-relationship-path="untitledRel"/>
+	<obj-relationship name="user" source="UserPasswordResetToken" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="naturalLanguage" source="UserRating" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
 	<obj-relationship name="pkgVersion" source="UserRating" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="user" source="UserRating" target="User" deleteRule="Nullify" db-relationship-path="user"/>

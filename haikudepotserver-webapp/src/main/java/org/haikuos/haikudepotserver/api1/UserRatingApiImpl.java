@@ -239,7 +239,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 context,
                 authenticatedUserOptional.orNull(),
                 pkgOptional.get(),
-                Permission.PKG_CREATERATING)) {
+                Permission.PKG_CREATEUSERRATING)) {
             throw new AuthorizationFailureException();
         }
 

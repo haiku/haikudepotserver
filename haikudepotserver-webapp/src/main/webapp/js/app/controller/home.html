@@ -75,16 +75,29 @@
                 <tr ng-repeat="pkg in pkgs.items">
                     <td><pkg-icon size="16" pkg="pkg"></pkg-icon></td>
                     <td>
-                        <a href="" ng-click="goViewPkg(pkg)">{{pkg.name}}</a>
+                        <a href="" ng-click="goViewPkg(pkg)">
+                            <highlighted-text
+                                value="pkg.name"
+                                search-expression="lastRefetchPkgsSearchExpression"
+                                search-expression-type="'CONTAINS'"></highlighted-text>
+                        </a>
+                        <div ng-show="shouldShowSummary(pkg)">
+                            <small class="muted">
+                                <highlighted-text
+                                        value="pkg.versions[0].summary"
+                                        search-expression="lastRefetchPkgsSearchExpression"
+                                        search-expression-type="'CONTAINS'"></highlighted-text>
+                            </small>
+                        </div>
                     </td>
                     <td>
                         <span ng-show="shouldShowDerivedRating(pkg)">
                             <rating-indicator rating="{{pkg.derivedRating}}"></rating-indicator>
                         </span>
                     </td>
-                    <td><version-label version="pkg.version[0]"></version-label></td>
-                    <td ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.version[0].createTimestamp|timestamp}}</span></td>
-                    <td ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.version[0].viewCounter}}</span></td>
+                    <td><version-label version="pkg.versions[0]"></version-label></td>
+                    <td ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.versions[0].createTimestamp|timestamp}}</span></td>
+                    <td ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.versions[0].viewCounter}}</span></td>
                 </tr>
                 </tbody>
             </table>

@@ -19,6 +19,8 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._User;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -107,6 +109,16 @@ public class User extends _User implements CreateAndModifyTimestamped {
         if(null != getPasswordSalt()) {
             if(!PASSWORDSALT_PATTERN.matcher(getPasswordSalt()).matches()) {
                 validationResult.addFailure(new BeanValidationFailure(this,PASSWORD_HASH_PROPERTY,"malformed"));
+            }
+        }
+
+        if(null != getEmail()) {
+            try {
+                InternetAddress internetAddress = new InternetAddress(getEmail());
+                internetAddress.validate();
+            }
+            catch(AddressException ae) {
+                validationResult.addFailure(new BeanValidationFailure(this,EMAIL_PROPERTY,"malformed"));
             }
         }
 

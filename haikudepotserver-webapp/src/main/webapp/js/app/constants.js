@@ -30,6 +30,63 @@ angular.module('haikudepotserver')
         SVG_LEFT_ARROW : '<svg height=\"12\" width=\"12\"><path fill=\"black\" d=\"M12 4.5 L12 7.5 L8 7.5 L8 12 L0 6 L8 0 L8 4.5\"/></svg>'
     })
 
+    // this constant provides mixins that are related somehow to search.
+
+    .constant('searchMixins', {
+
+        /**
+         * <p>Often, when searching, it is necessary to use a search expression to find something.  This function
+         * will take a candidate string and will find the next occurrence of the search expression after the
+         * index.  Search expressions come in different types such as "CONTAINS".  If there is no next match then
+         * the function will return a tuple { offset : -1, length : -1 }.  If there is a next match then the
+         * function will return a tuple containing the offset to the next match as well as the length of the next
+         * match.</p>
+         *
+         * <p>note that both the string and the searchExpression should be supplied as lower case.</p>
+         */
+
+        nextMatchSearchExpression: function(str, offset, searchExpression, searchExpressionType) {
+
+            if(!searchExpressionType||!searchExpressionType.length) {
+                throw 'the search expression type must be supplied';
+            }
+
+            if(null==offset || offset < 0) {
+                throw 'an offset is required';
+            }
+
+            if(str&&
+                str.length&&
+                searchExpression&&
+                searchExpression.length&&
+                offset < str.length) {
+
+                switch(searchExpressionType) {
+                    case 'CONTAINS':
+                        var found = str.indexOf(searchExpression, offset);
+
+                        if(-1!=found) {
+                            return {
+                                offset: found,
+                                length: searchExpression.length
+                            };
+                        }
+                        break;
+
+                    default:
+                        throw 'unknown search expression type; ' + searchExpressionType;
+                }
+
+            }
+
+            return {
+                offset: -1,
+                length: -1
+            };
+        }
+
+    })
+
     // this constant is an object of mix-ins that can be used to extend a directive so that it
     // has access to a cache of handy functions that can be re-used.
 

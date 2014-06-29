@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotserver.pkg.model;
 
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
 
@@ -33,6 +34,16 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
     private Number daysSinceLatestVersion;
 
     private SortOrdering sortOrdering;
+
+    private NaturalLanguage naturalLanguage;
+
+    public NaturalLanguage getNaturalLanguage() {
+        return naturalLanguage;
+    }
+
+    public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
+        this.naturalLanguage = naturalLanguage;
+    }
 
     public List<String> getPkgNames() {
         return pkgNames;

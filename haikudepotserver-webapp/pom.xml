@@ -8,7 +8,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.haikuos</groupId>
     <artifactId>haikudepotserver-webapp</artifactId>
     <packaging>war</packaging>
 
@@ -34,6 +33,10 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
         </dependency>
 
         <!-- logging -->

@@ -103,11 +103,12 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void searchPkgsTest() {
+    public void searchPkgsTest() throws ObjectNotFoundException {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
         request.architectureCode = "x86";
+        request.naturalLanguageCode = NaturalLanguage.CODE_ENGLISH;
         request.expression = "pk";
         request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
         request.limit = 2;
@@ -121,6 +122,90 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.size()).isEqualTo(2);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
         Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");
+    }
+
+    /**
+     * <p>This test will check that the search is able to find text in the content of the package
+     * version localization where the localization is a specific language other than english.
+     * This test will find something because it is looking for spanish and has some text from the
+     * spanish localization for the package version.</p>
+     */
+
+    @Test
+    public void searchPkgsTest_localizationDescriptionNotEnglish_hit() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+
+        SearchPkgsRequest request = new SearchPkgsRequest();
+        request.architectureCode = "x86";
+        request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
+        request.expression = "feij";
+        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
+        request.limit = 2;
+        request.offset = 0;
+
+        // ------------------------------------
+        SearchPkgsResult result = pkgApi.searchPkgs(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.total).isEqualTo(1);
+        Assertions.assertThat(result.items.size()).isEqualTo(1);
+        Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
+        Assertions.assertThat(result.items.get(0).versions.get(0).summary).isEqualTo("pkg1Version2SummarySpanish_feijoa");
+    }
+
+    /**
+     * <p>This test will check that the search is able to find text in the content of the package
+     * version localization where the localization is a specific language other than english.  This
+     * test will not find anything because it is looking for a keyword in the english test, but is
+     * searching for spanish.</p>
+     */
+
+    @Test
+    public void searchPkgsTest_localizationDescriptionNotEnglish_noHit() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+
+        SearchPkgsRequest request = new SearchPkgsRequest();
+        request.architectureCode = "x86";
+        request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
+        request.expression = "persim";
+        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
+        request.limit = 2;
+        request.offset = 0;
+
+        // ------------------------------------
+        SearchPkgsResult result = pkgApi.searchPkgs(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.total).isEqualTo(0);
+        Assertions.assertThat(result.items.size()).isEqualTo(0);
+    }
+
+    /**
+     * <p>This test checks where the client is searching for a package in a specific language, but
+     * there is no localization for that specific language.  In this case, </p>
+     * @throws ObjectNotFoundException
+     */
+
+    @Test
+    public void searchPkgsTest_localizationDescriptionNotEnglishFallBackToEnglish_hit() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+
+        SearchPkgsRequest request = new SearchPkgsRequest();
+        request.architectureCode = "x86_gcc2";
+        request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
+        request.expression = "appl";
+        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
+        request.limit = 2;
+        request.offset = 0;
+
+        // ------------------------------------
+        SearchPkgsResult result = pkgApi.searchPkgs(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.total).isEqualTo(1);
+        Assertions.assertThat(result.items.size()).isEqualTo(1);
+        Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
+        Assertions.assertThat(result.items.get(0).versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_apple");
     }
 
     @Test
@@ -149,8 +234,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
         Assertions.assertThat(result.versions.get(0).naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
-        Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
-        Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
+        Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
+        Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
     }
 
     /**
@@ -179,8 +264,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
         Assertions.assertThat(result.versions.get(0).naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
-        Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
-        Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
+        Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
+        Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
     }
 
     @Test
@@ -562,8 +647,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.pkgVersionLocalizations.size()).isEqualTo(1);
-        Assertions.assertThat(result.pkgVersionLocalizations.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
-        Assertions.assertThat(result.pkgVersionLocalizations.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
+        Assertions.assertThat(result.pkgVersionLocalizations.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
+        Assertions.assertThat(result.pkgVersionLocalizations.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
     }
 
     /**
@@ -651,8 +736,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(pkg1.versions.size()).isEqualTo(1);
         Assertions.assertThat(pkg1.versions.get(0).naturalLanguageCode).isEqualTo("en");
-        Assertions.assertThat(pkg1.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish");
-        Assertions.assertThat(pkg1.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish");
+        Assertions.assertThat(pkg1.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
+        Assertions.assertThat(pkg1.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
         Assertions.assertThat(pkg1.versions.get(0).major).isEqualTo("1");
         Assertions.assertThat(pkg1.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(pkg1.versions.get(0).revision).isEqualTo(4);

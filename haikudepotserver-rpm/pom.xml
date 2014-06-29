@@ -8,11 +8,8 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.haikuos</groupId>
     <artifactId>haikudepotserver-rpm</artifactId>
     <packaging>rpm</packaging>
-
-
 
     <build>
 

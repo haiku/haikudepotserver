@@ -27,6 +27,8 @@ public class SearchPkgsRequest extends AbstractSearchRequest {
 
     public SortOrdering sortOrdering;
 
+    public String naturalLanguageCode;
+
     /**
      * <p>This will only return data where the latest version is newer than the number of days indicated.</p>
      */
