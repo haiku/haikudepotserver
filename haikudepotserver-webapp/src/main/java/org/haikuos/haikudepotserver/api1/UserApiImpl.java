@@ -108,6 +108,10 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
                     break;
 
+                case EMAIL:
+                    user.get().setEmail(updateUserRequest.email);
+                    break;
+
                 case ACTIVE:
                     if(null==updateUserRequest.active) {
                         throw new IllegalStateException("the 'active' attribute is required to configure active on the user.");
@@ -208,6 +212,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         user.setNaturalLanguage(naturalLanguageOptional.get());
         user.setNickname(createUserRequest.nickname);
         user.setPasswordSalt(); // random
+        user.setEmail(createUserRequest.email);
         user.setPasswordHash(authenticationService.hashPassword(user, createUserRequest.passwordClear));
         context.commitChanges();
 
@@ -236,6 +241,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         GetUserResult result = new GetUserResult();
         result.nickname = user.get().getNickname();
+        result.email = user.get().getEmail();
         result.isRoot = user.get().getIsRoot();
         result.active = user.get().getActive();
         result.naturalLanguageCode = user.get().getNaturalLanguage().getCode();

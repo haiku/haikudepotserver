@@ -11,6 +11,7 @@ public class UpdateUserRequest {
 
     public enum Filter {
         NATURALLANGUAGE,
+        EMAIL,
         ACTIVE
     };
 
@@ -19,6 +20,8 @@ public class UpdateUserRequest {
     public String naturalLanguageCode;
 
     public Boolean active;
+
+    public String email;
 
     public List<Filter> filter;
 

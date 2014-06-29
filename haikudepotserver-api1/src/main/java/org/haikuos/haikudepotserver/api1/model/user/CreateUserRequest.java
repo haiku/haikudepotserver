@@ -9,6 +9,7 @@ public class CreateUserRequest {
 
     public String nickname;
     public String passwordClear;
+    public String email;
 
     /**
      * <p>The captcha token is obtained from an earlier invocation to the

@@ -8,8 +8,8 @@
  */
 
 angular.module('haikudepotserver').directive('userLabel',[
-    'standardDirectiveMixins','breadcrumbs',
-    function(standardDirectiveMixins,breadcrumbs) {
+    'standardDirectiveMixins','breadcrumbs','userState',
+    function(standardDirectiveMixins,breadcrumbs,userState) {
         return {
             restrict: 'E',
             link : function($scope,element,attributes) {
@@ -18,41 +18,67 @@ angular.module('haikudepotserver').directive('userLabel',[
                 angular.extend(this,standardDirectiveMixins);
 
                 var userExpression = attributes['user'];
-                var shouldLink = attributes['shouldLink'];
-                var userBreadcrumbItem = undefined;
+                var shouldLink = undefined == attributes['shouldLink'] || 'true' == shouldLink;
 
                 if(!userExpression || !userExpression.length) {
                     throw 'expected expression for "user"';
                 }
 
                 var containerEl = angular.element('<span></span>');
-                var textTargetEl = containerEl;
                 element.replaceWith(containerEl);
-
-                if((undefined == shouldLink || 'true' == shouldLink) && !isChildOfForm(containerEl)) {
-                    var hyperlinkEl = angular.element('<a href=""></a>');
-                    containerEl.append(hyperlinkEl);
-                    textTargetEl = hyperlinkEl;
-
-                    hyperlinkEl.on('click', function(el) {
-                        if(userBreadcrumbItem) {
-                            $scope.$apply(function() {
-                                breadcrumbs.pushAndNavigate(userBreadcrumbItem);
-                            });
-                        }
-                        el.preventDefault();
-                    });
-                }
 
                 function refresh(user) {
 
                     if (!user) {
-                        textTargetEl.text('');
-                        userBreadcrumbItem = undefined;
+                        containerEl.children().remove();
+                        containerEl.text('');
                     }
                     else {
-                        userBreadcrumbItem = breadcrumbs.createViewUser(user);
-                        textTargetEl.text(user.nickname);
+
+                        function setupNonLinking() {
+                            containerEl.children().remove();
+                            containerEl.text(user.nickname);
+                        }
+
+                        if(shouldLink && !isChildOfForm(containerEl)) {
+
+                            userState.areAuthorized([{
+                                targetType:'USER',
+                                targetIdentifier:user.nickname,
+                                permissionCode:'USER_VIEW'
+                            }]).then(
+                                function(flag) {
+                                    if(flag) {
+
+                                        // now we need to configure a hyperlink to view the user.
+
+                                        var anchorEl = angular.element('<a href=""></a>');
+                                        anchorEl.text(user.nickname);
+                                        containerEl.text('');
+                                        containerEl.append(anchorEl);
+
+                                        anchorEl.on('click', function(event) {
+                                            event.preventDefault();
+                                            $scope.$apply(function() {
+                                                breadcrumbs.pushAndNavigate(breadcrumbs.createViewUser(user));
+                                            });
+                                        });
+
+                                    }
+                                    else {
+                                        setupNonLinking();
+                                    }
+                                },
+                                function() {
+                                    setupNonLinking(); // should this perhaps be throwing an exception instead?
+                                }
+                            );
+
+                        }
+                        else {
+                            setupNonLinking();
+                        }
+
                     }
                 }
 
@@ -60,9 +86,8 @@ angular.module('haikudepotserver').directive('userLabel',[
                     refresh(newValue);
                 });
 
-                refresh($scope.$eval(userExpression));
-
             }
         }
 
-    }]);
+    }
+]);
