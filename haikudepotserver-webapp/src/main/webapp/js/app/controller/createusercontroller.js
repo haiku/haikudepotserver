@@ -18,6 +18,7 @@ angular.module('haikudepotserver').controller(
             $scope.naturalLanguageOptions = undefined;
             $scope.newUser = {
                 nickname : undefined,
+                email : undefined,
                 passwordClear : undefined,
                 passwordClearRepeated : undefined,
                 captchaResponse : undefined
@@ -148,6 +149,7 @@ angular.module('haikudepotserver').controller(
                     "createUser",
                     [{
                         nickname : $scope.newUser.nickname,
+                        email : $scope.newUser.email,
                         passwordClear : $scope.newUser.passwordClear,
                         captchaToken : $scope.captchaToken,
                         captchaResponse : $scope.newUser.captchaResponse,

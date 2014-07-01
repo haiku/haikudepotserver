@@ -18,6 +18,18 @@
             <error-messages key-prefix="createUser.nickname" error="createUserForm.nickname.$error"></error-messages>
         </div>
 
+        <label for="email"><message key="createUser.email.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('email')">
+            <input
+                    id="email"
+                    type="text"
+                    name="email"
+                    valid-email=""
+                    autocomplete="off"
+                    ng-model="newUser.email"></input>
+            <error-messages key-prefix="createUser.email" error="createUserForm.email.$error"></error-messages>
+        </div>
+
         <label for="password-clear"><message key="createUser.passwordClear.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClear')">
             <input

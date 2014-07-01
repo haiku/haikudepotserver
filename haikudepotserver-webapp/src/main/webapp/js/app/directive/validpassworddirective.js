@@ -5,7 +5,7 @@
 
 /**
  * <p>This directive will check to make sure that the password entered in is in the correct format, is long enough
- * and is complex enough.
+ * and is complex enough.</p>
  */
 
 angular.module('haikudepotserver').directive('validPassword',function() {

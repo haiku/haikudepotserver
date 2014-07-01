@@ -9,6 +9,8 @@
     <dl>
         <dt><message key="viewUser.active.title"></message></dt>
         <dd><active-indicator state="user.active"></active-indicator>&nbsp;</dd>
+        <dt ng-show="user.email"><message key="viewUser.email.title"></message></dt>
+        <dd ng-show="user.email">{{user.email}}</dd>
         <dt><message key="viewUser.naturalLanguage.title"></message></dt>
         <dd><message key="{{'naturalLanguage.' + user.naturalLanguageCode}}"></message></dd>
         <dt><message key="gen.created.title"></message></dt>

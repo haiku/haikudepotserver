@@ -74,9 +74,8 @@ angular.module('haikudepotserver').factory('messageSource',
 
                                 delete naturalLanguagesMessagesQueue[naturalLanguageCode];
                             },
-                            function (err) {
-                                $log.warn('unable to get the messages from the server for natural language; ' + naturalLanguageCode);
-                                errorHandling.logJsonRpcError(err);
+                            function(err) {
+                                errorHandling.logJsonRpcError(err ? err.error : null, 'unable to get the messages from the server for natural language; ' + naturalLanguageCode);
                                 deferred.reject(null);
                             }
                         );

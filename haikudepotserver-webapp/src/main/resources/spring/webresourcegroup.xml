@@ -70,6 +70,7 @@
                             <value>/js/app/directive/pkgversionlabeldirective.js</value>
                             <value>/js/app/directive/returnkeypressdirective.js</value>
                             <value>/js/app/directive/highlightedtextdirective.js</value>
+                            <value>/js/app/directive/validemaildirective.js</value>
 
                             <value>/js/app/controller/viewpkgcontroller.js</value>
                             <value>/js/app/controller/homecontroller.js</value>

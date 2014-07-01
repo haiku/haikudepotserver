@@ -82,6 +82,9 @@ public class ErrorFilter implements Filter {
 
         out.append("<html>\n");
         out.append("<head>\n");
+        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/img/haikudepot16.png\" sizes=\"16x16\">\n");
+        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/img/haikudepot32.png\" sizes=\"32x32\">\n");
+        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/img/haikudepot64.png\" sizes=\"64x64\">\n");
         out.append("<title>HaikuDepotServer - Error</title>\n");
         out.append("<style>\n");
         out.append("body { background-color: #336698; position: relative; font-family: sans-serif; }\n");

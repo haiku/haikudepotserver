@@ -78,10 +78,11 @@ angular.module('haikudepotserver').controller(
 
                                 updateNaturalLanguageOptionsTitles();
 
-                                // choose the current language as the one for this new user.
+                                // choose the current language as the one for editing.
 
                                 $scope.workingUser = {
                                     nickname : fetchedUser.nickname,
+                                    email : fetchedUser.email,
                                     naturalLanguageOption : _.findWhere(
                                         $scope.naturalLanguageOptions,
                                         { code : fetchedUser.naturalLanguageCode }
@@ -116,8 +117,9 @@ angular.module('haikudepotserver').controller(
                     constants.ENDPOINT_API_V1_USER,
                     "updateUser",
                     [{
-                        filter : [ 'NATURALLANGUAGE' ],
+                        filter : [ 'NATURALLANGUAGE', 'EMAIL' ],
                         nickname : $scope.workingUser.nickname,
+                        email : $scope.workingUser.email,
                         naturalLanguageCode : $scope.workingUser.naturalLanguageOption.code
                     }]
                 ).then(
