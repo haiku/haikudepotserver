@@ -13,6 +13,8 @@ angular.module('haikudepotserver').directive('banner',function() {
         restrict: 'E',
         templateUrl:'/js/app/directive/banner.html',
         replace: true,
+        scope: {
+        },
         controller:
             [
                 '$rootScope','$scope','$log','$location','$route','$window',

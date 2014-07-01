@@ -159,20 +159,29 @@ angular.module('haikudepotserver').controller(
                     function() {
                         $log.info('created new user; '+$scope.newUser.nickname);
 
-                        // get rid of the breadcrumb for creating the user as there is no sense in that any more
-                        // and push the authenticate user so the user can then login with their nickname and
-                        // password that they have just nominated.
+                        if(userState.user()) {
+                            breadcrumbs.pop();
+                            breadcrumbs.pushAndNavigate(
+                                breadcrumbs.createViewUser({ nickname : $scope.newUser.nickname })
+                            );
+                        }
+                        else {
 
-                        breadcrumbs.resetAndNavigate([
-                            breadcrumbs.createHome(),
-                            breadcrumbs.applySearch(
-                                breadcrumbs.createAuthenticate(),
-                                {
-                                    nickname : $scope.newUser.nickname,
-                                    didCreate : true
-                                }
-                            )
-                        ]);
+                            // get rid of the breadcrumb for creating the user as there is no sense in that any more
+                            // and push the authenticate user so the user can then login with their nickname and
+                            // password that they have just nominated.
+
+                            breadcrumbs.resetAndNavigate([
+                                breadcrumbs.createHome(),
+                                breadcrumbs.applySearch(
+                                    breadcrumbs.createAuthenticate(),
+                                    {
+                                        nickname: $scope.newUser.nickname,
+                                        didCreate: true
+                                    }
+                                )
+                            ]);
+                        }
                     },
                     function(err) {
 

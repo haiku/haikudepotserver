@@ -11,14 +11,19 @@ angular.module('haikudepotserver').factory('errorHandling',
     [ '$log','$location','breadcrumbs',
         function($log,$location,breadcrumbs) {
 
+            var haveNavigatedToError = false;
+
             /**
              * <p>This function will exit the AngularJS environment into vanilla HTML.</p>
              */
 
             function navigateToError(code) {
-                breadcrumbs.reset();
-                var query = code ? '?jrpcerrorcd=' + code : '';
-                window.location.href = '/error' + query;
+                if (!haveNavigatedToError) {
+                    breadcrumbs.reset();
+                    var query = code ? '?jrpcerrorcd=' + code : '';
+                    window.location.href = '/error' + query;
+                    haveNavigatedToError = true;
+                }
             }
 
             var ErrorHandlingService = {

@@ -48,6 +48,10 @@ angular.module('haikudepotserver').controller(
                 refetchUsersAtFirstPage();
             };
 
+            $scope.goCreateUser = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbs.createAddUser());
+            }
+
             // ---- LIST MANAGEMENT
 
             $scope.goSearch = function() {
