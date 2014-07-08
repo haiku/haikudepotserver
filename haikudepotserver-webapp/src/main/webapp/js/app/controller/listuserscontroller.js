@@ -8,15 +8,15 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location',
         'jsonRpc','constants',
-        'breadcrumbs','errorHandling',
+        'breadcrumbs','breadcrumbFactory','errorHandling',
         function(
             $scope,$log,$location,
             jsonRpc,constants,
-            breadcrumbs,errorHandling) {
+            breadcrumbs,breadcrumbFactory,errorHandling) {
 
             breadcrumbs.mergeCompleteStack([
-                breadcrumbs.createHome(),
-                breadcrumbs.applyCurrentLocation(breadcrumbs.createListUsers())
+                breadcrumbFactory.createHome(),
+                breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createListUsers())
             ]);
 
             var PAGESIZE = 15;
@@ -49,7 +49,7 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.goCreateUser = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createAddUser());
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddUser());
             }
 
             // ---- LIST MANAGEMENT

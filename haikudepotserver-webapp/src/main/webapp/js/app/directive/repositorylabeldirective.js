@@ -9,10 +9,10 @@
 
 angular.module('haikudepotserver').directive('repositoryLabel',[
     '$location',
-    'standardDirectiveMixins','userState','breadcrumbs',
+    'standardDirectiveMixins','userState','breadcrumbs','breadcrumbFactory',
     function(
         $location,
-        standardDirectiveMixins,userState,breadcrumbs) {
+        standardDirectiveMixins,userState,breadcrumbs,breadcrumbFactory) {
         return {
             restrict: 'E',
             link: function ($scope, element, attributes) {
@@ -72,7 +72,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                                     containerEl.text(repository ? repository.code : '');
                                 }
 
-                                breadcrumbItem = breadcrumbs.createViewRepository(repository);
+                                breadcrumbItem = breadcrumbFactory.createViewRepository(repository);
                             }
                             else {
                                 setupForNoHyperlink();

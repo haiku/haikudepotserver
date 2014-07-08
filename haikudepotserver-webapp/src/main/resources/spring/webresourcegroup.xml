@@ -104,6 +104,7 @@
                             <value>/js/app/service/pkgscreenshotservice.js</value>
                             <value>/js/app/service/pkgservice.js</value>
                             <value>/js/app/service/breadcrumbsservice.js</value>
+                            <value>/js/app/service/breadcrumbfactoryservice.js</value>
                             <value>/js/app/service/errorhandlingservice.js</value>
 
                             <value>/js/app/filter/timestampfilter.js</value>

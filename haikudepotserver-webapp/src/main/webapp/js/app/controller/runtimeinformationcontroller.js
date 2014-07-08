@@ -8,16 +8,16 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location',
         'jsonRpc','constants','userState',
-        'breadcrumbs','errorHandling',
+        'breadcrumbs','breadcrumbFactory','errorHandling',
         function(
             $scope,$log,$location,
             jsonRpc,constants,userState,
-            breadcrumbs,errorHandling) {
+            breadcrumbs,breadcrumbFactory,errorHandling) {
 
             breadcrumbs.mergeCompleteStack([
-                breadcrumbs.createHome(),
-                breadcrumbs.createAbout(),
-                breadcrumbs.applyCurrentLocation(breadcrumbs.createRuntimeInformation())
+                breadcrumbFactory.createHome(),
+                breadcrumbFactory.createAbout(),
+                breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createRuntimeInformation())
             ]);
 
             $scope.serverStartTimestamp = undefined;

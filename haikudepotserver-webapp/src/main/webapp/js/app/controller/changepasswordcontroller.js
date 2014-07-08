@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'ChangePasswordController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','userState','errorHandling',
+        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,userState,errorHandling) {
+            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
             $scope.user = undefined;
             $scope.captchaToken = undefined;
@@ -41,9 +41,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createViewUser($scope.user),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createChangePassword($scope.user))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createViewUser($scope.user),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createChangePassword($scope.user))
                 ]);
             }
 
@@ -133,9 +133,9 @@ angular.module('haikudepotserver').controller(
                         if(userState.user().nickname == $scope.user.nickname) {
                             userState.user(null); // logout
                             breadcrumbs.resetAndNavigate([
-                                breadcrumbs.createHome(),
-                                breadcrumbs.applySearch(
-                                    breadcrumbs.createAuthenticate(),
+                                breadcrumbFactory.createHome(),
+                                breadcrumbFactory.applySearch(
+                                    breadcrumbFactory.createAuthenticate(),
                                     {
                                         nickname: $scope.user.nickname,
                                         didChangePassword: 'true'

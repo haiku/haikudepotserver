@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$log','$scope','$rootScope','$q','$location',
         'jsonRpc','constants','userState','messageSource','errorHandling',
-        'referenceData','breadcrumbs','searchMixins',
+        'referenceData','breadcrumbs','breadcrumbFactory','searchMixins',
         function(
             $log,$scope,$rootScope,$q,$location,
             jsonRpc,constants,userState,messageSource,errorHandling,
-            referenceData,breadcrumbs,searchMixins) {
+            referenceData,breadcrumbs,breadcrumbFactory,searchMixins) {
 
             angular.extend(this,searchMixins);
 
@@ -103,7 +103,7 @@ angular.module('haikudepotserver').controller(
                 return amFetchingPkgs || !$scope.architectures;
             };
 
-            breadcrumbs.mergeCompleteStack([ breadcrumbs.applyCurrentLocation(breadcrumbs.createHome()) ]);
+            breadcrumbs.mergeCompleteStack([ breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createHome()) ]);
 
             // ---- LOCALIZATION
 
@@ -289,7 +289,7 @@ angular.module('haikudepotserver').controller(
             $scope.goViewPkg = function(pkg) {
 
                 breadcrumbs.pushAndNavigate(
-                    breadcrumbs.createViewPkgWithSpecificVersionFromPkg(pkg)
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg(pkg)
                 );
 
                 return false;

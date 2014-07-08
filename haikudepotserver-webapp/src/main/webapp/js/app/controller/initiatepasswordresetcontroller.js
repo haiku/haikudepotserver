@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'InitiatePasswordResetController',
     [
         '$scope','$log',
-        'jsonRpc','constants','errorHandling','userState','breadcrumbs',
+        'jsonRpc','constants','errorHandling','userState','breadcrumbs','breadcrumbFactory',
         function(
             $scope,$log,
-            jsonRpc,constants,errorHandling,userState,breadcrumbs) {
+            jsonRpc,constants,errorHandling,userState,breadcrumbs,breadcrumbFactory) {
 
             if(userState.user()) {
                 throw 'it is not possible to reset the password if a user is presently authenticated.';
@@ -43,8 +43,8 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createInitiatePasswordReset())
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createInitiatePasswordReset())
                 ]);
             }
 

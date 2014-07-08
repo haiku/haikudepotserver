@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
-        'breadcrumbs','userState','referenceData','pkg',
+        'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgIcon,errorHandling,
-            breadcrumbs,userState,referenceData,pkg) {
+            breadcrumbs,breadcrumbFactory,userState,referenceData,pkg) {
 
             var ARCHITECTUREAPPLICABILITY_ALL = '__all';
 
@@ -107,9 +107,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createEditPkgVersionLocalization($scope.pkg))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditPkgVersionLocalization($scope.pkg))
                 ]);
             }
 

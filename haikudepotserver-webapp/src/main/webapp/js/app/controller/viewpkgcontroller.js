@@ -9,12 +9,12 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location','$routeParams','$rootScope',
         'jsonRpc','constants','userState','errorHandling',
         'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
-        'pkg',
+        'pkg','breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,$rootScope,
             jsonRpc,constants,userState,errorHandling,
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
-            pkg) {
+            pkg,breadcrumbFactory) {
 
             var MAXCHARS_USERRATING_COMMENT = 256;
             var MAXLINES_USERRATING_COMMENT = 4;
@@ -75,8 +75,8 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createViewPkgWithSpecificVersionFromRouteParams($routeParams))
                 ]);
             }
 
@@ -268,39 +268,39 @@ angular.module('haikudepotserver').controller(
             // RATINGS
 
             $scope.goAddUserRating = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createAddUserRating($scope.pkg));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddUserRating($scope.pkg));
             };
 
             $scope.goViewUserRating = function(userRating) {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createViewUserRating(userRating));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewUserRating(userRating));
             };
 
             // ---------------------
             // ACTIONS FOR PACKAGE
 
             $scope.goListPkgVersions = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createListPkgVersionsForPkg($scope.pkg));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createListPkgVersionsForPkg($scope.pkg));
             }
 
             // this is used to cause an authentication in relation to adding a user rating
             $scope.goAuthenticate = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createAuthenticate());
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAuthenticate());
             };
 
             $scope.goEditIcon = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgIcon($scope.pkg));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgIcon($scope.pkg));
             };
 
             $scope.goEditScreenshots = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgScreenshots($scope.pkg));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgScreenshots($scope.pkg));
             };
 
             $scope.goEditVersionLocalization = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgVersionLocalization($scope.pkg));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgVersionLocalization($scope.pkg));
             };
 
             $scope.goEditPkgCategories = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createEditPkgCategories($scope.pkg));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgCategories($scope.pkg));
             };
 
             $scope.goRemoveIcon = function() {

@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
-        'breadcrumbs','userState','pkg',
+        'breadcrumbs','breadcrumbFactory','userState','pkg',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgIcon,errorHandling,
-            breadcrumbs,userState,pkg) {
+            breadcrumbs,breadcrumbFactory,userState,pkg) {
 
             var ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
@@ -52,9 +52,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createEditPkgIcon($scope.pkg))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditPkgIcon($scope.pkg))
                 ]);
             }
 

@@ -8,15 +8,15 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location',
         'jsonRpc','constants',
-        'breadcrumbs','errorHandling',
+        'breadcrumbs','breadcrumbFactory','errorHandling',
         function(
             $scope,$log,$location,
             jsonRpc,constants,
-            breadcrumbs,errorHandling) {
+            breadcrumbs,breadcrumbFactory,errorHandling) {
 
             breadcrumbs.mergeCompleteStack([
-                breadcrumbs.createHome(),
-                breadcrumbs.applyCurrentLocation(breadcrumbs.createListRepositories())
+                breadcrumbFactory.createHome(),
+                breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createListRepositories())
             ]);
 
             var PAGESIZE = 15;
@@ -89,7 +89,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goAdd = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createAddRepository());
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddRepository());
             };
 
             // ---- EVENTS

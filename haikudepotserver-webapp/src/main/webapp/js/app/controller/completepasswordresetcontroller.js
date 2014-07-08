@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'CompletePasswordResetController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','userState','errorHandling',
+        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,userState,errorHandling) {
+            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
             if(userState.user()) {
                 throw 'it is not possible to complete password reset with an authenticated user';
@@ -42,8 +42,8 @@ angular.module('haikudepotserver').controller(
 
             $scope.goAuthenticate = function() {
                 breadcrumbs.resetAndNavigate([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createAuthenticate()
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createAuthenticate()
                 ]);
             };
 
@@ -51,8 +51,8 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createCompletePasswordReset($routeParams.token)
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createCompletePasswordReset($routeParams.token)
                 ]);
             }
 

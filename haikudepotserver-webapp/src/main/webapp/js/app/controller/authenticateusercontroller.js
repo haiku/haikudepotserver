@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'AuthenticateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','userState','errorHandling','breadcrumbs',
+        'jsonRpc','constants','userState','errorHandling','breadcrumbs','breadcrumbFactory',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,userState,errorHandling,breadcrumbs) {
+            jsonRpc,constants,userState,errorHandling,breadcrumbs,breadcrumbFactory) {
 
             if(userState.user()) {
                 throw 'it is not possible to enter the authenticate user controller with a currently authenticated user';
@@ -26,8 +26,8 @@ angular.module('haikudepotserver').controller(
             };
 
             breadcrumbs.mergeCompleteStack([
-                breadcrumbs.createHome(),
-                breadcrumbs.applyCurrentLocation(breadcrumbs.createAuthenticate())
+                breadcrumbFactory.createHome(),
+                breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAuthenticate())
             ]);
 
             if($location.search()['nickname']) {
@@ -44,14 +44,14 @@ angular.module('haikudepotserver').controller(
 
             $scope.goInitiatePasswordReset = function() {
                 breadcrumbs.pushAndNavigate(
-                    breadcrumbs.createInitiatePasswordReset()
+                    breadcrumbFactory.createInitiatePasswordReset()
                 );
             };
 
             $scope.goCreateUser = function() {
                 breadcrumbs.resetAndNavigate([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createAddUser()
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createAddUser()
                 ]);
             };
 

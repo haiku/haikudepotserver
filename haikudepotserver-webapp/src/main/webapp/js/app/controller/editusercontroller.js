@@ -11,11 +11,11 @@ angular.module('haikudepotserver').controller(
     'EditUserController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','userState','errorHandling',
+        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
         'referenceData','messageSource',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,userState,errorHandling,
+            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,
             referenceData,messageSource) {
 
             $scope.workingUser = undefined;
@@ -32,9 +32,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createViewUser($scope.workingUser),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createEditUser($scope.workingUser))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createViewUser($scope.workingUser),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditUser($scope.workingUser))
                 ]);
             }
 

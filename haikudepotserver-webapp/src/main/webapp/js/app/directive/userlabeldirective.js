@@ -8,8 +8,8 @@
  */
 
 angular.module('haikudepotserver').directive('userLabel',[
-    'standardDirectiveMixins','breadcrumbs','userState',
-    function(standardDirectiveMixins,breadcrumbs,userState) {
+    'standardDirectiveMixins','breadcrumbs','userState','breadcrumbFactory',
+    function(standardDirectiveMixins,breadcrumbs,userState,breadcrumbFactory) {
         return {
             restrict: 'E',
             link : function($scope,element,attributes) {
@@ -60,7 +60,7 @@ angular.module('haikudepotserver').directive('userLabel',[
                                         anchorEl.on('click', function(event) {
                                             event.preventDefault();
                                             $scope.$apply(function() {
-                                                breadcrumbs.pushAndNavigate(breadcrumbs.createViewUser(user));
+                                                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewUser(user));
                                             });
                                         });
 

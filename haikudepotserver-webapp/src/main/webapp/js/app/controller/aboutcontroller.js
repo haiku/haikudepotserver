@@ -8,15 +8,15 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location',
         'jsonRpc','constants','userState',
-        'breadcrumbs','errorHandling',
+        'breadcrumbs','breadcrumbFactory','errorHandling',
         function(
             $scope,$log,$location,
             jsonRpc,constants,userState,
-            breadcrumbs,errorHandling) {
+            breadcrumbs,breadcrumbFactory,errorHandling) {
 
             breadcrumbs.mergeCompleteStack([
-                breadcrumbs.createHome(),
-                breadcrumbs.applyCurrentLocation(breadcrumbs.createAbout())
+                breadcrumbFactory.createHome(),
+                breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAbout())
             ]);
 
             $scope.serverStartTimestamp = undefined;
@@ -82,7 +82,7 @@ angular.module('haikudepotserver').controller(
             $scope.canGoRuntimeInformation = false;
 
             $scope.goRuntimeInformation = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createRuntimeInformation());
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createRuntimeInformation());
             }
 
         }

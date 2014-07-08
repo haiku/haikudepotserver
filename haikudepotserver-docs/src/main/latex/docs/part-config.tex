@@ -79,3 +79,35 @@ This identifies the system that has produced a given token and is required.  It 
 \subsubsection{\tt authentication.jws.expiryseconds}
 
 This configuration value defines how many seconds a token will be able to be used before it expires.  This value is optional and a sensible default will be employed in its absence.
+
+\subsection{Email}
+
+Email infrastructure is used for;
+
+\begin{itemize}
+\item Password reset (forgot my password)
+\end{itemize}
+
+\subsubsection{\tt smtp.host}
+
+The host name or IP address of the SMTP server.  This configuration value is required.
+
+\subsubsection{\tt smtp.port}
+
+The port of the SMTP server.  This configuration value is optional and will default to 25.
+
+\subsubsection{\tt smtp.auth}
+
+Possible values are ``true'' or ``false''.  When true, SMTP authentication will be used.  This configuration value is optional and will default to ``false''.
+
+\subsubsection{\tt smtp.username}
+
+This is only required when SMTP authentication is configured.
+
+\subsubsection{\tt smtp.password}
+
+This is only required when SMTP authentication is configured.
+
+\subsubsection{\tt smtp.starttls}
+
+Possible values are ``true'' and ``false''.  Configures the SMTP transport.  This value is optional and defaults to ``false''.

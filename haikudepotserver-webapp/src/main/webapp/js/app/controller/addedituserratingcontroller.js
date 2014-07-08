@@ -9,11 +9,11 @@ angular.module('haikudepotserver').controller(
     'AddEditUserRatingController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','userState',
+        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState',
         'errorHandling','referenceData','pkg','messageSource',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,userState,
+            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,
             errorHandling,referenceData,pkg,messageSource) {
 
             if(!userState.user()) {
@@ -288,15 +288,15 @@ angular.module('haikudepotserver').controller(
                 function(chain) {
 
                     var b = [
-                        breadcrumbs.createHome(),
-                        breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion($scope.workingUserRating.pkgVersion)
+                        breadcrumbFactory.createHome(),
+                        breadcrumbFactory.createViewPkgWithSpecificVersionFromPkgVersion($scope.workingUserRating.pkgVersion)
                     ];
 
                     if($scope.workingUserRating.code) {
-                        b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createEditUserRating($scope.workingUserRating)));
+                        b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditUserRating($scope.workingUserRating)));
                     }
                     else {
-                        b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createAddUserRating({
+                        b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAddUserRating({
                             name: $scope.workingUserRating.pkgVersion.pkg.name,
                             versions: [
                                 $scope.workingUserRating.pkgVersion
@@ -396,7 +396,7 @@ angular.module('haikudepotserver').controller(
                             function (data) {
                                 $log.info('did create user rating; ' + data.code);
                                 breadcrumbs.pop();
-                                breadcrumbs.pushAndNavigate(breadcrumbs.createViewUserRating(data)); // just needs the code
+                                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewUserRating(data)); // just needs the code
                             },
                             function (err) {
                                 errorHandling.handleJsonRpcError(err);

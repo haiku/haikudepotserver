@@ -8,9 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams','$timeout',
         'jsonRpc','constants','userState','errorHandling','breadcrumbs',
+        'breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,$timeout,
-            jsonRpc,constants,userState,errorHandling,breadcrumbs) {
+            jsonRpc,constants,userState,errorHandling,breadcrumbs,
+            breadcrumbFactory) {
 
             $scope.repository = undefined;
             $scope.didTriggerImportRepository = false;
@@ -63,7 +65,7 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.goEdit = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createEditRepository($scope.repository));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepository($scope.repository));
             };
 
             /**
@@ -93,9 +95,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createListRepositories(),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewRepository($scope.repository))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createListRepositories(),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createViewRepository($scope.repository))
                 ]);
             }
 

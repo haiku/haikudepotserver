@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$routeParams',
         'jsonRpc','constants','errorHandling',
-        'breadcrumbs','pkg','userState',
+        'breadcrumbs','breadcrumbFactory','pkg','userState',
         function(
             $scope,$log,$routeParams,
             jsonRpc,constants,errorHandling,
-            breadcrumbs,pkg,userState) {
+            breadcrumbs,breadcrumbFactory,pkg,userState) {
 
             $scope.pkg = undefined;
 
@@ -24,9 +24,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkgWithSpecificVersionFromPkg($scope.pkg),
-                    breadcrumbs.createListPkgVersionsForPkg($scope.pkg)
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg($scope.pkg),
+                    breadcrumbFactory.createListPkgVersionsForPkg($scope.pkg)
                 ]);
             }
 

@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'CreateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','errorHandling','referenceData','userState','messageSource','breadcrumbs',
+        'jsonRpc','constants','errorHandling','referenceData','userState','messageSource','breadcrumbs','breadcrumbFactory',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,errorHandling,referenceData,userState,messageSource,breadcrumbs) {
+            jsonRpc,constants,errorHandling,referenceData,userState,messageSource,breadcrumbs,breadcrumbFactory) {
 
             $scope.captchaToken = undefined;
             $scope.captchaImageUrl = undefined;
@@ -86,8 +86,8 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createAddUser())
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAddUser())
                 ]);
             }
 
@@ -162,7 +162,7 @@ angular.module('haikudepotserver').controller(
                         if(userState.user()) {
                             breadcrumbs.pop();
                             breadcrumbs.pushAndNavigate(
-                                breadcrumbs.createViewUser({ nickname : $scope.newUser.nickname })
+                                breadcrumbFactory.createViewUser({ nickname : $scope.newUser.nickname })
                             );
                         }
                         else {
@@ -172,9 +172,9 @@ angular.module('haikudepotserver').controller(
                             // password that they have just nominated.
 
                             breadcrumbs.resetAndNavigate([
-                                breadcrumbs.createHome(),
-                                breadcrumbs.applySearch(
-                                    breadcrumbs.createAuthenticate(),
+                                breadcrumbFactory.createHome(),
+                                breadcrumbFactory.applySearch(
+                                    breadcrumbFactory.createAuthenticate(),
                                     {
                                         nickname: $scope.newUser.nickname,
                                         didCreate: true

@@ -19,8 +19,8 @@
 
 angular.module('haikudepotserver').directive(
     'pkgVersionLabel',
-    ['breadcrumbs','$location','standardDirectiveMixins',
-        function(breadcrumbs,$location,standardDirectiveMixins) {
+    ['breadcrumbs','breadcrumbFactory','$location','standardDirectiveMixins',
+        function(breadcrumbs,breadcrumbFactory,$location,standardDirectiveMixins) {
             return {
                 restrict: 'E',
                 link : function($scope,element,attributes) {
@@ -63,7 +63,7 @@ angular.module('haikudepotserver').directive(
                         }
                         else {
 
-                            pkgVersionBreadcrumbItem = breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion(pkgVersion);
+                            pkgVersionBreadcrumbItem = breadcrumbFactory.createViewPkgWithSpecificVersionFromPkgVersion(pkgVersion);
 
                             textTargetEl.text(
                                     pkgVersion.pkg.name +

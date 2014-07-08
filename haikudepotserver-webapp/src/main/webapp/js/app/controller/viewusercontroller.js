@@ -8,9 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams','$window',
         'jsonRpc','constants','errorHandling','messageSource','userState','breadcrumbs',
+        'breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,$window,
-            jsonRpc,constants,errorHandling,messageSource,userState,breadcrumbs) {
+            jsonRpc,constants,errorHandling,messageSource,userState,breadcrumbs,
+            breadcrumbFactory) {
 
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
@@ -23,8 +25,8 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewUser($scope.user))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createViewUser($scope.user))
                 ]);
             }
 
@@ -54,11 +56,11 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goChangePassword = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createChangePassword($scope.user));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createChangePassword($scope.user));
             }
 
             $scope.goEdit = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createEditUser($scope.user));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditUser($scope.user));
             }
 
             /**
@@ -68,7 +70,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goLogout = function() {
                 userState.user(null);
-                breadcrumbs.resetAndNavigate([breadcrumbs.createHome()]);
+                breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
             }
 
             $scope.canDeactivate = function() {

@@ -8,9 +8,10 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','errorHandling','breadcrumbs',
+        'breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling,breadcrumbs) {
+            jsonRpc,constants,errorHandling,breadcrumbs,breadcrumbFactory) {
 
             var amUpdating = false;
             $scope.breadcrumbItems = undefined;
@@ -27,9 +28,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkgWithSpecificVersionFromPkgVersion($scope.userRating.pkgVersion),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createViewUserRating($scope.userRating))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromPkgVersion($scope.userRating.pkgVersion),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createViewUserRating($scope.userRating))
                 ]);
             }
 
@@ -56,7 +57,7 @@ angular.module('haikudepotserver').controller(
             // ACTIONS
 
             $scope.goEdit = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbs.createEditUserRating($scope.userRating));
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditUserRating($scope.userRating));
             };
 
             $scope.canDeactivate = function() {

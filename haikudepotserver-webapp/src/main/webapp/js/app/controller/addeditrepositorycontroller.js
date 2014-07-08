@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'AddEditRepositoryController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','userState','errorHandling','referenceData',
+        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling','referenceData',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,userState,errorHandling,referenceData) {
+            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,referenceData) {
 
             $scope.workingRepository = undefined;
             $scope.architectures = undefined;
@@ -40,15 +40,15 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
 
                 var b = [
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createListRepositories()
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createListRepositories()
                 ];
 
                 if($scope.amEditing) {
-                    b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createEditRepository($scope.workingRepository)));
+                    b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditRepository($scope.workingRepository)));
                 }
                 else {
-                    b.push(breadcrumbs.applyCurrentLocation(breadcrumbs.createAddRepository()));
+                    b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAddRepository()));
                 }
 
                 breadcrumbs.mergeCompleteStack(b);
@@ -157,7 +157,7 @@ angular.module('haikudepotserver').controller(
                         function() {
                             $log.info('did create repository; '+$scope.workingRepository.code);
                             breadcrumbs.pop();
-                            breadcrumbs.pushAndNavigate(breadcrumbs.createViewRepository($scope.workingRepository));
+                            breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepository($scope.workingRepository));
                         },
                         function(err) {
 

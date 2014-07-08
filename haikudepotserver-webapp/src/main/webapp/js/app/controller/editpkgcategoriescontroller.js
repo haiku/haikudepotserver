@@ -9,12 +9,12 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','errorHandling',
         'breadcrumbs','referenceData','userState',
-        'pkg',
+        'pkg','breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,errorHandling,
             breadcrumbs,referenceData,userState,
-            pkg) {
+            pkg,breadcrumbFactory) {
 
             // this is the maximum number of categories in which a package may be registered.  This
             // is just enforced in the user interface for practicalities sake.
@@ -70,9 +70,9 @@ angular.module('haikudepotserver').controller(
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
-                    breadcrumbs.createHome(),
-                    breadcrumbs.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
-                    breadcrumbs.applyCurrentLocation(breadcrumbs.createEditPkgCategories($scope.pkg))
+                    breadcrumbFactory.createHome(),
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromRouteParams($routeParams),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditPkgCategories($scope.pkg))
                 ]);
             }
 
