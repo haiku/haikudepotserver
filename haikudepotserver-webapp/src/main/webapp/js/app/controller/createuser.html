@@ -28,6 +28,9 @@
                     autocomplete="off"
                     ng-model="newUser.email"></input>
             <error-messages key-prefix="createUser.email" error="createUserForm.email.$error"></error-messages>
+            <div class="text-warning" ng-show="!newUser.email||!newUser.email.length">
+                <small><message key="createUser.email.emptyNote"></message></small>
+            </div>
         </div>
 
         <label for="password-clear"><message key="createUser.passwordClear.title"></message></label>

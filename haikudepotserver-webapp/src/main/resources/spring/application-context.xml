@@ -1,7 +1,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
     <import resource="general.xml"/>
 
@@ -24,5 +24,39 @@
     -->
 
     <bean class="org.haikuos.haikudepotserver.support.cayenne.UserRatingDerivationTriggerListener"/>
+
+    <!-- EMAIL -->
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${smtp.host}"/>
+        <property name="port" value="${smtp.port:25}"/>
+        <property name="username" value="${smtp.username:}"/>
+        <property name="password" value="${smtp.password:}"/>
+        <property name="protocol" value="smtp"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">${smtp.auth:false}</prop>
+                <prop key="mail.smtp.starttls.enable">${smtp.starttls:false}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- SCHEDULE STUFF TO HAPPEN -->
+
+    <task:scheduler id="generalScheduler" pool-size="1"/>
+
+    <task:scheduled-tasks scheduler="generalScheduler">
+
+        <!--
+        This will delete all of the expired tokens every hour.
+        -->
+
+        <task:scheduled
+                ref="passwordResetOrchestrationService"
+                method="deleteExpiredPasswordResetTokens"
+                fixed-delay="3600000"
+                initial-delay="5000"/>
+
+    </task:scheduled-tasks>
 
 </beans>

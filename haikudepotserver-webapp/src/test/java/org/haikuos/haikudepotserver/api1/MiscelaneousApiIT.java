@@ -11,14 +11,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
+import org.haikuos.haikudepotserver.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
+import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
-import org.haikuos.haikudepotserver.AbstractIntegrationTest;
-import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.junit.Test;
 
 import javax.annotation.Resource;

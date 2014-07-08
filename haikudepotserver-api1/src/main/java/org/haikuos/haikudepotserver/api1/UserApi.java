@@ -70,4 +70,19 @@ public interface UserApi {
 
     SearchUsersResult searchUsers(SearchUsersRequest searchUsersRequest);
 
+    /**
+     * <p>This method will kick-off a process to reset a user's password by email.  The user will be sent
+     * an email containing a URL.  They will then click on the URL which will take them to a page allowing
+     * them to reset their password.</p>
+     */
+
+    InitiatePasswordResetResult initiatePasswordReset(InitiatePasswordResetRequest initiatePasswordResetRequest);
+
+    /**
+     * <p>This method will complete the password reset process by taking the token and a new password then
+     * configuring that password on the user.</p>
+     */
+
+    CompletePasswordResetResult completePasswordReset(CompletePasswordResetRequest completePasswordResetRequest);
+
 }

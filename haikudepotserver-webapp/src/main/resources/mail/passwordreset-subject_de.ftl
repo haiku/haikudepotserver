@@ -1,0 +1,1 @@
+Haiku Depot Server - Anweisungen zum Kennwort-Zurücksetzen

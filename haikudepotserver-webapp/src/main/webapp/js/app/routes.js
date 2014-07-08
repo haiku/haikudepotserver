@@ -19,6 +19,8 @@ angular.module('haikudepotserver').config(
                 .when('/runtimeinformation',{controller:'RuntimeInformationController', templateUrl:'/js/app/controller/runtimeinformation.html'})
                 .when('/about',{controller:'AboutController', templateUrl:'/js/app/controller/about.html'})
                 .when('/authenticateuser',{controller:'AuthenticateUserController', templateUrl:'/js/app/controller/authenticateuser.html'})
+                .when('/initiatepasswordreset',{controller:'InitiatePasswordResetController', templateUrl:'/js/app/controller/initiatepasswordreset.html'})
+                .when('/completepasswordreset/:token',{controller:'CompletePasswordResetController', templateUrl:'/js/app/controller/completepasswordreset.html'})
                 .when('/users',{controller:'ListUsersController', templateUrl:'/js/app/controller/listusers.html'})
                 .when('/users/add',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
                 .when('/user/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
@@ -38,15 +40,6 @@ angular.module('haikudepotserver').config(
         }
     ]
 );
-
-/*
- Preload the error template because if the system is not able to access the server then it will have an
- error, but may not be able to get access to the error template to show the error page!
- */
-
-angular.module('haikudepotserver').run(function($http,$templateCache) {
-    $http.get('/js/app/controller/error.html', { cache: $templateCache });
-});
 
 /*
 This is a controller for an unknown page which just goes through to the error page.

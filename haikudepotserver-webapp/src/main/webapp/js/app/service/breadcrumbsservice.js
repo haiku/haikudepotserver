@@ -460,6 +460,24 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     });
                 },
 
+                createInitiatePasswordReset : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.initiatePasswordReset.title',
+                        path : '/initiatepasswordreset'
+                    });
+                },
+
+                createCompletePasswordReset : function(token) {
+                    if(!token||!token.length) {
+                        throw 'unable to create complete password reset without a token';
+                    }
+
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.completePasswordReset.title',
+                        path : '/completepasswordreset/'+token
+                    });
+                },
+
                 createAuthenticate : function() {
                     return applyDefaults({
                         titleKey : 'breadcrumb.authenticateUser.title',
@@ -542,13 +560,6 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     return applyDefaults({
                         titleKey : 'breadcrumb.viewUserRating.title',
                         path : '/userrating/' + userRating.code
-                    });
-                },
-
-                createEditUserRating : function(userRating) {
-                    return applyDefaults({
-                        titleKey : 'breadcrumb.editUserRating.title',
-                        path : '/userrating/' + userRating.code + '/edit'
                     });
                 },
 

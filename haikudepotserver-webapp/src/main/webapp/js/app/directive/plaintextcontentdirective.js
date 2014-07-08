@@ -19,11 +19,6 @@ angular.module('haikudepotserver').directive(
                     var containerEl = angular.element('<div></div>');
                     element.replaceWith(containerEl);
 
-                    function encodeLine(line) {
-                        // TODO; whitespace at the start?
-                        return _.escape(line);
-                    }
-
                     function encodeString(s) {
                         if(!s || !s.length) {
                             return '';
@@ -32,7 +27,7 @@ angular.module('haikudepotserver').directive(
                         return _.map(
                             s.split(/\r\n|\n/),
                             function(line) {
-                                return encodeLine(line);
+                                return _.escape(line);
                             }
                         ).join('<br/>\n');
                     }

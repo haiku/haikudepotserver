@@ -6,10 +6,9 @@
 
     <import resource="general.xml"/>
 
-    <bean class="org.haikuos.haikudepotserver.IntegrationTestSupportService">
-    </bean>
+    <bean class="org.haikuos.haikudepotserver.IntegrationTestSupportService"/>
+    <bean class="org.haikuos.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
+    <bean id="mailSender" class="org.haikuos.haikudepotserver.CapturingMailSender"/>
 
-    <bean class="org.haikuos.haikudepotserver.userrating.NoopUserRatingDerviationService">
-    </bean>
 
 </beans>

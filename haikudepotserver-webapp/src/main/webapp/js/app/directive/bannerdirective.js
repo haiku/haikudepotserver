@@ -19,9 +19,11 @@ angular.module('haikudepotserver').directive('banner',function() {
             [
                 '$rootScope','$scope','$log','$location','$route','$window',
                 'userState','referenceData','messageSource','breadcrumbs',
+                'errorHandling',
                 function(
                     $rootScope,$scope,$log,$location,$route,$window,
-                    userState,referenceData,messageSource,breadcrumbs) {
+                    userState,referenceData,messageSource,breadcrumbs,
+                    errorHandling) {
 
                     $scope.showActions = false;
                     $scope.userNickname = undefined;
@@ -32,14 +34,24 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     function isLocationPathDisablingUserState() {
+
                         var p = $location.path();
-                        return '/error' == p || '/authenticateuser' == p || '/createuser' == p;
+
+                        if(0==p.indexOf('/completepasswordreset/')) {
+                            return true;
+                        }
+
+                        return _.contains([
+                                '/authenticateuser',
+                                '/createuser',
+                                '/initiatepasswordreset'
+                            ],
+                            p);
                     }
 
                     $scope.canShowBannerActions = function() {
-                        var p = $location.path();
-                        return '/error' != p;
-                    }
+                        return true;
+                    };
 
                     // -----------------
                     // GENERAL
@@ -55,7 +67,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.canGoMore = function() {
                         var p = $location.path();
-                        return '/error' != p && '/about' != p;
+                        return '/about' != p;
                     };
 
                     // This will take the user to a page about the application.
@@ -73,10 +85,8 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // NATURAL LANGUAGES
 
                     $scope.canChooseNaturalLanguage = function() {
-                        var p = $location.path();
-                        return !!$scope.naturalLanguageData.naturalLanguageOptions &&
-                            '/error' != p;
-                    }
+                        return !!$scope.naturalLanguageData.naturalLanguageOptions;
+                    };
 
                     /**
                      * <p>This gets hit when the user chooses a language from the user interface's drop-down.</p>
@@ -130,7 +140,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                             updateSelectedNaturalLanguageOption();
                         },
                         function() {
-                            $location.path('/error').search({});
+                            errorHandling.navigateToError();
                         }
                     );
 
@@ -152,8 +162,8 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.canShowRepository = function() {
                         var p = $location.path();
-                        return '/error' != p && '/repositories' != p;
-                    }
+                        return '/repositories' != p;
+                    };
 
                     $scope.goListRepositories = function() {
                         breadcrumbs.resetAndNavigate([
@@ -161,7 +171,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                             breadcrumbs.createListRepositories()
                         ]);
                         $scope.showActions = false;
-                    }
+                    };
 
                     // -----------------
                     // AUTHENTICATED USER RELATED
@@ -212,7 +222,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $scope.canGoListUsers = function() {
                         var p = $location.path();
                         return '/users' != p;
-                    }
+                    };
 
                     $scope.goListUsers = function() {
                         breadcrumbs.resetAndNavigate([
@@ -220,7 +230,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                             breadcrumbs.createListUsers()
                         ]);
                         $scope.showActions = false;
-                    }
+                    };
 
                     // -----------------
                     // EVENT HANDLING

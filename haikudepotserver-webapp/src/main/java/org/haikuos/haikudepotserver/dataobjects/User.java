@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import org.apache.cayenne.ObjectContext;
@@ -30,6 +31,15 @@ public class User extends _User implements CreateAndModifyTimestamped {
     public final static Pattern NICKNAME_PATTERN = Pattern.compile("^[\\w]{4,16}$");
     public final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
     public final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
+
+    public static List<User> findByEmail(ObjectContext context, String email) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkState(!Strings.isNullOrEmpty(email));
+        return context.performQuery(new SelectQuery(
+                User.class,
+                ExpressionFactory.matchExp(User.EMAIL_PROPERTY, email)
+        ));
+    }
 
     public static User getByObjectId(ObjectContext context, ObjectId objectId) {
         Preconditions.checkNotNull(context);
@@ -56,6 +66,8 @@ public class User extends _User implements CreateAndModifyTimestamped {
     }
 
     public static Optional<User> getByNickname(ObjectContext context, String nickname) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkState(!Strings.isNullOrEmpty(nickname));
         return Optional.fromNullable(Iterables.getOnlyElement(
                 (List<User>) context.performQuery(new SelectQuery(
                         User.class,

@@ -20,6 +20,7 @@ import org.haikuos.haikudepotserver.api1.support.*;
 import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
@@ -62,6 +63,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     @Resource
     UserRatingDerivationService userRatingDerivationService;
+
+    @Resource
+    PasswordResetOrchestrationService passwordResetOrchestrationService;
 
     @Override
     public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException {
@@ -257,7 +261,6 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkNotNull(authenticateUserRequest);
         AuthenticateUserResult authenticateUserResult = new AuthenticateUserResult();
         authenticateUserResult.token = null;
-        Optional<ObjectId> userOidOptional = Optional.absent();
 
         if (null != authenticateUserRequest.nickname) {
             authenticateUserRequest.nickname = authenticateUserRequest.nickname.trim();
@@ -267,7 +270,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             authenticateUserRequest.passwordClear = authenticateUserRequest.passwordClear.trim();
         }
 
-        userOidOptional = authenticationService.authenticateByNicknameAndPassword(
+        Optional<ObjectId> userOidOptional = authenticationService.authenticateByNicknameAndPassword(
                 authenticateUserRequest.nickname,
                 authenticateUserRequest.passwordClear);
 
@@ -437,6 +440,47 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         return result;
 
+    }
+
+    @Override
+    public InitiatePasswordResetResult initiatePasswordReset(InitiatePasswordResetRequest initiatePasswordResetRequest) {
+        Preconditions.checkNotNull(initiatePasswordResetRequest);
+
+        if(!captchaService.verify(initiatePasswordResetRequest.captchaToken, initiatePasswordResetRequest.captchaResponse)) {
+            throw new CaptchaBadResponseException();
+        }
+
+        try {
+            passwordResetOrchestrationService.initiate(initiatePasswordResetRequest.email);
+        }
+        catch(Throwable th) {
+            logger.error("unable to initiate password reset",th);
+        }
+
+        return new InitiatePasswordResetResult();
+    }
+
+    @Override
+    public CompletePasswordResetResult completePasswordReset(CompletePasswordResetRequest completePasswordResetRequest) {
+        Preconditions.checkNotNull(completePasswordResetRequest);
+        Preconditions.checkState(!Strings.isNullOrEmpty(completePasswordResetRequest.captchaToken), "a capture token is required");
+        Preconditions.checkState(!Strings.isNullOrEmpty(completePasswordResetRequest.token), "a token is required to facilitate the reset of the password");
+        Preconditions.checkState(!Strings.isNullOrEmpty(completePasswordResetRequest.passwordClear), "a new password is required to reset the password");
+
+        if(!captchaService.verify(completePasswordResetRequest.captchaToken, completePasswordResetRequest.captchaResponse)) {
+            throw new CaptchaBadResponseException();
+        }
+
+        try {
+            passwordResetOrchestrationService.complete(
+                    completePasswordResetRequest.token,
+                    completePasswordResetRequest.passwordClear);
+        }
+        catch(Throwable th) {
+            logger.error("unable to complete password reset",th);
+        }
+
+        return new CompletePasswordResetResult();
     }
 
 }

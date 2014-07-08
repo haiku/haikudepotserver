@@ -93,6 +93,8 @@
                             <value>/js/app/controller/viewuserratingcontroller.js</value>
                             <value>/js/app/controller/listpkgversionsforpkgcontroller.js</value>
                             <value>/js/app/controller/listuserscontroller.js</value>
+                            <value>/js/app/controller/initiatepasswordresetcontroller.js</value>
+                            <value>/js/app/controller/completepasswordresetcontroller.js</value>
 
                             <value>/js/app/service/jsonrpcservice.js</value>
                             <value>/js/app/service/messagesourceservice.js</value>

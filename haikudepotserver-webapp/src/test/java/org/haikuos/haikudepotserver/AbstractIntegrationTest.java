@@ -66,6 +66,9 @@ public abstract class AbstractIntegrationTest {
     @Resource
     protected IntegrationTestSupportService integrationTestSupportService;
 
+    @Resource
+    protected CapturingMailSender mailSender;
+
     protected byte[] getResourceData(String path) throws IOException {
         InputStream inputStream = null;
 
@@ -108,6 +111,7 @@ public abstract class AbstractIntegrationTest {
     @After
     public void afterEachTest() {
         setUnauthenticated();
+        mailSender.clear();
     }
 
     /**
@@ -171,6 +175,7 @@ public abstract class AbstractIntegrationTest {
             logger.info("prep; did drop database objects for schema '{}' and re-create them", managedDatabase.getSchema());
         }
 
+        mailSender.clear();
 
         logger.info("did prepare for the next test");
     }

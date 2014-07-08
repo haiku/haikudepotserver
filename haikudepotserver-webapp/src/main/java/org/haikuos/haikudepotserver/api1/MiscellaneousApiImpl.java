@@ -11,11 +11,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
+import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.security.model.TargetType;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
@@ -258,6 +258,5 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                 )
         );
     }
-
 
 }

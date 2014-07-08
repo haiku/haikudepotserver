@@ -17,10 +17,15 @@ import org.haikuos.haikudepotserver.captcha.CaptchaService;
 import org.haikuos.haikudepotserver.captcha.model.Captcha;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haikuos.haikudepotserver.passwordreset.PasswordResetException;
+import org.haikuos.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
 import org.junit.Test;
+import org.springframework.mail.SimpleMailMessage;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.List;
 
 public class UserApiIT extends AbstractIntegrationTest {
 
@@ -29,6 +34,9 @@ public class UserApiIT extends AbstractIntegrationTest {
 
     @Resource
     CaptchaService captchaService;
+
+    @Resource
+    PasswordResetOrchestrationService passwordResetOrchestrationService;
 
     @Test
     public void testUpdateUser() throws Exception {
@@ -72,7 +80,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<User> userOptional = User.getByNickname(context,"testuser");
+        Optional<User> userOptional = User.getByNickname(context, "testuser");
 
         Assertions.assertThat(userOptional.isPresent()).isTrue();
         Assertions.assertThat(userOptional.get().getActive()).isTrue();
@@ -87,7 +95,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     public void testGetUser_found() throws ObjectNotFoundException {
 
         ObjectContext context = serverRuntime.getContext();
-        User user = integrationTestSupportService.createBasicUser(context,"testuser","yUe4o2Nwe009");
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
@@ -100,14 +108,14 @@ public class UserApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-         public void testAuthenticateUser_succcess() {
+    public void testAuthenticateUser_succcess() {
 
         ObjectContext context = serverRuntime.getContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
-        AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser","U7vqpsu6BB"));
+        AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser", "U7vqpsu6BB"));
         // ------------------------------------
 
         Assertions.assertThat(result.token).isNotNull();
@@ -119,11 +127,11 @@ public class UserApiIT extends AbstractIntegrationTest {
     public void testAuthenticateUser_fail() {
 
         ObjectContext context = serverRuntime.getContext();
-        User user = integrationTestSupportService.createBasicUser(context,"testuser","U7vqpsu6BB");
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
-        AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser","y63j20f22"));
+        AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser", "y63j20f22"));
         // ------------------------------------
 
         Assertions.assertThat(result.token).isNull();
@@ -161,7 +169,7 @@ public class UserApiIT extends AbstractIntegrationTest {
 
         Captcha captcha = captchaService.generate();
         ObjectContext context = serverRuntime.getContext();
-        User user = integrationTestSupportService.createBasicUser(context,"testuser","U7vqpsu6BB");
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // check that the password is correctly configured.
@@ -222,6 +230,109 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.get(0).nickname).isEqualTo("mangere");
         Assertions.assertThat(result.items.get(0).active).isEqualTo(Boolean.TRUE);
         Assertions.assertThat(result.items.get(1).nickname).isEqualTo("mtalbert");
+
+    }
+
+    private void createPasswordResetTestUser() {
+        ObjectContext context = serverRuntime.getContext();
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
+        user.setEmail("integration-test-recipient@haiku-os.org");
+        context.commitChanges();
+    }
+
+    private String getOnlyPasswordResetTokenCodeForTestUser() {
+        ObjectContext context = serverRuntime.getContext();
+        List<UserPasswordResetToken> tokens = UserPasswordResetToken.findByUser(
+                context,
+                User.getByNickname(context, "testuser").get());
+
+        switch (tokens.size()) {
+            case 0:
+                return null;
+            case 1:
+                return tokens.get(0).getCode();
+
+            default:
+                throw new IllegalStateException("more than one password reset token for the user 'testuser'");
+        }
+    }
+
+    /**
+     * <p>This test will check the initiation of the password reset procedure.</p>
+     */
+
+    @Test
+    public void testInitiatePasswordReset() {
+
+        createPasswordResetTestUser();
+        Captcha captcha = captchaService.generate();
+        InitiatePasswordResetRequest request = new InitiatePasswordResetRequest();
+        request.captchaToken = captcha.getToken();
+        request.captchaResponse = captcha.getResponse();
+        request.email = "integration-test-recipient@haiku-os.org";
+
+        // ------------------------------------
+        userApi.initiatePasswordReset(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            User user = User.getByNickname(context, "testuser").get();
+
+            // check for the presence of a token.
+            List<UserPasswordResetToken> tokens = UserPasswordResetToken.findByUser(context, user);
+            Assertions.assertThat(tokens.size()).isEqualTo(1);
+            UserPasswordResetToken token = tokens.get(0);
+
+            // check that an email did actually get sent.
+
+            List<SimpleMailMessage> messages = mailSender.getSentMessages();
+            Assertions.assertThat(messages.size()).isEqualTo(1);
+            SimpleMailMessage message = messages.get(0);
+            Assertions.assertThat(message.getTo()).isEqualTo(new String[]{"integration-test-recipient@haiku-os.org"});
+            Assertions.assertThat(message.getFrom()).isEqualTo("integration-test-sender@haiku-os.org");
+            Assertions.assertThat(message.getText()).contains(token.getCode());
+
+        }
+
+    }
+
+    /**
+     * <p>This checks a password reset token can be picked-up and actioned.  The token will have been sent to the
+     * user earlier in an email.</p>
+     */
+
+    @Test
+    public void testCompletePasswordReset_ok() {
+
+        createPasswordResetTestUser();
+        Assertions.assertThat(getOnlyPasswordResetTokenCodeForTestUser()).isNull();
+
+        try {
+            passwordResetOrchestrationService.initiate("integration-test-recipient@haiku-os.org");
+        } catch (PasswordResetException pre) {
+            throw new IllegalStateException("unable to initiate the password reset when testing complete", pre);
+        }
+
+        Captcha captcha = captchaService.generate();
+        CompletePasswordResetRequest request = new CompletePasswordResetRequest();
+        request.captchaToken = captcha.getToken();
+        request.captchaResponse = captcha.getResponse();
+        request.token = getOnlyPasswordResetTokenCodeForTestUser();
+        request.passwordClear = "kQ83hWi3oWnYY21k";
+
+        // ------------------------------------
+        userApi.completePasswordReset(request);
+        // ------------------------------------
+
+        // the user should now be able to be authenticated with the new password.
+        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "kQ83hWi3oWnYY21k").isPresent()).isTrue();
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Optional<UserPasswordResetToken> token = UserPasswordResetToken.getByCode(context, request.token);
+            Assertions.assertThat(token.isPresent()).isFalse();
+        }
 
     }
 

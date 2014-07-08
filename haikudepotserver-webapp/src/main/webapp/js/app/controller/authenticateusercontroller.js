@@ -42,12 +42,17 @@ angular.module('haikudepotserver').controller(
                 return $scope.authenticateUserForm[name].$invalid ? ['form-control-group-error'] : [];
             };
 
+            $scope.goInitiatePasswordReset = function() {
+                breadcrumbs.pushAndNavigate(
+                    breadcrumbs.createInitiatePasswordReset()
+                );
+            };
+
             $scope.goCreateUser = function() {
                 breadcrumbs.resetAndNavigate([
                     breadcrumbs.createHome(),
                     breadcrumbs.createAddUser()
                 ]);
-                $scope.showActions = false;
             };
 
             // This function will take the data from the form and will authenticate

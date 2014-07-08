@@ -20,6 +20,8 @@ CREATE SEQUENCE haikudepot.user_password_reset_token_seq START WITH 4251 INCREME
 
 ALTER TABLE haikudepot.user_password_reset_token ADD FOREIGN KEY (user_id) REFERENCES haikudepot.user (id);
 
+CREATE UNIQUE INDEX user_password_reset_token_idx01 ON haikudepot.user_password_reset_token(code);
+
 -- ------------------------------------------------------
 -- AUTHORIZATION
 -- ------------------------------------------------------
@@ -84,3 +86,8 @@ INSERT INTO haikudepot.permission (id, code, name) VALUES ((SELECT nextval('haik
 INSERT INTO haikudepot.permission (id, code, name) VALUES ((SELECT nextval('haikudepot.permission_seq')), 'pkg_editscreenshot','Edit Package Screenshot');
 INSERT INTO haikudepot.permission (id, code, name) VALUES ((SELECT nextval('haikudepot.permission_seq')), 'pkg_editcategories','Edit Package Categories');
 INSERT INTO haikudepot.permission (id, code, name) VALUES ((SELECT nextval('haikudepot.permission_seq')), 'pkg_editversionlocalization','Edit Version Localization');
+
+CREATE UNIQUE INDEX permission_idx01 ON haikudepot.permission(code);
+CREATE UNIQUE INDEX permission_user_pkg_idx01 ON haikudepot.permission_user_pkg(user_id,pkg_id,permission_id);
+CREATE UNIQUE INDEX permission_user_repository_idx01 ON haikudepot.permission_user_repository(user_id,repository_id,permission_id);
+CREATE UNIQUE INDEX permission_public_repository_idx01 ON haikudepot.permission_public_repository(repository_id,permission_id);
