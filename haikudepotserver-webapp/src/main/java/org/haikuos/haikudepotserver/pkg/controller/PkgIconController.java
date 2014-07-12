@@ -21,7 +21,6 @@ import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
-import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -44,7 +43,7 @@ import java.io.InputStream;
 @RequestMapping("/pkgicon")
 public class PkgIconController extends AbstractController {
 
-    protected static Logger logger = LoggerFactory.getLogger(WebResourceGroupController.class);
+    protected static Logger logger = LoggerFactory.getLogger(PkgIconController.class);
 
     public final static String KEY_PKGNAME = "pkgname";
     public final static String KEY_FORMAT = "format";

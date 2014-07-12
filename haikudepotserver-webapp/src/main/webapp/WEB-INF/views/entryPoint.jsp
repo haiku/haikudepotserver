@@ -1,6 +1,6 @@
 <%@ page session="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="hds" uri="/WEB-INF/haikudepotserver.tld" %>
+<%@ taglib prefix="jwr" uri="http://jawr.net/tags" %>
 
 <%--
 This is a single page application and this is essentially the 'single page'.  It boots-up some libraries and other
@@ -19,9 +19,9 @@ web-resources and then this starts the java-script single page environment drive
     <link rel="icon" type="image/png" href="/img/haikudepot32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="/img/haikudepot64.png" sizes="64x64">
 
-    <hds:webresourcegroup code="libScripts"/>
-    <hds:webresourcegroup code="appScripts"/>
-    <hds:webresourcegroup code="appStylesheets"/>
+    <jwr:script src="/bundles/libs.js"></jwr:script>
+    <jwr:script src="/bundles/app.js"></jwr:script>
+    <jwr:style src="/bundles/app.css"></jwr:style>
 
 </head>
 

@@ -22,7 +22,6 @@ import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.ByteCounterOutputStream;
 import org.haikuos.haikudepotserver.support.NoOpOutputStream;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
-import org.haikuos.haikudepotserver.web.controller.WebResourceGroupController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ import java.io.IOException;
 @RequestMapping("/pkgscreenshot")
 public class PkgScreenshotController extends AbstractController {
 
-    protected static Logger logger = LoggerFactory.getLogger(WebResourceGroupController.class);
+    protected static Logger logger = LoggerFactory.getLogger(PkgScreenshotController.class);
 
     public final static String HEADER_SCREENSHOTCODE = "X-HaikuDepotServer-ScreenshotCode";
 

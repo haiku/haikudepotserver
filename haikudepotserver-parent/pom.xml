@@ -13,11 +13,22 @@
         <spring.version>4.0.5.RELEASE</spring.version>
         <postgresql.version>9.3-1101-jdbc41</postgresql.version>
 
-        <web-angularjs.version>1.2.18</web-angularjs.version>
-        <web-underscorejs.version>1.6.0-3</web-underscorejs.version>
-        <web-momentjs.version>2.6.0-2</web-momentjs.version>
+<!--
+The extensions seem to appear in the maven coordinates, but not in the paths
+within the jars themselves.
+-->
+
+        <web-angularjs.versionbase>1.2.18</web-angularjs.versionbase>
+        <web-angularjs.versionextension></web-angularjs.versionextension>
+
+        <web-underscorejs.versionbase>1.6.0</web-underscorejs.versionbase>
+        <web-underscorejs.versionextension>-3</web-underscorejs.versionextension>
+
+        <web-momentjs.versionbase>2.6.0</web-momentjs.versionbase>
+        <web-momentjs.versionextension>-2</web-momentjs.versionextension>
 
         <nimbus-jose-jwt.version>2.26</nimbus-jose-jwt.version>
+
     </properties>
 
     <dependencyManagement>
@@ -48,6 +59,11 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
+                <version>1.7.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
                 <version>1.7.5</version>
             </dependency>
 
@@ -98,6 +114,11 @@
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.jawr</groupId>
+                <artifactId>jawr</artifactId>
+                <version>3.3.3</version>
             </dependency>
 
             <!-- DATABASE / PERSISTENCE -->
@@ -169,17 +190,17 @@
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>angularjs</artifactId>
-                <version>${web-angularjs.version}</version>
+                <version>${web-angularjs.versionbase}${web-angularjs.versionextension}</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>underscorejs</artifactId>
-                <version>${web-underscorejs.version}</version>
+                <version>${web-underscorejs.versionbase}${web-underscorejs.versionextension}</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>momentjs</artifactId>
-                <version>${web-momentjs.version}</version>
+                <version>${web-momentjs.versionbase}${web-momentjs.versionextension}</version>
             </dependency>
 
         </dependencies>

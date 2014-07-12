@@ -56,6 +56,10 @@
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+        </dependency>
 
         <!-- WEB / API -->
         <dependency>
@@ -75,6 +79,10 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.jawr</groupId>
+            <artifactId>jawr</artifactId>
         </dependency>
 
         <!-- DATABASE / PERSISTENCE -->
@@ -156,7 +164,7 @@
                 <directory>${basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>webjars.properties</include>
+                    <include>jawr.properties</include>
                     <include>build.properties</include>
                 </includes>
             </resource>
@@ -164,7 +172,7 @@
                 <directory>${basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>webjars.properties</exclude>
+                    <exclude>jawr.properties</exclude>
                     <exclude>build.properties</exclude>
                 </excludes>
             </resource>
