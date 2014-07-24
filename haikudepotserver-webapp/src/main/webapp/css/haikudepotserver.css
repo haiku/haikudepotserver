@@ -92,8 +92,8 @@ PAGE STRUCTURE
     margin-left: 32px;
     margin-right: 32px;
     margin-top: 16px;
-    margin-bottom: 0px; // handled by the trailer class
-width: auto;
+    margin-bottom: 0px; /* handled by the trailer class */
+    width: auto;
 }
 
 .footer {
@@ -111,6 +111,8 @@ ALERT BOXES FOR USE OUTSIDE OF FORMS
     border: 1px solid red;
     background-color: white;
     color: red;
+    margin-bottom: 4px;
+    margin-top: 4px;
 }
 
 .info-container {
@@ -118,6 +120,8 @@ ALERT BOXES FOR USE OUTSIDE OF FORMS
     border: 1px solid #336698;
     background-color: white;
     color: black;
+    margin-bottom: 4px;
+    margin-top: 4px;
 }
 
 .onelineform-container {
@@ -369,6 +373,17 @@ SEARCH BAR
 #search-criteria-container {
     background-color: rgb(253,207,49);
     border: 1px solid black;
+}
+
+#search-criteria-container label {
+    font-size: 10px;
+    white-space: nowrap;
+    margin: 5px;
+    width: auto;
+}
+
+#search-criteria-container label::after {
+    content:":";
 }
 
 #search-criteria-container input {

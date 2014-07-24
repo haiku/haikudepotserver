@@ -57,4 +57,9 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
 
     }
 
+    @Override
+    public String toString() {
+      return "repo;"+getCode();
+    }
+
 }

@@ -19,6 +19,8 @@ public enum Permission {
     USER_CHANGEPASSWORD(TargetType.USER),
     USER_LIST(null),
 
+    AUTHORIZATION_CONFIGURE(null),
+
     USERRATING_EDIT(TargetType.USERRATING),
 
     PKG_CREATEUSERRATING(TargetType.PKG),

@@ -14,6 +14,7 @@ import com.googlecode.jsonrpc4j.DefaultErrorResolver;
 import com.googlecode.jsonrpc4j.ErrorResolver;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.haikuos.haikudepotserver.api1.model.authorization.AuthorizationRuleConflictException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -28,6 +29,13 @@ public class ErrorResolverImpl implements ErrorResolver {
 
     @Override
     public JsonError resolveError(Throwable t, Method method, List<JsonNode> arguments) {
+
+        if(AuthorizationRuleConflictException.class.isAssignableFrom(t.getClass())) {
+            return new JsonError(
+                    Constants.ERROR_CODE_AUTHORIZATIONRULECONFLICT,
+                    "authorizationruleconflict",
+                    null);
+        }
 
         if(LimitExceededException.class.isAssignableFrom(t.getClass())) {
             return new JsonError(

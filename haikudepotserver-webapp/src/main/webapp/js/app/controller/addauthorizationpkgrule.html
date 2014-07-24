@@ -1,0 +1,80 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <div class="form-alert-container" ng-show="wasConflicting">
+        <strong><message key="addAuthorizationPkgRule.conflict.title"></message></strong>
+        <message key="addAuthorizationPkgRule.conflict.description"></message>
+    </div>
+
+    <form name="addRuleForm" novalidate="novalidate">
+
+        <label for="userNickname"><message key="addAuthorizationPkgRule.userNickname.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('user')">
+            <input
+                    id="userNickname"
+                    type="text"
+                    name="userNickname"
+                    autocomplete="off"
+                    placeholder="erik"
+                    ng-model="workingRule.userNickname"
+                    ng-required="true"
+                    ng-change="userNicknameDidChange()"
+                    ng-pattern="{{userNicknamePattern}}"></input>
+            <error-messages key-prefix="addAuthorizationPkgRule.userNickname" error="addRuleForm.userNickname.$error"></error-messages>
+        </div>
+
+        <label for="permission"><message key="addAuthorizationPkgRule.permission.title"></message></label>
+        <div class="form-control-group">
+            <select
+                    name="permission"
+                    id="permission"
+                    required="true"
+                    ng-model="workingRule.permission"
+                    ng-options="aPermission.title for aPermission in allPermissions">
+            </select>
+        </div>
+
+        <label><message key="addAuthorizationPkgRule.authorizationTargetScopeType.title"></message></label>
+        <div class="form-control-group">
+            <input type="radio" name="authorizationTargetScopeType" value="APKG" ng-model="workingRule.authorizationTargetScopeType">
+            <message key="addAuthorizationPkgRule.authorizationTargetScopeType.apkg.title"></message>
+            &nbsp;&nbsp;
+            <input type="radio" name="authorizationTargetScopeType" value="ALLPKGS" ng-model="workingRule.authorizationTargetScopeType">
+            <message key="addAuthorizationPkgRule.authorizationTargetScopeType.allpkgs.title"></message>
+        </div>
+
+        <label ng-show="'APKG'==workingRule.authorizationTargetScopeType" for="pkgName">
+            <message key="addAuthorizationPkgRule.pkgName.title"></message>
+        </label>
+        <div
+                ng-show="'APKG'==workingRule.authorizationTargetScopeType"
+                class="form-control-group"
+                ng-class="deriveFormControlsContainerClasses('user')">
+            <input
+                    id="pkgName"
+                    type="text"
+                    name="pkgName"
+                    autocomplete="off"
+                    placeholder="myapplication"
+                    ng-model="workingRule.pkgName"
+                    ng-required="'APKG'==workingRule.authorizationTargetScopeType"
+                    ng-change="pkgNameDidChange()"
+                    ng-pattern="{{pkgNamePattern}}"></input>
+            <error-messages key-prefix="addAuthorizationPkgRule.pkgName" error="addRuleForm.pkgName.$error"></error-messages>
+        </div>
+
+        <div class="form-action-container">
+            <button
+                    ng-disabled="addRuleForm.$invalid"
+                    ng-click="goAddRule()"
+                    type="submit"
+                    class="main-action"><message key="addAuthorizationPkgRule.action.title"></message></button>
+        </div>
+
+    </form>
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

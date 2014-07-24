@@ -64,6 +64,12 @@ Set this to {\tt true} if you would like database schema migrations to be applie
 
 This configuration relates to the \href{https://jawr.java.net/}{JAWR} debug setting.  It will default to ``false'.
 
+\subsubsection{\tt passwordreset.baseurl}
+
+This is the base URL to which password-reset requests will be directed.  The URL base is included in the email body to users who have requested a password-reset.  This has to be configured because the application itself does not know the path by which the HTTP request had reached it.  In the case of a development environment, this base URL might be something like;
+
+\framebox{http://localhost:8080/passwordreset/}
+
 \subsection{Token Bearer Authentication}
 
 See \ref{token-bearer-authentication} for details regarding this area.
@@ -111,3 +117,7 @@ This is only required when SMTP authentication is configured.
 \subsubsection{\tt smtp.starttls}
 
 Possible values are ``true'' and ``false''.  Configures the SMTP transport.  This value is optional and defaults to ``false''.
+
+\subsubsection{\tt email.from}
+
+This is the email address from which emails outbound from the system will be sent.  Typically this might be a ``no-reply'' email address such as ``noreply@haiku-os.org''.

@@ -254,13 +254,13 @@ public class PasswordResetOrchestrationService {
                         UserPasswordResetToken.CREATE_TIMESTAMP_PROPERTY,
                         now.minusHours(timeToLiveHours).toDate()));
 
-        List<UserPasswordResetToken> tokens = context.performQuery(query);
+        List<UserPasswordResetToken> tokens = (List<UserPasswordResetToken>) context.performQuery(query);
 
         if(tokens.isEmpty()) {
-            logger.info("no expired tokens to delete");
+            logger.debug("no expired tokens to delete");
         }
         else {
-            context.deleteObjects(tokens.toArray(new UserPasswordResetToken[] {}));
+            context.deleteObjects(tokens.toArray(new UserPasswordResetToken[tokens.size()]));
             context.commitChanges();
             logger.info("did delete {} expired tokens", tokens.size());
         }

@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.api1.model;
+package org.haikuos.haikudepotserver.api1.model.authorization;
 
 /**
  * <p>This enum is used to identify what type of target the authorization applies to.</p>

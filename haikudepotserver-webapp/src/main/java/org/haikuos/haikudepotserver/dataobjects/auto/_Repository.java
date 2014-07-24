@@ -1,11 +1,8 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
-import java.util.List;
 
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.PermissionPublicRepository;
-import org.haikuos.haikudepotserver.dataobjects.PermissionUserRepository;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -22,8 +19,6 @@ public abstract class _Repository extends AbstractDataObject {
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String URL_PROPERTY = "url";
     public static final String ARCHITECTURE_PROPERTY = "architecture";
-    public static final String PERMISSION_PUBLIC_REPOSITORIES_PROPERTY = "permissionPublicRepositories";
-    public static final String PERMISSION_USER_REPOSITORIES_PROPERTY = "permissionUserRepositories";
 
     public static final String ID_PK_COLUMN = "id";
 
@@ -68,30 +63,6 @@ public abstract class _Repository extends AbstractDataObject {
 
     public Architecture getArchitecture() {
         return (Architecture)readProperty(ARCHITECTURE_PROPERTY);
-    }
-
-
-    public void addToPermissionPublicRepositories(PermissionPublicRepository obj) {
-        addToManyTarget(PERMISSION_PUBLIC_REPOSITORIES_PROPERTY, obj, true);
-    }
-    public void removeFromPermissionPublicRepositories(PermissionPublicRepository obj) {
-        removeToManyTarget(PERMISSION_PUBLIC_REPOSITORIES_PROPERTY, obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PermissionPublicRepository> getPermissionPublicRepositories() {
-        return (List<PermissionPublicRepository>)readProperty(PERMISSION_PUBLIC_REPOSITORIES_PROPERTY);
-    }
-
-
-    public void addToPermissionUserRepositories(PermissionUserRepository obj) {
-        addToManyTarget(PERMISSION_USER_REPOSITORIES_PROPERTY, obj, true);
-    }
-    public void removeFromPermissionUserRepositories(PermissionUserRepository obj) {
-        removeToManyTarget(PERMISSION_USER_REPOSITORIES_PROPERTY, obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PermissionUserRepository> getPermissionUserRepositories() {
-        return (List<PermissionUserRepository>)readProperty(PERMISSION_USER_REPOSITORIES_PROPERTY);
     }
 
 

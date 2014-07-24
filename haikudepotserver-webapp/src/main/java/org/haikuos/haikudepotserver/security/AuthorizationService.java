@@ -62,7 +62,7 @@ public class AuthorizationService {
 
         if(null!=targetType) {
 
-            Optional<? extends DataObject> targetOptional = null;
+            Optional<? extends DataObject> targetOptional;
 
             if(Strings.isNullOrEmpty(targetIdentifier)) {
                 throw new IllegalStateException("the target type is supplied, but no target identifier");
@@ -129,6 +129,9 @@ public class AuthorizationService {
         }
 
         switch(permission) {
+
+            case AUTHORIZATION_CONFIGURE:
+                return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case REPOSITORY_EDIT:
             case REPOSITORY_IMPORT:

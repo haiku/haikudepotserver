@@ -93,8 +93,15 @@ angular.module('haikudepotserver').factory('breadcrumbs',
              */
 
             function push(item) {
+
                 verifyItem(item);
+
+                if(!stack) {
+                    stack = [];
+                }
+
                 stack.push(item);
+
                 $rootScope.$broadcast('breadcrumbChangeSuccess',stack);
             }
 

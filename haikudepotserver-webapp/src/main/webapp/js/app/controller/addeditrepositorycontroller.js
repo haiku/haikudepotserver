@@ -6,10 +6,10 @@
 angular.module('haikudepotserver').controller(
     'AddEditRepositoryController',
     [
-        '$scope','$log','$location','$routeParams',
+        '$scope','$log','$routeParams',
         'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling','referenceData',
         function(
-            $scope,$log,$location,$routeParams,
+            $scope,$log,$routeParams,
             jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,referenceData) {
 
             $scope.workingRepository = undefined;

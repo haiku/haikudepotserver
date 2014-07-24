@@ -11,11 +11,16 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 public abstract class _Permission extends AbstractDataObject {
 
     public static final String CODE_PROPERTY = "code";
+    public static final String NAME_PROPERTY = "name";
 
     public static final String ID_PK_COLUMN = "id";
 
     public String getCode() {
         return (String)readProperty(CODE_PROPERTY);
+    }
+
+    public String getName() {
+        return (String)readProperty(NAME_PROPERTY);
     }
 
 }

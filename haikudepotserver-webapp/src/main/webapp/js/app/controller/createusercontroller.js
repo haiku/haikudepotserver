@@ -12,6 +12,7 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$location,
             jsonRpc,constants,errorHandling,referenceData,userState,messageSource,breadcrumbs,breadcrumbFactory) {
 
+            $scope.userNicknamePattern = '' + constants.PATTERN_USER_NICKNAME;
             $scope.captchaToken = undefined;
             $scope.captchaImageUrl = undefined;
             $scope.amSaving = false;

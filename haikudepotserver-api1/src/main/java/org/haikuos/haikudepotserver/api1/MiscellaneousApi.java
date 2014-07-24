@@ -25,13 +25,6 @@ public interface MiscellaneousApi {
     GetAllNaturalLanguagesResult getAllNaturalLanguages(GetAllNaturalLanguagesRequest getAllNaturalLanguagesRequest);
 
     /**
-     * <p>This method will take in a list of permissions with targets and will return the list of those that
-     * pass authorization checks against the presently authenticated user.</p>
-     */
-
-    CheckAuthorizationResult checkAuthorization(CheckAuthorizationRequest deriveAuthorizationRequest);
-
-    /**
      * <p>This method will raise a runtime exception to test the behaviour of the server and client in this
      * situation.</p>
      */

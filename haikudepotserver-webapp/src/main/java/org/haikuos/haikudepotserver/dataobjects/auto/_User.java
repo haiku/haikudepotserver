@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PermissionUserPkg;
-import org.haikuos.haikudepotserver.dataobjects.PermissionUserRepository;
 import org.haikuos.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -28,7 +27,6 @@ public abstract class _User extends AbstractDataObject {
     public static final String PASSWORD_SALT_PROPERTY = "passwordSalt";
     public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
     public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
-    public static final String PERMISSION_USER_REPOSITORIES_PROPERTY = "permissionUserRepositories";
     public static final String USER_PASSWORD_RESET_TOKENS_PROPERTY = "userPasswordResetTokens";
 
     public static final String ID_PK_COLUMN = "id";
@@ -114,18 +112,6 @@ public abstract class _User extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PermissionUserPkg> getPermissionUserPkgs() {
         return (List<PermissionUserPkg>)readProperty(PERMISSION_USER_PKGS_PROPERTY);
-    }
-
-
-    public void addToPermissionUserRepositories(PermissionUserRepository obj) {
-        addToManyTarget(PERMISSION_USER_REPOSITORIES_PROPERTY, obj, true);
-    }
-    public void removeFromPermissionUserRepositories(PermissionUserRepository obj) {
-        removeToManyTarget(PERMISSION_USER_REPOSITORIES_PROPERTY, obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PermissionUserRepository> getPermissionUserRepositories() {
-        return (List<PermissionUserRepository>)readProperty(PERMISSION_USER_REPOSITORIES_PROPERTY);
     }
 
 

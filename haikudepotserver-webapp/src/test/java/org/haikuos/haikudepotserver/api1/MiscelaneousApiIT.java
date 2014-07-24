@@ -8,16 +8,12 @@ package org.haikuos.haikudepotserver.api1;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
-import org.haikuos.haikudepotserver.IntegrationTestSupportService;
-import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
-import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.junit.Test;
 
@@ -31,16 +27,6 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
 
     @Resource
     RuntimeInformationService runtimeInformationService;
-
-    private void assertTargetAndPermission(
-            IntegrationTestSupportService.StandardTestData data,
-            CheckAuthorizationResult.AuthorizationTargetAndPermission targetAndPermission,
-            boolean result) {
-        Assertions.assertThat(targetAndPermission.permissionCode).isEqualTo(Permission.PKG_EDITICON.name());
-        Assertions.assertThat(targetAndPermission.targetIdentifier).isEqualTo(data.pkg1.getName());
-        Assertions.assertThat(targetAndPermission.targetType).isEqualTo(AuthorizationTargetType.PKG);
-        Assertions.assertThat(targetAndPermission.authorized).isEqualTo(result);
-    }
 
     @Test
     public void testGetAllPkgCategories() {
@@ -82,51 +68,6 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(naturalLanguage.getName()).isEqualTo(apiNaturalLanguage.name);
             Assertions.assertThat(naturalLanguage.getCode()).isEqualTo(apiNaturalLanguage.code);
         }
-    }
-
-    @Test
-    public void checkAuthorizationRequest_asUnauthenticated() {
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-
-        CheckAuthorizationRequest request = new CheckAuthorizationRequest();
-        request.targetAndPermissions = Lists.newArrayList();
-
-        request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
-                AuthorizationTargetType.PKG,
-                data.pkg1.getName(),
-                Permission.PKG_EDITICON.name()));
-
-        // ------------------------------------
-        CheckAuthorizationResult result = miscellaneousApi.checkAuthorization(request);
-        // ------------------------------------
-
-        Assertions.assertThat(result.targetAndPermissions.size()).isEqualTo(1);
-        assertTargetAndPermission(data, result.targetAndPermissions.get(0), false);
-
-    }
-
-    // TODO : when some more sophisticated cases are available; implement some better tests
-    @Test
-    public void checkAuthorizationRequest_asRoot() {
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-
-        setAuthenticatedUserToRoot();
-
-        CheckAuthorizationRequest request = new CheckAuthorizationRequest();
-        request.targetAndPermissions = Lists.newArrayList();
-
-        request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
-                AuthorizationTargetType.PKG,
-                data.pkg1.getName(),
-                Permission.PKG_EDITICON.name()));
-
-        // ------------------------------------
-        CheckAuthorizationResult result = miscellaneousApi.checkAuthorization(request);
-        // ------------------------------------
-
-        Assertions.assertThat(result.targetAndPermissions.size()).isEqualTo(1);
-        assertTargetAndPermission(data, result.targetAndPermissions.get(0), true);
-
     }
 
     @Test

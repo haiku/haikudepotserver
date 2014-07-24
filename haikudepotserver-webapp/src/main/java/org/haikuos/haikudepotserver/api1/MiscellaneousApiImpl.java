@@ -14,9 +14,6 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.security.AuthorizationService;
-import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.security.model.TargetType;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
@@ -40,9 +37,6 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
     @Resource
     ServerRuntime serverRuntime;
-
-    @Resource
-    AuthorizationService authorizationService;
 
     @Resource
     RuntimeInformationService runtimeInformationService;
@@ -85,37 +79,6 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                         }
                 )
         );
-    }
-
-    @Override
-    public CheckAuthorizationResult checkAuthorization(CheckAuthorizationRequest deriveAuthorizationRequest) {
-
-        Preconditions.checkNotNull(deriveAuthorizationRequest);
-        Preconditions.checkNotNull(deriveAuthorizationRequest.targetAndPermissions);
-
-        final ObjectContext context = serverRuntime.getContext();
-        CheckAuthorizationResult result = new CheckAuthorizationResult();
-        result.targetAndPermissions = Lists.newArrayList();
-
-        for(CheckAuthorizationRequest.AuthorizationTargetAndPermission targetAndPermission : deriveAuthorizationRequest.targetAndPermissions) {
-
-            CheckAuthorizationResult.AuthorizationTargetAndPermission authorizationTargetAndPermission = new CheckAuthorizationResult.AuthorizationTargetAndPermission();
-
-            authorizationTargetAndPermission.permissionCode = targetAndPermission.permissionCode;
-            authorizationTargetAndPermission.targetIdentifier = targetAndPermission.targetIdentifier;
-            authorizationTargetAndPermission.targetType = targetAndPermission.targetType;
-
-            authorizationTargetAndPermission.authorized = authorizationService.check(
-                    context,
-                    tryObtainAuthenticatedUser(context).orNull(),
-                    null!=targetAndPermission.targetType ? TargetType.valueOf(targetAndPermission.targetType.name()) : null,
-                    targetAndPermission.targetIdentifier,
-                    Permission.valueOf(targetAndPermission.permissionCode));
-
-            result.targetAndPermissions.add(authorizationTargetAndPermission);
-        }
-
-        return result;
     }
 
     @Override

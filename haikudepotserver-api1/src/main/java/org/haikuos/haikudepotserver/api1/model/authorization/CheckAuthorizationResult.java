@@ -3,9 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.api1.model.miscellaneous;
-
-import org.haikuos.haikudepotserver.api1.model.AuthorizationTargetType;
+package org.haikuos.haikudepotserver.api1.model.authorization;
 
 import java.util.List;
 

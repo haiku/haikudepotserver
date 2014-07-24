@@ -111,7 +111,7 @@ public class PkgIconController extends AbstractController {
         Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
 
         if(!pkg.isPresent()) {
-            logger.info("request for icon for package '{}', but no such package was able to be found",pkgName);
+            logger.debug("request for icon for package '{}', but no such package was able to be found",pkgName);
             throw new PkgNotFound();
         }
 

@@ -377,6 +377,20 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                         titleKey : 'breadcrumb.changePassword.title',
                         path : '/user/' + user.nickname + '/changepassword'
                     });
+                },
+
+                createListAuthorizationPkgRules : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.listAuthorizationPkgRules.title',
+                        path : '/authorizationpkgrules'
+                    });
+                },
+
+                createAddAuthorizationPkgRule : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.addAuthorizationPkgRule.title',
+                        path : '/authorizationpkgrules/add'
+                    });
                 }
 
             };

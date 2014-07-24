@@ -1,5 +1,7 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
+import java.util.Date;
+
 import org.haikuos.haikudepotserver.dataobjects.Permission;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -13,11 +15,19 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PermissionUserPkg extends AbstractDataObject {
 
+    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
     public static final String PERMISSION_PROPERTY = "permission";
     public static final String PKG_PROPERTY = "pkg";
     public static final String USER_PROPERTY = "user";
 
     public static final String ID_PK_COLUMN = "id";
+
+    public void setCreateTimestamp(Date createTimestamp) {
+        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+    }
+    public Date getCreateTimestamp() {
+        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
 
     public void setPermission(Permission permission) {
         setToOneTarget(PERMISSION_PROPERTY, permission, true);

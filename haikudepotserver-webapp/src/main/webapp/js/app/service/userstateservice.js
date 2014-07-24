@@ -337,7 +337,7 @@ angular.module('haikudepotserver').factory('userState',
                             }
 
                             jsonRpc.call(
-                                constants.ENDPOINT_API_V1_MISCELLANEOUS,
+                                constants.ENDPOINT_API_V1_AUTHORIZATION,
                                 'checkAuthorization',
                                 [{ targetAndPermissions : uncachedTargetAndPermissions }]
                             ).then(

@@ -3,7 +3,7 @@
 <div class="content-container">
     <form name="createUserForm" novalidate="novalidate">
 
-        <label for="nickname"><message key="gen.nickname.title"></message></label>
+        <label for="nickname"><message key="addAuthorizationPkgRule.userNickname.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('nickname')">
             <input
                     id="nickname"
@@ -14,7 +14,7 @@
                     ng-model="newUser.nickname"
                     ng-required="true"
                     ng-change="nicknameDidChange()"
-                    ng-pattern="/^[a-z0-9]{4,16}$/"></input>
+                    ng-pattern="{{userNicknamePattern}}"></input>
             <error-messages key-prefix="createUser.nickname" error="createUserForm.nickname.$error"></error-messages>
         </div>
 

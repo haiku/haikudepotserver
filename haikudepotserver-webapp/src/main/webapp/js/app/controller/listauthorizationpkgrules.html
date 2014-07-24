@@ -1,0 +1,127 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container list-authorization-pkg-rules">
+
+    <!-- SEARCH -->
+
+    <div id="search-criteria-container">
+        <div>
+            <label for="user-nickname">
+                <message key="listAuthorizationPkgRules.search.userNickname.title"></message>
+            </label>
+            <input
+                    id="user-nickname"
+                    ng-model="criteria.userNickname"
+                    autocomplete="off"
+                    ng-maxlength="48"
+                    return-key-press="goSearch()"
+                    ng-change="userNicknameDidChange()"
+                    placeholder="erik"></input>
+        </div>
+        <div>
+            <label for="user-nickname">
+                <message key="listAuthorizationPkgRules.search.pkgName.title"></message>
+            </label>
+            <input
+                    ng-model="criteria.pkgName"
+                    autocomplete="off"
+                    ng-maxlength="48"
+                    return-key-press="goSearch()"
+                    ng-change="pkgNameDidChange()"
+                    placeholder="myapplication"></input>
+        </div>
+        <div>
+            <button ng-click="goSearch()">
+                <message key="listAuthorizationPkgRules.searchAction.title"></message>
+            </button>
+        </div>
+    </div>
+
+    <!-- RESULTS -->
+
+    <div id="search-results-container">
+
+        <div class="alert-container" ng-show="criteria.userNicknameNotFound">
+            <strong><message key="listAuthorizationPkgRules.userNicknameNotFound.title"></message></strong>
+            <message key="listAuthorizationPkgRules.userNicknameNotFound.description"></message>
+        </div>
+
+        <div class="alert-container" ng-show="criteria.pkgNameNotFound">
+            <strong><message key="listAuthorizationPkgRules.pkgNameNotFound.title"></message></strong>
+            <message key="listAuthorizationPkgRules.pkgNameNotFound.description"></message>
+        </div>
+
+        <div ng-show="rules.items && 0==rules.items.length" class="info-container">
+            <strong><message key="listAuthorizationPkgRules.noResults.title"></message>; </strong>
+            <message key="listAuthorizationPkgRules.noResults.description"></message>
+        </div>
+
+        <div ng-show="rules.items && rules.items.length" class="table-general-container">
+
+            <div class="table-general-pagination-container">
+                <pagination-control
+                        link-count="9"
+                        max="rules.max"
+                        total="rules.total"
+                        offset="rules.offset"></pagination-control>
+            </div>
+
+            <table class="table-general">
+                <thead>
+                <th><message key="listAuthorizationPkgRules.table.user.title"></message></th>
+                <th><message key="listAuthorizationPkgRules.table.permission.title"></message></th>
+                <th><message key="listAuthorizationPkgRules.table.pkg.title"></message></th>
+                <th></th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="item in rules.items">
+                    <td><user-label user="item.user"></user-label></td>
+                    <td>{{item.permission.title}}</td>
+                    <td>
+                        <span ng-show="item.pkg"><pkg-label pkg="item.pkg"></pkg-label></span>
+                        <span ng-show="!item.pkg">
+                            <em>
+                                <message key="listAuthorizationPkgRules.allPackages"></message>
+                            </em>
+                        </span>
+                    </td>
+                    <td>
+                        <a href="" ng-click="goDeleteRule(item)">
+                            <img src="/img/rowdelete.svg">
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <ul>
+        <li>
+            <a href="" ng-click="goAddRule()">
+                <message key="listAuthorizationPkgRules.addRuleAction.title"></message>
+            </a>
+        </li>
+    </ul>
+
+    <modal-container show="!!ruleToDelete" width="320" height="210" close="goCancelDeleteRule()">
+
+        <h3><message key="listAuthorizationPkgRules.deleteRuleModal.title"></message></h3>
+        <p><message key="listAuthorizationPkgRules.deleteRuleModal.description"></message></p>
+
+        <div>
+            <button ng-click="goConfirmDeleteRule()">
+                <message key="listAuthorizationPkgRules.deleteRuleModal.confirmAction.title"></message>
+            </button>
+            <button ng-click="goCancelDeleteRule()">
+                <message key="listAuthorizationPkgRules.deleteRuleModal.cancelAction.title"></message>
+            </button>
+        </div>
+
+    </modal-container>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>

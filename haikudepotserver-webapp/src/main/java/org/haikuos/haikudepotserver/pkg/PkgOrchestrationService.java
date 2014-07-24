@@ -322,6 +322,8 @@ public class PkgOrchestrationService {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(search.getNaturalLanguage());
+        Preconditions.checkState(search.getOffset() >= 0);
+        Preconditions.checkState(search.getLimit() > 0);
 
         if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
             return Collections.emptyList();
@@ -734,7 +736,7 @@ public class PkgOrchestrationService {
                     pkg.getName());
         }
 
-        logger.info("have processed package {}",pkg.toString());
+        logger.debug("have processed package {}",pkg.toString());
 
     }
 

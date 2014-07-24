@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 public class User extends _User implements CreateAndModifyTimestamped {
 
-    public final static Pattern NICKNAME_PATTERN = Pattern.compile("^[\\w]{4,16}$");
+    public final static Pattern NICKNAME_PATTERN = Pattern.compile("^[a-z0-9]{4,16}$");
     public final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
     public final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
 

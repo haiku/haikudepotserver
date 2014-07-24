@@ -21,6 +21,8 @@ angular.module('haikudepotserver').config(
                 .when('/authenticateuser',{controller:'AuthenticateUserController', templateUrl:'/js/app/controller/authenticateuser.html'})
                 .when('/initiatepasswordreset',{controller:'InitiatePasswordResetController', templateUrl:'/js/app/controller/initiatepasswordreset.html'})
                 .when('/completepasswordreset/:token',{controller:'CompletePasswordResetController', templateUrl:'/js/app/controller/completepasswordreset.html'})
+                .when('/authorizationpkgrules',{controller:'ListAuthorizationPkgRulesController', templateUrl:'/js/app/controller/listauthorizationpkgrules.html'})
+                .when('/authorizationpkgrules/add',{controller:'AddAuthorizationPkgRuleController', templateUrl:'/js/app/controller/addauthorizationpkgrule.html'})
                 .when('/users',{controller:'ListUsersController', templateUrl:'/js/app/controller/listusers.html'})
                 .when('/users/add',{controller:'CreateUserController', templateUrl:'/js/app/controller/createuser.html'})
                 .when('/user/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})

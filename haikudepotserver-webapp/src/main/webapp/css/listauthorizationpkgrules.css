@@ -1,0 +1,4 @@
+.list-authorization-pkg-rules .table-general > tbody > tr > td:nth-child(4) {
+    width: 16px;
+    text-align: center;
+}

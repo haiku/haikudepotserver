@@ -108,7 +108,7 @@ public class RepositoryImportService extends AbstractLocalBackgroundProcessingSe
             temporaryFile = File.createTempFile(job.getCode()+"__import",".hpkr");
             Resources.asByteSource(url).copyTo(Files.asByteSink(temporaryFile));
 
-            logger.info("did copy data for repository {} ({}) to temporary file",job.getCode(),url.toString());
+            logger.debug("did copy data for repository {} ({}) to temporary file",job.getCode(),url.toString());
 
             org.haikuos.pkg.HpkrFileExtractor fileExtractor = new org.haikuos.pkg.HpkrFileExtractor(temporaryFile);
             PkgIterator pkgIterator = new PkgIterator(fileExtractor.getPackageAttributesIterator());

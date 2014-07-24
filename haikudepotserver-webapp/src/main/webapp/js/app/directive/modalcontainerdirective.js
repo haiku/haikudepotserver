@@ -16,6 +16,7 @@ angular.module('haikudepotserver').directive('modalContainer',function() {
         scope: {
             show: '=',
             width: '@',
+            height: '@',
             close: '@' // a function to later eval
         },
         controller:
@@ -30,6 +31,13 @@ angular.module('haikudepotserver').directive('modalContainer',function() {
                     }
 
                     $scope.$watch('show', function() {
+                        updateShowModal();
+                    });
+
+                    $scope.$watch('height', function(newValue) {
+                        var height = parseInt(''+newValue,10);
+                        $scope.style['height'] = height + 'px';
+                        $scope.style['margin-top'] = '' + (height/-2.0) + 'px'; // centres it
                         updateShowModal();
                     });
 
