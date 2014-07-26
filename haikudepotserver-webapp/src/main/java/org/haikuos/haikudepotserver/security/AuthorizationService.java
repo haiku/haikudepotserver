@@ -7,16 +7,21 @@ package org.haikuos.haikudepotserver.security;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.dataobjects.UserRating;
+import org.haikuos.haikudepotserver.security.model.AuthorizationPkgRule;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.security.model.TargetType;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <P>This class will provide functions around authorization.  Some of the model for this is provided
@@ -48,6 +53,10 @@ public class AuthorizationService {
 
         throw new IllegalStateException("the data object type '"+dataObject.getClass().getSimpleName()+"' is not handled");
     }
+
+    /**
+     * <p>Returns true if the user supplied has the permission over the target object.</p>
+     */
 
     public boolean check(
             ObjectContext objectContext,
@@ -115,7 +124,7 @@ public class AuthorizationService {
             ObjectContext objectContext,
             User authenticatedUser,
             DataObject target,
-            Permission permission) {
+            final Permission permission) {
 
         Preconditions.checkNotNull(permission);
         Preconditions.checkNotNull(objectContext);
@@ -127,6 +136,31 @@ public class AuthorizationService {
         if(null!=authenticatedUser && !authenticatedUser.getActive()) {
             throw new IllegalStateException("the authenticated user '"+authenticatedUser.getNickname()+"' is not active and so authorization queries cannot be resolved for them");
         }
+
+        // it could be that permission is afforded based on rules stored in the user.  Check for
+        // this situation first.
+
+        if(null!=authenticatedUser) {
+            switch (permission) {
+                case PKG_EDITICON:
+                case PKG_EDITSCREENSHOT:
+                case PKG_EDITCATEGORIES:
+                case PKG_EDITVERSIONLOCALIZATION: {
+                    List<? extends AuthorizationPkgRule> rules = authenticatedUser.getAuthorizationPkgRules((Pkg) target);
+                    if (Iterables.tryFind(rules, new Predicate<AuthorizationPkgRule>() {
+                        @Override
+                        public boolean apply(AuthorizationPkgRule input) {
+                            return input.getPermission().getCode().equalsIgnoreCase(permission.name());
+                        }
+                    }).isPresent()) {
+                        return true;
+                    }
+                }
+                break;
+            }
+        }
+
+        // fall back to application-logic rules.
 
         switch(permission) {
 
@@ -155,7 +189,7 @@ public class AuthorizationService {
             case USER_CHANGEPASSWORD:
                 return
                         null!=authenticatedUser
-                        && (authenticatedUser.getIsRoot() || authenticatedUser.equals(target));
+                                && (authenticatedUser.getIsRoot() || authenticatedUser.equals(target));
 
             case USER_LIST:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();

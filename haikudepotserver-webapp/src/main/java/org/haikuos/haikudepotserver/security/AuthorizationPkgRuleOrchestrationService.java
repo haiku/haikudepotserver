@@ -228,7 +228,7 @@ public class AuthorizationPkgRuleOrchestrationService {
 
         PermissionUserPkg rule = context.newObject(PermissionUserPkg.class);
         rule.setPermission(permission);
-        rule.setUser(user);
+        user.addToManyTarget(User.PERMISSION_USER_PKGS_PROPERTY, rule, true);
         rule.setPkg(pkg);
         logger.info("did create permission user repository; {},{},{}",permission,user,pkg);
 
