@@ -5,6 +5,7 @@
 
 package org.haikuos.haikudepotserver.security;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -13,14 +14,22 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.security.model.AuthorizationPkgRule;
 import org.haikuos.haikudepotserver.security.model.AuthorizationPkgRuleSearchSpecification;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +41,8 @@ import java.util.List;
 public class AuthorizationPkgRuleOrchestrationService {
 
     protected static Logger logger = LoggerFactory.getLogger(AuthorizationPkgRuleOrchestrationService.class);
+
+    private static int LIMIT_GENERATECSV = 100;
 
     @SuppressWarnings("UnusedParameters")
     private String prepareWhereClause(
@@ -254,6 +265,59 @@ public class AuthorizationPkgRuleOrchestrationService {
             logger.info("no permission user package already existed to remove; {},{},{}",permission,user,pkg);
         }
 
+    }
+
+    /**
+     * <p>This method will generate a CSV dump of the rules.  This might be downloaded from a web-browser.</p>
+     */
+
+    public void generateCsv(
+            ObjectContext context,
+            OutputStream outputStream) throws IOException {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(outputStream);
+
+        DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.basicDateTimeNoMillis();
+
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+        CSVWriter csvWriter = new CSVWriter(outputStreamWriter);
+
+        csvWriter.writeNext(new String[]{
+                "create-timestamp",
+                "user-nickname",
+                "user-active",
+                "permission-code",
+                "permission-name",
+                "pkg-name"
+        });
+
+        SelectQuery query = new SelectQuery(PermissionUserPkg.class);
+        query.addOrdering(new Ordering(PermissionUserPkg.USER_PROPERTY + "." + User.NICKNAME_PROPERTY, SortOrder.ASCENDING));
+        query.addOrdering(new Ordering(PermissionUserPkg.PERMISSION_PROPERTY+ "." + Permission.CODE_PROPERTY, SortOrder.ASCENDING));
+        query.setFetchLimit(LIMIT_GENERATECSV);
+        List<PermissionUserPkg> rules;
+
+        do {
+            rules = context.performQuery(query);
+
+            for(PermissionUserPkg rule : rules) {
+                csvWriter.writeNext(new String[] {
+                        dateTimeFormatter.print(rule.getCreateTimestamp().getTime()),
+                        rule.getUser().getNickname(),
+                        Boolean.toString(rule.getUser().getActive()),
+                        rule.getPermission().getCode(),
+                        rule.getPermission().getName(),
+                        null!=rule.getPkg() ? rule.getPkg().getName() : ""
+                });
+            }
+
+            query.setFetchOffset(query.getFetchOffset() + LIMIT_GENERATECSV);
+        }
+        while(rules.size() >= LIMIT_GENERATECSV);
+
+        csvWriter.flush();
+        outputStreamWriter.flush();
     }
 
 

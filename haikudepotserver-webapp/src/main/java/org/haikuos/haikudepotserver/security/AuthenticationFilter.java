@@ -34,6 +34,9 @@ import java.util.regex.Pattern;
  * <p>This filter does not present back to the user an HTTP 401 (Authorization Required) as is the norm with
  * basic authentication method; it will simply fail the authentication and there will be no authenticated user
  * in the current request-response cycle.</p>
+ *
+ * <p>For some URLs (those starting with "/secured/"), it is also possible for the filter to look for a
+ * bearer token on the parameters.  This only works on a GET request.</p>
  */
 
 public class AuthenticationFilter implements Filter {
@@ -41,6 +44,10 @@ public class AuthenticationFilter implements Filter {
     protected static Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     private static Pattern PATTERN_AUTHORIZATION_HEADER = Pattern.compile("^([A-Za-z0-9]+)\\s+(.+)$");
+
+    private static String PREFIX_PATH_SECURED = "/secured/";
+
+    private static String PARAM_BEARER_TOKEN = "hdsbtok";
 
     @Resource
     AuthenticationService authenticationService;
@@ -92,6 +99,21 @@ public class AuthenticationFilter implements Filter {
             }
             else {
                 logger.warn("attempt to process an authorization header, but it is malformed :. ignoring");
+            }
+        }
+
+        // if the user was not authenticated on the header, under certain circumstances, it may be possible for
+        // the authentication to occur based on a parameter of the GET request (in the query).
+
+        if(!authenticatedUserObjectId.isPresent() && httpRequest.getMethod().equals("GET")) {
+            String filterPathInfo = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
+
+            if(filterPathInfo.startsWith(PREFIX_PATH_SECURED)) {
+                String param = httpRequest.getParameter(PARAM_BEARER_TOKEN);
+
+                if (!Strings.isNullOrEmpty(param)) {
+                    authenticatedUserObjectId = authenticationService.authenticateByToken(param);
+                }
             }
         }
 

@@ -59,6 +59,14 @@ angular.module('haikudepotserver').controller(
                 return amFetchingRules;
             };
 
+            $scope.goDownloadCsv = function() {
+                if(!userState.user().token) {
+                    throw Error('the user state token must be present to be able to authenticate the request');
+                }
+                var iframeEl = document.getElementById("download-iframe");
+                iframeEl.src = '/secured/authorization/authorizationpkgrule/download.csv?hdsbtok=' + userState.user().token;
+            }
+
             function refetchRules() {
 
                 amFetchingRules = true;

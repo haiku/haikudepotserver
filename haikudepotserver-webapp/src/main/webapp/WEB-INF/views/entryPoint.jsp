@@ -30,6 +30,13 @@ web-resources and then this starts the java-script single page environment drive
 <div class="container">
     <div ng-view></div>
 </div>
+
+<%--
+This IFRAME can be used by application logic to cause a download to occur.
+--%>
+
+<iframe id="download-iframe" style="display:none"></iframe>
+
 </body>
 
 </html>
