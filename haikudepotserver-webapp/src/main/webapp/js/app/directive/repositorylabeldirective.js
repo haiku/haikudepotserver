@@ -28,7 +28,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                 var shouldLink = attributes['shouldLink'];
 
                 if (!repositoryExpression || !repositoryExpression.length) {
-                    throw 'the repository expression should be defined';
+                    throw Error('the repository expression should be defined');
                 }
 
                 $scope.$watch(repositoryExpression, function (repository) {

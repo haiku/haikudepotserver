@@ -25,7 +25,7 @@ angular.module('haikudepotserver').directive(
                     var versionExpression = attributes['version'];
 
                     if(!versionExpression || !versionExpression.length) {
-                        throw 'expected expression for "version"';
+                        throw Error('expected expression for "version"');
                     }
 
                     var containerEl = angular.element('<span></span>');

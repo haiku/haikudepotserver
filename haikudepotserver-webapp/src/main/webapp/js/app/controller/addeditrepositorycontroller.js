@@ -107,7 +107,7 @@ angular.module('haikudepotserver').controller(
             $scope.goSave = function() {
 
                 if($scope.addEditRepositoryForm.$invalid) {
-                    throw 'expected the save of a repository to only to be possible if the form is valid';
+                    throw Error('expected the save of a repository to only to be possible if the form is valid');
                 }
 
                 amSaving = true;

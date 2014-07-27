@@ -51,7 +51,7 @@ angular.module('haikudepotserver').controller(
             // ERROR HANDLING TESTING
 
             $scope.goRaiseExceptionInLocalRuntime = function() {
-                throw 'test exception in javascript environment';
+                throw Error('test exception in javascript environment');
             };
 
             $scope.goRaiseExceptionInServerRuntime = function() {

@@ -21,7 +21,7 @@ angular.module('haikudepotserver').directive('userLabel',[
                 var shouldLink = undefined == attributes['shouldLink'] || 'true' == shouldLink;
 
                 if(!userExpression || !userExpression.length) {
-                    throw 'expected expression for "user"';
+                    throw Error('expected expression for "user"');
                 }
 
                 var containerEl = angular.element('<span></span>');

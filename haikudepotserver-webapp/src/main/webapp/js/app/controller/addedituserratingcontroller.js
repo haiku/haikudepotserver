@@ -17,7 +17,7 @@ angular.module('haikudepotserver').controller(
             errorHandling,referenceData,pkg,messageSource) {
 
             if(!userState.user()) {
-                throw 'a user is required to add / edit user ratings on a package';
+                throw Error('a user is required to add / edit user ratings on a package');
             }
 
             $scope.workingUserRating = undefined;
@@ -157,7 +157,7 @@ angular.module('haikudepotserver').controller(
                             { code : code });
 
                         if(!naturalLanguageOption) {
-                            throw 'unable to find the natural language option for; ' + code;
+                            throw Error('unable to find the natural language option for; ' + code);
                         }
 
                         return naturalLanguageOption;
@@ -169,7 +169,7 @@ angular.module('haikudepotserver').controller(
                             { code : code });
 
                         if(!userRatingStabilityOption) {
-                            throw 'unable to find the user rating stability option for; ' + code;
+                            throw Error('unable to find the user rating stability option for; ' + code);
                         }
 
                         return userRatingStabilityOption;
@@ -251,7 +251,7 @@ angular.module('haikudepotserver').controller(
                                             // one.
 
                                             if(!pkg.versions[0].isLatest) {
-                                                throw 'it is only possible to add a user rating to the latest version of a package.';
+                                                throw Error('it is only possible to add a user rating to the latest version of a package.');
                                             }
 
                                             // turn the package data inside out so that we have a pkgVersion data structure.
@@ -331,7 +331,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 if($scope.addEditUserRatingForm.$invalid) {
-                    throw 'expected the save of a user rating to only to be possible if the form is valid';
+                    throw Error('expected the save of a user rating to only to be possible if the form is valid');
                 }
 
                 // there is the possibility that the user has attempted to create a user rating with no data!  This

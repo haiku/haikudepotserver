@@ -26,15 +26,15 @@ angular.module('haikudepotserver').directive('highlightedText',[
             var searchExpressionTypeExpression = attributes['searchExpressionType'];
 
             if(!valueExpression || !valueExpression.length) {
-                throw 'the value expression must be supplied';
+                throw Error('the value expression must be supplied');
             }
 
             if(!searchExpressionExpression || !searchExpressionExpression.length) {
-                throw 'the search expression expression must be supplied';
+                throw Error('the search expression expression must be supplied');
             }
 
             if(!searchExpressionTypeExpression || !searchExpressionTypeExpression.length) {
-                throw 'the search expression type expression must be supplied';
+                throw Error('the search expression type expression must be supplied');
             }
 
             var containerE = angular.element('<span></span>');

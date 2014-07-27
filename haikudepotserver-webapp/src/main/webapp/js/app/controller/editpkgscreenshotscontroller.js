@@ -114,7 +114,7 @@ angular.module('haikudepotserver').controller(
             $scope.goAddPkgScreenshot = function() {
 
                 if($scope.addPkgScreenshotForm.$invalid) {
-                    throw 'expected the editing of package screenshots only to be possible if the form is valid';
+                    throw Error('expected the editing of package screenshots only to be possible if the form is valid');
                 }
 
                 $scope.amCommunicating = true;
@@ -216,7 +216,7 @@ angular.module('haikudepotserver').controller(
                 switch(i) {
 
                     case -1:
-                        throw 'unable to find the screenshot to re-order in the list of screenshots';
+                        throw Error('unable to find the screenshot to re-order in the list of screenshots');
 
                     case 0:
                         // already at the start
@@ -237,7 +237,7 @@ angular.module('haikudepotserver').controller(
                 switch(i) {
 
                     case -1:
-                        throw 'unable to find the screenshot to re-order in the list of screenshots';
+                        throw Error('unable to find the screenshot to re-order in the list of screenshots');
 
                     case $scope.pkgScreenshots.length-1:
                         // already at the end

@@ -22,7 +22,7 @@ angular.module('haikudepotserver').directive('pkgCategoryLabel',[
                 var pkgCategoryExpression = attributes['pkgCategory'];
 
                 if (!pkgCategoryExpression || !pkgCategoryExpression.length) {
-                    throw 'expected expression for "pkgCategoryExpression"';
+                    throw Error('expected expression for "pkgCategoryExpression"');
                 }
 
                 $scope.$watch(pkgCategoryExpression, function(newValue) {

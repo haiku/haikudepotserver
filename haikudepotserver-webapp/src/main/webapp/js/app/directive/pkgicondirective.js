@@ -20,17 +20,17 @@ angular.module('haikudepotserver').directive('pkgIcon',
                     var pkgExpression = attributes['pkg'];
 
                     if (!pkgExpression || !pkgExpression.length) {
-                        throw 'the pkg binding must be an expression to a package';
+                        throw Error('the pkg binding must be an expression to a package');
                     }
 
                     if (!size) {
-                        throw 'the size binding must be supplied';
+                        throw Error('the size binding must be supplied');
                     }
 
                     size = parseInt('' + size, 10);
 
                     if (size < 1 || size > 1000) {
-                        throw 'preposterous value for size; ' + size;
+                        throw Error('preposterous value for size; ' + size);
                     }
 
                     var el = angular.element('<img src="" width="' + size + '" height="' + size + '"></img>');
@@ -41,7 +41,7 @@ angular.module('haikudepotserver').directive('pkgIcon',
 
                         if (pkg) {
                             if (!pkg.name||!pkg.name.length) {
-                                throw 'the package is expected to have a name in order to derive an icon url';
+                                throw Error('the package is expected to have a name in order to derive an icon url');
                             }
 
                             url = pkgIcon.url(pkg, constants.MEDIATYPE_PNG, size);

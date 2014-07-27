@@ -42,7 +42,7 @@ angular.module('haikudepotserver').controller(
                 );
 
                 if(!result) {
-                    throw 'was not able to find the original translation';
+                    throw Error('was not able to find the original translation');
                 }
 
                 return result;
@@ -95,7 +95,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goChooseTranslation = function(translation) {
                 if(!translation) {
-                    throw 'the translation must be provided to select';
+                    throw Error('the translation must be provided to select');
                 }
 
                 $scope.selectedTranslation = translation;
@@ -228,7 +228,7 @@ angular.module('haikudepotserver').controller(
             $scope.saveEditedLocalizations = function() {
 
                  if(!$scope.canSave()) {
-                     throw 'not possible to save edited localizations';
+                     throw Error('not possible to save edited localizations');
                  }
 
                 $scope.amSaving = true;

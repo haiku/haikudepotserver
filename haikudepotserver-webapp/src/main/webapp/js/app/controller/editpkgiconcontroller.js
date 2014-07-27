@@ -103,7 +103,7 @@ angular.module('haikudepotserver').controller(
             $scope.goStorePkgIcons = function() {
 
                 if($scope.editPkgIconForm.$invalid) {
-                    throw 'expected the editing of package icons only to be possible if the form is valid';
+                    throw Error('expected the editing of package icons only to be possible if the form is valid');
                 }
 
                 $scope.amSaving = true;
@@ -166,7 +166,7 @@ angular.module('haikudepotserver').controller(
                                                         break;
 
                                                     default:
-                                                        throw 'expected size; ' + error.data.size;
+                                                        throw Error('expected size; ' + error.data.size);
                                                 }
                                                 break;
 
@@ -175,12 +175,12 @@ angular.module('haikudepotserver').controller(
                                                 break;
 
                                             default:
-                                                throw 'unexpected media type code; ' + err.data.mediaTypeCode;
+                                                throw Error('unexpected media type code; ' + err.data.mediaTypeCode);
 
                                         }
                                     }
                                     else {
-                                        throw 'expected data to be supplied with a bad pkg icon';
+                                        throw Error('expected data to be supplied with a bad pkg icon');
                                     }
 
                                     break;
@@ -213,21 +213,21 @@ angular.module('haikudepotserver').controller(
                     function dataUrlToBase64(u) {
 
                         if(!u) {
-                            throw 'the data url must be supplied to convert to base64';
+                            throw Error('the data url must be supplied to convert to base64');
                         }
 
                         if(0!= u.indexOf('data:')) {
-                            throw 'the data url was unable to be converted to base64 because it does not look like a data url';
+                            throw Error('the data url was unable to be converted to base64 because it does not look like a data url');
                         }
 
                         var commaI = u.indexOf(',');
 
                         if(-1==commaI) {
-                            throw 'expecting comma in data url to preceed the base64 data';
+                            throw Error('expecting comma in data url to preceed the base64 data');
                         }
 
                         if(!_.indexOf(u.substring(5,commaI).split(';'),'base64')) {
-                            throw 'expecting base64 to appear in the data url';
+                            throw Error('expecting base64 to appear in the data url');
                         }
 
                         return u.substring(commaI+1);

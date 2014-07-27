@@ -16,7 +16,7 @@ angular.module('haikudepotserver').directive('activeIndicator',function() {
             var stateExpression = attributes['state'];
 
             if(!stateExpression || !stateExpression.length) {
-                throw 'a value for the binding \'state\' was expected';
+                throw Error('a value for the binding \'state\' was expected');
             }
 
             var svgE = angular.element('<svg width="12px" height="12px"><circle cx="6px" cy="6px" r="5.5px" fill="gray"></circle></svg>');

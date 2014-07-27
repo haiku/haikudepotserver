@@ -32,7 +32,7 @@ angular.module('haikudepotserver').directive('paginationArrow',[
                             break;
 
                         default:
-                            throw 'illegal direction on pagination arrow; '+direction;
+                            throw Error('illegal direction on pagination arrow; '+direction);
                     }
 
                     // replaces the element supplied with the SVG one.

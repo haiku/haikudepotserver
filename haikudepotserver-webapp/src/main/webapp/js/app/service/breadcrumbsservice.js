@@ -32,26 +32,26 @@ angular.module('haikudepotserver').factory('breadcrumbs',
             function verifyItem(item) {
 
                 if(!item) {
-                    throw 'a breadcrumb item was expected';
+                    throw Error(('a breadcrumb item was expected');
                 }
 
                 if(!item.titleKey || !item.titleKey.length) {
-                    throw 'a breadcrumb item must have a title key';
+                    throw Error('a breadcrumb item must have a title key');
                 }
 
                 if(!item.path || !item.path.length) {
-                    throw 'a breadcrumb item must have a path';
+                    throw Error('a breadcrumb item must have a path');
                 }
 
                 if(!item.search || !item.search.bcguid) {
-                    throw 'a "bcguid" is expected on a breadcrumb item';
+                    throw Error('a "bcguid" is expected on a breadcrumb item');
                 }
             }
 
             function verifyItems(items) {
 
                 if(!items) {
-                    throw 'breadcrumb items were expected';
+                    throw Error('breadcrumb items were expected');
                 }
 
                 _.each(items, function(item) {
@@ -111,7 +111,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
             function pop() {
                 if(!stack||!stack.length) {
-                    throw 'attempt to pop from empty breadcrumb stack';
+                    throw Error('attempt to pop from empty breadcrumb stack');
                 }
 
                 var item = stack.pop();
@@ -126,7 +126,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
             function popTo(item) {
                 if(!stack) {
-                    throw 'the breadcrumb stack is empty; not possible to popTo(..)';
+                    throw Error('the breadcrumb stack is empty; not possible to popTo(..)');
                 }
 
                 while(stack.length && stack[stack.length-1] != item) {
@@ -134,7 +134,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                 }
 
                 if(!stack.length) {
-                    throw 'the item requested to popTo was not found on the breadcrumb stack';
+                    throw Error('the item requested to popTo was not found on the breadcrumb stack');
                 }
 
                 $rootScope.$broadcast('breadcrumbChangeSuccess',stack);
@@ -166,7 +166,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
 
             function mergeCompleteStack(stackIn) {
                 if(!stackIn || !stackIn.length) {
-                    throw 'attempt to merge an empty stack into the existing stack; not possible';
+                    throw Error('attempt to merge an empty stack into the existing stack; not possible');
                 }
 
                 verifyItems(stackIn);
@@ -259,7 +259,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     pop();
 
                     if(!stack.length) {
-                        throw 'have popped from the stack, but there is now nothing to navigate to';
+                        throw Error('have popped from the stack, but there is now nothing to navigate to');
                     }
 
                     var top = peek();
@@ -280,7 +280,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     var result = popTo(item);
 
                     if(!result) {
-                        throw 'unable to find the item on the stack';
+                        throw Error('unable to find the item on the stack');
                     }
 
                     navigateTo(result);

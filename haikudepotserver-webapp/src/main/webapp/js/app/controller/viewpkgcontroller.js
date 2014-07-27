@@ -203,7 +203,7 @@ angular.module('haikudepotserver').controller(
                                 var v0 = $scope.pkg.versions[0];
 
                                 if(ur.pkgVersion.pkg.name != $scope.pkg.name) {
-                                    throw 'illegal; a user rating is being shown for another package';
+                                    throw Error('illegal; a user rating is being shown for another package');
                                 }
 
                                 ur.isOtherVersion = ur.pkgVersion.major != v0.major ||

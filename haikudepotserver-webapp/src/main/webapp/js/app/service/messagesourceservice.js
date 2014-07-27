@@ -35,7 +35,7 @@ angular.module('haikudepotserver').factory('messageSource',
 
             function getMessages(naturalLanguageCode) {
                 if(!naturalLanguageCode || !naturalLanguageCode.length) {
-                    throw 'the natural language code should be supplied to get messages';
+                    throw Error('the natural language code should be supplied to get messages');
                 }
 
                 var deferred = $q.defer();
@@ -92,11 +92,11 @@ angular.module('haikudepotserver').factory('messageSource',
 
             function getMessage(naturalLanguageCode, key) {
                 if(!naturalLanguageCode || !naturalLanguageCode.length) {
-                    throw 'the natural language code should be supplied to get a message';
+                    throw Error('the natural language code should be supplied to get a message');
                 }
 
                 if(!key || !key.length) {
-                    throw 'a key must be supplied to get a message';
+                    throw Error('a key must be supplied to get a message');
                 }
 
                 var deferred = $q.defer();

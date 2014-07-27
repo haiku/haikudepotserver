@@ -51,7 +51,7 @@ angular.module('haikudepotserver').factory('userState',
                 }
                 else {
                     if(millisUntilExpirationForToken(token) <= 0) {
-                        throw 'at attempt has been made to set a token that has expired already';
+                        throw Error('at attempt has been made to set a token that has expired already');
                     }
 
                     if (userStateData.user && userStateData.user.nickname == tokenNickname(token)) {
@@ -103,7 +103,7 @@ angular.module('haikudepotserver').factory('userState',
                                         var firstMs = timestampsOfLastTokenRenewals.shift();
 
                                         if(nowMs - firstMs < MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS) {
-                                            throw '10 or more renewals of tokens in < ' + MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS + 'ms -- something wrong; failing';
+                                            throw Error('10 or more renewals of tokens in < ' + MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS + 'ms -- something wrong; failing');
                                         }
                                     }
 
@@ -159,13 +159,13 @@ angular.module('haikudepotserver').factory('userState',
 
             function tokenClaimSet(token) {
                 if(!token||!token.length) {
-                    throw 'missing json web token';
+                    throw Error('missing json web token');
                 }
 
                 var parts = token.split('.');
 
                 if(3 != parts.length) {
-                    throw 'json web token should contain three dot-separated parts';
+                    throw Error('json web token should contain three dot-separated parts');
                 }
 
                 return angular.fromJson(window.atob(parts[1]));
@@ -180,7 +180,7 @@ angular.module('haikudepotserver').factory('userState',
                 var claimSet = tokenClaimSet(token);
 
                 if(!claimSet || !claimSet.exp || !angular.isNumber(claimSet.exp)) {
-                    throw 'malformed claim set; unable to get the \'exp\' data';
+                    throw Error('malformed claim set; unable to get the \'exp\' data');
                 }
 
                 return new Date(claimSet.exp * 1000);
@@ -195,14 +195,14 @@ angular.module('haikudepotserver').factory('userState',
                 var claimSet = tokenClaimSet(token);
 
                 if(!claimSet || !claimSet.sub) {
-                    throw 'malformed claim set; unable to get the \'sub\' data';
+                    throw Error('malformed claim set; unable to get the \'sub\' data');
                 }
 
                 var sub = '' + claimSet.sub;
                 var suffixIndex = sub.indexOf('@hds');
 
                 if(-1==suffixIndex) {
-                    throw 'malformed nickname in token; missing suffix';
+                    throw Error('malformed nickname in token; missing suffix');
                 }
 
                 return sub.substring(0,suffixIndex);
@@ -225,11 +225,11 @@ angular.module('haikudepotserver').factory('userState',
                 else {
 
                     if(!value.nickname) {
-                        throw 'the nickname is required when setting a user';
+                        throw Error('the nickname is required when setting a user');
                     }
 
                     if(!value.token) {
-                        throw 'the json web token is required when setting a user';
+                        throw Error('the json web token is required when setting a user');
                     }
 
                     userStateData.user = { nickname : value.nickname };
@@ -251,15 +251,15 @@ angular.module('haikudepotserver').factory('userState',
             function validateTargetAndPermissions(targetAndPermissions) {
                 _.each(targetAndPermissions, function(targetAndPermission) {
                     if(undefined === targetAndPermission.targetType || !_.contains(['PKG','USER','REPOSITORY','USERRATING',null],targetAndPermission.targetType)) {
-                        throw 'illegal argument; bad targetType supplied';
+                        throw Error('illegal argument; bad targetType supplied');
                     }
 
                     if(undefined === targetAndPermission.targetIdentifier) {
-                        throw 'illegal argument; bad targetIdentifier supplied';
+                        throw Error('illegal argument; bad targetIdentifier supplied');
                     }
 
                     if(!targetAndPermission.permissionCode) {
-                        throw 'illegal argument; bad permission code';
+                        throw Error('illegal argument; bad permission code');
                     }
                 })
             }
@@ -333,7 +333,7 @@ angular.module('haikudepotserver').factory('userState',
                             // might be able to be a bit smarter about this in the future.
 
                             if(!uncachedTargetAndPermissions.length) {
-                                throw 'illegal state; top-most request has no uncached target and permissions';
+                                throw Error('illegal state; top-most request has no uncached target and permissions');
                             }
 
                             jsonRpc.call(
@@ -352,7 +352,7 @@ angular.module('haikudepotserver').factory('userState',
                                     result = tryDeriveFromCache(request.targetAndPermissions);
 
                                     if(!result) {
-                                        throw 'illegal state; was not able to resolve the request from cache after fetching from application server';
+                                        throw Error('illegal state; was not able to resolve the request from cache after fetching from application server');
                                     }
 
                                     request.deferred.resolve(result);
@@ -421,7 +421,7 @@ angular.module('haikudepotserver').factory('userState',
                 if(undefined !== value) {
 
                     if(!value || !value.match(/^[a-z]{2}$/)) {
-                        throw 'the value \''+value+'\' is not a valid natural language code';
+                        throw Error('the value \''+value+'\' is not a valid natural language code');
                     }
 
                     if(userStateData.naturalLanguageCode != value) {

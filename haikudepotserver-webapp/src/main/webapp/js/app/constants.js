@@ -53,11 +53,11 @@ angular.module('haikudepotserver')
         nextMatchSearchExpression: function(str, offset, searchExpression, searchExpressionType) {
 
             if(!searchExpressionType||!searchExpressionType.length) {
-                throw 'the search expression type must be supplied';
+                throw Error('the search expression type must be supplied');
             }
 
             if(null==offset || offset < 0) {
-                throw 'an offset is required';
+                throw Error('an offset is required');
             }
 
             if(str&&
@@ -79,7 +79,7 @@ angular.module('haikudepotserver')
                         break;
 
                     default:
-                        throw 'unknown search expression type; ' + searchExpressionType;
+                        throw Error('unknown search expression type; ' + searchExpressionType);
                 }
 
             }
@@ -119,7 +119,7 @@ angular.module('haikudepotserver')
             targetIdentifier) {
 
             if(null==targetType && targetIdentifier) {
-                throw 'if the target type is null (check on principal) then the target identifier is also expected to be null';
+                throw Error('if the target type is null (check on principal) then the target identifier is also expected to be null');
             }
 
             if(!permissionCode||(!targetIdentifier&&null!=targetType)) {

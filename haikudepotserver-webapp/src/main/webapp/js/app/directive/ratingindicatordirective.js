@@ -41,15 +41,15 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
                             topLevelE.removeClass('app-hide');
 
                             if (!angular.isNumber(rating)) {
-                                throw 'the value supplied is not a number';
+                                throw Error('the value supplied is not a number');
                             }
 
                             if (rating < 0) {
-                                throw 'the value supplied for a rating indicator is less than zero';
+                                throw Error('the value supplied for a rating indicator is less than zero');
                             }
 
                             if (rating > 5) {
-                                throw 'the value supplied for a rating indicator is more than five';
+                                throw Error('the value supplied for a rating indicator is more than five');
                             }
 
                             rating *= 2;

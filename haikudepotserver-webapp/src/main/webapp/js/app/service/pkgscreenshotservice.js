@@ -38,7 +38,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                 setHeader : function(name, value) {
 
                     if(!name || 0==''+name.length) {
-                        throw 'the name of the http header is required';
+                        throw Error('the name of the http header is required');
                     }
 
                     if(!value || 0==''+value.length) {
@@ -55,11 +55,11 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                 addScreenshot : function(pkg, screenshotFile) {
 
                     if(!pkg) {
-                        throw 'the pkg must be supplied to add a pkg screenshot';
+                        throw Error('the pkg must be supplied to add a pkg screenshot');
                     }
 
                     if(!screenshotFile) {
-                        throw 'to add a screenshot for '+pkg.name+' the image file must be provided';
+                        throw Error('to add a screenshot for '+pkg.name+' the image file must be provided');
                     }
 
                     var deferred = $q.defer();
@@ -77,7 +77,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                             var code = header('X-HaikuDepotServer-ScreenshotCode');
 
                             if(!code || !code.length) {
-                                throw 'the screenshot code should have been supplied back from creating a new screenshot';
+                                throw Error('the screenshot code should have been supplied back from creating a new screenshot');
                             }
 
                             deferred.resolve(code);
@@ -116,11 +116,11 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
 
                 rawUrl : function(pkg, code) {
                     if(!pkg) {
-                        throw 'the pkg must be supplied to get a package screenshot url';
+                        throw Error('the pkg must be supplied to get a package screenshot url');
                     }
 
                     if(!code || !code.length) {
-                        throw 'the code must be supplied to derive a url for the screenshot image';
+                        throw Error('the code must be supplied to derive a url for the screenshot image');
                     }
 
                     return '/pkgscreenshot/' + code + '/raw';
@@ -134,11 +134,11 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
 
                 url : function(pkg, code, targetWidth, targetHeight) {
                     if(!pkg) {
-                        throw 'the pkg must be supplied to get a package screenshot url';
+                        throw Error('the pkg must be supplied to get a package screenshot url');
                     }
 
                     if(!code || !code.length) {
-                        throw 'the code must be supplied to derive a url for the screenshot image';
+                        throw Error('the code must be supplied to derive a url for the screenshot image');
                     }
 
                     var u = '/pkgscreenshot/' + code + '.png';

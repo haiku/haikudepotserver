@@ -33,7 +33,7 @@ angular.module('haikudepotserver').directive(
                     var pkgVersionBreadcrumbItem = undefined;
 
                     if(!pkgVersionExpression || !pkgVersionExpression.length) {
-                        throw 'expected expression for "pkgVersion"';
+                        throw Error('expected expression for "pkgVersion"');
                     }
 
                     var containerEl = angular.element('<span></span>');

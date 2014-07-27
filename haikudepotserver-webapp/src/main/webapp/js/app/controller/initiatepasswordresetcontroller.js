@@ -13,7 +13,7 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,errorHandling,userState,breadcrumbs,breadcrumbFactory) {
 
             if(userState.user()) {
-                throw 'it is not possible to reset the password if a user is presently authenticated.';
+                throw Error('it is not possible to reset the password if a user is presently authenticated.');
             }
 
             var Status = {
@@ -84,7 +84,7 @@ angular.module('haikudepotserver').controller(
             $scope.goInitiatePasswordReset = function() {
 
                 if($scope.initiatePasswordResetForm.$invalid) {
-                    throw 'expected the initiation of password reset only to be possible if the form is valid';
+                    throw Error('expected the initiation of password reset only to be possible if the form is valid');
                 }
 
                 $scope.status = Status.UNDERTAKING;

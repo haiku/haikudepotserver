@@ -32,11 +32,11 @@ angular.module('haikudepotserver').directive('paginationControl',[
                     }
 
                     if(result < 3) {
-                        throw 'a link count of ' + result + ' is not possible for the pagination control - it must be >= 3';
+                        throw Error('a link count of ' + result + ' is not possible for the pagination control - it must be >= 3');
                     }
 
                     if(0 == result % 2) {
-                        throw 'a link count of ' + result + ' is not possible for the pagination control - it must be an odd number';
+                        throw Error('a link count of ' + result + ' is not possible for the pagination control - it must be an odd number');
                     }
 
                     return result;
@@ -89,7 +89,7 @@ angular.module('haikudepotserver').directive('paginationControl',[
                             var newOffsetStr = event.target.getAttribute('pagination-offset');
 
                             if(!newOffsetStr || !newOffsetStr.length) {
-                                throw 'unable to get the selected offset for the target of the pagination event';
+                                throw Error('unable to get the selected offset for the target of the pagination event');
                             }
 
                             $scope.$apply(function() {
@@ -137,15 +137,15 @@ angular.module('haikudepotserver').directive('paginationControl',[
                 function refreshPageControlsWithValues(total,offset,max) {
 
                     if(max <= 0) {
-                        throw 'the \'max\' value must be a positive integer';
+                        throw Error('the \'max\' value must be a positive integer');
                     }
 
                     if(offset < 0) {
-                        throw 'the \'offset\' must be >= 0';
+                        throw Error('the \'offset\' must be >= 0');
                     }
 
                     if(offset >= total) {
-                        throw 'the \'offset\' must be < '+total;
+                        throw Error('the \'offset\' must be < '+total);
                     }
 
                     var pages = Math.floor((total / max) + (total % max ? 1 : 0));

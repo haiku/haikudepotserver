@@ -31,7 +31,7 @@ angular.module('haikudepotserver').factory('referenceData',
             function getData(what) {
 
                 if(!what || !what.length) {
-                    throw 'the method name is expected in order to get reference data';
+                    throw Error('the method name is expected in order to get reference data');
                 }
 
                 var deferred = $q.defer();

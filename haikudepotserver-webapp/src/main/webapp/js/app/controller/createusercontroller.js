@@ -140,7 +140,7 @@ angular.module('haikudepotserver').controller(
             $scope.goCreateUser = function() {
 
                 if($scope.createUserForm.$invalid) {
-                    throw 'expected the creation of a user only to be possible if the form is valid';
+                    throw Error('expected the creation of a user only to be possible if the form is valid');
                 }
 
                 $scope.amSaving = true;

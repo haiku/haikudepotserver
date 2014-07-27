@@ -47,7 +47,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
                 setHeader : function(name, value) {
 
                     if(!name || 0==''+name.length) {
-                        throw 'the name of the http header is required';
+                        throw Error('the name of the http header is required');
                     }
 
                     if(!value || 0==''+value.length) {
@@ -76,11 +76,11 @@ angular.module('haikudepotserver').factory('jsonRpc',
                 call : function(endpoint, method, params, id) {
 
                     if(!endpoint) {
-                        throw 'the endpoint is required to invoke a json-rpc method';
+                        throw Error('the endpoint is required to invoke a json-rpc method');
                     }
 
                     if(!method) {
-                        throw 'the method is required to invoke a json-rpc method';
+                        throw Error('the method is required to invoke a json-rpc method');
                     }
 
                     if(!params) {

@@ -13,7 +13,7 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,userState,errorHandling,breadcrumbs,breadcrumbFactory) {
 
             if(userState.user()) {
-                throw 'it is not possible to enter the authenticate user controller with a currently authenticated user';
+                throw Error('it is not possible to enter the authenticate user controller with a currently authenticated user');
             }
 
             $scope.didFailAuthentication = false;
@@ -61,7 +61,7 @@ angular.module('haikudepotserver').controller(
             $scope.goAuthenticate = function() {
 
                 if($scope.authenticateUserForm.$invalid) {
-                    throw 'expected the authentication of a user only to be possible if the form is valid';
+                    throw Error('expected the authentication of a user only to be possible if the form is valid');
                 }
 
                 $scope.didFailAuthentication = false;

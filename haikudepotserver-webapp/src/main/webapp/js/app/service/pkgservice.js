@@ -22,15 +22,15 @@ angular.module('haikudepotserver').factory('pkg',
             function getPkgWithSpecificVersion(pkgName, versionCoordinates, architectureCode, incrementCounter) {
 
                 if(!pkgName||!pkgName.length) {
-                    throw 'pkg name must be supplied';
+                    throw Error('pkg name must be supplied');
                 }
 
                 if(!versionCoordinates||!versionCoordinates.major) {
-                    throw 'version coordinates must be supplied';
+                    throw Error('version coordinates must be supplied');
                 }
 
                 if(!architectureCode||!architectureCode.length) {
-                    throw 'architecture code must be supplied';
+                    throw Error('architecture code must be supplied');
                 }
 
                 var deferred = $q.defer();
@@ -73,7 +73,7 @@ angular.module('haikudepotserver').factory('pkg',
             function getPkgWithSpecificVersionFromRouteParams(routeParams, incrementCounter) {
 
                 if(!routeParams) {
-                    throw 'route params expected';
+                    throw Error('route params expected');
                 }
 
                 return getPkgWithSpecificVersion(

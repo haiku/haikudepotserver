@@ -19,15 +19,15 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
             function generateBaseUrlForPkg(pkgName,versionCoordinates,architectureCode) {
                 if(!pkgName||!pkgName.length) {
-                    throw 'the package name must be supplied';
+                    throw Error('the package name must be supplied');
                 }
 
                 if(!versionCoordinates||!versionCoordinates.major) {
-                    throw 'version coordinates must be supplied';
+                    throw Error('version coordinates must be supplied');
                 }
 
                 if(!architectureCode||!architectureCode.length) {
-                    throw 'the architectureCode must be supplied to create a view pkg';
+                    throw Error('the architectureCode must be supplied to create a view pkg');
                 }
 
                 var parts = [
@@ -64,7 +64,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
             function latestVersion(pkgVersions) {
                 if(!pkgVersions || !pkgVersions.length) {
-                    throw 'a package version is required to get the latest';
+                    throw Error('a package version is required to get the latest');
                 }
 
                 var pkgVersion = _.findWhere(pkgVersions, { isLatest : true } );
@@ -78,7 +78,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
             function createManipulatePkgBreadcrumbItem(pkgWithVersion0, pathSuffix, titlePortion) {
                 if(!pkgWithVersion0 || !pkgWithVersion0.versions || !pkgWithVersion0.versions.length) {
-                    throw 'a package version is required to form a breadcrumb';
+                    throw Error('a package version is required to form a breadcrumb');
                 }
 
                 var pkgVersion = latestVersion(pkgWithVersion0.versions);
@@ -125,7 +125,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
             function applyCurrentLocation(item) {
                 if(!item) {
-                    throw 'was expecting an item to be supplied to be augmented';
+                    throw Error('was expecting an item to be supplied to be augmented');
                 }
 
                 item.path = $location.path();
@@ -181,7 +181,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                 createCompletePasswordReset : function(token) {
                     if(!token||!token.length) {
-                        throw 'unable to create complete password reset without a token';
+                        throw Error('unable to create complete password reset without a token');
                     }
 
                     return applyDefaults({
@@ -206,7 +206,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                 createEditUser : function(user) {
                     if(!user||!user.nickname) {
-                        throw 'user with nickname is required to make this breadcrumb';
+                        throw Error('user with nickname is required to make this breadcrumb');
                     }
 
                     return applyDefaults({
@@ -232,7 +232,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                 createEditUserRating : function(userRating) {
                     if(!userRating || !userRating.code) {
-                        throw 'a user rating code is expected';
+                        throw Error('a user rating code is expected');
                     }
 
                     return applyDefaults({
@@ -311,7 +311,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                 createViewPkgWithSpecificVersionFromPkgVersion : function(pkgVersion) {
                     if(!pkgVersion || !pkgVersion.pkg) {
-                        throw 'a package version is required to form a breadcrumb';
+                        throw Error('a package version is required to form a breadcrumb');
                     }
 
                     return createViewPkgBreadcrumbItem(
@@ -328,7 +328,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                 createViewPkgWithSpecificVersionFromPkg : function(pkg) {
                     if(!pkg || !pkg.versions.length) {
-                        throw 'a package with a package version are required to form a breadcrumb';
+                        throw Error('a package with a package version are required to form a breadcrumb');
                     }
 
                     var pkgVersion = latestVersion(pkg.versions);
@@ -342,7 +342,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                 createViewPkgWithSpecificVersionFromRouteParams : function(routeParams) {
 
                     if(!routeParams||!routeParams.major) {
-                        throw 'route params are expected';
+                        throw Error('route params are expected');
                     }
 
                     return createViewPkgBreadcrumbItem(

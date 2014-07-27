@@ -110,7 +110,7 @@ angular.module('haikudepotserver').controller(
             $scope.goChangePassword = function() {
 
                 if($scope.changePasswordForm.$invalid) {
-                    throw 'expected the change password of a user only to be possible if the form is valid';
+                    throw Error('expected the change password of a user only to be possible if the form is valid');
                 }
 
                 $scope.amChangingPassword = true;

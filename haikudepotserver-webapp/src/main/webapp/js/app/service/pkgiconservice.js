@@ -21,13 +21,13 @@ angular.module('haikudepotserver').factory('pkgIcon',
                 url : function(pkg, mediaTypeCode, size) {
 
                     if(!pkg) {
-                        throw 'the pkg must be supplied to get the package icon url';
+                        throw Error('the pkg must be supplied to get the package icon url');
                     }
 
                     var u = '/pkgicon/' + pkg.name;
 
                     if(!mediaTypeCode) {
-                        throw 'the media type code is required to get the package icon url';
+                        throw Error('the media type code is required to get the package icon url');
                     }
 
                     switch(mediaTypeCode) {
@@ -37,7 +37,7 @@ angular.module('haikudepotserver').factory('pkgIcon',
 
                         case constants.MEDIATYPE_PNG: {
                             if(!size || !(32==size||16==size)) {
-                                throw 'the size is not valid for obtaining the package icon url';
+                                throw Error('the size is not valid for obtaining the package icon url');
                             }
 
                             u += '.png?f=true&s=' + size
@@ -45,7 +45,7 @@ angular.module('haikudepotserver').factory('pkgIcon',
                             break;
 
                         default:
-                            throw 'unknown media type; ' + mediaTypeCode;
+                            throw Error('unknown media type; ' + mediaTypeCode);
                     }
 
                     if(pkg.modifyTimestamp) {
