@@ -10,8 +10,8 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring.version>4.0.5.RELEASE</spring.version>
-        <postgresql.version>9.3-1101-jdbc41</postgresql.version>
+        <spring.version>4.0.6.RELEASE</spring.version>
+        <postgresql.version>9.3-1102-jdbc41</postgresql.version>
 
 <!--
 The extensions seem to appear in the maven coordinates, but not in the paths
@@ -24,7 +24,7 @@ within the jars themselves.
         <web-underscorejs.versionbase>1.6.0</web-underscorejs.versionbase>
         <web-underscorejs.versionextension>-3</web-underscorejs.versionextension>
 
-        <web-momentjs.versionbase>2.6.0</web-momentjs.versionbase>
+        <web-momentjs.versionbase>2.7.0</web-momentjs.versionbase>
         <web-momentjs.versionextension>-2</web-momentjs.versionextension>
 
         <nimbus-jose-jwt.version>2.26</nimbus-jose-jwt.version>
@@ -130,7 +130,7 @@ within the jars themselves.
             <dependency>
                 <groupId>com.googlecode.flyway</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>2.3.1</version>
+                <version>2.3.1</version> <!-- 3.x available -->
             </dependency>
             <dependency>
                 <groupId>org.apache.cayenne</groupId>

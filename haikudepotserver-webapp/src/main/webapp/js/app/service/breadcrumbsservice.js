@@ -32,7 +32,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
             function verifyItem(item) {
 
                 if(!item) {
-                    throw Error(('a breadcrumb item was expected');
+                    throw Error('a breadcrumb item was expected');
                 }
 
                 if(!item.titleKey || !item.titleKey.length) {

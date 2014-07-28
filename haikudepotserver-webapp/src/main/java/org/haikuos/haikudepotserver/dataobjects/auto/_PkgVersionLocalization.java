@@ -1,5 +1,7 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
+import java.util.Date;
+
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -12,18 +14,34 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersionLocalization extends AbstractDataObject {
 
+    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
     public static final String DESCRIPTION_PROPERTY = "description";
+    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String SUMMARY_PROPERTY = "summary";
     public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
     public static final String PKG_VERSION_PROPERTY = "pkgVersion";
 
     public static final String ID_PK_COLUMN = "id";
 
+    public void setCreateTimestamp(Date createTimestamp) {
+        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+    }
+    public Date getCreateTimestamp() {
+        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
+
     public void setDescription(String description) {
         writeProperty(DESCRIPTION_PROPERTY, description);
     }
     public String getDescription() {
         return (String)readProperty(DESCRIPTION_PROPERTY);
+    }
+
+    public void setModifyTimestamp(Date modifyTimestamp) {
+        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+    }
+    public Date getModifyTimestamp() {
+        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
     }
 
     public void setSummary(String summary) {

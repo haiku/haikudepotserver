@@ -189,8 +189,10 @@
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_version_localization" schema="haikudepot">
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="description" type="VARCHAR" length="8192"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="natural_language_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="pkg_version_id" type="BIGINT"/>
 		<db-attribute name="summary" type="VARCHAR" length="8192"/>
@@ -368,7 +370,9 @@
 		<obj-attribute name="body" type="java.lang.String" lock="true" db-attribute-path="body"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionLocalization" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization" lock-type="optimistic" dbEntityName="pkg_version_localization" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="description" type="java.lang.String" lock="true" db-attribute-path="description"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="summary" type="java.lang.String" lock="true" db-attribute-path="summary"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionUrl" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl" lock-type="optimistic" dbEntityName="pkg_version_url" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
