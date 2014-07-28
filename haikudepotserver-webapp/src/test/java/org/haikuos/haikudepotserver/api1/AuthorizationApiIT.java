@@ -87,6 +87,83 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
     }
 
     /**
+     * <P>With a user-pkg rule missing we should see this authorization come through in a check
+     * for that permission against the package being false.</P>
+     */
+
+    @Test
+    public void checkAuthorizationRequest_asUserWithoutRule() {
+        integrationTestSupportService.createStandardTestData();
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            integrationTestSupportService.createBasicUser(context, "testuser1", "fakepassword");
+        }
+
+        CheckAuthorizationRequest request = new CheckAuthorizationRequest();
+        request.targetAndPermissions = Lists.newArrayList();
+
+        request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
+                AuthorizationTargetType.PKG,
+                "pkg1",
+                Permission.PKG_EDITICON.name()));
+
+        setAuthenticatedUser("testuser1");
+
+        // ------------------------------------
+        CheckAuthorizationResult result = authorizationApi.checkAuthorization(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.targetAndPermissions.size()).isEqualTo(1);
+        Assertions.assertThat(result.targetAndPermissions.get(0).authorized).isFalse();
+
+    }
+
+    /**
+     * <P>With a user-pkg rule in place we should see this authorization come through in a check
+     * for that permission against the package being true.</P>
+     */
+
+    @Test
+    public void checkAuthorizationRequest_asUserWithRule() {
+        integrationTestSupportService.createStandardTestData();
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            User user1 = integrationTestSupportService.createBasicUser(context, "testuser1", "fakepassword");
+            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+
+            org.haikuos.haikudepotserver.dataobjects.Permission permission =
+                    org.haikuos.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITICON.name().toLowerCase()).get();
+
+            PermissionUserPkg pup_u1p1 = context.newObject(PermissionUserPkg.class);
+            pup_u1p1.setPkg(pkg1);
+            pup_u1p1.setUser(user1);
+            pup_u1p1.setPermission(permission);
+
+            context.commitChanges();
+        }
+
+        CheckAuthorizationRequest request = new CheckAuthorizationRequest();
+        request.targetAndPermissions = Lists.newArrayList();
+
+        request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
+                AuthorizationTargetType.PKG,
+                "pkg1",
+                Permission.PKG_EDITICON.name()));
+
+        setAuthenticatedUser("testuser1");
+
+        // ------------------------------------
+        CheckAuthorizationResult result = authorizationApi.checkAuthorization(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.targetAndPermissions.size()).isEqualTo(1);
+        Assertions.assertThat(result.targetAndPermissions.get(0).authorized).isTrue();
+
+    }
+
+    /**
      * <p>This test checks to see what happens if you try to create a new rule, but you are not
      * authorized to do so.</p>
      */
