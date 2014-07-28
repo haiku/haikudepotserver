@@ -25,7 +25,7 @@ within the jars themselves.
         <web-underscorejs.versionextension>-3</web-underscorejs.versionextension>
 
         <web-momentjs.versionbase>2.7.0</web-momentjs.versionbase>
-        <web-momentjs.versionextension>-2</web-momentjs.versionextension>
+        <web-momentjs.versionextension></web-momentjs.versionextension>
 
         <nimbus-jose-jwt.version>2.26</nimbus-jose-jwt.version>
 
