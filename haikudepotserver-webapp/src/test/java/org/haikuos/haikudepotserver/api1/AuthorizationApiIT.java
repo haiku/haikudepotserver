@@ -198,6 +198,39 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * <p>Checks what happens if you try to create a new rule, but you are not root.</p>
+     */
+
+    @Test
+    public void testCreateAuthorizationRule_notAuthorized() throws ObjectNotFoundException, AuthorizationRuleConflictException {
+        integrationTestSupportService.createStandardTestData();
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
+        }
+
+        setAuthenticatedUser("testuser");
+
+        CreateAuthorizationPkgRuleRequest request = new CreateAuthorizationPkgRuleRequest();
+        request.permissionCode = Permission.PKG_EDITSCREENSHOT.name().toLowerCase();
+        request.pkgName = "pkg1";
+        request.userNickname = "testuser";
+
+        try {
+            // ------------------------------------
+            authorizationApi.createAuthorizationPkgRule(request);
+            // ------------------------------------
+
+            Assert.fail("it was expected that an authorization error would arise.");
+        }
+        catch(AuthorizationFailureException afe) {
+            logger.info("authorization failed as expected");
+        }
+
+    }
+
     @Test
     public void testCreateAuthorizationRule_permissionUserPkg() throws ObjectNotFoundException, AuthorizationRuleConflictException {
         integrationTestSupportService.createStandardTestData();
