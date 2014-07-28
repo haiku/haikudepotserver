@@ -37,6 +37,9 @@ The token bearer system of authentication has the advantage that although a user
 
 Certain HTTP requests may be authenticated using a URL query parameter.  This approach only applies when the URL path has a prefix ``{\tt /secured/}'' and when the URL is employed with the HTTP ``GET'' method.  The query parameter key is ``{\tt hdsbtok}'' and the value is a {\it json web token} as described above.
 
+\fcolorbox{orange}{white}{\parbox{\textwidth}{\color{orange} Be aware that use of this technique is likely result in the token being visible in the user's browser history.  The token is subject to expiry, but may be able to be utilized for some period after it has been employed in this way.}}
+
+
 \subsection{Authorization}
 
 A user's ability to undertake some action is controlled by the authorization system.  In a given context, a user and a permission will be considered.  The enumeration {\tt Permission} contains a list of the permissions that are enforced by the application.  Each permission is either with respect to the currently authenticated user or some target object.  Examples of some permissions and the type of target objects that they apply to are;
