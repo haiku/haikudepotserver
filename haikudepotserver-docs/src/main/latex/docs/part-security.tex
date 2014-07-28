@@ -33,15 +33,13 @@ As the token has an expiry, an API method {\it UserApi.renewToken(..)} exists to
 
 The token bearer system of authentication has the advantage that although a user's password is supplied by the user to the client software for the initial authentication, subsequent requests do not need to convey the password.  In addition, the token expire and are unable to be employed after they have expired.
 
-\paragraph{Token Bearer on GET Queries}
+\subsubsection{Token Bearer on GET Queries}
 
 Certain HTTP requests may be authenticated using a URL query parameter.  This approach only applies when the URL path has a prefix ``{\tt /secured/}'' and when the URL is employed with the HTTP ``GET'' method.  The query parameter key is ``{\tt hdsbtok}'' and the value is a {\it json web token} as described above.
 
-This approach is sub-optimal because, although the token expires, it may be present in the browser's history for some time during which it is valid.
-
 \subsection{Authorization}
 
-A user's ability to undertake some action is controlled by the authorization system.  In a given context, a user will be involved and a permission will be in question.  The enumeration {\tt Permission} contains a list of the permissions that are enforced by the application.  Each permission is either with respect to the currently authenticated user or some target object.  An example of some permissions and their targets are;
+A user's ability to undertake some action is controlled by the authorization system.  In a given context, a user and a permission will be considered.  The enumeration {\tt Permission} contains a list of the permissions that are enforced by the application.  Each permission is either with respect to the currently authenticated user or some target object.  Examples of some permissions and the type of target objects that they apply to are;
 
 \begin{tabular}{ | l | l | }
 \hline
