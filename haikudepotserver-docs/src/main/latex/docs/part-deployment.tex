@@ -1,5 +1,5 @@
 % -----------
-% Copyright 2013, Andrew Lindesay
+% Copyright 2013-2014, Andrew Lindesay
 % Distributed under the terms of the MIT License.
 % -----------
 
@@ -44,7 +44,15 @@ java \
 \subsection{Setting Up Repositories}
 \label{settinguprepositories}
 
-The application server will pull ``.hpkr'' files from remote repositories that contain information about the packages at that repository.  Authenticated as root, it is possible to use the ``more'' link at the top of the home page to get to the repositories, to add a repository and to trigger the import of a repository.  There also exists an HTTP GET invocation (see \ref{api-importrepositorydata}) that can be made to trigger the import of a repository from another system.
+The application server will pull ``.hpkr'' files from remote repositories that contain information about the packages at that repository.  Authenticated as root, it is possible to use the ``more'' link at the top of the home page to get to the repositories, to add a repository and to trigger the import of a repository.  There also exists an HTTP GET invocation (see \ref{api-importrepositorydata}) that can be made to trigger the import of a repository from another system\footnote{Such as the HPKR assembly process}.
+
+\subsection{Maintenance Tasks}
+
+Some maintenance tasks are scheduled.  These tasks are scheduled from outside the application server in order to simplify a multi-instance deployment topology.  A simple approach to this is to schedule using the cron tool.  This would require a ``crontab'' entry such as;
+
+ \framebox{\tt 14 * * * * curl "http://localhost:8080/maintenance/mediumterm"}
+
+ The host and port should be adjusted to suit your deployment environment.
 
 \subsection{Accessing the Web Environment}
 

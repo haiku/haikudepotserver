@@ -40,7 +40,7 @@ import java.util.UUID;
 @Service
 public class PasswordResetOrchestrationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(PasswordResetOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(PasswordResetOrchestrationService.class);
 
     private final static String MAIL_SUBJECT = "passwordreset-subject";
     private final static String MAIL_PLAINTEXT = "passwordreset-plaintext";
@@ -141,20 +141,20 @@ public class PasswordResetOrchestrationService {
         List<User> users = User.findByEmail(context, email);
 
         if (users.isEmpty()) {
-            logger.warn("attempt to send password reset token to {}, but there are no users associated with this email address");
+            LOGGER.warn("attempt to send password reset token to {}, but there are no users associated with this email address");
         } else {
 
             int count = 0;
 
-            logger.info("will create tokens and invite; {}", email);
+            LOGGER.info("will create tokens and invite; {}", email);
 
             for(User user : users) {
                 if(!user.getActive()) {
-                    logger.warn("it is not possible to send a password reset to an inactive user; {}", user.toString());
+                    LOGGER.warn("it is not possible to send a password reset to an inactive user; {}", user.toString());
                 }
                 else {
                     if (user.getIsRoot()) {
-                        logger.warn("it is not possible to send a password reset to a root user; {}", user.toString());
+                        LOGGER.warn("it is not possible to send a password reset to a root user; {}", user.toString());
                     } else {
                         createTokenAndInvite(user);
                         count++;
@@ -162,7 +162,7 @@ public class PasswordResetOrchestrationService {
                 }
             }
 
-            logger.info("did create tokens and invite; {} - sent {}", email,count);
+            LOGGER.info("did create tokens and invite; {} - sent {}", email, count);
         }
     }
 
@@ -198,18 +198,18 @@ public class PasswordResetOrchestrationService {
                                     context.deleteObjects(token);
                                     context.commitChanges();
 
-                                    logger.info("did reset the password for; {}", user.toString());
+                                    LOGGER.info("did reset the password for; {}", user.toString());
                                 } else {
-                                    logger.warn("the password has been supplied as invalid; will ignore");
+                                    LOGGER.warn("the password has been supplied as invalid; will ignore");
                                 }
 
                             } else {
-                                logger.warn("the user having their password reset is inactive; will ignore");
+                                LOGGER.warn("the user having their password reset is inactive; will ignore");
                             }
 
                         }
                         else {
-                            logger.warn("the token used to reset the password is expired; will ignore");
+                            LOGGER.warn("the token used to reset the password is expired; will ignore");
                         }
                     } finally {
 
@@ -222,21 +222,21 @@ public class PasswordResetOrchestrationService {
                         if (deleteTokenOptional.isPresent()) {
                             deleteContext.deleteObjects(deleteTokenOptional.get());
                             deleteContext.commitChanges();
-                            logger.info("did delete user password reset token {} after having processed it", tokenCode);
+                            LOGGER.info("did delete user password reset token {} after having processed it", tokenCode);
                         }
 
                     }
 
                 } else {
-                    logger.warn("unable to find the user password reset token {}; will ignore", tokenCode);
+                    LOGGER.warn("unable to find the user password reset token {}; will ignore", tokenCode);
                 }
 
             } else {
-                logger.warn("the code has been supplied as null when attempting to reset a password; will ignore");
+                LOGGER.warn("the code has been supplied as null when attempting to reset a password; will ignore");
             }
         }
         catch(Throwable th) {
-            logger.error("unable to reset the password from a token",th);
+            LOGGER.error("unable to reset the password from a token", th);
         }
     }
 
@@ -257,12 +257,12 @@ public class PasswordResetOrchestrationService {
         List<UserPasswordResetToken> tokens = (List<UserPasswordResetToken>) context.performQuery(query);
 
         if(tokens.isEmpty()) {
-            logger.debug("no expired tokens to delete");
+            LOGGER.debug("no expired tokens to delete");
         }
         else {
             context.deleteObjects(tokens.toArray(new UserPasswordResetToken[tokens.size()]));
             context.commitChanges();
-            logger.info("did delete {} expired tokens", tokens.size());
+            LOGGER.info("did delete {} expired tokens", tokens.size());
         }
 
     }

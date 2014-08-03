@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 
 public class AuthenticationFilter implements Filter {
 
-    protected static Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     private static Pattern PATTERN_AUTHORIZATION_HEADER = Pattern.compile("^([A-Za-z0-9]+)\\s+(.+)$");
 
@@ -80,10 +80,10 @@ public class AuthenticationFilter implements Filter {
                             if (2 == parts.size()) {
                                 authenticatedUserObjectId = authenticationService.authenticateByNicknameAndPassword(parts.get(0), parts.get(1));
                             } else {
-                                logger.warn("attempt to process an authorization header, but the username password is malformed; is not <username>:<password>");
+                                LOGGER.warn("attempt to process an authorization header, but the username password is malformed; is not <username>:<password>");
                             }
                         } else {
-                            logger.warn("attempt to process an authorization header, but the username password is malformed; being decoded from base64");
+                            LOGGER.warn("attempt to process an authorization header, but the username password is malformed; being decoded from base64");
                         }
                         break;
 
@@ -92,13 +92,13 @@ public class AuthenticationFilter implements Filter {
                         break;
 
                     default:
-                        logger.warn("attempt to process an authorization header, but the authorization method {} is unknown :. ignoring", authorizationMatcher.group(1));
+                        LOGGER.warn("attempt to process an authorization header, but the authorization method {} is unknown :. ignoring", authorizationMatcher.group(1));
                         break;
 
                 }
             }
             else {
-                logger.warn("attempt to process an authorization header, but it is malformed :. ignoring");
+                LOGGER.warn("attempt to process an authorization header, but it is malformed :. ignoring");
             }
         }
 

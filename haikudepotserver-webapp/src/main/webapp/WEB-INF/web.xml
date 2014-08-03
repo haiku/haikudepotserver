@@ -11,7 +11,7 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
         <servlet-class>net.jawr.web.servlet.JawrServlet</servlet-class>
         <init-param>
             <param-name>configPropertiesSourceClass</param-name>
-            <param-value>org.haikuos.haikudepotserver.web.SpringProvidedConfigPropertiesSource</param-value>
+            <param-value>org.haikuos.haikudepotserver.support.web.SpringProvidedConfigPropertiesSource</param-value>
         </init-param>
         <init-param>
             <param-name>mapping</param-name>
@@ -29,7 +29,7 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
         <servlet-class>net.jawr.web.servlet.JawrServlet</servlet-class>
         <init-param>
             <param-name>configPropertiesSourceClass</param-name>
-            <param-value>org.haikuos.haikudepotserver.web.SpringProvidedConfigPropertiesSource</param-value>
+            <param-value>org.haikuos.haikudepotserver.support.web.SpringProvidedConfigPropertiesSource</param-value>
         </init-param>
         <init-param>
             <param-name>mapping</param-name>

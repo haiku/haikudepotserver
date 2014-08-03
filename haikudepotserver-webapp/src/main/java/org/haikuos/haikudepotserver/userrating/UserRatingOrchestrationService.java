@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -39,7 +38,7 @@ import java.util.List;
 @Service
 public class UserRatingOrchestrationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(UserRatingOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingOrchestrationService.class);
 
     @Value("${userrating.aggregation.pkg.versionsback:2}")
     int userRatingDerivationVersionsBack;
@@ -312,16 +311,16 @@ public class UserRatingOrchestrationService {
         long beforeMillis = System.currentTimeMillis();
         Optional<DerivedUserRating> rating = userRatingDerivation(context, pkgOptional.get());
 
-        logger.info(
+        LOGGER.info(
                 "calculated the user rating for {} in {}ms",
                 pkgOptional.get(),
                 System.currentTimeMillis() - beforeMillis);
 
         if(!rating.isPresent()) {
-            logger.info("unable to establish a user rating for {}", pkgOptional.get());
+            LOGGER.info("unable to establish a user rating for {}", pkgOptional.get());
         }
         else {
-            logger.info(
+            LOGGER.info(
                     "user rating established for {}; {} (sample {})",
                     pkgOptional.get(),
                     rating.get().getRating(),
@@ -339,7 +338,7 @@ public class UserRatingOrchestrationService {
 
         context.commitChanges();
 
-        logger.info("did persist user rating for {}", pkgOptional.get());
+        LOGGER.info("did persist user rating for {}", pkgOptional.get());
     }
 
     /**

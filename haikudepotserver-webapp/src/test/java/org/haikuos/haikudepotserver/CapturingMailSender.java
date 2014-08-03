@@ -20,19 +20,19 @@ import java.util.List;
 
 public class CapturingMailSender implements MailSender {
 
-    protected static Logger logger = LoggerFactory.getLogger(CapturingMailSender.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(CapturingMailSender.class);
 
     private List<SimpleMailMessage> sentMessages = Lists.newArrayList();
 
     @Override
     public void send(SimpleMailMessage simpleMessage) throws MailException {
-         logger.info("noop; send mail to {}",simpleMessage.getTo());
+         LOGGER.info("noop; send mail to {}", simpleMessage.getTo());
         sentMessages.add(simpleMessage);
     }
 
     @Override
     public void send(SimpleMailMessage[] simpleMessages) throws MailException {
-        logger.info("noop; send {} mails",simpleMessages.length);
+        LOGGER.info("noop; send {} mails", simpleMessages.length);
         sentMessages.addAll(Lists.newArrayList(simpleMessages));
     }
 

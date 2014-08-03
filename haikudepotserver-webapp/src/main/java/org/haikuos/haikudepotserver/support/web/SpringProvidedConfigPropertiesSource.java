@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.web;
+package org.haikuos.haikudepotserver.support.web;
 
 import net.jawr.web.resource.bundle.factory.util.ConfigPropertiesSource;
 import org.springframework.web.context.ContextLoader;

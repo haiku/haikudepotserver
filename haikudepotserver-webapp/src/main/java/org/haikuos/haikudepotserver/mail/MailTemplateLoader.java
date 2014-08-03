@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class MailTemplateLoader implements TemplateLoader, ResourceLoaderAware {
 
-    protected static Logger logger = LoggerFactory.getLogger(MailTemplateLoader.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(MailTemplateLoader.class);
 
     private final static String BASE = "classpath:/mail/";
 

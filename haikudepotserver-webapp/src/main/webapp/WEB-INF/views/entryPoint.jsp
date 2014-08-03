@@ -26,7 +26,11 @@ web-resources and then this starts the java-script single page environment drive
 </head>
 
 <body>
+
+<%@include file="/WEB-INF/includes/unsupported.jsp"%>
+
 <banner></banner>
+
 <div class="container">
     <div ng-view></div>
 </div>

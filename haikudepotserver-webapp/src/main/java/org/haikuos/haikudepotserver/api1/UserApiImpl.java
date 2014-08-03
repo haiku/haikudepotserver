@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
-    protected static Logger logger = LoggerFactory.getLogger(UserApiImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -108,7 +108,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
                     user.get().setNaturalLanguage(naturalLanguageOptional.get());
 
-                    logger.info("will update the natural language on the user {} to {}", user.get().toString(), naturalLanguageOptional.get().toString());
+                    LOGGER.info("will update the natural language on the user {} to {}", user.get().toString(), naturalLanguageOptional.get().toString());
 
                     break;
 
@@ -135,7 +135,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         if(context.hasChanges()) {
             context.commitChanges();
-            logger.info("did update the user {}", user.get().toString());
+            LOGGER.info("did update the user {}", user.get().toString());
 
             // if a user is made active or inactive will have some impact on the user-ratings.
 
@@ -143,7 +143,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                 List<String> pkgNames = userRatingOrchestrationService.pkgNamesEffectedByUserActiveStateChange(
                         context, user.get());
 
-                logger.info(
+                LOGGER.info(
                         "will update user rating derivation for {} packages owing to active state change on user {}",
                         pkgNames.size(),
                         user.get().toString());
@@ -155,7 +155,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         }
         else {
-            logger.info("no changes in updating the user {}", user.get().toString());
+            LOGGER.info("no changes in updating the user {}", user.get().toString());
         }
 
         return new UpdateUserResult();
@@ -220,7 +220,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         user.setPasswordHash(authenticationService.hashPassword(user, createUserRequest.passwordClear));
         context.commitChanges();
 
-        logger.info("data create user; {}",user.getNickname());
+        LOGGER.info("data create user; {}", user.getNickname());
 
         return new CreateUserResult();
     }
@@ -303,10 +303,10 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             ObjectContext context = serverRuntime.getContext();
             User user = User.getByObjectId(context, userOidOptional.get());
             result.token = authenticationService.generateToken(user);
-            logger.info("did renew token for user; {}", user.toString());
+            LOGGER.info("did renew token for user; {}", user.toString());
         }
         else {
-            logger.info("unable to renew token");
+            LOGGER.info("unable to renew token");
         }
 
         return result;
@@ -337,7 +337,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         User targetUser = targetUserOptional.get();
 
         if(!authorizationService.check(context, authUser, targetUserOptional.get(), Permission.USER_CHANGEPASSWORD)) {
-            logger.info("the logged in user {} is not allowed to change the password of another user {}",authUser.getNickname(),changePasswordRequest.nickname);
+            LOGGER.info("the logged in user {} is not allowed to change the password of another user {}", authUser.getNickname(), changePasswordRequest.nickname);
             throw new AuthorizationFailureException();
         }
 
@@ -376,7 +376,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                 // if the old password does not match to the user then we should present this
                 // as a validation failure rather than an authorization failure.
 
-                logger.info("the supplied old password is invalid for the user {}", changePasswordRequest.nickname);
+                LOGGER.info("the supplied old password is invalid for the user {}", changePasswordRequest.nickname);
 
                 throw new ValidationException(new ValidationFailure("oldPasswordClear", "mismatched"));
             }
@@ -384,7 +384,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         targetUser.setPasswordHash(authenticationService.hashPassword(targetUser, changePasswordRequest.newPasswordClear));
         context.commitChanges();
-        logger.info("did change password for user {}", changePasswordRequest.nickname);
+        LOGGER.info("did change password for user {}", changePasswordRequest.nickname);
 
         return new ChangePasswordResult();
     }
@@ -454,7 +454,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             passwordResetOrchestrationService.initiate(initiatePasswordResetRequest.email);
         }
         catch(Throwable th) {
-            logger.error("unable to initiate password reset",th);
+            LOGGER.error("unable to initiate password reset", th);
         }
 
         return new InitiatePasswordResetResult();
@@ -477,7 +477,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                     completePasswordResetRequest.passwordClear);
         }
         catch(Throwable th) {
-            logger.error("unable to complete password reset",th);
+            LOGGER.error("unable to complete password reset", th);
         }
 
         return new CompletePasswordResetResult();

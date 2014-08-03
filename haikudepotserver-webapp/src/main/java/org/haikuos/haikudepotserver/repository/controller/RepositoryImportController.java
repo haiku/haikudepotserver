@@ -32,7 +32,7 @@ import java.io.IOException;
 @RequestMapping("/importrepositorydata")
 public class RepositoryImportController {
 
-    protected static Logger logger = LoggerFactory.getLogger(RepositoryImportController.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryImportController.class);
 
     public final static String KEY_CODE = "code";
 
@@ -46,7 +46,7 @@ public class RepositoryImportController {
 
         try {
             if(Strings.isNullOrEmpty(repositoryCode)) {
-                logger.warn("attempt to import repository data service with no repository code supplied");
+                LOGGER.warn("attempt to import repository data service with no repository code supplied");
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
                 response.getWriter().print(String.format("expected '%s' to have been a query argument to this resource\n",KEY_CODE));
@@ -59,7 +59,7 @@ public class RepositoryImportController {
             }
         }
         catch(Throwable th) {
-            logger.error("failed to accept import repository job",th);
+            LOGGER.error("failed to accept import repository job", th);
 
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());

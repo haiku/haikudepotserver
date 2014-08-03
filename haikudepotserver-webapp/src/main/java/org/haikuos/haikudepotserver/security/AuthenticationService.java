@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
 @Service
 public class AuthenticationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
 
     private final static String SUFFIX_JSONWEBTOKEN_SUBJECT = "@hds";
 
@@ -101,7 +101,7 @@ public class AuthenticationService {
 
         if(Strings.isNullOrEmpty(jsonWebTokenSharedKey)) {
             jsonWebTokenSharedKey = UUID.randomUUID().toString();
-            logger.warn("a shared key is not supplied so a random one has been created");
+            LOGGER.warn("a shared key is not supplied so a random one has been created");
         }
 
         jsonWebTokenSigner = new MACSigner(jsonWebTokenSharedKey.getBytes(Charsets.UTF_8));
@@ -169,15 +169,15 @@ public class AuthenticationService {
                     result = Optional.fromNullable(userOptional.get().getObjectId());
                 }
                 else {
-                    logger.info("the authentication for the user; {} failed", nickname);
+                    LOGGER.info("the authentication for the user; {} failed", nickname);
                 }
             }
             else {
-                logger.info("unable to find the user; {}", nickname);
+                LOGGER.info("unable to find the user; {}", nickname);
             }
         }
         else {
-            logger.info("attempt to authenticate with no username or no password");
+            LOGGER.info("attempt to authenticate with no username or no password");
         }
 
         return result;
@@ -268,7 +268,7 @@ public class AuthenticationService {
         String issuer = claimsSet.getIssuer();
 
         if(null==issuer||!issuer.equals(jsonWebTokenIssuer)) {
-            logger.info("rejected jwt authentication; the issuer '{}' on the jwt does not match the expected '{}'", issuer, jsonWebTokenIssuer);
+            LOGGER.info("rejected jwt authentication; the issuer '{}' on the jwt does not match the expected '{}'", issuer, jsonWebTokenIssuer);
         }
         else {
             java.util.Date issueTime = claimsSet.getIssueTime();
@@ -279,7 +279,7 @@ public class AuthenticationService {
                             || null==expirationTime
                             || nowMillis < issueTime.getTime()
                             || nowMillis > expirationTime.getTime()) {
-                logger.info("rejected jwt authentication; the issue time or expiration time are invalid or do not contain the current time");
+                LOGGER.info("rejected jwt authentication; the issue time or expiration time are invalid or do not contain the current time");
             }
             else {
                 String subject = claimsSet.getSubject();
@@ -288,7 +288,7 @@ public class AuthenticationService {
                         null==subject
                                 || !subject.endsWith(SUFFIX_JSONWEBTOKEN_SUBJECT)
                                 || subject.length() <= SUFFIX_JSONWEBTOKEN_SUBJECT.length()) {
-                    logger.info("rejected jwt authentication; bad subject");
+                    LOGGER.info("rejected jwt authentication; bad subject");
                 }
                 else {
 
@@ -322,7 +322,7 @@ public class AuthenticationService {
                         return Optional.of(signedJWT);
                     }
                     else {
-                        logger.error("attempt to use jwt that was unable to be verified");
+                        LOGGER.error("attempt to use jwt that was unable to be verified");
                     }
                 }
                 catch(JOSEException je) {
@@ -330,7 +330,7 @@ public class AuthenticationService {
                 }
             }
             catch(ParseException pe) {
-                logger.error("rejected malformed jwt that was unable to be parsed",pe);
+                LOGGER.error("rejected malformed jwt that was unable to be parsed", pe);
             }
         }
 

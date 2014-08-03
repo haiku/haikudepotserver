@@ -6,6 +6,13 @@
     <packaging>pom</packaging>
     <version>1.0.2-SNAPSHOT</version>
 
+    <licenses>
+        <license>
+            <name>The MIT License (MIT)</name>
+            <url>http://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

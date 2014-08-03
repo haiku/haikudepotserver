@@ -26,8 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.ServletContextAware;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,9 +43,9 @@ import java.io.InputStream;
 
 @Controller
 @RequestMapping("/pkgicon")
-public class PkgIconController extends AbstractController {
+public class PkgIconController extends AbstractController implements ServletContextAware {
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgIconController.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconController.class);
 
     public final static String KEY_PKGNAME = "pkgname";
     public final static String KEY_FORMAT = "format";
@@ -59,16 +61,22 @@ public class PkgIconController extends AbstractController {
     @Resource
     AuthorizationService authorizationService;
 
+    private ServletContext servletContext;
+
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
+
     private LoadingCache<Integer, byte[]> genericBitmapIcons = CacheBuilder.newBuilder()
             .maximumSize(10)
             .build(
                     new CacheLoader<Integer, byte[]>() {
                         public byte[] load(@SuppressWarnings("NullableProblems") Integer size) {
-                            String resource = String.format("/img/generic/generic%d.png", size);
+                            String resource = String.format("img/generic%d.png", size);
                             InputStream inputStream = null;
 
                             try {
-                                inputStream = this.getClass().getResourceAsStream(resource);
+                                inputStream = servletContext.getResourceAsStream(resource);
 
                                 if(null==inputStream) {
                                     throw new IllegalStateException(String.format("the resource; %s was not able to be found, but should be in the application build product", resource));
@@ -104,14 +112,14 @@ public class PkgIconController extends AbstractController {
                 = org.haikuos.haikudepotserver.dataobjects.MediaType.getByExtension(context, format);
 
         if(!mediaTypeOptional.isPresent()) {
-            logger.warn("attempt to request icon of format '{}', but this format was not recognized",format);
+            LOGGER.warn("attempt to request icon of format '{}', but this format was not recognized", format);
             throw new MissingOrBadFormat();
         }
 
         Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
 
         if(!pkg.isPresent()) {
-            logger.debug("request for icon for package '{}', but no such package was able to be found",pkgName);
+            LOGGER.debug("request for icon for package '{}', but no such package was able to be found", pkgName);
             throw new PkgNotFound();
         }
 
@@ -130,6 +138,7 @@ public class PkgIconController extends AbstractController {
 
                 byte[] data = genericBitmapIcons.getUnchecked(size);
                 response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
+                response.setHeader(HttpHeaders.CACHE_CONTROL,"public, max-age=3600");
                 response.setContentType(mediaTypeOptional.get().getCode());
 
                 if(requestMethod == RequestMethod.GET) {

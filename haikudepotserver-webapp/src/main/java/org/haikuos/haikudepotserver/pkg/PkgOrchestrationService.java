@@ -47,7 +47,7 @@ import java.util.UUID;
 @Service
 public class PkgOrchestrationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(PkgOrchestrationService.class);
 
     protected static int SCREENSHOT_SIDE_LIMIT = 1500;
 
@@ -408,17 +408,17 @@ public class PkgOrchestrationService {
             ImageHelper.Size pngSize =  imageHelper.derivePngSize(imageData);
 
             if(null==pngSize) {
-                logger.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it is not a valid png image",pkg.getName());
+                LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it is not a valid png image", pkg.getName());
                 throw new BadPkgIconException();
             }
 
             if(!pngSize.areSides(16) && !pngSize.areSides(32)) {
-                logger.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it must be either 32x32 or 16x16 px, but was {}",pkg.getName(),pngSize.toString());
+                LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it must be either 32x32 or 16x16 px, but was {}", pkg.getName(), pngSize.toString());
                 throw new BadPkgIconException();
             }
 
             if(null!=expectedSize && !pngSize.areSides(expectedSize)) {
-                logger.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not match the expected size",pkg.getName());
+                LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not match the expected size", pkg.getName());
                 throw new BadPkgIconException();
             }
 
@@ -428,7 +428,7 @@ public class PkgOrchestrationService {
         else {
             if(MediaType.MEDIATYPE_HAIKUVECTORICONFILE.equals(mediaType.getCode())) {
                 if(!imageHelper.looksLikeHaikuVectorIconFormat(imageData)) {
-                    logger.warn("attempt to set the vector (hvif) package icon for package {}, but the data does not look like hvif",pkg.getName());
+                    LOGGER.warn("attempt to set the vector (hvif) package icon for package {}, but the data does not look like hvif", pkg.getName());
                     throw new BadPkgIconException();
                 }
                 pkgIconOptional = pkg.getPkgIcon(mediaType, null);
@@ -457,10 +457,10 @@ public class PkgOrchestrationService {
         pkg.setModifyTimestamp(new java.util.Date());
 
         if(null!=size) {
-            logger.info("the icon {}px for package {} has been updated", size, pkg.getName());
+            LOGGER.info("the icon {}px for package {} has been updated", size, pkg.getName());
         }
         else {
-            logger.info("the icon for package {} has been updated", pkg.getName());
+            LOGGER.info("the icon for package {} has been updated", pkg.getName());
         }
 
         return pkgIconOptional.get();
@@ -531,7 +531,7 @@ public class PkgOrchestrationService {
         ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
 
         if(null==size) {
-            logger.warn("attempt to store a screenshot image that is not a png");
+            LOGGER.warn("attempt to store a screenshot image that is not a png");
             throw new BadPkgScreenshotException();
         }
 
@@ -539,7 +539,7 @@ public class PkgOrchestrationService {
         // reasonable.
 
         if(size.height > SCREENSHOT_SIDE_LIMIT || size.width > SCREENSHOT_SIDE_LIMIT) {
-            logger.warn("attempt to store a screenshot image that is too large; "+size.toString());
+            LOGGER.warn("attempt to store a screenshot image that is too large; " + size.toString());
             throw new BadPkgScreenshotException();
         }
 
@@ -570,7 +570,7 @@ public class PkgOrchestrationService {
 
         pkg.setModifyTimestamp(new java.util.Date());
 
-        logger.info("a screenshot #{} has been added to package {} ({})", ordering, pkg.getName(), screenshot.getCode());
+        LOGGER.info("a screenshot #{} has been added to package {} ({})", ordering, pkg.getName(), screenshot.getCode());
 
         return screenshot;
     }
@@ -617,7 +617,7 @@ public class PkgOrchestrationService {
             persistedPkg.setName(pkg.getName());
             persistedPkg.setActive(Boolean.TRUE);
 
-            logger.info("the package {} did not exist; will create",pkg.getName());
+            LOGGER.info("the package {} did not exist; will create", pkg.getName());
         }
         else {
 
@@ -700,7 +700,7 @@ public class PkgOrchestrationService {
                         NaturalLanguage.getAllExceptEnglish(objectContext),
                         false).size();
 
-                logger.info(
+                LOGGER.info(
                         "replicated {} natural language localizations when creating new version of package {}",
                         naturalLanguagesReplicated,
                         pkg.getName());
@@ -720,7 +720,7 @@ public class PkgOrchestrationService {
                     persistedLatestExistingPkgVersion.get().setIsLatest(false);
                 }
                 else {
-                    logger.warn(
+                    LOGGER.warn(
                             "imported a package version {} which is older or the same as the existing {}",
                             persistedPkgVersionCoords,
                             persistedLatestExistingPkgVersionCoords);
@@ -730,13 +730,13 @@ public class PkgOrchestrationService {
                 persistedPkgVersion.setIsLatest(true);
             }
 
-            logger.info(
+            LOGGER.info(
                     "the version {} of package {} did not exist; will create",
                     pkg.getVersion().toString(),
                     pkg.getName());
         }
 
-        logger.debug("have processed package {}",pkg.toString());
+        LOGGER.debug("have processed package {}", pkg.toString());
 
     }
 

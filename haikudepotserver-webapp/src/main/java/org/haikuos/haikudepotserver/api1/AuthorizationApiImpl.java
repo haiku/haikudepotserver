@@ -35,7 +35,7 @@ import java.util.List;
 @Component
 public class AuthorizationApiImpl extends AbstractApiImpl implements AuthorizationApi {
 
-    protected static Logger logger = LoggerFactory.getLogger(AuthorizationApiImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationApiImpl.class);
 
     @Resource
     ServerRuntime serverRuntime;

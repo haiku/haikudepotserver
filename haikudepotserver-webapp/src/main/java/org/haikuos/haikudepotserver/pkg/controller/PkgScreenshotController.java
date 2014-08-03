@@ -37,7 +37,7 @@ import java.io.IOException;
 @RequestMapping("/pkgscreenshot")
 public class PkgScreenshotController extends AbstractController {
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgScreenshotController.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotController.class);
 
     public final static String HEADER_SCREENSHOTCODE = "X-HaikuDepotServer-ScreenshotCode";
 
@@ -245,7 +245,7 @@ public class PkgScreenshotController extends AbstractController {
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
         if(!authorizationService.check(context, user.orNull(), pkg.get(), Permission.PKG_EDITSCREENSHOT)) {
-            logger.warn("attempt to add a pkg screenshot, but there is no user present or that user is not able to edit the pkg");
+            LOGGER.warn("attempt to add a pkg screenshot, but there is no user present or that user is not able to edit the pkg");
             throw new PkgAuthorizationFailure();
         }
 
@@ -258,7 +258,7 @@ public class PkgScreenshotController extends AbstractController {
                     pkg.get()).getCode();
         }
         catch(SizeLimitReachedException sizeLimit) {
-            logger.warn("attempt to load in a screenshot larger than the size limit");
+            LOGGER.warn("attempt to load in a screenshot larger than the size limit");
             throw new MissingOrBadFormat();
         }
         catch(BadPkgScreenshotException badIcon) {

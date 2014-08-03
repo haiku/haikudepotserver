@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DatabaseCaptchaRepository implements CaptchaRepository {
 
-    protected static Logger logger = LoggerFactory.getLogger(DatabaseCaptchaRepository.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(DatabaseCaptchaRepository.class);
 
     private ServerRuntime serverRuntime;
 
@@ -73,7 +73,7 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
         if(responseOptional.isPresent()) {
             objectContext.deleteObjects(responseOptional.get());
             objectContext.commitChanges();
-            logger.info("did delete captcha response with token; {}", token);
+            LOGGER.info("did delete captcha response with token; {}", token);
             return true;
         }
 
@@ -114,7 +114,7 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
 
         objectContext.commitChanges();
 
-        logger.info("stored captcha response with token {}",token);
+        LOGGER.info("stored captcha response with token {}", token);
     }
 
 }

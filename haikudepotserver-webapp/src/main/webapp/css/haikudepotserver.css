@@ -89,10 +89,8 @@ PAGE STRUCTURE
 */
 
 .content-container {
-    margin-left: 32px;
-    margin-right: 32px;
-    margin-top: 16px;
-    margin-bottom: 0px; /* handled by the trailer class */
+    /* handled by the trailer class */
+    margin: 24px 5% 0px;
     width: auto;
 }
 
@@ -326,9 +324,9 @@ Also see "modal-backdrop-container" class above.
     padding: 16px;
     position: absolute;
     top: 20px;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
+    bottom: 0;
+    left: 0;
+    right: 0;
     overflow-y: auto;
 }
 
@@ -423,7 +421,7 @@ between the sections.
 }
 
 #search-results-container {
-    margin-top: 8px;
+    margin-top: 20px;
 }
 
 /*

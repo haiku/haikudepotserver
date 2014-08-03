@@ -257,6 +257,19 @@ An example URL is;
 
 \framebox{\tt http://localhost:8080/pkgscreenshot/apr/add?format=png}
 
+\subsubsection{Medium-Term Maintenance}
+
+Medium-term maintenance includes tasks that should be undertaken every hour or so that clean-up disused resources.  An example is removing expired password-reset tokens from the database.  Medium-term maintenance is triggered externally (from a process such as {\it cron}) rather than on an internal scheduler in order to simplify a multi-instance deployment.
+
+\begin{itemize}
+\item HTTP Method : GET
+\item Path : /maintenance/mediumterm
+\item Expected HTTP Status Codes
+  \begin{itemize}
+  \item {\bf 200} : The maintenance request was accepted
+  \item {\bf *} : The maintenance job was not accepted
+  \end{itemize}
+\end{itemize}
 
 
 

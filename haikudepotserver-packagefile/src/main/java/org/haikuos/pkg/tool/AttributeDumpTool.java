@@ -25,7 +25,7 @@ import java.io.OutputStreamWriter;
 
 public class AttributeDumpTool implements Runnable {
 
-    protected static Logger logger = LoggerFactory.getLogger(AttributeDumpTool.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(AttributeDumpTool.class);
 
     @Option(name = "-f", required = true, usage = "the HPKR file is required")
     private File hpkrFile;
@@ -57,7 +57,7 @@ public class AttributeDumpTool implements Runnable {
             attributeWriter.flush();
         }
         catch(Throwable th) {
-            logger.error("unable to dump attributes",th);
+            LOGGER.error("unable to dump attributes", th);
         }
         finally {
             if(null!=hpkrFileExtractor) {

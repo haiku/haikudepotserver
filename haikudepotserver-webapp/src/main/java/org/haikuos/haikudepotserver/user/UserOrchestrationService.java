@@ -27,7 +27,7 @@ import java.util.List;
 @Service
 public class UserOrchestrationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(UserOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserOrchestrationService.class);
 
     // ------------------------------
     // SEARCH
@@ -67,44 +67,6 @@ public class UserOrchestrationService {
         return Joiner.on(" AND ").join(parts);
     }
 
-    // WILL WORK AFTER CAY-1932 IS IMPLEMENTED!
-//    private SelectQuery prepare(
-//            ObjectContext context,
-//            UserSearchSpecification searchSpecification) {
-//        Preconditions.checkNotNull(context);
-//        Preconditions.checkNotNull(searchSpecification);
-//        List<Expression> expressions = Lists.newArrayList();
-//
-//        if(!Strings.isNullOrEmpty(searchSpecification.getExpression())) {
-//            switch(searchSpecification.getExpressionType()) {
-//
-//                case CONTAINS:
-//                    expressions.add(ExpressionFactory.likeExp(
-//                            User.NICKNAME_PROPERTY,
-//                            "%" + LikeHelper.ESCAPER.escape(searchSpecification.getExpression()) + "%"
-//                    ));
-//                    break;
-//
-//                default:
-//                    throw new IllegalStateException("unknown expression type " + searchSpecification.getExpressionType().name());
-//
-//            }
-//        }
-//
-//        if(!searchSpecification.getIncludeInactive()) {
-//            expressions.add(ExpressionFactory.matchExp(
-//                    User.ACTIVE_PROPERTY,
-//                    Boolean.TRUE));
-//        }
-//
-//        return new SelectQuery(
-//                User.class,
-//                ExpressionHelper.andAll(expressions),
-//                Collections.singletonList(new Ordering(
-//                        User.NICKNAME_PROPERTY,
-//                        SortOrder.ASCENDING)));
-//    }
-
     /**
      * <p>Undertakes a search for users.</p>
      */
@@ -135,7 +97,7 @@ public class UserOrchestrationService {
         query.setFetchOffset(searchSpecification.getOffset());
         query.setFetchLimit(searchSpecification.getLimit());
 
-        return context.performQuery(query);
+        return (List<User>) context.performQuery(query);
     }
 
     /**

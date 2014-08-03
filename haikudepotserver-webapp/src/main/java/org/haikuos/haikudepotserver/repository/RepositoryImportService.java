@@ -41,7 +41,7 @@ import java.net.URL;
 
 public class RepositoryImportService extends AbstractLocalBackgroundProcessingService {
 
-    protected static Logger logger = LoggerFactory.getLogger(RepositoryImportService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryImportService.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -77,10 +77,10 @@ public class RepositoryImportService extends AbstractLocalBackgroundProcessingSe
                     }
                 }).isPresent()) {
             executor.submit(new ImportRepositoryDataJobRunnable(this, job));
-            logger.info("have submitted job to import repository data; {}", job.toString());
+            LOGGER.info("have submitted job to import repository data; {}", job.toString());
         }
         else {
-            logger.info("ignoring job to import repository data as there is already one waiting; {}", job.toString());
+            LOGGER.info("ignoring job to import repository data as there is already one waiting; {}", job.toString());
         }
     }
 
@@ -108,13 +108,13 @@ public class RepositoryImportService extends AbstractLocalBackgroundProcessingSe
             temporaryFile = File.createTempFile(job.getCode()+"__import",".hpkr");
             Resources.asByteSource(url).copyTo(Files.asByteSink(temporaryFile));
 
-            logger.debug("did copy data for repository {} ({}) to temporary file",job.getCode(),url.toString());
+            LOGGER.debug("did copy data for repository {} ({}) to temporary file", job.getCode(), url.toString());
 
             org.haikuos.pkg.HpkrFileExtractor fileExtractor = new org.haikuos.pkg.HpkrFileExtractor(temporaryFile);
             PkgIterator pkgIterator = new PkgIterator(fileExtractor.getPackageAttributesIterator());
 
             long startTimeMs = System.currentTimeMillis();
-            logger.info("will process data for repository {}",job.getCode());
+            LOGGER.info("will process data for repository {}", job.getCode());
 
             while (pkgIterator.hasNext()) {
                 ObjectContext pkgImportContext = serverRuntime.getContext();
@@ -122,21 +122,21 @@ public class RepositoryImportService extends AbstractLocalBackgroundProcessingSe
                 pkgImportContext.commitChanges();
             }
 
-            logger.info("did process data for repository {} in {}ms",job.getCode(),System.currentTimeMillis()-startTimeMs);
+            LOGGER.info("did process data for repository {} in {}ms", job.getCode(), System.currentTimeMillis() - startTimeMs);
 
             transaction.commit();
         }
         catch(Throwable th) {
 
             transaction.setRollbackOnly();
-            logger.error("a problem has arisen processing a repository file for repository "+job.getCode()+" from url '"+url.toString()+"'",th);
+            LOGGER.error("a problem has arisen processing a repository file for repository " + job.getCode() + " from url '" + url.toString() + "'", th);
 
         }
         finally {
 
             if(null!=temporaryFile && temporaryFile.exists()) {
                 if(!temporaryFile.delete()) {
-                    logger.error("unable to delete the file; {}"+temporaryFile.getAbsolutePath());
+                    LOGGER.error("unable to delete the file; {}" + temporaryFile.getAbsolutePath());
                 }
             }
 

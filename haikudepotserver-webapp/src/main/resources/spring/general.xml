@@ -53,6 +53,14 @@
             destroy-method="stopAsyncAndAwaitTerminated">
     </bean>
 
+    <!-- DELETE EXPIRED PASSWORD RESET TOKENS -->
+
+    <bean
+            class="org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceService"
+            init-method="startAsyncAndAwaitRunning"
+            destroy-method="stopAsyncAndAwaitTerminated">
+    </bean>
+
     <!-- EMAIL -->
 
     <bean id="freemarkerConfiguration" class="freemarker.template.Configuration">

@@ -13,11 +13,11 @@ import javax.annotation.Resource;
  * operates in the same runtime as the application and has no persistence or distributed behaviour.</p>
  */
 
-public class LocalUserRatingDerviationService
+public class LocalUserRatingDerivationService
         extends AbstractLocalBackgroundProcessingService
         implements UserRatingDerivationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(UserRatingDerivationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingDerivationService.class);
 
     @Resource
     UserRatingOrchestrationService userRatingOrchestrationService;
@@ -26,7 +26,7 @@ public class LocalUserRatingDerviationService
         Preconditions.checkNotNull(job);
         Preconditions.checkState(null!=executor, "the service is not running, but a job is being submitted");
         executor.submit(new UserRatingDerivationJobRunnable(this, job));
-        logger.info("have submitted job to derive user rating; {}", job.toString());
+        LOGGER.info("have submitted job to derive user rating; {}", job.toString());
     }
 
     protected void run(UserRatingDerivationJob job) {
@@ -42,10 +42,10 @@ public class LocalUserRatingDerviationService
 
         private UserRatingDerivationJob job;
 
-        private LocalUserRatingDerviationService service;
+        private LocalUserRatingDerivationService service;
 
         public UserRatingDerivationJobRunnable(
-                LocalUserRatingDerviationService service,
+                LocalUserRatingDerivationService service,
                 UserRatingDerivationJob job) {
             Preconditions.checkNotNull(service);
             Preconditions.checkNotNull(job);

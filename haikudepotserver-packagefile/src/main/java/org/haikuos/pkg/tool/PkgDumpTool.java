@@ -26,7 +26,7 @@ import java.io.OutputStreamWriter;
 
 public class PkgDumpTool {
 
-    protected static Logger logger = LoggerFactory.getLogger(AttributeDumpTool.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AttributeDumpTool.class);
 
     @Option(name = "-f", required = true, usage = "the HPKR file is required")
     private File hpkrFile;
@@ -58,7 +58,7 @@ public class PkgDumpTool {
             pkgWriter.flush();
         }
         catch(Throwable th) {
-            logger.error("unable to dump packages",th);
+            LOGGER.error("unable to dump packages", th);
         }
         finally {
             if(null!=hpkrFileExtractor) {

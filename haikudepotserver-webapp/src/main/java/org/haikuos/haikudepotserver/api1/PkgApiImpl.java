@@ -55,7 +55,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     public final static int PKGPKGCATEGORIES_MAX = 3;
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgApiImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -113,7 +113,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         User user = obtainAuthenticatedUser(context);
 
         if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITCATEGORIES)) {
-            logger.warn("attempt to configure the categories for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
+            LOGGER.warn("attempt to configure the categories for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 
@@ -121,7 +121,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 PkgCategory.getByCodes(context, updatePkgCategoriesRequest.pkgCategoryCodes));
 
         if(pkgCategories.size() != updatePkgCategoriesRequest.pkgCategoryCodes.size()) {
-            logger.warn(
+            LOGGER.warn(
                     "request for {} categories yielded only {}; must be a code mismatch",
                     updatePkgCategoriesRequest.pkgCategoryCodes.size(),
                     pkgCategories.size());
@@ -156,9 +156,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         context.commitChanges();
 
-        logger.info(
+        LOGGER.info(
                 "did configure {} categories for pkg {}",
-                new Object[] {
+                new Object[]{
                         updatePkgCategoriesRequest.pkgCategoryCodes.size(),
                         pkg.getName(),
                 }
@@ -232,6 +232,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultPkg.name = input.getPkg().getName();
                         resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
                         resultPkg.derivedRating = input.getPkg().getDerivedRating();
+                        resultPkg.hasAnyPkgIcons = !input.getPkg().getPkgIcons().isEmpty();
 
                         SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
                         resultVersion.major = input.getMajor();
@@ -260,7 +261,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
         ));
 
-        logger.info("search for pkgs found {} results", result.items.size());
+        LOGGER.info("search for pkgs found {} results", result.items.size());
 
         return result;
     }
@@ -352,7 +353,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             shouldIncrement = null==previouslyIncremented;
 
             if(!shouldIncrement) {
-                logger.info(
+                LOGGER.info(
                         "would have incremented the view counter for '{}', but the client '{}' already did this recently",
                         pkgVersion.getPkg().toString(),
                         remoteIdentifier);
@@ -362,7 +363,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         if(shouldIncrement) {
             pkgVersion.incrementViewCounter();
             context.commitChanges();
-            logger.info("did increment the view counter for '{}'", pkgVersion.getPkg().toString());
+            LOGGER.info("did increment the view counter for '{}'", pkgVersion.getPkg().toString());
         }
 
         if(null!=cacheKey) {
@@ -577,7 +578,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         User user = obtainAuthenticatedUser(context);
 
         if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
-            logger.warn("attempt to configure the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
+            LOGGER.warn("attempt to configure the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 
@@ -655,7 +656,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         context.commitChanges();
 
-        logger.info(
+        LOGGER.info(
                 "did configure icons for pkg {} (updated {}, removed {})",
                 pkg.getName(),
                 updated,
@@ -677,7 +678,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         User user = obtainAuthenticatedUser(context);
 
         if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
-            logger.warn("attempt to remove the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
+            LOGGER.warn("attempt to remove the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 
@@ -691,7 +692,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         context.commitChanges();
 
-        logger.info("did remove icons for pkg {}",pkg.getName());
+        LOGGER.info("did remove icons for pkg {}", pkg.getName());
 
         return new RemovePkgIconResult();
     }
@@ -778,7 +779,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         context.deleteObjects(screenshotOptional.get());
         context.commitChanges();
 
-        logger.info("did remove the screenshot {} on package {}", removePkgScreenshotRequest.code, pkg.getName());
+        LOGGER.info("did remove the screenshot {} on package {}", removePkgScreenshotRequest.code, pkg.getName());
 
         return new RemovePkgScreenshotResult();
     }
@@ -801,7 +802,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         pkg.reorderPkgScreenshots(reorderPkgScreenshotsRequest.codes);
         context.commitChanges();
 
-        logger.info("did reorder the screenshots on package {}", pkg.getName());
+        LOGGER.info("did reorder the screenshots on package {}", pkg.getName());
 
         return new ReorderPkgScreenshotsResult();
     }
@@ -880,7 +881,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         context.commitChanges();
 
-        logger.info(
+        LOGGER.info(
                 "did update the localization for pkg {} in architecture {} for {} natural languages",
                 pkg.getName(),
                 architecture.getCode(),
@@ -1106,11 +1107,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     }
             );
 
-            logger.info(
+            LOGGER.info(
                     "did search and find {} pkg versions for get bulk pkg; fetch in {}ms, marshall in {}ms",
                     pkgVersions.size(),
                     postFetchMs - preFetchMs,
-                    System.currentTimeMillis()-postFetchMs);
+                    System.currentTimeMillis() - postFetchMs);
 
         }
 

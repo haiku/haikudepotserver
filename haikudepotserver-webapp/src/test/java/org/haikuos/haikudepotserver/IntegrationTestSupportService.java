@@ -27,7 +27,7 @@ import java.util.Collections;
 @Service
 public class IntegrationTestSupportService {
 
-    protected static Logger logger = LoggerFactory.getLogger(IntegrationTestSupportService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(IntegrationTestSupportService.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -114,7 +114,7 @@ public class IntegrationTestSupportService {
 
     public StandardTestData createStandardTestData() {
 
-        logger.info("will create standard test data");
+        LOGGER.info("will create standard test data");
 
         ObjectContext context = getObjectContext();
         StandardTestData result = new StandardTestData();
@@ -231,7 +231,7 @@ public class IntegrationTestSupportService {
 
         context.commitChanges();
 
-        logger.info("did create standard test data");
+        LOGGER.info("did create standard test data");
 
         return result;
     }

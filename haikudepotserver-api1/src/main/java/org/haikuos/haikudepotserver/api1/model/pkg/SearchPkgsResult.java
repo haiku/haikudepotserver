@@ -16,6 +16,15 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public Long modifyTimestamp;
 
         /**
+         * <p>This will be true if the package has any icon data stored for it;
+         * regardless of the format of that icon.  This can be used as a cue as
+         * to the value in using a specific URL to get a specific icon for the
+         * package or to use a generic icon.</p>
+         */
+
+        public boolean hasAnyPkgIcons;
+
+        /**
          * <p>This versions value should only contain the one item actually, but is
          * provided in this form to retain consistency with other API.</p>
          */

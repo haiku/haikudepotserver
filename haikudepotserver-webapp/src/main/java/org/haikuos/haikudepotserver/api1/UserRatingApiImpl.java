@@ -34,7 +34,7 @@ import java.util.UUID;
 @Component
 public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
 
-    protected static Logger logger = LoggerFactory.getLogger(UserApiImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -226,12 +226,12 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Optional<User> authenticatedUserOptional = tryObtainAuthenticatedUser(context);
 
         if(!authenticatedUserOptional.isPresent()) {
-            logger.warn("only authenticated users are able to add user ratings");
+            LOGGER.warn("only authenticated users are able to add user ratings");
             throw new AuthorizationFailureException();
         }
 
         if(!authenticatedUserOptional.get().getNickname().equals(userOptional.get().getNickname())) {
-            logger.warn("it is not allowed to add a user rating for another user");
+            LOGGER.warn("it is not allowed to add a user rating for another user");
             throw new AuthorizationFailureException();
         }
 
@@ -288,7 +288,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         context.commitChanges();
 
-        logger.info(
+        LOGGER.info(
                 "did create user rating for user {} on package {}",
                 userOptional.get().toString(),
                 pkgOptional.get().toString());
@@ -318,7 +318,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 authenticatedUser,
                 userRatingOptional.get(),
                 Permission.USERRATING_EDIT)) {
-            logger.error("unable to edit the userrating as {}", authenticatedUser.toString());
+            LOGGER.error("unable to edit the userrating as {}", authenticatedUser.toString());
             throw new AuthorizationFailureException();
         }
 
@@ -378,7 +378,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         }
 
-        logger.info(
+        LOGGER.info(
                 "did update user rating for user {} on package {}",
                 userRatingOptional.get().getUser().toString(),
                 userRatingOptional.get().getPkgVersion().getPkg().toString());

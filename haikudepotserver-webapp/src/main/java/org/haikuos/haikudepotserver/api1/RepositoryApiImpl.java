@@ -37,7 +37,7 @@ import java.util.List;
 @Component
 public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi {
 
-    protected static Logger logger = LoggerFactory.getLogger(RepositoryApiImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryApiImpl.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -204,14 +204,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
                     if(repositoryOptional.get().getActive() != updateRepositoryRequest.active) {
                         repositoryOptional.get().setActive(updateRepositoryRequest.active);
-                        logger.info("did set the active flag on repository {} to {}", updateRepositoryRequest.code,updateRepositoryRequest.active);
+                        LOGGER.info("did set the active flag on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.active);
                     }
 
                     break;
 
                 case URL:
                     repositoryOptional.get().setUrl(updateRepositoryRequest.url);
-                    logger.info("did set the url on repository {} to {}", updateRepositoryRequest.code,updateRepositoryRequest.url);
+                    LOGGER.info("did set the url on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.url);
                     break;
 
                 default:
@@ -223,7 +223,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             context.commitChanges();
         }
         else {
-            logger.info("update repository {} with no changes made", updateRepositoryRequest.code);
+            LOGGER.info("update repository {} with no changes made", updateRepositoryRequest.code);
         }
 
         return new UpdateRepositoryResult();

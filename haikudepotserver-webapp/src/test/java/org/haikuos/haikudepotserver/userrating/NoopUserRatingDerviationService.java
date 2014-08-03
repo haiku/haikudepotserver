@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory;
 
 public class NoopUserRatingDerviationService implements UserRatingDerivationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(NoopUserRatingDerviationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(NoopUserRatingDerviationService.class);
 
     @Override
     public void submit(UserRatingDerivationJob job) {
-        logger.info("did submit request to derive user rating for pkg; {} -- will ignore (noop)",job.getPkgName());
+        LOGGER.info("did submit request to derive user rating for pkg; {} -- will ignore (noop)", job.getPkgName());
     }
 }

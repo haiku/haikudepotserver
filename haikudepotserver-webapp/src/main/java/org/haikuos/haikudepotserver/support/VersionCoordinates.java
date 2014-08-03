@@ -8,6 +8,10 @@ package org.haikuos.haikudepotserver.support;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
+/**
+ * <p>This object models the version coordinates of a package.</p>
+ */
+
 public class VersionCoordinates {
 
     private String major;

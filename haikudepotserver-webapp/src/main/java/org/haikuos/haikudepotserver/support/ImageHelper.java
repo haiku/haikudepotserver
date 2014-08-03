@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImageHelper {
 
-    protected static Logger logger = LoggerFactory.getLogger(ImageHelper.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 
     private int HVIF_MAGIC[] = {
             0x6e, 0x63, 0x69, 0x66
@@ -40,7 +40,7 @@ public class ImageHelper {
 
         for(int i=0;i< HVIF_MAGIC.length;i++) {
             if((0xff & data[i]) != HVIF_MAGIC[i]) {
-                logger.trace("the magic header is not present in the hvif data");
+                LOGGER.trace("the magic header is not present in the hvif data");
                 return false;
             }
         }
@@ -64,7 +64,7 @@ public class ImageHelper {
 
         for(int i=0;i< PNG_MAGIC.length;i++) {
             if((0xff & data[i]) != PNG_MAGIC[i]) {
-                logger.trace("the magic header is not present in the png data");
+                LOGGER.trace("the magic header is not present in the png data");
                 return null;
             }
         }
@@ -77,7 +77,7 @@ public class ImageHelper {
 
         for(int i=0;i<PNG_IHDR.length;i++) {
             if((0xff & data[12+i]) != PNG_IHDR[i]) {
-                logger.trace("the IHDR chunk is not present in the png data");
+                LOGGER.trace("the IHDR chunk is not present in the png data");
                 return null;
             }
         }

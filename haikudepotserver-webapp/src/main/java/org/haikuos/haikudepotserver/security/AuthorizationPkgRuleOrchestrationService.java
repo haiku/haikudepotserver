@@ -42,7 +42,7 @@ import java.util.List;
 @Service
 public class AuthorizationPkgRuleOrchestrationService {
 
-    protected static Logger logger = LoggerFactory.getLogger(AuthorizationPkgRuleOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleOrchestrationService.class);
 
     private static int LIMIT_GENERATECSV = 100;
 
@@ -243,7 +243,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         rule.setPermission(permission);
         user.addToManyTarget(User.PERMISSION_USER_PKGS_PROPERTY, rule, true);
         rule.setPkg(pkg);
-        logger.info("did create permission user repository; {},{},{}",permission,user,pkg);
+        LOGGER.info("did create permission user repository; {},{},{}", permission, user, pkg);
 
         return rule;
     }
@@ -262,9 +262,9 @@ public class AuthorizationPkgRuleOrchestrationService {
 
         if (permissionUserPkgOptional.isPresent()) {
             context.deleteObjects(permissionUserPkgOptional.get());
-            logger.info("did remove permission user package; {},{},{}",permission,user,pkg);
+            LOGGER.info("did remove permission user package; {},{},{}", permission, user, pkg);
         } else {
-            logger.info("no permission user package already existed to remove; {},{},{}",permission,user,pkg);
+            LOGGER.info("no permission user package already existed to remove; {},{},{}", permission, user, pkg);
         }
 
     }

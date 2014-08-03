@@ -50,7 +50,7 @@ import java.util.Map;
 })
 public abstract class AbstractIntegrationTest {
 
-    protected static Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     private final static String DATABASEPRODUCTNAME_POSTGRES = "PostgreSQL";
 
@@ -122,14 +122,14 @@ public abstract class AbstractIntegrationTest {
     @Before
     public void beforeEachTest() {
 
-        logger.info("will prepare for the next test");
+        LOGGER.info("will prepare for the next test");
 
         // reset the apache cayenne cache before we go behind its back and
         // clear out the database for the next test.
 
         serverRuntime.getDataDomain().getQueryCache().clear();
         serverRuntime.getDataDomain().getSharedSnapshotCache().clear();
-        logger.info("prep; have cleared out cayenne caches");
+        LOGGER.info("prep; have cleared out cayenne caches");
 
         // get all of the databases that are managed.
 
@@ -172,12 +172,12 @@ public abstract class AbstractIntegrationTest {
             }
 
             managedDatabase.migrate();
-            logger.info("prep; did drop database objects for schema '{}' and re-create them", managedDatabase.getSchema());
+            LOGGER.info("prep; did drop database objects for schema '{}' and re-create them", managedDatabase.getSchema());
         }
 
         mailSender.clear();
 
-        logger.info("did prepare for the next test");
+        LOGGER.info("did prepare for the next test");
     }
 
     protected void setAuthenticatedUser(String nickname) {

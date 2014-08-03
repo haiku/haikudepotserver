@@ -31,7 +31,7 @@ import java.util.Properties;
 @Component
 public class MiscellaneousApiImpl extends AbstractApiImpl implements MiscellaneousApi {
 
-    protected static Logger logger = LoggerFactory.getLogger(PkgApiImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
     public final static String RESOURCE_MESSAGES = "/messages%s.properties";
 
@@ -91,7 +91,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             throw new RuntimeException("test exception");
         }
 
-        logger.warn("attempt to raise a test exception without being authenticated as root");
+        LOGGER.warn("attempt to raise a test exception without being authenticated as root");
 
         return new RaiseExceptionResult();
     }

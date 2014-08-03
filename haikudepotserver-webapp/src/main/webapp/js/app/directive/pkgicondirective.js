@@ -37,14 +37,16 @@ angular.module('haikudepotserver').directive('pkgIcon',
                     element.replaceWith(el);
 
                     $scope.$watch(pkgExpression, function(pkg) {
-                        var url = '';
+                        var url = '/img/generic'+size+'.png';
 
                         if (pkg) {
                             if (!pkg.name||!pkg.name.length) {
                                 throw Error('the package is expected to have a name in order to derive an icon url');
                             }
 
-                            url = pkgIcon.url(pkg, constants.MEDIATYPE_PNG, size);
+                            if(undefined == pkg.hasAnyPkgIcons || pkg.hasAnyPkgIcons) {
+                                url = pkgIcon.url(pkg, constants.MEDIATYPE_PNG, size);
+                            }
                         }
 
                         el.attr('src', url);

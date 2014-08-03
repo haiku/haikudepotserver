@@ -27,7 +27,7 @@ import java.io.IOException;
 @RequestMapping("/secured/authorization/authorizationpkgrule")
 public class AuthorizationPkgRuleController extends AbstractUserAuthenticationAware {
 
-    protected static Logger logger = LoggerFactory.getLogger(AuthorizationPkgRuleController.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleController.class);
 
     @Resource
     ServerRuntime serverRuntime;
@@ -63,7 +63,7 @@ public class AuthorizationPkgRuleController extends AbstractUserAuthenticationAw
             throw new RuntimeException("unable to produce the authorizationpkgrule csv download", ioe);
         }
 
-        logger.info("did generate the authorizationpkgrule csv download");
+        LOGGER.info("did generate the authorizationpkgrule csv download");
 
     }
 

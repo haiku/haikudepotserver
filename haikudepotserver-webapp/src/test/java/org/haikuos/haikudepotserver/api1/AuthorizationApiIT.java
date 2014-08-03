@@ -226,7 +226,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
             Assert.fail("it was expected that an authorization error would arise.");
         }
         catch(AuthorizationFailureException afe) {
-            logger.info("authorization failed as expected");
+            LOGGER.info("authorization failed as expected");
         }
 
     }

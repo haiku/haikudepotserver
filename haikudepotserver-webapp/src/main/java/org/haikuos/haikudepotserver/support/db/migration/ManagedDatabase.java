@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 
 public class ManagedDatabase {
 
-    protected static Logger logger = LoggerFactory.getLogger(ManagedDatabase.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(ManagedDatabase.class);
 
     private DataSource dataSource;
 
@@ -63,9 +63,9 @@ public class ManagedDatabase {
         flyway.setLocations(String.format("db/%s/migration",getSchema()));
         flyway.setDataSource(dataSource);
 
-        logger.info("will migrate database to latest version...");
+        LOGGER.info("will migrate database to latest version...");
         flyway.migrate();
-        logger.info("did migrate database to latest version...");
+        LOGGER.info("did migrate database to latest version...");
     }
 
 }

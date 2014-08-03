@@ -1,0 +1,42 @@
+/*
+This material refers to a panel that may appear if the browser is not supported or the javascript environment is
+not configured.
+*/
+
+#unsupported {
+    background-color: #505050;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-family: sans-serif;
+}
+
+#unsupported.unsupported-hide {
+    display: none;
+}
+
+#unsupported h1 {
+    text-align: center;
+}
+
+#unsupported .unsupported-image {
+    text-align: center;
+}
+
+#unsupported #unsupported-container {
+    color: white;
+    width: 420px;
+    height: 320px;
+    margin:0 auto;
+    margin-top: 72px;
+}
+
+#unsupported #unsupported-container .unsupported-message-container {
+    margin-bottom: 20px;
+}
+
+#unsupported #unsupported-container .unsupported-message-container > a {
+    color: white;
+}
