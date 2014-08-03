@@ -226,6 +226,9 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     if(item.search) {
                         $location.search(item.search);
                     }
+                    else {
+                        $location.search({});
+                    }
                 }
             }
 
