@@ -25,17 +25,25 @@ The rest of the application uses the messageSource service, together with these 
 
 The mapping from the keys to text is done using java properties files.  These property files are located in the source at;
 
-\framebox{\tt haikudepotserver-webapp/src/resources/messages*.properties}
+\framebox{\tt haikudepotserver-webapp/src/main/resources/messages*.properties}
 
 Variants of the properties file for various natural languages can be found at this location and each file is suffixed by the code for the natural language.  The default, with no suffix, is the English natural language.
 
 If a key does not have a value specified for a specific natural language then it will fall back to the default of English.
 
+\subsection{Formatted HTML / Passive Content}
+
+Sometimes it is impractical to take plain-text strings and re-format them into complex layouts.  In this case, segments of HTML can be used to insert pre-formatted content that is specific to a given natural language.  These segments are located at;
+
+\framebox{\tt haikudepotserver-webapp/src/main/webapp/js/app/passivecontent/*.html}
+
+This is used, for example, in the ``about page''.  These segments should use a containing element such as {\it div} in order to contain the material to be rendered.  Files for different languages will be suffixed with the natural language.
+
 \subsection{Emails}
 
 Emails are rendered from data models using the \href{http://freemarker.org/}{Freemarker} library.  For each email there is a default which is the English natural language and then there may be variants for various natural languages.  The Freemarker templates for email generation are located at;
 
-\framebox{\tt haikudepotserver-webapp/src/resources/email/*.ftl}
+\framebox{\tt haikudepotserver-webapp/src/main/resources/email/*.ftl}
 
 \subsection{Error Pages}
 
