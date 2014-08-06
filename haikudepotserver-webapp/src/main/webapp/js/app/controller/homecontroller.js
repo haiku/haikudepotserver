@@ -327,11 +327,33 @@ angular.module('haikudepotserver').controller(
                 if($scope.selectedArchitecture) {
 
                     // store the parameters for reproducing the page.
-                    $location.search(KEY_OFFSET,''+$scope.pkgs.offset);
+
+                    if (0 != $scope.pkgs.offset) {
+                        $location.search(KEY_OFFSET, '' + $scope.pkgs.offset);
+                    }
+                    else {
+                        $location.search(KEY_OFFSET, null);
+                    }
+
                     $location.search(KEY_ARCHITECTURECODE,$scope.selectedArchitecture.code);
-                    $location.search(KEY_PKGCATEGORYCODE,$scope.selectedPkgCategory.code);
                     $location.search(KEY_SEARCHEXPRESSION,$scope.searchExpression);
                     $location.search(KEY_VIEWCRITERIATYPECODE,$scope.selectedViewCriteriaTypeOption.code);
+
+                    if(ViewCriteriaTypes.CATEGORIES == $scope.selectedViewCriteriaTypeOption.code) {
+                        $location.search(KEY_PKGCATEGORYCODE, $scope.selectedPkgCategory.code);
+                    }
+                    else {
+                        $location.search(KEY_PKGCATEGORYCODE, null);
+                    }
+
+                    if($scope.searchExpression && $scope.searchExpression.length) {
+                        $location.search(KEY_SEARCHEXPRESSION,$scope.searchExpression);
+                    }
+                    else {
+                        $location.search(KEY_SEARCHEXPRESSION,null);
+                    }
+
+                    // copy those search values into the breadcrumb
                     breadcrumbs.peek().search = $location.search();
 
                     amFetchingPkgs = true;
