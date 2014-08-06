@@ -396,6 +396,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.modifyTimestamp = pkg.getModifyTimestamp().getTime();
         result.derivedRating = pkg.getDerivedRating();
         result.derivedRatingSampleSize = pkg.getDerivedRatingSampleSize();
+        result.prominenceOrdering = pkg.getProminence().getOrdering();
         result.pkgCategoryCodes = Lists.transform(pkg.getPkgPkgCategories(), new Function<PkgPkgCategory, String>() {
             @Override
             public String apply(PkgPkgCategory input) {
@@ -1040,6 +1041,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                             GetBulkPkgResult.Pkg resultPkg = new GetBulkPkgResult.Pkg();
                             resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
                             resultPkg.name = input.getPkg().getName();
+                            resultPkg.prominenceOrdering = input.getPkg().getProminence().getOrdering();
                             resultPkg.derivedRating = input.getPkg().getDerivedRating();
 
                             if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
@@ -1116,6 +1118,35 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         return result;
+    }
+
+    @Override
+    public UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) throws ObjectNotFoundException {
+       Preconditions.checkNotNull(request);
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName),"the package name must be supplied on the request");
+        Preconditions.checkState(null!=request.prominenceOrdering,"the presence ordering must be supplied");
+
+        final ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = getPkg(context, request.pkgName);
+
+        User authUser = obtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITPROMINENCE)) {
+            throw new AuthorizationFailureException();
+        }
+
+        Optional<Prominence> prominenceOptional = Prominence.getByOrdering(context, request.prominenceOrdering);
+
+        if(!prominenceOptional.isPresent()) {
+            throw new ObjectNotFoundException(Prominence.class.getSimpleName(), request.prominenceOrdering);
+        }
+
+        pkg.setProminence(prominenceOptional.get());
+        context.commitChanges();
+
+        LOGGER.info("the prominence for {} has been set to; {}", pkg.toString(), prominenceOptional.get().toString());
+
+        return new UpdatePkgProminenceResult();
     }
 
 }

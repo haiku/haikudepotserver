@@ -252,6 +252,10 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return createManipulatePkgBreadcrumbItem(pkg, 'editcategories', 'editPkgCategories');
                 },
 
+                createEditPkgProminence : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'editprominence', 'editPkgProminence');
+                },
+
                 createEditPkgIcon : function(pkg) {
                     return createManipulatePkgBreadcrumbItem(pkg, 'editicon', 'editPkgIcon');
                 },

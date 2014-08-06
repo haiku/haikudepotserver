@@ -63,6 +63,7 @@
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="prominence_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="publisher_id" type="BIGINT"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
@@ -210,6 +211,16 @@
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_url_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="prominence" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="ordering" type="INTEGER" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.prominence_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -370,13 +381,17 @@
 		<obj-attribute name="body" type="java.lang.String" lock="true" db-attribute-path="body"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionLocalization" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization" lock-type="optimistic" dbEntityName="pkg_version_localization" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Date" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="description" type="java.lang.String" lock="true" db-attribute-path="description"/>
-		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="summary" type="java.lang.String" lock="true" db-attribute-path="summary"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionUrl" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl" lock-type="optimistic" dbEntityName="pkg_version_url" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="url" type="java.lang.String" lock="true" db-attribute-path="url"/>
+	</obj-entity>
+	<obj-entity name="Prominence" className="org.haikuos.haikudepotserver.dataobjects.Prominence" readOnly="true" lock-type="optimistic" dbEntityName="prominence" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+		<obj-attribute name="ordering" type="java.lang.Integer" db-attribute-path="ordering"/>
 	</obj-entity>
 	<obj-entity name="Publisher" className="org.haikuos.haikudepotserver.dataobjects.Publisher" lock-type="optimistic" dbEntityName="publisher" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
@@ -450,6 +465,9 @@
 	<db-relationship name="user" source="permission_user_pkg" target="user" toMany="false">
 		<db-attribute-pair source="user_id" target="id"/>
 	</db-relationship>
+	<db-relationship name="permission_user_pkgs" source="pkg" target="permission_user_pkg" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
+	</db-relationship>
 	<db-relationship name="pkg_icons" source="pkg" target="pkg_icon" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
@@ -459,11 +477,11 @@
 	<db-relationship name="pkg_screenshots" source="pkg" target="pkg_screenshot" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
+	<db-relationship name="prominence" source="pkg" target="prominence" toMany="false">
+		<db-attribute-pair source="prominence_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="publisher" source="pkg" target="publisher" toMany="false">
 		<db-attribute-pair source="publisher_id" target="id"/>
-	</db-relationship>
-	<db-relationship name="untitledRel" source="pkg" target="permission_user_pkg" toMany="true">
-		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
 	<db-relationship name="pkg_pkg_categories" source="pkg_category" target="pkg_pkg_category" toMany="true">
 		<db-attribute-pair source="id" target="pkg_category_id"/>
@@ -540,6 +558,9 @@
 	<db-relationship name="pkg_version" source="pkg_version_url" target="pkg_version" toMany="false">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
+	<db-relationship name="pkgs" source="prominence" target="pkg" toMany="true">
+		<db-attribute-pair source="id" target="prominence_id"/>
+	</db-relationship>
 	<db-relationship name="pkgs" source="publisher" target="pkg" toMany="true">
 		<db-attribute-pair source="id" target="publisher_id"/>
 	</db-relationship>
@@ -582,10 +603,11 @@
 	<obj-relationship name="permission" source="PermissionUserPkg" target="Permission" deleteRule="Nullify" db-relationship-path="permission"/>
 	<obj-relationship name="pkg" source="PermissionUserPkg" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="user" source="PermissionUserPkg" target="User" deleteRule="Nullify" db-relationship-path="user"/>
-	<obj-relationship name="permissionUserPkgs" source="Pkg" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="untitledRel"/>
+	<obj-relationship name="permissionUserPkgs" source="Pkg" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="permission_user_pkgs"/>
 	<obj-relationship name="pkgIcons" source="Pkg" target="PkgIcon" deleteRule="Cascade" db-relationship-path="pkg_icons"/>
 	<obj-relationship name="pkgPkgCategories" source="Pkg" target="PkgPkgCategory" deleteRule="Cascade" db-relationship-path="pkg_pkg_categories"/>
 	<obj-relationship name="pkgScreenshots" source="Pkg" target="PkgScreenshot" deleteRule="Cascade" db-relationship-path="pkg_screenshots"/>
+	<obj-relationship name="prominence" source="Pkg" target="Prominence" deleteRule="Nullify" db-relationship-path="prominence"/>
 	<obj-relationship name="publisher" source="Pkg" target="Publisher" deleteRule="Nullify" db-relationship-path="publisher"/>
 	<obj-relationship name="mediaType" source="PkgIcon" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
 	<obj-relationship name="pkg" source="PkgIcon" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>

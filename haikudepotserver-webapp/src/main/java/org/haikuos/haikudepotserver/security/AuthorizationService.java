@@ -145,6 +145,7 @@ public class AuthorizationService {
                 case PKG_EDITICON:
                 case PKG_EDITSCREENSHOT:
                 case PKG_EDITCATEGORIES:
+                case PKG_EDITPROMINENCE:
                 case PKG_EDITVERSIONLOCALIZATION: {
                     List<? extends AuthorizationPkgRule> rules = authenticatedUser.getAuthorizationPkgRules((Pkg) target);
                     if (Iterables.tryFind(rules, new Predicate<AuthorizationPkgRule>() {
@@ -201,6 +202,7 @@ public class AuthorizationService {
             case PKG_EDITSCREENSHOT:
             case PKG_EDITCATEGORIES:
             case PKG_EDITVERSIONLOCALIZATION:
+            case PKG_EDITPROMINENCE:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case USERRATING_EDIT:

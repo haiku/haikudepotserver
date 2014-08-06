@@ -32,6 +32,8 @@ public class GetBulkPkgResult {
 
         public Float derivedRating;
 
+        public Integer prominenceOrdering;
+
     }
 
     public static class PkgVersion {

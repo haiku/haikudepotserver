@@ -222,4 +222,22 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         );
     }
 
+    @Override
+    public GetAllProminencesResult getAllProminences(GetAllProminencesRequest request) {
+        Preconditions.checkNotNull(request);
+        final ObjectContext context = serverRuntime.getContext();
+
+        return new GetAllProminencesResult(
+                Lists.transform(
+                        Prominence.getAll(context),
+                        new Function<Prominence, GetAllProminencesResult.Prominence>() {
+                            @Override
+                            public GetAllProminencesResult.Prominence apply(Prominence input) {
+                                return new GetAllProminencesResult.Prominence(input.getOrdering(), input.getName());
+                            }
+                        }
+                )
+        );
+    }
+
 }

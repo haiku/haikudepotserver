@@ -1,0 +1,40 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <form name="editPkgCategoriesForm" novalidate="novalidate">
+
+        <label><message key="gen.pkg.title"></message></label>
+        <div class="form-control-group">
+            <div class="form-control-group-static">
+                <pkg-label pkg="pkg"></pkg-label>
+            </div>
+        </div>
+
+        <label for="prominences"><message key="editPkgProminence.prominence.title"></message></label>
+        <div class="form-control-group">
+            <select
+                    id="prominences"
+                    required="true"
+                    ng-model="selectedProminence"
+                    ng-options="aProminence.title for aProminence in prominences">
+            </select>
+        </div>
+
+        <div class="form-action-container">
+            <button
+                    ng-disabled="editPkgProminence.$invalid"
+                    ng-click="goStoreProminence()"
+                    type="submit"
+                    class="main-action">
+                <message key="editPkgProminence.action.title"></message>
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

@@ -93,12 +93,28 @@ angular.module('haikudepotserver').controller(
                         refetchPkgIconMetaData();
                         refetchPkgCategories();
                         refetchUserRatings();
+                        refetchProminence();
                     },
                     function() {
                         errorHandling.navigateToError(); // already logged
                     }
                 );
 
+            }
+
+            function refetchProminence() {
+                referenceData.prominences().then(
+                    function(prominences) {
+                        $scope.pkg.prominence = _.findWhere(
+                            prominences,
+                            { ordering : $scope.pkg.prominenceOrdering }
+                        );
+                    },
+                    function() {
+                        $log.error('unable to obtain the list of prominences');
+                        errorHandling.navigateToError();
+                    }
+                )
             }
 
             function refetchPkgCategories() {
@@ -302,6 +318,10 @@ angular.module('haikudepotserver').controller(
             $scope.goEditPkgCategories = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgCategories($scope.pkg));
             };
+
+            $scope.goEditPkgProminence = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgProminence($scope.pkg));
+            }
 
             $scope.goRemoveIcon = function() {
                 jsonRpc.call(

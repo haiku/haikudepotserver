@@ -132,4 +132,11 @@ public interface PkgApi {
 
     GetBulkPkgResult getBulkPkg(GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException;
 
+    /**
+     * <p>This method will update the prominence of the nominated package.  The prominence is identified by the
+     * ordering of the prominence as a natural identifier.</p>
+     */
+
+    UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) throws ObjectNotFoundException;
+
 }

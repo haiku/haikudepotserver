@@ -7,6 +7,7 @@ import org.haikuos.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haikuos.haikudepotserver.dataobjects.Prominence;
 import org.haikuos.haikudepotserver.dataobjects.Publisher;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -28,6 +29,7 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final String PKG_ICONS_PROPERTY = "pkgIcons";
     public static final String PKG_PKG_CATEGORIES_PROPERTY = "pkgPkgCategories";
     public static final String PKG_SCREENSHOTS_PROPERTY = "pkgScreenshots";
+    public static final String PROMINENCE_PROPERTY = "prominence";
     public static final String PUBLISHER_PROPERTY = "publisher";
 
     public static final String ID_PK_COLUMN = "id";
@@ -119,6 +121,15 @@ public abstract class _Pkg extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PkgScreenshot> getPkgScreenshots() {
         return (List<PkgScreenshot>)readProperty(PKG_SCREENSHOTS_PROPERTY);
+    }
+
+
+    public void setProminence(Prominence prominence) {
+        setToOneTarget(PROMINENCE_PROPERTY, prominence, true);
+    }
+
+    public Prominence getProminence() {
+        return (Prominence)readProperty(PROMINENCE_PROPERTY);
     }
 
 

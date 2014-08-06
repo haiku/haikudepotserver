@@ -60,4 +60,10 @@ public interface MiscellaneousApi {
 
     GetAllUserRatingStabilitiesResult getAllUserRatingStabilities(GetAllUserRatingStabilitiesRequest getAllUserRatingStabilitiesRequest);
 
+    /**
+     * <p>This method will return all of the possible prominences.</p>
+     */
+
+    GetAllProminencesResult getAllProminences(GetAllProminencesRequest request);
+
 }

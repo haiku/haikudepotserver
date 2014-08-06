@@ -65,10 +65,16 @@
                 <span ng-show="pkgCategories && !pkgCategories.length">
                     <message key="viewPkg.categories.none"></message>
                 </span>
-                <span ng-show="pkgCategories.length"><span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span><pkg-category-label pkg-category="pkgCategory"></pkg-category-label></span>
+                <span ng-show="pkgCategories.length"><span ng-repeat="pkgCategory in pkgCategories"><span ng-show="$index">, </span><pkg-category-label pkg-category="pkgCategory"></pkg-category-label></span></span>
             </dd>
             <dt><message key="viewPkg.versionViews.title"></message></dt>
             <dd>{{pkg.versions[0].viewCounter}}</dd>
+            <dt pkg="pkg" show-if-pkg-permission="'PKG_EDITPROMINENCE'">
+                <message key="viewPkg.prominence.title"></message>
+            </dt>
+            <dd pkg="pkg" show-if-pkg-permission="'PKG_EDITPROMINENCE'">
+                {{pkg.prominence.name}} ({{pkg.prominence.ordering}})
+            </dd>
         </dl>
 
     </div>
@@ -187,6 +193,11 @@
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITVERSIONLOCALIZATION'">
                 <a href="" ng-click="goEditVersionLocalization()">
                     <message key="viewPkg.editVersionLocalizationAction.title"></message>
+                </a>
+            </li>
+            <li pkg="pkg" show-if-pkg-permission="'PKG_EDITPROMINENCE'">
+                <a href="" ng-click="goEditPkgProminence()">
+                    <message key="viewPkg.editPkgProminenceAction.title"></message>
                 </a>
             </li>
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITCATEGORIES'">

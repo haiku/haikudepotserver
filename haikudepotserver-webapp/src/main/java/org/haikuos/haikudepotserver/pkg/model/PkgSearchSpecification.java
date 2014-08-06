@@ -21,6 +21,7 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     public enum SortOrdering {
         NAME,
+        PROMINENCE,
         VERSIONCREATETIMESTAMP,
         VERSIONVIEWCOUNTER
     }

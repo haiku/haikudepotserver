@@ -27,7 +27,10 @@ public class GetPkgResult {
     public List<String> pkgCategoryCodes;
 
     public Float derivedRating;
+
     public Integer derivedRatingSampleSize;
+
+    public Integer prominenceOrdering;
 
     public static class PkgVersion {
 

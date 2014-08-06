@@ -746,4 +746,27 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
     }
 
+    @Test
+    public void testUpdatePkgProminence() throws Exception {
+
+        setAuthenticatedUserToRoot();
+
+        integrationTestSupportService.createStandardTestData();
+
+        UpdatePkgProminenceRequest request = new UpdatePkgProminenceRequest();
+        request.pkgName = "pkg1";
+        request.prominenceOrdering = 200;
+
+        // ------------------------------------
+        pkgApi.updatePkgProminence(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+            Assertions.assertThat(pkg1.getProminence().getOrdering()).isEqualTo(200);
+        }
+
+    }
+
 }

@@ -300,6 +300,9 @@ public class PkgOrchestrationService {
                     orderExpressions.add("pv." + PkgVersion.CREATE_TIMESTAMP_PROPERTY + " DESC");
                     break;
 
+                case PROMINENCE:
+                    orderExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.PROMINENCE_PROPERTY + "." + Prominence.ORDERING_PROPERTY + " ASC");
+
                 case NAME: // gets added anyway...
                     break;
 
@@ -616,6 +619,7 @@ public class PkgOrchestrationService {
             persistedPkg = objectContext.newObject(org.haikuos.haikudepotserver.dataobjects.Pkg.class);
             persistedPkg.setName(pkg.getName());
             persistedPkg.setActive(Boolean.TRUE);
+            persistedPkg.setProminence(Prominence.getByOrdering(objectContext, Prominence.ORDERING_LAST).get());
 
             LOGGER.info("the package {} did not exist; will create", pkg.getName());
         }

@@ -26,6 +26,7 @@ angular.module('haikudepotserver').controller(
             var KEY_VIEWCRITERIATYPECODE = 'viewcrttyp';
 
             var ViewCriteriaTypes = {
+                FEATURED : 'FEATURED',
                 ALL : 'ALL',
                 MOSTVIEWED : 'MOSTVIEWED',
                 CATEGORIES : 'CATEGORIES',
@@ -45,6 +46,7 @@ angular.module('haikudepotserver').controller(
             $scope.selectedPkgCategory = undefined;
             $scope.viewCriteriaTypeOptions = _.map(
                 [
+                    ViewCriteriaTypes.FEATURED,
                     ViewCriteriaTypes.ALL,
                     ViewCriteriaTypes.CATEGORIES,
                     ViewCriteriaTypes.MOSTRECENT,
@@ -62,7 +64,7 @@ angular.module('haikudepotserver').controller(
             $scope.selectedViewCriteriaTypeOption = _.findWhere(
                 $scope.viewCriteriaTypeOptions,
                 {
-                    code : $location.search()[KEY_VIEWCRITERIATYPECODE] ? $location.search()[KEY_VIEWCRITERIATYPECODE] : ViewCriteriaTypes.ALL
+                    code : $location.search()[KEY_VIEWCRITERIATYPECODE] ? $location.search()[KEY_VIEWCRITERIATYPECODE] : ViewCriteriaTypes.FEATURED
                 }
             );
 
@@ -80,11 +82,11 @@ angular.module('haikudepotserver').controller(
                     -1 != searchMixins.nextMatchSearchExpression(
                         pkg.versions[0].summary.toLowerCase(),0,
                         $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset;
-            }
+            };
 
             $scope.shouldShowDerivedRating = function(pkg) {
                 return angular.isNumber(pkg.derivedRating);
-            }
+            };
 
             // pagination
             $scope.pkgs = {
@@ -231,11 +233,11 @@ angular.module('haikudepotserver').controller(
 
                 function(chain) {
 
-                    $scope.$watch('pkgs.offset', function(newValue, oldValue) {
+                    $scope.$watch('pkgs.offset', function() {
                         refetchPkgs();
                     });
 
-                    $scope.$watch('selectedPkgCategory', function(newValue, oldValue) {
+                    $scope.$watch('selectedPkgCategory', function() {
                         var option = $scope.selectedViewCriteriaTypeOption;
 
                         if(option && option.code == ViewCriteriaTypes.CATEGORIES) {
@@ -245,7 +247,7 @@ angular.module('haikudepotserver').controller(
 
                     // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
 
-                    $scope.$watch('selectedArchitecture', function(newValue, oldValue) {
+                    $scope.$watch('selectedArchitecture', function() {
 
                         if(undefined != $scope.pkgs.items) {
                             refetchPkgsAtFirstPage();
@@ -264,6 +266,7 @@ angular.module('haikudepotserver').controller(
 
                                 case ViewCriteriaTypes.MOSTRECENT:
                                 case ViewCriteriaTypes.MOSTVIEWED:
+                                case ViewCriteriaTypes.FEATURED:
                                 case ViewCriteriaTypes.ALL:
                                     refetchPkgsAtFirstPage();
                                     break;
@@ -274,6 +277,9 @@ angular.module('haikudepotserver').controller(
                                     }
                                     refetchPkgsAtFirstPage();
                                     break;
+
+                                default:
+                                    throw new Error('unknown view criteria type option; ' + newValue.code);
 
                             }
                         }
@@ -346,6 +352,10 @@ angular.module('haikudepotserver').controller(
 
                     switch ($scope.selectedViewCriteriaTypeOption.code) {
 
+                        case ViewCriteriaTypes.FEATURED:
+                            req.sortOrdering = 'PROMINENCE';
+                            break;
+
                         case ViewCriteriaTypes.ALL:
                             break;
 
@@ -366,6 +376,9 @@ angular.module('haikudepotserver').controller(
                             req.daysSinceLatestVersion = constants.RECENT_DAYS;
                             req.sortOrdering = 'VERSIONVIEWCOUNTER';
                             break;
+
+                        default:
+                            throw new Error('unexpected view criteria type option; ' + $scope.selectedViewCriteriaTypeOption.code);
 
                     }
 

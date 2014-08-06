@@ -88,6 +88,10 @@ angular.module('haikudepotserver').factory('referenceData',
                     return getData('naturalLanguages');
                 },
 
+                prominences : function() {
+                    return getData('prominences');
+                },
+
                 pkgCategories : function() {
                     return getData('pkgCategories');
                 },

@@ -64,6 +64,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
         userRatingTestData.pkg = context.newObject(Pkg.class);
         userRatingTestData.pkg.setName("urtestpkg");
+        userRatingTestData.pkg.setProminence(Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get());
 
         userRatingTestData.user1 = integrationTestSupportService.createBasicUser(context,"urtestuser1","password");
         userRatingTestData.user2 = integrationTestSupportService.createBasicUser(context,"urtestuser2","password");

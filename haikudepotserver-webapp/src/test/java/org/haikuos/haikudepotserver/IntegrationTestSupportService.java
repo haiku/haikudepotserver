@@ -119,6 +119,8 @@ public class IntegrationTestSupportService {
         ObjectContext context = getObjectContext();
         StandardTestData result = new StandardTestData();
 
+        Prominence prominence = Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get();
+
         Architecture x86 = Architecture.getByCode(context, "x86").get();
         Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2").get();
 
@@ -133,6 +135,7 @@ public class IntegrationTestSupportService {
         result.pkg1.setName("pkg1");
         result.pkg1.setDerivedRating(3.5f);
         result.pkg1.setDerivedRatingSampleSize(4);
+        result.pkg1.setProminence(prominence);
 
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
@@ -204,6 +207,7 @@ public class IntegrationTestSupportService {
         result.pkg2 = context.newObject(Pkg.class);
         result.pkg2.setActive(true);
         result.pkg2.setName("pkg2");
+        result.pkg2.setProminence(prominence);
 
         result.pkg2Version1 = context.newObject(PkgVersion.class);
         result.pkg2Version1.setActive(Boolean.TRUE);
@@ -218,6 +222,7 @@ public class IntegrationTestSupportService {
         result.pkg3 = context.newObject(Pkg.class);
         result.pkg3.setActive(true);
         result.pkg3.setName("pkg3");
+        result.pkg3.setProminence(prominence);
 
         result.pkg3Version1 = context.newObject(PkgVersion.class);
         result.pkg3Version1.setActive(Boolean.TRUE);
