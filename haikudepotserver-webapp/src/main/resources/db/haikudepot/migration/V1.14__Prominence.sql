@@ -21,7 +21,6 @@ INSERT INTO haikudepot.prominence (id,ordering,name) VALUES ((SELECT nextval('ha
 
 ALTER TABLE haikudepot.pkg ADD COLUMN prominence_id BIGINT;
 UPDATE haikudepot.pkg SET prominence_id = (SELECT id FROM haikudepot.prominence WHERE ordering=1000);
-ALTER TABLE haikudepot.pkg ALTER COLUMN prominence_id SET NOT NULL;
 
 ALTER TABLE haikudepot.pkg ADD FOREIGN KEY (prominence_id) REFERENCES haikudepot.prominence (id);
 
