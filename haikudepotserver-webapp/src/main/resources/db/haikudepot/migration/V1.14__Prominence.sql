@@ -22,6 +22,4 @@ INSERT INTO haikudepot.prominence (id,ordering,name) VALUES ((SELECT nextval('ha
 ALTER TABLE haikudepot.pkg ADD COLUMN prominence_id BIGINT;
 UPDATE haikudepot.pkg SET prominence_id = (SELECT id FROM haikudepot.prominence WHERE ordering=1000);
 
-ALTER TABLE haikudepot.pkg ADD FOREIGN KEY (prominence_id) REFERENCES haikudepot.prominence (id);
-
 INSERT INTO haikudepot.permission (id, code, name) VALUES ((SELECT nextval('haikudepot.permission_seq')), 'pkg_editprominence', 'Edit Package Prominence');
