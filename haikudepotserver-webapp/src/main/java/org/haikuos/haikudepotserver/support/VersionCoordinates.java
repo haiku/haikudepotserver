@@ -90,9 +90,25 @@ public class VersionCoordinates {
         return result;
     }
 
+    private void appendDotValue(StringBuilder stringBuilder, String value) {
+        if(0!=stringBuilder.length()) {
+            stringBuilder.append('.');
+        }
+
+        if(null!=value) {
+            stringBuilder.append(value);
+        }
+    }
+
     @Override
     public String toString() {
-        return getMajor() + '.' + getMinor() + '.' + getMicro() + '.' + getPreRelease() + '.' + getRevision();
+        StringBuilder result = new StringBuilder();
+        appendDotValue(result,getMajor());
+        appendDotValue(result,getMinor());
+        appendDotValue(result,getMicro());
+        appendDotValue(result, getPreRelease());
+        appendDotValue(result, null == getRevision() ? null : getRevision().toString());
+        return result.toString();
     }
 
 }

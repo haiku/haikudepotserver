@@ -5,19 +5,22 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import com.google.common.base.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.dataobjects.Pkg;
+import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
+import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -27,6 +30,7 @@ import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
+import org.haikuos.pkg.model.*;
 import org.imgscalr.Scalr;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -38,6 +42,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -581,6 +586,65 @@ public class PkgOrchestrationService {
     // ------------------------------
     // IMPORT
 
+    /**
+     * <p>This method will deactivate package versions for a package where the package version is related to the
+     * supplied repository.  This is used in the situation where a package was once part of a repository, but has
+     * been removed.</p>
+     * @return the quantity of package versions that were deactivated.
+     */
+
+    public int deactivatePkgVersionsForPkgAssociatedWithRepository(
+            ObjectContext context,
+            Pkg pkg,
+            final Repository repository) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(repository);
+
+        int count = 0;
+
+        for(PkgVersion pkgVersion : PkgVersion.getForPkg(context, pkg)) {
+            if(pkgVersion.getRepository().equals(repository)) {
+                if(pkgVersion.getActive()) {
+                    pkgVersion.setActive(false);
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * <p>This method will return all of the package names that have package versions that are related to a
+     * repository.</p>
+     */
+
+    public Set<String> fetchPkgNamesWithAnyPkgVersionAssociatedWithRepository(
+            ObjectContext context,
+            Repository repository) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(repository);
+
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("SELECT p.name FROM ");
+        queryBuilder.append(Pkg.class.getSimpleName());
+        queryBuilder.append(" p WHERE EXISTS(SELECT pv FROM ");
+        queryBuilder.append(PkgVersion.class.getSimpleName());
+        queryBuilder.append(" pv WHERE pv.");
+        queryBuilder.append(PkgVersion.PKG_PROPERTY);
+        queryBuilder.append("=p AND pv.");
+        queryBuilder.append(PkgVersion.REPOSITORY_PROPERTY);
+        queryBuilder.append("=:repository)");
+
+        EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
+        query.setParameter("repository",repository);
+
+        return ImmutableSet.copyOf(context.performQuery(query));
+    }
+
     private VersionCoordinates toVersionCoordinates(org.haikuos.pkg.model.PkgVersion version) {
         return new VersionCoordinates(
                 version.getMajor(),
@@ -629,12 +693,19 @@ public class PkgOrchestrationService {
 
             // if we know that the package exists then we should look for the version.
 
-            SelectQuery selectQuery = new SelectQuery(
-                    org.haikuos.haikudepotserver.dataobjects.PkgVersion.class,
+            List<Expression> expressions = ImmutableList.of(
                     ExpressionFactory.matchExp(
                             org.haikuos.haikudepotserver.dataobjects.PkgVersion.PKG_PROPERTY,
-                            persistedPkg)
-                            .andExp(ExpressionHelper.toExpression(toVersionCoordinates(pkg.getVersion())))
+                            persistedPkg
+                    ),
+                    ExpressionHelper.toExpression(toVersionCoordinates(pkg.getVersion())),
+                    ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture)
+            );
+
+
+            SelectQuery selectQuery = new SelectQuery(
+                    org.haikuos.haikudepotserver.dataobjects.PkgVersion.class,
+                    ExpressionHelper.andAll(expressions)
             );
 
             //noinspection unchecked
@@ -651,7 +722,6 @@ public class PkgOrchestrationService {
         if(null==persistedPkgVersion) {
 
             persistedPkgVersion = objectContext.newObject(org.haikuos.haikudepotserver.dataobjects.PkgVersion.class);
-            persistedPkgVersion.setActive(Boolean.TRUE);
             persistedPkgVersion.setMajor(pkg.getVersion().getMajor());
             persistedPkgVersion.setMinor(pkg.getVersion().getMinor());
             persistedPkgVersion.setMicro(pkg.getVersion().getMicro());
@@ -661,83 +731,152 @@ public class PkgOrchestrationService {
             persistedPkgVersion.setArchitecture(architecture);
             persistedPkgVersion.setPkg(persistedPkg);
 
-            // now add the copyrights
-            for(String copyright : pkg.getCopyrights()) {
-                PkgVersionCopyright persistedPkgVersionCopyright = objectContext.newObject(PkgVersionCopyright.class);
-                persistedPkgVersionCopyright.setBody(copyright);
-                persistedPkgVersionCopyright.setPkgVersion(persistedPkgVersion);
+            LOGGER.info(
+                    "the version {} of package {} did not exist; will create",
+                    pkg.getVersion().toString(),
+                    pkg.getName());
+        }
+        else {
+
+            LOGGER.debug(
+                    "the version {} of package {} did exist; will re-configure necessary data",
+                    pkg.getVersion().toString(),
+                    pkg.getName());
+
+        }
+
+        persistedPkgVersion.setActive(Boolean.TRUE);
+
+        {
+            List<String> existingCopyrights = persistedPkgVersion.getCopyrights();
+
+            // now add the copyrights that are not already there.
+
+            for (String copyright : pkg.getCopyrights()) {
+                if(!existingCopyrights.contains(copyright)) {
+                    PkgVersionCopyright persistedPkgVersionCopyright = objectContext.newObject(PkgVersionCopyright.class);
+                    persistedPkgVersionCopyright.setBody(copyright);
+                    persistedPkgVersionCopyright.setPkgVersion(persistedPkgVersion);
+                }
             }
 
-            // now add the licenses
-            for(String license : pkg.getLicenses()) {
-                PkgVersionLicense persistedPkgVersionLicense = objectContext.newObject(PkgVersionLicense.class);
-                persistedPkgVersionLicense.setBody(license);
-                persistedPkgVersionLicense.setPkgVersion(persistedPkgVersion);
+            // remove those copyrights that are no longer present
+
+            for(PkgVersionCopyright pkgVersionCopyright : ImmutableList.copyOf(persistedPkgVersion.getPkgVersionCopyrights())) {
+                if(!pkg.getCopyrights().contains(pkgVersionCopyright.getBody())) {
+                    persistedPkgVersion.removeFromPkgVersionCopyrights(pkgVersionCopyright);
+                    objectContext.deleteObjects(pkgVersionCopyright);
+                }
             }
 
-            if(null!=pkg.getHomePageUrl()) {
-                PkgVersionUrl persistedPkgVersionUrl = objectContext.newObject(PkgVersionUrl.class);
-                persistedPkgVersionUrl.setUrl(pkg.getHomePageUrl().getUrl());
-                persistedPkgVersionUrl.setPkgUrlType(PkgUrlType.getByCode(
-                        objectContext,
-                        pkg.getHomePageUrl().getUrlType().name().toLowerCase()).get());
-                persistedPkgVersionUrl.setPkgVersion(persistedPkgVersion);
+        }
+
+        {
+            List<String> existingLicenses = persistedPkgVersion.getLicenses();
+
+            // now add the licenses that are not already there.
+
+            for (String license : pkg.getLicenses()) {
+                if(!existingLicenses.contains(license)) {
+                    PkgVersionLicense persistedPkgVersionLicense = objectContext.newObject(PkgVersionLicense.class);
+                    persistedPkgVersionLicense.setBody(license);
+                    persistedPkgVersionLicense.setPkgVersion(persistedPkgVersion);
+                }
             }
 
-            if(!Strings.isNullOrEmpty(pkg.getSummary()) || !Strings.isNullOrEmpty(pkg.getDescription())) {
-                updatePkgVersionLocalization(
-                        objectContext,
-                        persistedPkgVersion,
-                        NaturalLanguage.getByCode(objectContext, NaturalLanguage.CODE_ENGLISH).get(),
-                        pkg.getSummary(),
-                        pkg.getDescription());
+            // remove those licenses that are no longer present
+
+            for(PkgVersionLicense pkgVersionLicense : ImmutableList.copyOf(persistedPkgVersion.getPkgVersionLicenses())) {
+                if(!pkg.getLicenses().contains(pkgVersionLicense.getBody())) {
+                    persistedPkgVersion.removeFromPkgVersionLicenses(pkgVersionLicense);
+                    objectContext.deleteObjects(pkgVersionLicense);
+                }
             }
+        }
 
-            // look back at the previous version of the same package and see if there are localizations.  If there
-            // are then replicate those into this version as well, but only if the english variant exists.
+        {
+            PkgUrlType pkgUrlType = PkgUrlType.getByCode(
+                    objectContext,
+                    org.haikuos.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase()).get();
 
-            if(persistedLatestExistingPkgVersion.isPresent()) {
-                int naturalLanguagesReplicated = replicateLocalizationIfEnglishMatches(
-                        objectContext,
-                        persistedLatestExistingPkgVersion.get(),
-                        persistedPkgVersion,
-                        NaturalLanguage.getAllExceptEnglish(objectContext),
-                        false).size();
+            Optional<PkgVersionUrl> homeUrlOptional = persistedPkgVersion.getPkgVersionUrlForType(pkgUrlType);
 
+            if (null != pkg.getHomePageUrl()) {
+                if(homeUrlOptional.isPresent()) {
+                    homeUrlOptional.get().setUrl(pkg.getHomePageUrl().getUrl());
+                }
+                else {
+                    PkgVersionUrl persistedPkgVersionUrl = objectContext.newObject(PkgVersionUrl.class);
+                    persistedPkgVersionUrl.setUrl(pkg.getHomePageUrl().getUrl());
+                    persistedPkgVersionUrl.setPkgUrlType(pkgUrlType);
+                    persistedPkgVersionUrl.setPkgVersion(persistedPkgVersion);
+                }
+            }
+        }
+
+        if(!Strings.isNullOrEmpty(pkg.getSummary()) || !Strings.isNullOrEmpty(pkg.getDescription())) {
+            updatePkgVersionLocalization(
+                    objectContext,
+                    persistedPkgVersion,
+                    NaturalLanguage.getByCode(objectContext, NaturalLanguage.CODE_ENGLISH).get(),
+                    pkg.getSummary(),
+                    pkg.getDescription());
+        }
+
+        // look back at the previous version of the same package and see if there are localizations.  If there
+        // are then replicate those into this version as well, but only if the english variant exists.  Don't do
+        // this if the package is being updated instead of created.
+
+        if(persistedLatestExistingPkgVersion.isPresent() && persistedPkgVersion.getObjectId().isTemporary()) {
+            int naturalLanguagesReplicated = replicateLocalizationIfEnglishMatches(
+                    objectContext,
+                    persistedLatestExistingPkgVersion.get(),
+                    persistedPkgVersion,
+                    NaturalLanguage.getAllExceptEnglish(objectContext),
+                    false).size();
+
+            if(0!=naturalLanguagesReplicated) {
                 LOGGER.info(
                         "replicated {} natural language localizations when creating new version of package {}",
                         naturalLanguagesReplicated,
                         pkg.getName());
             }
+        }
 
-            // now possibly switch the latest flag over to the new one from the old one.
+        // now possibly switch the latest flag over to the new one from the old one.
 
-            if(persistedLatestExistingPkgVersion.isPresent()) {
-                VersionCoordinatesComparator versionCoordinatesComparator = new VersionCoordinatesComparator();
-                VersionCoordinates persistedPkgVersionCoords = persistedPkgVersion.toVersionCoordinates();
-                VersionCoordinates persistedLatestExistingPkgVersionCoords = persistedLatestExistingPkgVersion.get().toVersionCoordinates();
+        if(persistedLatestExistingPkgVersion.isPresent()) {
+            VersionCoordinatesComparator versionCoordinatesComparator = new VersionCoordinatesComparator();
+            VersionCoordinates persistedPkgVersionCoords = persistedPkgVersion.toVersionCoordinates();
+            VersionCoordinates persistedLatestExistingPkgVersionCoords = persistedLatestExistingPkgVersion.get().toVersionCoordinates();
 
-                if(versionCoordinatesComparator.compare(
-                        persistedPkgVersionCoords,
-                        persistedLatestExistingPkgVersionCoords) > 0) {
-                    persistedPkgVersion.setIsLatest(true);
-                    persistedLatestExistingPkgVersion.get().setIsLatest(false);
+            int c = versionCoordinatesComparator.compare(
+                    persistedPkgVersionCoords,
+                    persistedLatestExistingPkgVersionCoords);
+
+            if(c > 0) {
+                persistedPkgVersion.setIsLatest(true);
+                persistedLatestExistingPkgVersion.get().setIsLatest(false);
+            }
+            else {
+                if(0==c) {
+                    LOGGER.debug(
+                            "imported a package version {} of {} which is older or the same as the existing {}",
+                            persistedPkgVersionCoords,
+                            persistedPkgVersion.getPkg().getName(),
+                            persistedLatestExistingPkgVersionCoords);
                 }
                 else {
                     LOGGER.warn(
-                            "imported a package version {} which is older or the same as the existing {}",
+                            "imported a package version {} of {} which is older or the same as the existing {}",
                             persistedPkgVersionCoords,
+                            persistedPkgVersion.getPkg().getName(),
                             persistedLatestExistingPkgVersionCoords);
                 }
             }
-            else {
-                persistedPkgVersion.setIsLatest(true);
-            }
-
-            LOGGER.info(
-                    "the version {} of package {} did not exist; will create",
-                    pkg.getVersion().toString(),
-                    pkg.getName());
+        }
+        else {
+            persistedPkgVersion.setIsLatest(true);
         }
 
         LOGGER.debug("have processed package {}", pkg.toString());

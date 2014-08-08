@@ -5,13 +5,13 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
+import com.google.common.base.*;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
@@ -29,6 +29,10 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public final static Pattern MINOR_PATTERN = Pattern.compile("^[\\w_]+$");
     public final static Pattern MICRO_PATTERN = Pattern.compile("^[\\w_.]+$");
     public final static Pattern PRE_RELEASE_PATTERN = Pattern.compile("^[\\w_.]+$");
+
+    public static PkgVersion get(ObjectContext context, ObjectId objectId) {
+        return Iterables.getOnlyElement((List<PkgVersion>) context.performQuery(new ObjectIdQuery(objectId)));
+    }
 
     public static List<PkgVersion> getForPkg(
             ObjectContext context,
@@ -155,6 +159,51 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                     @Override
                     public boolean apply(PkgVersionLocalization input) {
                         return input.getNaturalLanguage().getCode().equals(naturalLanguageCode);
+                    }
+                }
+        );
+    }
+
+    /**
+     * <p>Renders the copyright entities into a list of strings.</p>
+     */
+
+    public List<String> getCopyrights() {
+        return Lists.transform(
+                getPkgVersionCopyrights(),
+                new Function<PkgVersionCopyright, String>() {
+                    @Override
+                    public String apply(PkgVersionCopyright input) {
+                        return input.getBody();
+                    }
+                }
+        );
+    }
+
+    /**
+     * <p>Renders the licenses entities into a list of strings.</p>
+     */
+
+    public List<String> getLicenses() {
+        return Lists.transform(
+                getPkgVersionLicenses(),
+                new Function<PkgVersionLicense, String>() {
+                    @Override
+                    public String apply(PkgVersionLicense input) {
+                        return input.getBody();
+                    }
+                }
+        );
+    }
+
+    public Optional<PkgVersionUrl> getPkgVersionUrlForType(final PkgUrlType type) {
+        Preconditions.checkNotNull(type);
+        return Iterables.tryFind(
+                getPkgVersionUrls(),
+                new Predicate<PkgVersionUrl>() {
+                    @Override
+                    public boolean apply(PkgVersionUrl input) {
+                        return input.getPkgUrlType().equals(type);
                     }
                 }
         );

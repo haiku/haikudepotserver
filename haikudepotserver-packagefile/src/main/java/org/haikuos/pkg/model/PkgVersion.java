@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,11 +46,11 @@ public class PkgVersion {
     }
 
     private void appendDotValue(StringBuilder stringBuilder, String value) {
-        if(null!=value) {
-            if(0!=stringBuilder.length()) {
-                stringBuilder.append('.');
-            }
+        if(0!=stringBuilder.length()) {
+            stringBuilder.append('.');
+        }
 
+        if(null!=value) {
             stringBuilder.append(value);
         }
     }
