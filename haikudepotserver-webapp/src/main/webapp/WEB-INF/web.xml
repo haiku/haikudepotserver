@@ -1,10 +1,17 @@
 
-<web-app id="WebApp_ID" version="2.4"
-         xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
-http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+<web-app
+        xmlns="http://java.sun.com/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+        version="3.0">
 
-    <display-name>Spring Web MVC Application</display-name>
+    <display-name>Haiku Depot Web</display-name>
+
+    <servlet>
+        <servlet-name>error-servlet</servlet-name>
+        <servlet-class>org.haikuos.haikudepotserver.support.web.ErrorServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
 
     <servlet>
         <servlet-name>jawr-servlet-css</servlet-name>
@@ -53,6 +60,11 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     </servlet>
 
     <servlet-mapping>
+        <servlet-name>error-servlet</servlet-name>
+        <url-pattern>/error</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>jawr-servlet-css</servlet-name>
         <url-pattern>/jawr/css/*</url-pattern>
     </servlet-mapping>
@@ -85,19 +97,13 @@ http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
 
-    <filter>
-        <filter-name>errorFilter</filter-name>
-        <filter-class>org.haikuos.haikudepotserver.support.web.ErrorFilter</filter-class>
-    </filter>
-
     <filter-mapping>
         <filter-name>authenticationFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <filter-mapping>
-        <filter-name>errorFilter</filter-name>
-        <url-pattern>/error</url-pattern>
-    </filter-mapping>
+    <error-page>
+        <location>/error</location>
+    </error-page>
 
 </web-app>

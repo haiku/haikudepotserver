@@ -218,6 +218,10 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                 getRevision());
     }
 
+    public String toStringWithPkgAndArchitecture() {
+        return getPkg().getName() + " - " + toString() + " - " + getArchitecture().getCode();
+    }
+
     @Override
     public String toString() {
         return toVersionCoordinates().toString();

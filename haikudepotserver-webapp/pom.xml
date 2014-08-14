@@ -88,6 +88,10 @@
             <groupId>net.jawr</groupId>
             <artifactId>jawr</artifactId>
         </dependency>
+        <dependency>
+            <groupId>rome</groupId>
+            <artifactId>rome</artifactId>
+        </dependency>
 
         <!-- DATABASE / PERSISTENCE -->
         <dependency>

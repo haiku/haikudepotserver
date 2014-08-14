@@ -11,6 +11,7 @@ angular.module('haikudepotserver').config(
             var pkgVersionPrefix = '/pkg/:name/:major/:minor?/:micro?/:preRelease?/:revision?/:architectureCode';
 
             $routeProvider
+                .when('/pkg/feed/builder',{controller:'PkgFeedBuilderController',templateUrl:'/js/app/controller/pkgfeedbuilder.html'})
                 .when('/paginationcontrolplayground',{controller:'PaginationControlPlayground',templateUrl:'/js/app/controller/paginationcontrolplayground.html'})
                 .when('/repositories/add',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})
                 .when('/repository/:code/edit',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})

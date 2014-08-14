@@ -156,6 +156,18 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     // -----------------
+                    // FEEDS
+
+                    $scope.goPkgFeedBuilder = function() {
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbFactory.createHome(),
+                            breadcrumbFactory.createPkgFeedBuilder()
+                        ]);
+
+                        $scope.showActions = false;
+                    }
+
+                    // -----------------
                     // REPOSITORY
 
                     // note that this is also protected by a permission which is enforced in the template.

@@ -5,7 +5,10 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.*;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -18,9 +21,6 @@ import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -30,7 +30,6 @@ import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
-import org.haikuos.pkg.model.*;
 import org.imgscalr.Scalr;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -861,7 +860,7 @@ public class PkgOrchestrationService {
             else {
                 if(0==c) {
                     LOGGER.debug(
-                            "imported a package version {} of {} which is older or the same as the existing {}",
+                            "imported a package version {} of {} which is the same as the existing {}",
                             persistedPkgVersionCoords,
                             persistedPkgVersion.getPkg().getName(),
                             persistedLatestExistingPkgVersionCoords);

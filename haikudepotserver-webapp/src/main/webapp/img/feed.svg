@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="16"
+   height="16">
+  <rect stroke="none" fill="#f08934" x="0" y="0" width="16" height="16" rx="3" ry="3"/>
+  <circle stroke="none" fill="white" cx="4" cy="12" r="2"/>
+  <path fill="none" stroke="white" stroke-width="2" d="M3 7 a 6 6 90 0 1 6 6"/>
+  <path fill="none" stroke="white" stroke-width="2" d="M3 3 a 10 10 90 0 1 10 10"/>
+</svg>

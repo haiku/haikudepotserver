@@ -13,19 +13,21 @@ import com.google.common.net.MediaType;
 import org.haikuos.haikudepotserver.api1.support.Constants;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 
-import javax.servlet.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
 /**
- * <p>This filter gets hit whenever anything goes wrong in the application from a user perspective.  It will
+ * <p>This servlet gets hit whenever anything goes wrong in the application from a user perspective.  It will
  * say that a problem has arisen and off the user the opportunity to re-enter the application.  It is as
  * simple as possible to reduce the possibility of the error page failing as well.</p>
  */
 
-public class ErrorFilter implements Filter {
+public class ErrorServlet extends HttpServlet {
 
     private final static String PARAM_JSONRPCERRORCODE = "jrpcerrorcd";
 
@@ -37,6 +39,10 @@ public class ErrorFilter implements Filter {
             NaturalLanguage.CODE_ENGLISH, "Something has gone wrong with your use of this web application.",
             NaturalLanguage.CODE_GERMAN, "Etwas ist falsch gegangen mit Ihre Benutzung des Anwendungs.");
 
+    private final static Map<String,String> BODY_NOTFOUND = ImmutableMap.of(
+            NaturalLanguage.CODE_ENGLISH, "The requested resource was not able to be found.",
+            NaturalLanguage.CODE_GERMAN, "Die angefragte Ressource wurde nicht gefunden.");
+
     private final static Map<String,String> BODY_AUTHORIZATIONFAILURE = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Your authentication with the service is expired or you have reached a page that is not accessible with the level of your permissions.",
             NaturalLanguage.CODE_GERMAN, "Die Berechtigungen für diesen Dienst sind abgelaufen, oder der Zugang zur angeforderten Seite erfordert zusätzliche Zugriffsrechte.");
@@ -47,14 +53,19 @@ public class ErrorFilter implements Filter {
 
     private byte[] pageGeneralBytes = null;
 
-    private Map<String,String> deriveBody(Integer jsonRpcErrorCode) {
+    private Map<String,String> deriveBody(Integer jsonRpcErrorCode, Integer httpStatusCode) {
         if (null != jsonRpcErrorCode && Constants.ERROR_CODE_AUTHORIZATIONFAILURE == jsonRpcErrorCode) {
             return BODY_AUTHORIZATIONFAILURE;
         }
+
+        if(null != httpStatusCode && 404 == httpStatusCode) {
+            return BODY_NOTFOUND;
+        }
+
         return BODY_GENERAL;
     }
 
-    private void messageLineAssembly(String naturalLanguageCode, StringBuilder out, Integer jsonRpcErrorCode) {
+    private void messageLineAssembly(String naturalLanguageCode, StringBuilder out, Integer jsonRpcErrorCode, Integer httpStatusCode) {
         HtmlEscapers.htmlEscaper();
         out.append("<div class=\"error-message-container\">\n");
         out.append("<div class=\"error-message\">\n");
@@ -62,7 +73,7 @@ public class ErrorFilter implements Filter {
         out.append(HtmlEscapers.htmlEscaper().escape(PREFIX.get(naturalLanguageCode)));
         out.append("</strong>");
         out.append(" ");
-        out.append(HtmlEscapers.htmlEscaper().escape(deriveBody(jsonRpcErrorCode).get(naturalLanguageCode)));
+        out.append(HtmlEscapers.htmlEscaper().escape(deriveBody(jsonRpcErrorCode, httpStatusCode).get(naturalLanguageCode)));
         out.append("</div>\n");
         out.append("<div class=\"error-startagain\">");
         out.append(" &#8594; ");
@@ -78,7 +89,7 @@ public class ErrorFilter implements Filter {
      * on.</p>
      */
 
-    private void pageAssembly(StringBuilder out, Integer jsonRpcErrorCode) {
+    private void pageAssembly(StringBuilder out, Integer jsonRpcErrorCode, Integer httpStatusCode) {
 
         out.append("<html>\n");
         out.append("<head>\n");
@@ -104,7 +115,11 @@ public class ErrorFilter implements Filter {
         for(String naturalLanguageCode : new String[] {
                 NaturalLanguage.CODE_ENGLISH,
                 NaturalLanguage.CODE_GERMAN }) {
-            messageLineAssembly(naturalLanguageCode, out, jsonRpcErrorCode);
+            messageLineAssembly(
+                    naturalLanguageCode,
+                    out,
+                    jsonRpcErrorCode,
+                    httpStatusCode);
         }
 
         out.append("</div>\n");
@@ -113,58 +128,50 @@ public class ErrorFilter implements Filter {
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
+    public void init(ServletConfig config) throws ServletException {
         // get together the basic general page as a fallback that exists in memory so that in the worst
         // case scenario, if memory is tight at least we can output this.
 
         StringBuilder out = new StringBuilder();
-        pageAssembly(out, null);
+        pageAssembly(out, null, null);
         pageGeneralBytes = out.toString().getBytes(Charsets.UTF_8);
     }
 
     @Override
-    public void doFilter(
-            ServletRequest request,
-            ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
 
         try {
-            HttpServletRequest httpRequest = (HttpServletRequest) request;
-            HttpServletResponse httpResponse = (HttpServletResponse) response;
-            httpResponse.setContentType(MediaType.HTML_UTF_8.toString());
-            String jsonRpcErrorCodeString = httpRequest.getParameter(PARAM_JSONRPCERRORCODE);
+            resp.setContentType(MediaType.HTML_UTF_8.toString());
+            String jsonRpcErrorCodeString = req.getParameter(PARAM_JSONRPCERRORCODE);
+            Integer jsonRpcErrorCode = Strings.isNullOrEmpty(jsonRpcErrorCodeString) ? null : Integer.parseInt(jsonRpcErrorCodeString);
 
             byte pageBytes[] = pageGeneralBytes;
 
-            if(!Strings.isNullOrEmpty(jsonRpcErrorCodeString)) {
+            // special handling for JSON-RPC errors
+
+
+            if(null!=jsonRpcErrorCode || 404 == resp.getStatus()) {
 
                 try {
-                    Integer jsonRpcErrorCode = Integer.parseInt(jsonRpcErrorCodeString);
                     StringBuilder out = new StringBuilder();
-                    pageAssembly(out, jsonRpcErrorCode);
+                    pageAssembly(out, jsonRpcErrorCode, resp.getStatus());
                     pageBytes = out.toString().getBytes(Charsets.UTF_8);
                 }
                 catch(Throwable th) {
-                    pageBytes = pageGeneralBytes;
+                    // swallow
                 }
 
             }
 
-            httpResponse.setContentLength(pageBytes.length);
-            httpResponse.getOutputStream().write(pageBytes);
-            httpResponse.getOutputStream().flush();
+            resp.setContentLength(pageBytes.length);
+            resp.getOutputStream().write(pageBytes);
+            resp.getOutputStream().flush();
 
         }
         catch(Throwable th) {
-            // eat it.
+            // swallow
         }
 
     }
-
-    @Override
-    public void destroy() {
-        pageGeneralBytes = null;
-    }
-
 }

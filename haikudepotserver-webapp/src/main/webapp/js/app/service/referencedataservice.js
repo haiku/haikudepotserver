@@ -84,6 +84,25 @@ angular.module('haikudepotserver').factory('referenceData',
 
             return {
 
+                /**
+                 * <p>This relates to the ATOM feed sources and although it is hard-coded, it is still
+                 * supplied from this reference data service in order to maintain consistency and to
+                 * allow for easier enhancement later.</p>
+                 */
+
+                feedSupplierTypes : function() {
+                    var deferred = $q.defer();
+                    deferred.resolve(_.map(
+                        [ 'CREATEDPKGVERSION', 'CREATEDUSERRATING' ],
+                        function(item) {
+                            return {
+                                code : item
+                            };
+                        }
+                    ));
+                    return deferred.promise;
+                },
+
                 naturalLanguages : function() {
                     return getData('naturalLanguages');
                 },

@@ -139,10 +139,10 @@ angular.module('haikudepotserver').controller(
                 $scope.pkgIconHvifUrl = undefined;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "getPkgIcons",
-                        [{ pkgName: $routeParams.name }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_PKG,
+                    "getPkgIcons",
+                    [{ pkgName: $routeParams.name }]
+                ).then(
                     function(result) {
 
                         var has = !!_.findWhere(
@@ -192,11 +192,11 @@ angular.module('haikudepotserver').controller(
                             // trim the comments down a bit if necessary.
 
                             _.each($scope.userRatings.items, function(ur) {
-                                 if(ur.comment) {
-                                     if(ur.comment.length > MAXCHARS_USERRATING_COMMENT) {
-                                         ur.comment = ur.comment.substring(0,MAXCHARS_USERRATING_COMMENT) + '...';
-                                     }
-                                 }
+                                if(ur.comment) {
+                                    if(ur.comment.length > MAXCHARS_USERRATING_COMMENT) {
+                                        ur.comment = ur.comment.substring(0,MAXCHARS_USERRATING_COMMENT) + '...';
+                                    }
+                                }
                             });
 
                             // trim down the number of lines in the comment if necessary.
@@ -247,10 +247,10 @@ angular.module('haikudepotserver').controller(
                 $scope.pkgScreenshots = undefined;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "getPkgScreenshots",
-                        [{ pkgName: $scope.pkg.name }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_PKG,
+                    "getPkgScreenshots",
+                    [{ pkgName: $scope.pkg.name }]
+                ).then(
                     function(result) {
                         $scope.pkgScreenshots = _.map(result.items, function(item) {
                             return {
@@ -294,9 +294,15 @@ angular.module('haikudepotserver').controller(
             // ---------------------
             // ACTIONS FOR PACKAGE
 
+            $scope.goPkgFeedBuilder = function() {
+                var item = breadcrumbFactory.createPkgFeedBuilder();
+                breadcrumbFactory.applySearch(item, { pkgNames : $scope.pkg.name });
+                breadcrumbs.pushAndNavigate(item);
+            };
+
             $scope.goListPkgVersions = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createListPkgVersionsForPkg($scope.pkg));
-            }
+            };
 
             // this is used to cause an authentication in relation to adding a user rating
             $scope.goAuthenticate = function() {
@@ -321,14 +327,14 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEditPkgProminence = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgProminence($scope.pkg));
-            }
+            };
 
             $scope.goRemoveIcon = function() {
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "removePkgIcon",
-                        [{ pkgName: $routeParams.name }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_PKG,
+                    "removePkgIcon",
+                    [{ pkgName: $routeParams.name }]
+                ).then(
                     function() {
                         $log.info('removed icons for '+$routeParams.name+' pkg');
                         refetchPkgIconMetaData();

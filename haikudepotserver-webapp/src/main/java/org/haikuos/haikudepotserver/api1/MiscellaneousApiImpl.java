@@ -14,6 +14,8 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.feed.FeedOrchestrationService;
+import org.haikuos.haikudepotserver.feed.model.FeedSpecification;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -40,6 +43,9 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
     @Resource
     RuntimeInformationService runtimeInformationService;
+
+    @Resource
+    FeedOrchestrationService feedOrchestrationService;
 
     @Override
     public GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest) {
@@ -238,6 +244,51 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                         }
                 )
         );
+    }
+
+    @Override
+    public GenerateFeedUrlResult generateFeedUrl(final GenerateFeedUrlRequest request) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(request);
+
+        final ObjectContext context = serverRuntime.getContext();
+        FeedSpecification specification = new FeedSpecification();
+        specification.setLimit(request.limit);
+
+        if(null!=request.supplierTypes) {
+            specification.setSupplierTypes(Lists.transform(
+                    request.supplierTypes,
+                    new Function<GenerateFeedUrlRequest.SupplierType, FeedSpecification.SupplierType>() {
+                        @Override
+                        public FeedSpecification.SupplierType apply(GenerateFeedUrlRequest.SupplierType input) {
+                            return FeedSpecification.SupplierType.valueOf(input.name());
+                        }
+                    }
+            ));
+        }
+
+        if(null!=request.naturalLanguageCode) {
+            specification.setNaturalLanguageCode(getNaturalLanguage(context, request.naturalLanguageCode).getCode());
+        }
+
+        if(null!=request.pkgNames) {
+            List<String> checkedPkgNames = Lists.newArrayList();
+
+            for (String pkgName : request.pkgNames) {
+                Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+
+                if (!pkgOptional.isPresent()) {
+                    throw new ObjectNotFoundException(Pkg.class.getSimpleName(), pkgName);
+                }
+
+                checkedPkgNames.add(pkgOptional.get().getName());
+            }
+
+            specification.setPkgNames(checkedPkgNames);
+        }
+
+        GenerateFeedUrlResult result = new GenerateFeedUrlResult();
+        result.url = feedOrchestrationService.generateUrl(specification);
+        return result;
     }
 
 }

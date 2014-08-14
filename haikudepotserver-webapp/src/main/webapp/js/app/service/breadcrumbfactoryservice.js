@@ -395,6 +395,13 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                         titleKey : 'breadcrumb.addAuthorizationPkgRule.title',
                         path : '/authorizationpkgrules/add'
                     });
+                },
+
+                createPkgFeedBuilder : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.pkgFeedBuilder.title',
+                        path : '/pkg/feed/builder'
+                    });
                 }
 
             };

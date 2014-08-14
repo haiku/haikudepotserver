@@ -2,6 +2,10 @@
     margin-bottom: 6px;
 }
 
+#pkg-title-feed {
+    float: right;
+}
+
 #pkg-title-icon {
     display: inline;
     float:left;

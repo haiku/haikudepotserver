@@ -1,0 +1,103 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container pkg-feed-builder">
+
+    <div ng-show="feedUrl">
+
+        <div class="feed-url-container">{{feedUrl}}</div>
+
+        <h2><message key="gen.actions.title"></message></h2>
+
+        <ul>
+            <li>
+                <a href="" ng-click="goEdit()">
+                    <message key="pkgFeedBuilder.editAction.title"></message>
+                </a>
+            </li>
+            <li>
+                <a href="{{feedUrl}}" target="_blank">
+                    <message key="pkgFeedBuilder.openFeedAction.title"></message>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div ng-show="!feedUrl">
+
+        <div class="form-info-container">
+            <message key="pkgFeedBuilder.info"></message>
+        </div>
+
+        <form name="feedForm" novalidate="novalidate">
+
+            <label for="limit"><message key="pkgFeedBuilder.limit.title"></message></label>
+            <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('limit')">
+                <select
+                        name="limit"
+                        id="limit"
+                        required="true"
+                        ng-model="feedSettings.limit"
+                        ng-options="aLimit for aLimit in limits"></select>
+            </div>
+
+            <label><message key="pkgFeedBuilder.pkgs.title"></message></label>
+            <div class="form-control-group">
+
+                <!-- START; PKG CHOOSER -->
+
+                <div ng-show="0==feedSettings.pkgs.length">
+                    <em><message key="pkgFeedBuilder.pkgs.all"></message></em>
+                </div>
+                <div ng-show="feedSettings.pkgs.length > 0" class="pkg-lozenge-container">
+                    <div class="pkg-lozenge" ng-repeat="pkg in feedSettings.pkgs">
+                        <pkg-icon pkg="pkg" size="16"></pkg-icon>
+                        <pkg-label pkg="pkg"></pkg-label>
+                        <img src="/img/rowdelete.svg" ng-click="goRemovePkg(pkg)">
+                    </div>
+                </div>
+
+                <div>
+                    <input
+                            type="text"
+                            placeholder="{{pkgNamePlaceholder}}"
+                            name="pkgChooserName"
+                            autocomplete="off"
+                            size="12"
+                            ng-model="pkgChooserName"
+                            ng-pattern="{{pkgNamePattern}}">
+                    <button
+                            ng-disabled="!pkgChooserName.length || feedForm.pkgChooserName.$invalid"
+                            ng-click="goAddPkg()"
+                            type="submit"><message key="pkgFeedBuilder.pkgs.addAction.title"></message></button>
+                    <error-messages
+                            key-prefix="pkgFeedBuilder.pkgChooserName"
+                            error="feedForm.pkgChooserName.$error"></error-messages>
+                </div>
+
+                <!-- END; PKG CHOOSER -->
+
+            </div>
+
+            <label><message key="pkgFeedBuilder.supplierTypes.title"></message></label>
+            <div class="form-control-group">
+                <div ng-repeat="supplierType in feedSettings.supplierTypes">
+                    <input
+                            type="checkbox"
+                            ng-model="supplierType.selected"> {{supplierType.title}}
+                </div>
+            </div>
+
+            <div class="form-action-container">
+                <button
+                        ng-disabled="addRuleForm.$invalid"
+                        ng-click="goBuild()"
+                        type="submit"
+                        class="main-action"><message key="pkgFeedBuilder.action.title"></message></button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

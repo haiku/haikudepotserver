@@ -64,11 +64,17 @@ Set this to {\tt true} if you would like database schema migrations to be applie
 
 This configuration relates to the \href{https://jawr.java.net/}{JAWR} debug setting.  It will default to ``false'.
 
-\subsubsection{\tt passwordreset.baseurl}
+\subsubsection{\tt baseurl}
 
-This is the base URL to which password-reset requests will be directed.  The URL base is included in the email body to users who have requested a password-reset.  This has to be configured because the application itself does not know the path by which the HTTP request had reached it.  In the case of a development environment, this base URL might be something like;
+This is the base URL used to formulate URLs to be sent out that can be used to return back to the system.
 
-\framebox{http://localhost:8080/passwordreset/}
+For example; this might be used to create the URL used to manage the password reset process.  The URL base is included in the email body to users who have requested a password-reset.  This has to be configured because the application itself does not know the path by which the HTTP request had reached it.
+
+In the case of a development environment, this base URL might be something like;
+
+\framebox{http://localhost:8080}
+
+Note that this value should have no trailing slash.
 
 \subsection{Token Bearer Authentication}
 

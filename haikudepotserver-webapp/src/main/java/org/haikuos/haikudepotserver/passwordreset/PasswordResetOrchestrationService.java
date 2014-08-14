@@ -60,7 +60,7 @@ public class PasswordResetOrchestrationService {
     @Value("${passwordreset.ttlhours:1}")
     Integer timeToLiveHours;
 
-    @Value("${passwordreset.baseurl}")
+    @Value("${baseurl}")
     String baseUrl;
 
     @Value("${email.from}")
@@ -106,7 +106,7 @@ public class PasswordResetOrchestrationService {
         userPasswordResetToken.setCreateTimestamp(new Date());
 
         PasswordResetMail mailModel = new PasswordResetMail();
-        mailModel.setPasswordResetBaseUrl(baseUrl);
+        mailModel.setPasswordResetBaseUrl(baseUrl + "/passwordreset/");
         mailModel.setUserNickname(user.getNickname());
         mailModel.setUserPasswordResetTokenCode(userPasswordResetToken.getCode());
 

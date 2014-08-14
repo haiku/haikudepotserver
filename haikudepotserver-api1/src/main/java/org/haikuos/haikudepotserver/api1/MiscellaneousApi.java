@@ -66,4 +66,12 @@ public interface MiscellaneousApi {
 
     GetAllProminencesResult getAllProminences(GetAllProminencesRequest request);
 
+    /**
+     * <p>This method will return a feed URL based on the supplied information in the request.  If
+     * any of the elements supplied in the request do not exist then this method will throw an
+     * instance of {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}.</p>
+     */
+
+    GenerateFeedUrlResult generateFeedUrl(GenerateFeedUrlRequest request) throws ObjectNotFoundException;
+
 }
