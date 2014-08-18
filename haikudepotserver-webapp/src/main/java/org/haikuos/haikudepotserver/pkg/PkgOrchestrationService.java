@@ -858,19 +858,25 @@ public class PkgOrchestrationService {
                 persistedLatestExistingPkgVersion.get().setIsLatest(false);
             }
             else {
+                boolean isRealArchitecture = !persistedPkgVersion.getArchitecture().getCode().equals(Architecture.CODE_SOURCE);
+
                 if(0==c) {
-                    LOGGER.debug(
-                            "imported a package version {} of {} which is the same as the existing {}",
-                            persistedPkgVersionCoords,
-                            persistedPkgVersion.getPkg().getName(),
-                            persistedLatestExistingPkgVersionCoords);
+                    if(isRealArchitecture) {
+                        LOGGER.debug(
+                                "imported a package version {} of {} which is the same as the existing {}",
+                                persistedPkgVersionCoords,
+                                persistedPkgVersion.getPkg().getName(),
+                                persistedLatestExistingPkgVersionCoords);
+                    }
                 }
                 else {
-                    LOGGER.warn(
-                            "imported a package version {} of {} which is older or the same as the existing {}",
-                            persistedPkgVersionCoords,
-                            persistedPkgVersion.getPkg().getName(),
-                            persistedLatestExistingPkgVersionCoords);
+                    if(isRealArchitecture) {
+                        LOGGER.warn(
+                                "imported a package version {} of {} which is older or the same as the existing {}",
+                                persistedPkgVersionCoords,
+                                persistedPkgVersion.getPkg().getName(),
+                                persistedLatestExistingPkgVersionCoords);
+                    }
                 }
             }
         }
