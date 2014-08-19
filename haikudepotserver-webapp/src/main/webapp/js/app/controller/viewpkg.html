@@ -208,6 +208,14 @@
                     <message key="viewPkg.editPkgCategoriesAction.title"></message>
                 </a>
             </li>
+            <li pkg="pkg" show-if-permission="'USERRATING_DERIVEANDSTOREFORPKG'">
+                <a href="" ng-click="goDeriveAndStoreUserRating()">
+                    <message key="viewPkg.deriveAndStoreUserRatingAction.title"></message>
+                </a>
+                <span ng-show="didDeriveAndStoreUserRating">
+                    <em><message key="viewPkg.deriveAndStoreUserRatingAction.completed"></message></em>
+                </span>
+            </li>
         </ul>
     </div>
 

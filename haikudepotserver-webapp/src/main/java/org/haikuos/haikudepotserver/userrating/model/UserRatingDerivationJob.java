@@ -8,7 +8,23 @@ package org.haikuos.haikudepotserver.userrating.model;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
+/**
+ * <p>An instance of this job can be submitted to an implementation of
+ * {@link org.haikuos.haikudepotserver.userrating.UserRatingDerivationService} in order to get the
+ * aggregated user rating re-calculated for the package.  It is possible that the job can also be configured
+ * such that the derivation is undertaken not for just one package, but for every package in the system.</p>
+ */
+
 public class UserRatingDerivationJob {
+
+    /**
+     * <P>This is a special package name that cannot occur in actual package names which means;
+     * do the user rating derivation for all of the packages.</P>
+     */
+
+    final static String PKG_NAME_ALL = "-*-";
+
+    public final static UserRatingDerivationJob JOB_ALL_PKG = new UserRatingDerivationJob(PKG_NAME_ALL);
 
     private String pkgName;
 
@@ -21,6 +37,10 @@ public class UserRatingDerivationJob {
 
     public String getPkgName() {
         return pkgName;
+    }
+
+    public boolean appliesToAllPkgs() {
+        return getPkgName().equals(PKG_NAME_ALL);
     }
 
     @Override

@@ -1,0 +1,26 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<!-- Because this page is root only, I will not worry about localization for it -->
+
+<div class="content-container">
+
+    <p>These are root-level operations that can be performed on the system.</p>
+
+    <h1>Actions</h1>
+    <ul>
+        <li>
+            <a href="" ng-click="goDeriveAndStoreUserRatingsForAllPkgs()">
+                Derive and store user ratings for all packages
+            </a>
+            <span ng-show="didDeriveAndStoreUserRatingsForAllPkgs">
+                <em>&mdash; did initiate</em>
+            </span>
+        </li>
+        <li><a href="" ng-click="goRuntimeInformation()">Runtime information</a></li>
+        <li><a href="" ng-click="goPaginationControlPlayground()">Pagination playground</a></li>
+        <li><a href="" ng-click="goRaiseExceptionInLocalRuntime()">Raise test exception in javascript environment</a></li>
+        <li><a href="" ng-click="goRaiseExceptionInServerRuntime()">Raise test exception on server via json-rpc</a></li>
+    </ul>
+
+</div>
+<div class="footer"></div>

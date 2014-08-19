@@ -39,15 +39,13 @@ angular.module('haikudepotserver').controller(
                 else {
                     jsonRpc.call(
                             constants.ENDPOINT_API_V1_USER,
-                            "getUser",
+                            'getUser',
                             [{
                                 nickname : u.nickname
                             }]
                         ).then(
                         function(result) {
-                            if(result.isRoot) {
-                                $scope.canGoRuntimeInformation = true;
-                            }
+                            $scope.canGoRuntimeInformation = !!result.isRoot;
                         },
                         function(err) {
                             errorHandling.handleJsonRpcError(err);

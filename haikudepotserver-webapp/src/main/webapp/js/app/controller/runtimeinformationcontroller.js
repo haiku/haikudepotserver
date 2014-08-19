@@ -47,27 +47,6 @@ angular.module('haikudepotserver').controller(
 
             refreshRuntimeInformation();
 
-            // -------------------
-            // ERROR HANDLING TESTING
-
-            $scope.goRaiseExceptionInLocalRuntime = function() {
-                throw Error('test exception in javascript environment');
-            };
-
-            $scope.goRaiseExceptionInServerRuntime = function() {
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                        "raiseException",
-                        [{}]
-                    ).then(
-                    function() {
-                        $log.error('the exception raised on the server runtime -> should not have reached this point');
-                    },
-                    function(err) {
-                        errorHandling.handleJsonRpcError(err);
-                    }
-                );
-            }
         }
     ]
 );

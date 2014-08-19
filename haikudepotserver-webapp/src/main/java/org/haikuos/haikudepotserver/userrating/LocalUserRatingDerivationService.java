@@ -31,7 +31,13 @@ public class LocalUserRatingDerivationService
 
     protected void run(UserRatingDerivationJob job) {
         Preconditions.checkNotNull(job);
-        userRatingOrchestrationService.updateUserRatingDerivation(job.getPkgName());
+
+        if(job.appliesToAllPkgs()) {
+            userRatingOrchestrationService.updateUserRatingDerivationsForAllPkgs();
+        }
+        else {
+            userRatingOrchestrationService.updateUserRatingDerivation(job.getPkgName());
+        }
     }
 
     /**

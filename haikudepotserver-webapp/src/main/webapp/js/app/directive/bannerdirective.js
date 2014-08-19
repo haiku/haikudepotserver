@@ -19,11 +19,11 @@ angular.module('haikudepotserver').directive('banner',function() {
             [
                 '$rootScope','$scope','$log','$location','$route','$window',
                 'userState','referenceData','messageSource','breadcrumbs',
-                'errorHandling','breadcrumbFactory',
+                'errorHandling','breadcrumbFactory','jsonRpc','constants',
                 function(
                     $rootScope,$scope,$log,$location,$route,$window,
                     userState,referenceData,messageSource,breadcrumbs,
-                    errorHandling,breadcrumbFactory) {
+                    errorHandling,breadcrumbFactory,jsonRpc,constants) {
 
                     $scope.showActions = false;
                     $scope.userNickname = undefined;
@@ -156,6 +156,42 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     // -----------------
+                    // ROOT ONLY
+
+                    $scope.canShowRootOperations = false;
+
+                    function updateCanShowRootOperations() {
+                        $scope.canShowRootOperations = false;
+                        var u = userState.user();
+
+                        if(u) {
+                            jsonRpc.call(
+                                constants.ENDPOINT_API_V1_USER,
+                                'getUser',
+                                [{ nickname : u.nickname }]
+                            ).then(
+                                function(result) {
+                                    $scope.canShowRootOperations = !!result.isRoot;
+                                },
+                                function(err) {
+                                    errorHandling.handleJsonRpcError(err);
+                                }
+                            );
+                        }
+                    }
+
+                    updateCanShowRootOperations();
+
+                    $scope.goRootOperations = function() {
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbFactory.createHome(),
+                            breadcrumbFactory.createRootOperations()
+                        ]);
+
+                        $scope.showActions = false;
+                    };
+
+                    // -----------------
                     // FEEDS
 
                     $scope.goPkgFeedBuilder = function() {
@@ -265,6 +301,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                         'userChangeSuccess',
                         function() {
                             $scope.userNickname = userState.user() ? userState.user().nickname : undefined;
+                            updateCanShowRootOperations();
                         }
                     );
 

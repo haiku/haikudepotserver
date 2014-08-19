@@ -17,6 +17,18 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 public interface UserRatingApi {
 
     /**
+     * <p>This method will re-calculate and store the user rating for the nominated packaging.</p>
+     */
+
+    DeriveAndStoreUserRatingForPkgResult deriveAndStoreUserRatingForPkg(DeriveAndStoreUserRatingForPkgRequest request) throws ObjectNotFoundException;
+
+    /**
+     * <p>This method will trigger the re-calculation of user ratings for all of the packages in the system.</p>
+     */
+
+    DeriveAndStoreUserRatingsForAllPkgsResult deriveAndStoreUserRatingsForAllPkgs(DeriveAndStoreUserRatingsForAllPkgsResult request);
+
+    /**
      * <p>This will find the user rating identified by the supplied code and will return data pertaining to that
      * or if the user rating was not able to be found for the code supplied then it will throw an instance of
      * {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}.  Note that this invocation

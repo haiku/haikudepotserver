@@ -209,6 +209,9 @@ public class AuthorizationService {
                 UserRating userRating = (UserRating) target;
                 return null!=authenticatedUser && (userRating.getUser().equals(authenticatedUser) || authenticatedUser.getIsRoot());
 
+            case USERRATING_DERIVEANDSTOREFORPKG:
+                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+
             default:
                 throw new IllegalStateException("unhandled permission; "+permission.name());
         }

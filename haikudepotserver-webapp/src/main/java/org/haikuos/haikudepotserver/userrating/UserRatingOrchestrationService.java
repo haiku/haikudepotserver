@@ -52,12 +52,6 @@ public class UserRatingOrchestrationService {
     // ------------------------------
     // SEARCH
 
-    // [apl 11.may.2014]
-    // SelectQuery has no means of getting a count.  This is a bit of an annoying limitation, but can be worked around
-    // by using EJBQL.  However converting from an Expression to EJBQL has a problem (see CAY-1932) so for the time
-    // being, just use EJBQL directly by assembling strings and convert back later.
-
-    // NOTE; raw EJBQL can be replaced with Expressions once CAY-1932 is fixed.
     private String prepareWhereClause(
             List<Object> parameterAccumulator,
             ObjectContext context,
@@ -143,92 +137,6 @@ public class UserRatingOrchestrationService {
         }
     }
 
-//    public SelectQuery prepare(ObjectContext context, UserRatingSearchSpecification search) {
-//        Preconditions.checkNotNull(search);
-//        Preconditions.checkNotNull(context);
-//        DateTime now = new DateTime();
-//
-//        // build up a list of expressions
-//
-//        List<Expression> expressions = Lists.newArrayList();
-//
-//        if (!search.getIncludeInactive()) {
-//            expressions.add(ExpressionFactory.matchExp(
-//                    UserRating.ACTIVE_PROPERTY,
-//                    Boolean.TRUE));
-//        }
-//
-//        if (null != search.getDaysSinceCreated()) {
-//            expressions.add(ExpressionFactory.greaterExp(
-//                    UserRating.CREATE_TIMESTAMP_PROPERTY,
-//                    new java.sql.Timestamp(now.minusDays(search.getDaysSinceCreated()).getMillis())));
-//        }
-//
-//        if (null != search.getPkg() && null == search.getPkgVersion()) {
-//            expressions.add(ExpressionFactory.matchExp(
-//                    UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY,
-//                    search.getPkg()));
-//        }
-//
-//        if (null != search.getArchitecture() && null == search.getPkgVersion()) {
-//            expressions.add(ExpressionFactory.matchExp(
-//                    UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.ARCHITECTURE_PROPERTY,
-//                    search.getArchitecture()));
-//        }
-//
-//        if (null != search.getPkgVersion()) {
-//            expressions.add(ExpressionFactory.matchExp(
-//                    UserRating.PKG_VERSION_PROPERTY,
-//                    search.getPkgVersion()));
-//        }
-//
-//        if (null != search.getUser()) {
-//            expressions.add(ExpressionFactory.matchExp(
-//                    UserRating.USER_PROPERTY,
-//                    search.getUser()));
-//        }
-//
-//        return new SelectQuery(UserRating.class, ExpressionHelper.andAll(expressions));
-//    }
-//
-//    public List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search) {
-//        Preconditions.checkNotNull(search);
-//        Preconditions.checkNotNull(context);
-//
-//        SelectQuery selectQuery = prepare(context, search);
-//        selectQuery.setFetchOffset(search.getOffset());
-//        selectQuery.setFetchLimit(search.getLimit());
-//        selectQuery.addOrdering(new Ordering(UserRating.CREATE_TIMESTAMP_PROPERTY, SortOrder.DESCENDING));
-//
-//        //noinspection unchecked
-//        return context.performQuery(selectQuery);
-//    }
-//
-//    public long total(ObjectContext context, UserRatingSearchSpecification search) {
-//        Preconditions.checkNotNull(search);
-//        Preconditions.checkNotNull(context);
-//
-//        SelectQuery selectQuery = prepare(context, search);
-//        List<Object> parameters = Lists.newArrayList();
-//        String ejbql = selectQuery.getQualifier().toEJBQL(parameters, "ur");
-//
-//        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(ur) FROM UserRating AS ur WHERE " + ejbql);
-//
-//        for(int i=0;i<parameters.size();i++) {
-//            ejbQuery.setParameter(i+1,parameters.get(i));
-//        }
-//
-//        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
-//
-//        switch(result.size()) {
-//            case 1:
-//                return result.get(0).longValue();
-//
-//            default:
-//                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
-//        }
-//    }
-
     // ------------------------------
     // DERIVATION ALGORITHM
 
@@ -296,6 +204,31 @@ public class UserRatingOrchestrationService {
         }
 
         return context.performQuery(query);
+    }
+
+    /**
+     * <p>This method will go through all of the relevant packages and will derive their user ratings.</p>
+     */
+
+    public void updateUserRatingDerivationsForAllPkgs() {
+        ObjectContext context = serverRuntime.getContext();
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("SELECT p.name FROM ");
+        builder.append(Pkg.class.getSimpleName());
+        builder.append(" p");
+        builder.append(" WHERE p.active=true");
+        builder.append(" ORDER BY p.name DESC");
+
+        List<String> pkgNames = context.performQuery(new EJBQLQuery(builder.toString()));
+
+        LOGGER.info("will derive and store user ratings for {} packages", pkgNames.size());
+
+        for (String pkgName : pkgNames) {
+            updateUserRatingDerivation(pkgName);
+        }
+
+        LOGGER.info("did derive and store user ratings for {} packages", pkgNames.size());
     }
 
     public void updateUserRatingDerivation(String pkgName) {

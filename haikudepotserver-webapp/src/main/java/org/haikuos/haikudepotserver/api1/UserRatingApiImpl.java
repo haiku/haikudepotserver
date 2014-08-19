@@ -20,7 +20,9 @@ import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
+import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
 import org.haikuos.haikudepotserver.userrating.UserRatingOrchestrationService;
+import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
 import org.haikuos.haikudepotserver.userrating.model.UserRatingSearchSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,9 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
     @Resource
     AuthorizationService authorizationService;
+
+    @Resource
+    UserRatingDerivationService userRatingDerivationService;
 
     @Resource
     UserRatingOrchestrationService userRatingOrchestrationService;
@@ -93,6 +98,53 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             result.userRatingStabilityCode = userRating.getUserRatingStability().getCode();
         }
     }
+
+    @Override
+    public DeriveAndStoreUserRatingForPkgResult deriveAndStoreUserRatingForPkg(DeriveAndStoreUserRatingForPkgRequest request) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orNull(),
+                null,
+                Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
+            throw new AuthorizationFailureException();
+        }
+
+        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.pkgName);
+
+        if(!pkgOptional.isPresent()) {
+            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
+        }
+
+        userRatingDerivationService.submit(new UserRatingDerivationJob(request.pkgName));
+
+        return new DeriveAndStoreUserRatingForPkgResult();
+    }
+
+    @Override
+    public DeriveAndStoreUserRatingsForAllPkgsResult deriveAndStoreUserRatingsForAllPkgs(DeriveAndStoreUserRatingsForAllPkgsResult request) {
+        Preconditions.checkNotNull(request);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orNull(),
+                null,
+                Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
+            throw new AuthorizationFailureException();
+        }
+
+        userRatingDerivationService.submit(UserRatingDerivationJob.JOB_ALL_PKG);
+        LOGGER.info("did enqueue request to derive and store user ratings for all packages");
+
+        return new DeriveAndStoreUserRatingsForAllPkgsResult();
+    }
+
 
     @Override
     public GetUserRatingResult getUserRating(GetUserRatingRequest request) throws ObjectNotFoundException {

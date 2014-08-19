@@ -6,12 +6,12 @@
 angular.module('haikudepotserver').controller(
     'ViewPkgController',
     [
-        '$scope','$log','$location','$routeParams','$rootScope',
+        '$scope','$log','$location','$routeParams','$rootScope','$timeout',
         'jsonRpc','constants','userState','errorHandling',
         'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
         'pkg','breadcrumbFactory',
         function(
-            $scope,$log,$location,$routeParams,$rootScope,
+            $scope,$log,$location,$routeParams,$rootScope,$timeout,
             jsonRpc,constants,userState,errorHandling,
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
             pkg,breadcrumbFactory) {
@@ -23,6 +23,9 @@ angular.module('haikudepotserver').controller(
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 320;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 240;
             var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
+
+            $scope.didDeriveAndStoreUserRating = false;
+            $scope.didDeriveAndStoreUserRatingTimeout = undefined;
 
             $scope.pkg = undefined;
             $scope.pkgScreenshots = undefined;
@@ -327,6 +330,38 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEditPkgProminence = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgProminence($scope.pkg));
+            };
+
+            /**
+             * <p>Sends a request off to enqueue that a package should have its derived rating re-calculated
+             * and stored.  It will display a little message to indicate that this has happened and the
+             * little message will vanish after a few moments.</p>
+             */
+
+            $scope.goDeriveAndStoreUserRating = function() {
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_USERRATING,
+                    "deriveAndStoreUserRatingForPkg",
+                    [{ pkgName: $routeParams.name }]
+                ).then(
+                    function() {
+                        $log.info('requested derive and store user rating for '+$routeParams.name+' pkg');
+                        $scope.didDeriveAndStoreUserRating = true;
+
+                        if($scope.didDeriveAndStoreUserRatingTimeout) {
+                            $timeout.cancel($scope.didDeriveAndStoreUserRatingTimeout);
+                        }
+
+                        $scope.didDeriveAndStoreUserRatingTimeout = $timeout(function() {
+                            $scope.didDeriveAndStoreUserRating = false;
+                            $scope.didDeriveAndStoreUserRatingTimeout = undefined;
+                        }, 3000);
+                    },
+                    function(err) {
+                        $log.error('unable to derive and store user rating for '+$routeParams.name+' pkg');
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             };
 
             $scope.goRemoveIcon = function() {
