@@ -61,8 +61,8 @@ angular.module('haikudepotserver').directive('paginationControl',[
                 // so we need this many elements to use as page numbers.
 
                 var topLevelE = angular.element('<ul class="pagination-control-container"></ul>');
-                var leftArrowAnchorE = angular.element('<a href="" class="pagination-control-left">'+constants.SVG_LEFT_ARROW+'</a>');
-                var rightArrowAnchorE = angular.element('<a href="" class="pagination-control-right">'+constants.SVG_RIGHT_ARROW+'</a>');
+                var leftArrowAnchorE = angular.element('<a href="" class="pagination-control-left"><img src="/img/paginationleft.svg"></a>');
+                var rightArrowAnchorE = angular.element('<a href="" class="pagination-control-right"><img src="/img/paginationright.svg"></a>');
 
                 element.replaceWith(topLevelE);
 

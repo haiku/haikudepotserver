@@ -17,7 +17,7 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
 
                     // setup by creating a number of star images.
 
-                    var topLevelE = angular.element('<div class="rating-indicator"></div>');
+                    var topLevelE = angular.element('<span class="rating-indicator"></div>');
                     var starEs = [];
 
                     element.replaceWith(topLevelE);

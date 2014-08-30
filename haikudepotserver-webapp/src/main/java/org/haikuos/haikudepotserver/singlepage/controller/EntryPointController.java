@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.web.controller;
+package org.haikuos.haikudepotserver.singlepage.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +20,7 @@ public class EntryPointController {
 
     @RequestMapping(method = RequestMethod.GET)
     public String entryPoint() {
-        return "entryPoint";
+        return "singlepage/launch";
     }
 
 }

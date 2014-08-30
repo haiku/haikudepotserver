@@ -1,21 +1,24 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2014, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.api1.support;
+package org.haikuos.haikudepotserver.multipage;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * <p>This exception is thrown when the system is not able to find an object in the system as part of an API
- * invocation.</p>
+ * <p>This exception will return a 404 when it arises.</p>
  */
 
-public class ObjectNotFoundException extends Exception {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class MultipageObjectNotFoundException extends Exception {
 
     public String entityName;
     public Object identifier;
 
-    public ObjectNotFoundException(String entityName, Object identifier) {
+    public MultipageObjectNotFoundException(String entityName, Object identifier) {
         super();
 
         if(null==entityName || 0==entityName.length()) {

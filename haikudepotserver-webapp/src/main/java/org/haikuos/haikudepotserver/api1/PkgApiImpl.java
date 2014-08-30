@@ -306,19 +306,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         version.viewCounter = pkgVersion.getViewCounter();
 
-        Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersion.getPkgVersionLocalization(naturalLanguage);
+        org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizationOrFallback(naturalLanguage);
 
-        if(!pkgVersionLocalizationOptional.isPresent()) {
-            if(!naturalLanguage.getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
-                pkgVersionLocalizationOptional = pkgVersion.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
-            }
-        }
-
-        if(pkgVersionLocalizationOptional.isPresent()) {
-            version.description = pkgVersionLocalizationOptional.get().getDescription();
-            version.summary = pkgVersionLocalizationOptional.get().getSummary();
-            version.naturalLanguageCode = pkgVersionLocalizationOptional.get().getNaturalLanguage().getCode();
-        }
+        version.description = pkgVersionLocalization.getDescription();
+        version.summary = pkgVersionLocalization.getSummary();
+        version.naturalLanguageCode = pkgVersionLocalization.getNaturalLanguage().getCode();
 
         version.urls = Lists.transform(
                 pkgVersion.getPkgVersionUrls(),
@@ -946,23 +938,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.revision = pkgVersion.getRevision();
         version.preRelease = pkgVersion.getPreRelease();
 
-        Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersion.getPkgVersionLocalization(naturalLanguage);
+        org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizationOrFallback(naturalLanguage);
 
-        if(!pkgVersionLocalizationOptional.isPresent()) {
-            if(!naturalLanguage.getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
-                pkgVersionLocalizationOptional = pkgVersion.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
-            }
+        if(includeDescription) {
+            version.description = pkgVersionLocalization.getDescription();
         }
 
-        if(pkgVersionLocalizationOptional.isPresent()) {
-
-            if(includeDescription) {
-                version.description = pkgVersionLocalizationOptional.get().getDescription();
-            }
-
-            version.summary = pkgVersionLocalizationOptional.get().getSummary();
-            version.naturalLanguageCode = pkgVersionLocalizationOptional.get().getNaturalLanguage().getCode();
-        }
+        version.summary = pkgVersionLocalization.getSummary();
+        version.naturalLanguageCode = pkgVersionLocalization.getNaturalLanguage().getCode();
 
         return version;
 
@@ -1122,7 +1105,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     @Override
     public UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) throws ObjectNotFoundException {
-       Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName),"the package name must be supplied on the request");
         Preconditions.checkState(null!=request.prominenceOrdering,"the presence ordering must be supplied");
 

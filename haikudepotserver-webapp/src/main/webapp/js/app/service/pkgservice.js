@@ -76,14 +76,22 @@ angular.module('haikudepotserver').factory('pkg',
                     throw Error('route params expected');
                 }
 
+                function hyphenToNull(val) {
+                    if('-'==val) {
+                        return null;
+                    }
+
+                    return val;
+                }
+
                 return getPkgWithSpecificVersion(
                     routeParams.name,
                     {
-                        major : routeParams.major,
-                        minor : routeParams.minor,
-                        micro : routeParams.micro,
-                        preRelease : routeParams.preRelease,
-                        revision : routeParams.revision
+                        major : hyphenToNull(routeParams.major),
+                        minor : hyphenToNull(routeParams.minor),
+                        micro : hyphenToNull(routeParams.micro),
+                        preRelease : hyphenToNull(routeParams.preRelease),
+                        revision : hyphenToNull(routeParams.revision)
                     },
                     routeParams.architectureCode,
                     incrementCounter);

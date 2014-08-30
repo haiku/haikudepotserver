@@ -145,6 +145,10 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         return getPkgVersionLocalization(naturalLanguage.getCode());
     }
 
+    public PkgVersionLocalization getPkgVersionLocalizationOrFallback(final NaturalLanguage naturalLanguage) {
+        return getPkgVersionLocalizationOrFallback(naturalLanguage.getCode());
+    }
+
     /**
      * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
      * English language data is hard-coded into the package payload, english will always be available.</p>
@@ -165,8 +169,27 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     }
 
     /**
-     * <p>Renders the copyright entities into a list of strings.</p>
+     * <p>This method will return the localization for the language specified or will return the localization
+     * for english if the desired language is not available.</p>
      */
+
+    public PkgVersionLocalization getPkgVersionLocalizationOrFallback(final String naturalLanguageCode) {
+        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = Optional.absent();
+
+        if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
+            pkgVersionLocalizationOptional = getPkgVersionLocalization(naturalLanguageCode);
+        }
+
+        if(!pkgVersionLocalizationOptional.isPresent()) {
+            pkgVersionLocalizationOptional = getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
+        }
+
+        return pkgVersionLocalizationOptional.get();
+    }
+
+        /**
+         * <p>Renders the copyright entities into a list of strings.</p>
+         */
 
     public List<String> getCopyrights() {
         return Lists.transform(

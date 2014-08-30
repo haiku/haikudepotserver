@@ -34,10 +34,10 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     'pkg',
                     pkgName,
                     versionCoordinates.major,
-                    versionCoordinates.minor ? versionCoordinates.minor : '',
-                    versionCoordinates.micro ? versionCoordinates.micro : '',
-                    versionCoordinates.preRelease ? versionCoordinates.preRelease : '',
-                    versionCoordinates.revision ? versionCoordinates.revision : '',
+                    versionCoordinates.minor ? versionCoordinates.minor : '-',
+                    versionCoordinates.micro ? versionCoordinates.micro : '-',
+                    versionCoordinates.preRelease ? versionCoordinates.preRelease : '-',
+                    versionCoordinates.revision ? versionCoordinates.revision : '-',
                     architectureCode
                 ];
 

@@ -27,9 +27,6 @@ angular.module('haikudepotserver')
         MEDIATYPE_PNG : 'image/png',
         MEDIATYPE_HAIKUVECTORICONFILE : 'application/x-vnd.haiku-icon',
 
-        SVG_RIGHT_ARROW : '<svg height=\"12\" width=\"12\"><path fill=\"black\" d=\"M0 4.5 L0 7.5 L4 7.5 L4 12 L12 6 L4 0 L4 4.5\"/></svg>',
-        SVG_LEFT_ARROW : '<svg height=\"12\" width=\"12\"><path fill=\"black\" d=\"M12 4.5 L12 7.5 L8 7.5 L8 12 L0 6 L8 0 L8 4.5\"/></svg>',
-
         PATTERN_USER_NICKNAME : /^[a-z0-9]{4,16}$/,
         PATTERN_PKG_NAME : /^[^\s/=!<>-]+$/
 
@@ -195,23 +192,13 @@ angular.module('haikudepotserver')
          */
 
         pkgVersionElementsToString: function(pkgVersion) {
-            var parts = [ pkgVersion.major ];
-
-            if (pkgVersion.minor) {
-                parts.push(pkgVersion.minor);
-            }
-
-            if (pkgVersion.micro) {
-                parts.push(pkgVersion.micro);
-            }
-
-            if (pkgVersion.preRelease) {
-                parts.push(pkgVersion.preRelease);
-            }
-
-            if (pkgVersion.revision) {
-                parts.push('' + pkgVersion.revision);
-            }
+            var parts = [
+                pkgVersion.major,
+                pkgVersion.minor ? pkgVersion.minor : '',
+                pkgVersion.micro ? pkgVersion.micro : '',
+                pkgVersion.preRelease ? pkgVersion.preRelease : '',
+                pkgVersion.revision ? pkgVersion.revision : ''
+            ];
 
             return parts.join('.');
         }

@@ -478,12 +478,12 @@ PAGINATION CONTROLS
     margin: 0;
 }
 
-.pagination-control-container.pagination-control-on-first a.pagination-control-left > svg {
-    fill-opacity: 0.25;
+.pagination-control-container.pagination-control-on-first a.pagination-control-left > img {
+    opacity: 0.25;
 }
 
-.pagination-control-container.pagination-control-on-last a.pagination-control-right > svg {
-    fill-opacity: 0.25;
+.pagination-control-container.pagination-control-on-last a.pagination-control-right > img {
+    opacity: 0.25;
 }
 
 .pagination-control-container li {
@@ -530,6 +530,5 @@ RATINGS
 */
 
 .rating-indicator {
-    display: inline-block;
     vertical-align: middle;
 }

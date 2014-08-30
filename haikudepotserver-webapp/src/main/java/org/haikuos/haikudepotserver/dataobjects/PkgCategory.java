@@ -68,4 +68,12 @@ public class PkgCategory extends _PkgCategory implements Coded {
         return (List<PkgCategory>) context.performQuery(new SelectQuery(PkgCategory.class, codeExpression));
     }
 
+    /**
+     * <p>Can be looked up in the localizations to get a title for this category.</p>
+     */
+
+    public String getTitleKey() {
+        return "pkgCategory." + getCode().toLowerCase() + ".title";
+    }
+
 }

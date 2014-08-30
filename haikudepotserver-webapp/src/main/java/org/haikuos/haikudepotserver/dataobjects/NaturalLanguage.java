@@ -17,6 +17,7 @@ import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._NaturalLanguage;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * <P>This describes a spoken or "natural" language that can be used for localization of the application.  These are
@@ -53,6 +54,10 @@ public class NaturalLanguage extends _NaturalLanguage {
                         NaturalLanguage.class,
                         ExpressionFactory.matchExp(MediaType.CODE_PROPERTY, code))),
                 null));
+    }
+
+    public Locale toLocale() {
+        return Locale.forLanguageTag(getCode());
     }
 
     @Override

@@ -36,7 +36,9 @@
         </property>
     </bean>
 
-    <!--
+    <bean id="localeResolver" class="org.haikuos.haikudepotserver.multipage.MultipageLocaleResolver"/>
+
+<!--
 The presence of this will get the JSON-RPC APIs activated without needing
 to do it manually.
 -->

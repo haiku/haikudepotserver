@@ -1,4 +1,4 @@
-<%@ page session="false" %>
+<%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="jwr" uri="http://jawr.net/tags" %>
 
@@ -15,9 +15,7 @@ web-resources and then this starts the java-script single page environment drive
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/png" href="/img/haikudepot16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="/img/haikudepot32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="/img/haikudepot64.png" sizes="64x64">
+    <%@include file="/WEB-INF/includes/favicons.jsp"%>
 
     <jwr:script src="/bundles/libs.js"></jwr:script>
     <jwr:script src="/bundles/app.js"></jwr:script>

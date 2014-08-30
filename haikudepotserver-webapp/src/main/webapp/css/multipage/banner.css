@@ -1,0 +1,35 @@
+/*
+Styles in this file are targeting the simplified multi-page interface.
+*/
+
+/*
+Overrides a setting on #banner-title
+*/
+
+.multipage-banner-title {
+    background: url('/img/haikudepot32.png') no-repeat 32px 4px transparent;
+}
+
+#banner-title > div > span {
+    font-family: serif;
+    font-weight: lighter;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.50)
+}
+
+.multipage-banner-actions {
+    text-align: right;
+}
+
+#banner-multipage-note > a {
+    color: rgba(255,255,255,0.75);
+}
+
+#banner-multipage-note {
+    font-size: 10pt;
+    color: rgba(255,255,255,0.75);
+}
+
+#banner-container .multipage-natural-language-chooser > a {
+    color: rgba(255,255,255,0.75);
+}

@@ -21,6 +21,7 @@ public class Architecture extends _Architecture {
 
     public final static String CODE_SOURCE = "source";
     public final static String CODE_ANY = "any";
+    public final static String CODE_X86 = "x86";
 
     public static List<Architecture> getAll(ObjectContext context) {
         SelectQuery query = new SelectQuery(Architecture.class);
