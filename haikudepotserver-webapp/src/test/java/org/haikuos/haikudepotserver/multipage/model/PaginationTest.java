@@ -35,13 +35,13 @@ public class PaginationTest {
     @Test
     public void testGenerateSuggestedPages_fanLeft() {
         Pagination p = new Pagination(500,475,10);
-        Assertions.assertThat(p.generateSuggestedPages(10)).isEqualTo(new int[] {0,13,23,31,38,43,45,46,48,49});
+        Assertions.assertThat(p.generateSuggestedPages(10)).isEqualTo(new int[] {0,15,26,35,41,45,46,47,48,49});
     }
 
     @Test
     public void testGenerateSuggestedPages_fanLeftAndRight() {
         Pagination p = new Pagination(500,250,10);
-        Assertions.assertThat(p.generateSuggestedPages(10)).isEqualTo(new int[] {0,9,16,21,23,24,27,31,38,49});
+        Assertions.assertThat(p.generateSuggestedPages(10)).isEqualTo(new int[] {0,11,18,23,24,25,26,28,36,49});
     }
 
     @Test

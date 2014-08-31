@@ -13,13 +13,15 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 public interface MiscellaneousApi {
 
     /**
-     * <p>Returns a list of all of the categories.</p>
+     * <p>Returns a list of all of the categories.  If a natural language code is supplied in the reuqest, then
+     * the results' names will be localized; otherwise a database-based default will be returned.</p>
      */
 
     GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest);
 
     /**
-     * <p>Returns a list of all of the natural languages.</p>
+     * <p>Returns a list of all of the natural languages.  If a natural language code is supplied in the request
+     * then the results' names will be localized; otherwise a database-based default will be returned.</p>
      */
 
     GetAllNaturalLanguagesResult getAllNaturalLanguages(GetAllNaturalLanguagesRequest getAllNaturalLanguagesRequest);
@@ -55,7 +57,8 @@ public interface MiscellaneousApi {
 
     /**
      * <p>This method will return all of the possible user rating stabilities that can be used when the user
-     * rates a package version.</p>
+     * rates a package version.  If a natural language code is supplied in the request then the results' names
+     * will be localized; otherwise a database-based default will be used.</p>
      */
 
     GetAllUserRatingStabilitiesResult getAllUserRatingStabilities(GetAllUserRatingStabilitiesRequest getAllUserRatingStabilitiesRequest);

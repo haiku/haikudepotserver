@@ -19,6 +19,7 @@ import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
+import org.haikuos.haikudepotserver.dataobjects.UserRatingStability;
 import org.haikuos.haikudepotserver.feed.controller.FeedController;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.junit.Test;
@@ -36,6 +37,53 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
 
     @Resource
     RuntimeInformationService runtimeInformationService;
+
+    @Test
+    public void testGetAllUserRatingStabilities() {
+
+        // ------------------------------------
+        GetAllUserRatingStabilitiesResult result = miscellaneousApi.getAllUserRatingStabilities(new GetAllUserRatingStabilitiesRequest());
+        // ------------------------------------
+
+        ObjectContext objectContext = serverRuntime.getContext();
+
+        List<UserRatingStability> userRatingStabilities = UserRatingStability.getAll(objectContext);
+
+        Assertions.assertThat(userRatingStabilities.size()).isEqualTo(result.userRatingStabilities.size());
+
+        for (int i = 0; i < userRatingStabilities.size(); i++) {
+            UserRatingStability userRatingStability = userRatingStabilities.get(i);
+            GetAllUserRatingStabilitiesResult.UserRatingStability apiUserRatingStability = result.userRatingStabilities.get(i);
+            Assertions.assertThat(userRatingStability.getCode()).isEqualTo(apiUserRatingStability.code);
+            Assertions.assertThat(userRatingStability.getName()).isEqualTo(apiUserRatingStability.name);
+        }
+    }
+
+    @Test
+    public void testGetAllUserRatingStabilities_de() {
+
+        GetAllUserRatingStabilitiesRequest request = new GetAllUserRatingStabilitiesRequest();
+        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
+
+        // ------------------------------------
+        GetAllUserRatingStabilitiesResult result = miscellaneousApi.getAllUserRatingStabilities(request);
+        // ------------------------------------
+
+        Optional<GetAllUserRatingStabilitiesResult.UserRatingStability> userRatingStabilityOptional =
+                Iterables.tryFind(
+                        result.userRatingStabilities,
+                        new Predicate<GetAllUserRatingStabilitiesResult.UserRatingStability>() {
+                            @Override
+                            public boolean apply(GetAllUserRatingStabilitiesResult.UserRatingStability input) {
+                                return input.code.equals("mostlystable");
+                            }
+                        }
+                );
+
+        Assertions.assertThat(userRatingStabilityOptional.isPresent()).isTrue();
+        Assertions.assertThat(userRatingStabilityOptional.get().name).isEqualTo("Ziemlich stabil");
+
+    }
 
     @Test
     public void testGetAllPkgCategories() {
@@ -58,6 +106,37 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         }
     }
 
+    /**
+     * <p>If the client asks for all of the categories with a natural language code then they will be returned
+     * the localized name of the category where possible.  This tests this with German as German translations
+     * are known to be present.</p>
+     */
+
+    @Test
+    public void testGetAllPkgCategories_de() {
+
+        GetAllPkgCategoriesRequest request = new GetAllPkgCategoriesRequest();
+        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
+
+        // ------------------------------------
+        GetAllPkgCategoriesResult result = miscellaneousApi.getAllPkgCategories(request);
+        // ------------------------------------
+
+        Optional<GetAllPkgCategoriesResult.PkgCategory> pkgCategoryOptional =
+                Iterables.tryFind(
+                        result.pkgCategories,
+                        new Predicate<GetAllPkgCategoriesResult.PkgCategory>() {
+                            @Override
+                            public boolean apply(GetAllPkgCategoriesResult.PkgCategory input) {
+                                return input.code.equals("EDUCATION");
+                            }
+                        }
+                );
+
+        Assertions.assertThat(pkgCategoryOptional.isPresent()).isTrue();
+        Assertions.assertThat(pkgCategoryOptional.get().name).isEqualTo("Ausbildung");
+    }
+
     @Test
     public void testGetAllNaturalLanguages() {
 
@@ -77,6 +156,37 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(naturalLanguage.getName()).isEqualTo(apiNaturalLanguage.name);
             Assertions.assertThat(naturalLanguage.getCode()).isEqualTo(apiNaturalLanguage.code);
         }
+    }
+
+    /**
+     * <p>It is possible to request the natural languages with a natural language code.  In this case, the
+     * results will localize the names as opposed to using those onces directly from the database.</p>
+     */
+
+    @Test
+    public void testGetAllNaturalLanguages_de() {
+
+        GetAllNaturalLanguagesRequest request = new GetAllNaturalLanguagesRequest();
+        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
+
+        // ------------------------------------
+        GetAllNaturalLanguagesResult result = miscellaneousApi.getAllNaturalLanguages(request);
+        // ------------------------------------
+
+        Optional<GetAllNaturalLanguagesResult.NaturalLanguage> naturalLanguageOptional =
+                Iterables.tryFind(
+                        result.naturalLanguages,
+                        new Predicate<GetAllNaturalLanguagesResult.NaturalLanguage>() {
+                            @Override
+                            public boolean apply(GetAllNaturalLanguagesResult.NaturalLanguage input) {
+                                return input.code.equalsIgnoreCase("es");
+                            }
+                        }
+                );
+
+        Assertions.assertThat(naturalLanguageOptional.isPresent()).isTrue();
+        Assertions.assertThat(naturalLanguageOptional.get().name).isEqualTo("Espa\u00F1ol");
+
     }
 
     @Test

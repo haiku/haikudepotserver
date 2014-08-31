@@ -45,4 +45,9 @@ public class UserRatingStability extends _UserRatingStability implements Coded {
         return (List<UserRatingStability>) context.performQuery(query);
     }
 
+
+    public String getTitleKey() {
+        return String.format("userRatingStability.%s.title", getCode());
+    }
+
 }

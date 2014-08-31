@@ -56,6 +56,14 @@ public class NaturalLanguage extends _NaturalLanguage {
                 null));
     }
 
+    /**
+     * <p>Can be used to lookup the title of this language in the localization strings.</p>
+     */
+
+    public String getTitleKey() {
+        return String.format("naturalLanguage.%s",getCode().toLowerCase());
+    }
+
     public Locale toLocale() {
         return Locale.forLanguageTag(getCode());
     }

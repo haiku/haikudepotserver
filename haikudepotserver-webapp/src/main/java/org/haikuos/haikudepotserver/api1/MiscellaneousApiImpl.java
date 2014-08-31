@@ -20,6 +20,7 @@ import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -47,10 +48,18 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     @Resource
     FeedOrchestrationService feedOrchestrationService;
 
+    @Resource
+    MessageSource messageSource;
+
     @Override
     public GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest) {
         Preconditions.checkNotNull(getAllPkgCategoriesRequest);
         final ObjectContext context = serverRuntime.getContext();
+
+        final Optional<NaturalLanguage> naturalLanguageOptional =
+                Strings.isNullOrEmpty(getAllPkgCategoriesRequest.naturalLanguageCode)
+                ? Optional.<NaturalLanguage>absent()
+                        : NaturalLanguage.getByCode(context, getAllPkgCategoriesRequest.naturalLanguageCode);
 
         return new GetAllPkgCategoriesResult(
                 Lists.transform(
@@ -58,9 +67,20 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                         new Function<PkgCategory, GetAllPkgCategoriesResult.PkgCategory>() {
                             @Override
                             public GetAllPkgCategoriesResult.PkgCategory apply(PkgCategory input) {
-                                return new GetAllPkgCategoriesResult.PkgCategory(
-                                        input.getCode(),
-                                        input.getName());
+
+                                if(naturalLanguageOptional.isPresent()) {
+                                    return new GetAllPkgCategoriesResult.PkgCategory(
+                                            input.getCode(),
+                                            messageSource.getMessage(
+                                                    input.getTitleKey(),
+                                                    null, // params
+                                                    naturalLanguageOptional.get().toLocale()));
+                                }
+                                else {
+                                    return new GetAllPkgCategoriesResult.PkgCategory(
+                                            input.getCode(),
+                                            input.getName());
+                                }
                             }
                         }
                 )
@@ -72,15 +92,31 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllNaturalLanguagesRequest);
         final ObjectContext context = serverRuntime.getContext();
 
+        final Optional<NaturalLanguage> naturalLanguageOptional =
+                Strings.isNullOrEmpty(getAllNaturalLanguagesRequest.naturalLanguageCode)
+                        ? Optional.<NaturalLanguage>absent()
+                        : NaturalLanguage.getByCode(context, getAllNaturalLanguagesRequest.naturalLanguageCode);
+
         return new GetAllNaturalLanguagesResult(
                 Lists.transform(
                         NaturalLanguage.getAll(context),
                         new Function<NaturalLanguage, GetAllNaturalLanguagesResult.NaturalLanguage>() {
                             @Override
                             public GetAllNaturalLanguagesResult.NaturalLanguage apply(NaturalLanguage input) {
-                                return new GetAllNaturalLanguagesResult.NaturalLanguage(
-                                        input.getCode(),
-                                        input.getName());
+
+                                if(naturalLanguageOptional.isPresent()) {
+                                    return new GetAllNaturalLanguagesResult.NaturalLanguage(
+                                            input.getCode(),
+                                            messageSource.getMessage(
+                                                    input.getTitleKey(),
+                                                    null, // params
+                                                    naturalLanguageOptional.get().toLocale()));
+                                }
+                                else {
+                                    return new GetAllNaturalLanguagesResult.NaturalLanguage(
+                                            input.getCode(),
+                                            input.getName());
+                                }
                             }
                         }
                 )
@@ -213,15 +249,31 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllUserRatingStabilitiesRequest);
         final ObjectContext context = serverRuntime.getContext();
 
+        final Optional<NaturalLanguage> naturalLanguageOptional =
+                Strings.isNullOrEmpty(getAllUserRatingStabilitiesRequest.naturalLanguageCode)
+                        ? Optional.<NaturalLanguage>absent()
+                        : NaturalLanguage.getByCode(context, getAllUserRatingStabilitiesRequest.naturalLanguageCode);
+
         return new GetAllUserRatingStabilitiesResult(
                 Lists.transform(
                         UserRatingStability.getAll(context),
                         new Function<UserRatingStability, GetAllUserRatingStabilitiesResult.UserRatingStability>() {
                             @Override
                             public GetAllUserRatingStabilitiesResult.UserRatingStability apply(UserRatingStability input) {
-                                return new GetAllUserRatingStabilitiesResult.UserRatingStability(
-                                        input.getCode(),
-                                        input.getName());
+
+                                if(naturalLanguageOptional.isPresent()) {
+                                    return new GetAllUserRatingStabilitiesResult.UserRatingStability(
+                                            input.getCode(),
+                                            messageSource.getMessage(
+                                                    input.getTitleKey(),
+                                                    null, // params
+                                                    naturalLanguageOptional.get().toLocale()));
+                                }
+                                else {
+                                    return new GetAllUserRatingStabilitiesResult.UserRatingStability(
+                                            input.getCode(),
+                                            input.getName());
+                                }
                             }
                         }
                 )
@@ -239,7 +291,9 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                         new Function<Prominence, GetAllProminencesResult.Prominence>() {
                             @Override
                             public GetAllProminencesResult.Prominence apply(Prominence input) {
-                                return new GetAllProminencesResult.Prominence(input.getOrdering(), input.getName());
+                                    return new GetAllProminencesResult.Prominence(
+                                            input.getOrdering(),
+                                            input.getName());
                             }
                         }
                 )
