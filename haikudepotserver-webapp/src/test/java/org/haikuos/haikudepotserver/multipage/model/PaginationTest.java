@@ -44,4 +44,16 @@ public class PaginationTest {
         Assertions.assertThat(p.generateSuggestedPages(10)).isEqualTo(new int[] {0,9,16,21,23,24,27,31,38,49});
     }
 
+    @Test
+    public void testGenerateSuggestedPages_general_1() {
+        Pagination p = new Pagination(168,120,15);
+        Assertions.assertThat(p.generateSuggestedPages(9)).isEqualTo(new int[] {0,4,5,6,7,8,9,10,11});
+    }
+
+    @Test
+    public void testGenerateSuggestedPages_general_2() {
+        Pagination p = new Pagination(168,75,15);
+        Assertions.assertThat(p.generateSuggestedPages(9)).isEqualTo(new int[] {0,2,3,4,5,6,7,8,11});
+    }
+
 }

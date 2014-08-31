@@ -98,7 +98,7 @@ public class PaginationLinksTag extends RequestContextAwareTag {
                 "<--",
                 0==p.getPage() ? "" : deriveHref(p.getPage()-1));
 
-        int[] pageNumbers = p.generateSuggestedPages(null==getLinkCount() ? LINK_COUNT_DEFAULT : getLinkCount());
+        int[] pageNumbers = p.generateSuggestedPages(null == getLinkCount() ? LINK_COUNT_DEFAULT : getLinkCount());
 
         for(int pageNumber : pageNumbers) {
             tagWriter.startTag("li");

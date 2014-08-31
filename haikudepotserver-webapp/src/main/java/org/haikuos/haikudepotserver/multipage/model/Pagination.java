@@ -7,6 +7,8 @@ package org.haikuos.haikudepotserver.multipage.model;
 
 import com.google.common.base.Preconditions;
 
+import java.util.Arrays;
+
 /**
  * <P>This object aims to provide the pagination within a list of items.  It aims to be more or less
  * like the "paginationcontroldirective.js" behaviour.</P>
@@ -106,7 +108,7 @@ public class Pagination {
 
         int page = getPage() - 1; // assume the actual page has been set already
 
-        for (int i = 0; i < startI; i++) {
+        for (int i = 0; i <= startI; i++) {
             float p = (float) i / (float) startI;
             float f = p * p;
             result[startI - i] = Math.min(
@@ -125,7 +127,7 @@ public class Pagination {
 
     public int[] generateSuggestedPages(int count) {
 
-        Preconditions.checkState(count > 3 && 0==count%2,"the count of pages must be more than 3 and an even number");
+        Preconditions.checkState(count > 3,"the count of pages must be more than 3");
 
         int pages = getPages();
 
@@ -142,6 +144,9 @@ public class Pagination {
         int[] result = new int[count];
         int middleI = count / 2;
 
+        // a debugging aid to see any bad values easily.
+        Arrays.fill(result,-10);
+
         if(page < middleI) {
 
             for(int i=0;i<=page;i++) {
@@ -155,7 +160,7 @@ public class Pagination {
 
             int remainder = pages - page;
 
-            if(remainder < middleI) {
+            if(remainder <= (result.length - middleI) - 1) {
 
                 for(int i=0;i<remainder;i++) {
                     result[result.length - (i + 1)] = (pages - 1) - i;

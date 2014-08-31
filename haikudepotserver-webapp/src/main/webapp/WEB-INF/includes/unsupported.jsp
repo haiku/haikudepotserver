@@ -31,8 +31,9 @@ environment is working.
             <a href="https://www.haiku-os.org/docs/userguide/en/applications/webpositive.html">WebPositive</a>,
             <a href="https://www.mozilla.org/firefox">Firefox</a>
             und <a href="https://www.google.com/chrome/browser/">Google Chrome</a>
-            funktionieren auf alle F&#xE4;lle.  Eine einfache Darstellung ist auch
-            <a href="/multipage">zu verfügen</a>.
+            funktionieren auf alle F&#xE4;lle.  Eine
+            <a href="/multipage">einfache Darstellung</a>
+            steht auch zur Verfügung.
         </div>
 
     </div>
