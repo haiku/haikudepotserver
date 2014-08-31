@@ -112,6 +112,14 @@ public class IntegrationTestSupportService {
         addHvifPkgIcon(objectContext, pkg);
     }
 
+    public void addDummyLocalization(ObjectContext context, PkgVersion pkgVersion) {
+        PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
+        pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+        pkgVersionLocalization.setDescription("sample description");
+        pkgVersionLocalization.setSummary("sample summary");
+        pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+    }
+
     public StandardTestData createStandardTestData() {
 
         LOGGER.info("will create standard test data");
@@ -123,6 +131,7 @@ public class IntegrationTestSupportService {
 
         Architecture x86 = Architecture.getByCode(context, "x86").get();
         Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2").get();
+        Architecture any = Architecture.getByCode(context, "any").get();
 
         result.repository = context.newObject(Repository.class);
         result.repository.setActive(Boolean.TRUE);
@@ -140,7 +149,7 @@ public class IntegrationTestSupportService {
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
             result.pkg1.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
-            pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "GRAPHICS").get());
+            pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "graphics").get());
         }
 
         addPkgScreenshot(context,result.pkg1);
@@ -157,6 +166,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version1x86.setIsLatest(false);
         result.pkg1Version1x86.setPkg(result.pkg1);
         result.pkg1Version1x86.setRepository(result.repository);
+        addDummyLocalization(context, result.pkg1Version1x86);
 
         result.pkg1Version2x86 = context.newObject(PkgVersion.class);
         result.pkg1Version2x86.setActive(Boolean.TRUE);
@@ -218,6 +228,7 @@ public class IntegrationTestSupportService {
         result.pkg2Version1.setIsLatest(true);
         result.pkg2Version1.setPkg(result.pkg2);
         result.pkg2Version1.setRepository(result.repository);
+        addDummyLocalization(context, result.pkg2Version1);
 
         result.pkg3 = context.newObject(Pkg.class);
         result.pkg3.setActive(true);
@@ -233,6 +244,23 @@ public class IntegrationTestSupportService {
         result.pkg3Version1.setIsLatest(true);
         result.pkg3Version1.setPkg(result.pkg3);
         result.pkg3Version1.setRepository(result.repository);
+        addDummyLocalization(context, result.pkg3Version1);
+
+        result.pkgAny = context.newObject(Pkg.class);
+        result.pkgAny.setActive(true);
+        result.pkgAny.setName("pkgany");
+        result.pkgAny.setProminence(prominence);
+
+        result.pkgAnyVersion1 = context.newObject(PkgVersion.class);
+        result.pkgAnyVersion1.setActive(Boolean.TRUE);
+        result.pkgAnyVersion1.setArchitecture(any);
+        result.pkgAnyVersion1.setMajor("123");
+        result.pkgAnyVersion1.setMicro("123");
+        result.pkgAnyVersion1.setRevision(3);
+        result.pkgAnyVersion1.setIsLatest(true);
+        result.pkgAnyVersion1.setPkg(result.pkgAny);
+        result.pkgAnyVersion1.setRepository(result.repository);
+        addDummyLocalization(context, result.pkgAnyVersion1);
 
         context.commitChanges();
 
@@ -330,6 +358,10 @@ public class IntegrationTestSupportService {
 
         public Pkg pkg3;
         public PkgVersion pkg3Version1;
+
+        public Pkg pkgAny;
+        public PkgVersion pkgAnyVersion1;
+
     }
 
 }

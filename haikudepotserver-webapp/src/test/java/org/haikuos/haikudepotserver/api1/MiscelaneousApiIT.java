@@ -128,7 +128,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
                         new Predicate<GetAllPkgCategoriesResult.PkgCategory>() {
                             @Override
                             public boolean apply(GetAllPkgCategoriesResult.PkgCategory input) {
-                                return input.code.equals("EDUCATION");
+                                return input.code.equals("education");
                             }
                         }
                 );

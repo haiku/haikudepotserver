@@ -184,6 +184,10 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             pkgVersionLocalizationOptional = getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
         }
 
+        if(!pkgVersionLocalizationOptional.isPresent()) {
+            throw new IllegalStateException("unable to find the fallback localization for " + toString());
+        }
+
         return pkgVersionLocalizationOptional.get();
     }
 

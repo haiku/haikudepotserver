@@ -33,6 +33,7 @@ import org.junit.Test;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class PkgApiIT extends AbstractIntegrationTest {
 
@@ -59,13 +60,13 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
-                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "GAMES").get());
+                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "games").get());
                 pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
             }
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
-                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "BUSINESS").get());
+                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "business").get());
                 pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
             }
 
@@ -74,7 +75,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         UpdatePkgCategoriesRequest request = new UpdatePkgCategoriesRequest();
         request.pkgName = data.pkg1.getName();
-        request.pkgCategoryCodes = ImmutableList.of("BUSINESS", "DEVELOPMENT");
+        request.pkgCategoryCodes = ImmutableList.of("business", "development");
 
         // ------------------------------------
         pkgApi.updatePkgCategories(request);
@@ -87,16 +88,16 @@ public class PkgApiIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.getContext();
             Pkg pkg = Pkg.getByName(context, data.pkg1.getName()).get();
 
-            Assertions.assertThat(ImmutableSet.of("BUSINESS", "DEVELOPMENT")).isEqualTo(
-                ImmutableSet.copyOf(Iterables.transform(
-                        pkg.getPkgPkgCategories(),
-                        new Function<PkgPkgCategory, String>() {
-                            @Override
-                            public String apply(PkgPkgCategory input) {
-                                return input.getPkgCategory().getCode();
+            Assertions.assertThat(ImmutableSet.of("business", "development")).isEqualTo(
+                    ImmutableSet.copyOf(Iterables.transform(
+                            pkg.getPkgPkgCategories(),
+                            new Function<PkgPkgCategory, String>() {
+                                @Override
+                                public String apply(PkgPkgCategory input) {
+                                    return input.getPkgCategory().getCode();
+                                }
                             }
-                        }
-                ))
+                    ))
             );
         }
 
@@ -118,7 +119,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         SearchPkgsResult result = pkgApi.searchPkgs(request);
         // ------------------------------------
 
-        Assertions.assertThat(result.total).isEqualTo(3);
+        Assertions.assertThat(result.total).isEqualTo(4); // note includes the "any" package
         Assertions.assertThat(result.items.size()).isEqualTo(2);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
         Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");
@@ -690,13 +691,27 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.versionType = PkgVersionType.LATEST;
         request.architectureCode = "x86";
         request.naturalLanguageCode = "en";
-        request.pkgNames = ImmutableList.of("pkg1","pkg2","pkg3");
+        request.pkgNames = ImmutableList.of("pkg1","pkg2","pkg3","pkg4","pkgany"); // pkg4 does not exist
 
         // ------------------------------------
         GetBulkPkgResult result = pkgApi.getBulkPkg(request);
         // ------------------------------------
 
-        Assertions.assertThat(result.pkgs.size()).isEqualTo(3);
+        Assertions.assertThat(result.pkgs.size()).isEqualTo(4); // includes the any package
+
+        // check they are all there.
+
+        Set<String> packageNames = ImmutableSet.copyOf(Lists.transform(
+                result.pkgs,
+                new Function<GetBulkPkgResult.Pkg, String>() {
+                    @Override
+                    public String apply(GetBulkPkgResult.Pkg input) {
+                        return input.name;
+                    }
+                }
+        ));
+
+        Assertions.assertThat(packageNames).containsOnly("pkg1","pkg2","pkg3","pkgany");
 
         // now check pkg1 because it has some in-depth data on it.
 
@@ -711,7 +726,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(pkg1.modifyTimestamp).isNotNull();
 
         Assertions.assertThat(pkg1.pkgCategoryCodes.size()).isEqualTo(1);
-        Assertions.assertThat(pkg1.pkgCategoryCodes.get(0)).isEqualTo("GRAPHICS");
+        Assertions.assertThat(pkg1.pkgCategoryCodes.get(0)).isEqualTo("graphics");
 
         Assertions.assertThat(pkg1.derivedRating).isNotNull();
         Assertions.assertThat(pkg1.derivedRating).isGreaterThanOrEqualTo(0.0f);
@@ -728,11 +743,11 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(pkg1.pkgIcons.size()).isEqualTo(3);
         Assertions.assertThat(
                 Iterables.tryFind(pkg1.pkgIcons, new Predicate<org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon>() {
-            @Override
-            public boolean apply(org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon input) {
-                return input.mediaTypeCode.equals(org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
-            }
-        }).isPresent()).isTrue();
+                    @Override
+                    public boolean apply(org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon input) {
+                        return input.mediaTypeCode.equals(org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
+                    }
+                }).isPresent()).isTrue();
 
         Assertions.assertThat(pkg1.versions.size()).isEqualTo(1);
         Assertions.assertThat(pkg1.versions.get(0).naturalLanguageCode).isEqualTo("en");
