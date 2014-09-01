@@ -103,7 +103,7 @@ angular.module('haikudepotserver').directive('paginationControl',[
 
                 function pageJumpBackOrForward(direction) {
                     var p = parameters();
-                    var offset = p.offset + (direction * max);
+                    var offset = p.offset + (direction * p.max);
 
                     if(offset >= 0 && offset < p.total) {
                         $parse(offsetExpression).assign($scope, offset);
