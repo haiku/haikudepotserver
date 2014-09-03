@@ -359,7 +359,10 @@ angular.module('haikudepotserver').controller(
                     amFetchingPkgs = true;
 
                     var req = {
-                        architectureCode: $scope.selectedArchitecture.code,
+                        architectureCodes: [
+                            'any',
+                            $scope.selectedArchitecture.code
+                        ],
                         naturalLanguageCode : userState.naturalLanguageCode(),
                         offset: $scope.pkgs.offset,
                         limit: PAGESIZE

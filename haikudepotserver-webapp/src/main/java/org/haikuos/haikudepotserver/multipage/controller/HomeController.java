@@ -105,7 +105,12 @@ public class HomeController {
             throw new IllegalStateException("unable to obtain the architecture; " + architectureCode);
         }
 
-        searchSpecification.setArchitecture(architectureOptional.get());
+        searchSpecification.setArchitectures(
+                ImmutableList.of(
+                        architectureOptional.get(),
+                        Architecture.getByCode(context, Architecture.CODE_ANY).get()
+                )
+        );
 
         Optional<PkgCategory> pkgCategoryOptional = Optional.absent();
 

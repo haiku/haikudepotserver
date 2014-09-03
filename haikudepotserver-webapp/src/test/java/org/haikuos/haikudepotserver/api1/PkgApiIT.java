@@ -108,7 +108,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCode = "x86";
+        request.architectureCodes = ImmutableList.of("any","x86");
         request.naturalLanguageCode = NaturalLanguage.CODE_ENGLISH;
         request.expression = "pk";
         request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
@@ -137,7 +137,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCode = "x86";
+        request.architectureCodes = Collections.singletonList("x86");
         request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
         request.expression = "feij";
         request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
@@ -166,7 +166,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCode = "x86";
+        request.architectureCodes = Collections.singletonList("x86");
         request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
         request.expression = "persim";
         request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
@@ -192,7 +192,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCode = "x86_gcc2";
+        request.architectureCodes = Collections.singletonList("x86_gcc2");
         request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
         request.expression = "appl";
         request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
@@ -663,7 +663,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetBulkPkgRequest request = new GetBulkPkgRequest();
         request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
         request.versionType = PkgVersionType.LATEST;
-        request.architectureCode = "x86";
+        request.architectureCodes = Collections.singletonList("x86");
         request.naturalLanguageCode = "en";
         request.pkgNames = Lists.newArrayList();
 
@@ -689,7 +689,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetBulkPkgRequest request = new GetBulkPkgRequest();
         request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
         request.versionType = PkgVersionType.LATEST;
-        request.architectureCode = "x86";
+        request.architectureCodes = ImmutableList.of("any","x86");
         request.naturalLanguageCode = "en";
         request.pkgNames = ImmutableList.of("pkg1","pkg2","pkg3","pkg4","pkgany"); // pkg4 does not exist
 

@@ -20,7 +20,7 @@ public class GetBulkPkgRequest {
 
     public List<String> pkgNames;
 
-    public String architectureCode;
+    public List<String> architectureCodes;
 
     public PkgVersionType versionType;
 

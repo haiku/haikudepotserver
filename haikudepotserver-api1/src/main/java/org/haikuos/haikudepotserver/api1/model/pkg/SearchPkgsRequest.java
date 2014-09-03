@@ -7,6 +7,8 @@ package org.haikuos.haikudepotserver.api1.model.pkg;
 
 import org.haikuos.haikudepotserver.api1.support.AbstractSearchRequest;
 
+import java.util.List;
+
 /**
  * <p>This is the model object that is used to define the request to search for packages in the system.</p>
  */
@@ -20,7 +22,7 @@ public class SearchPkgsRequest extends AbstractSearchRequest {
         VERSIONVIEWCOUNTER
     }
 
-    public String architectureCode;
+    public List<String> architectureCodes;
 
     public String pkgCategoryCode;
 

@@ -148,16 +148,23 @@ public class PkgOrchestrationService {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
-        Preconditions.checkNotNull(search.getArchitecture());
+        Preconditions.checkNotNull(null!=search.getArchitectures()&&!search.getArchitectures().isEmpty());
         Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
 
         List<String> whereExpressions = Lists.newArrayList();
 
         whereExpressions.add("pv." + PkgVersion.IS_LATEST_PROPERTY + " = true");
 
-        whereExpressions.add("(pv." + PkgVersion.ARCHITECTURE_PROPERTY + " = ?" + (parameterAccumulator.size() + 1) + " OR pv." + PkgVersion.ARCHITECTURE_PROPERTY + " = ?" + (parameterAccumulator.size() + 2) + ")");
-        parameterAccumulator.add(search.getArchitecture());
-        parameterAccumulator.add(Architecture.getByCode(context, Architecture.CODE_ANY).get());
+        {
+            List<String> architectureWhereExpressions = Lists.newArrayList();
+
+            for(Architecture architecture : search.getArchitectures()) {
+                architectureWhereExpressions.add("(pv." + PkgVersion.ARCHITECTURE_PROPERTY + " = ?" + (parameterAccumulator.size() + 1)+")");
+                parameterAccumulator.add(architecture);
+            }
+
+            whereExpressions.add("(" + Joiner.on(" OR ").join(architectureWhereExpressions) + ")");
+        }
 
         if(!search.getIncludeInactive()) {
             whereExpressions.add("pv." + PkgVersion.ACTIVE_PROPERTY + " = true");

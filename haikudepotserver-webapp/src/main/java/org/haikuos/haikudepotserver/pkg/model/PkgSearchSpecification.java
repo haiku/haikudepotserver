@@ -28,7 +28,7 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     private List<String> pkgNames;
 
-    private Architecture architecture;
+    private List<Architecture> architectures;
 
     private PkgCategory pkgCategory;
 
@@ -54,12 +54,12 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
         this.pkgNames = pkgNames;
     }
 
-    public Architecture getArchitecture() {
-        return architecture;
+    public List<Architecture> getArchitectures() {
+        return architectures;
     }
 
-    public void setArchitecture(Architecture architecture) {
-        this.architecture = architecture;
+    public void setArchitectures(List<Architecture> architectures) {
+        this.architectures = architectures;
     }
 
     public PkgCategory getPkgCategory() {

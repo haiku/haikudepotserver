@@ -96,6 +96,31 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return pkgOptional.get();
     }
 
+    /**
+     * <p>This method will convert the supplied codes into a list of architectures.  It requires that at least one
+     * architecture is supplied.  If any architecture code is not able to be converted into an architecture, it
+     * will throw {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}.</p>
+     */
+
+    private List<Architecture> transformCodesToArchitectures(final ObjectContext context, List<String> codes) throws ObjectNotFoundException {
+        Preconditions.checkState(null != codes && !codes.isEmpty(), "the architecture codes must be supplied and at least one architecture is required");
+
+        List<Architecture> result = Lists.newArrayList();
+
+        //noinspection ConstantConditions
+        for (String code : codes) {
+            Optional<Architecture> architectureOptional = Architecture.getByCode(context, code);
+
+            if (!architectureOptional.isPresent()) {
+                throw new ObjectNotFoundException(Architecture.class.getSimpleName(), code);
+            }
+
+            result.add(architectureOptional.get());
+        }
+
+        return result;
+    }
+
     @Override
     public UpdatePkgCategoriesResult updatePkgCategories(UpdatePkgCategoriesRequest updatePkgCategoriesRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(updatePkgCategoriesRequest);
@@ -170,7 +195,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public SearchPkgsResult searchPkgs(final SearchPkgsRequest request) throws ObjectNotFoundException {
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.architectureCode));
+        Preconditions.checkState(null!=request.architectureCodes && !request.architectureCodes.isEmpty(),"architecture codes must be supplied and at least one is required");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkNotNull(request.limit);
         Preconditions.checkState(request.limit > 0);
@@ -203,15 +228,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         specification.setNaturalLanguage(getNaturalLanguage(context, request.naturalLanguageCode));
         specification.setDaysSinceLatestVersion(request.daysSinceLatestVersion);
         specification.setSortOrdering(PkgSearchSpecification.SortOrdering.valueOf(request.sortOrdering.name()));
-
-        final Optional<Architecture> architectureOptional = Architecture.getByCode(context,request.architectureCode);
-
-        if(!architectureOptional.isPresent()) {
-            throw new IllegalStateException("the architecture specified is not able to be found; "+request.architectureCode);
-        }
-
-        specification.setArchitecture(architectureOptional.get());
-
+        specification.setArchitectures(transformCodesToArchitectures(context, request.architectureCodes));
         specification.setLimit(request.limit);
         specification.setOffset(request.offset);
 
@@ -937,6 +954,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.micro = pkgVersion.getMicro();
         version.revision = pkgVersion.getRevision();
         version.preRelease = pkgVersion.getPreRelease();
+        version.architectureCode = pkgVersion.getArchitecture().getCode();
 
         org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizationOrFallback(naturalLanguage);
 
@@ -954,7 +972,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public GetBulkPkgResult getBulkPkg(final GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException {
         Preconditions.checkNotNull(getBulkPkgRequest);
-        Preconditions.checkNotNull(getBulkPkgRequest.architectureCode);
+        Preconditions.checkState(null != getBulkPkgRequest.architectureCodes && !getBulkPkgRequest.architectureCodes.isEmpty(), "architecture codes must be supplied and at least one is required");
         Preconditions.checkNotNull(getBulkPkgRequest.pkgNames);
 
         if(getBulkPkgRequest.pkgNames.size() > GETBULKPKG_LIMIT) {
@@ -969,7 +987,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         else {
 
             final ObjectContext context = serverRuntime.getContext();
-            final Architecture architecture = getArchitecture(context, getBulkPkgRequest.architectureCode);
             final NaturalLanguage naturalLanguage = getNaturalLanguage(context, getBulkPkgRequest.naturalLanguageCode);
 
             if(null==getBulkPkgRequest.filter) {
@@ -1004,7 +1021,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             // now search the data.
             PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
-            searchSpecification.setArchitecture(architecture);
+            searchSpecification.setArchitectures(transformCodesToArchitectures(context, getBulkPkgRequest.architectureCodes));
             searchSpecification.setPkgNames(getBulkPkgRequest.pkgNames);
             searchSpecification.setNaturalLanguage(getNaturalLanguage(context, getBulkPkgRequest.naturalLanguageCode));
             searchSpecification.setLimit(0);

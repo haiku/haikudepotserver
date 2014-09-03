@@ -44,6 +44,8 @@ public class GetBulkPkgResult {
         public String preRelease;
         public Integer revision;
 
+        public String architectureCode;
+
         /**
          * <p>In the request the client may have requested a specific natural language, but that may not have been
          * available.  This code indicates the natural language code that was <em>actually</em> used to obtain
