@@ -22,6 +22,9 @@ angular.module('haikudepotserver').controller(
             $scope.didDeriveAndStoreUserRatingsForAllPkgs = false;
             $scope.deriveAndStoreUserRatingsForAllPkgsTimeout = undefined;
 
+            $scope.didSynchronizeUsers = false;
+            $scope.didSynchronizeUsersTimeout = undefined;
+
             $scope.goDeriveAndStoreUserRatingsForAllPkgs = function() {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_USERRATING,
@@ -43,6 +46,32 @@ angular.module('haikudepotserver').controller(
                     },
                     function(err) {
                         $log.error('unable to derive and store user ratings for all pkgs');
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+            };
+
+            $scope.goSynchronizeUsers = function() {
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_USER,
+                    "synchronizeUsers",
+                    [{}]
+                ).then(
+                    function() {
+                        $log.info('requested synchronize users');
+                        $scope.didSynchronizeUsers = true;
+
+                        if($scope.didSynchronizeUsersTimeout) {
+                            $timeout.cancel($scope.didSynchronizeUsersTimeout);
+                        }
+
+                        $scope.didSynchronizeUsersTimeout = $timeout(function() {
+                            $scope.didSynchronizeUsers = false;
+                            $scope.didSynchronizeUsersTimeout = undefined;
+                        }, 3000);
+                    },
+                    function(err) {
+                        $log.error('unable to synchronize users');
                         errorHandling.handleJsonRpcError(err);
                     }
                 );

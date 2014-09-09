@@ -16,6 +16,14 @@
                 <em>&mdash; did initiate</em>
             </span>
         </li>
+        <li>
+            <a href="" ng-click="goSynchronizeUsers()">
+                Synchronize users (with LDAP)
+            </a>
+            <span ng-show="didSynchronizeUsersTimeout">
+                <em>&mdash; did initiate</em>
+            </span>
+        </li>
         <li><a href="" ng-click="goRuntimeInformation()">Runtime information</a></li>
         <li><a href="" ng-click="goPaginationControlPlayground()">Pagination playground</a></li>
         <li><a href="" ng-click="goRaiseExceptionInLocalRuntime()">Raise test exception in javascript environment</a></li>

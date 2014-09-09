@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
@@ -188,7 +189,20 @@ public class AuthenticationService {
      */
 
     public String hashPassword(User user, String passwordClear) {
-        return Hashing.sha256().hashUnencodedChars(user.getPasswordSalt() + passwordClear).toString();
+        byte[] saltBytes = BaseEncoding.base16().decode(user.getPasswordSalt().toUpperCase());
+
+        MessageDigest sha;
+        try {
+            sha = MessageDigest.getInstance("SHA-256");
+            sha.update(passwordClear.getBytes(Charsets.UTF_8));
+        }
+        catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("no SHA-256 crypt algorithm available",e);
+        }
+
+        sha.update(saltBytes);
+
+        return BaseEncoding.base16().encode(sha.digest()).toLowerCase();
     }
 
     private int countMatches(String s, CharToBooleanFunction fn) {

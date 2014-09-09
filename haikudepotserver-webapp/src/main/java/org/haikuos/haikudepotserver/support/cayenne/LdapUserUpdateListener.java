@@ -7,39 +7,46 @@ package org.haikuos.haikudepotserver.support.cayenne;
 
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.LifecycleListener;
+import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
-import org.haikuos.haikudepotserver.dataobjects.UserRating;
-import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
-import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
+import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.user.LdapException;
+import org.haikuos.haikudepotserver.user.UserOrchestrationService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 /**
- * <p>This listener will detect changes in the user rating entities and will then trigger a process (probably
- * async) that is able to update the derived user rating on the package involved.</p>
+ * <p>This will attempt to listen to changes to a user and then after those changes have been
+ * persisted, to look them up and to relay those into an LDAP server.</p>
  */
 
-public class UserRatingDerivationTriggerListener implements LifecycleListener {
+public class LdapUserUpdateListener implements LifecycleListener {
 
     @Resource
     ServerRuntime serverRuntime;
 
     @Resource
-    UserRatingDerivationService userRatingDerivationService;
+    UserOrchestrationService userOrchestrationService;
 
     @PostConstruct
     public void init() {
         LifecycleCallbackRegistry callbackRegistry = serverRuntime.getDataDomain().getEntityResolver().getCallbackRegistry();
-        callbackRegistry.addListener(UserRating.class, this);
+        callbackRegistry.addListener(User.class, this);
     }
 
-    private void triggerUpdateUserRatingDerivationForAssociatedPackage(Object entity) {
+    private void triggerUpdateUser(Object entity) {
         Preconditions.checkNotNull(entity);
-        UserRating userRating = (UserRating) entity;
-        String pkgName = userRating.getPkgVersion().getPkg().getName();
-        userRatingDerivationService.submit(new UserRatingDerivationJob(pkgName));
+        ObjectContext context = serverRuntime.getContext();
+        User user = User.getByObjectId(context, ((User) entity).getObjectId());
+
+        try {
+            userOrchestrationService.ldapUpdateUser(context, user);
+        }
+        catch(LdapException le) {
+            throw new RuntimeException("unable to ldap update user; " + user.toString(), le);
+        }
     }
 
     @Override
@@ -52,7 +59,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postPersist(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
+        triggerUpdateUser(entity);
     }
 
     @Override
@@ -65,12 +72,11 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void preUpdate(Object entity) {
-
     }
 
     @Override
     public void postUpdate(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
+        triggerUpdateUser(entity);
     }
 
     @Override

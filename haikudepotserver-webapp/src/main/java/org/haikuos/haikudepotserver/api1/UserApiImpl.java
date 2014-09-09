@@ -25,7 +25,9 @@ import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.user.LdapSynchronizeUsersService;
 import org.haikuos.haikudepotserver.user.UserOrchestrationService;
+import org.haikuos.haikudepotserver.user.model.LdapSynchronizeUsersJob;
 import org.haikuos.haikudepotserver.user.model.UserSearchSpecification;
 import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
 import org.haikuos.haikudepotserver.userrating.UserRatingOrchestrationService;
@@ -66,6 +68,28 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     @Resource
     PasswordResetOrchestrationService passwordResetOrchestrationService;
+
+    @Resource
+    LdapSynchronizeUsersService ldapUpdateUsersService;
+
+    @Override
+    public SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest) {
+       Preconditions.checkNotNull(synchronizeUsersRequest);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orNull(),
+                null,
+                Permission.USER_SYNCHRONIZE)) {
+            throw new AuthorizationFailureException();
+        }
+
+        ldapUpdateUsersService.submit(new LdapSynchronizeUsersJob());
+
+        return new SynchronizeUsersResult();
+    }
 
     @Override
     public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException {

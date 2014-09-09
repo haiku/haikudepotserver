@@ -25,6 +25,25 @@
 
     <bean class="org.haikuos.haikudepotserver.support.cayenne.UserRatingDerivationTriggerListener"/>
 
+    <!-- LDAP -->
+
+    <!--
+    Processes requests to synchronize the HDS database into LDAP
+    -->
+
+    <bean
+            class="org.haikuos.haikudepotserver.user.LocalLdapSynchronizeUsersService"
+            init-method="startAsyncAndAwaitRunning"
+            destroy-method="stopAsyncAndAwaitTerminated">
+    </bean>
+
+    <!--
+    Picks up on Cayenne ORM events around user changes so that LDAP can (optionally) be
+    updated with changes.
+    -->
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.LdapUserUpdateListener"/>
+
     <!-- EMAIL -->
 
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">

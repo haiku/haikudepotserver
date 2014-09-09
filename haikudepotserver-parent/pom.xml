@@ -139,7 +139,7 @@ within the jars themselves.
                 <version>1.0</version>
             </dependency>
 
-            <!-- DATABASE / PERSISTENCE -->
+            <!-- DATABASE / PERSISTENCE / DIRECTORY -->
             <dependency>
                 <groupId>com.googlecode.flyway</groupId>
                 <artifactId>flyway-core</artifactId>
@@ -149,6 +149,11 @@ within the jars themselves.
                 <groupId>org.apache.cayenne</groupId>
                 <artifactId>cayenne-server</artifactId>
                 <version>3.1RC1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.directory.api</groupId>
+                <artifactId>api-all</artifactId>
+                <version>1.0.0-M24</version>
             </dependency>
 
             <!-- APPLICATION SERVER -->

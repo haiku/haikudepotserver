@@ -1,3 +1,8 @@
+/*
+ * Copyright 2014, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haikuos.haikudepotserver.userrating;
 
 import com.google.common.base.Preconditions;
@@ -26,7 +31,7 @@ public class LocalUserRatingDerivationService
         Preconditions.checkNotNull(job);
         Preconditions.checkState(null!=executor, "the service is not running, but a job is being submitted");
         executor.submit(new UserRatingDerivationJobRunnable(this, job));
-        LOGGER.info("have submitted job to derive user rating; {}", job.toString());
+        LOGGER.info("did submit job to derive user rating; {}", job.toString());
     }
 
     protected void run(UserRatingDerivationJob job) {

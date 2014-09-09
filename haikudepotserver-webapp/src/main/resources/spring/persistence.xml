@@ -48,4 +48,16 @@
         </constructor-arg>
     </bean>
 
+    <!--
+    LDAP
+    -->
+
+    <bean class="org.haikuos.haikudepotserver.support.ldap.LdapConnectionPoolFactory">
+        <property name="host" value="${ldap.host:}"/>
+        <property name="port" value="${ldap.port:}"/>
+        <property name="userDn" value="${ldap.user.dn:}"/>
+        <property name="password" value="${ldap.password:}"/>
+    </bean>
+
+
 </beans>

@@ -192,6 +192,7 @@ public class AuthorizationService {
                         null!=authenticatedUser
                                 && (authenticatedUser.getIsRoot() || authenticatedUser.equals(target));
 
+            case USER_SYNCHRONIZE:
             case USER_LIST:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 

@@ -19,6 +19,12 @@ import org.haikuos.haikudepotserver.api1.support.ValidationException;
 public interface UserApi {
 
     /**
+     * <P>This method will synchronize user data with external systems; such as LDAP servers.</P>
+     */
+
+    SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest);
+
+    /**
      * <p>This method will update the user based on the data in the request.  Only the data which is included
      * in the filter will be updated.</p>
      */

@@ -12,6 +12,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -31,9 +32,11 @@ import java.util.regex.Pattern;
 
 public class User extends _User implements CreateAndModifyTimestamped {
 
+    public final static String NICKNAME_ROOT = "root";
+
     public final static Pattern NICKNAME_PATTERN = Pattern.compile("^[a-z0-9]{4,16}$");
     public final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
-    public final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
+    public final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{10,32}$");
 
     public static List<User> findByEmail(ObjectContext context, String email) {
         Preconditions.checkNotNull(context);
@@ -159,11 +162,44 @@ public class User extends _User implements CreateAndModifyTimestamped {
     }
 
     /**
+     * <p>The LDAP entry for a person can have a 'userPassword' attribute.  This has the format
+     * {SSHA-256}&lt;base64data&gt;.  The base 64 data, decoded to bytes contains 20 bytes of
+     * hash and the rest is salt.</p>
+     *
+     * <p>This method will convert the information stored in this user over into a format suitable
+     * for storage in this format for LDAP.</p>
+     *
+     * <p>SSHA stands for salted SHA hash.</p>
+     *
+     * <p>RFC-2307</p>
+     */
+
+    public String toLdapUserPasswordAttributeValue() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{SSHA-256}");
+
+        byte[] hash = BaseEncoding.base16().decode(getPasswordHash().toUpperCase());
+
+        if(32 != hash.length) {
+            throw new IllegalStateException("the password hash should be 20 bytes long");
+        }
+
+        byte[] salt = BaseEncoding.base16().decode(getPasswordSalt().toUpperCase());
+
+        byte[] hashAndSalt = new byte[hash.length + salt.length];
+        System.arraycopy(hash, 0, hashAndSalt, 0, hash.length);
+        System.arraycopy(salt, 0, hashAndSalt, hash.length, salt.length);
+
+        return "{SSHA-256}" + BaseEncoding.base64().encode(hashAndSalt);
+    }
+
+    /**
      * <p>This method will configure a random salt value.</p>
      */
 
     public void setPasswordSalt() {
-        setPasswordSalt(Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString());
+        String randomHash = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString();
+        setPasswordSalt(randomHash.substring(0,16)); // LDAP server doesn't seem to like very long salts
     }
 
     public Boolean getDerivedCanManageUsers() {

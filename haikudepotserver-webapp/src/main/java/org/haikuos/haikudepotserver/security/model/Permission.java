@@ -18,6 +18,7 @@ public enum Permission {
     USER_EDIT(TargetType.USER),
     USER_CHANGEPASSWORD(TargetType.USER),
     USER_LIST(null),
+    USER_SYNCHRONIZE(null),
 
     AUTHORIZATION_CONFIGURE(null),
 
