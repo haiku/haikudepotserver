@@ -97,6 +97,7 @@ angular.module('haikudepotserver').controller(
                         refetchPkgCategories();
                         refetchUserRatings();
                         refetchProminence();
+                        refetchIsSourcePkgAvailable();
                     },
                     function() {
                         errorHandling.navigateToError(); // already logged
@@ -132,6 +133,71 @@ angular.module('haikudepotserver').controller(
                     function() {
                         $log.error('unable to obtain the list of categories');
                         errorHandling.navigateToError();
+                    }
+                );
+
+            }
+
+            /**
+             * <p>If there is a source package for this viewed package then this function
+             * will go off and get it.</p>
+             */
+
+            function refetchIsSourcePkgAvailable() {
+
+                if(!$scope.pkg) {
+                    throw Error('there is not pkg available from which it would be possible to ascertain if a source pkg exists.');
+                }
+
+                var pv = $scope.pkg.versions[0];
+
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_PKG,
+                    'getPkg',
+                    [{
+                        name : $scope.pkg.name + "_source",
+                        versionType : 'SPECIFIC',
+                        incrementViewCounter : false,
+                        architectureCode : 'source',
+                        naturalLanguageCode: constants.NATURALLANGUAGECODE_ENGLISH,
+                        major: pv.major,
+                        minor : pv.minor,
+                        micro : pv.micro,
+                        preRelease : pv.preRelease,
+                        revision : pv.revision
+                    }]
+                ).then(
+                    function(result) {
+                        $log.info('source exists for pkg');
+                        pv.sourcePkg = result;
+                    },
+                    function(err) {
+
+                        switch(err.code) {
+
+                            case jsonRpc.errorCodes.OBJECTNOTFOUND:
+
+                                switch(err.data.entityName) {
+
+                                    case 'Pkg':
+                                    case 'PkgVersion':
+                                        $log.info('there is no source package found');
+                                        pv.sourcePkg = null;
+                                        break;
+
+                                    default:
+                                        $log.error('unable to ascertain if source is available for the package');
+                                        errorHandling.handleJsonRpcError(err);
+                                        break;
+                                }
+                                break;
+
+                            default:
+                                $log.error('unable to ascertain if source is available for the package');
+                                errorHandling.handleJsonRpcError(err);
+                                break;
+
+                        }
                     }
                 );
 

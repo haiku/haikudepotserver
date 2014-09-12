@@ -384,7 +384,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public GetPkgResult getPkg(GetPkgRequest request) throws ObjectNotFoundException {
 
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.name));
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.name), "request pkg name is required");
         Preconditions.checkNotNull(request.versionType);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
 
