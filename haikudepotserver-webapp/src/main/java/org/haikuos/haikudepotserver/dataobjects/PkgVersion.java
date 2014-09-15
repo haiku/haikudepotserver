@@ -146,7 +146,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     }
 
     public PkgVersionLocalization getPkgVersionLocalizationOrFallback(final NaturalLanguage naturalLanguage) {
-        return getPkgVersionLocalizationOrFallback(naturalLanguage.getCode());
+        return getPkgVersionLocalizationOrFallbackByCode(naturalLanguage.getCode());
     }
 
     /**
@@ -173,7 +173,8 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
      * for english if the desired language is not available.</p>
      */
 
-    public PkgVersionLocalization getPkgVersionLocalizationOrFallback(final String naturalLanguageCode) {
+    // have to add the 'byCode' for JSP to be able to work with it.
+    public PkgVersionLocalization getPkgVersionLocalizationOrFallbackByCode(final String naturalLanguageCode) {
         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = Optional.absent();
 
         if(!Strings.isNullOrEmpty(naturalLanguageCode)) {

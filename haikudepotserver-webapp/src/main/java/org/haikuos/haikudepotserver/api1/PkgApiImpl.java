@@ -1109,7 +1109,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     }
             );
 
-            LOGGER.info(
+            LOGGER.debug(
                     "did search and find {} pkg versions for get bulk pkg; fetch in {}ms, marshall in {}ms",
                     pkgVersions.size(),
                     postFetchMs - preFetchMs,
