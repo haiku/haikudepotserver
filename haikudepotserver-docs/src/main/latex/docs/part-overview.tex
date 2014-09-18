@@ -1,5 +1,5 @@
 % -----------
-% Copyright 2013, Andrew Lindesay
+% Copyright 2013-2014, Andrew Lindesay
 % Distributed under the terms of the MIT License.
 % -----------
 
@@ -85,4 +85,21 @@ You can check the login to the database works by opening a SQL terminal;
 \framebox{\tt psql -h localhost -U haikudepotserver haikudepotserver}
 
 The database schema objects will be automatically populated into the fresh database by the application-server as it launches.
+
+\subsection{Basic ApacheDS LDAP Setup}
+
+\fcolorbox{red}{white}{\parbox{\textwidth}{\color{red}The LDAP integration is not intended to be used at this point in time; these notes are here in case this aspect of the system is ever used.}}
+
+LDAP can be used to store authentication details for the system.  In this section, it is assumed that the \href{http://directory.apache.org}{ApacheDS} is used and is configured through the Apache Studio tool, but it should be possible to use the system with another LDAP server.
+
+\begin{enumerate}
+\item Edit the ``example'' partition to be ``hikudepotserver'' and change the suffix to be ``dc=haiku-os,dc=org''.
+\item Disallow anonymous access
+\item Disable password policy
+\item Start the server
+\item Import the resource ``directory.ldif'' (found in the source)
+\item Add new SSHA-256 ``userPassword'' attribute for the ``cn=haikudepotserver'' user in LDAP.
+\item Configure the LDAP properties for the application and start
+\item Synchronize the system's user data with LDAP using the action on the root operations page.
+\end{enumerate}
 
