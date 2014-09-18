@@ -25,7 +25,7 @@ The extensions seem to appear in the maven coordinates, but not in the paths
 within the jars themselves.
 -->
 
-        <web-angularjs.versionbase>1.2.21</web-angularjs.versionbase>
+        <web-angularjs.versionbase>1.2.25</web-angularjs.versionbase>
         <web-angularjs.versionextension></web-angularjs.versionextension>
 
         <web-underscorejs.versionbase>1.6.0</web-underscorejs.versionbase>
