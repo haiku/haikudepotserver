@@ -1,10 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.haikuos</groupId>
     <artifactId>haikudepotserver</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
 
     <modules>
         <module>haikudepotserver-api1</module>
@@ -33,10 +34,7 @@
         </profile>
     </profiles>
 
-    <!--
-    This entry is necessary it seems to instruct the release process that there is an SCM (local GIT) for the
-    release process.
-    -->
+    
 
     <scm>
         <connection>scm:git:git</connection>
@@ -52,29 +50,16 @@
                 <version>2.4.1</version>
                 <configuration>
 
-                    <!--
-                    By default this will attempt to deploy the artifacts into a 'distribution management' system, but
-                    this is not necessary (or possible) here right now as there is nowhere to put it.
-                    -->
+                    
                     <goals>install</goals>
 
-                    <!--
-                    This prevents the process from asking versions for each module; it will assume that the versions
-                    that apply at the top-level will trickle down.
-                    -->
+                    
                     <autoVersionSubmodules>true</autoVersionSubmodules>
 
-                    <!--
-                    Without this set to 'false', the release process will attempt to push changes to the remote repo
-                    all through the process.  It is best to let the release run to completion on the local machine
-                    and then to manually push to the origin.
-                    -->
+                    
                     <pushChanges>false</pushChanges>
 
-                    <!--
-                    By setting this to true, the release process will work on the local repository rather than trying
-                    to get the origin involved.
-                    -->
+                    
                     <localCheckout>true</localCheckout>
 
                 </configuration>

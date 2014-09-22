@@ -1,10 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <artifactId>haikudepotserver-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.5</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +14,7 @@
 
     <dependencies>
 
-        <!-- HAIKUDEPOT -->
+        
         <dependency>
             <groupId>org.haikuos</groupId>
             <artifactId>haikudepotserver-packagefile</artifactId>
@@ -25,7 +26,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- GENERAL -->
+        
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -47,7 +48,7 @@
             <artifactId>opencsv</artifactId>
         </dependency>
 
-        <!-- LOGGING -->
+        
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -65,7 +66,7 @@
             <artifactId>log4j-over-slf4j</artifactId>
         </dependency>
 
-        <!-- WEB / API -->
+        
         <dependency>
             <groupId>jstl</groupId>
             <artifactId>jstl</artifactId>
@@ -93,7 +94,7 @@
             <artifactId>rome</artifactId>
         </dependency>
 
-        <!-- DATABASE / PERSISTENCE / DIRECTORY -->
+        
         <dependency>
             <groupId>com.googlecode.flyway</groupId>
             <artifactId>flyway-core</artifactId>
@@ -107,19 +108,19 @@
             <artifactId>api-all</artifactId>
         </dependency>
 
-        <!-- APPLICATION SERVER -->
+        
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
         </dependency>
 
-        <!-- MEDIA -->
+        
         <dependency>
             <groupId>org.imgscalr</groupId>
             <artifactId>imgscalr-lib</artifactId>
         </dependency>
 
-        <!-- SPRING -->
+        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
@@ -133,7 +134,7 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- spring-context-support is required for mail integration -->
+        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
@@ -193,10 +194,7 @@
 
         <plugins>
 
-            <!--
-            This plugin will ensure that the integration tests are run when
-            appropriate.
-            -->
+            
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -212,10 +210,7 @@
                 </executions>
             </plugin>
 
-            <!--
-            This is required in order to configure the exclusion of the local properties files from the build
-            product.
-            -->
+            
 
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
