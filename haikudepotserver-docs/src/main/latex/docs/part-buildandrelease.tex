@@ -61,12 +61,36 @@ The release process will run the automated testing including the integration tes
 
 \subsubsection{Undertaking a Release}
 
-To undertake a release, all changes in the local repository must be committed.  Note that during the release process, the user will be prompted to supply version numbers at the console.  The following commands will cause a release to be undertaken;
+The system was using the maven release plugin, but some issues arose with the maven release plugin and git.  For this reason, a bespoke scripted release process has been developed.  The script will simply update the version used in the various project "pom" files; it does none of the checks and tests that the maven release plugin does.
+
+In the following example, the following assumed (ficticious) version numbers are used for demonstration purposes;
+
+\begin{tabular}{ | l | l | }
+\hline
+Version & Purpose \\
+\hline
+{\tt 1.2.3-SNAPSHOT} & The version {\bf prior} to release \\
+{\tt 1.2.3} & The version of the release  \\
+{\tt 1.2.4-SNAPSHOT} & The version {\bf after} the release \\
+\hline
+\end{tabular}
+
+Prior to a release;
+
+\begin{enumerate}
+\item All changes should be committed.
+\item A {\it package} goal is run to ensure that automated testing passes.
+\item A {\it clean} goal is run to clean out any build files
+\end{enumerate}
+
+The following series of commands would orchestrate the release process;
 
 \begin{verbatim}
-mvn clean
-mvn release:prepare
-mvn release:perform
+python setversion.py -v 1.2.3 -a
+git commit -m "version 1.2.3"
+git tag -a "haikudepotserver-1.2.3" -m "release haikudepotserver-1.2.3"
+python setversion.py -v 1.2.4-SNAPSHOT -a
+git commit -m "version 1.2.4-SNAPSHOT" -m "version 1.2.4-SNAPSHOT"
 git push
 git push --tags
 \end{verbatim}
