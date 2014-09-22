@@ -12,6 +12,7 @@
 
 # =====================================
 
+import os
 import os.path
 import subprocess
 import sys
@@ -57,6 +58,23 @@ def parseargs():
             syntax()
 
 
+# This function will return the list of modules' names based on scanning the file
+# system rather than looking at the top level POM.  It does this because different
+# profiles may be employed to avoid, for example, building an RPM on a non-linux
+# host.
+
+def scanmodules():
+
+    result = []
+
+    for f in os.listdir('.'):
+        if os.path.isdir(f) and not f.startswith(".") and os.path.isfile(f + "/pom.xml"):
+            result.append(f)
+
+    return result
+
+
+
 # =====================================
 # DOM / ELEMENT HANDLING
 
@@ -93,13 +111,6 @@ def pomtoplevelelement(tree, taglocalname):
 
 # =====================================
 # DOM / ELEMENT HANDLING FOR POM
-
-
-def pomextractmodules(tree):
-    modulese = pomtoplevelelement(tree, "modules")
-    namespace = extractdefaultnamespace(modulese.tag)
-    return map(lambda module: module.text, modulese.findall("{"+namespace+"}module"))
-
 
 def pomextractartifactid(tree):
     return pomtoplevelelement(tree, "artifactId").text
@@ -202,13 +213,11 @@ if rootPomCurrentVersion == updatedVersion:
     print "the updated version and the current version are the same"
     sys.exit(1)
 
-rootPomModuleNames = pomextractmodules(rootPomTree)
+rootPomModuleNames = scanmodules()
 
 if 0 == len(rootPomModuleNames):
-    print("expecting the top level pom to have some modules")
+    print("expecting the project to have some modules")
     sys.exit(1)
-
-print "top level pom version; " + rootPomCurrentVersion
 
 # One of the modules, will have "-parent" on the end and will be the parent.  The others will be
 # subordinate to that in terms of versions.  So, the aim here is to update the actual version of
@@ -216,8 +225,14 @@ print "top level pom version; " + rootPomCurrentVersion
 # with, it is expected that all of the versions will be consistent and so the process will
 # ensure that this is the case as well.
 
+print "will check version consistency"
+
+print "top-level; " + rootPomCurrentVersion
+
 for m in rootPomModuleNames:
     ensurecurrentversionconsistencyformodule(m, rootPomCurrentVersion)
+
+print "did check version consistency"
 
 if 0 != len(updatedVersion):
     print "will update version to; " + updatedVersion
@@ -236,8 +251,10 @@ if 0 != len(updatedVersion):
 
 if gitAddPoms:
 
+    print "will git-add pom files"
+
     if 0 == subprocess.call(["git", "add", "pom.xml"]):
-        print "did git-add; pom.xml"
+        print "pom.xml: (added)"
     else:
         print "failed to git-add; pom.xml"
         sys.exit(1)
@@ -245,7 +262,9 @@ if gitAddPoms:
     for m in rootPomModuleNames:
 
         if 0 == subprocess.call(["git", "add", m + "/pom.xml"]):
-            print("did git-add; "+m+"/pom.xml")
+            print m + "/pom.xml: (added)"
         else:
             print("failed to git-add; "+m+"/pom.xml")
             sys.exit(1)
+
+    print "did git-add pom files"
