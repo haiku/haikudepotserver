@@ -43,7 +43,14 @@ public class ValidationException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return String.format("%d validation failures",validationFailures.size());
+        switch(validationFailures.size()) {
+            case 0:
+                return "unknown validation failure";
+            case 1:
+                return "validation failure - {}" + validationFailures.get(0).toString();
+            default:
+                return String.format("%d validation failures", validationFailures.size());
+        }
     }
 
 }
