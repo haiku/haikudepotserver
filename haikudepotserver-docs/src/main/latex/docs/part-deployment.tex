@@ -62,19 +62,32 @@ Once running, the web environment will be accessible from;
 
 \subsection{Deployment with RPM}
 
-The build system, when executed on a linux host, will produce an RPM deployment file containing the resources necessary for the system to be installed onto an RPM-based linux system.  This RPM does not have any dependencies and so both java and Postgres database server will need to be installed before the application server can be successfully started --- see \ref{prerequisites}.  The RPM is built under the {\tt haikudepotserver-rpm} module and can be found at this path from that module;
+The build system, when executed on a linux host, will produce RPMs that can be deployed into an RPM-based linux system.  The RPMs do not have any dependencies and so both java and Postgres database server will need to be installed before the application server can be successfully started --- see \ref{prerequisites}.  Two RPMs are built;
 
-\framebox{\tt ../target/rpm/haikudepotserver/RPMS/noarch/}
+\begin{tabular}{|l|l|l|}
+\hline
+Variant & Project & HTTP Port \\
+\hline
+Production & {\tt haikudepotserver-rpm-production} & 8801 \\
+Test & {\tt haikudepotserver-rpm-test} & 8701 \\
+\hline
+\end{tabular}
+
+The production variant has names and paths that are simply ``{\tt haikudepotserver}'' whereas the test variant has names and paths that are of the form ``{\tt haikudepotserver-test}''.  In the instructions that follow, the test variant has been indicated by a colored suffix ``{\tt\color{magenta} -test}''.
+
+The RPM is built with the ``package'' maven goal.  The RPM build product can be found at this path from that module;
+
+\framebox{\tt ../target/rpm/haikudepotserver{\color{magenta} -test}/RPMS/noarch/}
 
 \subsubsection{Installing}
 
 The RPM can be installed with the following command making an obvious reference to the RPM file.
 
-\framebox{\tt rpm -ivh haikudepotserver-1.0.2.rpm}
+\framebox{\tt rpm -ivh haikudepotserver{\color{magenta} -test}-1.0.2.rpm}
 
 The RPM can be uninstalled with the following command;
 
-\framebox{\tt rpm -e haikudepotserver}
+\framebox{\tt rpm -e haikudepotserver{\color{magenta} -test}}
 
 It would be prudent to first ensure that the application server is not running before uninstalling it.
 
@@ -84,12 +97,14 @@ The RPM will install files into the following locations;
 
 \begin{tabular}{|l|l|}
 \hline
-{\tt /var/log/haikudepotserver/..} & Log files from the application server \\
-{\tt /opt/haikudepotserver/..} & Application server binary resources \\
-{\tt /var/cache/haikudepotserver/..} & Operational files for the application server \\
-{\tt /etc/haikudepotserver/..} & Configuration files \\
+Location & Description \\
+\hline
+{\tt /var/log/haikudepotserver{\color{magenta} -test}/..} & Log files from the application server \\
+{\tt /opt/haikudepotserver{\color{magenta} -test}/..} & Application server binary resources \\
+{\tt /var/cache/haikudepotserver{\color{magenta} -test}/..} & Operational files for the application server \\
+{\tt /etc/haikudepotserver{\color{magenta} -test}/..} & Configuration files \\
 {\tt /etc/logrotate.d/..} & Log rotation configuration \\
-{\tt /etc/init.d/haikudepotserver} & Start and stop script \\
+{\tt /etc/init.d/haikudepotserver{\color{magenta} -test}} & Start and stop script \\
 \hline
 \end{tabular}
 
@@ -97,18 +112,34 @@ The RPM will install files into the following locations;
 
 The installed application server can be started with the following command, referencing the RPM file;
 
-\framebox{\tt service haikudepotserver start}
+\framebox{\tt service haikudepotserver{\color{magenta} -test} start}
 
 The installed application server can be stopped with the following command;
 
-\framebox{\tt service haikudepotserver stop}
+\framebox{\tt service haikudepotserver{\color{magenta} -test} stop}
 
 \subsubsection{Automatic Startup and Shutdown}
 
 The installed application server can be configured to startup automatically using the following command;
 
-\framebox{\tt chkconfig --add haikudepotserver}
+\framebox{\tt chkconfig --add haikudepotserver{\color{magenta} -test}}
 
 The installed application can later be prevented from automatic startup using the following command;
 
-\framebox{\tt chkconfig --del haikudepotserver}
+\framebox{\tt chkconfig --del haikudepotserver{\color{magenta} -test}}
+
+\subsubsection{RPM Assembly / Maven}
+
+\begin{figure}
+\centering
+\vspace{.2in}
+\includegraphics[width=6.5in]{img-rpm-package-assembly-diagram.pdf}
+\caption{The maven modules that are related to the RPM assembly process and how they inter-relate.}
+\label{\thefigure}
+\end{figure}
+
+There are a number of inter-related maven modules that work together to generate the RPMs.  These are shown in figure {\thefigure}.  The blue lines show module inheritance.  An ``reactor POM'' (not shown here) will prevent the RPM from being assembled unless the build system is on a linux host.  It does this by using a maven profile that is triggered by the operating system type.
+
+The module {\tt haikudepotserver-rpm-common} provides (purple line) resources for the RPM assembly that are common to the variants (production and test).  This means that the same resources will assemble both variants.  Note that the resources are intended to be {\it filtered} in the RPM assembly process so they contain token-replacement strings such as {\tt \$\{rpm.variant\}}.  The filtering occurs late in the RPM assembly process.  These resources are unpacked in both of the RPM assembly modules {\tt haikudepotserver-rpm-production} and {\tt haikudepotserver-rpm-test}.
+
+Both of the RPM assembly modules have {\tt haikudepotserver-rpm-parent} as a parent and this parent has the configuration (using a maven plugin called {\tt rpm-maven-plugin}) for the assembly so that the configuration of the assembly is shared between the two assembly modules.  The {\tt haikudepotserver-rpm-parent} also introduces a dependency (red line) on the {\tt haikudepotserver-webapp} module in order that the web application build-product can be included in the RPMs.
