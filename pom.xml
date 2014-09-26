@@ -5,7 +5,7 @@
     <groupId>org.haikuos</groupId>
     <artifactId>haikudepotserver</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.7</version>
+    <version>1.0.8-SNAPSHOT</version>
 
     <modules>
         <module>haikudepotserver-api1</module>
