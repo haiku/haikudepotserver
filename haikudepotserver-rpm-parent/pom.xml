@@ -5,7 +5,7 @@
         <artifactId>haikudepotserver-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
-        <version>1.0.7-SNAPSHOT</version>
+        <version>1.0.7</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -16,9 +16,7 @@
         use this as a parent and simply replace variables that control the configuration of the variant.
     </description>
 
-    <!--
-    These are placeholder variables that are overriden in the concrete RPM-assembly projects.
-    -->
+    
 
     <properties>
        <rpm.variant>-invalid</rpm.variant>
@@ -31,11 +29,7 @@
 
         <plugins>
 
-            <!--
-            This plugin will extract the bundled shared resources and will unpack them prior to the RPM assembly
-            process.  Note that filtering is disabled here so that the filtering of certain resources can be
-            undertaken as a last step in the RPM assembly.
-            -->
+            
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -196,9 +190,7 @@
             </exclusions>
         </dependency>
 
-        <!--
-        This will bring in the shared resources for the RPM assembly.
-        -->
+        
 
         <dependency>
             <groupId>${project.groupId}</groupId>

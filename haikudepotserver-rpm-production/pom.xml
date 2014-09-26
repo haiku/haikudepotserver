@@ -5,7 +5,7 @@
         <artifactId>haikudepotserver-rpm-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-rpm-parent</relativePath>
-        <version>1.0.7-SNAPSHOT</version>
+        <version>1.0.7</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -17,7 +17,7 @@
     </description>
 
     <properties>
-        <rpm.variant></rpm.variant> <!-- intentional missing value -->
+        <rpm.variant /> 
         <rpm.http.port>8801</rpm.http.port>
     </properties>
 

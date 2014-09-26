@@ -5,7 +5,7 @@
         <artifactId>haikudepotserver-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
-        <version>1.0.7-SNAPSHOT</version>
+        <version>1.0.7</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -18,11 +18,7 @@
 
     <build>
 
-        <!--
-        This will prevent the resources from being filtered in the bundling process so that they can
-        be filtered (have variables replaced) when they are unbundled ready for inclusion in the
-        RPM.
-        -->
+        
 
         <resources>
             <resource>
@@ -36,11 +32,7 @@
 
         <plugins>
 
-            <!--
-            This will create a bundle that can be (re)used in assembly of the various RPMs such as
-            production and test.  Note that again, the filtering is disabled in order to ensure that
-            the raw resources can then be filtered in the unpacking process.
-            -->
+            
 
             <plugin>
                 <artifactId>maven-remote-resources-plugin</artifactId>
