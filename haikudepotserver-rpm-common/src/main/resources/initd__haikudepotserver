@@ -1,23 +1,23 @@
 #!/bin/bash
 #
-# This script is for starting and stopping the haikudepotserver service.
+# This script is for starting and stopping the haikudepotserver${rpm.variant} service.
 #
 # chkconfig: 345 80 20
 #
 ### BEGIN INIT INFO
-# Provides: haikudepotserver
+# Provides: haikudepotserver${rpm.variant}
 # Required-Start: $network $syslog
 # Required-Stop: $network $syslog
 # Default-Start:
 # Default-Stop:
 # Description: Haiku Depot Server
-# Short-Description: start and stop haikudepotserver
+# Short-Description: start and stop haikudepotserver${rpm.variant}
 ### END INIT INFO
 
-HDS_CONFIGBASE=/etc/haikudepotserver
-HDS_HOME=/opt/haikudepotserver
-HDS_LOGFILE=/var/log/haikudepotserver/haikudepotserver.log
-HDS_PSIDENTIFIER=haikudepotserver-6B03C28C-4AF1-450E-909D-2E623B571F93
+HDS_CONFIGBASE=/etc/haikudepotserver${rpm.variant}
+HDS_HOME=/opt/haikudepotserver${rpm.variant}
+HDS_LOGFILE=/var/log/haikudepotserver${rpm.variant}/haikudepotserver${rpm.variant}.log
+HDS_PSIDENTIFIER=haikudepotserver${rpm.variant}-3D84A80C-38A4-40BC-9AEE-86C3CA986517
 
 MAXSHUTDOWNDELAYSECONDS=20
 
@@ -29,7 +29,8 @@ JAVA_OPTS="-Dfile.encoding=UTF-8 \
 -Dconfig.properties=file://${HDS_CONFIGBASE}/config.properties \
 -jar ${HDS_HOME}/haikudepotserver-webapp-exec-war.jar \
 -resetExtract \
--extractDirectory /var/cache/haikudepotserver/extract"
+-httpPort ${rpm.http.port} \
+-extractDirectory /var/cache/haikudepotserver${rpm.variant}/extract"
 
 haikudepotserver_pid() {
   echo `ps aux | grep "${HDS_PSIDENTIFIER}" | grep -v grep | awk '{ print $2 }'`
@@ -38,10 +39,10 @@ haikudepotserver_pid() {
 start() {
   pid="$(haikudepotserver_pid)"
   if [ -n "$pid" ]; then
-    echo "haikudepotserver; is already running (pid: $pid)"
+    echo "haikudepotserver${rpm.variant}; is already running (pid: $pid)"
   else
-    echo "haikudepotserver; starting..."
-    /bin/su -s /bin/bash haikudepotserver -c "${JAVA_HOME}/bin/java ${JAVA_OPTS} -Dcommand.identifier=${HDS_PSIDENTIFIER} 2>&1 | tee -a ${HDS_LOGFILE} > /dev/null &"
+    echo "haikudepotserver${rpm.variant}; starting..."
+    /bin/su -s /bin/bash haikudepotserver${rpm.variant} -c "${JAVA_HOME}/bin/java ${JAVA_OPTS} -Dcommand.identifier=${HDS_PSIDENTIFIER} 2>&1 | tee -a ${HDS_LOGFILE} > /dev/null &"
   fi
   return 0
 }
@@ -49,7 +50,7 @@ start() {
 stop() {
  pid="$(haikudepotserver_pid)"
   if [ -n "$pid" ]; then
-    echo "haikudepotserver; stopping... (pid: $pid)"
+    echo "haikudepotserver${rpm.variant}; stopping... (pid: $pid)"
     kill "$pid"
 
     count=0;
@@ -59,12 +60,12 @@ stop() {
     done;
 
     if [[ -n "$(haikudepotserver_pid)" ]]; then
-        echo "haikudepotserver; unable to be stopped"
+        echo "haikudepotserver${rpm.variant}; unable to be stopped"
     else
-        echo "haikudepotserver; stopped"
+        echo "haikudepotserver${rpm.variant}; stopped"
     fi
   else
-    echo "haikudepotserver; not running"
+    echo "haikudepotserver${rpm.variant}; not running"
   fi
   return 0
 }
@@ -83,7 +84,7 @@ case $1 in
   status)
     pid="$(haikudepotserver_pid)"
     if [ -n "$pid" ]; then
-      echo "haikudepotserver; running (pid: $pid)"
+      echo "haikudepotserver${rpm.variant}; running (pid: $pid)"
     else
       echo "haikudepotserver; not running"
     fi

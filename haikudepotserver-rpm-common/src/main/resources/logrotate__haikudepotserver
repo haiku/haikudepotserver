@@ -1,0 +1,7 @@
+/var/log/haikudepotserver${rpm.variant}/haikudepotserver${rpm.variant}.log {
+    rotate 20
+    size 10M
+    compress
+    su haikudepotserver${rpm.variant} haikudepotserver${rpm.variant}
+    copytruncate
+}

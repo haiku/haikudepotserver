@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <artifactId>haikudepotserver-parent</artifactId>
+        <groupId>org.haikuos</groupId>
+        <relativePath>../haikudepotserver-parent</relativePath>
+        <version>1.0.7-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>haikudepotserver-rpm-parent</artifactId>
+    <packaging>pom</packaging>
+    <description>
+        This project provides the rules and instructions for the RPM assembly.  Specific RPM-assembly projects
+        use this as a parent and simply replace variables that control the configuration of the variant.
+    </description>
+
+    <!--
+    These are placeholder variables that are overriden in the concrete RPM-assembly projects.
+    -->
+
+    <properties>
+       <rpm.variant>-invalid</rpm.variant>
+       <rpm.http.port>invalid</rpm.http.port>
+    </properties>
+
+    <build>
+
+        <finalName>haikudepotserver${rpm.variant}-${project.version}.rpm</finalName>
+
+        <plugins>
+
+            <!--
+            This plugin will extract the bundled shared resources and will unpack them prior to the RPM assembly
+            process.  Note that filtering is disabled here so that the filtering of certain resources can be
+            undertaken as a last step in the RPM assembly.
+            -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-remote-resources-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <resourceBundles>
+                        <resourceBundle>${project.groupId}:haikudepotserver-rpm-common:${project.version}</resourceBundle>
+                    </resourceBundles>
+                    <useDefaultFilterDelimiters>false</useDefaultFilterDelimiters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1-alpha-4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <name>haikudepotserver${rpm.variant}</name>
+                    <group>haikuos</group>
+                    <packager>haikuos</packager>
+                    <version>${project.version}</version>
+                    <copyright>MIT</copyright>
+                    <defineStatements>
+                        <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+                    </defineStatements>
+
+                    <preinstallScriptlet>
+                        <script>
+/usr/bin/getent group haikudepotserver${rpm.variant} || groupadd -r haikudepotserver${rpm.variant} &gt;&gt; /dev/null
+/usr/bin/getent passwd haikudepotserver${rpm.variant} || useradd -r -g haikudepotserver${rpm.variant} -s /sbin/nologin haikudepotserver${rpm.variant} &gt;&gt; /dev/null
+                </script>
+                    </preinstallScriptlet>
+
+                    <mappings>
+
+                        <mapping>
+                            <directory>/etc/haikudepotserver${rpm.variant}</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver${rpm.variant}</username>
+                            <groupname>haikudepotserver${rpm.variant}</groupname>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/haikudepotserver${rpm.variant}</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>660</filemode>
+                            <configuration>noreplace</configuration>
+                            <username>haikudepotserver${rpm.variant}</username>
+                            <groupname>haikudepotserver${rpm.variant}</groupname>
+                            <sources>
+                                <source>
+                                    <location>${project.build.directory}/maven-shared-archive-resources/config__config.properties</location>
+                                    <destination>config.properties</destination>
+                                    <filter>true</filter>
+                                </source>
+                                <source>
+                                    <location>${project.build.directory}/maven-shared-archive-resources/logging__logback.xml</location>
+                                    <destination>logback.xml</destination>
+                                    <filter>true</filter>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/logrotate.d</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>644</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>${project.build.directory}/maven-shared-archive-resources/logrotate__haikudepotserver</location>
+                                    <destination>haikudepotserver${rpm.variant}</destination>
+                                    <filter>true</filter>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/init.d</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>700</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>${project.build.directory}/maven-shared-archive-resources/initd__haikudepotserver</location>
+                                    <destination>haikudepotserver${rpm.variant}</destination>
+                                    <filter>true</filter>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/opt/haikudepotserver${rpm.variant}</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver${rpm.variant}</username>
+                            <groupname>haikudepotserver${rpm.variant}</groupname>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/opt/haikudepotserver${rpm.variant}</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <filemode>660</filemode>
+                            <username>haikudepotserver${rpm.variant}</username>
+                            <groupname>haikudepotserver${rpm.variant}</groupname>
+                            <dependency>
+                                <includes>
+                                    <include>org.haikuos:haikudepotserver-webapp</include>
+                                </includes>
+                                <stripVersion>true</stripVersion>
+                            </dependency>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/var/cache/haikudepotserver${rpm.variant}</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver${rpm.variant}</username>
+                            <groupname>haikudepotserver${rpm.variant}</groupname>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/var/log/haikudepotserver${rpm.variant}</directory>
+                            <filemode>770</filemode>
+                            <username>haikudepotserver${rpm.variant}</username>
+                            <groupname>haikudepotserver${rpm.variant}</groupname>
+                        </mapping>
+
+                    </mappings>
+
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>haikudepotserver-webapp</artifactId>
+            <version>${project.version}</version>
+            <classifier>exec-war</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--
+        This will bring in the shared resources for the RPM assembly.
+        -->
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>haikudepotserver-rpm-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

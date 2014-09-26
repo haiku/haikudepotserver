@@ -140,7 +140,7 @@ def ensurecurrentversionconsistencyformodule(modulename, expectedversion):
         print "the 'pom.xml' for module "+modulename+" should be accessible"
         sys.exit(1)
 
-    if modulename.endswith("-parent"):
+    if modulename == "haikudepotserver-parent":
         actualversion = pomtoplevelelement(modulepomtree, "version").text
 
         if actualversion != expectedversion:

@@ -196,7 +196,10 @@ public class HomeController {
 
         data.setSearchExpression(searchExpression);
         data.setPkgVersions(pkgVersions);
-        data.setPagination(new Pagination(totalPkgVersions.intValue(), offset, PAGESIZE));
+
+        if(0!=totalPkgVersions.intValue()) {
+            data.setPagination(new Pagination(totalPkgVersions.intValue(), offset, PAGESIZE));
+        }
 
         ModelAndView result = new ModelAndView("multipage/home");
         result.addObject("data", data);

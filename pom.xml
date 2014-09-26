@@ -28,7 +28,10 @@
             </activation>
 
             <modules>
-                <module>haikudepotserver-rpm</module>
+                <module>haikudepotserver-rpm-production</module>
+                <module>haikudepotserver-rpm-common</module>
+                <module>haikudepotserver-rpm-parent</module>
+                <module>haikudepotserver-rpm-test</module>
             </modules>
 
         </profile>
