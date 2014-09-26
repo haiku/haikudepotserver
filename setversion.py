@@ -175,7 +175,7 @@ def updateversionformodule(modulename, version):
         print "the 'pom.xml' for module "+modulename+" should be accessible"
         sys.exit(1)
 
-    if modulename.endswith("-parent"):
+    if modulename == "haikudepotserver-parent":
         versione = pomtoplevelelement(modulepomtree, "version")
         versione.text = version
     else:
