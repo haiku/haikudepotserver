@@ -40,7 +40,13 @@ public class ObjectNotFoundException extends Exception {
 
     @Override
     public String getMessage() {
-        return String.format("the entity %s was not able to be found with the identifier %s",getEntityName(),getIdentifier().toString());
+
+        String identifierString = getIdentifier().toString();
+
+        return String.format(
+                "the entity '%s' was not able to be found with the identifier '%s'",
+                getEntityName(),
+                0==identifierString.length() ? "???" : identifierString);
     }
 
 }

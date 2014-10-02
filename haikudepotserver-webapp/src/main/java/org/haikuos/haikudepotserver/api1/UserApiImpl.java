@@ -192,7 +192,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.nickname));
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.passwordClear));
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.captchaToken));
-        Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.captchaResponse));
+        Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.captchaResponse),"a capture response is required to create a user");
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.naturalLanguageCode));
 
         if(!authenticationService.validatePassword(createUserRequest.passwordClear)) {
