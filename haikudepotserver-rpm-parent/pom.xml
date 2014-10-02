@@ -16,8 +16,6 @@
         use this as a parent and simply replace variables that control the configuration of the variant.
     </description>
 
-    
-
     <properties>
        <rpm.variant>-invalid</rpm.variant>
        <rpm.http.port>invalid</rpm.http.port>
