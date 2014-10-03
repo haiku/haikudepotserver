@@ -8,14 +8,16 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','errorHandling','breadcrumbs',
-        'breadcrumbFactory',
+        'breadcrumbFactory','userState',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling,breadcrumbs,breadcrumbFactory) {
+            jsonRpc,constants,errorHandling,breadcrumbs,
+            breadcrumbFactory,userState) {
 
             var amUpdating = false;
             $scope.breadcrumbItems = undefined;
             $scope.userRating = undefined;
+            $scope.canEdit = undefined;
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.userRating || amUpdating;
@@ -34,6 +36,31 @@ angular.module('haikudepotserver').controller(
                 ]);
             }
 
+            /**
+             * <P>This function will recheck to see if the user is able to edit the user rating or
+             * not.  It stores this in the scope and then elements can show/hide depending on the
+             * state of the flag.</P>
+             */
+
+            function refreshAuthorization() {
+                $scope.canEdit = undefined;
+
+                userState.areAuthorized([
+                    {
+                        targetType: 'USERRATING',
+                        targetIdentifier: $scope.userRating.code,
+                        permissionCode: 'USERRATING_EDIT'
+                    }
+                ]).then(
+                    function(flag) {
+                        $scope.canEdit = flag;
+                    },
+                    function() {
+                        throw Error('unable to establish if the user is able to edit the user rating');
+                    }
+                );
+            }
+
             function refreshUserRating() {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_USERRATING,
@@ -43,6 +70,7 @@ angular.module('haikudepotserver').controller(
                     function(userRatingData) {
                         $scope.userRating = userRatingData;
                         refreshBreadcrumbItems();
+                        refreshAuthorization();
                         $log.info('fetched user rating; '+userRatingData.code);
                     },
                     function(err) {

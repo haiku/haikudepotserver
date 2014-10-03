@@ -23,20 +23,20 @@
         <dd ng-show="userRating.userRatingStabilityCode"><message key="{{'userRatingStability.' + userRating.userRatingStabilityCode + '.title'}}"></message></rating-indicator></dd>
     </dl>
 
-    <h2><message key="gen.actions.title"></message></h2>
+    <h2 ng-show="canEdit"><message key="gen.actions.title"></message></h2>
 
     <ul>
-        <li ng-show="canDeactivate()" user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
+        <li ng-show="canDeactivate() && canEdit">
             <a href="" ng-click="goDeactivate()">
                 <message key="viewUserRating.deactiveAction.title"></message>
             </a>
         </li>
-        <li ng-show="canReactivate()" user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
+        <li ng-show="canReactivate() && canEdit">
             <a href="" ng-click="goReactivate()">
                 <message key="viewUserRating.reactiveAction.title"></message>
             </a>
         </li>
-        <li ng-show="userRating.active" user-rating="userRating" show-if-user-rating-permission="'USERRATING_EDIT'">
+        <li ng-show="userRating.active && canEdit">
             <a href="" ng-click="goEdit()">
                 <message key="viewUserRating.editAction.title"></message>
             </a>
