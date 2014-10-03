@@ -26,12 +26,30 @@ angular.module('haikudepotserver').directive('banner',function() {
                     errorHandling,breadcrumbFactory,jsonRpc,constants) {
 
                     $scope.showActions = false;
+                    $scope.showWarnNonProduction = undefined;
                     $scope.userNickname = undefined;
                     $scope.naturalLanguageData = {
                         naturalLanguageCode : userState.naturalLanguageCode(),
                         naturalLanguageOptions : undefined,
                         selectedNaturalLanguageOption : undefined
                     };
+
+                    function refreshShowWarnNonProduction() {
+                        jsonRpc.call(
+                            constants.ENDPOINT_API_V1_MISCELLANEOUS,
+                            "getRuntimeInformation",
+                            [{}]
+                        ).then(
+                            function(result) {
+                                $scope.showWarnNonProduction = !result.isProduction;
+                            },
+                            function(err) {
+                                errorHandling.handleJsonRpcError(err);
+                            }
+                        );
+                    }
+
+                    refreshShowWarnNonProduction();
 
                     function isLocationPathDisablingUserState() {
 
@@ -55,6 +73,10 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     // -----------------
                     // GENERAL
+
+                    $scope.goHideWarnNonProduction = function() {
+                        $scope.showWarnNonProduction = false;
+                    };
 
                     // This will take the user back to the home page.
 
@@ -201,7 +223,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                         ]);
 
                         $scope.showActions = false;
-                    }
+                    };
 
                     // -----------------
                     // REPOSITORY

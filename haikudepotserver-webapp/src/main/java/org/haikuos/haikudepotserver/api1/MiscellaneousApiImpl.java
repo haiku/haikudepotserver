@@ -20,6 +20,7 @@ import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +51,9 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
     @Resource
     MessageSource messageSource;
+
+    @Value("${deployment.isproduction:false}")
+    Boolean isProduction;
 
     @Override
     public GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest) {
@@ -147,6 +151,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         GetRuntimeInformationResult result = new GetRuntimeInformationResult();
         result.projectVersion = runtimeInformationService.getProjectVersion();
         result.getBulkPkgRequestLimit = PkgApi.GETBULKPKG_LIMIT;
+        result.isProduction = isProduction;
 
         if(authUserOptional.isPresent() && authUserOptional.get().getIsRoot()) {
             result.javaVersion = runtimeInformationService.getJavaVersion();

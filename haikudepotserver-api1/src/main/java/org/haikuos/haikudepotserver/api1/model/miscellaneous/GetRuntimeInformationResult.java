@@ -15,4 +15,6 @@ public class GetRuntimeInformationResult {
 
     public Integer getBulkPkgRequestLimit;
 
+    public Boolean isProduction;
+
 }
