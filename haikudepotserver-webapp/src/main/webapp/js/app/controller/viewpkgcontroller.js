@@ -145,67 +145,61 @@ angular.module('haikudepotserver').controller(
 
             function refetchIsSourcePkgAvailable() {
 
-// [apl 15.sep.2014]
-// disabling this for now because it creates exception logs on the server-side if
-// there is no source package (often).  Maybe this can be dealt with later on, but
-// I don't want to delay release because of this.
+                if(!$scope.pkg) {
+                    throw Error('there is not pkg available from which it would be possible to ascertain if a source pkg exists.');
+                }
 
+                var pv = $scope.pkg.versions[0];
 
-//                if(!$scope.pkg) {
-//                    throw Error('there is not pkg available from which it would be possible to ascertain if a source pkg exists.');
-//                }
-//
-//                var pv = $scope.pkg.versions[0];
-//
-//                jsonRpc.call(
-//                    constants.ENDPOINT_API_V1_PKG,
-//                    'getPkg',
-//                    [{
-//                        name : $scope.pkg.name + "_source",
-//                        versionType : 'SPECIFIC',
-//                        incrementViewCounter : false,
-//                        architectureCode : 'source',
-//                        naturalLanguageCode: constants.NATURALLANGUAGECODE_ENGLISH,
-//                        major: pv.major,
-//                        minor : pv.minor,
-//                        micro : pv.micro,
-//                        preRelease : pv.preRelease,
-//                        revision : pv.revision
-//                    }]
-//                ).then(
-//                    function(result) {
-//                        $log.info('source exists for pkg');
-//                        pv.sourcePkg = result;
-//                    },
-//                    function(err) {
-//
-//                        switch(err.code) {
-//
-//                            case jsonRpc.errorCodes.OBJECTNOTFOUND:
-//
-//                                switch(err.data.entityName) {
-//
-//                                    case 'Pkg':
-//                                    case 'PkgVersion':
-//                                        $log.info('there is no source package found');
-//                                        pv.sourcePkg = null;
-//                                        break;
-//
-//                                    default:
-//                                        $log.error('unable to ascertain if source is available for the package');
-//                                        errorHandling.handleJsonRpcError(err);
-//                                        break;
-//                                }
-//                                break;
-//
-//                            default:
-//                                $log.error('unable to ascertain if source is available for the package');
-//                                errorHandling.handleJsonRpcError(err);
-//                                break;
-//
-//                        }
-//                    }
-//                );
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_PKG,
+                    'getPkg',
+                    [{
+                        name : $scope.pkg.name + "_source",
+                        versionType : 'SPECIFIC',
+                        incrementViewCounter : false,
+                        architectureCode : 'source',
+                        naturalLanguageCode: constants.NATURALLANGUAGECODE_ENGLISH,
+                        major: pv.major,
+                        minor : pv.minor,
+                        micro : pv.micro,
+                        preRelease : pv.preRelease,
+                        revision : pv.revision
+                    }]
+                ).then(
+                    function(result) {
+                        $log.info('source exists for pkg');
+                        pv.sourcePkg = result;
+                    },
+                    function(err) {
+
+                        switch(err.code) {
+
+                            case jsonRpc.errorCodes.OBJECTNOTFOUND:
+
+                                switch(err.data.entityName) {
+
+                                    case 'Pkg':
+                                    case 'PkgVersion':
+                                        $log.info('there is no source package found');
+                                        pv.sourcePkg = null;
+                                        break;
+
+                                    default:
+                                        $log.error('unable to ascertain if source is available for the package');
+                                        errorHandling.handleJsonRpcError(err);
+                                        break;
+                                }
+                                break;
+
+                            default:
+                                $log.error('unable to ascertain if source is available for the package');
+                                errorHandling.handleJsonRpcError(err);
+                                break;
+
+                        }
+                    }
+                );
 
             }
 

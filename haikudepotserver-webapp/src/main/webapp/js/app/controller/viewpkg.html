@@ -62,8 +62,8 @@
     <div id="pkg-metadata-container">
 
         <dl>
-            <dt ng-show="undefined!=viewPkg.sourceAvailable"><message key="viewPkg.sourceAvailable.title"></message></dt>
-            <dd ng-show="undefined!=viewPkg.sourceAvailable">
+            <dt ng-show="undefined!=pkg.versions[0].sourcePkg"><message key="viewPkg.sourceAvailable.title"></message></dt>
+            <dd ng-show="undefined!=pkg.versions[0].sourcePkg">
                 <boolean-indicator state="!!pkg.versions[0].sourcePkg"></boolean-indicator>
             </dd>
             <dt><message key="viewPkg.categories.title"></message></dt>
