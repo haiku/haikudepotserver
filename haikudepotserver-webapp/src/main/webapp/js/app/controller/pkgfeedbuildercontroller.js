@@ -187,40 +187,54 @@ angular.module('haikudepotserver').controller(
 
             $scope.$watch('pkgChooserName', function() {
                 $scope.feedForm.pkgChooserName.$setValidity('notfound',true);
+                $scope.feedForm.pkgChooserName.$setValidity('included',true);
             })
 
             $scope.goAddPkg = function() {
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    'getPkg',
-                    [{
-                        naturalLanguageCode : userState.naturalLanguageCode(),
-                        name : $scope.pkgChooserName,
-                        versionType : 'NONE'
-                    }]
-                ).then(
-                    function(pkg) {
-                        $scope.pkgChooserName = '';
-                        $scope.feedSettings.pkgs.push(pkg);
-                    },
-                    function(err) {
+                // if the package is already in the list then the situation should be
+                // avoided where the same package is added twice.
 
-                        switch(err.code) {
+                if(_.findWhere(
+                    $scope.feedSettings.pkgs,
+                    { name : $scope.pkgChooserName })) {
+                    $scope.feedForm.pkgChooserName.$setValidity('included',false);
+                }
+                else {
 
-                            case jsonRpc.errorCodes.OBJECTNOTFOUND:
-                                $scope.feedForm.pkgChooserName.$setValidity('notfound',false);
-                                break;
+                    jsonRpc.call(
+                        constants.ENDPOINT_API_V1_PKG,
+                        'getPkg',
+                        [
+                            {
+                                naturalLanguageCode: userState.naturalLanguageCode(),
+                                name: $scope.pkgChooserName,
+                                versionType: 'NONE'
+                            }
+                        ]
+                    ).then(
+                        function (pkg) {
+                            $scope.pkgChooserName = '';
+                            $scope.feedSettings.pkgs.push(pkg);
+                        },
+                        function (err) {
 
-                            default:
-                                $log.error('unable to get the pkg for name; ' + $scope.pkgChooserName);
-                                errorHandling.handleJsonRpcError(err);
-                                break;
+                            switch (err.code) {
+
+                                case jsonRpc.errorCodes.OBJECTNOTFOUND:
+                                    $scope.feedForm.pkgChooserName.$setValidity('notfound', false);
+                                    break;
+
+                                default:
+                                    $log.error('unable to get the pkg for name; ' + $scope.pkgChooserName);
+                                    errorHandling.handleJsonRpcError(err);
+                                    break;
+
+                            }
 
                         }
-
-                    }
-                );
+                    );
+                }
 
             }
 
