@@ -23,7 +23,7 @@
 
 
 
-        <web-angularjs.versionbase>1.2.25</web-angularjs.versionbase>
+        <web-angularjs.versionbase>1.2.26</web-angularjs.versionbase>
         <web-angularjs.versionextension />
 
         <web-underscorejs.versionbase>1.6.0</web-underscorejs.versionbase>
@@ -76,7 +76,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>17.0</version>
+                <version>18.0</version>
             </dependency>
             <dependency>
                 <groupId>joda-time</groupId>
