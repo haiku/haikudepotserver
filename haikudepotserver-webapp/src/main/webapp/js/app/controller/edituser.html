@@ -5,7 +5,9 @@
 
         <label><message key="gen.nickname.title"></message></label>
         <div class="form-control-group">
-            <code>{{workingUser.nickname}}</code>
+            <div class="form-control-group-static">
+                <code>{{workingUser.nickname}}</code>
+            </div>
         </div>
 
         <label for="email"><message key="editUser.email.title"></message></label>
@@ -16,18 +18,17 @@
                     name="email"
                     valid-email=""
                     autocomplete="off"
-                    ng-model="workingUser.email"></input>
+                    ng-model="workingUser.email">
             <error-messages key-prefix="editUser.email" error="editUserForm.email.$error"></error-messages>
         </div>
 
-        <label for="natural-language"><message key="editUser.naturalLanguage.title"></message></label>
+        <label><message key="editUser.naturalLanguage.title"></message></label>
         <div class="form-control-group">
-            <select
-                    id="natural-language"
-                    required="true"
-                    ng-model="workingUser.naturalLanguageOption"
-                    ng-options="aNaturalLanguageOption.title for aNaturalLanguageOption in naturalLanguageOptions">
-            </select>
+            <div class="form-control-group-static">
+                <natural-language-chooser
+                        natural-language-code="workingUser.naturalLanguageCode">
+                </natural-language-chooser>
+            </div>
         </div>
 
         <div class="form-action-container">

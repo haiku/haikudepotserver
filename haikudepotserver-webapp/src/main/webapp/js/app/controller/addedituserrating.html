@@ -22,15 +22,13 @@
             </div>
         </div>
 
-        <label for="natural-language"><message key="addEditUserRating.naturalLanguage.title"></message></label>
+        <label><message key="addEditUserRating.naturalLanguage.title"></message></label>
         <div class="form-control-group">
-            <select
-                    name="naturalLanguage"
-                    id="natural-language"
-                    required="true"
-                    ng-model="workingUserRating.naturalLanguageOption"
-                    ng-options="aNaturalLanguageOption.title for aNaturalLanguageOption in naturalLanguageOptions">
-            </select>
+            <div class="form-control-group-static">
+                <natural-language-chooser
+                        natural-language-code="workingUserRating.naturalLanguageCode">
+                </natural-language-chooser>
+            </div>
         </div>
 
         <label for="comment"><message key="addEditUserRating.comment.title"></message></label>
@@ -58,11 +56,11 @@
         <div class="form-control-group">
 
             <div>
-                <input type="radio" ng-value="null" name="{{userRatingPickerInputName}}" ng-model="workingUserRating.rating"></input>
+                <input type="radio" ng-value="null" name="{{userRatingPickerInputName}}" ng-model="workingUserRating.rating">
                 <span class="muted"><em><message key="rating.none"></message></em></span>
             </div>
             <div ng-repeat="possibleValue in userRatingPickerPossibleValues">
-                <input type="radio" ng-value="possibleValue" name="{{userRatingPickerInputName}}" ng-model="workingUserRating.rating"></input>
+                <input type="radio" ng-value="possibleValue" name="{{userRatingPickerInputName}}" ng-model="workingUserRating.rating">
                 <rating-indicator rating="possibleValue"></rating-indicator>
             </div>
 

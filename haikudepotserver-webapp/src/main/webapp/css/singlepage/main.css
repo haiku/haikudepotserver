@@ -58,10 +58,10 @@ the spinner or the modal dialog can be shown over the top.
 
 .modal-backdrop-container {
     position: fixed;
-    left: 0px;
-    top: 0px;
-    bottom: 0px;
-    right: 0px;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
     background-color: rgba(0, 0, 0, 0.6);
     z-index: 1050;
 }
@@ -90,7 +90,7 @@ PAGE STRUCTURE
 
 .content-container {
     /* handled by the trailer class */
-    margin: 24px 5% 0px;
+    margin: 24px 5% 0;
     width: auto;
 }
 

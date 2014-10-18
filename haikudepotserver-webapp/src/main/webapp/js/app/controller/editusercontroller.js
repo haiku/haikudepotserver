@@ -19,7 +19,6 @@ angular.module('haikudepotserver').controller(
             referenceData,messageSource) {
 
             $scope.workingUser = undefined;
-            $scope.naturalLanguageOptions = undefined;
             var amSaving = false;
 
             $scope.shouldSpin = function() {
@@ -50,52 +49,16 @@ angular.module('haikudepotserver').controller(
 
                         $log.info('fetched user; '+fetchedUser.nickname);
 
-                        referenceData.naturalLanguages().then(
-                            function(fetchedNaturalLanguages) {
+                        // choose the current language as the one for editing.
 
-                                function updateNaturalLanguageOptionsTitles() {
-                                    _.each($scope.naturalLanguageOptions, function(nl) {
-                                        messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
-                                            function(value) {
-                                                nl.title = value;
-                                            },
-                                            function() {
-                                                $log.error('unable to get the localized name for the natural language \''+nl.code+'\'');
-                                            }
-                                        );
-                                    });
-                                }
+                        $scope.workingUser = {
+                            nickname : fetchedUser.nickname,
+                            email : fetchedUser.email,
+                            naturalLanguageCode : fetchedUser.naturalLanguageCode
+                        };
 
-                                $scope.naturalLanguageOptions = _.map(
-                                    fetchedNaturalLanguages,
-                                    function(nl) {
-                                        return {
-                                            code : nl.code,
-                                            title : nl.name
-                                        }
-                                    }
-                                );
+                        refreshBreadcrumbItems();
 
-                                updateNaturalLanguageOptionsTitles();
-
-                                // choose the current language as the one for editing.
-
-                                $scope.workingUser = {
-                                    nickname : fetchedUser.nickname,
-                                    email : fetchedUser.email,
-                                    naturalLanguageOption : _.findWhere(
-                                        $scope.naturalLanguageOptions,
-                                        { code : fetchedUser.naturalLanguageCode }
-                                    )
-                                };
-
-                                refreshBreadcrumbItems();
-
-                            },
-                            function() { // already logged.
-                                errorHandling.navigateToError();
-                            }
-                        );
                     },
                     function(err) {
                         errorHandling.handleJsonRpcError(err);
@@ -120,7 +83,7 @@ angular.module('haikudepotserver').controller(
                         filter : [ 'NATURALLANGUAGE', 'EMAIL' ],
                         nickname : $scope.workingUser.nickname,
                         email : $scope.workingUser.email,
-                        naturalLanguageCode : $scope.workingUser.naturalLanguageOption.code
+                        naturalLanguageCode : $scope.workingUser.naturalLanguageCode
                     }]
                 ).then(
                     function() {
@@ -130,7 +93,7 @@ angular.module('haikudepotserver').controller(
                         // also update the current language.
 
                         if(userState.user().nickname == $scope.workingUser.nickname) {
-                            userState.naturalLanguageCode($scope.workingUser.naturalLanguageOption.code);
+                            userState.naturalLanguageCode($scope.workingUser.naturalLanguageCode);
                         }
 
                         breadcrumbs.popAndNavigate();

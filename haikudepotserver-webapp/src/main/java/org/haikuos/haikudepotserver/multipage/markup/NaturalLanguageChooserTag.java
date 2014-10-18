@@ -24,6 +24,9 @@ import java.util.List;
  * <p>This tag renders a list of languages allowing the user to choose one of those languages.</p>
  */
 
+// [apl 10.oct.2014]
+// Presently to keep things simple, it will only show the popular languages.
+
 public class NaturalLanguageChooserTag extends RequestContextAwareTag {
 
     private ObjectContext getObjectContext() {
@@ -35,7 +38,7 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
 
         ObjectContext context = getObjectContext();
         TagWriter tagWriter = new TagWriter(pageContext.getOut());
-        List<NaturalLanguage> naturalLanguages = Lists.newArrayList(NaturalLanguage.getAll(context));
+        List<NaturalLanguage> naturalLanguages = Lists.newArrayList(NaturalLanguage.getAllPopular(context));
         NaturalLanguage currentNaturalLanguage = MultipageHelper.deriveNaturalLanguage(
                 context,
                 (HttpServletRequest) pageContext.getRequest());

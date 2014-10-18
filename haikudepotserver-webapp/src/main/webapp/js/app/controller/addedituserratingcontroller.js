@@ -3,8 +3,6 @@
  * Distributed under the terms of the MIT License.
  */
 
-// WORK IN PROGRESS!
-
 angular.module('haikudepotserver').controller(
     'AddEditUserRatingController',
     [
@@ -22,7 +20,6 @@ angular.module('haikudepotserver').controller(
 
             $scope.workingUserRating = undefined;
             $scope.userRatingStabilityOptions = undefined;
-            $scope.naturalLanguageOptions = undefined;
             $scope.didAttemptToSaveWithEmptyWorkingUserRating = false;
             $scope.userRatingPickerInputName = _.uniqueId("ratingPicker");
             $scope.userRatingPickerPossibleValues = [ 0,1,2,3,4,5 ];
@@ -50,19 +47,6 @@ angular.module('haikudepotserver').controller(
             }
 
             // specific localizations
-
-            function updateNaturalLanguageOptionsTitles() {
-                _.each($scope.naturalLanguageOptions, function(nl) {
-                    messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
-                        function (value) {
-                            nl.title = value;
-                        },
-                        function () {
-                            $log.error('unable to get the localized name for the natural language \'' + nl.code + '\'');
-                        }
-                    );
-                });
-            }
 
             function updateUserRatingStabilityOptionsTitles() {
                 _.each($scope.userRatingStabilityOptions, function(userRatingStabilityOption) {
@@ -119,49 +103,10 @@ angular.module('haikudepotserver').controller(
                     )
                 },
 
-                // natural language options; allows the user to select what language they would like to add
-                // their user rating in.
-                // TODO: generalized code with edit user.
-
-                function(chain) {
-                    referenceData.naturalLanguages().then(
-                        function (fetchedNaturalLanguages) {
-
-                            $scope.naturalLanguageOptions = _.map(
-                                fetchedNaturalLanguages,
-                                function (nl) {
-                                    return {
-                                        code: nl.code,
-                                        title: nl.name
-                                    }
-                                }
-                            );
-
-                            updateNaturalLanguageOptionsTitles();
-                            fnChain(chain);
-                        },
-                        function () { // already logged.
-                            errorHandling.navigateToError();
-                        }
-                    )
-                },
-
                 // working rating data; either this is an add rating or it is an edit rating and in the latter
                 // case we actually have to get the data for the rating downloaded.
 
                 function(chain) {
-
-                    function findNaturalLanguageOptionByCode(code) {
-                        var naturalLanguageOption = _.findWhere(
-                            $scope.naturalLanguageOptions,
-                            { code : code });
-
-                        if(!naturalLanguageOption) {
-                            throw Error('unable to find the natural language option for; ' + code);
-                        }
-
-                        return naturalLanguageOption;
-                    }
 
                     function findUserRatingStabilityOptionByCode(code) {
                         var userRatingStabilityOption = _.findWhere(
@@ -182,7 +127,7 @@ angular.module('haikudepotserver').controller(
                         return {
                             code: userRatingData.code,
                             userRatingStabilityOption: findUserRatingStabilityOptionByCode(userRatingData.userRatingStabilityCode),
-                            naturalLanguageOption: findNaturalLanguageOptionByCode(userRatingData.naturalLanguageCode),
+                            naturalLanguageCode: userRatingData.naturalLanguageCode,
                             user: userRatingData.user,
                             comment: userRatingData.comment,
                             rating: userRatingData.rating,
@@ -260,7 +205,7 @@ angular.module('haikudepotserver').controller(
 
                                             $scope.workingUserRating = {
                                                 userRatingStabilityOption: findUserRatingStabilityOptionByCode(null),
-                                                naturalLanguageOption: findNaturalLanguageOptionByCode(userState.naturalLanguageCode()),
+                                                naturalLanguageCode: userState.naturalLanguageCode(),
                                                 user: userState.user(),
                                                 userRatingStability: null,
                                                 rating: null,
@@ -352,7 +297,7 @@ angular.module('haikudepotserver').controller(
                                 {
                                     active: true, // in case an older rating is being edited that was de-activated
                                     code: $scope.workingUserRating.code,
-                                    naturalLanguageCode: $scope.workingUserRating.naturalLanguageOption.code,
+                                    naturalLanguageCode: $scope.workingUserRating.naturalLanguageCode,
                                     userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
                                     comment: $scope.workingUserRating.comment,
                                     rating: $scope.workingUserRating.rating,
@@ -382,7 +327,7 @@ angular.module('haikudepotserver').controller(
                             "createUserRating",
                             [
                                 {
-                                    naturalLanguageCode: $scope.workingUserRating.naturalLanguageOption.code,
+                                    naturalLanguageCode: $scope.workingUserRating.naturalLanguageCode,
                                     userNickname: $scope.workingUserRating.user.nickname,
                                     userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
                                     comment: $scope.workingUserRating.comment,

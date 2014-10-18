@@ -141,3 +141,17 @@ This is the email address from which emails outbound from the system will be sen
 \subsubsection{\tt ldap.user.dn}
 \subsubsection{\tt ldap.password}
 \subsubsection{\tt ldap.people.dn}
+
+\section{Logging Configuration}
+
+The application logging uses the \href{http://www.slf4j.org/}{SLF4J} logging framework.  This is backed by the \href{http://logback.qos.ch/}{Logback} logging system.  When formatting log lines, it is possible to add additional meta data from the application server.  This is known as the ``MDC''.  Presently supported;
+
+\begin{tabular}{ | l | l | }
+\hline
+Key & Description \\
+\hline
+{\tt authUserNickname} & The nickname of the presently authenticated user \\
+{\tt userAgent} & The User-Agent HTTP header related to the current request \\
+{\tt userAgentCode} & This is a short code to describe the user agent in brief \\
+\hline
+\end{tabular}

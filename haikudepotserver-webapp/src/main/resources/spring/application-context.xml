@@ -19,6 +19,14 @@
     </bean>
 
     <!--
+    Picks up on Cayenne ORM events around user ratings as well as package localizations and then
+    triggers that a natural language has been used.
+    -->
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.UserRatingNaturalLanguageUsageListener"/>
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.PkgVersionLocalizationNaturalLanguageUsageListener"/>
+
+    <!--
     Picks up on Cayenne ORM events around user ratings and triggers the background update
     of the packages' user ratings.
     -->

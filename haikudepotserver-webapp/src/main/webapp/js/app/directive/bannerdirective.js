@@ -28,11 +28,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $scope.showActions = false;
                     $scope.showWarnNonProduction = undefined;
                     $scope.userNickname = undefined;
-                    $scope.naturalLanguageData = {
-                        naturalLanguageCode : userState.naturalLanguageCode(),
-                        naturalLanguageOptions : undefined,
-                        selectedNaturalLanguageOption : undefined
-                    };
+                    $scope.naturalLanguageCode = userState.naturalLanguageCode();
 
                     function refreshShowWarnNonProduction() {
                         jsonRpc.call(
@@ -102,69 +98,6 @@ angular.module('haikudepotserver').directive('banner',function() {
                         $scope.showActions = false;
                         return false;
                     };
-
-                    // -----------------
-                    // NATURAL LANGUAGES
-
-                    $scope.canChooseNaturalLanguage = function() {
-                        return !!$scope.naturalLanguageData.naturalLanguageOptions;
-                    };
-
-                    /**
-                     * <p>This gets hit when the user chooses a language from the user interface's drop-down.</p>
-                     */
-
-                    $scope.$watch(
-                        'naturalLanguageData.selectedNaturalLanguageOption',
-                        function(newValue) {
-                            if(!!newValue) {
-                                userState.naturalLanguageCode(newValue.code);
-                                $scope.showActions = false;
-                            }
-                        }
-                    );
-
-                    /**
-                     * <p>This function will get the natural language code chosen in the user state and will make sure
-                     * that the selected language option reflects this.</p>
-                     */
-
-                    function updateSelectedNaturalLanguageOption() {
-                        $scope.naturalLanguageData.selectedNaturalLanguageOption = _.findWhere(
-                            $scope.naturalLanguageData.naturalLanguageOptions,
-                            { code : userState.naturalLanguageCode() }
-                        );
-                    }
-
-                    function updateNaturalLanguageOptionsTitles() {
-                        _.each($scope.naturalLanguageData.naturalLanguageOptions, function(nl) {
-                            messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
-                                function(value) {
-                                    nl.title = value;
-                                },
-                                function() {
-                                    $log.error('unable to get the localized name for the natural language \''+nl.code+'\'');
-                                }
-                            );
-                        });
-                    }
-
-                    referenceData.naturalLanguages().then(
-                        function(data) {
-                            $scope.naturalLanguageData.naturalLanguageOptions = _.map(data, function(d) {
-                                return {
-                                    code : d.code,
-                                    title : d.name
-                                };
-                            });
-
-                            updateNaturalLanguageOptionsTitles();
-                            updateSelectedNaturalLanguageOption();
-                        },
-                        function() {
-                            errorHandling.navigateToError();
-                        }
-                    );
 
                     // -----------------
                     // HIDE AND SHOW ACTIONS
@@ -333,9 +266,22 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $scope.$on(
                         'naturalLanguageChange',
                         function() {
-                            $scope.naturalLanguageData.naturalLanguageCode = userState.naturalLanguageCode();
-                            updateNaturalLanguageOptionsTitles();
-                            updateSelectedNaturalLanguageOption();
+                            var nlc;
+                            nlc = userState.naturalLanguageCode();
+
+                            if($scope.naturalLanguageCode != nlc) {
+                                $scope.naturalLanguageCode = nlc;
+                            }
+                        }
+                    );
+
+                    // when the user chooses a new natural language to use, this should be configured into the
+                    // user state.
+
+                    $scope.$watch(
+                        'naturalLanguageCode',
+                        function(newValue) {
+                            userState.naturalLanguageCode(newValue);
                         }
                     );
 

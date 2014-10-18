@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
-        'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg',
+        'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg','messageSource',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgIcon,errorHandling,
-            breadcrumbs,breadcrumbFactory,userState,referenceData,pkg) {
+            breadcrumbs,breadcrumbFactory,userState,referenceData,pkg,messageSource) {
 
             var ARCHITECTUREAPPLICABILITY_ALL = '__all';
 
@@ -23,6 +23,8 @@ angular.module('haikudepotserver').controller(
             $scope.selectedArchitectureApplicability = ARCHITECTUREAPPLICABILITY_ALL;
             $scope.originalTranslations = undefined;
             $scope.selectedTranslation = undefined;
+            $scope.addableNaturalLanguages = undefined;
+            $scope.selectedAddableNaturalLanguage = undefined;
             $scope.editPkgVersionLocalizations = { };
 
             $scope.shouldSpin = function() {
@@ -117,6 +119,23 @@ angular.module('haikudepotserver').controller(
                 referenceData.naturalLanguages().then(
                     function(naturalLanguageData) {
 
+                        // bring in titles for the natural languages.
+
+                        function updateNaturalLanguageOptionsTitles() {
+                            _.each(naturalLanguageData, function(nl) {
+                                messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
+                                    function(value) {
+                                        nl.title = value;
+                                    },
+                                    function() {
+                                        $log.error('unable to get the localized name for the natural language \''+nl.code+'\'');
+                                    }
+                                );
+                            });
+                        }
+
+                        updateNaturalLanguageOptionsTitles();
+
                         // now we need to get the _existing_ translations for the package.
 
                         jsonRpc.call(
@@ -133,37 +152,43 @@ angular.module('haikudepotserver').controller(
                                 architectureCode : $routeParams.architectureCode
                             }]
                         )
-                        .then(
+                            .then(
                             function(pkgVersionLocalizationsData) {
 
                                 // now merge the data about the various natural languages together with the data about
                                 // the packages existing localizations and we should have enough working data to setup
                                 // an internal data model.
 
-                                $scope.translations = _.map(
+                                $scope.translations = _.filter(
+                                    // marry the natural language with the existing localized data.
 
-                                    // don't include English as a localization target because the English language will
-                                    // have been included in the hpkg data from the repository.
-
-                                    _.reject(
+                                    _.map(
                                         naturalLanguageData,
-                                        function(d) {
-                                            return d.code == constants.NATURALLANGUAGECODE_ENGLISH;
+                                        function (d) {
+
+                                            var pkgVersionLocalizationData = _.findWhere(
+                                                pkgVersionLocalizationsData.pkgVersionLocalizations,
+                                                { naturalLanguageCode: d.code }
+                                            );
+
+                                            return {
+                                                naturalLanguage: d,
+                                                summary: pkgVersionLocalizationData ? pkgVersionLocalizationData.summary : '',
+                                                description: pkgVersionLocalizationData ? pkgVersionLocalizationData.description : '',
+                                                wasEdited: false
+                                            };
                                         }
                                     ),
-                                    function(d) {
+                                    function (translation) {
 
-                                        var pkgVersionLocalizationData = _.findWhere(
-                                            pkgVersionLocalizationsData.pkgVersionLocalizations,
-                                            { naturalLanguageCode : d.code }
-                                        );
+                                        // don't include English as a localization target because the English language will
+                                        // have been included in the hpkg data from the repository.
 
-                                        return {
-                                            naturalLanguage:d,
-                                            summary: pkgVersionLocalizationData ? pkgVersionLocalizationData.summary : '',
-                                            description: pkgVersionLocalizationData ? pkgVersionLocalizationData.description : '',
-                                            wasEdited:false
-                                        };
+                                        return translation.naturalLanguage.code != constants.NATURALLANGUAGECODE_ENGLISH &&
+                                            ( translation.naturalLanguage.hasData ||
+                                                translation.naturalLanguage.hasLocalizationMessages ||
+                                                (translation.summary && translation.summary.length) ||
+                                                (translation.description && translation.description.length) );
                                     }
                                 );
 
@@ -171,6 +196,25 @@ angular.module('haikudepotserver').controller(
                                 $scope.selectedTranslation = $scope.translations[0];
 
                                 $log.info('did setup translations');
+
+                                // get together a list of natural languages that could be added because they are not
+                                // already in the list shown.
+
+                                $scope.addableNaturalLanguages = _.filter(
+                                    naturalLanguageData,
+                                    function (d) {
+                                        return d.code != constants.NATURALLANGUAGECODE_ENGLISH && !_.find(
+                                            $scope.translations,
+                                            function (t) {
+                                                return d.code == t.naturalLanguage.code;
+                                            }
+                                        );
+                                    }
+                                );
+
+                                if (0 != $scope.addableNaturalLanguages.length) {
+                                    $scope.selectedAddableNaturalLanguage = $scope.addableNaturalLanguages[0];
+                                }
 
                             },
                             function(jsonRpcEnvelope) {
@@ -201,6 +245,36 @@ angular.module('haikudepotserver').controller(
             }
 
             // --------------------------
+            // ADD A NATURAL LANGUAGE
+
+            /**
+             * <p>Add a new translation into the list based on a natural language.  This will also remove the
+             * added language from the addable languages list.  It will then choose a new selected language.
+             * </p>
+             */
+
+            $scope.goAddSelectedAddableNaturalLanguage = function() {
+
+                var translation = {
+                    naturalLanguage: $scope.selectedAddableNaturalLanguage,
+                    summary: '',
+                    description: '',
+                    wasEdited: false
+                };
+
+                $scope.translations.push(translation);
+                $scope.originalTranslations.push(_.clone(translation));
+
+                $scope.addableNaturalLanguages = _.without(
+                    $scope.addableNaturalLanguages,
+                    $scope.selectedAddableNaturalLanguage);
+
+                $scope.selectedAddableNaturalLanguage = $scope.addableNaturalLanguages.length ? $scope.addableNaturalLanguages[0] : undefined;
+
+                $scope.goChooseTranslation(translation);
+            };
+
+            // --------------------------
             // SAVE CHANGES
 
             /**
@@ -227,9 +301,9 @@ angular.module('haikudepotserver').controller(
 
             $scope.saveEditedLocalizations = function() {
 
-                 if(!$scope.canSave()) {
-                     throw Error('not possible to save edited localizations');
-                 }
+                if(!$scope.canSave()) {
+                    throw Error('not possible to save edited localizations');
+                }
 
                 $scope.amSaving = true;
 

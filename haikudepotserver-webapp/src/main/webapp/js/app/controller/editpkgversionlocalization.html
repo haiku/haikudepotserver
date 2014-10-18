@@ -19,6 +19,17 @@
                         ({{translation.naturalLanguage.code}})
                         <span ng-show="translation.wasEdited" class="muted">*</span>
                     </div>
+
+                    <div
+                            id="natural-translations-add-language-container"
+                            ng-show="addableNaturalLanguages.length">
+                        <select
+                                required="true"
+                                ng-model="selectedAddableNaturalLanguage"
+                                ng-options="anAddableNaturalLanguages.title for anAddableNaturalLanguages in addableNaturalLanguages">
+                        </select>
+                        <button ng-click="goAddSelectedAddableNaturalLanguage()">+</button>
+                    </div>
                 </td>
                 <td id="translation-cell">
 

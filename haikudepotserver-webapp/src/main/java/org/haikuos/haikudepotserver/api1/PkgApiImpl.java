@@ -972,7 +972,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public GetBulkPkgResult getBulkPkg(final GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException {
         Preconditions.checkNotNull(getBulkPkgRequest);
-        Preconditions.checkState(null != getBulkPkgRequest.architectureCodes && !getBulkPkgRequest.architectureCodes.isEmpty(), "architecture codes must be supplied and at least one is required");
+        Preconditions.checkState(null != getBulkPkgRequest.architectureCodes, "architecture codes must be non-null");
         Preconditions.checkNotNull(getBulkPkgRequest.pkgNames);
 
         if(getBulkPkgRequest.pkgNames.size() > GETBULKPKG_LIMIT) {
@@ -981,7 +981,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         final GetBulkPkgResult result = new GetBulkPkgResult();
 
-        if(getBulkPkgRequest.pkgNames.isEmpty()) {
+        if(getBulkPkgRequest.pkgNames.isEmpty() || getBulkPkgRequest.architectureCodes.isEmpty()) {
             result.pkgs = Collections.emptyList();
         }
         else {

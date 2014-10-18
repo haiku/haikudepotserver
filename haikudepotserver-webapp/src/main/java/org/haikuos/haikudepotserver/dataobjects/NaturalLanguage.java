@@ -10,7 +10,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ejbql.parser.EJBQL;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
@@ -37,6 +39,15 @@ public class NaturalLanguage extends _NaturalLanguage {
         return (List<NaturalLanguage>) context.performQuery(query);
     }
 
+    public static List<NaturalLanguage> getAllPopular(ObjectContext context) {
+        Preconditions.checkNotNull(context);
+        SelectQuery query = new SelectQuery(
+                NaturalLanguage.class,
+                ExpressionFactory.matchExp(NaturalLanguage.IS_POPULAR_PROPERTY, Boolean.TRUE));
+        query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
+        return (List<NaturalLanguage>) context.performQuery(query);
+    }
+
     public static List<NaturalLanguage> getAllExceptEnglish(ObjectContext context) {
         Preconditions.checkNotNull(context);
         SelectQuery query = new SelectQuery(
@@ -54,6 +65,16 @@ public class NaturalLanguage extends _NaturalLanguage {
                         NaturalLanguage.class,
                         ExpressionFactory.matchExp(MediaType.CODE_PROPERTY, code))),
                 null));
+    }
+
+    /**
+     * <p>This method will return all of the natural language codes in the system.</p>
+     */
+
+    public static List<String> getAllCodes(ObjectContext context) {
+        Preconditions.checkNotNull(context);
+        EJBQLQuery query = new EJBQLQuery("SELECT nl.code FROM " + NaturalLanguage.class.getSimpleName() + " nl");
+        return (List<String>) context.performQuery(query);
     }
 
     /**

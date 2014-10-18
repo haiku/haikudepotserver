@@ -69,6 +69,7 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.googlecode.jsonrpc4j.ErrorResolver.JsonError;
+import org.haikuos.haikudepotserver.api1.support.CaptchaBadResponseException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.api1.support.ValidationException;
 
@@ -1069,6 +1070,7 @@ public class JsonRpcServer {
     private boolean isMainFlowThrowable(Throwable t) {
         return
                 ObjectNotFoundException.class.isAssignableFrom(t.getClass())
+                        || CaptchaBadResponseException.class.isAssignableFrom(t.getClass())
                         || ValidationException.class.isAssignableFrom(t.getClass());
     }
 

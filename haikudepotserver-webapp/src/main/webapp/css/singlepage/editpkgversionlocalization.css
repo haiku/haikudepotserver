@@ -1,8 +1,20 @@
+#natural-translations-add-language-container {
+    margin-top: 16px;
+    padding-top: 4px;
+}
+
+#natural-translations-add-language-container > select {
+    width: 140px;
+}
+
+#natural-translations-add-language-container > * {
+    margin-top: 4px;
+}
+
 #edit-pkg-version-localization-container {
     position: relative;
     border : 1px solid black;
     border-collapse: collapse;
-    border: 1px black solid;
     width: 100%
 }
 

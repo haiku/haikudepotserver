@@ -16,69 +16,20 @@ angular.module('haikudepotserver').controller(
             $scope.captchaToken = undefined;
             $scope.captchaImageUrl = undefined;
             $scope.amSaving = false;
-            $scope.naturalLanguageOptions = undefined;
             $scope.newUser = {
                 nickname : undefined,
                 email : undefined,
                 passwordClear : undefined,
                 passwordClearRepeated : undefined,
-                captchaResponse : undefined
+                captchaResponse : undefined,
+                naturalLanguageCode : userState.naturalLanguageCode()
             };
 
             regenerateCaptcha();
 
-            // this function will derive these options from the reference data of the natural languages.  It will then
-            // also blend-in the localized names of the languages as well.  It can do this asynchronously in the
-            // background by taking the database supplied (unlocalized) names first of all and then updating the data
-            // objects later.
-
-            function refreshNaturalLanguageOptions() {
-
-                function updateNaturalLanguageOptionsTitles() {
-                    _.each($scope.naturalLanguageOptions, function(nl) {
-                        messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
-                            function(value) {
-                                nl.title = value;
-                            },
-                            function() {
-                                $log.error('unable to get the localized name for the natural language \''+nl.code+'\'');
-                            }
-                        );
-                    });
-                }
-
-                referenceData.naturalLanguages().then(
-                    function(data) {
-
-                        $scope.naturalLanguageOptions = _.map(data, function(nl) {
-                            return {
-                                code : nl.code,
-                                title : nl.name
-                            }
-                        });
-
-                        updateNaturalLanguageOptionsTitles();
-
-                        // choose the current language as the one for this new user.
-
-                        $scope.newUser.naturalLanguageOption = _.findWhere(
-                            $scope.naturalLanguageOptions,
-                            { code : userState.naturalLanguageCode() }
-                        );
-
-                    },
-                    function() { // already logged.
-                        errorHandling.navigateToError();
-                    }
-                )
-            }
-
-            refreshNaturalLanguageOptions();
-
             $scope.shouldSpin = function() {
                 return undefined == $scope.captchaToken ||
-                    $scope.amSaving ||
-                    undefined == $scope.naturalLanguageOptions; // have to be async loaded
+                    $scope.amSaving;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
@@ -154,7 +105,7 @@ angular.module('haikudepotserver').controller(
                         passwordClear : $scope.newUser.passwordClear,
                         captchaToken : $scope.captchaToken,
                         captchaResponse : $scope.newUser.captchaResponse,
-                        naturalLanguageCode : $scope.newUser.naturalLanguageOption.code
+                        naturalLanguageCode : $scope.newUser.naturalLanguageCode
                     }]
                 ).then(
                     function() {

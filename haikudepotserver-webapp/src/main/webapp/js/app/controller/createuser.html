@@ -14,7 +14,7 @@
                     ng-model="newUser.nickname"
                     ng-required="true"
                     ng-change="nicknameDidChange()"
-                    ng-pattern="{{userNicknamePattern}}"></input>
+                    ng-pattern="{{userNicknamePattern}}">
             <error-messages key-prefix="createUser.nickname" error="createUserForm.nickname.$error"></error-messages>
         </div>
 
@@ -26,7 +26,7 @@
                     name="email"
                     valid-email=""
                     autocomplete="off"
-                    ng-model="newUser.email"></input>
+                    ng-model="newUser.email">
             <error-messages key-prefix="createUser.email" error="createUserForm.email.$error"></error-messages>
             <div class="text-warning" ng-show="!newUser.email||!newUser.email.length">
                 <small><message key="createUser.email.emptyNote"></message></small>
@@ -43,7 +43,7 @@
                     ng-required="true"
                     ng-change="passwordsChanged()"
                     valid-password=""
-                    ng-model="newUser.passwordClear"></input>
+                    ng-model="newUser.passwordClear">
             <error-messages key-prefix="createUser.passwordClear" error="createUserForm.passwordClear.$error"></error-messages>
         </div>
 
@@ -56,23 +56,18 @@
                     autocomplete="off"
                     ng-change="passwordsChanged()"
                     ng-required="true"
-                    ng-model="newUser.passwordClearRepeated"></input>
+                    ng-model="newUser.passwordClearRepeated">
             <error-messages key-prefix="createUser.passwordClearRepeated" error="createUserForm.passwordClearRepeated.$error"></error-messages>
         </div>
 
-        <label for="natural-language"><message key="createUser.naturalLanguage.title"></message></label>
+        <label><message key="createUser.naturalLanguage.title"></message></label>
         <div class="form-control-group">
-            <select
-                    id="natural-language"
-                    required="true"
-                    ng-model="newUser.naturalLanguageOption"
-                    ng-options="aNaturalLanguageOption.title for aNaturalLanguageOption in naturalLanguageOptions">
-            </select>
+            <natural-language-chooser natural-language-code="newUser.naturalLanguageCode"></natural-language-chooser>
         </div>
 
         <label for="captcha-response-input"><message key="createUser.captchaResponse.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('captchaResponse')">
-            <img style="vertical-align:middle;" src="{{captchaImageUrl}}"></img>
+            <img style="vertical-align:middle;" src="{{captchaImageUrl}}">
             =
             <input
                     id="captcha-response-input"
@@ -82,7 +77,7 @@
                     name="captchaResponse"
                     ng-required="true"
                     ng-change="captchaResponseDidChange()"
-                    ng-model="newUser.captchaResponse"></input>
+                    ng-model="newUser.captchaResponse">
             <error-messages key-prefix="createUser.captchaResponse" error="createUserForm.captchaResponse.$error"></error-messages>
         </div>
 

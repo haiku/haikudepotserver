@@ -1,0 +1,39 @@
+.natural-language-chooser-container .has-data {
+    color: orange;
+    font-weight: bold;
+}
+
+.natural-language-chooser-container .has-localization-messages {
+    color: mediumpurple;
+    font-weight: bold;
+}
+
+.natural-language-chooser-languages-container {
+    height: 200px;
+    width: 100%;
+    overflow-y: scroll;
+    border: 1px lightgray solid;
+}
+
+.natural-language-chooser-languages-container > table {
+    width: 100%;
+}
+
+.natural-language-chooser-languages-container > table > tbody > tr > td:nth-child(1) {
+    width: 75%;
+    overflow-x: hidden;
+}
+
+.natural-language-chooser-languages-container > table > tbody > tr > td:nth-child(2) {
+    width: 10%;
+    font-family: monospace;
+    color: grey;
+}
+
+.natural-language-chooser-languages-container > table > tbody > tr > td:nth-child(3) {
+    width: 5%;
+}
+
+.natural-language-chooser-languages-container > table > tbody > tr > td:nth-child(4) {
+    width: 5%;
+}

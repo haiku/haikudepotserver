@@ -5,29 +5,29 @@
 
 package org.haikuos.haikudepotserver.support.cayenne;
 
-import com.google.common.base.Preconditions;
 import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
 import org.haikuos.haikudepotserver.dataobjects.UserRating;
-import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
-import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
+import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 /**
- * <p>This listener will detect changes in the user rating entities and will then trigger a process (probably
- * async) that is able to update the derived user rating on the package involved.</p>
+ * <p>This will listen for changes to user ratings and will then register that
+ * the natural language is in-use with the
+ * {@link org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService}.
+ * This is essentially a cache update mechanism.</p>
  */
 
-public class UserRatingDerivationTriggerListener implements LifecycleListener {
+public class UserRatingNaturalLanguageUsageListener implements LifecycleListener {
 
     @Resource
     ServerRuntime serverRuntime;
 
     @Resource
-    UserRatingDerivationService userRatingDerivationService;
+    NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
 
     @PostConstruct
     public void init() {
@@ -35,11 +35,14 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
         callbackRegistry.addListener(UserRating.class, this);
     }
 
-    private void triggerUpdateUserRatingDerivationForAssociatedPackage(Object entity) {
-        Preconditions.checkNotNull(entity);
-        UserRating userRating = (UserRating) entity;
-        String pkgName = userRating.getPkgVersion().getPkg().getName();
-        userRatingDerivationService.submit(new UserRatingDerivationJob(pkgName));
+    private void trigger(UserRating userRating) {
+
+        // note that this logic may need to be distributed if more than one instance of the application
+        // server were deployed in a cluster.  This is because the cache is local to the VM in the
+        // NaturalLanguageOrchestrationService.
+
+        String naturalLanguageCode = userRating.getNaturalLanguage().getCode();
+        naturalLanguageOrchestrationService.setHasUserRating(naturalLanguageCode);
     }
 
     @Override
@@ -52,7 +55,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postPersist(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
+        trigger((UserRating) entity);
     }
 
     @Override
@@ -69,7 +72,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postUpdate(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
+        trigger((UserRating) entity);
     }
 
     @Override

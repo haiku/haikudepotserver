@@ -16,6 +16,7 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.feed.FeedOrchestrationService;
 import org.haikuos.haikudepotserver.feed.model.FeedSpecification;
+import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
 import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
@@ -25,7 +26,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,6 +51,9 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
     @Resource
     MessageSource messageSource;
+
+    @Resource
+    NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
 
     @Value("${deployment.isproduction:false}")
     Boolean isProduction;
@@ -114,12 +117,18 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                                             messageSource.getMessage(
                                                     input.getTitleKey(),
                                                     null, // params
-                                                    naturalLanguageOptional.get().toLocale()));
+                                                    naturalLanguageOptional.get().toLocale()),
+                                            input.getIsPopular(),
+                                            naturalLanguageOrchestrationService.hasData(input.getCode()),
+                                            naturalLanguageOrchestrationService.hasLocalizationMessages(input.getCode()));
                                 }
                                 else {
                                     return new GetAllNaturalLanguagesResult.NaturalLanguage(
                                             input.getCode(),
-                                            input.getName());
+                                            input.getName(),
+                                            input.getIsPopular(),
+                                            naturalLanguageOrchestrationService.hasData(input.getCode()),
+                                            naturalLanguageOrchestrationService.hasLocalizationMessages(input.getCode()));
                                 }
                             }
                         }
@@ -220,20 +229,22 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         InputStreamReader reader = null;
 
         try {
+            Map<String, String> map = Maps.newHashMap();
             inputStream = getClass().getResourceAsStream(resourcePath);
 
             if(null==inputStream) {
-                throw new FileNotFoundException(resourcePath);
+                LOGGER.info("attempt to access localization messages; {} -- not found", resourcePath);
             }
+            else {
 
-            reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                reader = new InputStreamReader(inputStream, Charsets.UTF_8);
 
-            Properties properties = new Properties();
-            properties.load(reader);
-            Map<String,String> map = Maps.newHashMap();
+                Properties properties = new Properties();
+                properties.load(reader);
 
-            for(String propertyName : properties.stringPropertyNames()) {
-                map.put(propertyName, properties.get(propertyName).toString());
+                for (String propertyName : properties.stringPropertyNames()) {
+                    map.put(propertyName, properties.get(propertyName).toString());
+                }
             }
 
             GetAllMessagesResult getAllMessagesResult = new GetAllMessagesResult();

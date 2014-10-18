@@ -1,0 +1,67 @@
+<span>
+
+    <a href="" ng-show="!!naturalLanguageCode" ng-click="goShowChooser()" ng-class="naturalLanguageTitleClass">
+        <message key="{{'naturalLanguage.' + naturalLanguageCode}}"></message>
+    </a>
+
+    <modal-container show="showChooser" width="420" close="goHideChooser()">
+
+        <div ng-show="!possibleNaturalLanguages">
+            Loading...
+        </div>
+
+        <div ng-show="!!possibleNaturalLanguages" class="natural-language-chooser-container">
+            <div class="natural-language-chooser-languages-container">
+                <table>
+                    <tbody>
+                    <tr ng-repeat="aNaturalLanguage in possibleNaturalLanguages">
+                        <td>
+                            <strong ng-show="isChosen(aNaturalLanguage)">
+                                {{aNaturalLanguage.title}}
+                            </strong>
+                            <a ng-show="!isChosen(aNaturalLanguage)" href="" ng-click="goChoose(aNaturalLanguage)">
+                                {{aNaturalLanguage.title}}
+                            </a>
+                        </td>
+                        <td>{{aNaturalLanguage.code}}</td>
+                        <td>
+                        <span class="has-data" ng-show="aNaturalLanguage.hasData">
+                            &diams;
+                        </span>
+                        </td>
+                        <td>
+                        <span class="has-localization-messages" ng-show="aNaturalLanguage.hasLocalizationMessages">
+                            &dagger;
+                        </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+                <small>
+                    <span class="has-data">&diams;</span>
+                    &rarr; <message key="naturalLanguageChooser.legend.hasData"></message>,
+                    <span class="has-localization-messages">&dagger;</span>
+                    &rarr; <message key="naturalLanguageChooser.legend.hasLocalizationMessages"></message>
+                </small>
+            </div>
+
+            <ul>
+                <li ng-show="requiresDataOrLocalizationMessages">
+                    <a href="" ng-click="setRequiresDataOrLocalizationMessages(false)">
+                        <message key="naturalLanguageChooser.showAllLanguages"></message>
+                    </a>
+                </li>
+                <li ng-show="!requiresDataOrLocalizationMessages">
+                    <a href="" ng-click="setRequiresDataOrLocalizationMessages(true)">
+                        <message key="naturalLanguageChooser.showLanguagesInUse"></message>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </modal-container>
+
+</span>

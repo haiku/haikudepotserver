@@ -9,14 +9,14 @@ as well as the status of the authenticated user.
     background-color: #336698;
     width: 100%;
     height: 40px;
-    padding: 0px;
+    padding: 0;
     border-bottom: 1px solid black;
 }
 
 #banner-title {
     position: absolute;
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     padding-left: 68px;
     height: 40px;
     background: url('/img/haikudepot.svg') no-repeat 32px 4px transparent;
@@ -26,7 +26,7 @@ as well as the status of the authenticated user.
 #banner-title div {
     position: relative;
     top: 8px;
-    left: 0px;
+    left: 0;
     color: white;
     font-weight: bold;
     font-size: 24px;
@@ -36,11 +36,18 @@ as well as the status of the authenticated user.
 #banner-actions {
     position: absolute;
     top: 6px;
-    right: 0px;
+    right: 0;
     overflow: hidden;
     padding-right: 32px;
+}
+
+/*
+This is a slightly strange way to do this, but is necessary to avoid styles from
+leaching into the modal that allows for language selection.
+*/
+
+#banner-actions .banner-actions-text {
     color: white;
-    overflow: hidden;
 }
 
 #banner-actions > .banner-actions-state-container {
@@ -50,11 +57,6 @@ as well as the status of the authenticated user.
 
 #banner-actions > .banner-actions-state-container > span {
    line-height: 18px;
-   vertial-align: middle;
-}
-
-#banner-container a {
-    color: white;
 }
 
 #banner-actions button {

@@ -111,8 +111,15 @@ angular.module('haikudepotserver').config([
             function($delegate, $injector) {
                 return function(exception, cause) {
                     var $location = $injector.get('$location');
+                    var $log = $injector.get('$log');
                     var breadcrumbs = $injector.get('breadcrumbs');
+
+                    if ($log) {
+                        $log.error('unhandled error; ' + exception);
+                    }
+
                     $delegate(exception,cause);
+
                     breadcrumbs.reset();
                     window.location.href = '/error';
                 }

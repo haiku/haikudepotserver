@@ -11,12 +11,17 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 public abstract class _NaturalLanguage extends AbstractDataObject {
 
     public static final String CODE_PROPERTY = "code";
+    public static final String IS_POPULAR_PROPERTY = "isPopular";
     public static final String NAME_PROPERTY = "name";
 
     public static final String ID_PK_COLUMN = "id";
 
     public String getCode() {
         return (String)readProperty(CODE_PROPERTY);
+    }
+
+    public Boolean getIsPopular() {
+        return (Boolean)readProperty(IS_POPULAR_PROPERTY);
     }
 
     public String getName() {

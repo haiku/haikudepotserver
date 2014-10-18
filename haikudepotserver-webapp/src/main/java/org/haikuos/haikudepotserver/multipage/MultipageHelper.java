@@ -28,6 +28,9 @@ public class MultipageHelper {
      * resort to English language if no other language is able to be derived.</p>
      */
 
+    // [apl 10.oct.2014]
+    // This will presently only select from the list of popular languages.
+
     public static NaturalLanguage deriveNaturalLanguage(ObjectContext context, HttpServletRequest request) {
         Preconditions.checkNotNull(context);
 
@@ -37,7 +40,7 @@ public class MultipageHelper {
             if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
                 Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, naturalLanguageCode);
 
-                if(!naturalLanguageOptional.isPresent()) {
+                if(!naturalLanguageOptional.isPresent() && naturalLanguageOptional.get().getIsPopular()) {
                     throw new IllegalStateException("the natural language for code " + naturalLanguageCode + " was not able to be found");
                 }
 
@@ -54,7 +57,7 @@ public class MultipageHelper {
                 if(langI.hasNext()) {
                     Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, langI.next());
 
-                    if(naturalLanguageOptional.isPresent()) {
+                    if(naturalLanguageOptional.isPresent() && naturalLanguageOptional.get().getIsPopular()) {
                         return naturalLanguageOptional.get();
                     }
                 }

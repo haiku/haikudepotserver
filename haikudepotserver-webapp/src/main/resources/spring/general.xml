@@ -39,6 +39,7 @@
 
     <!-- LOGGING -->
 
+    <bean id="loggingFilter" class="org.haikuos.haikudepotserver.support.logging.LoggingFilter"/>
     <bean class="org.haikuos.haikudepotserver.support.logging.LoggingSetupOrchestration" init-method="init"/>
 
     <!-- SUNDRY -->
