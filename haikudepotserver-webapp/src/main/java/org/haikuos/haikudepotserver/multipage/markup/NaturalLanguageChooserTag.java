@@ -75,6 +75,7 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
             }
             else {
                 tagWriter.startTag("strong");
+                tagWriter.writeAttribute("class", "banner-actions-text");
                 tagWriter.appendValue(naturalLanguage.getCode());
                 tagWriter.endTag(); // strong
             }

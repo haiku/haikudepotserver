@@ -14,7 +14,8 @@
 
 </head>
 
-<body>
+<body onload="hdsOnBodyLoad()">
+
 <%@include file="includes/banner.jsp"%>
 
 <div class="container">
@@ -36,7 +37,7 @@
                     </select>
                 </div>
                 <div>
-                    <select name="viewcrttyp">
+                    <select id="viewcrttyp" name="viewcrttyp" onchange="hdsHideShowPkgCatContainer()">
                         <c:forEach items="${data.allViewCriteriaTypes}" var="aViewCriteriaType">
                             <option
                                     <c:if test="${aViewCriteriaType == data.viewCriteriaType}">
@@ -48,7 +49,7 @@
                         </c:forEach>
                     </select>
                 </div>
-                <div>
+                <div id="pkgcat-container">
                     <select name="pkgcat">
                         <c:forEach items="${data.allPkgCategories}" var="aPkgCategory">
                             <option
@@ -164,6 +165,32 @@
 </div>
 
 <div class="footer"></div>
+
+<script>
+
+    <%--
+    Some very basic javascript to hide and show the categories list as the user chooses
+    the filtering criteria.  This is a global function, but there is *intentionally*
+    very little java-script on the page so this is managable.
+    --%>
+
+    function hdsHideShowPkgCatContainer() {
+        var select = document.getElementById('viewcrttyp');
+        var value = select.options[select.selectedIndex].value;
+        var container = document.getElementById('pkgcat-container');
+
+        container.setAttribute(
+                'style',
+                (value && value == 'CATEGORIES') ? '' : 'display:none;'
+        );
+
+    }
+
+    function hdsOnBodyLoad() {
+        hdsHideShowPkgCatContainer();
+    }
+
+</script>
 
 </body>
 

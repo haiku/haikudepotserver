@@ -67,7 +67,7 @@
 
         <label for="captcha-response-input"><message key="createUser.captchaResponse.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('captchaResponse')">
-            <img style="vertical-align:middle;" src="{{captchaImageUrl}}">
+            <img style="vertical-align:middle;" ng-src="{{captchaImageUrl}}">
             =
             <input
                     id="captcha-response-input"
