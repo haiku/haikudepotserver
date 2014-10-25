@@ -8,6 +8,7 @@ package org.haikuos.haikudepotserver.dataobjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -75,6 +76,18 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_SAMPLE_SIZE_PROPERTY,"min"));
         }
 
+    }
+
+    public Optional<PkgPkgCategory> getPkgPkgCategory(String pkgCategoryCode) {
+        Preconditions.checkState(!Strings.isNullOrEmpty(pkgCategoryCode));
+
+        for(PkgPkgCategory pkgPkgCategory : getPkgPkgCategories()) {
+            if(pkgPkgCategory.getPkgCategory().getCode().equals(pkgCategoryCode)) {
+                return Optional.of(pkgPkgCategory);
+            }
+        }
+
+        return Optional.absent();
     }
 
     public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final Integer size) {

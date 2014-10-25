@@ -247,6 +247,21 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     // -----------------
+                    // REPORTING
+
+                    $scope.canGoReports = function() {
+                        return !!userState.user()
+                    };
+
+                    $scope.goReports = function() {
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbFactory.createHome(),
+                            breadcrumbFactory.createReports()
+                        ]);
+                        $scope.showActions = false;
+                    };
+
+                    // -----------------
                     // EVENT HANDLING
 
                     // when the user logs in or out then the actions may also change; for example, it makes

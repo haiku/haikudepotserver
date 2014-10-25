@@ -12,6 +12,7 @@ angular.module('haikudepotserver').config(
 
             $routeProvider
                 .when('/rootoperations',{controller:'RootOperationsController',templateUrl:'/js/app/controller/rootoperations.html'})
+                .when('/reports',{controller:'ReportsController',templateUrl:'/js/app/controller/reports.html'})
                 .when('/pkg/feed/builder',{controller:'PkgFeedBuilderController',templateUrl:'/js/app/controller/pkgfeedbuilder.html'})
                 .when('/paginationcontrolplayground',{controller:'PaginationControlPlayground',templateUrl:'/js/app/controller/paginationcontrolplayground.html'})
                 .when('/repositories/add',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})

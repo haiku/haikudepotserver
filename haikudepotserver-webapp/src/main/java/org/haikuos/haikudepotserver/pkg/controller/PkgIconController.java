@@ -19,7 +19,6 @@ import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,10 +72,8 @@ public class PkgIconController extends AbstractController implements ServletCont
                     new CacheLoader<Integer, byte[]>() {
                         public byte[] load(@SuppressWarnings("NullableProblems") Integer size) {
                             String resource = String.format("img/generic%d.png", size);
-                            InputStream inputStream = null;
 
-                            try {
-                                inputStream = servletContext.getResourceAsStream(resource);
+                            try (InputStream inputStream = servletContext.getResourceAsStream(resource)) {
 
                                 if(null==inputStream) {
                                     throw new IllegalStateException(String.format("the resource; %s was not able to be found, but should be in the application build product", resource));
@@ -87,9 +84,6 @@ public class PkgIconController extends AbstractController implements ServletCont
                             }
                             catch(IOException ioe) {
                                 throw new IllegalStateException("unable to read the generic icon",ioe);
-                            }
-                            finally {
-                                Closeables.closeQuietly(inputStream);
                             }
                         }
                     });

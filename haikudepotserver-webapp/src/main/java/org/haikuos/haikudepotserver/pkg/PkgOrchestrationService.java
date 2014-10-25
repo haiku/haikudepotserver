@@ -17,14 +17,13 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.cayenne.query.PrefetchTreeNode;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.*;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
+import org.haikuos.haikudepotserver.support.Callback;
 import org.haikuos.haikudepotserver.support.ImageHelper;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
@@ -894,6 +893,54 @@ public class PkgOrchestrationService {
         LOGGER.debug("have processed package {}", pkg.toString());
 
     }
+
+    // -------------------------------------
+    // ITERATION
+
+    /**
+     * <p>This will be called for each package in the system.</p>
+     * @param c is the callback to invoke.
+     * @return the quantity of packages processed.
+     */
+
+    public int each(ObjectContext context, PrefetchTreeNode prefetchTreeNode, Callback<Pkg> c) {
+        Preconditions.checkNotNull(c);
+        Preconditions.checkNotNull(context);
+
+        SelectQuery query = new SelectQuery(
+                Pkg.class,
+                ExpressionFactory.matchExp(Pkg.ACTIVE_PROPERTY, Boolean.TRUE),
+                Collections.singletonList(new Ordering(Pkg.NAME_PROPERTY, SortOrder.ASCENDING)));
+
+        if(null != prefetchTreeNode) {
+            query.setPrefetchTree(prefetchTreeNode);
+        }
+
+        int offset = 0;
+
+        while(true) {
+            query.setFetchLimit(100); // arbitrary -- might need to tune.
+            query.setFetchOffset(offset);
+
+            List<Pkg> pkgs = (List<Pkg>) context.performQuery(query);
+
+            if(pkgs.isEmpty()) {
+                return offset; // stop
+            }
+            else {
+                for(Pkg pkg : pkgs) {
+
+                    offset++;
+
+                    if(!c.process(pkg)) {
+                        return offset;
+                    }
+                }
+            }
+        }
+
+    }
+
 
     // -------------------------------------
     // LOCALIZATION

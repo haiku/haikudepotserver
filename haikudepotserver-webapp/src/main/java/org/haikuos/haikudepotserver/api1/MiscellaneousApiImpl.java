@@ -17,7 +17,6 @@ import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.feed.FeedOrchestrationService;
 import org.haikuos.haikudepotserver.feed.model.FeedSpecification;
 import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,25 +224,23 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                 RESOURCE_MESSAGES,
                 !isEnglish ? "_" + naturalLanguageOptional.get().getCode() : "");
 
-        InputStream inputStream = null;
-        InputStreamReader reader = null;
+        try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
 
-        try {
             Map<String, String> map = Maps.newHashMap();
-            inputStream = getClass().getResourceAsStream(resourcePath);
 
             if(null==inputStream) {
                 LOGGER.info("attempt to access localization messages; {} -- not found", resourcePath);
             }
             else {
 
-                reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                try (InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8)) {
 
-                Properties properties = new Properties();
-                properties.load(reader);
+                    Properties properties = new Properties();
+                    properties.load(reader);
 
-                for (String propertyName : properties.stringPropertyNames()) {
-                    map.put(propertyName, properties.get(propertyName).toString());
+                    for (String propertyName : properties.stringPropertyNames()) {
+                        map.put(propertyName, properties.get(propertyName).toString());
+                    }
                 }
             }
 
@@ -253,10 +250,6 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         }
         catch(IOException ioe) {
             throw new RuntimeException("unable to assemble the messages to send for api1 from; "+resourcePath,ioe);
-        }
-        finally {
-            Closeables.closeQuietly(reader);
-            Closeables.closeQuietly(inputStream);
         }
     }
 

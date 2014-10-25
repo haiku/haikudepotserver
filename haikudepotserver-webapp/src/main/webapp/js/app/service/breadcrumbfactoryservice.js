@@ -409,6 +409,13 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                         titleKey : 'breadcrumb.rootOperations.title',
                         path : '/rootoperations'
                     });
+                },
+
+                createReports : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.reports.title',
+                        path : '/reports'
+                    });
                 }
 
             };

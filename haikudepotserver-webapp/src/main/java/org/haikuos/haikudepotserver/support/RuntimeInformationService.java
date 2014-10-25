@@ -25,10 +25,7 @@ public class RuntimeInformationService {
         if(null==buildProperties) {
             buildProperties = new Properties();
 
-            InputStream inputStream = null;
-
-            try {
-                inputStream = RuntimeInformationService.class.getResourceAsStream("/build.properties");
+            try (InputStream inputStream = RuntimeInformationService.class.getResourceAsStream("/build.properties")) {
 
                 if(null==inputStream) {
                     throw new IllegalStateException("the build properties do not seem to be present.");
@@ -38,9 +35,6 @@ public class RuntimeInformationService {
             }
             catch(IOException ioe) {
                 throw new IllegalStateException("an issue has arisen loading the build properties");
-            }
-            finally {
-                Closeables.closeQuietly(inputStream);
             }
         }
 

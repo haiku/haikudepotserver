@@ -14,7 +14,6 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthenticationHelper;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase;
 import org.junit.After;
 import org.junit.Before;
@@ -70,10 +69,8 @@ public abstract class AbstractIntegrationTest {
     protected CapturingMailSender mailSender;
 
     protected byte[] getResourceData(String path) throws IOException {
-        InputStream inputStream = null;
 
-        try {
-            inputStream = this.getClass().getResourceAsStream(path);
+        try (InputStream inputStream = this.getClass().getResourceAsStream(path)) {
 
             if(null==inputStream) {
                 throw new IllegalStateException("unable to find the test resource; "+path);
@@ -81,30 +78,21 @@ public abstract class AbstractIntegrationTest {
 
             return ByteStreams.toByteArray(inputStream);
         }
-        finally {
-            Closeables.closeQuietly(inputStream);
-        }
     }
 
     private String getDatabaseName(Connection connection) throws SQLException {
         Preconditions.checkNotNull(connection);
 
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
-        try {
-            preparedStatement = connection.prepareStatement("SELECT current_database()");
-            resultSet = preparedStatement.executeQuery();
+        try (
+                PreparedStatement preparedStatement = connection.prepareStatement("SELECT current_database()");
+                ResultSet resultSet = preparedStatement.executeQuery();
+        ) {
 
             if(!resultSet.next()) {
                 throw new IllegalStateException("unable to get the current database name");
             }
 
             return resultSet.getString(1);
-        }
-        finally {
-            Closeables.closeQuietly(resultSet);
-            Closeables.closeQuietly(preparedStatement);
         }
     }
 
@@ -137,11 +125,7 @@ public abstract class AbstractIntegrationTest {
 
         for(ManagedDatabase managedDatabase : managedDatabases.values()) {
 
-            Connection connection = null;
-            PreparedStatement statement = null;
-
-            try {
-                connection = managedDatabase.getDataSource().getConnection();
+            try (Connection connection = managedDatabase.getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
 
                 String databaseProductName = connection.getMetaData().getDatabaseProductName();
@@ -159,16 +143,14 @@ public abstract class AbstractIntegrationTest {
 
                 {
                     String statementString = "DROP SCHEMA "+managedDatabase.getSchema()+" CASCADE";
-                    statement = connection.prepareStatement(statementString);
-                    statement.execute();
+
+                    try (PreparedStatement statement = connection.prepareStatement(statementString)) {
+                        statement.execute();
+                    }
                 }
             }
             catch(SQLException se) {
                 throw new IllegalStateException("a database problem has arisen in preparing for an integration test",se);
-            }
-            finally {
-                Closeables.closeQuietly(statement);
-                Closeables.closeQuietly(connection);
             }
 
             managedDatabase.migrate();

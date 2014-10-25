@@ -30,7 +30,9 @@ public enum Permission {
     PKG_EDITSCREENSHOT(TargetType.PKG),
     PKG_EDITCATEGORIES(TargetType.PKG),
     PKG_EDITVERSIONLOCALIZATION(TargetType.PKG),
-    PKG_EDITPROMINENCE(TargetType.PKG);
+    PKG_EDITPROMINENCE(TargetType.PKG),
+
+    BULK_CATEGORYCOVERAGESPREADSHEETREPORT(null);
 
     private TargetType requiredTargetType;
 

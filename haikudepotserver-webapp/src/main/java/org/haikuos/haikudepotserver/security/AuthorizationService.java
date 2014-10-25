@@ -213,6 +213,9 @@ public class AuthorizationService {
             case USERRATING_DERIVEANDSTOREFORPKG:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
+            case BULK_CATEGORYCOVERAGESPREADSHEETREPORT:
+                return null!=authenticatedUser;
+
             default:
                 throw new IllegalStateException("unhandled permission; "+permission.name());
         }

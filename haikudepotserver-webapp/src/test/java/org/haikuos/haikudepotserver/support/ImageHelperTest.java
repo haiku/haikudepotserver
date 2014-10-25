@@ -7,22 +7,17 @@ package org.haikuos.haikudepotserver.support;
 
 import com.google.common.io.ByteStreams;
 import org.junit.Test;
-import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.fest.assertions.Assertions.assertThat;
+
 public class ImageHelperTest {
 
     private byte[] getData(String leafname) throws IOException {
-        InputStream inputStream = null;
-
-        try {
-            inputStream = this.getClass().getResourceAsStream(leafname);
+        try (InputStream inputStream = this.getClass().getResourceAsStream(leafname)) {
             return ByteStreams.toByteArray(inputStream);
-        }
-        finally {
-            Closeables.closeQuietly(inputStream);
         }
     }
 

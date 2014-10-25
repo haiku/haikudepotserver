@@ -8,10 +8,8 @@ package org.haikuos.haikudepotserver;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.dataobjects.MediaType;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
-import org.haikuos.haikudepotserver.support.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -52,25 +50,17 @@ public class IntegrationTestSupportService {
     }
 
     private PkgScreenshot addPkgScreenshot(ObjectContext objectContext, Pkg pkg) {
-        InputStream inputStream = null;
-
-        try {
-            inputStream = IntegrationTestSupportService.class.getResourceAsStream("/sample-320x240.png");
+        try (InputStream inputStream = IntegrationTestSupportService.class.getResourceAsStream("/sample-320x240.png")) {
             return pkgService.storePkgScreenshotImage(inputStream, objectContext, pkg);
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading a sample screenshot into a test package",e);
         }
-        finally {
-            Closeables.closeQuietly(inputStream);
-        }
     }
 
     private void addPngPkgIcon(ObjectContext objectContext, Pkg pkg, int size) {
-        InputStream inputStream = null;
 
-        try {
-            inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png", size, size));
+        try (InputStream inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png", size, size))) {
             pkgService.storePkgIconImage(
                     inputStream,
                     MediaType.getByCode(objectContext, com.google.common.net.MediaType.PNG.toString()).get(),
@@ -81,16 +71,12 @@ public class IntegrationTestSupportService {
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading an icon",e);
         }
-        finally {
-            Closeables.closeQuietly(inputStream);
-        }
     }
 
     private void addHvifPkgIcon(ObjectContext objectContext, Pkg pkg) {
-        InputStream inputStream = null;
 
-        try {
-            inputStream = this.getClass().getResourceAsStream("/sample.hvif");
+        try (InputStream inputStream = this.getClass().getResourceAsStream("/sample.hvif")) {
+
             pkgService.storePkgIconImage(
                     inputStream,
                     MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get(),
@@ -100,9 +86,6 @@ public class IntegrationTestSupportService {
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading an icon",e);
-        }
-        finally {
-            Closeables.closeQuietly(inputStream);
         }
     }
 
