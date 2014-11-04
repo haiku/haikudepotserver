@@ -1071,6 +1071,7 @@ public class JsonRpcServer {
         return
                 ObjectNotFoundException.class.isAssignableFrom(t.getClass())
                         || CaptchaBadResponseException.class.isAssignableFrom(t.getClass())
+                        || org.apache.cayenne.validation.ValidationException.class.isAssignableFrom(t.getClass())
                         || ValidationException.class.isAssignableFrom(t.getClass());
     }
 
