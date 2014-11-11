@@ -9,8 +9,6 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.PrefetchTreeNode;
@@ -22,8 +20,6 @@ import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -63,18 +59,6 @@ public class PkgCategoryCoverageSpreadsheetReportController extends AbstractCont
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
 
-    private DateTimeFormatter create14DigitDateTimeFormat() {
-        return
-                new DateTimeFormatterBuilder()
-                .appendYearOfEra(4,4)
-                .appendMonthOfYear(2)
-                .appendDayOfMonth(2)
-                .appendHourOfDay(2)
-                .appendMinuteOfHour(2)
-                .appendSecondOfMinute(2)
-                .toFormatter();
-    }
-
     @RequestMapping(value="download.csv", method = RequestMethod.GET)
     public void generate(HttpServletResponse response) throws IOException {
 
@@ -85,19 +69,12 @@ public class PkgCategoryCoverageSpreadsheetReportController extends AbstractCont
         if(!authorizationService.check(
                 context,
                 user.orNull(),
-                null, Permission.BULK_CATEGORYCOVERAGESPREADSHEETREPORT)) {
+                null, Permission.BULK_PKGCATEGORYCOVERAGESPREADSHEETREPORT)) {
             LOGGER.warn("attempt to access a bulk category coverage spreadsheet report, but was unauthorized");
             throw new AuthorizationFailure();
         }
 
-        String filename = String.format(
-                "hds_pkgcategorycoveragespreadsheetreport_%s.csv",
-                create14DigitDateTimeFormat().print(System.currentTimeMillis()));
-
-        response.setContentType(MediaType.CSV_UTF_8.toString());
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+filename);
-        response.setDateHeader(HttpHeaders.EXPIRES, 0);
-        response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
+        setHeadersForCsvDownload(response, "pkgcategorycoveragespreadsheetreport");
 
         final CSVWriter writer = new CSVWriter(response.getWriter(), ',');
 

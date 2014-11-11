@@ -27,6 +27,14 @@ angular.module('haikudepotserver').controller(
                     _.random(0,1000);
             }
 
+            $scope.goPkgProminenceSpreadsheetReport = function() {
+                var iframeEl = document.getElementById("download-iframe");
+                iframeEl.src = '/secured/pkg/pkgprominencespreadsheetreport/download.csv?hdsbtok=' +
+                userState.user().token +
+                '&rnd=' +
+                _.random(0,1000);
+            }
+
         }
     ]
 );
