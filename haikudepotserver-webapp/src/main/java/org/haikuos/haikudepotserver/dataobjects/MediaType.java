@@ -11,7 +11,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._MediaType;
 
 import java.util.List;
@@ -23,6 +25,13 @@ public class MediaType extends _MediaType {
     public final static String EXTENSION_HAIKUVECTORICONFILE = "hvif";
 
     public final static String EXTENSION_PNG = "png";
+
+    public static List<MediaType> getAll(ObjectContext context) {
+        Preconditions.checkNotNull(context);
+        SelectQuery query = new SelectQuery(MediaType.class);
+        query.addOrdering(new Ordering(CODE_PROPERTY, SortOrder.ASCENDING));
+        return (List<MediaType>) context.performQuery(query);
+    }
 
     /**
      * <p>Files can have extensions that help to signify what sort of files they are.  For example, a PNG file would

@@ -19,21 +19,25 @@ angular.module('haikudepotserver').controller(
 
             // the random aspect here is so that it is unlikely to cache the result.
 
-            $scope.goPkgCategoryCoverageSpreadsheetReport = function() {
+            function goSecuredCsvReport(pathPart) {
                 var iframeEl = document.getElementById("download-iframe");
-                iframeEl.src = '/secured/pkg/pkgcategorycoveragespreadsheetreport/download.csv?hdsbtok=' +
-                    userState.user().token +
-                    '&rnd=' +
-                    _.random(0,1000);
-            }
-
-            $scope.goPkgProminenceSpreadsheetReport = function() {
-                var iframeEl = document.getElementById("download-iframe");
-                iframeEl.src = '/secured/pkg/pkgprominencespreadsheetreport/download.csv?hdsbtok=' +
+                iframeEl.src = '/secured/'+pathPart+'/download.csv?hdsbtok=' +
                 userState.user().token +
                 '&rnd=' +
                 _.random(0,1000);
             }
+
+            $scope.goPkgCategoryCoverageSpreadsheetReport = function() {
+                goSecuredCsvReport('pkg/pkgcategorycoveragespreadsheetreport');
+            };
+
+            $scope.goPkgProminenceSpreadsheetReport = function() {
+                goSecuredCsvReport('pkg/pkgprominencespreadsheetreport');
+            };
+
+            $scope.goPkgIconSpreadsheetReport = function() {
+                goSecuredCsvReport('pkg/pkgiconspreadsheetreport');
+            };
 
         }
     ]

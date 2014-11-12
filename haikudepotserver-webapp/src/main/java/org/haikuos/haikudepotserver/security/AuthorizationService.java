@@ -214,6 +214,7 @@ public class AuthorizationService {
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case BULK_PKGPROMINENCESPREADSHEETREPORT:
+            case BULK_PKGICONSPREADSHEETREPORT:
             case BULK_PKGCATEGORYCOVERAGESPREADSHEETREPORT:
                 return null!=authenticatedUser;
 

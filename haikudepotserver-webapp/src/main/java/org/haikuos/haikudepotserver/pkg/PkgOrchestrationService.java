@@ -5,10 +5,7 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import com.google.common.base.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -19,10 +16,7 @@ import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.*;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.pkg.model.BadPkgIconException;
-import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
-import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
+import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.haikuos.haikudepotserver.support.ImageHelper;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
@@ -38,10 +32,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -477,6 +468,79 @@ public class PkgOrchestrationService {
         }
 
         return pkgIconOptional.get();
+    }
+
+    private List<MediaType> getInUsePkgIconMediaTypes(final ObjectContext context) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("SELECT ");
+        queryString.append(" DISTINCT pi.");
+        queryString.append(PkgIcon.MEDIA_TYPE_PROPERTY + "." + MediaType.CODE_PROPERTY);
+        queryString.append(" FROM ");
+        queryString.append(PkgIcon.class.getSimpleName());
+        queryString.append(" pi");
+
+        EJBQLQuery query = new EJBQLQuery(queryString.toString());
+
+        final List<String> codes = context.performQuery(query);
+
+        return Lists.transform(
+                codes,
+                new Function<String, MediaType>() {
+                    @Override
+                    public MediaType apply(String input) {
+                        return MediaType.getByCode(context, input).get();
+                    }
+                }
+        );
+
+    }
+
+    private List<Integer> getInUsePkgIconSizes(ObjectContext context, MediaType mediaType) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("SELECT ");
+        queryString.append(" DISTINCT pi.");
+        queryString.append(PkgIcon.SIZE_PROPERTY);
+        queryString.append(" FROM ");
+        queryString.append(PkgIcon.class.getSimpleName());
+        queryString.append(" pi WHERE pi.");
+        queryString.append(PkgIcon.MEDIA_TYPE_PROPERTY);
+        queryString.append(" = :mediaType");
+
+        EJBQLQuery query = new EJBQLQuery(queryString.toString());
+        query.setParameter("mediaType", mediaType);
+
+        return (List<Integer>) context.performQuery(query);
+    }
+
+    /**
+     * <p>The packages are configured with icons.  Each icon has a media type and,
+     * optionally a size.  This method will return all of those possible media
+     * type + size combinations that are actually in use at the moment.  The list
+     * will be unique.</p>
+     */
+
+    public List<PkgIconConfiguration> getInUsePkgIconConfigurations(ObjectContext objectContext) {
+        Preconditions.checkState(null!=objectContext,"the object context must be supplied");
+        List<PkgIconConfiguration> result = Lists.newArrayList();
+
+        for(MediaType mediaType : getInUsePkgIconMediaTypes(objectContext)) {
+            List<Integer> sizes = getInUsePkgIconSizes(objectContext, mediaType);
+
+            if(sizes.isEmpty()) {
+                result.add(new PkgIconConfiguration(mediaType, null));
+            }
+            else {
+                for(Integer size : sizes) {
+                    result.add(new PkgIconConfiguration(mediaType, size));
+                }
+            }
+        }
+
+        Collections.sort(result);
+
+        return result;
     }
 
     // ------------------------------
