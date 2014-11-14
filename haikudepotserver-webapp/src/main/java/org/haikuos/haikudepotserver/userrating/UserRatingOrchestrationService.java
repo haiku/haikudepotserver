@@ -16,6 +16,7 @@ import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.dataobjects.UserRating;
+import org.haikuos.haikudepotserver.support.Callback;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haikuos.haikudepotserver.userrating.model.UserRatingSearchSpecification;
@@ -49,7 +50,69 @@ public class UserRatingOrchestrationService {
     @Resource
     ServerRuntime serverRuntime;
 
-    // ------------------------------
+    // -------------------------------------
+    // ITERATION
+
+    /**
+     * <p>This will be called for each user rating in the system with some constraints.</p>
+     * @param c is the callback to invoke.
+     * @return the quantity of user ratings processed.
+     */
+
+    // TODO; somehow prefetch the user?  prefetch tree?
+
+    public int each(
+            ObjectContext context,
+            UserRatingSearchSpecification search,
+            Callback<UserRating> c) {
+
+        Preconditions.checkNotNull(c);
+        Preconditions.checkNotNull(context);
+
+        int count = 0;
+        StringBuilder queryExpression = new StringBuilder();
+        List<Object> parameters = Lists.newArrayList();
+
+        queryExpression.append("SELECT ur FROM UserRating ur");
+
+        if(null!=search) {
+            queryExpression.append(" WHERE ");
+            queryExpression.append(prepareWhereClause(parameters, context, search));
+        }
+
+        queryExpression.append(" ORDER BY ur.createTimestamp DESC, ur.code DESC");
+
+        EJBQLQuery query = new EJBQLQuery(queryExpression.toString());
+
+        for(int i=0;i<parameters.size();i++) {
+            query.setParameter(i + 1, parameters.get(i));
+        }
+
+        query.setFetchLimit(100);
+
+        // now loop through the user ratings.
+
+        while(true) {
+
+            query.setFetchOffset(count);
+            List<UserRating> userRatings = (List<UserRating>) context.performQuery(query);
+
+            if(userRatings.isEmpty()) {
+                return count;
+            }
+
+            for(UserRating userRating : userRatings) {
+                if(!c.process(userRating)) {
+                    return count;
+                }
+            }
+
+            count += userRatings.size();
+        }
+
+    }
+
+    // -------------------------------------
     // SEARCH
 
     private String prepareWhereClause(

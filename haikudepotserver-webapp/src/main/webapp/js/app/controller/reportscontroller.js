@@ -39,6 +39,10 @@ angular.module('haikudepotserver').controller(
                 goSecuredCsvReport('pkg/pkgiconspreadsheetreport');
             };
 
+            $scope.goUserRatingSpreadsheetReportAll = function() {
+                goSecuredCsvReport('userrating/userratingspreadsheetreport');
+            };
+
         }
     ]
 );

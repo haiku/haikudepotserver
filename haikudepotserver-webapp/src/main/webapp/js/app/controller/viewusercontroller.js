@@ -111,11 +111,26 @@ angular.module('haikudepotserver').controller(
 
             $scope.goDeactivate = function() {
                 setActive(false);
-            }
+            };
 
             $scope.goReactivate = function() {
                 setActive(true);
-            }
+            };
+
+            /**
+             * <p>This function will produce a spreadsheet of the user ratings for this
+             * package.</p>
+             */
+
+            $scope.goDownloadUserRatings = function() {
+                var iframeEl = document.getElementById("download-iframe");
+                iframeEl.src = '/secured/userrating/userratingspreadsheetreport/download.csv?hdsbtok=' +
+                userState.user().token +
+                '&nicknam=' +
+                $routeParams.nickname +
+                '&rnd=' +
+                _.random(0,1000);
+            };
 
         }
     ]

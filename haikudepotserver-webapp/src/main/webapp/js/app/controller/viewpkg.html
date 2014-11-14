@@ -158,6 +158,19 @@
                         <message key="viewPkg.userRating.addAction.title"></message>
                     </a>
                 </li>
+                <li pkg="pkg" show-if-pkg-permission="'BULK_USERRATINGSPREADSHEETREPORT_PKG'" ng-show="userRatings.items.length">
+                    <a href="" ng-click="goDownloadUserRatings()">
+                        <message key="viewPkg.downloadUserRatingsAction.title"></message>
+                    </a>
+                </li>
+                <li show-if-permission="'USERRATING_DERIVEANDSTOREFORPKG'">
+                    <a href="" ng-click="goDeriveAndStoreUserRating()">
+                        <message key="viewPkg.deriveAndStoreUserRatingAction.title"></message>
+                    </a>
+                    <span ng-show="didDeriveAndStoreUserRating">
+                        <em><message key="viewPkg.deriveAndStoreUserRatingAction.completed"></message></em>
+                    </span>
+                </li>
             </ul>
         </div>
 
@@ -211,14 +224,6 @@
                 <a href="" ng-click="goEditPkgCategories()">
                     <message key="viewPkg.editPkgCategoriesAction.title"></message>
                 </a>
-            </li>
-            <li pkg="pkg" show-if-permission="'USERRATING_DERIVEANDSTOREFORPKG'">
-                <a href="" ng-click="goDeriveAndStoreUserRating()">
-                    <message key="viewPkg.deriveAndStoreUserRatingAction.title"></message>
-                </a>
-                <span ng-show="didDeriveAndStoreUserRating">
-                    <em><message key="viewPkg.deriveAndStoreUserRatingAction.completed"></message></em>
-                </span>
             </li>
         </ul>
     </div>

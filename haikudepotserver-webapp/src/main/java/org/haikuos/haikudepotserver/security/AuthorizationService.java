@@ -128,7 +128,9 @@ public class AuthorizationService {
 
         Preconditions.checkNotNull(permission);
         Preconditions.checkNotNull(objectContext);
-        Preconditions.checkState(deriveTargetType(target) == permission.getRequiredTargetType());
+        Preconditions.checkState(
+                deriveTargetType(target) == permission.getRequiredTargetType(),
+                "during checking authorization, the target object type " + deriveTargetType(target) + " does not match the expected type "  + permission.getRequiredTargetType());
 
         // if the authenticated user is not active then there should not be a situation arising where
         // an authorization check is being made.
@@ -217,6 +219,17 @@ public class AuthorizationService {
             case BULK_PKGICONSPREADSHEETREPORT:
             case BULK_PKGCATEGORYCOVERAGESPREADSHEETREPORT:
                 return null!=authenticatedUser;
+
+            case BULK_USERRATINGSPREADSHEETREPORT_ALL:
+                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+
+            case BULK_USERRATINGSPREADSHEETREPORT_PKG:
+                return null!=authenticatedUser;
+
+            case BULK_USERRATINGSPREADSHEETREPORT_USER:
+                return null!=authenticatedUser &&
+                        (authenticatedUser.getIsRoot() ||
+                                authenticatedUser.getNickname().equals(((User) target).getNickname()));
 
             default:
                 throw new IllegalStateException("unhandled permission; "+permission.name());
