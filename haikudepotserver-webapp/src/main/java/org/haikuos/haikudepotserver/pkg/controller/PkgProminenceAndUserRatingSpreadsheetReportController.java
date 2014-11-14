@@ -34,10 +34,10 @@ import java.io.IOException;
  */
 
 @Controller
-@RequestMapping("/secured/pkg/pkgprominencespreadsheetreport")
-public class PkgProminenceSpreadsheetReportController extends AbstractController {
+@RequestMapping("/secured/pkg/pkgprominenceanduserratingspreadsheetreport")
+public class PkgProminenceAndUserRatingSpreadsheetReportController extends AbstractController {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgProminenceSpreadsheetReportController.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PkgProminenceAndUserRatingSpreadsheetReportController.class);
 
     @Resource
     private AuthorizationService authorizationService;
@@ -58,16 +58,22 @@ public class PkgProminenceSpreadsheetReportController extends AbstractController
         if(!authorizationService.check(
                 context,
                 user.orNull(),
-                null, Permission.BULK_PKGPROMINENCESPREADSHEETREPORT)) {
-            LOGGER.warn("attempt to access a bulk prominence coverage spreadsheet report, but was unauthorized");
+                null, Permission.BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT)) {
+            LOGGER.warn("attempt to access a prominence and user rating coverage spreadsheet report, but was unauthorized");
             throw new AuthorizationFailure();
         }
 
-        setHeadersForCsvDownload(response, "pkgprominencespreadsheetreport");
+        setHeadersForCsvDownload(response, "pkgprominenceanduserratingspreadsheetreport");
 
         final CSVWriter writer = new CSVWriter(response.getWriter(), ',');
 
-        writer.writeNext(new String[] { "pkg-name", "prominence-name", "prominence-ordering" });
+        writer.writeNext(new String[] {
+                "pkg-name",
+                "prominence-name",
+                "prominence-ordering",
+                "derived-rating",
+                "derived-rating-sample-size"
+        });
 
         // stream out the packages.
 
@@ -82,7 +88,9 @@ public class PkgProminenceSpreadsheetReportController extends AbstractController
                         new String[] {
                                 pkg.getName(),
                                 pkg.getProminence().getName(),
-                                pkg.getProminence().getOrdering().toString()
+                                pkg.getProminence().getOrdering().toString(),
+                                null==pkg.getDerivedRating() ? "" : pkg.getDerivedRating().toString(),
+                                null==pkg.getDerivedRating() ? "" : pkg.getDerivedRatingSampleSize().toString()
                         }
                 );
 

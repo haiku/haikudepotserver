@@ -31,8 +31,8 @@ angular.module('haikudepotserver').controller(
                 goSecuredCsvReport('pkg/pkgcategorycoveragespreadsheetreport');
             };
 
-            $scope.goPkgProminenceSpreadsheetReport = function() {
-                goSecuredCsvReport('pkg/pkgprominencespreadsheetreport');
+            $scope.goPkgProminenceAndUserRatingSpreadsheetReport = function() {
+                goSecuredCsvReport('pkg/pkgprominenceanduserratingspreadsheetreport');
             };
 
             $scope.goPkgIconSpreadsheetReport = function() {
