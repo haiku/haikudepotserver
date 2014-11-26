@@ -9,7 +9,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Optional;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.PrefetchTreeNode;
+import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * <p>This report generates a report that lists the prominence of the packages.</p>
@@ -80,23 +81,27 @@ public class PkgProminenceAndUserRatingSpreadsheetReportController extends Abstr
         long startMs = System.currentTimeMillis();
         LOGGER.info("will produce prominence spreadsheet report");
 
-        int count = pkgOrchestrationService.each(context, new PrefetchTreeNode(), new Callback<Pkg>() {
-            @Override
-            public boolean process(Pkg pkg) {
+        int count = pkgOrchestrationService.each(
+                context,
+                null,
+                Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)),
+                new Callback<Pkg>() {
+                    @Override
+                    public boolean process(Pkg pkg) {
 
-                writer.writeNext(
-                        new String[] {
-                                pkg.getName(),
-                                pkg.getProminence().getName(),
-                                pkg.getProminence().getOrdering().toString(),
-                                null==pkg.getDerivedRating() ? "" : pkg.getDerivedRating().toString(),
-                                null==pkg.getDerivedRating() ? "" : pkg.getDerivedRatingSampleSize().toString()
-                        }
-                );
+                        writer.writeNext(
+                                new String[] {
+                                        pkg.getName(),
+                                        pkg.getProminence().getName(),
+                                        pkg.getProminence().getOrdering().toString(),
+                                        null==pkg.getDerivedRating() ? "" : pkg.getDerivedRating().toString(),
+                                        null==pkg.getDerivedRating() ? "" : pkg.getDerivedRatingSampleSize().toString()
+                                }
+                        );
 
-                return true;
-            }
-        });
+                        return true;
+                    }
+                });
 
         LOGGER.info(
                 "did produce prominence spreadsheet report for {} packages in {}ms",

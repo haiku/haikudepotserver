@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.PrefetchTreeNode;
+import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -108,30 +110,34 @@ public class PkgIconSpreadsheetReportController extends AbstractController {
         PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
         prefetchTreeNode.addPath(Pkg.PKG_ICONS_PROPERTY);
 
-        int count = pkgOrchestrationService.each(context, prefetchTreeNode, new Callback<Pkg>() {
-            @Override
-            public boolean process(Pkg pkg) {
+        int count = pkgOrchestrationService.each(
+                context,
+                prefetchTreeNode,
+                Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)),
+                new Callback<Pkg>() {
+                    @Override
+                    public boolean process(Pkg pkg) {
 
-                List<String> cells = Lists.newArrayList();
-                cells.add(pkg.getName());
+                        List<String> cells = Lists.newArrayList();
+                        cells.add(pkg.getName());
 
-                cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");
+                        cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");
 
-                for(PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
-                    cells.add(
-                            pkg.getPkgIcon(
-                                    pkgIconConfiguration.getMediaType(),
-                                    pkgIconConfiguration.getSize()
-                            ).isPresent()
-                                    ? MARKER
-                                    : "");
-                }
+                        for(PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
+                            cells.add(
+                                    pkg.getPkgIcon(
+                                            pkgIconConfiguration.getMediaType(),
+                                            pkgIconConfiguration.getSize()
+                                    ).isPresent()
+                                            ? MARKER
+                                            : "");
+                        }
 
-                writer.writeNext(cells.toArray(new String[cells.size()]));
+                        writer.writeNext(cells.toArray(new String[cells.size()]));
 
-                return true;
-            }
-        });
+                        return true;
+                    }
+                });
 
         LOGGER.info(
                 "did produce icon report for {} packages in {}ms",

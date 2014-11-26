@@ -7,7 +7,9 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -15,6 +17,7 @@ import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._Architecture;
 
+import java.util.Collection;
 import java.util.List;
 
 public class Architecture extends _Architecture {
@@ -37,6 +40,22 @@ public class Architecture extends _Architecture {
                         Architecture.class,
                         ExpressionFactory.matchExp(Architecture.CODE_PROPERTY, code))),
                 null));
+    }
+
+    /**
+     * <p>This method will return all of the architectures except for those that are identified by
+     * the supplied list of codes.</p>
+     */
+
+    public static List<Architecture> getAllExceptByCode(ObjectContext context, final Collection<String> codes) {
+        Preconditions.checkArgument(null!=context);
+        Preconditions.checkArgument(null!=codes);
+        return ImmutableList.copyOf(Iterables.filter(getAll(context), new Predicate<Architecture>() {
+            @Override
+            public boolean apply(Architecture input) {
+                return !codes.contains(input.getCode());
+            }
+        }));
     }
 
     @Override

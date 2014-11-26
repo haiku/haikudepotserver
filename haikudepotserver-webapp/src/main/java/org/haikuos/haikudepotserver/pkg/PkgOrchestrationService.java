@@ -14,7 +14,9 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.*;
+import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.PrefetchTreeNode;
+import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.support.Callback;
@@ -32,7 +34,10 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -967,17 +972,62 @@ public class PkgOrchestrationService {
      * @return the quantity of packages processed.
      */
 
-    public int each(ObjectContext context, PrefetchTreeNode prefetchTreeNode, Callback<Pkg> c) {
+    public int each(
+            ObjectContext context,
+            PrefetchTreeNode prefetchTreeNode,
+            List<Architecture> architectures,
+            Callback<Pkg> c) {
+
         Preconditions.checkNotNull(c);
         Preconditions.checkNotNull(context);
 
-        SelectQuery query = new SelectQuery(
-                Pkg.class,
-                ExpressionFactory.matchExp(Pkg.ACTIVE_PROPERTY, Boolean.TRUE),
-                Collections.singletonList(new Ordering(Pkg.NAME_PROPERTY, SortOrder.ASCENDING)));
+        if(null!=architectures && architectures.isEmpty()) {
+            return 0;
+        }
 
-        if(null != prefetchTreeNode) {
-            query.setPrefetchTree(prefetchTreeNode);
+        StringBuilder queryString = new StringBuilder();
+        List<Object> parameters = Lists.newArrayList();
+
+        queryString.append("SELECT p FROM ");
+        queryString.append(Pkg.class.getSimpleName());
+        queryString.append(" p");
+
+// [apl 26.nov.2014] not working in Cayenne 3.1; maybe try again for Cayenne 3.2
+//        if(null!=prefetchTreeNode) {
+//            queryString.append(PrefetchTreeNodeHelper.toEJBQL(prefetchTreeNode, "p"));
+//        }
+
+        queryString.append(" WHERE p.active=true");
+
+        if(null!=architectures) {
+            queryString.append(" AND EXISTS(SELECT pv FROM ");
+            queryString.append(PkgVersion.class.getSimpleName());
+            queryString.append(" pv WHERE pv.");
+            queryString.append(PkgVersion.PKG_PROPERTY);
+            queryString.append("=p");
+            queryString.append(" AND pv.");
+            queryString.append(PkgVersion.ARCHITECTURE_PROPERTY);
+            queryString.append(" IN (");
+
+            for(int i=0;i<architectures.size();i++) {
+                if(0!=i) {
+                    queryString.append(",");
+                }
+
+                queryString.append("?"+(parameters.size()+1));
+                parameters.add(architectures.get(i));
+            }
+
+            queryString.append(")");
+            queryString.append(")");
+        }
+
+        queryString.append(" ORDER BY p.name ASC");
+
+        EJBQLQuery query = new EJBQLQuery(queryString.toString());
+
+        for(int i=0;i<parameters.size();i++) {
+            query.setParameter(i+1, parameters.get(i));
         }
 
         int offset = 0;

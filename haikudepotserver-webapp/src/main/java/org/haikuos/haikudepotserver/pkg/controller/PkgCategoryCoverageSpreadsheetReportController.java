@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.PrefetchTreeNode;
+import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -106,24 +108,28 @@ public class PkgCategoryCoverageSpreadsheetReportController extends AbstractCont
         long startMs = System.currentTimeMillis();
         LOGGER.info("will produce category coverage spreadsheet report");
 
-        int count = pkgOrchestrationService.each(context, treeNode, new Callback<Pkg>() {
-            @Override
-            public boolean process(Pkg pkg) {
+        int count = pkgOrchestrationService.each(
+                context,
+                treeNode,
+                Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)),
+                new Callback<Pkg>() {
+                    @Override
+                    public boolean process(Pkg pkg) {
 
-                List<String> cols = Lists.newArrayList();
-                cols.add(pkg.getName());
+                        List<String> cols = Lists.newArrayList();
+                        cols.add(pkg.getName());
 
-                cols.add(pkg.getPkgPkgCategories().isEmpty() ? MARKER : "");
+                        cols.add(pkg.getPkgPkgCategories().isEmpty() ? MARKER : "");
 
-                for(String pkgCategoryCode : pkgCategoryCodes) {
-                    cols.add(pkg.getPkgPkgCategory(pkgCategoryCode).isPresent() ? MARKER : "");
-                }
+                        for(String pkgCategoryCode : pkgCategoryCodes) {
+                            cols.add(pkg.getPkgPkgCategory(pkgCategoryCode).isPresent() ? MARKER : "");
+                        }
 
-                writer.writeNext(cols.toArray(new String[cols.size()]));
+                        writer.writeNext(cols.toArray(new String[cols.size()]));
 
-                return true;
-            }
-        });
+                        return true;
+                    }
+                });
 
         LOGGER.info(
                 "did produce category coverage spreadsheet report for {} packages in {}ms",
