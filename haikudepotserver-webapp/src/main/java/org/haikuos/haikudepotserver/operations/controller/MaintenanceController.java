@@ -7,7 +7,9 @@ package org.haikuos.haikudepotserver.operations.controller;
 
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceService;
+import org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner;
+import org.haikuos.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
+import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,7 +27,7 @@ import java.io.IOException;
 public class MaintenanceController {
 
     @Resource
-    PasswordResetMaintenanceService passwordResetMaintenanceService;
+    private JobOrchestrationService jobOrchestrationService;
 
     /**
      * <p>This triggers medium-term maintenance tasks.  It is suggested that this might be triggered
@@ -36,7 +38,10 @@ public class MaintenanceController {
     public void fetch(
             HttpServletResponse response) throws IOException {
 
-        passwordResetMaintenanceService.submit();
+        jobOrchestrationService.clearExpiredJobs();
+        jobOrchestrationService.submit(
+                new PasswordResetMaintenanceJobSpecification(),
+                JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());

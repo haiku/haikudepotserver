@@ -25,13 +25,12 @@ import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.user.LdapSynchronizeUsersService;
+import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.user.UserOrchestrationService;
-import org.haikuos.haikudepotserver.user.model.LdapSynchronizeUsersJob;
+import org.haikuos.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
 import org.haikuos.haikudepotserver.user.model.UserSearchSpecification;
-import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
 import org.haikuos.haikudepotserver.userrating.UserRatingOrchestrationService;
-import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
+import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -46,31 +45,28 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    AuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Resource
-    CaptchaService captchaService;
+    private CaptchaService captchaService;
 
     @Resource
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
 
     @Resource
-    UserOrchestrationService userOrchestrationService;
+    private UserOrchestrationService userOrchestrationService;
 
     @Resource
-    UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingOrchestrationService userRatingOrchestrationService;
 
     @Resource
-    UserRatingDerivationService userRatingDerivationService;
+    private PasswordResetOrchestrationService passwordResetOrchestrationService;
 
     @Resource
-    PasswordResetOrchestrationService passwordResetOrchestrationService;
-
-    @Resource
-    LdapSynchronizeUsersService ldapUpdateUsersService;
+    private JobOrchestrationService jobOrchestrationService;
 
     @Override
     public SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest) {
@@ -86,7 +82,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             throw new AuthorizationFailureException();
         }
 
-        ldapUpdateUsersService.submit(new LdapSynchronizeUsersJob());
+        jobOrchestrationService.submit(
+                new LdapSynchronizeUsersJobSpecification(),
+                JobOrchestrationService.CoalesceMode.QUEUED);
 
         return new SynchronizeUsersResult();
     }
@@ -173,7 +171,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                         user.get().toString());
 
                 for(String pkgName : pkgNames) {
-                    userRatingDerivationService.submit(new UserRatingDerivationJob(pkgName));
+                    jobOrchestrationService.submit(
+                            new UserRatingDerivationJobSpecification(pkgName),
+                            JobOrchestrationService.CoalesceMode.QUEUED);
                 }
             }
 

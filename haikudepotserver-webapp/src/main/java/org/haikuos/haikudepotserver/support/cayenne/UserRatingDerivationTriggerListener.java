@@ -10,8 +10,8 @@ import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
 import org.haikuos.haikudepotserver.dataobjects.UserRating;
-import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
-import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
+import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -24,10 +24,10 @@ import javax.annotation.Resource;
 public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    UserRatingDerivationService userRatingDerivationService;
+    private JobOrchestrationService jobOrchestrationService;
 
     @PostConstruct
     public void init() {
@@ -39,7 +39,9 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
         Preconditions.checkNotNull(entity);
         UserRating userRating = (UserRating) entity;
         String pkgName = userRating.getPkgVersion().getPkg().getName();
-        userRatingDerivationService.submit(new UserRatingDerivationJob(pkgName));
+        jobOrchestrationService.submit(
+                new UserRatingDerivationJobSpecification(pkgName),
+                JobOrchestrationService.CoalesceMode.QUEUED);
     }
 
     @Override

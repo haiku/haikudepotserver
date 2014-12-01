@@ -20,13 +20,13 @@ import org.haikuos.haikudepotserver.api1.support.ValidationException;
 import org.haikuos.haikudepotserver.api1.support.ValidationFailure;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
-import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJob;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haikuos.haikudepotserver.repository.RepositoryImportService;
 import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;
+import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haikuos.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -49,7 +49,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     RepositoryOrchestrationService repositoryService;
 
     @Resource
-    RepositoryImportService repositoryImportService;
+    JobOrchestrationService jobOrchestrationService;
 
     // note; no integration test for this one.
     @Override
@@ -76,7 +76,9 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new AuthorizationFailureException();
         }
 
-        repositoryImportService.submit(new PkgRepositoryImportJob(repositoryOptional.get().getCode()));
+        jobOrchestrationService.submit(
+                new PkgRepositoryImportJobSpecification(repositoryOptional.get().getCode()),
+                JobOrchestrationService.CoalesceMode.QUEUED);
 
         return new TriggerImportRepositoryResult();
     }

@@ -8,7 +8,7 @@
 
     <bean class="org.haikuos.haikudepotserver.IntegrationTestSupportService"/>
     <bean class="org.haikuos.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
-    <bean class="org.haikuos.haikudepotserver.user.NoopLdapSynchronizeUsersService"/>
+    <bean class="org.haikuos.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
     <bean id="mailSender" class="org.haikuos.haikudepotserver.CapturingMailSender"/>
 
 

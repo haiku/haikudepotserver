@@ -8,8 +8,9 @@ package org.haikuos.haikudepotserver.repository.controller;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import org.haikuos.haikudepotserver.repository.RepositoryImportService;
-import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJob;
+import org.haikuos.haikudepotserver.repository.PkgRepositoryImportJobRunner;
+import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
+import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -37,7 +38,7 @@ public class RepositoryImportController {
     public final static String KEY_CODE = "code";
 
     @Resource
-    RepositoryImportService importRepositoryDataService;
+    JobOrchestrationService jobOrchestrationService;
 
     @RequestMapping(method = RequestMethod.GET)
     public void fetch(
@@ -52,7 +53,10 @@ public class RepositoryImportController {
                 response.getWriter().print(String.format("expected '%s' to have been a query argument to this resource\n",KEY_CODE));
             }
             else {
-                importRepositoryDataService.submit(new PkgRepositoryImportJob(repositoryCode));
+                jobOrchestrationService.submit(
+                        new PkgRepositoryImportJobSpecification(repositoryCode),
+                        JobOrchestrationService.CoalesceMode.QUEUED);
+
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
                 response.getWriter().print(String.format("accepted import repository job for repository %s\n",repositoryCode));

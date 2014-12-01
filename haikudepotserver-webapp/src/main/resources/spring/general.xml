@@ -46,20 +46,14 @@
 
     <bean class="org.haikuos.haikudepotserver.support.RuntimeInformationService"/>
 
-    <!-- IMPORTING REPOSITORY FILES -->
+    <!-- JOB MANAGEMENT -->
 
-    <bean
-            class="org.haikuos.haikudepotserver.repository.RepositoryImportService"
-            init-method="startAsyncAndAwaitRunning"
-            destroy-method="stopAsyncAndAwaitTerminated">
-    </bean>
+    <bean class="org.haikuos.haikudepotserver.repository.PkgRepositoryImportJobRunner"/>
+    <bean class="org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner"/>
 
-    <!-- DELETE EXPIRED PASSWORD RESET TOKENS -->
-
-    <bean
-            class="org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceService"
-            init-method="startAsyncAndAwaitRunning"
-            destroy-method="stopAsyncAndAwaitTerminated">
+    <bean class="org.haikuos.haikudepotserver.support.job.LocalJobOrchestrationService"
+          init-method="startAsyncAndAwaitRunning"
+          destroy-method="stopAsyncAndAwaitTerminated">
     </bean>
 
     <!-- EMAIL -->

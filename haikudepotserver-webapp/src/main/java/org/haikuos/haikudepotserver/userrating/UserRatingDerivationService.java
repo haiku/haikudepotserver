@@ -5,7 +5,7 @@
 
 package org.haikuos.haikudepotserver.userrating;
 
-import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
+import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 
 /**
  * <p>User ratings are collected from users.  User ratings can then be used to derive a overall or 'aggregated'
@@ -16,6 +16,6 @@ import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
 
 public interface UserRatingDerivationService {
 
-    public void submit(final UserRatingDerivationJob job);
+    public void submit(final UserRatingDerivationJobSpecification job);
 
 }

@@ -16,6 +16,7 @@ import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.Entity;
+import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
@@ -344,6 +345,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return version;
     }
 
+    /**
+     * <p>This method will bump the view counter for the package version.  It will also try to prevent
+     * a user from the same client (IP) from doing this more than once within a reasonable stand-down
+     * time.  This is prone to optimistic locking failure because lots of people can look at the same
+     * package at the same time.  For this reason, it will try to load the data into a different
+     * {@link org.apache.cayenne.ObjectContext} to edit.</p>
+     */
+
     private void incrementCounter(final ObjectContext context, PkgVersion pkgVersion) {
         String cacheKey = null;
         String remoteIdentifier = getRemoteIdentifier();
@@ -370,8 +379,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         if(shouldIncrement) {
-            pkgVersion.incrementViewCounter();
-            context.commitChanges();
+            ObjectContext contextEdit = serverRuntime.getContext();
+            PkgVersion pkgVersionEdit = (PkgVersion) Iterables.getOnlyElement(contextEdit.performQuery(new ObjectIdQuery(pkgVersion.getObjectId())));
+            pkgVersionEdit.incrementViewCounter();
+            contextEdit.commitChanges();
             LOGGER.info("did increment the view counter for '{}'", pkgVersion.getPkg().toString());
         }
 
@@ -416,7 +427,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         switch(request.versionType) {
 
             // might be used to show a history of the versions.  If an architecture is present then it will
-            // only return versions for that architecture.  If no architecure is present then it will return
+            // only return versions for that architecture.  If no architecture is present then it will return
             // versions for all architectures.
 
             case ALL: {

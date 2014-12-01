@@ -20,8 +20,9 @@ import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
-import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJob;
+import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
+import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -38,7 +39,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
     public final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
 
     @Resource
-    RepositoryImportService repositoryImportService;
+    JobOrchestrationService jobOrchestrationService;
 
     private void verifyPackage(
             ObjectContext context,
@@ -164,7 +165,9 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
             // do the import.
 
-            repositoryImportService.submit(new PkgRepositoryImportJob("test"));
+            String guid = jobOrchestrationService.submit(
+                    new PkgRepositoryImportJobSpecification("test"),
+                    JobOrchestrationService.CoalesceMode.NONE).get();
 
             // wait for it to finish.
 
@@ -172,12 +175,12 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 long startMs = System.currentTimeMillis();
 
                 while(
-                        repositoryImportService.isProcessingSubmittedJobs()
+                        jobOrchestrationService.tryGetJobRunState(guid).get().isQueuedOrStarted()
                                 && (System.currentTimeMillis() - startMs) < DELAY_PROCESSSUBMITTEDTESTJOB) {
                     Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                 }
 
-                if(repositoryImportService.isProcessingSubmittedJobs()) {
+                if(jobOrchestrationService.tryGetJobRunState(guid).get().isQueuedOrStarted()) {
                     throw new IllegalStateException("test processing of the sample repo has taken > "+DELAY_PROCESSSUBMITTEDTESTJOB+"ms");
                 }
             }
@@ -244,7 +247,9 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
         }
         finally {
             if(null!=temporaryFile) {
-                temporaryFile.delete();
+                if(!temporaryFile.delete()) {
+                    LOGGER.warn("unable to delete the temporary file");
+                }
             }
         }
     }

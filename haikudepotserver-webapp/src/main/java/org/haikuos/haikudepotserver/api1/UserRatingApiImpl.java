@@ -20,9 +20,9 @@ import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
-import org.haikuos.haikudepotserver.userrating.UserRatingDerivationService;
+import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.userrating.UserRatingOrchestrationService;
-import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJob;
+import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haikuos.haikudepotserver.userrating.model.UserRatingSearchSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     AuthorizationService authorizationService;
 
     @Resource
-    UserRatingDerivationService userRatingDerivationService;
+    JobOrchestrationService jobOrchestrationService;
 
     @Resource
     UserRatingOrchestrationService userRatingOrchestrationService;
@@ -120,7 +120,9 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
         }
 
-        userRatingDerivationService.submit(new UserRatingDerivationJob(request.pkgName));
+        jobOrchestrationService.submit(
+                new UserRatingDerivationJobSpecification(request.pkgName),
+                JobOrchestrationService.CoalesceMode.QUEUED);
 
         return new DeriveAndStoreUserRatingForPkgResult();
     }
@@ -139,7 +141,10 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new AuthorizationFailureException();
         }
 
-        userRatingDerivationService.submit(UserRatingDerivationJob.JOB_ALL_PKG);
+        jobOrchestrationService.submit(
+                new UserRatingDerivationJobSpecification(),
+                JobOrchestrationService.CoalesceMode.QUEUED);
+
         LOGGER.info("did enqueue request to derive and store user ratings for all packages");
 
         return new DeriveAndStoreUserRatingsForAllPkgsResult();

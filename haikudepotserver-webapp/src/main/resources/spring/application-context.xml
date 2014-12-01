@@ -12,11 +12,7 @@
     package entity.
     -->
 
-    <bean
-            class="org.haikuos.haikudepotserver.userrating.LocalUserRatingDerivationService"
-            init-method="startAsyncAndAwaitRunning"
-            destroy-method="stopAsyncAndAwaitTerminated">
-    </bean>
+    <bean class="org.haikuos.haikudepotserver.userrating.UserRatingDerivationJobRunner"/>
 
     <!--
     Picks up on Cayenne ORM events around user ratings as well as package localizations and then
@@ -39,11 +35,7 @@
     Processes requests to synchronize the HDS database into LDAP
     -->
 
-    <bean
-            class="org.haikuos.haikudepotserver.user.LocalLdapSynchronizeUsersService"
-            init-method="startAsyncAndAwaitRunning"
-            destroy-method="stopAsyncAndAwaitTerminated">
-    </bean>
+    <bean class="org.haikuos.haikudepotserver.user.LdapSynchronizeUsersJobRunner"/>
 
     <!--
     Picks up on Cayenne ORM events around user changes so that LDAP can (optionally) be
