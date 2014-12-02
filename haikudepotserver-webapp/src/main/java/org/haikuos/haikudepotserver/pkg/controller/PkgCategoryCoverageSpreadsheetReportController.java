@@ -8,18 +8,20 @@ package org.haikuos.haikudepotserver.pkg.controller;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.exp.Expression;
+import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.PrefetchTreeNode;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
-import org.haikuos.haikudepotserver.dataobjects.User;
+import org.apache.cayenne.query.SelectQuery;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.Callback;
+import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,10 +63,44 @@ public class PkgCategoryCoverageSpreadsheetReportController extends AbstractCont
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
 
+    /**
+     * <p>This will go out and find the first package localization it can find on the latest package
+     * versions.</p>
+     */
+
+    private Optional<PkgVersionLocalization> getAnyPkgVersionLocalizationForPkg(ObjectContext context, Pkg pkg) {
+
+        List<Expression> expressions = Lists.newArrayList();
+
+        expressions.add(ExpressionFactory.matchExp(
+                PkgVersionLocalization.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY + ".",
+                pkg));
+
+        expressions.add(ExpressionFactory.matchExp(
+                PkgVersionLocalization.PKG_VERSION_PROPERTY + "." + PkgVersion.IS_LATEST_PROPERTY,
+                true));
+
+        expressions.add(ExpressionFactory.matchExp(
+                PkgVersionLocalization.PKG_VERSION_PROPERTY + "." + PkgVersion.ACTIVE_PROPERTY,
+                true));
+
+        SelectQuery query = new SelectQuery(
+                PkgVersionLocalization.class,
+                ExpressionHelper.andAll(expressions));
+
+        List<PkgVersionLocalization> locs = (List<PkgVersionLocalization>) context.performQuery(query);
+
+        if(locs.isEmpty()) {
+            return Optional.absent();
+        }
+
+        return Optional.of(locs.get(0));
+    }
+
     @RequestMapping(value="download.csv", method = RequestMethod.GET)
     public void generate(HttpServletResponse response) throws IOException {
 
-        ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.getContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
@@ -92,11 +128,11 @@ public class PkgCategoryCoverageSpreadsheetReportController extends AbstractCont
                 }
         );
 
-        List<String> headings = Lists.asList(
-                "pkg-name",
-                "none",
-                pkgCategoryCodes.toArray(new String[pkgCategoryCodes.size()])
-        );
+        List<String> headings = Lists.newArrayList();
+        headings.add("pkg-name");
+        headings.add("any-summary");
+        headings.add("none");
+        Collections.addAll(headings,pkgCategoryCodes.toArray(new String[pkgCategoryCodes.size()]));
 
         writer.writeNext(headings.toArray(new String[headings.size()]));
 
@@ -115,10 +151,11 @@ public class PkgCategoryCoverageSpreadsheetReportController extends AbstractCont
                 new Callback<Pkg>() {
                     @Override
                     public boolean process(Pkg pkg) {
+                        Optional<PkgVersionLocalization> locOptional = getAnyPkgVersionLocalizationForPkg(context, pkg);
 
                         List<String> cols = Lists.newArrayList();
                         cols.add(pkg.getName());
-
+                        cols.add(locOptional.isPresent() ? locOptional.get().getSummary() : "");
                         cols.add(pkg.getPkgPkgCategories().isEmpty() ? MARKER : "");
 
                         for(String pkgCategoryCode : pkgCategoryCodes) {
