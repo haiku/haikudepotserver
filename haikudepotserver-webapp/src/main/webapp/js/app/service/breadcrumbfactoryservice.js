@@ -416,6 +416,13 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                         titleKey : 'breadcrumb.reports.title',
                         path : '/reports'
                     });
+                },
+
+                createListJobs : function(user) {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.jobs.title',
+                        path : user ? '/user/' + user.nickname + '/jobs' : '/jobs'
+                    });
                 }
 
             };

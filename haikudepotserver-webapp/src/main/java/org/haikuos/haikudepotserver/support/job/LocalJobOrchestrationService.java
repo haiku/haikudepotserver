@@ -5,16 +5,11 @@
 
 package org.haikuos.haikudepotserver.support.job;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
+import com.google.common.base.*;
+import com.google.common.collect.*;
 import com.google.common.util.concurrent.AbstractService;
-import org.haikuos.haikudepotserver.support.job.model.JobRunState;
+import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.support.job.model.Job;
 import org.haikuos.haikudepotserver.support.job.model.JobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +44,7 @@ public class LocalJobOrchestrationService
 
     protected Map<String,JobRunner> jobRunners;
 
-    protected Map<String, JobRunState> jobs;
+    protected Map<String, Job> jobs;
 
     private ApplicationContext applicationContext;
 
@@ -58,7 +53,7 @@ public class LocalJobOrchestrationService
         this.applicationContext = applicationContext;
     }
 
-    private Collection<JobRunState> findJobRunStatesWithStatuses(final EnumSet<JobRunState.Status> statuses) {
+    private Collection<Job> findJobsWithStatuses(final EnumSet<Job.Status> statuses) {
         Preconditions.checkArgument(null!=statuses, "the status must be supplied to filter the job run states");
         assert statuses != null;
 
@@ -69,9 +64,9 @@ public class LocalJobOrchestrationService
         return ImmutableList.copyOf(
                 Iterables.filter(
                         jobs.values(),
-                        new Predicate<JobRunState>() {
+                        new Predicate<Job>() {
                             @Override
-                            public boolean apply(JobRunState input) {
+                            public boolean apply(Job input) {
                                 return statuses.contains(input.getStatus());
                             }
                         }
@@ -89,13 +84,13 @@ public class LocalJobOrchestrationService
     }
 
     private String submit(JobSpecification specification) {
-        JobRunState jobRunState = new JobRunState();
-        jobRunState.setJobSpecification(specification);
+        Job job = new Job();
+        job.setJobSpecification(specification);
 
         LOGGER.debug("{}; will submit job", specification.toString());
-        jobs.put(jobRunState.getGuid(), jobRunState);
+        jobs.put(job.getGuid(), job);
         setJobRunQueuedTimestamp(specification.getGuid());
-        executor.submit(new JobRunnable(jobRunState.getJobSpecification()));
+        executor.submit(new JobRunnable(job.getJobSpecification()));
         LOGGER.debug("{}; did submit job", specification.toString());
 
         return specification.getGuid();
@@ -124,18 +119,18 @@ public class LocalJobOrchestrationService
                 return Optional.of(submit(specification));
 
             case QUEUED:
-                if(!tryGetJobRunStateWithEquivalentSpecification(
+                if(!tryGetJobWithEquivalentSpecification(
                         specification,
-                        findJobRunStatesWithStatuses(EnumSet.of(JobRunState.Status.QUEUED))).isPresent()) {
+                        findJobsWithStatuses(EnumSet.of(Job.Status.QUEUED))).isPresent()) {
                     return Optional.of(submit(specification));
                 }
                 break;
 
             case QUEUEDANDSTARTED:
-                if(!tryGetJobRunStateWithEquivalentSpecification(
+                if(!tryGetJobWithEquivalentSpecification(
                         specification,
-                        findJobRunStatesWithStatuses(
-                                EnumSet.of(JobRunState.Status.QUEUED,JobRunState.Status.STARTED))
+                        findJobsWithStatuses(
+                                EnumSet.of(Job.Status.QUEUED, Job.Status.STARTED))
                 ).isPresent()) {
                     return Optional.of(submit(specification));
                 }
@@ -158,26 +153,26 @@ public class LocalJobOrchestrationService
                     specification.toString(),
                     specification.getJobTypeCode());
 
-            setJobRunFailTimestamp(specification.getGuid());
+            setJobFailTimestamp(specification.getGuid());
         }
 
         try {
-            setJobRunStartTimestamp(specification.getGuid());
+            setJobStartTimestamp(specification.getGuid());
             //noinspection unchecked
             jobRunnerOptional.get().run(specification);
-            setJobRunFinishTimestamp(specification.getGuid());
+            setJobFinishTimestamp(specification.getGuid());
         }
         catch(Throwable th) {
             LOGGER.error(specification.getGuid() + "; failure to run the job", th);
-            setJobRunFailTimestamp(specification.getGuid());
+            setJobFailTimestamp(specification.getGuid());
         }
     }
 
     // ------------------------------
     // PURGE
 
-    private long deriveTimeToLive(JobRunState runState) {
-        Long timeToLive = runState.getTimeToLive();
+    private long deriveTimeToLive(Job job) {
+        Long timeToLive = job.getTimeToLive();
 
         if(null==timeToLive) {
             return TTL_DEFAULT;
@@ -189,66 +184,132 @@ public class LocalJobOrchestrationService
     @Override
     public synchronized void clearExpiredJobs() {
         long nowMillis = System.currentTimeMillis();
-        List<JobRunState> jobsCopy;
+        List<Job> jobsCopy;
 
         synchronized (this) {
-            jobsCopy = ImmutableList.copyOf(jobs.values());
-        }
 
-        for(JobRunState runState : jobsCopy) {
+            for (Job job : ImmutableList.copyOf(jobs.values())) {
 
-            Long ttl = deriveTimeToLive(runState);
-            Date quiesenceTimestamp = null;
+                Long ttl = deriveTimeToLive(job);
+                Date quiesenceTimestamp = null;
 
-            switch(runState.getStatus()) {
+                switch (job.getStatus()) {
 
-                case CANCELLED:
-                    quiesenceTimestamp = runState.getCancelTimestamp();
-                    break;
+                    case CANCELLED:
+                        quiesenceTimestamp = job.getCancelTimestamp();
+                        break;
 
-                case FINISHED:
-                    quiesenceTimestamp = runState.getFinishTimestamp();
-                    break;
+                    case FINISHED:
+                        quiesenceTimestamp = job.getFinishTimestamp();
+                        break;
 
-                case FAILED:
-                    quiesenceTimestamp = runState.getFailTimestamp();
-                    break;
+                    case FAILED:
+                        quiesenceTimestamp = job.getFailTimestamp();
+                        break;
 
-            }
-
-            if(null!=quiesenceTimestamp) {
-                if(nowMillis - quiesenceTimestamp.getTime() > ttl) {
-
-                    synchronized(this) {
-                        jobs.remove(runState.getGuid());
-                    }
-
-                    LOGGER.info(
-                            "{} purged expired job for ttl; {}ms",
-                            runState.getJobSpecification().toString(),
-                            ttl);
                 }
-            }
 
+                if (null != quiesenceTimestamp) {
+                    if (nowMillis - quiesenceTimestamp.getTime() > ttl) {
+
+                        synchronized (this) {
+                            jobs.remove(job.getGuid());
+                        }
+
+                        LOGGER.info(
+                                "{} purged expired job for ttl; {}ms",
+                                job.getJobSpecification().toString(),
+                                ttl);
+                    }
+                }
+
+            }
         }
     }
 
     // ------------------------------
     // RUN STATE MANIPULATION
 
+    private synchronized List<Job> filteredJobs(
+            final User user,
+            final Set<Job.Status> statuses) {
+
+        clearExpiredJobs();
+
+        if(null!=statuses && statuses.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Lists.newArrayList(
+                Iterables.transform(
+                        Iterables.filter(
+                                jobs.values(),
+                                new Predicate<Job>() {
+                                    @Override
+                                    public boolean apply(Job input) {
+                                        return
+                                                (null == user || user.getNickname().equals(input.getOwnerUserNickname()))
+                                                        && (null == statuses || statuses.contains(input.getStatus()));
+                                    }
+                                }
+                        ),
+                        new Function<Job, Job>() {
+                            @Override
+                            public Job apply(Job input) {
+                                return new Job(input);
+                            }
+                        }
+                )
+        );
+    }
+
+    @Override
+    public List<Job> findJobs(
+            final User user,
+            final Set<Job.Status> statuses,
+            int offset,
+            int limit) {
+
+        Preconditions.checkState(offset >= 0, "illegal offset value");
+        Preconditions.checkState(limit >= 1, "illegal limit value");
+
+        if(null!=statuses && statuses.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Job> result = filteredJobs(user, statuses);
+
+        if(offset >= result.size()) {
+            return Collections.emptyList();
+        }
+
+        Collections.sort(result);
+
+        if(offset + limit > result.size()) {
+            limit = result.size() - offset;
+        }
+
+        return result.subList(offset, offset+limit);
+    }
+
+    @Override
+    public int totalJobs(User user, Set<Job.Status> statuses) {
+        return filteredJobs(user, statuses).size();
+    }
+
     /**
      * <p>Parameters from this are concurrency-safe from caller.</p>
      */
 
-    private static Optional<JobRunState> tryGetJobRunStateWithEquivalentSpecification(
+    private static Optional<Job> tryGetJobWithEquivalentSpecification(
             JobSpecification other,
-            Collection<JobRunState> jobRunStates) {
+            Collection<Job> jobs) {
         Preconditions.checkArgument(null!=other, "need to provide the other job specification");
 
-        for(JobRunState jobRunState : ImmutableList.copyOf(jobRunStates)) {
+        for(Job job : ImmutableList.copyOf(jobs)) {
             assert other != null;
-            if(other.isEquivalent(jobRunState.getJobSpecification())) {
-                return Optional.of(jobRunState);
+            if(other.isEquivalent(job.getJobSpecification())) {
+                return Optional.of(job);
             }
         }
 
@@ -256,12 +317,12 @@ public class LocalJobOrchestrationService
     }
 
     @Override
-    public synchronized Optional<JobRunState> tryGetJobRunState(String guid) {
+    public synchronized Optional<Job> tryGetJob(String guid) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
-        JobRunState jobRunState = jobs.get(guid);
+        Job job = jobs.get(guid);
 
-        if(null!=jobRunState) {
-            return Optional.of(new JobRunState(jobRunState));
+        if(null!=job) {
+            return Optional.of(new Job(job));
         }
 
         return Optional.absent();
@@ -269,25 +330,25 @@ public class LocalJobOrchestrationService
 
     /**
      * <p>Note that this method does not return a copy of the
-     * {@link org.haikuos.haikudepotserver.support.job.model.JobRunState}; it will return
+     * {@link org.haikuos.haikudepotserver.support.job.model.Job}; it will return
      * the working copy.</p>
      */
 
-    private JobRunState getJobRunState(String guid) {
+    private Job getJob(String guid) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
-        JobRunState jobRunState = jobs.get(guid);
+        Job job = jobs.get(guid);
 
-        if(null==jobRunState) {
+        if(null==job) {
             throw new IllegalStateException("no job run state exists for; " + guid);
         }
 
-        return jobRunState;
+        return job;
     }
 
-    public synchronized void setJobRunStartTimestamp(String guid) {
-        JobRunState state = getJobRunState(guid);
+    public synchronized void setJobStartTimestamp(String guid) {
+        Job state = getJob(guid);
 
-        if(state.getStatus() != JobRunState.Status.QUEUED) {
+        if(state.getStatus() != Job.Status.QUEUED) {
             throw new IllegalStateException("it is not possible to start a job from status; " + state.getStatus());
         }
 
@@ -295,10 +356,10 @@ public class LocalJobOrchestrationService
         LOGGER.info("{}; start", state.getJobSpecification().toString());
     }
 
-    public synchronized void setJobRunFinishTimestamp(String guid) {
-        JobRunState state = getJobRunState(guid);
+    public synchronized void setJobFinishTimestamp(String guid) {
+        Job state = getJob(guid);
 
-        if(state.getStatus() != JobRunState.Status.STARTED) {
+        if(state.getStatus() != Job.Status.STARTED) {
             throw new IllegalStateException("it is not possible to finish a job from status; " + state.getStatus());
         }
 
@@ -307,9 +368,9 @@ public class LocalJobOrchestrationService
     }
 
     public synchronized void setJobRunQueuedTimestamp(String guid) {
-        JobRunState state = getJobRunState(guid);
+        Job state = getJob(guid);
 
-        if(state.getStatus() != JobRunState.Status.INDETERMINATE) {
+        if(state.getStatus() != Job.Status.INDETERMINATE) {
             throw new IllegalStateException("it is not possible to queue a job from status; " + state.getStatus());
         }
 
@@ -318,10 +379,10 @@ public class LocalJobOrchestrationService
     }
 
     @Override
-    public synchronized void setJobRunFailTimestamp(String guid) {
-        JobRunState state = getJobRunState(guid);
+    public synchronized void setJobFailTimestamp(String guid) {
+        Job state = getJob(guid);
 
-        if(state.getStatus() != JobRunState.Status.STARTED) {
+        if(state.getStatus() != Job.Status.STARTED) {
             throw new IllegalStateException("it is not possible to fail a job from status; " + state.getStatus());
         }
 
@@ -330,8 +391,8 @@ public class LocalJobOrchestrationService
     }
 
     @Override
-    public synchronized void setJobRunCancelTimestamp(String guid) {
-        JobRunState state = getJobRunState(guid);
+    public synchronized void setJobCancelTimestamp(String guid) {
+        Job state = getJob(guid);
 
         switch (state.getStatus()) {
             case QUEUED:
@@ -346,12 +407,12 @@ public class LocalJobOrchestrationService
     }
 
     @Override
-    public synchronized void setJobRunProgressPercent(String guid, Integer progressPercent) {
+    public synchronized void setJobProgressPercent(String guid, Integer progressPercent) {
         Preconditions.checkArgument(null==progressPercent || (progressPercent >= 0 && progressPercent <= 100), "bad progress percent value");
 
-        JobRunState state = getJobRunState(guid);
+        Job state = getJob(guid);
 
-        if(state.getStatus() != JobRunState.Status.STARTED) {
+        if(state.getStatus() != Job.Status.STARTED) {
             throw new IllegalStateException("it is not possible to set the progress percent for a job from status; " + state.getStatus());
         }
 

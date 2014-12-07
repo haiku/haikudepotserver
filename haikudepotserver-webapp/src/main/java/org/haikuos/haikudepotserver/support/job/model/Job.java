@@ -13,7 +13,7 @@ import java.util.Date;
  * <p>The job run state is used to convey data about the running of a job; has it started, was it cancelled etc...</p>
  */
 
-public class JobRunState {
+public class Job implements Comparable<Job> {
 
     public enum Status {
         INDETERMINATE,
@@ -39,10 +39,10 @@ public class JobRunState {
 
     private JobSpecification jobSpecification;
 
-    public JobRunState() {
+    public Job() {
     }
 
-    public JobRunState(JobRunState other) {
+    public Job(Job other) {
         this();
         Preconditions.checkArgument(null!=other,"the other job run state must be supplied");
         assert other != null;
@@ -198,6 +198,21 @@ public class JobRunState {
         }
 
         return null;
+    }
+
+    @Override
+    public int compareTo(Job o) {
+        Date qThis = getQueuedTimestamp();
+        Date qOther = o.getQueuedTimestamp();
+        int cmp = Long.compare(
+                null == qThis ? 0 : qThis.getTime(),
+                null == qOther ? 0 : qOther.getTime());
+
+        if(0==cmp) {
+            cmp = getGuid().compareTo(o.getGuid());
+        }
+
+        return cmp;
     }
 
     @Override

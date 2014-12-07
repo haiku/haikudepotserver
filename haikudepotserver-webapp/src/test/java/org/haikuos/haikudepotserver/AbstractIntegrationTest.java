@@ -38,7 +38,7 @@ import java.util.Map;
  * basically delete all of the schema objects and then prompt the database schema migration to again,
  * repopulate the database afresh.  This ensures that the database is taken from a blank state at the
  * start of each test.  This is important for tests to maintain their independence.  The use a
- * 'transaction' over the test is not possible here as the ORM technology isnot bound to a single
+ * 'transaction' over the test is not possible here as the ORM technology is not bound to a single
  * transaction.</p>
  */
 

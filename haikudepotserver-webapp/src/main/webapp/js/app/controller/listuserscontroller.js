@@ -50,7 +50,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goCreateUser = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddUser());
-            }
+            };
 
             // ---- LIST MANAGEMENT
 

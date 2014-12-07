@@ -5,6 +5,13 @@
 
     <import resource="general.xml"/>
 
+    <!-- JOB-MANAGEMENT -->
+
+    <bean class="org.haikuos.haikudepotserver.support.job.LocalJobOrchestrationService"
+          init-method="startAsyncAndAwaitRunning"
+          destroy-method="stopAsyncAndAwaitTerminated">
+    </bean>
+
     <!-- RECALCULATE DERIVED USER RATINGS -->
 
     <!--

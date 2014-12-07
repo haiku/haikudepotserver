@@ -12,6 +12,7 @@ angular.module('haikudepotserver').config(
 
             $routeProvider
                 .when('/rootoperations',{controller:'RootOperationsController',templateUrl:'/js/app/controller/rootoperations.html'})
+                .when('/jobs',{controller:'ListJobsController',templateUrl:'/js/app/controller/listjobs.html'})
                 .when('/reports',{controller:'ReportsController',templateUrl:'/js/app/controller/reports.html'})
                 .when('/pkg/feed/builder',{controller:'PkgFeedBuilderController',templateUrl:'/js/app/controller/pkgfeedbuilder.html'})
                 .when('/paginationcontrolplayground',{controller:'PaginationControlPlayground',templateUrl:'/js/app/controller/paginationcontrolplayground.html'})
@@ -31,6 +32,7 @@ angular.module('haikudepotserver').config(
                 .when('/user/:nickname',{controller:'ViewUserController', templateUrl:'/js/app/controller/viewuser.html'})
                 .when('/user/:nickname/edit',{controller:'EditUserController', templateUrl:'/js/app/controller/edituser.html'})
                 .when('/user/:nickname/changepassword',{controller:'ChangePasswordController', templateUrl:'/js/app/controller/changepassword.html'})
+                .when('/user/:nickname/jobs',{controller:'ListJobsController', templateUrl:'/js/app/controller/listjobs.html'})
                 .when('/userrating/:code/edit',{controller:'AddEditUserRatingController', templateUrl:'/js/app/controller/addedituserrating.html'})
                 .when('/userrating/:code',{controller:'ViewUserRatingController', templateUrl:'/js/app/controller/viewuserrating.html'})
                 .when('/pkg/:name/listpkgversions',{controller:'ListPkgVersionsForPkgController', templateUrl:'/js/app/controller/listpkgversionsforpkg.html'})

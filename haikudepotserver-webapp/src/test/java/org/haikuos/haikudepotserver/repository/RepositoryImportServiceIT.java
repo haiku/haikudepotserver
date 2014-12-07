@@ -175,12 +175,12 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 long startMs = System.currentTimeMillis();
 
                 while(
-                        jobOrchestrationService.tryGetJobRunState(guid).get().isQueuedOrStarted()
+                        jobOrchestrationService.tryGetJob(guid).get().isQueuedOrStarted()
                                 && (System.currentTimeMillis() - startMs) < DELAY_PROCESSSUBMITTEDTESTJOB) {
                     Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                 }
 
-                if(jobOrchestrationService.tryGetJobRunState(guid).get().isQueuedOrStarted()) {
+                if(jobOrchestrationService.tryGetJob(guid).get().isQueuedOrStarted()) {
                     throw new IllegalStateException("test processing of the sample repo has taken > "+DELAY_PROCESSSUBMITTEDTESTJOB+"ms");
                 }
             }

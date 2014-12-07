@@ -21,6 +21,7 @@ angular.module('haikudepotserver')
         ENDPOINT_API_V1_CAPTCHA : '/api/v1/captcha',
         ENDPOINT_API_V1_MISCELLANEOUS : '/api/v1/miscellaneous',
         ENDPOINT_API_V1_USER : '/api/v1/user',
+        ENDPOINT_API_V1_JOB : '/api/v1/job',
         ENDPOINT_API_V1_USERRATING : '/api/v1/userrating',
         ENDPOINT_API_V1_AUTHORIZATION : '/api/v1/authorization',
 

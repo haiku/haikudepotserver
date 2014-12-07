@@ -14,6 +14,7 @@ public enum Permission {
     REPOSITORY_LIST_INACTIVE(null),
     REPOSITORY_ADD(null),
 
+    USER_VIEWJOBS(TargetType.USER),
     USER_VIEW(TargetType.USER),
     USER_EDIT(TargetType.USER),
     USER_CHANGEPASSWORD(TargetType.USER),
@@ -37,7 +38,9 @@ public enum Permission {
     BULK_PKGICONSPREADSHEETREPORT(null),
     BULK_USERRATINGSPREADSHEETREPORT_PKG(TargetType.PKG),
     BULK_USERRATINGSPREADSHEETREPORT_ALL(null),
-    BULK_USERRATINGSPREADSHEETREPORT_USER(TargetType.USER);
+    BULK_USERRATINGSPREADSHEETREPORT_USER(TargetType.USER),
+
+    JOBS_VIEW(null);
 
     private TargetType requiredTargetType;
 

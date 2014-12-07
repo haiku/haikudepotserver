@@ -16,7 +16,7 @@ angular.module('haikudepotserver').controller(
 
             breadcrumbs.mergeCompleteStack([
                 breadcrumbFactory.createHome(),
-                breadcrumbFactory.createRootOperations(),
+                breadcrumbFactory.createRootOperations()
             ]);
 
             $scope.didDeriveAndStoreUserRatingsForAllPkgs = false;
@@ -84,11 +84,15 @@ angular.module('haikudepotserver').controller(
 
             $scope.goPaginationControlPlayground = function() {
                 $location.path('/paginationcontrolplayground').search({});
-            }
+            };
 
             $scope.goRuntimeInformation = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createRuntimeInformation());
-            }
+            };
+
+            $scope.goJobs = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createListJobs());
+            };
 
             // -------------------
             // TEST ERROR HANDLING TESTING

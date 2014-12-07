@@ -1,0 +1,60 @@
+<breadcrumbs items="breadcrumbItems"></breadcrumbs>
+
+<div class="content-container">
+
+    <!-- RESULTS -->
+
+    <div id="search-results-container">
+
+        <div ng-show="jobs.items && 0==jobs.items.length" class="info-container">
+            <strong><message key="listJobs.noResults.title"></message>; </strong>
+            <message key="listJobs.noResults.description"></message>
+        </div>
+
+        <div ng-show="jobs.items && jobs.items.length" class="table-general-container">
+
+            <div class="table-general-pagination-container">
+                <pagination-control
+                        link-count="9"
+                        max="jobs.max"
+                        total="jobs.total"
+                        offset="jobs.offset"></pagination-control>
+            </div>
+
+            <table class="table-general">
+                <thead>
+                <th><message key="listJobs.table.id.title"></message></th>
+                <th><message key="listJobs.table.type.title"></message></th>
+                <th><message key="listJobs.table.user.title"></message></th>
+                <th><message key="listJobs.table.queued.title"></message></th>
+                <th><message key="listJobs.table.status.title"></message></th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="job in jobs.items">
+                    <td>{{job.guid|croppedGuid}}</td>
+                    <td><message key="{{'job.jobtype.' + job.jobTypeCode + '.title'}}"></message></td>
+                    <td>
+                        <span ng-show="job.ownerUser"><user-label user="job.ownerUser"></user-label></span>
+                        <span ng-show="!job.ownerUser">&mdash;</span>
+                    </td>
+                    <td>{{job.queuedTimestamp|timestamp}}</td>
+                    <td><job-status-indicator job="job"></job-status-indicator></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <ul>
+            <li>
+                <a href="" ng-click="goRefetchJobsAtFirstPage()">
+                    <message key="listJobs.refetchJobsAtFirstPageAction.title"></message>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>

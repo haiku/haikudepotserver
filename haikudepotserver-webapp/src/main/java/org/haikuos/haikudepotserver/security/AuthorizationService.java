@@ -187,6 +187,7 @@ public class AuthorizationService {
             case REPOSITORY_ADD:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
+            case USER_VIEWJOBS:
             case USER_VIEW:
             case USER_EDIT:
             case USER_CHANGEPASSWORD:
@@ -230,6 +231,9 @@ public class AuthorizationService {
                 return null!=authenticatedUser &&
                         (authenticatedUser.getIsRoot() ||
                                 authenticatedUser.getNickname().equals(((User) target).getNickname()));
+
+            case JOBS_VIEW:
+                return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             default:
                 throw new IllegalStateException("unhandled permission; "+permission.name());

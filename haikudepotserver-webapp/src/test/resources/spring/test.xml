@@ -10,6 +10,6 @@
     <bean class="org.haikuos.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
     <bean class="org.haikuos.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
     <bean id="mailSender" class="org.haikuos.haikudepotserver.CapturingMailSender"/>
-
+    <bean class="org.haikuos.haikudepotserver.support.job.TestJobOrchestrationServiceImpl"/>
 
 </beans>

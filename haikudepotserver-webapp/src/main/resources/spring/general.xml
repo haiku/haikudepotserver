@@ -46,15 +46,10 @@
 
     <bean class="org.haikuos.haikudepotserver.support.RuntimeInformationService"/>
 
-    <!-- JOB MANAGEMENT -->
+    <!-- JOBS -->
 
     <bean class="org.haikuos.haikudepotserver.repository.PkgRepositoryImportJobRunner"/>
     <bean class="org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner"/>
-
-    <bean class="org.haikuos.haikudepotserver.support.job.LocalJobOrchestrationService"
-          init-method="startAsyncAndAwaitRunning"
-          destroy-method="stopAsyncAndAwaitTerminated">
-    </bean>
 
     <!-- EMAIL -->
 
