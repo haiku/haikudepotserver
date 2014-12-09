@@ -1,0 +1,23 @@
+<breadcrumbs></breadcrumbs>
+
+<div class="content-container">
+
+    <div ng-show="job && job.guid">
+
+    <dl>
+        <dt><message key="viewJob.id.title"></message></dt>
+        <dd><code>{{job.guid}}</code></dd>
+        <dt><message key="viewJob.status.title"></message></dt>
+        <dd><job-status-indicator job="job"></job-status-indicator></dd>
+    </dl>
+
+    </div>
+
+    <div ng-show="job && !job.guid" class="alert-container">
+        <message key="viewJob.notfound.description"></message>
+    </div>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>

@@ -6,6 +6,8 @@
 package org.haikuos.haikudepotserver.api1;
 
 import com.googlecode.jsonrpc4j.JsonRpcService;
+import org.haikuos.haikudepotserver.api1.model.job.GetJobRequest;
+import org.haikuos.haikudepotserver.api1.model.job.GetJobResult;
 import org.haikuos.haikudepotserver.api1.model.job.SearchJobsRequest;
 import org.haikuos.haikudepotserver.api1.model.job.SearchJobsResult;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
@@ -26,5 +28,13 @@ public interface JobApi {
      */
 
     SearchJobsResult searchJobs(SearchJobsRequest request) throws ObjectNotFoundException;
+
+    /**
+     * <p>This method returns details of the job identified by data in the request.  If there is no such
+     * job for the guid supplied, it will throw
+     * {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}.</p>
+     */
+
+    GetJobResult getJob(GetJobRequest request) throws ObjectNotFoundException;
 
 }

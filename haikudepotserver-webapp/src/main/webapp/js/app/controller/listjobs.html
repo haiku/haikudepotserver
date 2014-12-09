@@ -31,7 +31,9 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="job in jobs.items">
-                    <td>{{job.guid|croppedGuid}}</td>
+                    <td>
+                        <a href="" ng-click="goViewJob(job)">{{job.guid|croppedGuid}}</a>
+                    </td>
                     <td><message key="{{'job.jobtype.' + job.jobTypeCode + '.title'}}"></message></td>
                     <td>
                         <span ng-show="job.ownerUser"><user-label user="job.ownerUser"></user-label></span>

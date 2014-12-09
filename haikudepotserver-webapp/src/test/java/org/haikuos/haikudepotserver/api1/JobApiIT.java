@@ -8,9 +8,7 @@ package org.haikuos.haikudepotserver.api1;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
-import org.haikuos.haikudepotserver.api1.model.job.JobStatus;
-import org.haikuos.haikudepotserver.api1.model.job.SearchJobsRequest;
-import org.haikuos.haikudepotserver.api1.model.job.SearchJobsResult;
+import org.haikuos.haikudepotserver.api1.model.job.*;
 import org.haikuos.haikudepotserver.support.job.TestJobOrchestrationServiceImpl;
 import org.junit.Test;
 
@@ -82,5 +80,26 @@ public class JobApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(job.jobStatus).isEqualTo(JobStatus.FINISHED);
 
     }
+
+    @Test
+    public void testGetJob() throws Exception {
+        setAuthenticatedUserToRoot();
+
+        GetJobRequest request = new GetJobRequest();
+        request.guid = "started";
+
+        // ------------------------------------
+        GetJobResult result = jobApi.getJob(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.guid).isEqualTo("started");
+        Assertions.assertThat(result.queuedTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_FEB.getMillis());
+        Assertions.assertThat(result.startTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_MAR.getMillis());
+        Assertions.assertThat(result.finishTimestamp).isNull();
+        Assertions.assertThat(result.ownerUserNickname).isNull();
+        Assertions.assertThat(result.jobStatus).isEqualTo(JobStatus.STARTED);
+
+    }
+
 
 }

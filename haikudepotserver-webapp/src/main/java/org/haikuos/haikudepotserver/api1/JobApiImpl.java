@@ -14,9 +14,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.api1.model.job.JobStatus;
-import org.haikuos.haikudepotserver.api1.model.job.SearchJobsRequest;
-import org.haikuos.haikudepotserver.api1.model.job.SearchJobsResult;
+import org.haikuos.haikudepotserver.api1.model.job.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -122,6 +120,61 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
 
             LOGGER.info("search for jobs found {} results", result.items.size());
         }
+
+        return result;
+    }
+
+    @Override
+    public GetJobResult getJob(GetJobRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.guid));
+
+        final ObjectContext context = serverRuntime.getContext();
+        User authUser = obtainAuthenticatedUser(context);
+
+        Optional<Job> jobOptional = jobOrchestrationService.tryGetJob(request.guid);
+
+        if(!jobOptional.isPresent()) {
+            throw new ObjectNotFoundException(Job.class.getSimpleName(), request.guid);
+        }
+
+        Job job = jobOptional.get();
+
+        // authorization
+
+        if(Strings.isNullOrEmpty(job.getOwnerUserNickname())) {
+            if (!authorizationService.check(context, authUser, null, Permission.JOBS_VIEW)) {
+                LOGGER.warn("attempt to access jobs view");
+                throw new AuthorizationFailureException();
+            }
+        }
+        else {
+            Optional<User> ownerUserOptional = User.getByNickname(context, job.getOwnerUserNickname());
+
+            if(!ownerUserOptional.isPresent()) {
+                throw new ObjectNotFoundException(User.class.getSimpleName(), job.getOwnerUserNickname());
+            }
+
+            if (!authorizationService.check(context, authUser, ownerUserOptional.get(), Permission.USER_VIEWJOBS)) {
+                LOGGER.warn("attempt to access jobs view for; {}", job.toString());
+                throw new AuthorizationFailureException();
+            }
+        }
+
+        // now output the result.
+
+        GetJobResult result = new GetJobResult();
+
+        result.guid = job.getGuid();
+        result.jobStatus = new JobStatusToApiJobStatus().apply(job.getStatus());
+        result.jobTypeCode = job.getJobTypeCode();
+        result.ownerUserNickname = job.getOwnerUserNickname();
+        result.startTimestamp = null == job.getStartTimestamp() ? null : job.getStartTimestamp().getTime();
+        result.finishTimestamp = null == job.getFinishTimestamp() ? null : job.getFinishTimestamp().getTime();
+        result.queuedTimestamp = null == job.getQueuedTimestamp() ? null : job.getQueuedTimestamp().getTime();
+        result.failTimestamp = null == job.getFailTimestamp() ? null : job.getFailTimestamp().getTime();
+        result.cancelTimestamp = null == job.getCancelTimestamp() ? null : job.getCancelTimestamp().getTime();
+        result.progressPercent = job.getProgressPercent();
 
         return result;
     }

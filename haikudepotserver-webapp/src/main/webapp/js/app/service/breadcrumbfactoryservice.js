@@ -420,8 +420,15 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                 createListJobs : function(user) {
                     return applyDefaults({
-                        titleKey : 'breadcrumb.jobs.title',
+                        titleKey : 'breadcrumb.listJobs.title',
                         path : user ? '/user/' + user.nickname + '/jobs' : '/jobs'
+                    });
+                },
+
+                createViewJob : function(job) {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.viewJob.title',
+                        path : '/job/' + job.guid
                     });
                 }
 

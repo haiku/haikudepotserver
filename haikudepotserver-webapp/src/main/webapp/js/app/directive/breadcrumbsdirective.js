@@ -15,8 +15,8 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
         scope: {
         },
         controller:
-            ['$scope','$location','breadcrumbs','$rootScope',
-                function($scope,$location,breadcrumbs,$rootScope) {
+            ['$scope','$location','breadcrumbs',
+                function($scope,$location,breadcrumbs) {
 
                     $scope.stack = breadcrumbs.stack();
 
@@ -46,7 +46,7 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
                         }
 
                         return [];
-                    }
+                    };
 
                     $scope.$on(
                         "breadcrumbChangeSuccess",

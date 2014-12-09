@@ -120,6 +120,12 @@ angular.module('haikudepotserver').controller(
 
             }
 
+            // ---- ACTIONS
+
+            $scope.goViewJob = function(job) {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob(job));
+            };
+
             // ---- EVENTS
 
             $scope.$watch('jobs.offset', function() {

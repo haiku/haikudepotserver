@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.support.job;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.haikuos.haikudepotserver.dataobjects.User;
@@ -35,7 +36,9 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     public final static DateTime DT_1976_JUN = new DateTime(1976,6,1,0,0);
     public final static DateTime DT_1976_JUL = new DateTime(1976,6,1,0,0);
 
-    private List<Job> jobs;
+    private Job queuedJob;
+    private Job startedJob;
+    private Job finishedJob;
 
     public TestJobOrchestrationServiceImpl() {
         super();
@@ -43,31 +46,27 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
 
     @PostConstruct
     public void init() {
-        jobs = Lists.newArrayList();
 
         {
-            Job j = new Job();
-            j.setQueuedTimestamp(DT_1976_JAN.toDate());
-            j.setJobSpecification(new TestJobSpecificationImpl("queued"));
-            jobs.add(j);
+            queuedJob = new Job();
+            queuedJob.setQueuedTimestamp(DT_1976_JAN.toDate());
+            queuedJob.setJobSpecification(new TestJobSpecificationImpl("queued"));
         }
 
         {
-            Job j = new Job();
-            j.setQueuedTimestamp(DT_1976_FEB.toDate());
-            j.setStartTimestamp(DT_1976_MAR.toDate());
-            j.setJobSpecification(new TestJobSpecificationImpl("started"));
-            jobs.add(j);
+            startedJob = new Job();
+            startedJob.setQueuedTimestamp(DT_1976_FEB.toDate());
+            startedJob.setStartTimestamp(DT_1976_MAR.toDate());
+            startedJob.setJobSpecification(new TestJobSpecificationImpl("started"));
         }
 
         {
-            Job j = new Job();
-            j.setOwnerUserNickname("testuser");
-            j.setQueuedTimestamp(DT_1976_APR.toDate());
-            j.setStartTimestamp(DT_1976_JUN.toDate());
-            j.setFinishTimestamp(DT_1976_JUL.toDate());
-            j.setJobSpecification(new TestJobSpecificationImpl("finished"));
-            jobs.add(j);
+            finishedJob = new Job();
+            finishedJob.setOwnerUserNickname("testuser");
+            finishedJob.setQueuedTimestamp(DT_1976_APR.toDate());
+            finishedJob.setStartTimestamp(DT_1976_JUN.toDate());
+            finishedJob.setFinishTimestamp(DT_1976_JUL.toDate());
+            finishedJob.setJobSpecification(new TestJobSpecificationImpl("finished"));
         }
 
     }
@@ -89,7 +88,13 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
 
     @Override
     public Optional<Job> tryGetJob(String guid) {
-        return null;
+        switch(guid) {
+            case "queued" : return Optional.of(queuedJob);
+            case "started" : return Optional.of(startedJob);
+            case "finished" : return Optional.of(finishedJob);
+        }
+
+        return Optional.absent();
     }
 
     @Override
@@ -125,7 +130,11 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     private List<Job> filteredJobs(final User user, final Set<Job.Status> statuses) {
         return Lists.newArrayList(
                 Iterables.filter(
-                        jobs,
+                        ImmutableList.of(
+                                queuedJob,
+                                startedJob,
+                                finishedJob
+                        ),
                         new Predicate<Job>() {
                             @Override
                             public boolean apply(Job input) {

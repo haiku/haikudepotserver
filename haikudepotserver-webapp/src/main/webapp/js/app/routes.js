@@ -13,6 +13,7 @@ angular.module('haikudepotserver').config(
             $routeProvider
                 .when('/rootoperations',{controller:'RootOperationsController',templateUrl:'/js/app/controller/rootoperations.html'})
                 .when('/jobs',{controller:'ListJobsController',templateUrl:'/js/app/controller/listjobs.html'})
+                .when('/job/:guid',{controller:'ViewJobController',templateUrl:'/js/app/controller/viewjob.html'})
                 .when('/reports',{controller:'ReportsController',templateUrl:'/js/app/controller/reports.html'})
                 .when('/pkg/feed/builder',{controller:'PkgFeedBuilderController',templateUrl:'/js/app/controller/pkgfeedbuilder.html'})
                 .when('/paginationcontrolplayground',{controller:'PaginationControlPlayground',templateUrl:'/js/app/controller/paginationcontrolplayground.html'})
