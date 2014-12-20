@@ -6,7 +6,8 @@
 package org.haikuos.haikudepotserver.userrating;
 
 import com.google.common.base.Preconditions;
-import org.haikuos.haikudepotserver.support.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class UserRatingDerivationJobRunner
     @Resource
     UserRatingOrchestrationService userRatingOrchestrationService;
 
-    public void run(UserRatingDerivationJobSpecification job) {
+    public void run(JobOrchestrationService jobOrchestrationService, UserRatingDerivationJobSpecification job) {
         Preconditions.checkNotNull(job);
 
         if(job.appliesToAllPkgs()) {

@@ -3,28 +3,21 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.support.job.model;
+package org.haikuos.haikudepotserver.job.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * <p>The job run state is used to convey data about the running of a job; has it started, was it cancelled etc...</p>
  */
 
-public class Job implements Comparable<Job> {
+public class Job implements Comparable<JobSnapshot>, JobSnapshot {
 
-    public enum Status {
-        INDETERMINATE,
-        QUEUED,
-        STARTED,
-        FINISHED,
-        FAILED,
-        CANCELLED
-    }
-
-    private String ownerUserNickname;
     private Date startTimestamp;
     private Date finishTimestamp;
     private Date queuedTimestamp;
@@ -33,20 +26,21 @@ public class Job implements Comparable<Job> {
     private Integer progressPercent;
 
     /**
-     * <p>This is the {@link org.haikuos.haikudepotserver.support.job.model.JobSpecification} that this instance is
+     * <p>This is the {@link org.haikuos.haikudepotserver.job.model.JobSpecification} that this instance is
      * conveying the run state for.</p>
      */
 
     private JobSpecification jobSpecification;
 
+    private Set<String> generatedDataGuids = Sets.newHashSet();
+
     public Job() {
     }
 
-    public Job(Job other) {
+    public Job(JobSnapshot other) {
         this();
-        Preconditions.checkArgument(null!=other,"the other job run state must be supplied");
+        Preconditions.checkArgument(null != other, "the other job run state must be supplied");
         assert other != null;
-        this.ownerUserNickname = other.getOwnerUserNickname();
         this.startTimestamp = other.getStartTimestamp();
         this.finishTimestamp = other.getFinishTimestamp();
         this.queuedTimestamp = other.getQueuedTimestamp();
@@ -54,17 +48,10 @@ public class Job implements Comparable<Job> {
         this.cancelTimestamp = other.getCancelTimestamp();
         this.progressPercent = other.getProgressPercent();
         this.jobSpecification = other.getJobSpecification();
+        this.generatedDataGuids = Sets.newHashSet(other.getGeneratedDataGuids());
     }
 
-
-    public String getOwnerUserNickname() {
-        return ownerUserNickname;
-    }
-
-    public void setOwnerUserNickname(String ownerUserNickname) {
-        this.ownerUserNickname = ownerUserNickname;
-    }
-
+    @Override
     public Date getStartTimestamp() {
         return startTimestamp;
     }
@@ -77,6 +64,7 @@ public class Job implements Comparable<Job> {
         setStartTimestamp(new Date());
     }
 
+    @Override
     public Date getFinishTimestamp() {
         return finishTimestamp;
     }
@@ -89,6 +77,7 @@ public class Job implements Comparable<Job> {
         setFinishTimestamp(new Date());
     }
 
+    @Override
     public Date getQueuedTimestamp() {
         return queuedTimestamp;
     }
@@ -101,6 +90,7 @@ public class Job implements Comparable<Job> {
         setQueuedTimestamp(new Date());
     }
 
+    @Override
     public Date getFailTimestamp() {
         return failTimestamp;
     }
@@ -113,6 +103,7 @@ public class Job implements Comparable<Job> {
         setFailTimestamp(new Date());
     }
 
+    @Override
     public Date getCancelTimestamp() {
         return cancelTimestamp;
     }
@@ -125,6 +116,7 @@ public class Job implements Comparable<Job> {
         setCancelTimestamp(new Date());
     }
 
+    @Override
     public Integer getProgressPercent() {
         return progressPercent;
     }
@@ -133,6 +125,7 @@ public class Job implements Comparable<Job> {
         this.progressPercent = progressPercent;
     }
 
+    @Override
     public JobSpecification getJobSpecification() {
         return jobSpecification;
     }
@@ -141,6 +134,24 @@ public class Job implements Comparable<Job> {
         this.jobSpecification = jobSpecification;
     }
 
+    @Override
+    public Set<String> getGeneratedDataGuids() {
+        return ImmutableSet.copyOf(generatedDataGuids);
+    }
+
+    public void addGeneratedDataGuid(String guid) {
+        generatedDataGuids.add(guid);
+    }
+
+    @Override
+    public Set<String> getDataGuids() {
+        Set<String> result = Sets.newHashSet();
+        result.addAll(generatedDataGuids);
+        result.addAll(getJobSpecification().getSuppliedDataGuids());
+        return result;
+    }
+
+    @Override
     public Status getStatus() {
 
         if(null!=getCancelTimestamp()) {
@@ -169,13 +180,23 @@ public class Job implements Comparable<Job> {
     public boolean isQueuedOrStarted() {
         switch(getStatus()) {
             case QUEUED:
-                case STARTED:
-                    return true;
+            case STARTED:
+                return true;
         }
 
         return false;
     }
 
+    @Override
+    public String getOwnerUserNickname() {
+        if(null!=jobSpecification) {
+            return jobSpecification.getOwnerUserNickname();
+        }
+
+        return null;
+    }
+
+    @Override
     public String getJobTypeCode() {
         if(null!=jobSpecification) {
             return jobSpecification.getJobTypeCode();
@@ -184,6 +205,7 @@ public class Job implements Comparable<Job> {
         return null;
     }
 
+    @Override
     public String getGuid() {
         if (null != jobSpecification) {
             return jobSpecification.getGuid();
@@ -192,6 +214,7 @@ public class Job implements Comparable<Job> {
         return null;
     }
 
+    @Override
     public Long getTimeToLive() {
         if (null != jobSpecification) {
             return jobSpecification.getTimeToLive();
@@ -201,12 +224,13 @@ public class Job implements Comparable<Job> {
     }
 
     @Override
-    public int compareTo(Job o) {
+    public int compareTo(JobSnapshot o) {
         Date qThis = getQueuedTimestamp();
         Date qOther = o.getQueuedTimestamp();
         int cmp = Long.compare(
-                null == qThis ? 0 : qThis.getTime(),
-                null == qOther ? 0 : qOther.getTime());
+                null == qOther ? 0 : qOther.getTime(),
+                null == qThis ? 0 : qThis.getTime()
+        );
 
         if(0==cmp) {
             cmp = getGuid().compareTo(o.getGuid());
@@ -219,7 +243,7 @@ public class Job implements Comparable<Job> {
     public String toString() {
         @SuppressWarnings("StringBufferReplaceableByString")
         StringBuilder result = new StringBuilder();
-        result.append("job-run-state ");
+        result.append("job ");
         result.append(getGuid());
         result.append(" ");
         result.append(getJobTypeCode());

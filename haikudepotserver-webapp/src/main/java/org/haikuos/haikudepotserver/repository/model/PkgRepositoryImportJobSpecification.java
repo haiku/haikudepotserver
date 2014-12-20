@@ -7,8 +7,8 @@ package org.haikuos.haikudepotserver.repository.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.haikuos.haikudepotserver.support.job.model.AbstractJobSpecification;
-import org.haikuos.haikudepotserver.support.job.model.JobSpecification;
+import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
+import org.haikuos.haikudepotserver.job.model.JobSpecification;
 
 /**
  * <p>This object models the request to pull a repository's data into the database locally.

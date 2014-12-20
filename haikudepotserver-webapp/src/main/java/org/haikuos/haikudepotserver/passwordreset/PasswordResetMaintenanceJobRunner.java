@@ -7,7 +7,8 @@ package org.haikuos.haikudepotserver.passwordreset;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
-import org.haikuos.haikudepotserver.support.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class PasswordResetMaintenanceJobRunner extends AbstractJobRunner<Passwor
      */
 
     @Override
-    public void run(PasswordResetMaintenanceJobSpecification specification) {
+    public void run(JobOrchestrationService jobOrchestrationService, PasswordResetMaintenanceJobSpecification specification) {
         passwordResetOrchestrationService.deleteExpiredPasswordResetTokens();
     }
 

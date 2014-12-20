@@ -3,13 +3,14 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.support.job.model;
+package org.haikuos.haikudepotserver.job.model;
 
-import com.google.common.base.CaseFormat;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * <p>This is an abstract superclass which provides some implementation for a
- * {@link org.haikuos.haikudepotserver.support.job.model.JobSpecification}
+ * {@link org.haikuos.haikudepotserver.job.model.JobSpecification}
  * such as being able to derive the "job type code" from the name of the class.
  * </p>
  */
@@ -17,6 +18,8 @@ import com.google.common.base.CaseFormat;
 public abstract class AbstractJobSpecification implements JobSpecification {
 
     private final static String SUFFIX = "JobSpecification";
+
+    private String ownerUserNickname;
 
     private String guid;
 
@@ -28,6 +31,14 @@ public abstract class AbstractJobSpecification implements JobSpecification {
     @Override
     public void setGuid(String guid) {
         this.guid = guid;
+    }
+
+    public String getOwnerUserNickname() {
+        return ownerUserNickname;
+    }
+
+    public void setOwnerUserNickname(String ownerUserNickname) {
+        this.ownerUserNickname = ownerUserNickname;
     }
 
     @Override
@@ -44,6 +55,11 @@ public abstract class AbstractJobSpecification implements JobSpecification {
     @Override
     public Long getTimeToLive() {
         return null;
+    }
+
+    @Override
+    public Collection<String> getSuppliedDataGuids() {
+        return Collections.emptySet();
     }
 
     @Override

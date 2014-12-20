@@ -5,8 +5,8 @@
 
 package org.haikuos.haikudepotserver.passwordreset.model;
 
-import org.haikuos.haikudepotserver.support.job.model.AbstractJobSpecification;
-import org.haikuos.haikudepotserver.support.job.model.JobSpecification;
+import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
+import org.haikuos.haikudepotserver.job.model.JobSpecification;
 
 public class PasswordResetMaintenanceJobSpecification extends AbstractJobSpecification {
 

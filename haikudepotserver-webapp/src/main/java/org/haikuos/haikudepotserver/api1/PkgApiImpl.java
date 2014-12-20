@@ -27,7 +27,11 @@ import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haikuos.haikudepotserver.pkg.model.PkgCategoryCoverageSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.pkg.model.PkgIconSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
@@ -59,19 +63,22 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    AuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Resource
-    PkgOrchestrationService pkgOrchestrationService;
+    private PkgOrchestrationService pkgOrchestrationService;
 
     @Resource
-    PkgOrchestrationService pkgService;
+    private PkgOrchestrationService pkgService;
+
+    @Resource
+    private JobOrchestrationService jobOrchestrationService;
 
     @Value("${pkgversion.viewcounter.protectrecurringincrementfromsameclient:true}")
-    Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient;
+    private Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient;
 
     /**
      * <p>This cache is used to keep track (in memory) of who has viewed a package so that repeat increments of the
@@ -1159,5 +1166,78 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         return new UpdatePkgProminenceResult();
     }
+
+    @Override
+    public QueuePkgCategoryCoverageSpreadsheetJobResult queuePkgCategoryCoverageSpreadsheetJob(QueuePkgCategoryCoverageSpreadsheetJobRequest request) {
+        Preconditions.checkArgument(null!=request);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orNull(),
+                null,
+                Permission.BULK_PKGCATEGORYCOVERAGESPREADSHEETREPORT)) {
+            LOGGER.warn("attempt to access a bulk category coverage spreadsheet report, but was unauthorized");
+            throw new AuthorizationFailureException();
+        }
+
+        PkgCategoryCoverageSpreadsheetJobSpecification spec = new PkgCategoryCoverageSpreadsheetJobSpecification();
+        spec.setOwnerUserNickname(user.get().getNickname());
+
+        return new QueuePkgCategoryCoverageSpreadsheetJobResult(
+                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+    }
+
+    @Override
+    public QueuePkgIconSpreadsheetJobResult queuePkgIconSpreadsheetJob(QueuePkgIconSpreadsheetJobRequest request) {
+        Preconditions.checkArgument(null!=request);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orNull(),
+                null,
+                Permission.BULK_PKGICONSPREADSHEETREPORT)) {
+            LOGGER.warn("attempt to access a pkg icon spreadsheet report, but was unauthorized");
+            throw new AuthorizationFailureException();
+        }
+
+        PkgIconSpreadsheetJobSpecification spec = new PkgIconSpreadsheetJobSpecification();
+        spec.setOwnerUserNickname(user.get().getNickname());
+
+        return new QueuePkgIconSpreadsheetJobResult(
+                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+    }
+
+    @Override
+    public QueuePkgProminenceAndUserRatingSpreadsheetJobResult queuePkgProminenceAndUserRatingSpreadsheetJob(QueuePkgProminenceAndUserRatingSpreadsheetJobRequest request) {
+        Preconditions.checkArgument(null!=request);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orNull(),
+                null,
+                Permission.BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT)) {
+            LOGGER.warn("attempt to access a prominence and user rating coverage spreadsheet report, but was unauthorized");
+            throw new AuthorizationFailureException();
+        }
+
+        PkgProminenceAndUserRatingSpreadsheetJobSpecification spec = new PkgProminenceAndUserRatingSpreadsheetJobSpecification();
+        spec.setOwnerUserNickname(user.get().getNickname());
+
+        return new QueuePkgProminenceAndUserRatingSpreadsheetJobResult(
+                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+    }
+
 
 }

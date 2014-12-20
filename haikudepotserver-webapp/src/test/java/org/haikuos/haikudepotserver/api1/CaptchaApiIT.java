@@ -11,9 +11,14 @@ import org.haikuos.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
 import org.haikuos.haikudepotserver.captcha.model.CaptchaRepository;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-context.xml"
+})
 public class CaptchaApiIT extends AbstractIntegrationTest {
 
     @Resource

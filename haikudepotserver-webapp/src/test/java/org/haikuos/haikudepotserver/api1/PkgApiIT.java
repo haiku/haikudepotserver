@@ -29,12 +29,17 @@ import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-context.xml"
+})
 public class PkgApiIT extends AbstractIntegrationTest {
 
     @Resource

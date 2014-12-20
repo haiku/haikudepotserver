@@ -22,8 +22,10 @@ import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
-import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.Jobs;
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -34,6 +36,10 @@ import java.util.concurrent.TimeUnit;
  * <p>This test will load in a fake repository HPKR file and will then check to see that it imported correctly.</p>
  */
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-context.xml"
+})
 public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
     public final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
@@ -175,12 +181,12 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 long startMs = System.currentTimeMillis();
 
                 while(
-                        jobOrchestrationService.tryGetJob(guid).get().isQueuedOrStarted()
+                        Jobs.isQueuedOrStarted(jobOrchestrationService.tryGetJob(guid).get())
                                 && (System.currentTimeMillis() - startMs) < DELAY_PROCESSSUBMITTEDTESTJOB) {
                     Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                 }
 
-                if(jobOrchestrationService.tryGetJob(guid).get().isQueuedOrStarted()) {
+                if(Jobs.isQueuedOrStarted(jobOrchestrationService.tryGetJob(guid).get())) {
                     throw new IllegalStateException("test processing of the sample repo has taken > "+DELAY_PROCESSSUBMITTEDTESTJOB+"ms");
                 }
             }

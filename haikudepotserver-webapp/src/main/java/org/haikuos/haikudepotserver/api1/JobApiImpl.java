@@ -20,8 +20,9 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
-import org.haikuos.haikudepotserver.support.job.model.Job;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.model.JobData;
+import org.haikuos.haikudepotserver.job.model.JobSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -47,6 +48,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
     @Override
     public SearchJobsResult searchJobs(SearchJobsRequest request) throws ObjectNotFoundException {
         Preconditions.checkArgument(null!=request);
+        assert null!=request;
         final SearchJobsResult result = new SearchJobsResult();
 
         final ObjectContext context = serverRuntime.getContext();
@@ -84,7 +86,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
             final JobStatusToApiJobStatus toApiStatusFn = new JobStatusToApiJobStatus();
             final ApiJobStatusToJobStatus toStatusFn = new ApiJobStatusToJobStatus();
 
-            Set<Job.Status> statuses = null;
+            Set<JobSnapshot.Status> statuses = null;
 
             if(null!=request.statuses) {
                 statuses = ImmutableSet.copyOf(Iterables.transform(request.statuses,toStatusFn));
@@ -97,9 +99,9 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
                             statuses,
                             null == request.offset ? 0 : request.offset,
                             null == request.limit ? Integer.MAX_VALUE : request.limit),
-                    new Function<Job, SearchJobsResult.Job>() {
+                    new Function<JobSnapshot, SearchJobsResult.Job>() {
                         @Override
-                        public SearchJobsResult.Job apply(Job input) {
+                        public SearchJobsResult.Job apply(JobSnapshot input) {
                             SearchJobsResult.Job resultJob = new SearchJobsResult.Job();
 
                             resultJob.guid = input.getGuid();
@@ -127,18 +129,19 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
     @Override
     public GetJobResult getJob(GetJobRequest request) throws ObjectNotFoundException {
         Preconditions.checkArgument(null!=request);
+        assert null!=request;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.guid));
 
         final ObjectContext context = serverRuntime.getContext();
         User authUser = obtainAuthenticatedUser(context);
 
-        Optional<Job> jobOptional = jobOrchestrationService.tryGetJob(request.guid);
+        Optional<? extends JobSnapshot> jobOptional = jobOrchestrationService.tryGetJob(request.guid);
 
         if(!jobOptional.isPresent()) {
-            throw new ObjectNotFoundException(Job.class.getSimpleName(), request.guid);
+            throw new ObjectNotFoundException(JobSnapshot.class.getSimpleName(), request.guid);
         }
 
-        Job job = jobOptional.get();
+        JobSnapshot job = jobOptional.get();
 
         // authorization
 
@@ -175,23 +178,44 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
         result.failTimestamp = null == job.getFailTimestamp() ? null : job.getFailTimestamp().getTime();
         result.cancelTimestamp = null == job.getCancelTimestamp() ? null : job.getCancelTimestamp().getTime();
         result.progressPercent = job.getProgressPercent();
+        result.generatedDatas = Lists.newArrayList();
+
+        // could go functional here, but keeping it simple to keep the exception handling simple.
+
+        for(String guid : job.getGeneratedDataGuids()) {
+
+            Optional<JobData> jobData = jobOrchestrationService.tryGetData(guid);
+
+            if(!jobData.isPresent()) {
+                throw new ObjectNotFoundException(JobData.class.getSimpleName(), guid);
+            }
+
+            GetJobResult.JobData resultJobData = new GetJobResult.JobData();
+            resultJobData.useCode = jobData.get().getUseCode();
+            resultJobData.guid = jobData.get().getGuid();
+            resultJobData.mediaTypeCode = jobData.get().getMediaTypeCode();
+            resultJobData.filename = jobOrchestrationService.deriveDataFilename(guid);
+
+            result.generatedDatas.add(resultJobData);
+
+        }
 
         return result;
     }
 
-    private static class ApiJobStatusToJobStatus implements Function<JobStatus, Job.Status> {
+    private static class ApiJobStatusToJobStatus implements Function<JobStatus, JobSnapshot.Status> {
 
         @Override
-        public Job.Status apply(JobStatus input) {
-            return Job.Status.valueOf(input.name());
+        public JobSnapshot.Status apply(JobStatus input) {
+            return JobSnapshot.Status.valueOf(input.name());
         }
 
     }
 
-    private static class JobStatusToApiJobStatus implements Function<Job.Status, JobStatus> {
+    private static class JobStatusToApiJobStatus implements Function<JobSnapshot.Status, JobStatus> {
 
         @Override
-        public JobStatus apply(Job.Status input) {
+        public JobStatus apply(JobSnapshot.Status input) {
             return JobStatus.valueOf(input.name());
         }
 

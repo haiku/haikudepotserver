@@ -12,10 +12,15 @@ import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-context.xml"
+})
 public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
     @Resource

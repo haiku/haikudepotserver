@@ -5,8 +5,8 @@
 
 package org.haikuos.haikudepotserver.userrating.model;
 
-import org.haikuos.haikudepotserver.support.job.model.AbstractJobSpecification;
-import org.haikuos.haikudepotserver.support.job.model.JobSpecification;
+import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
+import org.haikuos.haikudepotserver.job.model.JobSpecification;
 
 /**
  * <p>An instance of this job can be submitted in order to get the

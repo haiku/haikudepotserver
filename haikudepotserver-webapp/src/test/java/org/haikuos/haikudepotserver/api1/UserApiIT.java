@@ -22,11 +22,16 @@ import org.haikuos.haikudepotserver.passwordreset.PasswordResetException;
 import org.haikuos.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
 import org.junit.Test;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-context.xml"
+})
 public class UserApiIT extends AbstractIntegrationTest {
 
     @Resource

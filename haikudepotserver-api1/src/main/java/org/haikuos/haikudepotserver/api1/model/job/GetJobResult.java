@@ -5,6 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1.model.job;
 
+import java.util.List;
+
 public class GetJobResult {
 
     public String guid;
@@ -17,5 +19,15 @@ public class GetJobResult {
     public Long failTimestamp;
     public Long cancelTimestamp;
     public Integer progressPercent;
+    public List<JobData> generatedDatas;
+
+    public static class JobData {
+
+        public String useCode;
+        public String guid;
+        public String mediaTypeCode;
+        public String filename;
+
+    }
 
 }

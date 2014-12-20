@@ -81,6 +81,34 @@ angular.module('haikudepotserver').controller(
 
             refreshJob();
 
+            $scope.goRefresh = function() {
+                refreshJob();
+            };
+
+            /**
+             * <p>This will trigger when the user clicks on a link in the
+             * @param jobData
+             */
+
+            $scope.goDownloadData = function(jobData) {
+
+                if(!jobData || !jobData.guid) {
+                    throw Error('bad job data');
+                }
+
+                var iframeEl = document.getElementById("download-iframe");
+
+                if(!iframeEl) {
+                    throw Error('am not able to find the \'download-iframe\'');
+                }
+
+                iframeEl.src = '/secured/jobdata/'+jobData.guid+'/download?hdsbtok=' +
+                userState.user().token +
+                '&rnd=' +
+                _.random(0,1000);
+
+            };
+
         }
     ]
 );

@@ -26,7 +26,7 @@ import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpeci
 import org.haikuos.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

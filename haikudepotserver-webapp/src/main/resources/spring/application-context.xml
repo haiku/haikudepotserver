@@ -7,9 +7,12 @@
 
     <!-- JOB-MANAGEMENT -->
 
-    <bean class="org.haikuos.haikudepotserver.support.job.LocalJobOrchestrationService"
+    <bean class="org.haikuos.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
           init-method="startAsyncAndAwaitRunning"
           destroy-method="stopAsyncAndAwaitTerminated">
+        <property name="jobDataStorageService">
+            <bean class="org.haikuos.haikudepotserver.job.LocalJobDataStorageServiceImpl"></bean>
+        </property>
     </bean>
 
     <!-- RECALCULATE DERIVED USER RATINGS -->

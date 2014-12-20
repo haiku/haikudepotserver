@@ -47,21 +47,21 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-            };
+            }
 
             $scope.canLogout = function() {
                 return userState.user() &&
                     $scope.user &&
                     userState.user().nickname == $scope.user.nickname;
-            }
+            };
 
             $scope.goChangePassword = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createChangePassword($scope.user));
-            }
+            };
 
             $scope.goEdit = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditUser($scope.user));
-            }
+            };
 
             /**
              * <p>This method will logout the user; it will take them to the entry point for the application
@@ -71,21 +71,25 @@ angular.module('haikudepotserver').controller(
             $scope.goLogout = function() {
                 userState.user(null);
                 breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
-            }
+            };
 
             $scope.canDeactivate = function() {
                 return userState.user() &&
                     $scope.user &&
                     $scope.user.active &&
                     $scope.user.nickname != userState.user().nickname;
-            }
+            };
 
             $scope.canReactivate = function() {
                 return userState.user() &&
                     $scope.user &&
                     !$scope.user.active &&
                     $scope.user.nickname != userState.user().nickname;
-            }
+            };
+
+            $scope.goListJobs = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createListJobs($scope.user));
+            };
 
             function setActive(flag) {
                 $log.info('will update user active flag; '+flag);
@@ -123,13 +127,24 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goDownloadUserRatings = function() {
-                var iframeEl = document.getElementById("download-iframe");
-                iframeEl.src = '/secured/userrating/userratingspreadsheetreport/download.csv?hdsbtok=' +
-                userState.user().token +
-                '&nicknam=' +
-                $routeParams.nickname +
-                '&rnd=' +
-                _.random(0,1000);
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_USERRATING,
+                    'queueUserRatingSpreadsheetJob',
+                    [{ userNickname: $routeParams.nickname }]
+                ).then(
+                    function(data) {
+                        if(data.guid && data.guid.length) {
+                            breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:data.guid }));
+                        }
+                        else {
+                            $log.warn('attempt to run the user rating spreadsheet job failed');
+                            // TODO; some sort of user-facing indication of this?
+                        }
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             };
 
         }

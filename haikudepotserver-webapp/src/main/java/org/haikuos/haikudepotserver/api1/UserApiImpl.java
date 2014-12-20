@@ -25,7 +25,7 @@ import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.user.UserOrchestrationService;
 import org.haikuos.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
 import org.haikuos.haikudepotserver.user.model.UserSearchSpecification;

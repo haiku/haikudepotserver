@@ -455,13 +455,24 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goDownloadUserRatings = function() {
-                var iframeEl = document.getElementById("download-iframe");
-                iframeEl.src = '/secured/userrating/userratingspreadsheetreport/download.csv?hdsbtok=' +
-                userState.user().token +
-                '&pkgname=' +
-                $routeParams.name +
-                '&rnd=' +
-                _.random(0,1000);
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_USERRATING,
+                    'queueUserRatingSpreadsheetJob',
+                    [{ pkgName: $routeParams.name }]
+                ).then(
+                    function(data) {
+                        if(data.guid && data.guid.length) {
+                            breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:data.guid }));
+                        }
+                        else {
+                            $log.warn('attempt to run the user rating spreadsheet job failed');
+                            // TODO; some sort of user-facing indication of this?
+                        }
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             };
 
             // ---------------------

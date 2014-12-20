@@ -9,12 +9,17 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.api1.model.job.*;
-import org.haikuos.haikudepotserver.support.job.TestJobOrchestrationServiceImpl;
+import org.haikuos.haikudepotserver.job.TestJobOrchestrationServiceImpl;
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.EnumSet;
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-jobapi-context.xml"
+})
 public class JobApiIT extends AbstractIntegrationTest {
 
     @Resource

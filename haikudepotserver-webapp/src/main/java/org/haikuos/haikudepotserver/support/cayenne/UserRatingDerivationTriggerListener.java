@@ -10,7 +10,7 @@ import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
 import org.haikuos.haikudepotserver.dataobjects.UserRating;
-import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 
 import javax.annotation.PostConstruct;

@@ -16,14 +16,15 @@ import org.haikuos.haikudepotserver.api1.model.userrating.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
-import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.userrating.UserRatingOrchestrationService;
 import org.haikuos.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haikuos.haikudepotserver.userrating.model.UserRatingSearchSpecification;
+import org.haikuos.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -552,6 +553,75 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         );
 
         return result;
+    }
+
+    @Override
+    public QueueUserRatingSpreadsheetJobResult queueUserRatingSpreadsheetJob(QueueUserRatingSpreadsheetJobRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(Strings.isNullOrEmpty(request.pkgName) || Strings.isNullOrEmpty(request.userNickname),"the user nickname or pkg name can be supplied, but not both");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+        UserRatingSpreadsheetJobSpecification spec = new UserRatingSpreadsheetJobSpecification();
+
+        if(!Strings.isNullOrEmpty(request.userNickname)) {
+            Optional<User> requestUserOptional = User.getByNickname(context, request.userNickname);
+
+            if(!requestUserOptional.isPresent()) {
+                LOGGER.warn("attempt to produce user rating report for user {}, but that user does not exist -- not allowed", request.userNickname);
+                throw new AuthorizationFailureException();
+            }
+
+            if(!authorizationService.check(
+                    context,
+                    user.orNull(),
+                    requestUserOptional.get(),
+                    Permission.BULK_USERRATINGSPREADSHEETREPORT_USER)) {
+                LOGGER.warn("attempt to access a user rating report for user {}, but this was disallowed", request.userNickname);
+                throw new AuthorizationFailureException();
+            }
+
+            spec.setUserNickname(request.userNickname);
+        }
+        else {
+
+            if (!Strings.isNullOrEmpty(request.pkgName)) {
+                Optional<Pkg> requestPkgOptional = Pkg.getByName(context, request.pkgName);
+
+                if (!requestPkgOptional.isPresent()) {
+                    LOGGER.warn("attempt to produce user rating report for pkg {}, but that pkg does not exist -- not allowed", request.pkgName);
+                    throw new AuthorizationFailureException();
+                }
+
+                if (!authorizationService.check(
+                        context,
+                        user.orNull(),
+                        requestPkgOptional.get(),
+                        Permission.BULK_USERRATINGSPREADSHEETREPORT_PKG)) {
+                    LOGGER.warn("attempt to access a user rating report for pkg {}, but this was disallowed", request.pkgName);
+                    throw new AuthorizationFailureException();
+                }
+
+                spec.setPkgName(request.pkgName);
+            }
+            else {
+                if (!authorizationService.check(
+                        context,
+                        user.orNull(),
+                        null,
+                        Permission.BULK_PKGICONSPREADSHEETREPORT)) {
+                    LOGGER.warn("attempt to access a pkg icon spreadsheet report, but was unauthorized");
+                    throw new AuthorizationFailureException();
+                }
+            }
+        }
+
+        spec.setOwnerUserNickname(user.get().getNickname());
+
+        return new QueueUserRatingSpreadsheetJobResult(
+                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+
     }
 
 

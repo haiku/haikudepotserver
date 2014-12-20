@@ -5,8 +5,8 @@
 
 package org.haikuos.haikudepotserver.user.model;
 
-import org.haikuos.haikudepotserver.support.job.model.AbstractJobSpecification;
-import org.haikuos.haikudepotserver.support.job.model.JobSpecification;
+import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
+import org.haikuos.haikudepotserver.job.model.JobSpecification;
 
 /**
  * <p>This object models a job that can be submitted to synchronize the user data into an LDAP directory.</p>

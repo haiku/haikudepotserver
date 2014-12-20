@@ -7,9 +7,8 @@ package org.haikuos.haikudepotserver.operations.controller;
 
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner;
 import org.haikuos.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
-import org.haikuos.haikudepotserver.support.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

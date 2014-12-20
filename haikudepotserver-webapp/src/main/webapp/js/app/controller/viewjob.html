@@ -4,18 +4,50 @@
 
     <div ng-show="job && job.guid">
 
-    <dl>
-        <dt><message key="viewJob.id.title"></message></dt>
-        <dd><code>{{job.guid}}</code></dd>
-        <dt><message key="viewJob.status.title"></message></dt>
-        <dd><job-status-indicator job="job"></job-status-indicator></dd>
-    </dl>
+        <dl>
+            <dt><message key="viewJob.typecode.title"></message></dt>
+            <dd><message key="{{'job.jobtype.' + job.jobTypeCode + '.title'}}"></message></dd>
+            <dt><message key="viewJob.queuedtimestamp.title"></message></dt>
+            <dd>{{job.queuedTimestamp|timestamp}}</dd>
+            <dt><message key="viewJob.id.title"></message></dt>
+            <dd><code>{{job.guid}}</code></dd>
+            <dt><message key="viewJob.status.title"></message></dt>
+            <dd><job-status-indicator job="job"></job-status-indicator></dd>
+        </dl>
+
+        <div ng-show="job.jobStatus == 'FINISHED' && job.generatedDatas && job.generatedDatas.length">
+            <h2><message key="viewJob.generateddatas.title"></message></h2>
+
+            <table class="table-general">
+                <thead>
+                <th><message key="viewJob.generateddatas.table.filename.title"></message></th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="generatedData in job.generatedDatas">
+                    <td>
+                        <a href="" ng-click="goDownloadData(generatedData)">
+                            {{generatedData.filename}}
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
 
     </div>
 
     <div ng-show="job && !job.guid" class="alert-container">
         <message key="viewJob.notfound.description"></message>
     </div>
+
+    <ul>
+        <li>
+            <a href="" ng-click="goRefresh()">
+                <message key="viewJob.refreshaction.title"></message>
+            </a>
+        </li>
+    </ul>
 
 </div>
 

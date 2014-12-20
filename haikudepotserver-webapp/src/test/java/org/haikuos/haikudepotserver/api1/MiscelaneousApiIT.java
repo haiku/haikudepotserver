@@ -23,6 +23,7 @@ import org.haikuos.haikudepotserver.dataobjects.UserRatingStability;
 import org.haikuos.haikudepotserver.feed.controller.FeedController;
 import org.haikuos.haikudepotserver.support.RuntimeInformationService;
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.net.MalformedURLException;
@@ -30,6 +31,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-context.xml"
+})
 public class MiscelaneousApiIT extends AbstractIntegrationTest {
 
     @Resource

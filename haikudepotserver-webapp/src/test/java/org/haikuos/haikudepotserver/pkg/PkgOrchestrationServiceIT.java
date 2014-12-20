@@ -1,3 +1,8 @@
+/*
+ * Copyright 2014, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haikuos.haikudepotserver.pkg;
 
 import org.apache.cayenne.ObjectContext;
@@ -12,10 +17,15 @@ import org.haikuos.pkg.model.Pkg;
 import org.haikuos.pkg.model.PkgArchitecture;
 import org.haikuos.pkg.model.PkgVersion;
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
 
+@ContextConfiguration({
+        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-context.xml"
+})
 public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
     @Resource

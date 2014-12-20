@@ -139,4 +139,28 @@ public interface PkgApi {
 
     UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) throws ObjectNotFoundException;
 
+    /**
+     * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing the coverage of categories
+     * for the packages.  See the {@link org.haikuos.haikudepotserver.api1.JobApi} for details on how to control the
+     * job.</p>
+     */
+
+    QueuePkgCategoryCoverageSpreadsheetJobResult queuePkgCategoryCoverageSpreadsheetJob(QueuePkgCategoryCoverageSpreadsheetJobRequest request);
+
+    /**
+     * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have icons
+     * associated with them.  See the {@link org.haikuos.haikudepotserver.api1.JobApi} for details on how to control the
+     * job.</p>
+     */
+
+    QueuePkgIconSpreadsheetJobResult queuePkgIconSpreadsheetJob(QueuePkgIconSpreadsheetJobRequest request);
+
+    /**
+     * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have what
+     * prominence.  See the {@link org.haikuos.haikudepotserver.api1.JobApi} for details on how to control the
+     * job.</p>
+     */
+
+    QueuePkgProminenceAndUserRatingSpreadsheetJobResult queuePkgProminenceAndUserRatingSpreadsheetJob(QueuePkgProminenceAndUserRatingSpreadsheetJobRequest request);
+
 }

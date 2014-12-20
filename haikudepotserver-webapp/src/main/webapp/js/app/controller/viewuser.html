@@ -42,6 +42,11 @@
                 <message key="viewUser.editAction.title"></message>
             </a>
         </li>
+        <li user="user" show-if-user-permission="'USER_VIEWJOBS'">
+            <a href="" ng-click="goListJobs()">
+                <message key="viewUser.listJobsAction.title"></message>
+            </a>
+        </li>
         <li ng-show="canLogout()">
             <a href="" ng-click="goLogout()">
                 <message key="viewUser.logoutAction.title"></message>

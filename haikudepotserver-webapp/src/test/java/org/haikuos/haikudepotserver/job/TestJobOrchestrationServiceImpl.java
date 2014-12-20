@@ -3,26 +3,26 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.support.job;
+package org.haikuos.haikudepotserver.job;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteSource;
 import org.haikuos.haikudepotserver.dataobjects.User;
-import org.haikuos.haikudepotserver.support.job.model.Job;
-import org.haikuos.haikudepotserver.support.job.model.JobSpecification;
-import org.haikuos.haikudepotserver.support.job.model.TestJobSpecificationImpl;
+import org.haikuos.haikudepotserver.job.model.*;
 import org.joda.time.DateTime;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 /**
- * <p>This implementation of {@link org.haikuos.haikudepotserver.support.job.JobOrchestrationService} has some
+ * <p>This implementation of {@link org.haikuos.haikudepotserver.job.JobOrchestrationService} has some
  * jobs in "suspended" state so that tests of the {@link org.haikuos.haikudepotserver.api1.JobApi} are able to
  * query that known state.</p>
  */
@@ -50,29 +50,30 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
         {
             queuedJob = new Job();
             queuedJob.setQueuedTimestamp(DT_1976_JAN.toDate());
-            queuedJob.setJobSpecification(new TestJobSpecificationImpl("queued"));
+            queuedJob.setJobSpecification(new TestJobSpecificationImpl(null,"queued"));
         }
 
         {
             startedJob = new Job();
             startedJob.setQueuedTimestamp(DT_1976_FEB.toDate());
             startedJob.setStartTimestamp(DT_1976_MAR.toDate());
-            startedJob.setJobSpecification(new TestJobSpecificationImpl("started"));
+            startedJob.setJobSpecification(new TestJobSpecificationImpl(null,"started"));
         }
 
         {
             finishedJob = new Job();
-            finishedJob.setOwnerUserNickname("testuser");
             finishedJob.setQueuedTimestamp(DT_1976_APR.toDate());
             finishedJob.setStartTimestamp(DT_1976_JUN.toDate());
             finishedJob.setFinishTimestamp(DT_1976_JUL.toDate());
-            finishedJob.setJobSpecification(new TestJobSpecificationImpl("finished"));
+            finishedJob.setJobSpecification(new TestJobSpecificationImpl("testuser", "finished"));
         }
 
     }
 
     @Override
-    public Optional<String> submit(JobSpecification specification, CoalesceMode coalesceMode) {
+    public Optional<String> submit(
+            JobSpecification specification,
+            CoalesceMode coalesceMode) {
         throw new UnsupportedOperationException();
     }
 
@@ -87,7 +88,7 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     }
 
     @Override
-    public Optional<Job> tryGetJob(String guid) {
+    public Optional<? extends JobSnapshot> tryGetJob(String guid) {
         switch(guid) {
             case "queued" : return Optional.of(queuedJob);
             case "started" : return Optional.of(startedJob);
@@ -107,7 +108,7 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
         throw new UnsupportedOperationException();
     }
 
-    private boolean matches(Job job, User user, Set<Job.Status> statuses) {
+    private boolean matches(JobSnapshot job, User user, Set<JobSnapshot.Status> statuses) {
         if(null!=user) {
             if(null==job.getOwnerUserNickname()) {
                 return false;
@@ -127,7 +128,7 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
         return true;
     }
 
-    private List<Job> filteredJobs(final User user, final Set<Job.Status> statuses) {
+    private List<Job> filteredJobs(final User user, final Set<JobSnapshot.Status> statuses) {
         return Lists.newArrayList(
                 Iterables.filter(
                         ImmutableList.of(
@@ -135,9 +136,9 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
                                 startedJob,
                                 finishedJob
                         ),
-                        new Predicate<Job>() {
+                        new Predicate<JobSnapshot>() {
                             @Override
-                            public boolean apply(Job input) {
+                            public boolean apply(JobSnapshot input) {
                                 return matches(input, user, statuses);
                             }
                         }
@@ -146,7 +147,7 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     }
 
     @Override
-    public List<Job> findJobs(User user, Set<Job.Status> statuses, int offset, int limit) {
+    public List<? extends JobSnapshot> findJobs(User user, Set<JobSnapshot.Status> statuses, int offset, int limit) {
         List<Job> result = filteredJobs(user, statuses);
 
         if(offset >= result.size()) {
@@ -163,8 +164,37 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     }
 
     @Override
-    public int totalJobs(User user, Set<Job.Status> statuses) {
+    public int totalJobs(User user, Set<JobSnapshot.Status> statuses) {
         return filteredJobs(user, statuses).size();
     }
 
+    @Override
+    public JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JobData storeSuppliedData(String useCode, String mediaTypeCode, ByteSource byteSource) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String deriveDataFilename(String guid) {
+        return "file.dat";
+    }
+
+    @Override
+    public Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<JobData> tryGetData(String guid) {
+        return Optional.absent();
+    }
+
+    @Override
+    public Optional<JobDataWithByteSource> tryObtainData(String guid) throws IOException {
+        return Optional.absent();
+    }
 }

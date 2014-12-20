@@ -5,7 +5,8 @@
 
 package org.haikuos.haikudepotserver.user;
 
-import org.haikuos.haikudepotserver.support.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
 
 /**
@@ -20,7 +21,7 @@ public class NoopLdapSynchronizeJobRunner extends AbstractJobRunner<LdapSynchron
     }
 
     @Override
-    public void run(LdapSynchronizeUsersJobSpecification job) {
+    public void run(JobOrchestrationService jobOrchestrationService, LdapSynchronizeUsersJobSpecification job) {
         // do nothing
     }
 

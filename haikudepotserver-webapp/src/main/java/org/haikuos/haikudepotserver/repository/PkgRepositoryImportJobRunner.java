@@ -15,7 +15,8 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
-import org.haikuos.haikudepotserver.support.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.AbstractJobRunner;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.pkg.PkgIterator;
 import org.haikuos.pkg.model.Pkg;
 import org.slf4j.Logger;
@@ -46,7 +47,8 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
     @Resource
     PkgOrchestrationService pkgService;
 
-    public void run(PkgRepositoryImportJobSpecification specification) {
+    @Override
+    public void run(JobOrchestrationService jobOrchestrationService, PkgRepositoryImportJobSpecification specification) {
 
         Preconditions.checkNotNull(specification);
 
