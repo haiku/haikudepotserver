@@ -14,7 +14,7 @@ angular.module('haikudepotserver')
 
         RECENT_DAYS : 90,
 
-        ARCHITECTURE_CODE_DEFAULT : 'x86',
+        ARCHITECTURE_CODE_DEFAULT : 'x86_gcc2',
 
         ENDPOINT_API_V1_REPOSITORY : '/api/v1/repository',
         ENDPOINT_API_V1_PKG : '/api/v1/pkg',

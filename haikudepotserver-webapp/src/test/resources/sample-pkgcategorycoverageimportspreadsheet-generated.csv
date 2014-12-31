@@ -1,0 +1,6 @@
+"pkg-name","any-summary","none","audio","business","development","education","games","graphics","internetandnetwork","productivity","scienceandmathematics","systemandutilities","video","action"
+"pkg1","pkg1Version2SummaryEnglish_persimon","","*","","","","","*","","","","","","UPDATED"
+"notexisting","sample summary","","","*","*","*","","","","","","","","NOTFOUND"
+"pkg3","sample summary","*","","","","","","","","","","","","NOACTION"
+"pkgany","sample summary","*","","*","","*","","","","","","","","INVALID"
+"badline","","","","","","","","","","","","","","INVALID"

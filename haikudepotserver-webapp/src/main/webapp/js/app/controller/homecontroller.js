@@ -175,6 +175,10 @@ angular.module('haikudepotserver').controller(
                             }
 
                             if(!$scope.selectedArchitecture) {
+                                $scope.selectedArchitecture = _.findWhere(data,{ code : constants.ARCHITECTURE_CODE_DEFAULT });
+                            }
+
+                            if(!$scope.selectedArchitecture) {
                                 $scope.selectedArchitecture = $scope.architectures[0];
                             }
 

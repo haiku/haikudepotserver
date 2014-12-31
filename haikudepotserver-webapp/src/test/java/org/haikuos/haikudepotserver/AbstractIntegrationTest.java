@@ -7,7 +7,8 @@ package org.haikuos.haikudepotserver;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.ByteSource;
+import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -24,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -31,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>This superclass of all of the tests has a hook to run before each integration test.  The hook will
@@ -63,16 +66,39 @@ public abstract class AbstractIntegrationTest {
     @Resource
     protected CapturingMailSender mailSender;
 
-    protected byte[] getResourceData(String path) throws IOException {
+    protected void assertEqualsLineByLine(BufferedReader expected, BufferedReader actual) throws IOException {
+            String expectedLine;
+            String actualLine;
 
-        try (InputStream inputStream = this.getClass().getResourceAsStream(path)) {
+            do {
+                expectedLine = expected.readLine();
+                actualLine = actual.readLine();
 
-            if(null==inputStream) {
-                throw new IllegalStateException("unable to find the test resource; "+path);
+                if(!Objects.equals(expectedLine, actualLine)) {
+                    Assert.fail("mismatch expected and actual; [" + expectedLine + "] [" + actualLine + "]");
+                }
+
             }
+            while(null!=expectedLine || null!=actualLine);
+    }
 
-            return ByteStreams.toByteArray(inputStream);
-        }
+    protected ByteSource getResourceByteSource(final String path) {
+        return new ByteSource() {
+            @Override
+            public InputStream openStream() throws IOException {
+                InputStream result = this.getClass().getResourceAsStream(path);
+
+                if (null == result) {
+                    throw new IllegalStateException("unable to find the test resource; " + path);
+                }
+
+                return result;
+            }
+        };
+    }
+
+    protected byte[] getResourceData(String path) throws IOException {
+        return getResourceByteSource(path).read();
     }
 
     private String getDatabaseName(Connection connection) throws SQLException {

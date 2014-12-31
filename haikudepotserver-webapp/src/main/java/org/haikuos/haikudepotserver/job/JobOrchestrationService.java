@@ -27,6 +27,12 @@ public interface JobOrchestrationService {
         QUEUEDANDSTARTED
     }
 
+    /**
+     * <p>This method will block until the job is no longer queued or started.</p>
+     */
+
+    void awaitJobConcludedUninterruptibly(String guid, long timeout);
+
     Optional<String> submit(
             JobSpecification specification,
             CoalesceMode coalesceMode);

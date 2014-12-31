@@ -29,10 +29,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haikuos.haikudepotserver.pkg.model.PkgCategoryCoverageSpreadsheetJobSpecification;
-import org.haikuos.haikudepotserver.pkg.model.PkgIconSpreadsheetJobSpecification;
-import org.haikuos.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
-import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
+import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
@@ -162,30 +159,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new ObjectNotFoundException(PkgCategory.class.getSimpleName(), null);
         }
 
-        // now go through and delete any of those pkg relationships to packages that are already present
-        // and which are no longer required.  Also remove those that we already have from the list.
-
-        for(PkgPkgCategory pkgPkgCategory : ImmutableList.copyOf(pkg.getPkgPkgCategories())) {
-            if(!pkgCategories.contains(pkgPkgCategory.getPkgCategory())) {
-                pkg.removeToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
-                context.deleteObjects(pkgPkgCategory);
-            }
-            else {
-                pkgCategories.remove(pkgPkgCategory.getPkgCategory());
-            }
-        }
-
-        // now any remaining in the pkgCategories will need to be added to the pkg.
-
-        for(PkgCategory pkgCategory : pkgCategories) {
-            PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
-            pkgPkgCategory.setPkgCategory(pkgCategory);
-            pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
-        }
-
-        // now save and finish.
-
-        pkg.setModifyTimestamp();
+        pkgOrchestrationService.updatePkgCategories(context, pkg, pkgCategories);
 
         context.commitChanges();
 
@@ -1168,7 +1142,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public QueuePkgCategoryCoverageSpreadsheetJobResult queuePkgCategoryCoverageSpreadsheetJob(QueuePkgCategoryCoverageSpreadsheetJobRequest request) {
+    public QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request) {
         Preconditions.checkArgument(null!=request);
 
         final ObjectContext context = serverRuntime.getContext();
@@ -1179,15 +1153,15 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 context,
                 user.orNull(),
                 null,
-                Permission.BULK_PKGCATEGORYCOVERAGESPREADSHEETREPORT)) {
+                Permission.BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET)) {
             LOGGER.warn("attempt to access a bulk category coverage spreadsheet report, but was unauthorized");
             throw new AuthorizationFailureException();
         }
 
-        PkgCategoryCoverageSpreadsheetJobSpecification spec = new PkgCategoryCoverageSpreadsheetJobSpecification();
+        PkgCategoryCoverageExportSpreadsheetJobSpecification spec = new PkgCategoryCoverageExportSpreadsheetJobSpecification();
         spec.setOwnerUserNickname(user.get().getNickname());
 
-        return new QueuePkgCategoryCoverageSpreadsheetJobResult(
+        return new QueuePkgCategoryCoverageExportSpreadsheetJobResult(
                 jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
     }
 

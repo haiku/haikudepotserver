@@ -15,9 +15,7 @@ import org.haikuos.haikudepotserver.job.model.*;
 import org.haikuos.haikudepotserver.support.DateTimeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 public class LocalJobOrchestrationServiceImpl
         extends AbstractService
-        implements ApplicationContextAware, JobOrchestrationService {
+        implements JobOrchestrationService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobOrchestrationService.class);
 
@@ -48,11 +46,8 @@ public class LocalJobOrchestrationServiceImpl
 
     private ArrayBlockingQueue<Runnable> runnables = Queues.newArrayBlockingQueue(SIZE_QUEUE);
 
-    /**
-     * <p>Contains a mapping from the job type code to a suitable runner for that type code.</p>
-     */
-
-    private Map<String,JobRunner> jobRunners;
+    @Autowired
+    private List<JobRunner> jobRunners;
 
     /**
      * <p>Contains a mapping from the GUID to the job.</p>
@@ -66,15 +61,8 @@ public class LocalJobOrchestrationServiceImpl
 
     private Set<JobData> datas = Sets.newHashSet();
 
-    private ApplicationContext applicationContext;
-
     public void setJobDataStorageService(JobDataStorageService dataStorageService) {
         this.dataStorageService = dataStorageService;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 
     private synchronized Collection<Job> findJobsWithStatuses(final EnumSet<JobSnapshot.Status> statuses) {
@@ -101,10 +89,55 @@ public class LocalJobOrchestrationServiceImpl
     // ------------------------------
     // RUN JOBS
 
-    private Optional<JobRunner> getJobRunner(String jobTypeCode) {
+    private boolean existsAndIsQueuedOrStarted(String guid) {
+        Optional<? extends JobSnapshot> jobSnapshotOptional = tryGetJob(guid);
+
+        if(!jobSnapshotOptional.isPresent()) {
+            return false;
+        }
+
+        switch(jobSnapshotOptional.get().getStatus()) {
+            case QUEUED:
+                case STARTED:
+                    return true;
+
+            default:
+                return false;
+        }
+
+    }
+
+    @Override
+    public void awaitJobConcludedUninterruptibly(String guid, long timeout) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
+        Preconditions.checkArgument(timeout > 0);
+        long ms = System.currentTimeMillis();
+
+        while(System.currentTimeMillis() - ms < timeout
+                && existsAndIsQueuedOrStarted(guid)) {
+            synchronized(this) {
+                try {
+                    wait(timeout);
+                }
+                catch(InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+
+    private Optional<JobRunner> getJobRunner(final String jobTypeCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobTypeCode));
         Preconditions.checkState(null!=jobRunners,"the job runners must be configured - was this started up properly?");
-        return Optional.fromNullable(jobRunners.get(jobTypeCode));
+        return Iterables.tryFind(
+                jobRunners,
+                new Predicate<JobRunner>() {
+                    @Override
+                    public boolean apply(JobRunner input) {
+                        return input.getJobTypeCode().equals(jobTypeCode);
+                    }
+                }
+        );
     }
 
     private Job submit(JobSpecification specification) {
@@ -449,6 +482,8 @@ public class LocalJobOrchestrationServiceImpl
 
         job.setStartTimestamp();
         LOGGER.info("{}; start", job.getJobSpecification().toString());
+
+        notifyAll();
     }
 
     public synchronized void setJobFinishTimestamp(String guid) {
@@ -460,6 +495,8 @@ public class LocalJobOrchestrationServiceImpl
 
         job.setFinishTimestamp();
         LOGGER.info("{}; finish", job.getJobSpecification().toString());
+
+        notifyAll();
     }
 
     public synchronized void setJobRunQueuedTimestamp(String guid) {
@@ -471,6 +508,8 @@ public class LocalJobOrchestrationServiceImpl
 
         job.setQueuedTimestamp();
         LOGGER.info("{}; queued", job.getJobSpecification().toString());
+
+        notifyAll();
     }
 
     @Override
@@ -483,6 +522,8 @@ public class LocalJobOrchestrationServiceImpl
 
         job.setFailTimestamp();
         LOGGER.info("{}; fail", job.getJobSpecification().toString());
+
+        notifyAll();
     }
 
     @Override
@@ -494,6 +535,7 @@ public class LocalJobOrchestrationServiceImpl
             case STARTED:
                 job.setCancelTimestamp();
                 LOGGER.info("{}; cancelled", job.getJobSpecification().toString());
+                notifyAll();
                 break;
 
             default:
@@ -519,6 +561,8 @@ public class LocalJobOrchestrationServiceImpl
         }
 
         job.setProgressPercent(progressPercent);
+
+        notifyAll();
     }
 
     // ------------------------------
@@ -532,16 +576,6 @@ public class LocalJobOrchestrationServiceImpl
             LOGGER.info("will start service");
 
             jobs = Maps.newHashMap();
-
-            jobRunners = Maps.newHashMap();
-
-            for(JobRunner jobRunner : applicationContext.getBeansOfType(JobRunner.class).values()) {
-                jobRunners.put(jobRunner.getJobTypeCode(), jobRunner);
-                LOGGER.info(
-                        "registered job runner; {} ({})",
-                        jobRunner.getJobTypeCode(),
-                        jobRunner.getClass().getSimpleName());
-            }
 
             executor = new ThreadPoolExecutor(
                     0, // core pool size

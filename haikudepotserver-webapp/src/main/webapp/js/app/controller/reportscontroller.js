@@ -73,8 +73,8 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
-            $scope.goPkgCategoryCoverageSpreadsheetReport = function() {
-                goBasicPkgReport('queuePkgCategoryCoverageSpreadsheetJob');
+            $scope.goPkgCategoryCoverageExportSpreadsheet = function() {
+                goBasicPkgReport('queuePkgCategoryCoverageExportSpreadsheetJob');
             };
 
             $scope.goPkgProminenceAndUserRatingSpreadsheetReport = function() {

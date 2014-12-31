@@ -1194,5 +1194,54 @@ public class PkgOrchestrationService {
         return Collections.emptyList();
     }
 
+    // ------------------------------
+    // MISC
+
+    /**
+     * <p>This method will update the {@link org.haikuos.haikudepotserver.dataobjects.PkgCategory} set in the
+     * nominated {@link org.haikuos.haikudepotserver.dataobjects.Pkg} such that the supplied set are the
+     * categories for the package.  It will do this by adding and removing relationships between the package
+     * and the categories.</p>
+     * @return true if a change was made.
+     */
+
+    public boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories) {
+        Preconditions.checkArgument(null!=context);
+        Preconditions.checkArgument(null!=pkg);
+        Preconditions.checkArgument(null!=pkgCategories);
+
+        boolean didChange = false;
+
+        // now go through and delete any of those pkg relationships to packages that are already present
+        // and which are no longer required.  Also remove those that we already have from the list.
+
+        for(PkgPkgCategory pkgPkgCategory : ImmutableList.copyOf(pkg.getPkgPkgCategories())) {
+            if(!pkgCategories.contains(pkgPkgCategory.getPkgCategory())) {
+                pkg.removeToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+                context.deleteObjects(pkgPkgCategory);
+                didChange = true;
+            }
+            else {
+                pkgCategories.remove(pkgPkgCategory.getPkgCategory());
+            }
+        }
+
+        // now any remaining in the pkgCategories will need to be added to the pkg.
+
+        for(PkgCategory pkgCategory : pkgCategories) {
+            PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
+            pkgPkgCategory.setPkgCategory(pkgCategory);
+            pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+            didChange = true;
+        }
+
+        // now save and finish.
+
+        if(didChange) {
+            pkg.setModifyTimestamp();
+        }
+
+        return didChange;
+    }
 
 }

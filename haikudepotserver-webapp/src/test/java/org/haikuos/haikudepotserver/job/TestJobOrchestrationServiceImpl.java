@@ -197,4 +197,10 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     public Optional<JobDataWithByteSource> tryObtainData(String guid) throws IOException {
         return Optional.absent();
     }
+
+    @Override
+    public void awaitJobConcludedUninterruptibly(String guid, long timeout) {
+        // ignore
+    }
+
 }

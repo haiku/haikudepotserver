@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotserver.job;
 
 import org.haikuos.haikudepotserver.job.model.JobSpecification;
+import org.haikuos.haikudepotserver.job.model.JobRunnerException;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public abstract class AbstractJobRunner<T extends JobSpecification> implements J
     }
 
     @Override
-    public abstract void run(JobOrchestrationService jobOrchestrationService, T specification) throws IOException;
+    public abstract void run(JobOrchestrationService jobOrchestrationService, T specification)
+            throws IOException, JobRunnerException;
 
 }

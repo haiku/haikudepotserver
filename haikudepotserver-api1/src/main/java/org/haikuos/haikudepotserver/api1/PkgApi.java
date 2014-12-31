@@ -145,7 +145,7 @@ public interface PkgApi {
      * job.</p>
      */
 
-    QueuePkgCategoryCoverageSpreadsheetJobResult queuePkgCategoryCoverageSpreadsheetJob(QueuePkgCategoryCoverageSpreadsheetJobRequest request);
+    QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request);
 
     /**
      * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have icons

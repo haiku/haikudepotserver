@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotserver.job;
 
 import org.haikuos.haikudepotserver.job.model.JobSpecification;
+import org.haikuos.haikudepotserver.job.model.JobRunnerException;
 
 import java.io.IOException;
 
@@ -24,6 +25,6 @@ public interface JobRunner<T extends JobSpecification> {
 
     String getJobTypeCode();
 
-    void run(JobOrchestrationService jobOrchestrationService, T specification) throws IOException;
+    void run(JobOrchestrationService jobOrchestrationService, T specification) throws IOException, JobRunnerException;
 
 }

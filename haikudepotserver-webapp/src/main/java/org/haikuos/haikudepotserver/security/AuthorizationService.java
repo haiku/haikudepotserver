@@ -218,8 +218,11 @@ public class AuthorizationService {
 
             case BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT:
             case BULK_PKGICONSPREADSHEETREPORT:
-            case BULK_PKGCATEGORYCOVERAGESPREADSHEETREPORT:
+            case BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET:
                 return null!=authenticatedUser;
+
+            case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:
+                return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case BULK_USERRATINGSPREADSHEETREPORT_ALL:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();

@@ -5,14 +5,14 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class QueuePkgCategoryCoverageSpreadsheetJobResult {
+public class QueuePkgCategoryCoverageExportSpreadsheetJobResult {
 
     public String guid;
 
-    public QueuePkgCategoryCoverageSpreadsheetJobResult() {
+    public QueuePkgCategoryCoverageExportSpreadsheetJobResult() {
     }
 
-    public QueuePkgCategoryCoverageSpreadsheetJobResult(String guid) {
+    public QueuePkgCategoryCoverageExportSpreadsheetJobResult(String guid) {
         this.guid = guid;
     }
 

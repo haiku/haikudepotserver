@@ -6,7 +6,9 @@
 package org.haikuos.haikudepotserver.job.controller;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.io.ByteSource;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -23,14 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * <p>The job controller allows for upload and download of binary data related to jobs; for example, there are
@@ -46,6 +47,8 @@ public class JobController extends AbstractController {
 
     public final static String KEY_GUID = "guid";
 
+    public final static String KEY_USECODE = "usecode";
+
     @Resource
     private JobOrchestrationService jobOrchestrationService;
 
@@ -55,8 +58,42 @@ public class JobController extends AbstractController {
     @Resource
     private AuthorizationService authorizationService;
 
+    /**
+     * <p>This URL can be used to supply data that can be used with a job to be run as an input to the
+     * job.</p>
+     */
+
+    @RequestMapping(value = "/jobdata", method = RequestMethod.POST)
+    @ResponseBody
+    public String supplyData(
+            final HttpServletRequest request,
+            @RequestHeader(value = HttpHeaders.CONTENT_TYPE, required = false) String contentType,
+            @RequestParam(value = KEY_USECODE, required = false) String useCode)
+    throws IOException {
+
+        Preconditions.checkArgument(null!=request);
+        assert null!=request;
+
+        JobData data = jobOrchestrationService.storeSuppliedData(
+                useCode,
+                !Strings.isNullOrEmpty(contentType) ? contentType : MediaType.OCTET_STREAM.toString(),
+                new ByteSource() {
+                    @Override
+                    public InputStream openStream() throws IOException {
+                        return request.getInputStream();
+                    }
+                }
+        );
+
+        return data.getGuid();
+    }
+
+    /**
+     * <p>This URL can be used to download job data that has resulted from a job being run.</p>
+     */
+
     @RequestMapping(value = "/jobdata/{" + KEY_GUID + "}/download", method = RequestMethod.GET)
-    public void data(
+    public void downloadGeneratedData(
             HttpServletResponse response,
             @PathVariable(value = KEY_GUID) String guid)
     throws IOException{
