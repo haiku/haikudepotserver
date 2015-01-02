@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -146,6 +146,14 @@ public interface PkgApi {
      */
 
     QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request);
+
+    /**
+     * <P>Enqueues a request on behalf od the current user to import package data from a spreadsheet that is uploaded
+     * to the server.  It does this and also produces an outbound spreadsheet of the result.</P>
+     * @throws org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException in the case that the data identified by GUID does not exist.
+     */
+
+    QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException;
 
     /**
      * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have icons

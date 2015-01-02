@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,6 +28,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.model.JobData;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
@@ -1154,7 +1155,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 user.orNull(),
                 null,
                 Permission.BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET)) {
-            LOGGER.warn("attempt to access a bulk category coverage spreadsheet report, but was unauthorized");
+            LOGGER.warn("attempt to access a package category coverage export spreadsheet, but was unauthorized");
             throw new AuthorizationFailureException();
         }
 
@@ -1163,6 +1164,43 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         return new QueuePkgCategoryCoverageExportSpreadsheetJobResult(
                 jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+    }
+
+    @Override
+    public QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(
+            QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request,"the request must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orNull(),
+                null,
+                Permission.BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET)) {
+            LOGGER.warn("attempt to import package categories, but was not authorized");
+            throw new AuthorizationFailureException();
+        }
+
+        // now check that the data is present.
+
+        Optional<JobData> dataOptional = jobOrchestrationService.tryGetData(request.inputDataGuid);
+
+        if(!dataOptional.isPresent()) {
+            throw new ObjectNotFoundException(JobData.class.getSimpleName(), request.inputDataGuid);
+        }
+
+        // setup and go
+
+        PkgCategoryCoverageImportSpreadsheetJobSpecification spec = new PkgCategoryCoverageImportSpreadsheetJobSpecification();
+        spec.setOwnerUserNickname(user.get().getNickname());
+        spec.setInputDataGuid(request.inputDataGuid);
+
+        return new QueuePkgCategoryCoverageImportSpreadsheetJobResult(
+                jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE).orNull());
     }
 
     @Override

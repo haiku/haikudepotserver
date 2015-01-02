@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,11 +15,11 @@ angular.module('haikudepotserver').factory('userState',
     [
         '$log','$q','$rootScope','$timeout','$window',
         'jsonRpc','pkgScreenshot','errorHandling',
-        'constants','referenceData',
+        'constants','referenceData','jobs',
         function(
             $log,$q,$rootScope,$timeout,$window,
             jsonRpc,pkgScreenshot,errorHandling,
-            constants,referenceData) {
+            constants,referenceData,jobs) {
 
             var SIZE_CHECKED_PERMISSION_CACHE = 25;
             var SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 10;
@@ -61,6 +61,7 @@ angular.module('haikudepotserver').factory('userState',
 
                         jsonRpc.setHeader('Authorization', authenticationContent);
                         pkgScreenshot.setHeader('Authorization', authenticationContent);
+                        jobs.setHeader('Authorization', authenticationContent);
                     }
                     else {
                        $log.info('cannot set the token because the user state is not compatible with the token');

@@ -1,0 +1,29 @@
+<breadcrumbs></breadcrumbs>
+
+<div class="content-container">
+
+        <form name="specificationForm" novalidate="novalidate">
+
+            <label for="import-data-file"><message key="pkgCategoryCoverageImportSpreadsheet.importDataFile.title"></message></label>
+            <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('importDataFile')">
+                <input id="import-data-file" name="importDataFile" type="file" ng-model="specification.importDataFile" file-supply required></input>
+                <error-messages key-prefix="pkgCategoryCoverageImportSpreadsheet.importDataFile" error="specificationForm.importDataFile.$error"></error-messages>
+            </div>
+
+            <div class="form-action-container">
+                <button
+                        ng-disabled="specificationForm.$invalid"
+                        ng-click="goQueue()"
+                        type="submit"
+                        class="main-action">
+                    <message key="pkgCategoryCoverageImportSpreadsheet.action.title"></message>
+                </button>
+            </div>
+
+        </form>
+
+</div>
+
+<div class="footer"></div>
+<spinner spin="shouldSpin()"></spinner>
+

@@ -776,6 +776,9 @@ public class LocalJobOrchestrationServiceImpl
         long len;
 
         try(InputStream inputStream = byteSource.openStream()) {
+
+            // TODO; constrain this to a sensible size
+
             len = dataStorageService.put(guid).writeFrom(inputStream);
             data = new JobData(guid, JobDataType.SUPPLIED, useCode, mediaTypeCode);
 

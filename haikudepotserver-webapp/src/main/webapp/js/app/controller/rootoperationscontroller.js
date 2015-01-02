@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -92,6 +92,10 @@ angular.module('haikudepotserver').controller(
 
             $scope.goJobs = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createListJobs());
+            };
+
+            $scope.goPkgCategoryCoverageImportSpreadsheet = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createPkgCategoryCoverageImportSpreadsheet());
             };
 
             // -------------------

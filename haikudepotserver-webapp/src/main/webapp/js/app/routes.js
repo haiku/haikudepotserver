@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ angular.module('haikudepotserver').config(
             $routeProvider
                 .when('/rootoperations',{controller:'RootOperationsController',templateUrl:'/js/app/controller/rootoperations.html'})
                 .when('/jobs',{controller:'ListJobsController',templateUrl:'/js/app/controller/listjobs.html'})
+                .when('/pkgcategorycoverageimportspreadsheet',{controller:'PkgCategoryCoverageImportSpreadsheetController',templateUrl:'/js/app/controller/pkgcategorycoverageimportspreadsheet.html'})
                 .when('/job/:guid',{controller:'ViewJobController',templateUrl:'/js/app/controller/viewjob.html'})
                 .when('/reports',{controller:'ReportsController',templateUrl:'/js/app/controller/reports.html'})
                 .when('/pkg/feed/builder',{controller:'PkgFeedBuilderController',templateUrl:'/js/app/controller/pkgfeedbuilder.html'})

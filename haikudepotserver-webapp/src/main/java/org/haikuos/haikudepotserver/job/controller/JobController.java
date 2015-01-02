@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,6 +43,10 @@ import java.io.InputStream;
 @RequestMapping("/secured")
 public class JobController extends AbstractController {
 
+    private final static long MAX_SUPPLY_DATA_LENGTH = 1 * 1024 * 1024; // 1MB
+
+    public final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
+
     protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
 
     public final static String KEY_GUID = "guid";
@@ -65,14 +69,30 @@ public class JobController extends AbstractController {
 
     @RequestMapping(value = "/jobdata", method = RequestMethod.POST)
     @ResponseBody
-    public String supplyData(
+    public void supplyData(
             final HttpServletRequest request,
+            final HttpServletResponse response,
             @RequestHeader(value = HttpHeaders.CONTENT_TYPE, required = false) String contentType,
             @RequestParam(value = KEY_USECODE, required = false) String useCode)
     throws IOException {
 
         Preconditions.checkArgument(null!=request);
         assert null!=request;
+
+        int length = request.getContentLength();
+
+        if(-1 != length && length > MAX_SUPPLY_DATA_LENGTH) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
+
+        ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!user.isPresent()) {
+            LOGGER.warn("attempt to supply job data with no authenticated user");
+            throw new JobDataAuthorizationFailure();
+        }
 
         JobData data = jobOrchestrationService.storeSuppliedData(
                 useCode,
@@ -85,7 +105,8 @@ public class JobController extends AbstractController {
                 }
         );
 
-        return data.getGuid();
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setHeader(HEADER_DATAGUID, data.getGuid());
     }
 
     /**
