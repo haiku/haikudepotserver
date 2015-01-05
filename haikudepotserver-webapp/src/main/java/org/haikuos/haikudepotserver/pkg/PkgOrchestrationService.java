@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.net.*;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
@@ -18,11 +19,9 @@ import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.dataobjects.MediaType;
 import org.haikuos.haikudepotserver.pkg.model.*;
-import org.haikuos.haikudepotserver.support.Callback;
-import org.haikuos.haikudepotserver.support.ImageHelper;
-import org.haikuos.haikudepotserver.support.VersionCoordinates;
-import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haikuos.haikudepotserver.support.*;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
 import org.imgscalr.Scalr;
@@ -31,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -55,6 +55,9 @@ public class PkgOrchestrationService {
 
     protected static int SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
     protected static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
+
+    @Resource
+    private PngOptimizationService pngOptimizationService;
 
     private ImageHelper imageHelper = new ImageHelper();
 
@@ -394,6 +397,8 @@ public class PkgOrchestrationService {
      * must comply with necessary characteristics; for example it must be either 16 or 32 pixels along both its sides
      * if it is a PNG.  If it is non-compliant then an instance of
      * {@link org.haikuos.haikudepotserver.pkg.model.BadPkgIconException} will be thrown.</p>
+     *
+     * <p>This method will also use apply PNG optimization if this is possible.</p>
      */
 
     public PkgIcon storePkgIconImage(
@@ -409,6 +414,7 @@ public class PkgOrchestrationService {
         Preconditions.checkNotNull(pkg);
 
         byte[] imageData = toByteArray(input, ICON_SIZE_LIMIT);
+
         Optional<PkgIcon> pkgIconOptional;
         Integer size = null;
 
@@ -429,6 +435,18 @@ public class PkgOrchestrationService {
             if(null!=expectedSize && !pngSize.areSides(expectedSize)) {
                 LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not match the expected size", pkg.getName());
                 throw new BadPkgIconException();
+            }
+
+            if(pngOptimizationService.isConfigured()) {
+                try {
+                    imageData = pngOptimizationService.optimize(imageData);
+                }
+                catch(IOException ioe) {
+                    throw new RuntimeException("the png optimization process has failed; ", ioe);
+                }
+            }
+            else {
+                LOGGER.info("skipping png optimization because the service is not configured");
             }
 
             size = pngSize.width;

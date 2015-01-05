@@ -618,6 +618,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
                 try {
                     byte[] data = Base64.decode(pkgIconApi.dataBase64);
+
                     ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data);
 
                     createdOrUpdatedPkgIcons.add(

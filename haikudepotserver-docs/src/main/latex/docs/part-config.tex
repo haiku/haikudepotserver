@@ -20,6 +20,10 @@ There are a number of keys which are described below.
 
 \subsection{General}
 
+\subsubsection{\tt architecture.default.code}
+
+This configuration setting defines the code of the default architecture that should be shown.  Example values might be ``x86\_gcc2'' or ``ppc''.
+
 \subsubsection{\tt deployment.isproduction}
 
 This configuration setting can have a value of ``true'' or ``false''.  When false, the system will display a warning message on the user interface to indicate that the deployment is non-production.
@@ -27,6 +31,10 @@ This configuration setting can have a value of ``true'' or ``false''.  When fals
 \subsubsection{\tt pkgversion.viewcounter.protectrecurringincrementfromsameclient}
 
 This configuration setting can have a value of ``true'' or ``false''.  When true (the default), the system will make basic efforts to protect against one client repeatedly incrementing a package version's view counter.  This might happen when a user navigates to view a package and then navigates away and back again.  With this value set as true, within a window of time, these two visits would be considered to be the same in terms of incrementing the view counter.
+
+\subsubsection{\tt optipng.path}
+
+This is a system path to the \href{http://optipng.sourceforge.net/}{OptiPNG} tool.  This tool can be used in some situations to optimize PNG data; for example when configuring icons for packages.  An example value might be ``{\tt /usr/local/bin/optipng}''.
 
 \subsection{Package Rating Derivation}
 

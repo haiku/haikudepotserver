@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,10 @@ package org.haikuos.haikudepotserver.support;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+/**
+ * <p>This class provides simple, static manipulations or inspections of image data.</p>
+ */
 
 public class ImageHelper {
 
