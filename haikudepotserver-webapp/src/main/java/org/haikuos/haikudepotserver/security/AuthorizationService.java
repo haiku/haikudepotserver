@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -219,6 +219,7 @@ public class AuthorizationService {
             case BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT:
             case BULK_PKGICONSPREADSHEETREPORT:
             case BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET:
+            case BULK_PKGICONARCHIVEEXPORT:
                 return null!=authenticatedUser;
 
             case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:

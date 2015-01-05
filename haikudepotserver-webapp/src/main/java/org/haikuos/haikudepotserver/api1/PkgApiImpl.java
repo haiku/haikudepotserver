@@ -1252,5 +1252,28 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
     }
 
+    @Override
+    public QueuePkgIconArchiveExportJobResult queuePkgIconArchiveExportJob(QueuePkgIconArchiveExportJobRequest request) {
+        Preconditions.checkArgument(null!=request);
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orNull(),
+                null,
+                Permission.BULK_PKGICONARCHIVEEXPORT)) {
+            LOGGER.warn("attempt to access a pkg icon archive export without authorization");
+            throw new AuthorizationFailureException();
+        }
+
+        PkgIconArchiveExportJobSpecification spec = new PkgIconArchiveExportJobSpecification();
+        spec.setOwnerUserNickname(user.get().getNickname());
+
+        return new QueuePkgIconArchiveExportJobResult(
+                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+    }
 
 }

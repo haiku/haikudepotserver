@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -718,6 +718,10 @@ public class LocalJobOrchestrationServiceImpl
             if (!Strings.isNullOrEmpty(jobData.getMediaTypeCode())) {
                 if (jobData.getMediaTypeCode().startsWith(MediaType.CSV_UTF_8.withoutParameters().toString())) {
                     extension = "csv";
+                }
+
+                if(jobData.getMediaTypeCode().equals(MediaType.ZIP.withoutParameters().toString())) {
+                    extension = "zip";
                 }
             }
         }

@@ -171,4 +171,10 @@ public interface PkgApi {
 
     QueuePkgProminenceAndUserRatingSpreadsheetJobResult queuePkgProminenceAndUserRatingSpreadsheetJob(QueuePkgProminenceAndUserRatingSpreadsheetJobRequest request);
 
+    /**
+     * <p>Enqueues a request to produce an archive of all of the icons of the packages.</p>
+     */
+
+    QueuePkgIconArchiveExportJobResult queuePkgIconArchiveExportJob(QueuePkgIconArchiveExportJobRequest request);
+
 }
