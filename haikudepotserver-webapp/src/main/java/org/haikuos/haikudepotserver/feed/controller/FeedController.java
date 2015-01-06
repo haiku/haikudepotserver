@@ -65,10 +65,10 @@ public class FeedController {
     public final static String PATH_PKG_LEAF = "/pkg.atom";
 
     @Resource
-    List<SyndEntrySupplier> syndEntrySuppliers;
+    private List<SyndEntrySupplier> syndEntrySuppliers;
 
     @Value("${baseurl}")
-    String baseUrl;
+    private String baseUrl;
 
     private LoadingCache<FeedSpecification,SyndFeed> feedCache = CacheBuilder
             .newBuilder()

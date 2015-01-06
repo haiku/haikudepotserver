@@ -40,19 +40,19 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    AuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Resource
-    JobOrchestrationService jobOrchestrationService;
+    private JobOrchestrationService jobOrchestrationService;
 
     @Resource
-    UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingOrchestrationService userRatingOrchestrationService;
 
     @Resource
-    PkgOrchestrationService pkgOrchestrationService;
+    private PkgOrchestrationService pkgOrchestrationService;
 
     private AbstractGetUserRatingResult.User createUser(User user) {
         Preconditions.checkNotNull(user);

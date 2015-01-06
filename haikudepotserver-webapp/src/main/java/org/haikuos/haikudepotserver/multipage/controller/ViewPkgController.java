@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ViewPkgController {
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     private String hyphenToNull(String part) {
         if(null!=part && !part.equals("-")) {

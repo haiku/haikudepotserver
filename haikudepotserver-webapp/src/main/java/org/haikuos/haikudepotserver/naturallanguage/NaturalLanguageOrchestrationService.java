@@ -47,7 +47,7 @@ public class NaturalLanguageOrchestrationService {
     private Map<String,Boolean> naturalLanguageCodeHasPkgVersionLocalization = null;
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     private boolean hasLocalizationMessagesPrimative(NaturalLanguage naturalLanguage) {
 

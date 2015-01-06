@@ -68,10 +68,10 @@ public class HomeController {
     public final static int PAGESIZE = 15;
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    PkgOrchestrationService pkgOrchestrationService;
+    private PkgOrchestrationService pkgOrchestrationService;
 
     /**
      * <p>This is the entry point for the home page.  It will look at the parameters supplied and will

@@ -42,13 +42,13 @@ public class UserRatingOrchestrationService {
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingOrchestrationService.class);
 
     @Value("${userrating.aggregation.pkg.versionsback:2}")
-    int userRatingDerivationVersionsBack;
+    private int userRatingDerivationVersionsBack;
 
     @Value("${userrating.aggregation.pkg.minratings:3}")
-    int userRatingsDerivationMinRatings;
+    private int userRatingsDerivationMinRatings;
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     // -------------------------------------
     // ITERATION

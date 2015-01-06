@@ -60,16 +60,16 @@ public class AuthenticationService {
      */
 
     @Value("${authentication.jws.sharedkey:}")
-    String jsonWebTokenSharedKey;
+    private String jsonWebTokenSharedKey;
 
     @Value("${authentication.jws.expiryseconds:300}")
-    Integer jsonWebTokenExpirySeconds;
+    private Integer jsonWebTokenExpirySeconds;
 
     @Value("${authentication.jws.issuer}")
-    String jsonWebTokenIssuer;
+    private String jsonWebTokenIssuer;
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     private JWSSigner jsonWebTokenSigner = null;
 

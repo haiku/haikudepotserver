@@ -30,10 +30,10 @@ public class AuthorizationPkgRuleController extends AbstractUserAuthenticationAw
     protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleController.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    AuthorizationPkgRuleOrchestrationService authorizationPkgRuleOrchestrationService;
+    private AuthorizationPkgRuleOrchestrationService authorizationPkgRuleOrchestrationService;
 
     /**
      * <p>This method will produce a CSV file containing all of the rules.</p>

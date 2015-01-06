@@ -40,16 +40,16 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryApiImpl.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    AuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Resource
-    RepositoryOrchestrationService repositoryService;
+    private RepositoryOrchestrationService repositoryService;
 
     @Resource
-    JobOrchestrationService jobOrchestrationService;
+    private JobOrchestrationService jobOrchestrationService;
 
     // note; no integration test for this one.
     @Override

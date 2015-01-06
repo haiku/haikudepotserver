@@ -46,25 +46,25 @@ public class PasswordResetOrchestrationService {
     private final static String MAIL_PLAINTEXT = "passwordreset-plaintext";
 
     @Resource
-    MailSender mailSender;
+    private MailSender mailSender;
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
 
     @Resource
-    Configuration freemarkerConfiguration;
+    private Configuration freemarkerConfiguration;
 
     @Value("${passwordreset.ttlhours:1}")
-    Integer timeToLiveHours;
+    private Integer timeToLiveHours;
 
     @Value("${baseurl}")
-    String baseUrl;
+    private String baseUrl;
 
     @Value("${email.from}")
-    String from;
+    private String from;
 
     private String fillFreemarkerTemplate(
             PasswordResetMail mailModel,

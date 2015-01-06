@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class FeedOrchestrationService {
 
     @Value("${baseurl}")
-    String baseUrl;
+    private String baseUrl;
 
     /**
      * <p>Given a specification for a feed, this method will generate a URL that external users can query in order

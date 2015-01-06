@@ -37,7 +37,7 @@ public class RepositoryImportController {
     public final static String KEY_CODE = "code";
 
     @Resource
-    JobOrchestrationService jobOrchestrationService;
+    private JobOrchestrationService jobOrchestrationService;
 
     @RequestMapping(method = RequestMethod.GET)
     public void fetch(

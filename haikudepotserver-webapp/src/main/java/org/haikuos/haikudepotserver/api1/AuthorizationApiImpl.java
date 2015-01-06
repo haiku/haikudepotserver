@@ -38,13 +38,13 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationApiImpl.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    AuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     @Resource
-    AuthorizationPkgRuleOrchestrationService authorizationRulesOrchestrationService;
+    private AuthorizationPkgRuleOrchestrationService authorizationRulesOrchestrationService;
 
     // -------------------------------
     // HELPERS

@@ -21,9 +21,6 @@ public abstract class AbstractJobRunner<T extends JobSpecification> implements J
 
     private final static String SUFFIX = "JobRunner";
 
-    @Resource
-    JobOrchestrationService jobOrchestrationService;
-
     @Override
     public String getJobTypeCode() {
         String sn = this.getClass().getSimpleName();

@@ -45,13 +45,13 @@ import java.util.Locale;
 public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Value("${baseurl}")
-    String baseUrl;
+    private String baseUrl;
 
     @Resource
-    MessageSource messageSource;
+    private MessageSource messageSource;
 
     @Override
     public List<SyndEntry> generate(final FeedSpecification specification) {

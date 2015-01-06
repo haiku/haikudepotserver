@@ -58,10 +58,10 @@ public class UserOrchestrationService {
     private final static String LDAP_ATTRIBUTE_VALUE_OBJECTCLASS_INETORGPERSON = "inetOrgPerson";
 
     @Resource
-    LdapConnectionPoolHolder ldapConnectionPoolHolder;
+    private LdapConnectionPoolHolder ldapConnectionPoolHolder;
 
     @Value("${ldap.people.dn:}")
-    String ldapPeopleDn;
+    private String ldapPeopleDn;
 
     @PostConstruct
     public void init() {

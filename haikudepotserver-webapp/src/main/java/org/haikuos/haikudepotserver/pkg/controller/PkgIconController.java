@@ -52,13 +52,13 @@ public class PkgIconController extends AbstractController implements ServletCont
     public final static String KEY_FALLBACK = "f";
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    PkgOrchestrationService pkgService;
+    private PkgOrchestrationService pkgService;
 
     @Resource
-    AuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     private ServletContext servletContext;
 

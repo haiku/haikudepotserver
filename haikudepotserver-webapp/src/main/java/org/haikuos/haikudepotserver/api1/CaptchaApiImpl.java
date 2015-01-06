@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 public class CaptchaApiImpl implements CaptchaApi {
 
     @Resource
-    CaptchaService captchaService;
+    private CaptchaService captchaService;
 
     @Override
     public GenerateCaptchaResult generateCaptcha(GenerateCaptchaRequest generateCaptchaRequest) {

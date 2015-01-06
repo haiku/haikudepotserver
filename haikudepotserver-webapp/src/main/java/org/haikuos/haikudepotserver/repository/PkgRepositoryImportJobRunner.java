@@ -42,10 +42,10 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgRepositoryImportJobRunner.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    PkgOrchestrationService pkgService;
+    private PkgOrchestrationService pkgService;
 
     @Override
     public void run(JobOrchestrationService jobOrchestrationService, PkgRepositoryImportJobSpecification specification) {

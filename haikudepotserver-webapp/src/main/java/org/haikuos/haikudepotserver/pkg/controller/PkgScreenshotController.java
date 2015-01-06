@@ -61,7 +61,7 @@ public class PkgScreenshotController extends AbstractController {
     private JobOrchestrationService jobOrchestrationService;
 
     @Resource
-    AuthorizationService authorizationService;
+    private AuthorizationService authorizationService;
 
     private void handleHeadOrGet(
             RequestMethod requestMethod,

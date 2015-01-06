@@ -40,22 +40,22 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     public final static String RESOURCE_MESSAGES = "/messages%s.properties";
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    RuntimeInformationService runtimeInformationService;
+    private RuntimeInformationService runtimeInformationService;
 
     @Resource
-    FeedOrchestrationService feedOrchestrationService;
+    private FeedOrchestrationService feedOrchestrationService;
 
     @Resource
-    MessageSource messageSource;
+    private MessageSource messageSource;
 
     @Resource
-    NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
+    private NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
 
     @Value("${deployment.isproduction:false}")
-    Boolean isProduction;
+    private Boolean isProduction;
 
     @Override
     public GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest) {
