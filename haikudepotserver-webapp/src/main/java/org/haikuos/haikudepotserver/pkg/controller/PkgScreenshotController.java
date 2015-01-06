@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,8 +14,10 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.BadPkgScreenshotException;
+import org.haikuos.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecification;
 import org.haikuos.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
@@ -50,10 +52,13 @@ public class PkgScreenshotController extends AbstractController {
     protected static int SCREENSHOT_SIDE_LIMIT = 1500;
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    PkgOrchestrationService pkgService;
+    private PkgOrchestrationService pkgService;
+
+    @Resource
+    private JobOrchestrationService jobOrchestrationService;
 
     @Resource
     AuthorizationService authorizationService;
@@ -214,7 +219,7 @@ public class PkgScreenshotController extends AbstractController {
     }
 
     /**
-     * <p>This handler will take-up an HTTP PUT that provides a new screenshot for the package.</p>
+     * <p>This handler will take-up an HTTP POST that provides a new screenshot for the package.</p>
      */
 
     @RequestMapping(value = "/{"+KEY_PKGNAME+"}/add", method = RequestMethod.POST)
@@ -266,6 +271,12 @@ public class PkgScreenshotController extends AbstractController {
         }
 
         context.commitChanges();
+
+        // trigger optimization of the screenshot image.
+
+        jobOrchestrationService.submit(
+                new PkgScreenshotOptimizationJobSpecification(screenshotCode),
+                JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED);
 
         response.setHeader(HEADER_SCREENSHOTCODE, screenshotCode);
         response.setStatus(HttpServletResponse.SC_OK);
