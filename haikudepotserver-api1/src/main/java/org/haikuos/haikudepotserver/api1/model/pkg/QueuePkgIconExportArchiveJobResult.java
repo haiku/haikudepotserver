@@ -5,14 +5,14 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class QueuePkgIconArchiveExportJobResult {
+public class QueuePkgIconExportArchiveJobResult {
 
     public String guid;
 
-    public QueuePkgIconArchiveExportJobResult() {
+    public QueuePkgIconExportArchiveJobResult() {
     }
 
-    public QueuePkgIconArchiveExportJobResult(String guid) {
+    public QueuePkgIconExportArchiveJobResult(String guid) {
         this.guid = guid;
     }
 

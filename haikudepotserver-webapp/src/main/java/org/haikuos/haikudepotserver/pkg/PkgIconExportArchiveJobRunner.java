@@ -16,7 +16,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.job.AbstractJobRunner;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haikuos.haikudepotserver.pkg.model.PkgIconArchiveExportJobSpecification;
+import org.haikuos.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +35,9 @@ import java.util.zip.ZipOutputStream;
  */
 
 @Component
-public class PkgIconArchiveExportJobRunner extends AbstractJobRunner<PkgIconArchiveExportJobSpecification> {
+public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExportArchiveJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgIconArchiveExportJobRunner.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunner.class);
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -48,7 +48,7 @@ public class PkgIconArchiveExportJobRunner extends AbstractJobRunner<PkgIconArch
     @Override
     public void run(
             JobOrchestrationService jobOrchestrationService,
-            PkgIconArchiveExportJobSpecification specification) throws IOException {
+            PkgIconExportArchiveJobSpecification specification) throws IOException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
         assert null!=jobOrchestrationService;

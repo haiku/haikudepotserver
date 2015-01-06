@@ -219,7 +219,7 @@ public class AuthorizationService {
             case BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT:
             case BULK_PKGICONSPREADSHEETREPORT:
             case BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET:
-            case BULK_PKGICONARCHIVEEXPORT:
+            case BULK_PKGICONEXPORTARCHIVE:
                 return null!=authenticatedUser;
 
             case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:

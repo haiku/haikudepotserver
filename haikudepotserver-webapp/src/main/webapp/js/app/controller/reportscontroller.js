@@ -85,8 +85,8 @@ angular.module('haikudepotserver').controller(
                 goBasicPkgReport('queuePkgIconSpreadsheetJob');
             };
 
-            $scope.goPkgIconArchiveExport = function() {
-                goBasicPkgReport('queuePkgIconArchiveExportJob');
+            $scope.goPkgIconExportArchive = function() {
+                goBasicPkgReport('queuePkgIconExportArchiveJob');
             };
 
             $scope.goUserRatingSpreadsheetReportAll = function() {

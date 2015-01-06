@@ -9,11 +9,11 @@ import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haikuos.haikudepotserver.job.model.JobSpecification;
 import org.springframework.util.ObjectUtils;
 
-public class PkgIconArchiveExportJobSpecification extends AbstractJobSpecification {
+public class PkgIconExportArchiveJobSpecification extends AbstractJobSpecification {
 
     @Override
     public boolean isEquivalent(JobSpecification other) {
-        if(PkgIconArchiveExportJobSpecification.class.isAssignableFrom(other.getClass())) {
+        if(PkgIconExportArchiveJobSpecification.class.isAssignableFrom(other.getClass())) {
             return ObjectUtils.nullSafeEquals(other.getOwnerUserNickname(), getOwnerUserNickname());
         }
 
