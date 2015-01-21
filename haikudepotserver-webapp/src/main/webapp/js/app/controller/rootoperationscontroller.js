@@ -19,11 +19,40 @@ angular.module('haikudepotserver').controller(
                 breadcrumbFactory.createRootOperations()
             ]);
 
-            $scope.didDeriveAndStoreUserRatingsForAllPkgs = false;
-            $scope.deriveAndStoreUserRatingsForAllPkgsTimeout = undefined;
+            $scope.didActions = {
+            };
 
-            $scope.didSynchronizeUsers = false;
-            $scope.didSynchronizeUsersTimeout = undefined;
+            function showDidAction(name) {
+                $log.info('did action; ' + name);
+
+                var didAction = $scope.didActions[name];
+
+                if(didAction) {
+                    $timeout.cancel(didAction.timeout);
+                }
+
+                $scope.didActions[name] = {
+                    timeout : $timeout(function() {
+                        $scope.didActions[name] = undefined;
+                    }, 3000)
+                };
+            }
+
+            $scope.goQueuePkgVersionPayloadLengthPopulationJob = function() {
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_PKG,
+                    "queuePkgVersionPayloadLengthPopulationJob",
+                    [{}]
+                ).then(
+                    function() {
+                        showDidAction('queuePkgVersionPayloadLengthPopulationJob');
+                    },
+                    function(err) {
+                        $log.error('unable to queue pkg version payload length population job');
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+            };
 
             $scope.goDeriveAndStoreUserRatingsForAllPkgs = function() {
                 jsonRpc.call(
@@ -32,17 +61,7 @@ angular.module('haikudepotserver').controller(
                     [{}]
                 ).then(
                     function() {
-                        $log.info('requested derive and store user ratings for all pkgs');
-                        $scope.didDeriveAndStoreUserRatingsForAllPkgs = true;
-
-                        if($scope.deriveAndStoreUserRatingsForAllPkgsTimeout) {
-                            $timeout.cancel($scope.deriveAndStoreUserRatingsForAllPkgsTimeout);
-                        }
-
-                        $scope.deriveAndStoreUserRatingsForAllPkgsTimeout = $timeout(function() {
-                            $scope.didDeriveAndStoreUserRatingsForAllPkgs = false;
-                            $scope.deriveAndStoreUserRatingsForAllPkgsTimeout = undefined;
-                        }, 3000);
+                        showDidAction('deriveAndStoreUserRatingsForAllPkgs');
                     },
                     function(err) {
                         $log.error('unable to derive and store user ratings for all pkgs');
@@ -58,17 +77,7 @@ angular.module('haikudepotserver').controller(
                     [{}]
                 ).then(
                     function() {
-                        $log.info('requested synchronize users');
-                        $scope.didSynchronizeUsers = true;
-
-                        if($scope.didSynchronizeUsersTimeout) {
-                            $timeout.cancel($scope.didSynchronizeUsersTimeout);
-                        }
-
-                        $scope.didSynchronizeUsersTimeout = $timeout(function() {
-                            $scope.didSynchronizeUsers = false;
-                            $scope.didSynchronizeUsersTimeout = undefined;
-                        }, 3000);
+                        showDidAction('synchronizeUsers');
                     },
                     function(err) {
                         $log.error('unable to synchronize users');
@@ -118,7 +127,7 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
-            }
+            };
         }
     ]
 );

@@ -177,4 +177,10 @@ public interface PkgApi {
 
     QueuePkgIconExportArchiveJobResult queuePkgIconExportArchiveJob(QueuePkgIconExportArchiveJobRequest request);
 
+    /**
+     * <p>Enqueues a job to cause all PkgVersion objects with no payload length to get those populated if possible.</p>
+     */
+
+    QueuePkgVersionPayloadLengthPopulationJobResult queuePkgVersionPayloadLengthPopulationJob(QueuePkgVersionPayloadLengthPopulationJobRequest request);
+
 }

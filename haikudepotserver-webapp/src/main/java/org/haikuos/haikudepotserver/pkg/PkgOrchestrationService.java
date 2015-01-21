@@ -695,7 +695,7 @@ public class PkgOrchestrationService {
 
         LOGGER.info(
                 "will obtain length for pkg version {} from; {}",
-                pkgVersion.toString(),
+                pkgVersion.toStringWithPkgAndArchitecture(),
                 pkgVersionHpkgURL.toString());
 
         switch(pkgVersionHpkgURL.getProtocol()) {
@@ -756,7 +756,7 @@ public class PkgOrchestrationService {
 
         LOGGER.info(
                 "did obtain length for pkg version {}; {}",
-                pkgVersion.toString(),
+                pkgVersion.toStringWithPkgAndArchitecture(),
                 result);
 
         return result;
@@ -1070,15 +1070,17 @@ public class PkgOrchestrationService {
         // failing the import at this stage since this is "just" meta data.
 
         if(populatePayloadLength && null==persistedPkgVersion.getPayloadLength()) {
-            try {
-                long length = payloadLength(persistedPkgVersion);
+            long length = -1;
 
-                if(length > 0) {
-                    persistedPkgVersion.setPayloadLength(length);
-                }
+            try {
+                length = payloadLength(persistedPkgVersion);
             }
             catch(IOException ioe) {
-                LOGGER.warn("unable to obtain the payload length at this time", ioe);
+                LOGGER.error("unable to get the payload length for; " + persistedPkgVersion, ioe);
+            }
+
+            if(length > 0) {
+                persistedPkgVersion.setPayloadLength(length);
             }
         }
 

@@ -62,6 +62,10 @@
     <div id="pkg-metadata-container">
 
         <dl>
+            <dt ng-show="undefined!=pkg.versions[0].payloadLength"><message key="viewPkg.payloadLength.title"></message></dt>
+            <dd ng-show="undefined!=pkg.versions[0].payloadLength">
+                {{pkg.versions[0].payloadLength|dataLength}} <span class="muted">({{pkg.versions[0].payloadLength}} B)</span>
+            </dd>
             <dt ng-show="undefined!=pkg.versions[0].sourcePkg"><message key="viewPkg.sourceAvailable.title"></message></dt>
             <dd ng-show="undefined!=pkg.versions[0].sourcePkg">
                 <boolean-indicator state="!!pkg.versions[0].sourcePkg"></boolean-indicator>

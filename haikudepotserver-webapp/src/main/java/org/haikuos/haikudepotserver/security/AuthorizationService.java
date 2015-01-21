@@ -236,6 +236,9 @@ public class AuthorizationService {
                         (authenticatedUser.getIsRoot() ||
                                 authenticatedUser.getNickname().equals(((User) target).getNickname()));
 
+            case BULK_PKGVERSIONPAYLOADLENGTHPOPULATION:
+                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+
             case JOBS_VIEW:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 

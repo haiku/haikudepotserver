@@ -9,10 +9,18 @@
     <h1>Actions</h1>
     <ul>
         <li>
+            <a href="" ng-click="goQueuePkgVersionPayloadLengthPopulationJob()">
+                Populate payload lengths for package versions that are missing them
+            </a>
+            <span ng-show="!!didActions['queuePkgVersionPayloadLengthPopulationJob']">
+                <em>&mdash; did initiate</em>
+            </span>
+        </li>
+        <li>
             <a href="" ng-click="goDeriveAndStoreUserRatingsForAllPkgs()">
                 Derive and store user ratings for all packages
             </a>
-            <span ng-show="didDeriveAndStoreUserRatingsForAllPkgs">
+            <span ng-show="!!didActions['deriveAndStoreUserRatingsForAllPkgs']">
                 <em>&mdash; did initiate</em>
             </span>
         </li>
@@ -20,7 +28,7 @@
             <a href="" ng-click="goSynchronizeUsers()">
                 Synchronize users (with LDAP)
             </a>
-            <span ng-show="didSynchronizeUsersTimeout">
+            <span ng-show="!!didActions['synchronizeUsers']">
                 <em>&mdash; did initiate</em>
             </span>
         </li>

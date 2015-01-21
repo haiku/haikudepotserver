@@ -1278,4 +1278,29 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
     }
 
+    @Override
+    public QueuePkgVersionPayloadLengthPopulationJobResult queuePkgVersionPayloadLengthPopulationJob(QueuePkgVersionPayloadLengthPopulationJobRequest request) {
+        Preconditions.checkArgument(null!=request, "a request objects is required");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orNull(),
+                null,
+                Permission.BULK_PKGVERSIONPAYLOADLENGTHPOPULATION)) {
+            LOGGER.warn("attempt to access pkg version payload length population without authorization");
+            throw new AuthorizationFailureException();
+        }
+
+        PkgVersionPayloadLengthPopulationJobSpecification spec = new PkgVersionPayloadLengthPopulationJobSpecification();
+        spec.setOwnerUserNickname(user.get().getNickname());
+
+        return new QueuePkgVersionPayloadLengthPopulationJobResult(
+                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+
+    }
+
 }
