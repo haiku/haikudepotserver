@@ -1,10 +1,11 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver;
 
+import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.*;
@@ -107,6 +108,12 @@ public class IntegrationTestSupportService {
 
         LOGGER.info("will create standard test data");
 
+        String platformTmpDirPath = System.getProperty("java.io.tmpdir");
+
+        if (Strings.isNullOrEmpty(platformTmpDirPath)) {
+            throw new IllegalStateException("unable to get the java temporary directory");
+        }
+
         ObjectContext context = getObjectContext();
         StandardTestData result = new StandardTestData();
 
@@ -120,7 +127,7 @@ public class IntegrationTestSupportService {
         result.repository.setActive(Boolean.TRUE);
         result.repository.setCode("testrepository");
         result.repository.setArchitecture(x86);
-        result.repository.setUrl("file:///");
+        result.repository.setUrl("file://" + platformTmpDirPath + "/repository");
 
         result.pkg1 = context.newObject(Pkg.class);
         result.pkg1.setActive(true);

@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.net.*;
+import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.Expression;
@@ -19,7 +19,6 @@ import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
-import org.haikuos.haikudepotserver.dataobjects.MediaType;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.support.*;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
@@ -34,6 +33,8 @@ import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,9 @@ import java.util.UUID;
 public class PkgOrchestrationService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgOrchestrationService.class);
+
+    protected static int PAYLOAD_LENGTH_CONNECT_TIMEOUT = 10 * 1000;
+    protected static int PAYLOAD_LENGTH_READ_TIMEOUT = 10 * 1000;
 
     protected static int SCREENSHOT_SIDE_LIMIT = 1500;
 
@@ -679,6 +683,86 @@ public class PkgOrchestrationService {
     // IMPORT
 
     /**
+     * <p>Downloads the nominated package's payload in order to ascertain how long it is.</p>
+     */
+
+    public long payloadLength(PkgVersion pkgVersion) throws IOException {
+        Preconditions.checkArgument(null!=pkgVersion);
+
+        long result = -1;
+        URL pkgVersionHpkgURL = pkgVersion.getHpkgURL();
+        HttpURLConnection connection = null;
+
+        LOGGER.info(
+                "will obtain length for pkg version {} from; {}",
+                pkgVersion.toString(),
+                pkgVersionHpkgURL.toString());
+
+        switch(pkgVersionHpkgURL.getProtocol()) {
+
+            case "http":
+            case "https":
+
+                try {
+                    connection = (HttpURLConnection) pkgVersionHpkgURL.openConnection();
+
+                    connection.setConnectTimeout(PAYLOAD_LENGTH_CONNECT_TIMEOUT);
+                    connection.setReadTimeout(PAYLOAD_LENGTH_READ_TIMEOUT);
+                    connection.setRequestMethod("HEAD");
+                    connection.connect();
+
+                    String contentLengthHeader = connection.getHeaderField(HttpHeaders.CONTENT_LENGTH);
+
+                    if(!Strings.isNullOrEmpty(contentLengthHeader)) {
+                        long contentLength;
+
+                        try {
+                            contentLength = Long.parseLong(contentLengthHeader);
+
+                            if(contentLength > 0) {
+                                result = contentLength;
+                            }
+                            else {
+                                LOGGER.warn("bad content length; {}", contentLength);
+                            }
+                        }
+                        catch(NumberFormatException nfe) {
+                            LOGGER.warn("malformed content length; {}", contentLengthHeader);
+                        }
+                    }
+                    else {
+                        LOGGER.warn("unable to get the content length header");
+                    }
+
+                } finally {
+                    if (null != connection) {
+                        connection.disconnect();
+                    }
+                }
+                break;
+
+            case "file":
+                File file = new File(pkgVersionHpkgURL.getPath());
+
+                if(file.exists() && file.isFile()) {
+                    result = file.length();
+                }
+                else {
+                    LOGGER.warn("unable to find the package file; {}", pkgVersionHpkgURL.getPath());
+                }
+                break;
+
+        }
+
+        LOGGER.info(
+                "did obtain length for pkg version {}; {}",
+                pkgVersion.toString(),
+                result);
+
+        return result;
+    }
+
+    /**
      * <p>This method will deactivate package versions for a package where the package version is related to the
      * supplied repository.  This is used in the situation where a package was once part of a repository, but has
      * been removed.</p>
@@ -750,12 +834,15 @@ public class PkgOrchestrationService {
      * <p>This method will import the package described by the 'pkg' parameter by locating the package and
      * either creating it or updating it as necessary.</p>
      * @param pkg imports into the local database from this package model.
+     * @param populatePayloadLength is able to signal to the import process that the length of the package should be
+     *                              populated.
      */
 
     public void importFrom(
             ObjectContext objectContext,
             ObjectId repositoryObjectId,
-            org.haikuos.pkg.model.Pkg pkg) {
+            org.haikuos.pkg.model.Pkg pkg,
+            boolean populatePayloadLength) {
 
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(repositoryObjectId);
@@ -975,6 +1062,24 @@ public class PkgOrchestrationService {
         }
         else {
             persistedPkgVersion.setIsLatest(true);
+        }
+
+        // [apl]
+        // If this fails, we will let it go and it can be tried again a bit later on.  The system can try to back-fill
+        // those at some later date if any of the latest versions for packages are missing.  This is better than
+        // failing the import at this stage since this is "just" meta data.
+
+        if(populatePayloadLength && null==persistedPkgVersion.getPayloadLength()) {
+            try {
+                long length = payloadLength(persistedPkgVersion);
+
+                if(length > 0) {
+                    persistedPkgVersion.setPayloadLength(length);
+                }
+            }
+            catch(IOException ioe) {
+                LOGGER.warn("unable to obtain the payload length at this time", ioe);
+            }
         }
 
         LOGGER.debug("have processed package {}", pkg.toString());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,6 +20,8 @@ import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamp
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -235,6 +237,68 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                     }
                 }
         );
+    }
+
+    /**
+     * <p>This method will provide a URL to the actual data of the package.</p>
+     * @return
+     */
+
+    public URL getHpkgURL() {
+        URL packagesBaseUrl = getRepository().getPackagesBaseURL();
+
+        try {
+            return new URL(
+                    packagesBaseUrl.getProtocol(),
+                    packagesBaseUrl.getHost(),
+                    packagesBaseUrl.getPort(),
+                    packagesBaseUrl.getPath() + "/" + getHpkgFilename());
+        }
+        catch(MalformedURLException mue) {
+            throw new IllegalStateException("unable to create the URL to the hpkg data", mue);
+        }
+    }
+
+    /**
+     * <p>Ultimately, the HPKG file will exist on a server somewhere in the repository for access
+     * by clients.  The file must have a name which is able to be derived from information about
+     * the package version.  This method will provide that package version's filename for the
+     * package file.</p>
+     */
+
+    public String getHpkgFilename() {
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(getPkg().getName());
+        builder.append('-');
+        builder.append(getMajor());
+
+        if(null!=getMinor()) {
+            builder.append('.');
+            builder.append(getMinor());
+        }
+
+        if(null!=getMicro()) {
+            builder.append('.');
+            builder.append(getMicro());
+        }
+
+        if(null!=getPreRelease()) {
+            builder.append('.');
+            builder.append(getPreRelease());
+        }
+
+        if(null!=getRevision()) {
+            builder.append('-');
+            builder.append(getRevision());
+        }
+
+        builder.append('-');
+        builder.append(getArchitecture().getCode());
+
+        builder.append(".hpkg");
+
+        return builder.toString();
     }
 
     public VersionCoordinates toVersionCoordinates() {

@@ -159,6 +159,7 @@
 		<db-attribute name="micro" type="VARCHAR" length="255"/>
 		<db-attribute name="minor" type="VARCHAR" length="255"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="payload_length" type="BIGINT"/>
 		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="pre_release" type="VARCHAR" length="255"/>
 		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
@@ -372,6 +373,7 @@
 		<obj-attribute name="micro" type="java.lang.String" db-attribute-path="micro"/>
 		<obj-attribute name="minor" type="java.lang.String" db-attribute-path="minor"/>
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="payloadLength" type="java.lang.Long" lock="true" db-attribute-path="payload_length"/>
 		<obj-attribute name="preRelease" type="java.lang.String" db-attribute-path="pre_release"/>
 		<obj-attribute name="revision" type="java.lang.Integer" db-attribute-path="revision"/>
 		<obj-attribute name="viewCounter" type="java.lang.Long" lock="true" db-attribute-path="view_counter"/>

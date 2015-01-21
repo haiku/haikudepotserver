@@ -1,5 +1,5 @@
 /*
-* Copyright 2014, Andrew Lindesay
+* Copyright 2014-2015, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -56,6 +56,8 @@ public class GetBulkPkgResult {
 
         public String summary;
         public String description;
+
+        public Long payloadLength;
 
     }
 

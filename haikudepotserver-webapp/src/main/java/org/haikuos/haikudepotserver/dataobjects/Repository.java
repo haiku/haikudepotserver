@@ -1,11 +1,12 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
@@ -55,6 +56,73 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
             }
         }
 
+    }
+
+    /**
+     * <p>This is the URL at which one might find the packages for this repository.</p>
+     */
+
+    public URL getPackagesBaseURL() {
+        URL base = getBaseURL();
+
+        try {
+            return new URL(
+                    base.getProtocol(),
+                    base.getHost(),
+                    base.getPort(),
+                    base.getPath() + "/packages");
+        }
+        catch(MalformedURLException mue) {
+            throw new IllegalStateException("unable to reform a url",mue);
+        }
+
+    }
+
+    /**
+     * <p>Other files are able to be found in the repository.  This method provides a root for these
+     * files.</p>
+     */
+
+    private URL getBaseURL() {
+        URL url;
+
+        try {
+            url = new URL(getUrl());
+        }
+        catch(MalformedURLException mue) {
+            throw new IllegalStateException("malformed url should not be stored in a repository");
+        }
+
+        String path = url.getPath();
+
+        if(Strings.isNullOrEmpty(path)) {
+            throw new IllegalStateException("malformed url; no path component to the hpkr data");
+        }
+
+        int lastSlash = path.lastIndexOf('/');
+
+        if(lastSlash == path.length()-1) {
+            throw new IllegalStateException("malformed url; no path component to the hpkr data");
+        }
+        else {
+            if(-1==lastSlash) {
+                path = "";
+            }
+            else {
+                path = path.substring(0,lastSlash);
+            }
+        }
+
+        try {
+            return new URL(
+                    url.getProtocol(),
+                    url.getHost(),
+                    url.getPort(),
+                    path);
+        }
+        catch(MalformedURLException mue) {
+            throw new IllegalStateException("unable to reform a url",mue);
+        }
     }
 
     @Override

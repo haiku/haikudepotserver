@@ -284,6 +284,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.revision = pkgVersion.getRevision();
         version.preRelease = pkgVersion.getPreRelease();
 
+        version.payloadLength = pkgVersion.getPayloadLength();
         version.repositoryCode = pkgVersion.getRepository().getCode();
         version.architectureCode = pkgVersion.getArchitecture().getCode();
         version.copyrights = Lists.transform(
@@ -949,6 +950,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.revision = pkgVersion.getRevision();
         version.preRelease = pkgVersion.getPreRelease();
         version.architectureCode = pkgVersion.getArchitecture().getCode();
+        version.payloadLength = pkgVersion.getPayloadLength();
 
         org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizationOrFallback(naturalLanguage);
 

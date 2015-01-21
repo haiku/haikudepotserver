@@ -27,6 +27,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
     public static final String MICRO_PROPERTY = "micro";
     public static final String MINOR_PROPERTY = "minor";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
+    public static final String PAYLOAD_LENGTH_PROPERTY = "payloadLength";
     public static final String PRE_RELEASE_PROPERTY = "preRelease";
     public static final String REVISION_PROPERTY = "revision";
     public static final String VIEW_COUNTER_PROPERTY = "viewCounter";
@@ -87,6 +88,13 @@ public abstract class _PkgVersion extends AbstractDataObject {
     }
     public Date getModifyTimestamp() {
         return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+    }
+
+    public void setPayloadLength(Long payloadLength) {
+        writeProperty(PAYLOAD_LENGTH_PROPERTY, payloadLength);
+    }
+    public Long getPayloadLength() {
+        return (Long)readProperty(PAYLOAD_LENGTH_PROPERTY);
     }
 
     public void setPreRelease(String preRelease) {

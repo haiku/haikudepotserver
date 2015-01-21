@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -61,6 +61,12 @@ public class GetPkgResult {
         public Long viewCounter;
 
         public Boolean isLatest;
+
+        /**
+         * <p>The length in bytes of the package payload.</p>
+         */
+
+        public Long payloadLength;
 
     }
 

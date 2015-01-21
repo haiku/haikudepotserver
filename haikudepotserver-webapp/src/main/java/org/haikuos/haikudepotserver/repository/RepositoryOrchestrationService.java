@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,15 +8,21 @@ package org.haikuos.haikudepotserver.repository;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.repository.model.RepositorySearchSpecification;
+import org.haikuos.haikudepotserver.support.NoOpOutputStream;
 import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 /**

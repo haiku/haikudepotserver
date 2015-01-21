@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,6 +21,7 @@ import org.haikuos.pkg.PkgIterator;
 import org.haikuos.pkg.model.Pkg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -46,6 +47,9 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
 
     @Resource
     private PkgOrchestrationService pkgService;
+
+    @Value("${repository.import.populatepayloadlength:false}")
+    private boolean shouldPopulatePayloadLength;
 
     @Override
     public void run(JobOrchestrationService jobOrchestrationService, PkgRepositoryImportJobSpecification specification) {
@@ -87,10 +91,12 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
             PkgIterator pkgIterator = new PkgIterator(fileExtractor.getPackageAttributesIterator());
 
             while (pkgIterator.hasNext()) {
+
                 ObjectContext pkgImportContext = serverRuntime.getContext();
+
                 Pkg pkg = pkgIterator.next();
                 repositoryImportPkgNames.add(pkg.getName());
-                pkgService.importFrom(pkgImportContext, repository.getObjectId(), pkg);
+                pkgService.importFrom(pkgImportContext, repository.getObjectId(), pkg, shouldPopulatePayloadLength);
                 pkgImportContext.commitChanges();
             }
 
