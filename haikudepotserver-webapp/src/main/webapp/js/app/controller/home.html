@@ -64,6 +64,7 @@
                 <thead>
                 <th></th>
                 <th><message key="gen.pkg.title"></message></th>
+                <th><message key="home.table.payloadlength.title"></message></th>
                 <th><message key="home.table.rating.title"></message></th>
                 <th><message key="home.table.version.title"></message></th>
                 <th ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><message key="home.table.approximateVersionDate.title"></message></th>
@@ -87,6 +88,9 @@
                                         search-expression-type="'CONTAINS'"></highlighted-text>
                             </small>
                         </div>
+                    </td>
+                    <td>
+                        <span class="muted">{{pkg.versions[0].payloadLength|dataLength}}</span>
                     </td>
                     <td>
                         <span ng-show="shouldShowDerivedRating(pkg)">

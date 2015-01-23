@@ -243,6 +243,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.createTimestamp = input.getCreateTimestamp().getTime();
                         resultVersion.viewCounter = input.getViewCounter();
                         resultVersion.architectureCode = input.getArchitecture().getCode();
+                        resultVersion.payloadLength = input.getPayloadLength();
 
                         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = input.getPkgVersionLocalization(request.naturalLanguageCode);
 

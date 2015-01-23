@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,6 +43,7 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public Long viewCounter;
         public String architectureCode;
         public String summary;
+        public Long payloadLength;
     }
 
 }
