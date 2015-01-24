@@ -84,7 +84,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(result.active).isTrue();
         Assertions.assertThat(result.architectureCode).isEqualTo("x86");
-        Assertions.assertThat(result.url).isEqualTo("file:///");
+        Assertions.assertThat(result.url).startsWith("file:///");
     }
 
     @Test

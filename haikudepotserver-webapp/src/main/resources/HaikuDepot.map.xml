@@ -103,6 +103,19 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="pkg_localization" schema="haikudepot">
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="natural_language_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="title" type="VARCHAR" length="1024"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.pkg_localization_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="pkg_pkg_category" schema="haikudepot">
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="pkg_category_id" type="BIGINT" isMandatory="true"/>
@@ -348,6 +361,11 @@
 	<obj-entity name="PkgIconImage" className="org.haikuos.haikudepotserver.dataobjects.PkgIconImage" dbEntityName="pkg_icon_image" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="data" type="byte[]" db-attribute-path="data"/>
 	</obj-entity>
+	<obj-entity name="PkgLocalization" className="org.haikuos.haikudepotserver.dataobjects.PkgLocalization" lock-type="optimistic" dbEntityName="pkg_localization" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="title" type="java.lang.String" db-attribute-path="title"/>
+	</obj-entity>
 	<obj-entity name="PkgPkgCategory" className="org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory" dbEntityName="pkg_pkg_category" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 	</obj-entity>
 	<obj-entity name="PkgScreenshot" className="org.haikuos.haikudepotserver.dataobjects.PkgScreenshot" lock-type="optimistic" dbEntityName="pkg_screenshot" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
@@ -451,6 +469,9 @@
 	<db-relationship name="pkg_version_localizations" source="natural_language" target="pkg_version_localization" toMany="true">
 		<db-attribute-pair source="id" target="natural_language_id"/>
 	</db-relationship>
+	<db-relationship name="untitledRel" source="natural_language" target="pkg_localization" toMany="true">
+		<db-attribute-pair source="id" target="natural_language_id"/>
+	</db-relationship>
 	<db-relationship name="user_ratings" source="natural_language" target="user_rating" toMany="true">
 		<db-attribute-pair source="id" target="natural_language_id"/>
 	</db-relationship>
@@ -473,6 +494,9 @@
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
 	<db-relationship name="pkg_icons" source="pkg" target="pkg_icon" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_localizations" source="pkg" target="pkg_localization" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
 	<db-relationship name="pkg_pkg_categories" source="pkg" target="pkg_pkg_category" toMany="true">
@@ -501,6 +525,12 @@
 	</db-relationship>
 	<db-relationship name="pkg_icon" source="pkg_icon_image" target="pkg_icon" toMany="false">
 		<db-attribute-pair source="pkg_icon_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="natural_language" source="pkg_localization" target="natural_language" toMany="false">
+		<db-attribute-pair source="natural_language_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg" source="pkg_localization" target="pkg" toMany="false">
+		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg" source="pkg_pkg_category" target="pkg" toMany="false">
 		<db-attribute-pair source="pkg_id" target="id"/>
@@ -617,6 +647,8 @@
 	<obj-relationship name="pkg" source="PkgIcon" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgIconImages" source="PkgIcon" target="PkgIconImage" deleteRule="Deny" db-relationship-path="pkg_icon_images"/>
 	<obj-relationship name="pkgIcon" source="PkgIconImage" target="PkgIcon" deleteRule="Nullify" db-relationship-path="pkg_icon"/>
+	<obj-relationship name="naturalLanguage" source="PkgLocalization" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
+	<obj-relationship name="pkg" source="PkgLocalization" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkg" source="PkgPkgCategory" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgCategory" source="PkgPkgCategory" target="PkgCategory" deleteRule="Nullify" db-relationship-path="pkg_category"/>
 	<obj-relationship name="pkg" source="PkgScreenshot" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
