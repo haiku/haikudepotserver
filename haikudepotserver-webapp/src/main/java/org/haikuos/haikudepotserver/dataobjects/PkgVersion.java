@@ -284,7 +284,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         }
 
         if(null!=getPreRelease()) {
-            builder.append('.');
+            builder.append('~');
             builder.append(getPreRelease());
         }
 

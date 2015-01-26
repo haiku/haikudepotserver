@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -141,7 +141,7 @@ public class PasswordResetOrchestrationService {
         List<User> users = User.findByEmail(context, email);
 
         if (users.isEmpty()) {
-            LOGGER.warn("attempt to send password reset token to {}, but there are no users associated with this email address");
+            LOGGER.warn("attempt to send password reset token to {}, but there are no users associated with this email address", email);
         } else {
 
             int count = 0;

@@ -91,7 +91,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                 }
 
                 Random random = new Random(System.currentTimeMillis());
-                File fileF = new File(repositoryDirectory, "testpkg-1.3.3.4-5-x86.hpkg");
+                File fileF = new File(repositoryDirectory, "testpkg-1.3.3~4-5-x86.hpkg");
                 byte[] buffer = new byte[1000 + (Math.abs(random.nextInt()) % 10*1000)];
                 Files.write(buffer,fileF);
                 expectedPayloadLength = buffer.length;
