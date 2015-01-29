@@ -217,7 +217,7 @@ public class PasswordResetOrchestrationService {
                         // that the deletion of the token can stil proceed.
 
                         ObjectContext deleteContext = serverRuntime.getContext();
-                        Optional<UserPasswordResetToken> deleteTokenOptional = UserPasswordResetToken.getByCode(context, tokenCode);
+                        Optional<UserPasswordResetToken> deleteTokenOptional = UserPasswordResetToken.getByCode(deleteContext, tokenCode);
 
                         if (deleteTokenOptional.isPresent()) {
                             deleteContext.deleteObjects(deleteTokenOptional.get());
