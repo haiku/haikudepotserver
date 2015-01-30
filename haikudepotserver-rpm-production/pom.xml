@@ -5,7 +5,7 @@
         <artifactId>haikudepotserver-rpm-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-rpm-parent</relativePath>
-        <version>1.0.20-SNAPSHOT</version>
+        <version>1.0.20</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
