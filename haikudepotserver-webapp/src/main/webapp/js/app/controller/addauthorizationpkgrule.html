@@ -20,7 +20,7 @@
                     ng-model="workingRule.userNickname"
                     ng-required="true"
                     ng-change="userNicknameDidChange()"
-                    ng-pattern="{{userNicknamePattern}}"></input>
+                    ng-pattern="userNicknamePattern"></input>
             <error-messages key-prefix="addAuthorizationPkgRule.userNickname" error="addRuleForm.userNickname.$error"></error-messages>
         </div>
 
@@ -60,7 +60,7 @@
                     ng-model="workingRule.pkgName"
                     ng-required="'APKG'==workingRule.authorizationTargetScopeType"
                     ng-change="pkgNameDidChange()"
-                    ng-pattern="{{pkgNamePattern}}"></input>
+                    ng-pattern="pkgNamePattern"></input>
             <error-messages key-prefix="addAuthorizationPkgRule.pkgName" error="addRuleForm.pkgName.$error"></error-messages>
         </div>
 

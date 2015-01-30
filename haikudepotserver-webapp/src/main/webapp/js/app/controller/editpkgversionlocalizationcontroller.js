@@ -3,6 +3,13 @@
  * Distributed under the terms of the MIT License.
  */
 
+/**
+ * <p>This controller allows the user to be able to provide translations for the package version.
+ * The scope contains a number of 'translations' that couple the natural language together with
+ * the data that has been translated.  Only translations for some languages will be shown; those
+ * with existing data to start with.</p>
+ */
+
 angular.module('haikudepotserver').controller(
     'EditPkgVersionLocalizationController',
     [

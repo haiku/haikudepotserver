@@ -25,7 +25,7 @@ angular.module('haikudepotserver').controller(
             ]);
 
             $scope.pkgChooserName = '';
-            $scope.pkgNamePattern = '' + constants.PATTERN_PKG_NAME;
+            $scope.pkgNamePattern = ('' + constants.PATTERN_PKG_NAME).replace(/^\//,'').replace(/\/$/,'');
             $scope.pkgNamePlaceholder = undefined;
             $scope.feedUrl = undefined;
             $scope.limits = [5,10,25,50,75,100];

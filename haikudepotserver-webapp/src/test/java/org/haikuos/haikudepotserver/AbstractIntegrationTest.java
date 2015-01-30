@@ -178,6 +178,7 @@ public abstract class AbstractIntegrationTest {
             LOGGER.info("prep; did drop database objects for schema '{}' and re-create them", managedDatabase.getSchema());
         }
 
+        setUnauthenticated();
         mailSender.clear();
 
         LOGGER.info("did prepare for the next test");

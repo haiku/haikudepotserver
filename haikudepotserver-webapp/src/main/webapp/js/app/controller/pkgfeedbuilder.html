@@ -63,7 +63,7 @@
                             autocomplete="off"
                             size="12"
                             ng-model="pkgChooserName"
-                            ng-pattern="{{pkgNamePattern}}">
+                            ng-pattern="pkgNamePattern">
                     <button
                             ng-disabled="!pkgChooserName.length || feedForm.pkgChooserName.$invalid"
                             ng-click="goAddPkg()"

@@ -14,8 +14,8 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,breadcrumbs,breadcrumbFactory,errorHandling,messageSource,
             userState) {
 
-            $scope.pkgNamePattern = '' + constants.PATTERN_PKG_NAME;
-            $scope.userNicknamePattern = '' + constants.PATTERN_USER_NICKNAME;
+            $scope.pkgNamePattern = ('' + constants.PATTERN_PKG_NAME).replace(/^\//,'').replace(/\/$/,'');
+            $scope.userNicknamePattern = ('' + constants.PATTERN_USER_NICKNAME).replace(/^\//,'').replace(/\/$/,'');
 
             // This var will be true if the rule that the operator was attempting to create conflicted
             // with an existing rule that was already there.

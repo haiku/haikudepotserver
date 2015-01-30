@@ -14,7 +14,7 @@
                     ng-model="newUser.nickname"
                     ng-required="true"
                     ng-change="nicknameDidChange()"
-                    ng-pattern="{{userNicknamePattern}}">
+                    ng-pattern="userNicknamePattern">
             <error-messages key-prefix="createUser.nickname" error="createUserForm.nickname.$error"></error-messages>
         </div>
 
