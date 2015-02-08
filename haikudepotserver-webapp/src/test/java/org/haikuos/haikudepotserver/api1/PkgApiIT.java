@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
+import org.haikuos.haikudepotserver.api1.model.pkg.PkgLocalization;
 import org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
@@ -623,6 +624,34 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
+    public void testUpdatePkgLocalization() throws Exception {
+        setAuthenticatedUserToRoot();
+
+        integrationTestSupportService.createStandardTestData();
+
+        UpdatePkgLocalizationRequest request = new UpdatePkgLocalizationRequest();
+        request.pkgName = "pkg1";
+        request.pkgLocalizations = ImmutableList.of(
+                new PkgLocalization(NaturalLanguage.CODE_ENGLISH, "flourescence"),
+                new PkgLocalization(NaturalLanguage.CODE_FRENCH, "treacle"));
+
+        // ------------------------------------
+        pkgApi.updatePkgLocalization(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+
+            Assertions.assertThat(pkg1.getPkgLocalization(NaturalLanguage.CODE_ENGLISH).get().getTitle()).isEqualTo("flourescence");
+            Assertions.assertThat(pkg1.getPkgLocalization(NaturalLanguage.CODE_FRENCH).get().getTitle()).isEqualTo("treacle");
+            Assertions.assertThat(pkg1.getPkgLocalization(NaturalLanguage.CODE_GERMAN).get().getTitle()).isEqualTo("Packet 1");
+
+        }
+
+    }
+
+    @Test
     public void testUpdatePkgVersionLocalization_existingNaturalLanguage() throws Exception {
         testUpdatePkgVersionLocalization(NaturalLanguage.CODE_SPANISH);
     }
@@ -633,7 +662,43 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     /**
-     * <p>This test requests german and english, but only english ispresent so needs to check that the output
+     * <p>This test checks that it is possible to get a couple of known localizations for a known pkg.</p>
+     */
+
+    @Test
+    public void testGetPkgLocalizations() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+
+        GetPkgLocalizationsRequest request = new GetPkgLocalizationsRequest();
+        request.naturalLanguageCodes = ImmutableList.of(NaturalLanguage.CODE_ENGLISH, NaturalLanguage.CODE_GERMAN);
+        request.pkgName = "pkg1";
+
+        // ------------------------------------
+        GetPkgLocalizationsResult result = pkgApi.getPkgLocalizations(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.pkgLocalizations.size()).isEqualTo(2);
+
+        PkgLocalization en = Iterables.find(result.pkgLocalizations, new Predicate<PkgLocalization>() {
+            @Override
+            public boolean apply(PkgLocalization input) {
+                return input.naturalLanguageCode.equals(NaturalLanguage.CODE_ENGLISH);
+            }
+        });
+
+        PkgLocalization de = Iterables.find(result.pkgLocalizations, new Predicate<PkgLocalization>() {
+            @Override
+            public boolean apply(PkgLocalization input) {
+                return input.naturalLanguageCode.equals(NaturalLanguage.CODE_GERMAN);
+            }
+        });
+
+        Assertions.assertThat(en.title).isEqualTo("Package 1");
+        Assertions.assertThat(de.title).isEqualTo("Packet 1");
+    }
+
+    /**
+     * <p>This test requests german and english, but only english is present so needs to check that the output
      * contains only the english data.</p>
      */
 

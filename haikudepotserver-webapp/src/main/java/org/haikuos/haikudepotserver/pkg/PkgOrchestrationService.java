@@ -1184,6 +1184,46 @@ public class PkgOrchestrationService {
     // LOCALIZATION
 
     /**
+     * <p>This method will update the localization defined in the parameters to this method into the data
+     * structure for the package.</p>
+     */
+
+    public PkgLocalization updatePkgLocalization(
+            ObjectContext context,
+            Pkg pkg,
+            NaturalLanguage naturalLanguage,
+            String title) {
+
+        Preconditions.checkNotNull(naturalLanguage);
+
+        if(null!=title) {
+            title = title.trim();
+        }
+
+        Optional<PkgLocalization> pkgLocalizationOptional = pkg.getPkgLocalization(naturalLanguage.getCode());
+
+        if(Strings.isNullOrEmpty(title)) {
+            if(!pkgLocalizationOptional.isPresent()) {
+                pkg.removeToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalizationOptional.get(), true);
+                context.deleteObject(pkgLocalizationOptional.get());
+            }
+
+            return null;
+        }
+
+        if(!pkgLocalizationOptional.isPresent()) {
+            PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
+            pkgLocalization.setNaturalLanguage(naturalLanguage);
+            pkgLocalization.setTitle(title);
+            pkg.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+            return pkgLocalization;
+        }
+
+        pkgLocalizationOptional.get().setTitle(title);
+        return pkgLocalizationOptional.get();
+    }
+
+    /**
      * <p>This method will either find the existing localization or create a new one.  It will then set the localized
      * values for the package.  Note that null or empty values will be treated the same and these values will be
      * trimmed.  Note that if the summary and description are null or empty string then if there is an existing

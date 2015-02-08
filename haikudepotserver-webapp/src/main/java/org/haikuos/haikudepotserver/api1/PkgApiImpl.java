@@ -814,6 +814,43 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
+    public UpdatePkgLocalizationResult updatePkgLocalization(UpdatePkgLocalizationRequest updatePkgLocalizationRequest) throws ObjectNotFoundException {
+
+        Preconditions.checkArgument(null!=updatePkgLocalizationRequest);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(updatePkgLocalizationRequest.pkgName), "the package name must be supplied");
+
+        final ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = getPkg(context, updatePkgLocalizationRequest.pkgName);
+
+        User authUser = obtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITLOCALIZATION)) {
+            throw new AuthorizationFailureException();
+        }
+
+        for(org.haikuos.haikudepotserver.api1.model.pkg.PkgLocalization requestPkgVersionLocalization : updatePkgLocalizationRequest.pkgLocalizations) {
+
+            NaturalLanguage naturalLanguage = getNaturalLanguage(context, requestPkgVersionLocalization.naturalLanguageCode);
+
+            pkgService.updatePkgLocalization(
+                    context,
+                    pkg,
+                    naturalLanguage,
+                    requestPkgVersionLocalization.title);
+        }
+
+        context.commitChanges();
+
+        LOGGER.info(
+                "did update the localization for pkg {} for {} natural languages",
+                pkg.getName(),
+                updatePkgLocalizationRequest.pkgLocalizations.size()
+        );
+
+        return new UpdatePkgLocalizationResult();
+    }
+
+    @Override
     public UpdatePkgVersionLocalizationsResult updatePkgVersionLocalization(
             UpdatePkgVersionLocalizationsRequest updatePkgVersionLocalizationRequest) throws ObjectNotFoundException {
 
@@ -895,6 +932,32 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         );
 
         return new UpdatePkgVersionLocalizationsResult();
+    }
+
+    @Override
+    public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=getPkgLocalizationsRequest, "a request is required");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgLocalizationsRequest.pkgName), "a package name is required");
+        Preconditions.checkArgument(null!=getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
+
+        final ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = getPkg(context, getPkgLocalizationsRequest.pkgName);
+
+        GetPkgLocalizationsResult result = new GetPkgLocalizationsResult();
+        result.pkgLocalizations = Lists.newArrayList();
+
+        for(String naturalLanguageCode : getPkgLocalizationsRequest.naturalLanguageCodes) {
+            Optional<org.haikuos.haikudepotserver.dataobjects.PkgLocalization> pkgLocalizationOptional = pkg.getPkgLocalization(naturalLanguageCode);
+
+            if(pkgLocalizationOptional.isPresent()) {
+                org.haikuos.haikudepotserver.api1.model.pkg.PkgLocalization resultPkgVersionLocalization = new org.haikuos.haikudepotserver.api1.model.pkg.PkgLocalization();
+                resultPkgVersionLocalization.naturalLanguageCode = naturalLanguageCode;
+                resultPkgVersionLocalization.title = pkgLocalizationOptional.get().getTitle();
+                result.pkgLocalizations.add(resultPkgVersionLocalization);
+            }
+        }
+
+        return result;
     }
 
     @Override

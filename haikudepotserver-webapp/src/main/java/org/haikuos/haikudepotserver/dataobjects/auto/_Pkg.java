@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.haikuos.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
+import org.haikuos.haikudepotserver.dataobjects.PkgLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.Prominence;
@@ -27,6 +28,7 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final String NAME_PROPERTY = "name";
     public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
     public static final String PKG_ICONS_PROPERTY = "pkgIcons";
+    public static final String PKG_LOCALIZATIONS_PROPERTY = "pkgLocalizations";
     public static final String PKG_PKG_CATEGORIES_PROPERTY = "pkgPkgCategories";
     public static final String PKG_SCREENSHOTS_PROPERTY = "pkgScreenshots";
     public static final String PROMINENCE_PROPERTY = "prominence";
@@ -97,6 +99,18 @@ public abstract class _Pkg extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PkgIcon> getPkgIcons() {
         return (List<PkgIcon>)readProperty(PKG_ICONS_PROPERTY);
+    }
+
+
+    public void addToPkgLocalizations(PkgLocalization obj) {
+        addToManyTarget(PKG_LOCALIZATIONS_PROPERTY, obj, true);
+    }
+    public void removeFromPkgLocalizations(PkgLocalization obj) {
+        removeToManyTarget(PKG_LOCALIZATIONS_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PkgLocalization> getPkgLocalizations() {
+        return (List<PkgLocalization>)readProperty(PKG_LOCALIZATIONS_PROPERTY);
     }
 
 

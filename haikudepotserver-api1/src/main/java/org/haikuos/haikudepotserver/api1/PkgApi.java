@@ -93,6 +93,13 @@ public interface PkgApi {
     ReorderPkgScreenshotsResult reorderPkgScreenshots(ReorderPkgScreenshotsRequest reorderPkgScreenshotsRequest) throws ObjectNotFoundException;
 
     /**
+     * <p>This method will update the localizations supplied for the package identified in the request.  In order to
+     * remove a localization for a given language, supply the localization data for that language as NULL.</p>
+     */
+
+    UpdatePkgLocalizationResult updatePkgLocalization(UpdatePkgLocalizationRequest updatePkgLocalizationRequest) throws ObjectNotFoundException;
+
+    /**
      * <p>This method will set the localized text stored against the <strong>latest</strong> version of the nominated
      * package.  If the package cannot be found then this method will throw an instance of
      * {@link org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException}.  It is not possible to update the
@@ -101,6 +108,12 @@ public interface PkgApi {
      */
 
     UpdatePkgVersionLocalizationsResult updatePkgVersionLocalization(UpdatePkgVersionLocalizationsRequest updatePkgVersionLocalizationRequest) throws ObjectNotFoundException;
+
+    /**
+     * <p>This method will return all of the localizations that are specific to the package identified in the request.</p>
+     */
+
+    GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException;
 
     /**
      * <p>This method will return the package version localizations for the nominated package.  It will only return

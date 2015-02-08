@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -196,6 +196,25 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             PkgScreenshot pkgScreenshot = screenshots.get(i);
             pkgScreenshot.setOrdering(i+1);
         }
+    }
+
+    /**
+     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
+     * English language data is hard-coded into the package payload, english will always be available.</p>
+     */
+
+    public Optional<PkgLocalization> getPkgLocalization(final String naturalLanguageCode) {
+        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
+
+        return Iterables.tryFind(
+                getPkgLocalizations(),
+                new Predicate<PkgLocalization>() {
+                    @Override
+                    public boolean apply(PkgLocalization input) {
+                        return input.getNaturalLanguage().getCode().equals(naturalLanguageCode);
+                    }
+                }
+        );
     }
 
     @Override

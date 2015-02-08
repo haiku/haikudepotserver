@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.ejbql.parser.EJBQL;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Ordering;
@@ -31,6 +30,7 @@ public class NaturalLanguage extends _NaturalLanguage {
     public final static String CODE_ENGLISH = "en";
     public final static String CODE_GERMAN = "de";
     public final static String CODE_SPANISH = "es";
+    public final static String CODE_FRENCH = "fr";
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkNotNull(context);

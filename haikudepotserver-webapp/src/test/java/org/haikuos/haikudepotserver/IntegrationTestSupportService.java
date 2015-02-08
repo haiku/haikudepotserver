@@ -142,6 +142,27 @@ public class IntegrationTestSupportService {
             pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "graphics").get());
         }
 
+        {
+            PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+            pkgLocalization.setTitle("Package 1");
+            result.pkg1.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+        }
+
+        {
+            PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN).get());
+            pkgLocalization.setTitle("Packet 1");
+            result.pkg1.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+        }
+
+        {
+            PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
+            pkgLocalization.setTitle("Ping 1");
+            result.pkg1.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+        }
+
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
