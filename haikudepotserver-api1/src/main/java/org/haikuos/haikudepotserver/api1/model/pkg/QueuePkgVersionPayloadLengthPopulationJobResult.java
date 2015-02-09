@@ -5,9 +5,9 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class QueuePkgVersionPayloadLengthPopulationJobResult {
+import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 
-    public String guid;
+public class QueuePkgVersionPayloadLengthPopulationJobResult extends AbstractQueueJobResult {
 
     public QueuePkgVersionPayloadLengthPopulationJobResult() {
     }

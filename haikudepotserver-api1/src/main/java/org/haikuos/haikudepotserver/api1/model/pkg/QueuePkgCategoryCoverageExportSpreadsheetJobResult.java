@@ -1,13 +1,13 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class QueuePkgCategoryCoverageExportSpreadsheetJobResult {
+import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 
-    public String guid;
+public class QueuePkgCategoryCoverageExportSpreadsheetJobResult extends AbstractQueueJobResult {
 
     public QueuePkgCategoryCoverageExportSpreadsheetJobResult() {
     }

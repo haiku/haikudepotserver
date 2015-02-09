@@ -196,4 +196,10 @@ public interface PkgApi {
 
     QueuePkgVersionPayloadLengthPopulationJobResult queuePkgVersionPayloadLengthPopulationJob(QueuePkgVersionPayloadLengthPopulationJobRequest request);
 
+    /**
+     * <p>Enqueues a job to produce a spreadsheet of the coverage of package version localizations.</p>
+     */
+
+    QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult queuePkgVersionLocalizationCoverageExportSpreadsheetJob(QueuePkgVersionLocalizationCoverageExportSpreadsheetJobRequest request);
+
 }

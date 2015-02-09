@@ -1,14 +1,13 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.job;
 
-import org.haikuos.haikudepotserver.job.model.JobSpecification;
 import org.haikuos.haikudepotserver.job.model.JobRunnerException;
+import org.haikuos.haikudepotserver.job.model.JobSpecification;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
@@ -20,6 +19,13 @@ import java.io.IOException;
 public abstract class AbstractJobRunner<T extends JobSpecification> implements JobRunner<T> {
 
     private final static String SUFFIX = "JobRunner";
+
+    /**
+     * <p>This string is inserted into a cell in order to indicate that the combination of the
+     * row and column are true.</p>
+     */
+
+    protected static String MARKER = "*";
 
     @Override
     public String getJobTypeCode() {

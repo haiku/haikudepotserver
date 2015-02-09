@@ -1,3 +1,8 @@
+/*
+ * Copyright 2015, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haikuos.haikudepotserver.pkg;
 
 import com.google.common.base.Function;
@@ -13,13 +18,6 @@ import java.util.List;
 
 public abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecification>
         extends AbstractJobRunner<T> {
-
-    /**
-     * <p>This string is inserted into a cell in order to indicate that the combination of the
-     * package on the row and the category on the column are true.</p>
-     */
-
-    protected static String MARKER = "*";
 
     @Resource
     protected ServerRuntime serverRuntime;

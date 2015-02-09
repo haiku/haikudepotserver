@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,7 +9,7 @@ import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haikuos.haikudepotserver.job.model.JobSpecification;
 import org.springframework.util.ObjectUtils;
 
-public class PkgCategoryCoverageExportSpreadsheetJobSpecification extends AbstractJobSpecification {
+public class PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification extends AbstractJobSpecification {
 
     @Override
     public boolean isEquivalent(JobSpecification other) {

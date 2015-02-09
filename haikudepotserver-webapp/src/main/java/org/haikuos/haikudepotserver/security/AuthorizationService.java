@@ -224,6 +224,7 @@ public class AuthorizationService {
             case BULK_PKGICONEXPORTARCHIVE:
                 return null!=authenticatedUser;
 
+            case BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 

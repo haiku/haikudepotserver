@@ -5,9 +5,9 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class QueuePkgIconExportArchiveJobResult {
+import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 
-    public String guid;
+public class QueuePkgIconExportArchiveJobResult extends AbstractQueueJobResult {
 
     public QueuePkgIconExportArchiveJobResult() {
     }

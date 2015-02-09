@@ -5,9 +5,9 @@
 
 package org.haikuos.haikudepotserver.api1.model.pkg;
 
-public class QueuePkgCategoryCoverageImportSpreadsheetJobResult {
+import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 
-    public String guid;
+public class QueuePkgCategoryCoverageImportSpreadsheetJobResult extends AbstractQueueJobResult {
 
     public QueuePkgCategoryCoverageImportSpreadsheetJobResult() {
     }

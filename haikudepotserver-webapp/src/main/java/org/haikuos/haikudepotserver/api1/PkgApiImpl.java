@@ -18,6 +18,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.Entity;
 import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
+import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
@@ -28,7 +29,9 @@ import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
+import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haikuos.haikudepotserver.job.model.JobData;
+import org.haikuos.haikudepotserver.job.model.JobSpecification;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
@@ -1212,25 +1215,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request) {
         Preconditions.checkArgument(null!=request);
-
-        final ObjectContext context = serverRuntime.getContext();
-
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(
-                context,
-                user.orNull(),
-                null,
-                Permission.BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET)) {
-            LOGGER.warn("attempt to access a package category coverage export spreadsheet, but was unauthorized");
-            throw new AuthorizationFailureException();
-        }
-
-        PkgCategoryCoverageExportSpreadsheetJobSpecification spec = new PkgCategoryCoverageExportSpreadsheetJobSpecification();
-        spec.setOwnerUserNickname(user.get().getNickname());
-
-        return new QueuePkgCategoryCoverageExportSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+        return queueSimplePkgJob(
+                QueuePkgCategoryCoverageExportSpreadsheetJobResult.class,
+                PkgCategoryCoverageExportSpreadsheetJobSpecification.class,
+                Permission.BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET);
     }
 
     @Override
@@ -1273,98 +1261,90 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public QueuePkgIconSpreadsheetJobResult queuePkgIconSpreadsheetJob(QueuePkgIconSpreadsheetJobRequest request) {
         Preconditions.checkArgument(null!=request);
-
-        final ObjectContext context = serverRuntime.getContext();
-
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(
-                context,
-                user.orNull(),
-                null,
-                Permission.BULK_PKGICONSPREADSHEETREPORT)) {
-            LOGGER.warn("attempt to access a pkg icon spreadsheet report, but was unauthorized");
-            throw new AuthorizationFailureException();
-        }
-
-        PkgIconSpreadsheetJobSpecification spec = new PkgIconSpreadsheetJobSpecification();
-        spec.setOwnerUserNickname(user.get().getNickname());
-
-        return new QueuePkgIconSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+        return queueSimplePkgJob(
+                QueuePkgIconSpreadsheetJobResult.class,
+                PkgIconSpreadsheetJobSpecification.class,
+                Permission.BULK_PKGICONSPREADSHEETREPORT);
     }
 
     @Override
     public QueuePkgProminenceAndUserRatingSpreadsheetJobResult queuePkgProminenceAndUserRatingSpreadsheetJob(QueuePkgProminenceAndUserRatingSpreadsheetJobRequest request) {
         Preconditions.checkArgument(null!=request);
-
-        final ObjectContext context = serverRuntime.getContext();
-
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(
-                context,
-                user.orNull(),
-                null,
-                Permission.BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT)) {
-            LOGGER.warn("attempt to access a prominence and user rating coverage spreadsheet report, but was unauthorized");
-            throw new AuthorizationFailureException();
-        }
-
-        PkgProminenceAndUserRatingSpreadsheetJobSpecification spec = new PkgProminenceAndUserRatingSpreadsheetJobSpecification();
-        spec.setOwnerUserNickname(user.get().getNickname());
-
-        return new QueuePkgProminenceAndUserRatingSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+        return queueSimplePkgJob(
+                QueuePkgProminenceAndUserRatingSpreadsheetJobResult.class,
+                PkgProminenceAndUserRatingSpreadsheetJobSpecification.class,
+                Permission.BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT);
     }
 
     @Override
     public QueuePkgIconExportArchiveJobResult queuePkgIconExportArchiveJob(QueuePkgIconExportArchiveJobRequest request) {
         Preconditions.checkArgument(null!=request);
-
-        final ObjectContext context = serverRuntime.getContext();
-
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(
-                context,
-                user.orNull(),
-                null,
-                Permission.BULK_PKGICONEXPORTARCHIVE)) {
-            LOGGER.warn("attempt to access a pkg icon archive export without authorization");
-            throw new AuthorizationFailureException();
-        }
-
-        PkgIconExportArchiveJobSpecification spec = new PkgIconExportArchiveJobSpecification();
-        spec.setOwnerUserNickname(user.get().getNickname());
-
-        return new QueuePkgIconExportArchiveJobResult(
-                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+        return queueSimplePkgJob(
+                QueuePkgIconExportArchiveJobResult.class,
+                PkgIconExportArchiveJobSpecification.class,
+                Permission.BULK_PKGICONEXPORTARCHIVE);
     }
 
     @Override
     public QueuePkgVersionPayloadLengthPopulationJobResult queuePkgVersionPayloadLengthPopulationJob(QueuePkgVersionPayloadLengthPopulationJobRequest request) {
         Preconditions.checkArgument(null!=request, "a request objects is required");
+        return queueSimplePkgJob(
+                QueuePkgVersionPayloadLengthPopulationJobResult.class,
+                PkgVersionPayloadLengthPopulationJobSpecification.class,
+                Permission.BULK_PKGVERSIONPAYLOADLENGTHPOPULATION);
+    }
+
+    @Override
+    public QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult queuePkgVersionLocalizationCoverageExportSpreadsheetJob(QueuePkgVersionLocalizationCoverageExportSpreadsheetJobRequest request) {
+        Preconditions.checkArgument(null!=request, "a request objects is required");
+        return queueSimplePkgJob(
+                QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult.class,
+                PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification.class,
+                Permission.BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET);
+    }
+
+    private <R extends AbstractQueueJobResult> R queueSimplePkgJob(
+            Class<R> resultClass,
+            Class<? extends AbstractJobSpecification> jobSpecificationClass,
+            Permission permission) {
 
         final ObjectContext context = serverRuntime.getContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(
-                context,
-                user.orNull(),
-                null,
-                Permission.BULK_PKGVERSIONPAYLOADLENGTHPOPULATION)) {
-            LOGGER.warn("attempt to access pkg version payload length population without authorization");
+        if (!user.isPresent()) {
+            LOGGER.warn("attempt to queue {} without a user", jobSpecificationClass.getSimpleName());
             throw new AuthorizationFailureException();
         }
 
-        PkgVersionPayloadLengthPopulationJobSpecification spec = new PkgVersionPayloadLengthPopulationJobSpecification();
+        if (!authorizationService.check(context, user.get(), null, permission)) {
+            LOGGER.warn("attempt to queue {} without sufficient authorization", jobSpecificationClass.getSimpleName());
+            throw new AuthorizationFailureException();
+        }
+
+        AbstractJobSpecification spec;
+
+        try {
+            spec = jobSpecificationClass.newInstance();
+        }
+        catch(InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("unable to create the job specification for class; " + jobSpecificationClass.getSimpleName(), e);
+        }
+
         spec.setOwnerUserNickname(user.get().getNickname());
 
-        return new QueuePkgVersionPayloadLengthPopulationJobResult(
-                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+        R result;
 
+        try {
+            result = resultClass.newInstance();
+        }
+        catch(InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("unable to create the result; " + resultClass.getSimpleName(), e);
+        }
+
+        result.guid = jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull();
+        return result;
     }
+
 
 }
