@@ -148,8 +148,6 @@ public class PkgOrchestrationService {
         Preconditions.checkNotNull(parameterAccumulator);
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-        Preconditions.checkState(search.getOffset() >= 0);
-        Preconditions.checkState(search.getLimit() > 0);
         Preconditions.checkNotNull(null!=search.getArchitectures()&&!search.getArchitectures().isEmpty());
         Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
 
@@ -391,6 +389,64 @@ public class PkgOrchestrationService {
             default:
                 throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
         }
+    }
+
+    /**
+     * <p>This will be called for each package in the system.</p>
+     * @param c is the callback to invoke.
+     * @return the quantity of packages processed.
+     */
+
+    public long eachPkg(
+            ObjectContext context,
+            PkgSearchSpecification search,
+            Callback<Pkg> c) {
+
+        Preconditions.checkArgument(null!=c, "the callback should be provided to run for each package");
+        Preconditions.checkArgument(null!=search, "the search should be provided to specify the packages to iterate over");
+        Preconditions.checkArgument(null!=context, "the object context must be provided");
+
+        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+            return 0L;
+        }
+
+        List<Object> parameterAccumulator = Lists.newArrayList();
+        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
+
+        StringBuilder ejbql = new StringBuilder();
+        ejbql.append("SELECT DISTINCT p FROM Pkg AS p, PkgVersion AS pv WHERE pv.pkg=p AND ");
+        ejbql.append(whereClause);
+        ejbql.append(" ORDER BY p.name ASC");
+
+        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
+
+        for(int i=0;i<parameterAccumulator.size();i++) {
+            query.setParameter(i+1, parameterAccumulator.get(i));
+        }
+
+        int offset = 0;
+
+        while(true) {
+            query.setFetchLimit(100); // arbitrary -- might need to tune.
+            query.setFetchOffset(offset);
+
+            List<Pkg> pkgs = (List<Pkg>) context.performQuery(query);
+
+            if(pkgs.isEmpty()) {
+                return offset; // stop
+            }
+            else {
+                for(Pkg pkg : pkgs) {
+
+                    offset++;
+
+                    if(!c.process(pkg)) {
+                        return offset;
+                    }
+                }
+            }
+        }
+
     }
 
     // ------------------------------
@@ -1085,98 +1141,6 @@ public class PkgOrchestrationService {
         }
 
         LOGGER.debug("have processed package {}", pkg.toString());
-
-    }
-
-    // -------------------------------------
-    // ITERATION
-
-    /**
-     * <p>This will be called for each package in the system.</p>
-     * @param c is the callback to invoke.
-     * @return the quantity of packages processed.
-     */
-
-    public int each(
-            ObjectContext context,
-            PrefetchTreeNode prefetchTreeNode,
-            List<Architecture> architectures,
-            Callback<Pkg> c) {
-
-        Preconditions.checkNotNull(c);
-        Preconditions.checkNotNull(context);
-
-        if(null!=architectures && architectures.isEmpty()) {
-            return 0;
-        }
-
-        StringBuilder queryString = new StringBuilder();
-        List<Object> parameters = Lists.newArrayList();
-
-        queryString.append("SELECT p FROM ");
-        queryString.append(Pkg.class.getSimpleName());
-        queryString.append(" p");
-
-// [apl 26.nov.2014] not working in Cayenne 3.1; maybe try again for Cayenne 3.2
-//        if(null!=prefetchTreeNode) {
-//            queryString.append(PrefetchTreeNodeHelper.toEJBQL(prefetchTreeNode, "p"));
-//        }
-
-        queryString.append(" WHERE p.active=true");
-
-        if(null!=architectures) {
-            queryString.append(" AND EXISTS(SELECT pv FROM ");
-            queryString.append(PkgVersion.class.getSimpleName());
-            queryString.append(" pv WHERE pv.");
-            queryString.append(PkgVersion.PKG_PROPERTY);
-            queryString.append("=p");
-            queryString.append(" AND pv.");
-            queryString.append(PkgVersion.ARCHITECTURE_PROPERTY);
-            queryString.append(" IN (");
-
-            for(int i=0;i<architectures.size();i++) {
-                if(0!=i) {
-                    queryString.append(",");
-                }
-
-                queryString.append("?"+(parameters.size()+1));
-                parameters.add(architectures.get(i));
-            }
-
-            queryString.append(")");
-            queryString.append(")");
-        }
-
-        queryString.append(" ORDER BY p.name ASC");
-
-        EJBQLQuery query = new EJBQLQuery(queryString.toString());
-
-        for(int i=0;i<parameters.size();i++) {
-            query.setParameter(i+1, parameters.get(i));
-        }
-
-        int offset = 0;
-
-        while(true) {
-            query.setFetchLimit(100); // arbitrary -- might need to tune.
-            query.setFetchOffset(offset);
-
-            List<Pkg> pkgs = (List<Pkg>) context.performQuery(query);
-
-            if(pkgs.isEmpty()) {
-                return offset; // stop
-            }
-            else {
-                for(Pkg pkg : pkgs) {
-
-                    offset++;
-
-                    if(!c.process(pkg)) {
-                        return offset;
-                    }
-                }
-            }
-        }
 
     }
 

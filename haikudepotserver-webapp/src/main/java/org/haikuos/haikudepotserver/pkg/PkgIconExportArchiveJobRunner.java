@@ -17,6 +17,7 @@ import org.haikuos.haikudepotserver.job.AbstractJobRunner;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
+import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,13 +71,12 @@ public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExpo
                 final ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
         ) {
 
-            PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
-            prefetchTreeNode.addPath(Pkg.PKG_ICONS_PROPERTY);
+            PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
+            searchSpecification.setArchitectures(Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)));
 
-            count += pkgOrchestrationService.each(
+            count += pkgOrchestrationService.eachPkg(
                     context,
-                    prefetchTreeNode,
-                    Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)),
+                    searchSpecification,
                     new Callback<Pkg>() {
 
                         @Override

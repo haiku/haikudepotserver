@@ -24,6 +24,7 @@ import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.job.model.JobRunnerException;
 import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
+import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
@@ -125,14 +126,14 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
             // stream out the packages.
 
-            PrefetchTreeNode treeNode = new PrefetchTreeNode();
+            PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
+            searchSpecification.setArchitectures(Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)));
 
             LOGGER.info("will produce package version localization report");
 
-            int count = pkgOrchestrationService.each(
+            long count = pkgOrchestrationService.eachPkg(
                     context,
-                    treeNode,
-                    architectures,
+                    searchSpecification,
                     new Callback<Pkg>() {
                         @Override
                         public boolean process(Pkg pkg) {

@@ -327,7 +327,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             ObjectContext context = serverRuntime.getContext();
             User user = User.getByObjectId(context, userOidOptional.get());
             result.token = authenticationService.generateToken(user);
-            LOGGER.info("did renew token for user; {}", user.toString());
+            LOGGER.debug("did renew token for user; {}", user.toString());
         }
         else {
             LOGGER.info("unable to renew token");

@@ -16,6 +16,7 @@ import org.haikuos.haikudepotserver.job.AbstractJobRunner;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,10 +78,12 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
             long startMs = System.currentTimeMillis();
             LOGGER.info("will produce prominence spreadsheet report");
 
-            int count = pkgOrchestrationService.each(
+            PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
+            searchSpecification.setArchitectures(Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)));
+
+            long count = pkgOrchestrationService.eachPkg(
                     context,
-                    null,
-                    Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)),
+                    searchSpecification,
                     new Callback<Pkg>() {
                         @Override
                         public boolean process(Pkg pkg) {

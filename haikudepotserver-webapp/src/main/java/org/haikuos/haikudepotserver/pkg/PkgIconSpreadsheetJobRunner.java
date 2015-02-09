@@ -19,6 +19,7 @@ import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.pkg.model.PkgIconConfiguration;
 import org.haikuos.haikudepotserver.pkg.model.PkgIconSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,10 +105,12 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
             PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
             prefetchTreeNode.addPath(Pkg.PKG_ICONS_PROPERTY);
 
-            int count = pkgOrchestrationService.each(
+            PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
+            searchSpecification.setArchitectures(Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)));
+
+            long count = pkgOrchestrationService.eachPkg(
                     context,
-                    prefetchTreeNode,
-                    Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)),
+                    searchSpecification,
                     new Callback<Pkg>() {
                         @Override
                         public boolean process(Pkg pkg) {
@@ -117,7 +120,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
 
                             cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");
 
-                            for(PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
+                            for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
                                 cells.add(
                                         pkg.getPkgIcon(
                                                 pkgIconConfiguration.getMediaType(),
