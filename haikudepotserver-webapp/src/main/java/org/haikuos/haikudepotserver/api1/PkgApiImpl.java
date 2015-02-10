@@ -16,7 +16,6 @@ import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.Entity;
-import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
@@ -31,7 +30,6 @@ import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haikuos.haikudepotserver.job.model.JobData;
-import org.haikuos.haikudepotserver.job.model.JobSpecification;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
@@ -366,11 +364,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         if(shouldIncrement) {
-            ObjectContext contextEdit = serverRuntime.getContext();
-            PkgVersion pkgVersionEdit = (PkgVersion) Iterables.getOnlyElement(contextEdit.performQuery(new ObjectIdQuery(pkgVersion.getObjectId())));
-            pkgVersionEdit.incrementViewCounter();
-            contextEdit.commitChanges();
-            LOGGER.info("did increment the view counter for '{}'", pkgVersion.getPkg().toString());
+            pkgOrchestrationService.incrementViewCounter(serverRuntime, pkgVersion.getObjectId());
         }
 
         if(null!=cacheKey) {

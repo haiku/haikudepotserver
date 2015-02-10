@@ -11,11 +11,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.access.OptimisticLockException;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
@@ -39,6 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -1411,6 +1416,40 @@ public class PkgOrchestrationService {
         }
 
         return didChange;
+    }
+
+    /**
+     * <p>This method will increment the view counter on a package version.  If it encounters an optimistic
+     * locking problem then it will pause and it will try again in a moment.  It will attempt this a few
+     * times and then fail with a runtime exception.</p>
+     */
+
+    public void incrementViewCounter(ServerRuntime serverRuntime, ObjectId pkgVersionOid) {
+
+        int attempts = 3;
+
+        while(true) {
+            ObjectContext contextEdit = serverRuntime.getContext();
+            PkgVersion pkgVersionEdit = (PkgVersion) Iterables.getOnlyElement(contextEdit.performQuery(new ObjectIdQuery(pkgVersionOid)));
+            pkgVersionEdit.incrementViewCounter();
+
+            try {
+                contextEdit.commitChanges();
+                LOGGER.info("did increment the view counter for '{}'", pkgVersionEdit.getPkg().toString());
+                return;
+            } catch (OptimisticLockException ole) {
+                contextEdit.invalidateObjects(pkgVersionEdit);
+
+                attempts--;
+
+                if (0 == attempts) {
+                    throw new RuntimeException("unable to increment the view counter for '"+pkgVersionEdit.getPkg().toString()+"' because of an optimistic locking failure; have exhausted attempts", ole);
+                } else {
+                    LOGGER.error("unable to increment the view counter for '{}' because of an optimistic locking failure; will try again...", pkgVersionEdit.getPkg().toString());
+                    Uninterruptibles.sleepUninterruptibly(250 + (System.currentTimeMillis() % 250), TimeUnit.MILLISECONDS);
+                }
+            }
+        }
     }
 
 }
