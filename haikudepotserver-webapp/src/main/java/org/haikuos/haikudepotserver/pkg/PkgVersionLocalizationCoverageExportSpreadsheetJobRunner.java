@@ -15,7 +15,6 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.*;
@@ -37,7 +36,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <P>This report produces a spreadsheet that outlines for each package, for which natural languages there are
@@ -83,8 +82,8 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
     @Override
     public void run(
-            JobOrchestrationService jobOrchestrationService,
-            PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification specification)
+            final JobOrchestrationService jobOrchestrationService,
+            final PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification specification)
             throws IOException, JobRunnerException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
@@ -129,7 +128,10 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
             PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
             searchSpecification.setArchitectures(Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)));
 
-            LOGGER.info("will produce package version localization report");
+            final long expectedTotal = pkgOrchestrationService.totalPkg(context, searchSpecification);
+            final AtomicLong counter = new AtomicLong(0);
+
+            LOGGER.info("will produce package version localization report for {} packages", expectedTotal);
 
             long count = pkgOrchestrationService.eachPkg(
                     context,
@@ -138,7 +140,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
                         @Override
                         public boolean process(Pkg pkg) {
 
-                            for(Architecture architecture : architectures) {
+                            for (Architecture architecture : architectures) {
 
                                 Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
                                         context,
@@ -151,7 +153,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
                                     cells[1] = architecture.getCode();
                                     cells[2] = pkgVersionOptional.get().toVersionCoordinates().toString();
 
-                                    for(int i=0;i<naturalLanguages.size();i++) {
+                                    for (int i = 0; i < naturalLanguages.size(); i++) {
                                         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguages.get(i));
                                         cells[3 + i] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
                                     }
@@ -160,6 +162,10 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
                                 }
                             }
+
+                            jobOrchestrationService.setJobProgressPercent(
+                                    specification.getGuid(),
+                                    (int) ((100 * counter.incrementAndGet()) / expectedTotal));
 
                             return true; // keep going!
                         }

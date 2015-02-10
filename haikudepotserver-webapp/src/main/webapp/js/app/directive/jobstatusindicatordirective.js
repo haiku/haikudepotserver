@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -58,7 +58,13 @@ angular.module('haikudepotserver').directive('jobStatusIndicator',[
                         function standardText(key,atMillis) {
                             messageSource.get(naturalLanguageCode, key).then(
                                 function(str) {
-                                    containerE.text(str.replace('{0}',toTimestampStr(atMillis)));
+                                    var str = str.replace('{0}',toTimestampStr(atMillis));
+
+                                    if('STARTED' == job.jobStatus && !!job.progressPercent) {
+                                        str += ' (' + job.progressPercent + '%)';
+                                    }
+
+                                    containerE.text(str);
                                 },
                                 function() {
                                     setErrorText();

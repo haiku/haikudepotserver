@@ -360,13 +360,16 @@ public class PkgOrchestrationService {
         return (List<PkgVersion>) context.performQuery(query);
     }
 
+    /**
+     * <p>This method will provide a total of the package versions.</p>
+     */
+
     public long total(
             ObjectContext context,
             PkgSearchSpecification search) {
 
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(search);
-        Preconditions.checkNotNull(search.getNaturalLanguage());
 
         if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
             return 0L;
@@ -381,6 +384,44 @@ public class PkgOrchestrationService {
         }
 
         @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
+
+        switch(result.size()) {
+            case 1:
+                return result.get(0).longValue();
+
+            default:
+                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+        }
+    }
+
+    /**
+     * <p>This method will provide a total of the packages.</p>
+     */
+
+    public long totalPkg(
+            ObjectContext context,
+            PkgSearchSpecification search) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(search);
+
+        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
+            return 0L;
+        }
+
+        List<Object> parameterAccumulator = Lists.newArrayList();
+
+        StringBuilder ejbql = new StringBuilder();
+        ejbql.append("SELECT COUNT(DISTINCT pv.pkg.name) FROM PkgVersion AS pv WHERE ");
+        ejbql.append(prepareWhereClause(parameterAccumulator, context, search));
+
+        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
+
+        for(int i=0;i<parameterAccumulator.size();i++) {
+            query.setParameter(i + 1, parameterAccumulator.get(i));
+        }
+
+        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(query);
 
         switch(result.size()) {
             case 1:
@@ -411,11 +452,10 @@ public class PkgOrchestrationService {
         }
 
         List<Object> parameterAccumulator = Lists.newArrayList();
-        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
 
         StringBuilder ejbql = new StringBuilder();
         ejbql.append("SELECT DISTINCT p FROM Pkg AS p, PkgVersion AS pv WHERE pv.pkg=p AND ");
-        ejbql.append(whereClause);
+        ejbql.append(prepareWhereClause(parameterAccumulator, context, search));
         ejbql.append(" ORDER BY p.name ASC");
 
         EJBQLQuery query = new EJBQLQuery(ejbql.toString());
