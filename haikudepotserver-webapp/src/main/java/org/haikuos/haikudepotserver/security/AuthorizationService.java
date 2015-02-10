@@ -218,13 +218,13 @@ public class AuthorizationService {
             case USERRATING_DERIVEANDSTOREFORPKG:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
+            case BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT:
             case BULK_PKGICONSPREADSHEETREPORT:
             case BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGICONEXPORTARCHIVE:
                 return null!=authenticatedUser;
 
-            case BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
