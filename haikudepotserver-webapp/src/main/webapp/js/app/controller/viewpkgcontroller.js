@@ -398,6 +398,14 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgProminence($scope.pkg));
             };
 
+            // This is a bit strange; we're cycling through a list of package versions, but
+            // need to make the argument to the function look as if we are only looking at
+            // one version.
+
+            $scope.goViewLocalization = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewPkgVersionLocalization($scope.pkg));
+            };
+
             /**
              * <p>Sends a request off to enqueue that a package should have its derived rating re-calculated
              * and stored.  It will display a little message to indicate that this has happened and the
