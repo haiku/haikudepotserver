@@ -62,6 +62,8 @@
     <div id="pkg-metadata-container">
 
         <dl>
+            <dt><message key="viewPkg.isLatest.title" parameters="[pkg.versions[0].architectureCode]"></message></dt>
+            <dd><boolean-indicator state="!!pkg.versions[0].isLatest"></boolean-indicator></dd>
             <dt ng-show="undefined!=pkg.versions[0].payloadLength"><message key="viewPkg.payloadLength.title"></message></dt>
             <dd ng-show="undefined!=pkg.versions[0].payloadLength">
                 {{pkg.versions[0].payloadLength|dataLength}} <span class="muted">({{pkg.versions[0].payloadLength}} B)</span>
@@ -214,7 +216,10 @@
                     <message key="viewPkg.editScreenshotsAction.title"></message>
                 </a>
             </li>
-            <li pkg="pkg" show-if-pkg-permission="'PKG_EDITVERSIONLOCALIZATION'">
+            <li
+                    ng-show="!!pkg.versions[0].isLatest"
+                    pkg="pkg"
+                    show-if-pkg-permission="'PKG_EDITVERSIONLOCALIZATION'">
                 <a href="" ng-click="goEditVersionLocalization()">
                     <message key="viewPkg.editVersionLocalizationAction.title"></message>
                 </a>

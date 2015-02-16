@@ -116,8 +116,10 @@ public interface PkgApi {
     GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException;
 
     /**
-     * <p>This method will return the package version localizations for the nominated package.  It will only return
-     * the package version localizations for the most recent version on the package.</p>
+     * <p>This method will return the package version localizations for the nominated package.  It will return
+     * data for the latest package version in the architecture nominated in the request.  The architecture is
+     * required.  If a "major" value is supplied in the request then it is assumed that the request is in the
+     * context of a specific package version rather than the latest.</p>
      */
 
     GetPkgVersionLocalizationsResult getPkgVersionLocalizations(GetPkgVersionLocalizationsRequest getPkgVersionLocalizationsRequest) throws ObjectNotFoundException;

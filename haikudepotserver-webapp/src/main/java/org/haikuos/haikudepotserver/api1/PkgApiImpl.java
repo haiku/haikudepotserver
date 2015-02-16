@@ -967,11 +967,26 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.getContext();
         Pkg pkg = getPkg(context, getPkgVersionLocalizationsRequest.pkgName);
         Architecture architecture = getArchitecture(context, getPkgVersionLocalizationsRequest.architectureCode);
+        Optional<PkgVersion> pkgVersionOptional;
 
-        Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
-                context,
-                pkg,
-                Collections.singletonList(architecture));
+        if(null==getPkgVersionLocalizationsRequest.major) {
+            pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                    context,
+                    pkg,
+                    Collections.singletonList(architecture));
+        }
+        else {
+            pkgVersionOptional = PkgVersion.getForPkg(
+                    context,
+                    pkg,
+                    architecture,
+                    new VersionCoordinates(
+                            getPkgVersionLocalizationsRequest.major,
+                            getPkgVersionLocalizationsRequest.minor,
+                            getPkgVersionLocalizationsRequest.micro,
+                            getPkgVersionLocalizationsRequest.preRelease,
+                            getPkgVersionLocalizationsRequest.revision));
+        }
 
         if(!pkgVersionOptional.isPresent()) {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());

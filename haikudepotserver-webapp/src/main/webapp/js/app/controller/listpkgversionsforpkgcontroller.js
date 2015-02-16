@@ -55,13 +55,27 @@ angular.module('haikudepotserver').controller(
 
                         refreshBreadcrumbItems();
                     },
-                    function(err) {
+                    function() {
                         errorHandling.handleJsonRpcError();
                     }
                 );
             }
 
             refetchPkg();
+
+            // --------------------------
+            // ACTIONS
+
+            // This is a bit strange; we're cycling through a list of package versions, but
+            // need to make the argument to the function look as if we are only looking at
+            // one version.
+
+            $scope.goViewLocalization = function(pkgVersion) {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewPkgVersionLocalization({
+                    name : pkgVersion.pkg.name,
+                    versions : [ pkgVersion ]
+                }));
+            };
 
         }
     ]

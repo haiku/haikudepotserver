@@ -11,14 +11,27 @@
         </span>
     </h1>
 
-    <ul>
-        <li ng-repeat="pkgVersion in pkg.versions">
-            <pkg-version-label pkg-version="pkgVersion"></pkg-version-label>
-            <span class="muted" ng-show="pkgVersion.isLatest">
-                (<message key="listPkgVersionsForPkg.latest"></message>)
-            </span>
-        </li>
-    </ul>
+    <table class="table-general">
+        <thead>
+        <th><message key="listPkgVersionsForPkg.table.pkgVersion.title"></message></th>
+        <th></th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="pkgVersion in pkg.versions">
+            <td>
+                <pkg-version-label pkg-version="pkgVersion"></pkg-version-label>
+                <span class="muted" ng-show="pkgVersion.isLatest">
+                    (<message key="listPkgVersionsForPkg.latest" parameters="[pkgVersion.architectureCode]"></message>)
+                </span>
+            </td>
+            <td>
+                <a href="" ng-click="goViewLocalization(pkgVersion)">
+                    <message key="listPkgVersionsForPkg.viewLocalizationAction.title"></message>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
 </div>
 

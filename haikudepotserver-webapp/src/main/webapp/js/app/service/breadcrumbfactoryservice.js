@@ -264,6 +264,10 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return createManipulatePkgBreadcrumbItem(pkg, 'editscreenshots', 'editPkgScreenshots');
                 },
 
+                createViewPkgVersionLocalization : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'viewversionlocalizations', 'viewPkgVersionLocalizations');
+                },
+
                 createEditPkgVersionLocalization : function(pkg) {
                     return createManipulatePkgBreadcrumbItem(pkg, 'editversionlocalizations', 'editPkgVersionLocalizations');
                 },
