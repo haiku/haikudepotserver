@@ -16,6 +16,7 @@ angular.module('haikudepotserver').controller(
 
             var ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
+            $scope.showHelp = false;
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.editPkgIcon = {
@@ -93,6 +94,10 @@ angular.module('haikudepotserver').controller(
             $scope.$watch('editPkgIcon.iconHvifFile', function() {
                 validateHvifIconFile($scope.editPkgIcon.iconHvifFile, $scope.editPkgIconForm['iconHvifFile']);
             });
+
+            $scope.goHelp = function() {
+                $scope.showHelp =true;
+            };
 
             $scope.goClearIconHvifFile = function() {
                 $scope.editPkgIcon.iconHvifFile = undefined;

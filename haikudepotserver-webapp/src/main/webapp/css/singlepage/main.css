@@ -105,7 +105,10 @@ ALERT BOXES FOR USE OUTSIDE OF FORMS
 */
 
 .alert-container {
-    padding: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 16px;
+    padding-right: 16px;
     border: 1px solid red;
     background-color: white;
     color: red;
@@ -114,10 +117,13 @@ ALERT BOXES FOR USE OUTSIDE OF FORMS
 }
 
 .info-container {
-    padding: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 16px;
+    padding-right: 16px;
     border: 1px solid #336698;
     background-color: white;
-    color: black;
+    color: #336698;
     margin-bottom: 4px;
     margin-top: 4px;
 }
@@ -212,7 +218,10 @@ This is used to place a box above the form in order to show some alert text such
     margin-left: 30%;
     margin-top: 16px;
     margin-bottom: 16px;
-    padding: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 16px;
+    padding-right: 16px;
     border: 1px solid red;
     background-color: white;
     color: red;
@@ -223,7 +232,10 @@ This is used to place a box above the form in order to show some alert text such
     margin-left: 30%;
     margin-top: 16px;
     margin-bottom: 16px;
-    padding: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 16px;
+    padding-right: 16px;
     border: 1px solid #336698;
     background-color: white;
     color: #336698;

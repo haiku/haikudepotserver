@@ -2,6 +2,12 @@
 
 <div class="content-container">
 
+    <div
+            ng-show="showHelp"
+            class="form-info-container"
+            passive-content="editpkgiconhelp.html">
+    </div>
+
     <form name="editPkgIconForm" novalidate="novalidate">
 
         <label><message key="gen.pkg.title"></message></label>
@@ -43,6 +49,14 @@
         </div>
 
     </form>
+
+    <ul>
+        <li ng-show="!showHelp">
+            <a href="" ng-click="goHelp()">
+                <message key="gen.help.title"></message>
+            </a>
+        </li>
+    </ul>
 
 </div>
 

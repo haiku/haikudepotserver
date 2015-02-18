@@ -1,0 +1,8 @@
+.reports .table-general > tbody > tr > td:nth-child(1) {
+    width: 40%;
+}
+
+.reports .table-general > tbody > tr > td:nth-child(2) {
+    width: 60%;
+    color: grey;
+}

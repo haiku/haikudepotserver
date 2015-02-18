@@ -4,41 +4,107 @@
     <message key="reporting.didreject.description"></message>
 </div>
 
-<div class="content-container">
+<div class="content-container reports">
 
-    <ul>
-        <li show-if-permission="'BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET'">
-            <a href="" ng-click="goPkgCategoryCoverageExportSpreadsheet()">
-                <message key="reporting.pkgcategorycoverageexportspreadsheet.title"></message>
-            </a>
-        </li>
-        <li show-if-permission="'BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT'">
-            <a href="" ng-click="goPkgProminenceAndUserRatingSpreadsheetReport()">
-                <message key="reporting.pkgprominenceanduserratingspreadsheetreport.title"></message>
-            </a>
-        </li>
-        <li show-if-permission="'BULK_PKGICONSPREADSHEETREPORT'">
-            <a href="" ng-click="goPkgIconSpreadsheetReport()">
-                <message key="reporting.pkgiconspreadsheetreport.title"></message>
-            </a>
-        </li>
-        <li show-if-permission="'BULK_USERRATINGSPREADSHEETREPORT_ALL'">
-            <a href="" ng-click="goUserRatingSpreadsheetReportAll()">
-                <message key="reporting.userratingspreadsheetreportall.title"></message>
-            </a>
-        </li>
-        <li show-if-permission="'BULK_PKGICONEXPORTARCHIVE'">
-            <a href="" ng-click="goPkgIconExportArchive()">
-                <message key="reporting.pkgiconexportarchive.title"></message>
-            </a>
-        </li>
-        <li show-if-permission="'BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET'">
-            <a href="" ng-click="goPkgVersionLocalizationCoverageExportSpreadsheet()">
-                <message key="reporting.pkgversionlocalizationcoverageexportspreadsheet.title"></message>
-            </a>
-        </li>
+    <table class="table-general">
+        <thead>
+        <th><message key="reporting.table.report.title"></message></th>
+        <th><message key="reporting.table.description.title"></message></th>
+        </thead>
+        <tbody>
 
-    </ul>
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET'">
+            <td>
+                <a href="" ng-click="goPkgCategoryCoverageExportSpreadsheet()">
+                    <message key="reporting.pkgcategorycoverageexportspreadsheet.title"></message>
+                </a>
+            </td>
+            <td>
+                <message key="reporting.pkgcategorycoverageexportspreadsheet.description"></message>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT'">
+            <td>
+                <a href="" ng-click="goPkgProminenceAndUserRatingSpreadsheetReport()">
+                    <message key="reporting.pkgprominenceanduserratingspreadsheetreport.title"></message>
+                </a>
+            </td>
+            <td>
+                <message key="reporting.pkgprominenceanduserratingspreadsheetreport.description"></message>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_PKGICONSPREADSHEETREPORT'">
+            <td>
+                <a href="" ng-click="goPkgIconSpreadsheetReport()">
+                    <message key="reporting.pkgiconspreadsheetreport.title"></message>
+                </a>
+            </td>
+            <td>
+                <message key="reporting.pkgiconspreadsheetreport.description"></message>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_PKGICONSPREADSHEETREPORT'">
+            <td>
+                <a href="" ng-click="goPkgIconSpreadsheetReport()">
+                    <message key="reporting.pkgiconspreadsheetreport.title"></message>
+                </a>
+            </td>
+            <td>
+                <message key="reporting.pkgiconspreadsheetreport.description"></message>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_USERRATINGSPREADSHEETREPORT_ALL'">
+            <td>
+                <a href="" ng-click="goUserRatingSpreadsheetReportAll()">
+                    <message key="reporting.userratingspreadsheetreportall.title"></message>
+                </a>
+            </td>
+            <td>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_PKGICONEXPORTARCHIVE'">
+            <td>
+                <a href="" ng-click="goPkgIconExportArchive()">
+                    <message key="reporting.pkgiconexportarchive.title"></message>
+                </a>
+            </td>
+            <td>
+                <message key="reporting.pkgiconexportarchive.description"></message>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET'">
+            <td>
+                <a href="" ng-click="goPkgVersionLocalizationCoverageExportSpreadsheet()">
+                    <message key="reporting.pkgversionlocalizationcoverageexportspreadsheet.title"></message>
+                </a>
+            </td>
+            <td>
+                <message key="reporting.pkgversionlocalizationcoverageexportspreadsheet.description"></message>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
 
 </div>
 <div class="footer"></div>

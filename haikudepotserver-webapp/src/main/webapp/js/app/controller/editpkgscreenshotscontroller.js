@@ -22,6 +22,7 @@ angular.module('haikudepotserver').controller(
             var THUMBNAIL_TARGETWIDTH = 180;
             var THUMBNAIL_TARGETHEIGHT = 180;
 
+            $scope.showHelp = false;
             $scope.pkg = undefined;
             $scope.pkgScreenshots = undefined;
             $scope.amCommunicating = false;
@@ -250,7 +251,11 @@ angular.module('haikudepotserver').controller(
                         storeOrdering();
                         break;
                 }
-            }
+            };
+
+            $scope.goHelp = function() {
+                $scope.showHelp =true;
+            };
 
         }
     ]

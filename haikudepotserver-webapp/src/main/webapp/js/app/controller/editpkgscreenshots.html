@@ -2,6 +2,12 @@
 
 <div class="content-container edit-pkg-screenshots">
 
+    <div
+            ng-show="showHelp"
+            class="info-container"
+            passive-content="editpkgscreenshotshelp.html">
+    </div>
+
     <div class="onelineform-container">
         <form name="addPkgScreenshotForm" novalidate="novalidate">
             <message key="addPkgScreenshot.file.title"></message>
@@ -40,6 +46,14 @@
             <div style="clear: both;"></div>
         </div>
     </div>
+
+    <ul>
+        <li ng-show="!showHelp">
+            <a href="" ng-click="goHelp()">
+                <message key="gen.help.title"></message>
+            </a>
+        </li>
+    </ul>
 
 </div>
 
