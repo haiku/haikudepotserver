@@ -27,12 +27,14 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="migrate" value="${flyway.migrate}"/>
         <property name="schema" value="haikudepot"/>
+        <property name="validateOnMigrate" value="${flyway.validateOnMigrate:true}"/>
     </bean>
 
     <bean class="org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase" init-method="init">
         <property name="dataSource" ref="dataSource"/>
         <property name="migrate" value="${flyway.migrate}"/>
         <property name="schema" value="captcha"/>
+        <property name="validateOnMigrate" value="${flyway.validateOnMigrate:true}"/>
     </bean>
 
     <!--

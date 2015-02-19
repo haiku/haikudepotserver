@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,6 +49,15 @@ public class NaturalLanguageOrchestrationService {
     @Resource
     private ServerRuntime serverRuntime;
 
+    /**
+     * <p>Useful from integration tests in order to clear caches.</p>
+     */
+
+    public void reset() {
+        naturalLanguageCodeHasUserRating = null;
+        naturalLanguageCodeHasPkgVersionLocalization = null;
+    }
+
     private boolean hasLocalizationMessagesPrimative(NaturalLanguage naturalLanguage) {
 
         // see if we can obtain a properties file for this language
@@ -72,11 +81,8 @@ public class NaturalLanguageOrchestrationService {
             Properties properties = new Properties();
             properties.load(inputStream);
 
-            if(0==properties.size()) {
-                return false;
-            }
+            return 0 != properties.size();
 
-            return true;
         }
         catch(IOException ioe) {
             throw new IllegalStateException("unable to check if the natural language "+naturalLanguage.getCode()+" has localization present");

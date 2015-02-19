@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,7 @@ package org.haikuos.haikudepotserver.support.db.migration;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.googlecode.flyway.core.Flyway;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,9 @@ public class ManagedDatabase {
 
     private DataSource dataSource;
 
-    private boolean migrate = false;
+    private Boolean migrate = null;
+
+    private Boolean validateOnMigrate = null;
 
     private String schema;
 
@@ -46,8 +48,12 @@ public class ManagedDatabase {
         this.dataSource = dataSource;
     }
 
-    public void setMigrate(boolean migrate) {
+    public void setMigrate(Boolean migrate) {
         this.migrate = migrate;
+    }
+
+    public void setValidateOnMigrate(Boolean validateOnMigrate) {
+        this.validateOnMigrate = validateOnMigrate;
     }
 
     public void init() {
@@ -55,17 +61,23 @@ public class ManagedDatabase {
     }
 
     public void migrate() {
-        Preconditions.checkNotNull(getDataSource());
-        Preconditions.checkState(!Strings.isNullOrEmpty(getSchema()));
+        if(null==migrate || migrate) {
+            Preconditions.checkNotNull(getDataSource());
+            Preconditions.checkState(!Strings.isNullOrEmpty(getSchema()));
 
-        Flyway flyway = new Flyway();
-        flyway.setSchemas(getSchema());
-        flyway.setLocations(String.format("db/%s/migration",getSchema()));
-        flyway.setDataSource(dataSource);
+            Flyway flyway = new Flyway();
+            flyway.setSchemas(getSchema());
+            flyway.setLocations(String.format("db/%s/migration", getSchema()));
+            flyway.setValidateOnMigrate(null==validateOnMigrate || validateOnMigrate);
+            flyway.setDataSource(dataSource);
 
-        LOGGER.info("will migrate database to latest version...");
-        flyway.migrate();
-        LOGGER.info("did migrate database to latest version...");
+            LOGGER.info("will migrate database to latest version...");
+            flyway.migrate();
+            LOGGER.info("did migrate database to latest version...");
+        }
+        else {
+            LOGGER.warn("migration disabled");
+        }
     }
 
 }

@@ -18,16 +18,16 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring.version>4.0.6.RELEASE</spring.version>
-        <postgresql.version>9.3-1102-jdbc41</postgresql.version>
+        <spring.version>4.1.4.RELEASE</spring.version>
+        <postgresql.version>9.4-1200-jdbc41</postgresql.version>
 
-        <web-angularjs.versionbase>1.3.4</web-angularjs.versionbase>
+        <web-angularjs.versionbase>1.3.13</web-angularjs.versionbase>
         <web-angularjs.versionextension />
 
-        <web-underscorejs.versionbase>1.6.0</web-underscorejs.versionbase>
-        <web-underscorejs.versionextension>-3</web-underscorejs.versionextension>
+        <web-underscorejs.versionbase>1.7.0</web-underscorejs.versionbase>
+        <web-underscorejs.versionextension>-1</web-underscorejs.versionextension>
 
-        <web-momentjs.versionbase>2.7.0</web-momentjs.versionbase>
+        <web-momentjs.versionbase>2.9.0</web-momentjs.versionbase>
         <web-momentjs.versionextension />
 
         <nimbus-jose-jwt.version>2.26</nimbus-jose-jwt.version>
@@ -137,9 +137,9 @@
 
             
             <dependency>
-                <groupId>com.googlecode.flyway</groupId>
+                <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>2.3.1</version> 
+                <version>3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cayenne</groupId>
@@ -156,7 +156,7 @@
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-jdbc</artifactId>
-                <version>7.0.54</version>
+                <version>7.0.59</version>
             </dependency>
 
             
@@ -199,7 +199,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.8.2</version>
+                <version>4.12</version>
             </dependency>
             <dependency>
                 <groupId>org.easytesting</groupId>

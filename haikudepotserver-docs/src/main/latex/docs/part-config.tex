@@ -70,6 +70,10 @@ Database user's username and password
 
 Set this to {\tt true} if you would like database schema migrations to be applied automatically as necessary.  Generally this should be configured to {\tt true}.
 
+\subsubsection{\tt flyway.validateOnMigrate}
+
+Set this to {\tt false} if you want the system to validate schema migrations.  This can be helpful at development time when the schema is in flux, but should be {\tt true} in production.
+
 \subsection{Web-Related}
 
 \subsubsection{\tt jawr.debug.on}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthenticationHelper;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase;
@@ -65,6 +66,9 @@ public abstract class AbstractIntegrationTest {
 
     @Resource
     protected CapturingMailSender mailSender;
+
+    @Resource
+    protected NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
 
     protected void assertEqualsLineByLine(BufferedReader expected, BufferedReader actual) throws IOException {
             String expectedLine;
@@ -132,6 +136,11 @@ public abstract class AbstractIntegrationTest {
     public void beforeEachTest() {
 
         LOGGER.info("will prepare for the next test");
+
+        // the natural language caches may be full of data from a prior test.
+
+        naturalLanguageOrchestrationService.reset();
+        LOGGER.info("prep; have cleared out natural language caches");
 
         // reset the apache cayenne cache before we go behind its back and
         // clear out the database for the next test.

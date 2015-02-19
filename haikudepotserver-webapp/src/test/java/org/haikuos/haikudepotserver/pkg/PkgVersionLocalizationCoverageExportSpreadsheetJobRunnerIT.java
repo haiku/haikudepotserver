@@ -9,7 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
-import junit.framework.Assert;
+import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
@@ -48,7 +48,7 @@ public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends 
 
         jobOrchestrationService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
-        Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         String dataGuid = Iterables.getOnlyElement(snapshotOptional.get().getGeneratedDataGuids());
         JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();

@@ -92,8 +92,13 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
         assert null!=specification;
 
         final ObjectContext context = serverRuntime.getContext();
+
         final List<NaturalLanguage> naturalLanguages = getNaturalLanguages(context);
         final List<Architecture> architectures = Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE));
+
+        if(naturalLanguages.isEmpty()) {
+            throw new RuntimeException("there appear to be no natural languages in the system");
+        }
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(

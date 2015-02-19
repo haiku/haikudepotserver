@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,7 +39,7 @@ angular.module('haikudepotserver').controller(
                         name : $routeParams.name,
                         versionType : 'ALL',
                         incrementViewCounter : false,
-                        naturalLanguageCode: userState.naturalLanguageCode(),
+                        naturalLanguageCode: userState.naturalLanguageCode()
                     }]
                 ).then(
                     function(result) {
@@ -50,8 +50,8 @@ angular.module('haikudepotserver').controller(
                         // directive.
 
                         $scope.pkg.versions = _.map($scope.pkg.versions,function(v) {
-                            return _.extend(v,{ pkg : { name : $scope.pkg.name }});
-                        });
+                                return _.extend(v,{ pkg : { name : $scope.pkg.name }});
+                            });
 
                         refreshBreadcrumbItems();
                     },

@@ -436,10 +436,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 Collections.sort(allVersions, new Comparator<PkgVersion>() {
                     @Override
                     public int compare(PkgVersion o1, PkgVersion o2) {
-                        int result = vcc.compare(o1.toVersionCoordinates(),o2.toVersionCoordinates());
+                        int result = o1.getArchitecture().getCode().compareTo(o2.getArchitecture().getCode());
 
                         if(0==result) {
-                            result = o1.getArchitecture().getCode().compareTo(o2.getArchitecture().getCode());
+                            result = vcc.compare(o1.toVersionCoordinates(),o2.toVersionCoordinates());
                         }
 
                         return result;
