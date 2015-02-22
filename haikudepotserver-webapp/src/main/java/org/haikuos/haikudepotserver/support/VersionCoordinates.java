@@ -90,24 +90,40 @@ public class VersionCoordinates {
         return result;
     }
 
-    private void appendDotValue(StringBuilder stringBuilder, String value) {
-        if(0!=stringBuilder.length()) {
-            stringBuilder.append('.');
-        }
-
-        if(null!=value) {
-            stringBuilder.append(value);
-        }
-    }
+    // log here correlates with the "PackageVersion.cpp" file in the Haiku source
+    // code.
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        appendDotValue(result,getMajor());
-        appendDotValue(result,getMinor());
-        appendDotValue(result,getMicro());
-        appendDotValue(result, getPreRelease());
-        appendDotValue(result, null == getRevision() ? null : getRevision().toString());
+
+        if(null!=getMajor()) {
+            result.append(getMajor());
+        }
+        else {
+            result.append('!'); // major is required so need to point this out.
+        }
+
+        if(!Strings.isNullOrEmpty(getMinor())) {
+            result.append('.');
+            result.append(getMinor());
+
+            if(!Strings.isNullOrEmpty(getMicro())) {
+                result.append('.');
+                result.append(getMicro());
+            }
+        }
+
+        if(!Strings.isNullOrEmpty(getPreRelease())) {
+            result.append('~');
+            result.append(getPreRelease());
+        }
+
+        if(null!=getRevision() && getRevision() > 0) {
+            result.append('-');
+            result.append(getRevision().toString());
+        }
+
         return result.toString();
     }
 

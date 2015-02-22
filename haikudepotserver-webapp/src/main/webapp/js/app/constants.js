@@ -189,18 +189,33 @@ angular.module('haikudepotserver')
         },
 
         /**
-         * <p>This function will return a string that represents the version number in a string form.</p>
+         * <p>This function will return a string that represents the version number in a string form.  The
+         * logic for this should be the same as the logic in the C/C++ code in "PackageVersion.cpp".</p>
          */
 
         pkgVersionElementsToString: function(pkgVersion) {
-            var parts = [
-                pkgVersion.major,
-                pkgVersion.minor ? pkgVersion.minor : '',
-                pkgVersion.micro ? pkgVersion.micro : '',
-                pkgVersion.preRelease ? pkgVersion.preRelease : '',
-                pkgVersion.revision ? pkgVersion.revision : ''
-            ];
+            var result = '' + pkgVersion.major;
 
-            return parts.join('.');
+            if(pkgVersion.minor && '' != pkgVersion.minor) {
+                result += '.';
+                result += pkgVersion.minor;
+
+                if(pkgVersion.micro && '' != pkgVersion.micro) {
+                    result += '.';
+                    result += pkgVersion.micro;
+                }
+            }
+
+            if(pkgVersion.preRelease && '' != pkgVersion.preRelease) {
+                result += '~';
+                result += pkgVersion.preRelease
+            }
+
+            if(pkgVersion.revision && pkgVersion.revision > 0) {
+                result += '-';
+                result += pkgVersion.revision
+            }
+
+            return result;
         }
     });
