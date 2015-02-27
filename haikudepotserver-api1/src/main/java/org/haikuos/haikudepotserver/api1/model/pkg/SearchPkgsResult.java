@@ -12,7 +12,16 @@ import java.util.List;
 public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg> {
 
     public static class Pkg {
+
         public String name;
+
+        /**
+         * <p>This value is localized.</p>
+         * @since 2015-02-26
+         */
+
+        public String title;
+
         public Long modifyTimestamp;
 
         /**

@@ -14,7 +14,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import com.googlecode.jsonrpc4j.Base64;
-import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
@@ -29,6 +28,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -157,6 +157,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.total).isEqualTo(1);
         Assertions.assertThat(result.items.size()).isEqualTo(1);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
+        Assertions.assertThat(result.items.get(0).title).isEqualTo("Ping 1");
         Assertions.assertThat(result.items.get(0).versions.get(0).summary).isEqualTo("pkg1Version2SummarySpanish_feijoa");
     }
 
@@ -235,6 +236,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.name).isEqualTo("pkg1");
+        Assertions.assertThat(result.title).isEqualTo("Package 1");
         Assertions.assertThat(result.versions.size()).isEqualTo(1);
         Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
         Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");
@@ -291,7 +293,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
             pkgApi.getPkg(request);
             // ------------------------------------
 
-            Assert.fail("expected an instance of "+ObjectNotFoundException.class.getSimpleName()+" to be thrown, but was not");
+            Assert.fail("expected an instance of " + ObjectNotFoundException.class.getSimpleName() + " to be thrown, but was not");
         }
         catch(ObjectNotFoundException onfe) {
             Assertions.assertThat(onfe.getEntityName()).isEqualTo(Pkg.class.getSimpleName());
@@ -793,6 +795,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         }).get();
 
         Assertions.assertThat(pkg1.name).isEqualTo("pkg1");
+        Assertions.assertThat(pkg1.title).isEqualTo("Package 1");
         Assertions.assertThat(pkg1.modifyTimestamp).isNotNull();
 
         Assertions.assertThat(pkg1.pkgCategoryCodes.size()).isEqualTo(1);

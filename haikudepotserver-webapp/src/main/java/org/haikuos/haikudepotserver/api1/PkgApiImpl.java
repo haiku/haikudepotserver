@@ -24,6 +24,7 @@ import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.dataobjects.PkgLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
@@ -235,6 +236,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultPkg.derivedRating = input.getPkg().getDerivedRating();
                         resultPkg.hasAnyPkgIcons = !input.getPkg().getPkgIcons().isEmpty();
 
+                        Optional<PkgLocalization> pkgLocalizationOptional = input.getPkg().getPkgLocalization(request.naturalLanguageCode);
+
+                        if(!pkgLocalizationOptional.isPresent()) {
+                            pkgLocalizationOptional = input.getPkg().getPkgLocalization(NaturalLanguage.CODE_ENGLISH);
+                        }
+
+                        resultPkg.title = pkgLocalizationOptional.isPresent() ? pkgLocalizationOptional.get().getTitle() : null;
+
                         SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
                         resultVersion.major = input.getMajor();
                         resultVersion.minor = input.getMinor();
@@ -404,6 +413,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 return input.getPkgCategory().getCode();
             }
         });
+
+        Optional<PkgLocalization> pkgLocalizationOptional = pkg.getPkgLocalization(request.naturalLanguageCode);
+
+        if(!pkgLocalizationOptional.isPresent()) {
+            pkgLocalizationOptional = pkg.getPkgLocalization(NaturalLanguage.CODE_ENGLISH);
+        }
+
+        result.title = pkgLocalizationOptional.isPresent() ? pkgLocalizationOptional.get().getTitle() : null;
 
         switch(request.versionType) {
 
@@ -1071,6 +1088,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
 
             prefetchTreeNode.addPath(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY);
+            prefetchTreeNode.addPath(PkgVersion.PKG_PROPERTY + "." + Pkg.PKG_LOCALIZATIONS_PROPERTY);
 
             for(GetBulkPkgRequest.Filter filter : getBulkPkgRequest.filter) {
                 switch(filter) {
@@ -1115,6 +1133,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                             resultPkg.name = input.getPkg().getName();
                             resultPkg.prominenceOrdering = input.getPkg().getProminence().getOrdering();
                             resultPkg.derivedRating = input.getPkg().getDerivedRating();
+
+                            Optional<PkgLocalization> pkgLocalizationOptional = input.getPkg().getPkgLocalization(getBulkPkgRequest.naturalLanguageCode);
+
+                            if(!pkgLocalizationOptional.isPresent()) {
+                                pkgLocalizationOptional = input.getPkg().getPkgLocalization(NaturalLanguage.CODE_ENGLISH);
+                            }
+
+                            resultPkg.title = pkgLocalizationOptional.isPresent() ? pkgLocalizationOptional.get().getTitle() : null;
 
                             if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
                                 resultPkg.pkgIcons = Lists.transform(

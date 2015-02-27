@@ -1,24 +1,24 @@
-#natural-translations-add-language-container {
+#natural-language-translations-add-language-container {
     margin-top: 16px;
     padding-top: 4px;
 }
 
-#natural-translations-add-language-container > select {
+#natural-language-translations-add-language-container > select {
     width: 140px;
 }
 
-#natural-translations-add-language-container > * {
+#natural-language-translations-add-language-container > * {
     margin-top: 4px;
 }
 
-#edit-pkg-version-localization-container {
+#edit-localization-container {
     position: relative;
     border : 1px solid black;
     border-collapse: collapse;
     width: 100%
 }
 
-#edit-pkg-version-localization-container td {
+#edit-localization-container td {
     padding-left: 20px;
     padding-right: 20px;
     padding-bottom: 20px;
@@ -26,22 +26,22 @@
     vertical-align: top;
 }
 
-#edit-pkg-version-localization-container > tr > td {
+#edit-localization-container > tr > td {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
 }
 
-#natural-translations-cell {
-    width: 16%;
+#natural-language-translations-cell {
+    width: 20%;
     border-right : 1px dotted lightgray;
     border-left: 1px solid black;
 }
 
-#natural-translations-cell div {
+#natural-language-translations-cell div {
     padding: 4px;
 }
 
-#natural-translations-cell .selected-translation {
+#natural-language-translations-cell .selected-translation {
     font-weight: bold;
 }
 
@@ -65,6 +65,10 @@
     height: 200px;
 }
 
+#translation-cell-title {
+    width: 100%;
+}
+
 #english-original-cell h1 {
     text-align: right;
     margin-top: 2px;
@@ -83,7 +87,7 @@
     margin-bottom:8px;
 }
 
-#edit-pkg-version-localization-actions-container {
+#edit-localization-actions-container {
     margin-top: 16px;
-    margin-left: 16%
+    margin-left: 20%
 }

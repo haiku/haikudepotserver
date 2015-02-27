@@ -1,17 +1,20 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 /**
- * <p>This controller allows the user to be able to provide translations for the package version.
+ * <p>This controller allows the user to be able to provide translations for the package.
  * The scope contains a number of 'translations' that couple the natural language together with
  * the data that has been translated.  Only translations for some languages will be shown; those
  * with existing data to start with.</p>
+ *
+ * <p>Note that this controller manages the translations on the package rather than the package
+ * version.</p>
  */
 
 angular.module('haikudepotserver').controller(
-    'EditPkgVersionLocalizationController',
+    'EditPkgLocalizationController',
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
@@ -21,19 +24,14 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,userState,referenceData,pkg,messageSource) {
 
-            var ARCHITECTUREAPPLICABILITY_ALL = '__all';
-
             $scope.showHelp = false;
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.translations = undefined;
-            $scope.architectureCode = $routeParams.architectureCode;
-            $scope.selectedArchitectureApplicability = ARCHITECTUREAPPLICABILITY_ALL;
             $scope.originalTranslations = undefined;
             $scope.selectedTranslation = undefined;
             $scope.addableNaturalLanguages = undefined;
             $scope.selectedAddableNaturalLanguage = undefined;
-            $scope.editPkgVersionLocalizations = { };
 
             $scope.shouldSpin = function() {
                 return undefined == $scope.pkg || $scope.amSaving || undefined == $scope.translations;
@@ -59,41 +57,18 @@ angular.module('haikudepotserver').controller(
             }
 
             /**
-             * <p>The only requirement for a translation to be valid is that if the description and the summary
-             * are either present or not present.  It is not possible to have a summary and not a description
-             * and vica-versa.</p>
-             */
-
-            $scope.isTranslationValid = function(translation) {
-                if(translation) {
-                    var hasSummary = translation.summary && translation.summary.length;
-                    var hasDescription = translation.description && translation.description.length;
-                    return !!hasDescription == !!hasSummary;
-                }
-
-                return true;
-            };
-
-            /**
              * <p>This colours the text of the language to indicate if the translation is missing, invalid or
              * has been supplied successfully.</p>
              */
 
             $scope.classesForTranslation = function(translation) {
                 var classes = [];
-                var hasSummary = translation.summary && translation.summary.length;
-                var hasDescription = translation.description && translation.description.length;
 
-                if(hasDescription && hasSummary) {
-                    classes.push('text-success');
+                if (translation.title && translation.title.length) {
+                   classes.push('text-success');
                 }
                 else {
-                    if(hasDescription != hasSummary) {
-                        classes.push('text-error');
-                    }
-                    else {
-                        classes.push('text-warning');
-                    }
+                    classes.push('text-warning');
                 }
 
                 if($scope.isTranslationSelected(translation)) {
@@ -101,6 +76,10 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return classes;
+            };
+
+            $scope.goShowHelp = function() {
+                $scope.showHelp = true;
             };
 
             $scope.goChooseTranslation = function(translation) {
@@ -111,10 +90,6 @@ angular.module('haikudepotserver').controller(
                 $scope.selectedTranslation = translation;
             };
 
-            $scope.goShowHelp = function() {
-                $scope.showHelp = true;
-            };
-
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.editPkgIconForm[name].$invalid ? ['form-control-group-error'] : [];
             };
@@ -123,7 +98,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbFactory.createHome(),
                     breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg($scope.pkg),
-                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditPkgVersionLocalization($scope.pkg))
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditPkgLocalization($scope.pkg))
                 ]);
             }
 
@@ -152,7 +127,7 @@ angular.module('haikudepotserver').controller(
 
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_PKG,
-                            'getPkgVersionLocalizations',
+                            'getPkgLocalizations',
                             [{
                                 pkgName: $routeParams.name,
                                 naturalLanguageCodes : _.map(
@@ -160,47 +135,37 @@ angular.module('haikudepotserver').controller(
                                     function(d) {
                                         return d.code;
                                     }
-                                ),
-                                architectureCode : $routeParams.architectureCode
+                                )
                             }]
                         )
                             .then(
-                            function(pkgVersionLocalizationsData) {
+                            function(pkgLocalizationsData) {
 
                                 // now merge the data about the various natural languages together with the data about
                                 // the packages existing localizations and we should have enough working data to setup
                                 // an internal data model.
 
                                 $scope.translations = _.filter(
-                                    // marry the natural language with the existing localized data.
-
                                     _.map(
-                                        naturalLanguageData,
-                                        function (d) {
+                                    naturalLanguageData,
+                                    function (d) {
 
-                                            var pkgVersionLocalizationData = _.findWhere(
-                                                pkgVersionLocalizationsData.pkgVersionLocalizations,
-                                                { naturalLanguageCode: d.code }
-                                            );
+                                        var pkgLocalizationData = _.findWhere(
+                                            pkgLocalizationsData.pkgLocalizations,
+                                            { naturalLanguageCode: d.code }
+                                        );
 
-                                            return {
-                                                naturalLanguage: d,
-                                                summary: pkgVersionLocalizationData ? pkgVersionLocalizationData.summary : '',
-                                                description: pkgVersionLocalizationData ? pkgVersionLocalizationData.description : '',
-                                                wasEdited: false
-                                            };
-                                        }
-                                    ),
-                                    function (translation) {
-
-                                        // don't include English as a localization target because the English language will
-                                        // have been included in the hpkg data from the repository.
-
-                                        return translation.naturalLanguage.code != constants.NATURALLANGUAGECODE_ENGLISH &&
-                                            ( translation.naturalLanguage.hasData ||
-                                                translation.naturalLanguage.hasLocalizationMessages ||
-                                                (translation.summary && translation.summary.length) ||
-                                                (translation.description && translation.description.length) );
+                                        return {
+                                            naturalLanguage: d,
+                                            title: pkgLocalizationData ? pkgLocalizationData.title : '',
+                                            wasEdited: false
+                                        };
+                                    }
+                                ),
+                                    function(translation) {
+                                        return translation.naturalLanguage.hasData ||
+                                            translation.naturalLanguage.hasLocalizationMessages ||
+                                            (translation.title && translation.title.length);
                                     }
                                 );
 
@@ -216,11 +181,11 @@ angular.module('haikudepotserver').controller(
                                     naturalLanguageData,
                                     function (d) {
                                         return d.code != constants.NATURALLANGUAGECODE_ENGLISH && !_.find(
-                                            $scope.translations,
-                                            function (t) {
-                                                return d.code == t.naturalLanguage.code;
-                                            }
-                                        );
+                                                $scope.translations,
+                                                function (t) {
+                                                    return d.code == t.naturalLanguage.code;
+                                                }
+                                            );
                                     }
                                 );
 
@@ -269,8 +234,7 @@ angular.module('haikudepotserver').controller(
 
                 var translation = {
                     naturalLanguage: $scope.selectedAddableNaturalLanguage,
-                    summary: '',
-                    description: '',
+                    title: '',
                     wasEdited: false
                 };
 
@@ -296,14 +260,8 @@ angular.module('haikudepotserver').controller(
 
             $scope.canSave = function() {
                 return !!_.findWhere(
-                    $scope.translations,
-                    { wasEdited : true }
-                ) &&
-                    !_.find(
                         $scope.translations,
-                        function(t) {
-                            return !$scope.isTranslationValid(t);
-                        }
+                        { wasEdited : true }
                     );
             };
 
@@ -321,12 +279,10 @@ angular.module('haikudepotserver').controller(
 
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_PKG,
-                    'updatePkgVersionLocalization',
+                    'updatePkgLocalization',
                     [{
                         pkgName: $routeParams.name,
-                        architectureCode: $routeParams.architectureCode,
-                        replicateToOtherArchitecturesWithSameEnglishContent: $scope.selectedArchitectureApplicability == ARCHITECTUREAPPLICABILITY_ALL,
-                        pkgVersionLocalizations: _.map(
+                        pkgLocalizations: _.map(
                             _.filter(
                                 $scope.translations,
                                 function(t) { return t.wasEdited; }
@@ -334,8 +290,7 @@ angular.module('haikudepotserver').controller(
                             function(t) {
                                 return {
                                     naturalLanguageCode : t.naturalLanguage.code,
-                                    summary : t.summary,
-                                    description : t.description
+                                    title : t.title
                                 };
                             }
                         )
@@ -369,13 +324,12 @@ angular.module('haikudepotserver').controller(
                 function(newValue, oldValue) {
                     if(null!=oldValue) {
                         if(oldValue.naturalLanguage.code == newValue.naturalLanguage.code &&
-                            (oldValue.summary != newValue.summary || oldValue.description != newValue.description) ) {
+                            oldValue.title != newValue.title) {
 
                             // quick check to see if the new values equal the original values.
 
                             var originalTranslation = findOriginalTranslation(newValue.naturalLanguage.code);
-                            $scope.selectedTranslation.wasEdited = (originalTranslation.summary != newValue.summary) ||
-                                (originalTranslation.description != newValue.description);
+                            $scope.selectedTranslation.wasEdited = (originalTranslation.title != newValue.title);
                         }
                     }
                 },

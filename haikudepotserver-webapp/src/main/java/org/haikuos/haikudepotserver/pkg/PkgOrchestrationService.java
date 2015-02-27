@@ -198,6 +198,82 @@ public class PkgOrchestrationService {
 
             }
 
+            // ----------
+
+            // [apl 27.feb.2015] search in the package title as well; dropping back to english if necessary.
+
+            expressionWhereAssembly.append(" OR ");
+
+            // specified natural language localized title
+
+            {
+                expressionWhereAssembly.append("EXISTS(SELECT pl1 FROM ");
+                expressionWhereAssembly.append(PkgLocalization.class.getSimpleName());
+                expressionWhereAssembly.append(" pl1 WHERE pl1." + PkgLocalization.PKG_PROPERTY + " = pv.pkg");
+                parameterAccumulator.add(search.getNaturalLanguage());
+                expressionWhereAssembly.append(" AND pl1." + PkgVersionLocalization.NATURAL_LANGUAGE_PROPERTY + " = ?" + parameterAccumulator.size());
+
+                switch (search.getExpressionType()) {
+
+                    case CONTAINS:
+                        parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
+                        expressionWhereAssembly.append(" AND LOWER(pl1." + PkgLocalization.TITLE_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
+                        break;
+
+                    default:
+                        throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
+
+                }
+                expressionWhereAssembly.append(")");
+            }
+
+            if(!search.getNaturalLanguage().getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
+                expressionWhereAssembly.append(" OR ");
+
+                // fallback english localized description if necessary
+
+                {
+                    expressionWhereAssembly.append("(");
+
+                    {
+                        expressionWhereAssembly.append("NOT EXISTS(SELECT pl2 FROM ");
+                        expressionWhereAssembly.append(PkgLocalization.class.getSimpleName());
+                        expressionWhereAssembly.append(" pl2 WHERE pl2." + PkgLocalization.PKG_PROPERTY + " = pv.pkg");
+                        parameterAccumulator.add(search.getNaturalLanguage());
+                        expressionWhereAssembly.append(" AND pl2." + PkgLocalization.NATURAL_LANGUAGE_PROPERTY + " = ?" + parameterAccumulator.size());
+                        expressionWhereAssembly.append(")");
+                    }
+
+                    expressionWhereAssembly.append(" AND ");
+
+                    {
+                        expressionWhereAssembly.append("EXISTS(SELECT pl3 FROM ");
+                        expressionWhereAssembly.append(PkgLocalization.class.getSimpleName());
+                        expressionWhereAssembly.append(" pl3 WHERE pl3." + PkgLocalization.PKG_PROPERTY + " = pv.pkg");
+                        parameterAccumulator.add(NaturalLanguage.CODE_ENGLISH);
+                        expressionWhereAssembly.append(" AND pl3." + PkgLocalization.NATURAL_LANGUAGE_PROPERTY + "." + NaturalLanguage.CODE_PROPERTY + " = ?" + parameterAccumulator.size());
+
+                        switch (search.getExpressionType()) {
+
+                            case CONTAINS:
+                                parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
+                                expressionWhereAssembly.append(" AND LOWER(pl3." + PkgLocalization.TITLE_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
+                                break;
+
+                            default:
+                                throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
+
+                        }
+                        expressionWhereAssembly.append(")");
+                    }
+
+                    expressionWhereAssembly.append(")");
+
+                }
+            }
+
+            // ----------
+
             // [apl 29.jun.2014] search in the package version descriptions as well.  In this case, try to find the
             // latest package version on the package.  If this has a localization for the supplied natural language
             // then search in that; otherwise drop back to english.
@@ -272,6 +348,9 @@ public class PkgOrchestrationService {
             }
 
             expressionWhereAssembly.append(")");
+
+            // ----------
+
             whereExpressions.add(expressionWhereAssembly.toString());
         }
 

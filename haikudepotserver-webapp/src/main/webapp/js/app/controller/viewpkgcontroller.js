@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -79,7 +79,7 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbFactory.createHome(),
-                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createViewPkgWithSpecificVersionFromRouteParams($routeParams))
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg($scope.pkg))
                 ]);
             }
 
@@ -384,6 +384,10 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEditScreenshots = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgScreenshots($scope.pkg));
+            };
+
+            $scope.goEditLocalization = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgLocalization($scope.pkg));
             };
 
             $scope.goEditVersionLocalization = function() {

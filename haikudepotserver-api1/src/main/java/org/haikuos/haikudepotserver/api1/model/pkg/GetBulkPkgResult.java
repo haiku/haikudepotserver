@@ -16,6 +16,13 @@ public class GetBulkPkgResult {
         public String name;
 
         /**
+         * <p>This value is localized</p>
+         * @since 2015-02-26
+         */
+
+        public String title;
+
+        /**
          * <p>This is the timestamp (millis since epoc) at which the package was last edited.  This is helpful for
          * situations where it is necessary to create a url that will cause the browser to refresh the data.</p>
          */

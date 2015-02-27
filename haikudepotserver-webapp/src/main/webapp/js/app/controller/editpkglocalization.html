@@ -5,10 +5,10 @@
     <div
             ng-show="showHelp"
             class="info-container"
-            passive-content="editpkgversionlocalizationhelp.html">
+            passive-content="editpkglocalizationhelp.html">
     </div>
 
-    <form name="editPkgVersionLocalizationForm" novalidate="novalidate">
+    <form name="editPkgLocalizationForm" novalidate="novalidate">
 
         <table id="edit-localization-container">
             <tr>
@@ -39,45 +39,24 @@
                 </td>
                 <td id="translation-cell">
 
-                    <div ng-show="!isTranslationValid(selectedTranslation)" class="alert-container">
-                        <message key="editPkgVersionLocalization.summaryAndDescription.required"></message>
-                    </div>
+                    <h2><message key="editPkgLocalization.title.title"></message></h2>
+                    <input
+                            type="text"
+                            ng-model="selectedTranslation.title"
+                            id="translation-cell-title"></textarea>
 
-                    <h2><message key="editPkgVersionLocalization.summary.title"></message></h2>
-                    <textarea ng-model="selectedTranslation.summary" id="translation-cell-summary"></textarea>
-
-                    <h2><message key="editPkgVersionLocalization.description.title"></message></h2>
-                    <textarea ng-model="selectedTranslation.description" id="translation-cell-description"></textarea>
-
-                </td>
-                <td id="english-original-cell">
-                    <h1><message key="editPkgVersionLocalization.englishOriginal.title"></message></h1>
-                    <h2><message key="editPkgVersionLocalization.summary.title"></message></h2>
-                    <p>{{pkg.versions[0].summary}}</p>
-                    <h2><message key="editPkgVersionLocalization.description.title"></message></h2>
-                    <p><plain-text-content value="pkg.versions[0].description"></plain-text-content></p>
                 </td>
             </tr>
         </table>
 
         <div id="edit-localization-actions-container">
-            <p>
-                <em>Effects:</em>
-                &nbsp;&nbsp;
-                <input type="radio" name="selectedArchitectureApplicability" value="{{architectureCode}}" ng-model="selectedArchitectureApplicability">
-                <message key="editPkgVersionLocalization.selectedArchitectureApplicability.singleArchitecture.title" parameters="[architectureCode]"></message>
-                &nbsp;&nbsp;
-                <input type="radio" name="selectedArchitectureApplicability" value="__all" ng-model="selectedArchitectureApplicability">
-                <message key="editPkgVersionLocalization.selectedArchitectureApplicability.allArchitectures.title" parameters="[pkg.name]"></message>
-            </p>
-
             <div>
                 <button
                         ng-disabled="!canSave()"
                         ng-click="saveEditedLocalizations()"
                         type="submit"
                         class="main-action">
-                    <message key="editPkgVersionLocalization.action.title"></message>
+                    <message key="editPkgLocalization.action.title"></message>
                 </button>
             </div>
         </div>

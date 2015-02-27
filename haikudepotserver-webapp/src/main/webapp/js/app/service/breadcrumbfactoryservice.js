@@ -49,10 +49,10 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
              * based on the details provided.</p>
              */
 
-            function createViewPkgBreadcrumbItem(pkgName,versionCoordinates,architectureCode) {
+            function createViewPkgBreadcrumbItem(pkgName,pkgTitle,versionCoordinates,architectureCode) {
                 return applyDefaults({
                     titleKey : 'breadcrumb.viewPkg.title',
-                    titleParameters : [ pkgName ],
+                    titleParameters : [ pkgTitle||pkgName ],
                     path : generateBaseUrlForPkg(pkgName,versionCoordinates,architectureCode)
                 });
             }
@@ -272,6 +272,10 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return createManipulatePkgBreadcrumbItem(pkg, 'editversionlocalizations', 'editPkgVersionLocalizations');
                 },
 
+                createEditPkgLocalization : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'editlocalizations', 'editPkgLocalizations');
+                },
+
                 createAddUserRating : function(pkg) {
                     return createManipulatePkgBreadcrumbItem(pkg, 'adduserrating', 'addUserRating');
                 },
@@ -324,6 +328,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                     return createViewPkgBreadcrumbItem(
                         pkgVersion.pkg.name,
+                        pkgVersion.pkg.title,
                         pkgVersion,
                         pkgVersion.architectureCode);
                 },
@@ -343,26 +348,9 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                     return createViewPkgBreadcrumbItem(
                         pkg.name,
+                        pkg.title,
                         pkgVersion,
                         pkgVersion.architectureCode);
-                },
-
-                createViewPkgWithSpecificVersionFromRouteParams : function(routeParams) {
-
-                    if(!routeParams||!routeParams.major) {
-                        throw Error('route params are expected');
-                    }
-
-                    return createViewPkgBreadcrumbItem(
-                        routeParams.name,
-                        {
-                            major : routeParams.major,
-                            minor : routeParams.minor,
-                            micro : routeParams.micro,
-                            preRelease : routeParams.preRelease,
-                            revision : routeParams.revision
-                        },
-                        routeParams.architectureCode);
                 },
 
                 createViewUser : function(user) {
