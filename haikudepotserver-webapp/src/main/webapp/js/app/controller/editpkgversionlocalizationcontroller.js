@@ -27,6 +27,7 @@ angular.module('haikudepotserver').controller(
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.translations = undefined;
+            $scope.englishTranslation = undefined;
             $scope.architectureCode = $routeParams.architectureCode;
             $scope.selectedArchitectureApplicability = ARCHITECTUREAPPLICABILITY_ALL;
             $scope.originalTranslations = undefined;
@@ -171,26 +172,36 @@ angular.module('haikudepotserver').controller(
                                 // the packages existing localizations and we should have enough working data to setup
                                 // an internal data model.
 
+                                $scope.translations = _.map(
+                                    naturalLanguageData,
+                                    function (d) {
+
+                                        var pkgVersionLocalizationData = _.findWhere(
+                                            pkgVersionLocalizationsData.pkgVersionLocalizations,
+                                            { naturalLanguageCode: d.code }
+                                        );
+
+                                        return {
+                                            naturalLanguage: d,
+                                            summary: pkgVersionLocalizationData ? pkgVersionLocalizationData.summary : '',
+                                            description: pkgVersionLocalizationData ? pkgVersionLocalizationData.description : '',
+                                            wasEdited: false
+                                        };
+                                    }
+                                );
+
+                                // find the english language translation in order that it can be displayed as
+                                // the 'original'.
+
+                                $scope.englishTranslation = _.find(
+                                    $scope.translations,
+                                    function(t) {
+                                        return t.naturalLanguage.code == 'en';
+                                    }
+                                );
+
                                 $scope.translations = _.filter(
-                                    // marry the natural language with the existing localized data.
-
-                                    _.map(
-                                        naturalLanguageData,
-                                        function (d) {
-
-                                            var pkgVersionLocalizationData = _.findWhere(
-                                                pkgVersionLocalizationsData.pkgVersionLocalizations,
-                                                { naturalLanguageCode: d.code }
-                                            );
-
-                                            return {
-                                                naturalLanguage: d,
-                                                summary: pkgVersionLocalizationData ? pkgVersionLocalizationData.summary : '',
-                                                description: pkgVersionLocalizationData ? pkgVersionLocalizationData.description : '',
-                                                wasEdited: false
-                                            };
-                                        }
-                                    ),
+                                    $scope.translations,
                                     function (translation) {
 
                                         // don't include English as a localization target because the English language will
