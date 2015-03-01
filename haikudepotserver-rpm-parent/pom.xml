@@ -5,7 +5,7 @@
         <artifactId>haikudepotserver-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
-        <version>1.0.24-SNAPSHOT</version>
+        <version>1.0.24</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
