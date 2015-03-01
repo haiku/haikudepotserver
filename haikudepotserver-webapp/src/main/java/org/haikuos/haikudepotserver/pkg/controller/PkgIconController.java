@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,8 +17,6 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
-import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,12 +51,6 @@ public class PkgIconController extends AbstractController implements ServletCont
 
     @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
-    private PkgOrchestrationService pkgService;
-
-    @Resource
-    private AuthorizationService authorizationService;
 
     private ServletContext servletContext;
 

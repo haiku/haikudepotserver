@@ -639,7 +639,6 @@
 	<obj-relationship name="user" source="PermissionUserPkg" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="permissionUserPkgs" source="Pkg" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="permission_user_pkgs"/>
 	<obj-relationship name="pkgIcons" source="Pkg" target="PkgIcon" deleteRule="Cascade" db-relationship-path="pkg_icons"/>
-	<obj-relationship name="pkgLocalizations" source="Pkg" target="PkgLocalization" deleteRule="Cascade" db-relationship-path="pkg_localizations"/>
 	<obj-relationship name="pkgPkgCategories" source="Pkg" target="PkgPkgCategory" deleteRule="Cascade" db-relationship-path="pkg_pkg_categories"/>
 	<obj-relationship name="pkgScreenshots" source="Pkg" target="PkgScreenshot" deleteRule="Cascade" db-relationship-path="pkg_screenshots"/>
 	<obj-relationship name="prominence" source="Pkg" target="Prominence" deleteRule="Nullify" db-relationship-path="prominence"/>

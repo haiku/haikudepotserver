@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,12 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.Ordering;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._MediaType;
@@ -30,6 +31,7 @@ public class MediaType extends _MediaType {
         Preconditions.checkNotNull(context);
         SelectQuery query = new SelectQuery(MediaType.class);
         query.addOrdering(new Ordering(CODE_PROPERTY, SortOrder.ASCENDING));
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         return (List<MediaType>) context.performQuery(query);
     }
 
@@ -53,14 +55,18 @@ public class MediaType extends _MediaType {
         return Optional.absent();
     }
 
-    public static Optional<MediaType> getByCode(ObjectContext context, String code) {
+    public static Optional<MediaType> getByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<MediaType>) context.performQuery(new SelectQuery(
-                        MediaType.class,
-                        ExpressionFactory.matchExp(MediaType.CODE_PROPERTY, code))),
-                null));
+        return Iterables.tryFind(
+                getAll(context),
+                new Predicate<MediaType>() {
+                    @Override
+                    public boolean apply(MediaType input) {
+                        return input.getCode().equals(code);
+                    }
+                }
+        );
     }
 
 }

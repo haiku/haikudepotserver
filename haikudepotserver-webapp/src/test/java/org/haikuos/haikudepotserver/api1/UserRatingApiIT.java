@@ -1,5 +1,5 @@
 /*
-* Copyright 2014, Andrew Lindesay
+* Copyright 2014-2015, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -224,7 +224,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.pkgVersion.major).isEqualTo("1");
             Assertions.assertThat(userRating.pkgVersion.micro).isEqualTo("2");
             Assertions.assertThat(userRating.pkgVersion.revision).isEqualTo(3);
-            Assertions.assertThat(userRating.pkgVersion.minor).isNull();
+            Assertions.assertThat(userRating.pkgVersion.minor).isEqualTo("1");
             Assertions.assertThat(userRating.pkgVersion.preRelease).isNull();
             Assertions.assertThat(userRating.rating).isEqualTo((short) 5);
             Assertions.assertThat(userRating.user.nickname).isEqualTo("urtest1");

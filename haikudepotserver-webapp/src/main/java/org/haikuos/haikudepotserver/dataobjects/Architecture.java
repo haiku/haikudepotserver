@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._Architecture;
@@ -29,17 +29,22 @@ public class Architecture extends _Architecture {
     public static List<Architecture> getAll(ObjectContext context) {
         SelectQuery query = new SelectQuery(Architecture.class);
         query.addOrdering(Architecture.CODE_PROPERTY, SortOrder.ASCENDING);
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         return (List<Architecture>) context.performQuery(query);
     }
 
-    public static Optional<Architecture> getByCode(ObjectContext context, String code) {
+    public static Optional<Architecture> getByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<Architecture>) context.performQuery(new SelectQuery(
-                        Architecture.class,
-                        ExpressionFactory.matchExp(Architecture.CODE_PROPERTY, code))),
-                null));
+        return Iterables.tryFind(
+                getAll(context),
+                new Predicate<Architecture>() {
+                    @Override
+                    public boolean apply(Architecture input) {
+                        return input.getCode().equals(code);
+                    }
+                }
+        );
     }
 
     /**

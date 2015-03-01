@@ -31,10 +31,15 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
     public static Pattern NAME_PATTERN = Pattern.compile("^[^\\s/=!<>-]+$");
 
     public static Optional<Pkg> getByName(ObjectContext context, String name) {
+        Preconditions.checkArgument(null!=context, "a context must be provided to lookup a package");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name), "a name must be provided to get a package");
+
+        SelectQuery query = new SelectQuery(
+                Pkg.class,
+                ExpressionFactory.matchExp(Pkg.NAME_PROPERTY, name));
+
         return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<Pkg>) context.performQuery(new SelectQuery(
-                        Pkg.class,
-                        ExpressionFactory.matchExp(Pkg.NAME_PROPERTY, name))),
+                (List<Pkg>) context.performQuery(query),
                 null));
     }
 
@@ -196,25 +201,6 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             PkgScreenshot pkgScreenshot = screenshots.get(i);
             pkgScreenshot.setOrdering(i+1);
         }
-    }
-
-    /**
-     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
-     * English language data is hard-coded into the package payload, english will always be available.</p>
-     */
-
-    public Optional<PkgLocalization> getPkgLocalization(final String naturalLanguageCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-
-        return Iterables.tryFind(
-                getPkgLocalizations(),
-                new Predicate<PkgLocalization>() {
-                    @Override
-                    public boolean apply(PkgLocalization input) {
-                        return input.getNaturalLanguage().getCode().equals(naturalLanguageCode);
-                    }
-                }
-        );
     }
 
     @Override

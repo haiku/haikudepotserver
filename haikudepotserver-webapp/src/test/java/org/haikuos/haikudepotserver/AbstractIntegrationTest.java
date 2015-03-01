@@ -8,7 +8,6 @@ package org.haikuos.haikudepotserver;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
-import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -18,6 +17,7 @@ import org.haikuos.haikudepotserver.security.AuthenticationHelper;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
 import org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -73,15 +73,17 @@ public abstract class AbstractIntegrationTest {
     protected void assertEqualsLineByLine(BufferedReader expected, BufferedReader actual) throws IOException {
             String expectedLine;
             String actualLine;
+            int line = 1;
 
             do {
                 expectedLine = expected.readLine();
                 actualLine = actual.readLine();
 
                 if(!Objects.equals(expectedLine, actualLine)) {
-                    Assert.fail("mismatch expected and actual; [" + expectedLine + "] [" + actualLine + "]");
+                    Assert.fail("mismatch expected and actual; [" + expectedLine + "] [" + actualLine + "] @ line " + line);
                 }
 
+                line++;
             }
             while(null!=expectedLine || null!=actualLine);
     }

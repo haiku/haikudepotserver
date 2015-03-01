@@ -1288,11 +1288,10 @@ public class PkgOrchestrationService {
             title = title.trim();
         }
 
-        Optional<PkgLocalization> pkgLocalizationOptional = pkg.getPkgLocalization(naturalLanguage.getCode());
+        Optional<PkgLocalization> pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg, naturalLanguage.getCode());
 
         if(Strings.isNullOrEmpty(title)) {
             if(!pkgLocalizationOptional.isPresent()) {
-                pkg.removeToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalizationOptional.get(), true);
                 context.deleteObject(pkgLocalizationOptional.get());
             }
 
@@ -1303,7 +1302,7 @@ public class PkgOrchestrationService {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
             pkgLocalization.setNaturalLanguage(naturalLanguage);
             pkgLocalization.setTitle(title);
-            pkg.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+            pkgLocalization.setPkg(pkg);
             return pkgLocalization;
         }
 

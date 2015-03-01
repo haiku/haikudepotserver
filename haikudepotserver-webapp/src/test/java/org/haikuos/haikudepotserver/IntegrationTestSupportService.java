@@ -146,21 +146,21 @@ public class IntegrationTestSupportService {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
             pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
             pkgLocalization.setTitle("Package 1");
-            result.pkg1.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+            pkgLocalization.setPkg(result.pkg1);
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
             pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN).get());
             pkgLocalization.setTitle("Packet 1");
-            result.pkg1.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+            pkgLocalization.setPkg(result.pkg1);
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
             pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
             pkgLocalization.setTitle("Ping 1");
-            result.pkg1.addToManyTarget(Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+            pkgLocalization.setPkg(result.pkg1);
         }
 
         addPkgScreenshot(context,result.pkg1);
@@ -234,6 +234,7 @@ public class IntegrationTestSupportService {
         result.pkg2Version1.setActive(Boolean.TRUE);
         result.pkg2Version1.setArchitecture(x86);
         result.pkg2Version1.setMajor("1");
+        result.pkg2Version1.setMinor("1");
         result.pkg2Version1.setMicro("2");
         result.pkg2Version1.setRevision(3);
         result.pkg2Version1.setIsLatest(true);
@@ -250,6 +251,7 @@ public class IntegrationTestSupportService {
         result.pkg3Version1.setActive(Boolean.TRUE);
         result.pkg3Version1.setArchitecture(x86);
         result.pkg3Version1.setMajor("1");
+        result.pkg3Version1.setMinor("1");
         result.pkg3Version1.setMicro("2");
         result.pkg3Version1.setRevision(3);
         result.pkg3Version1.setIsLatest(true);

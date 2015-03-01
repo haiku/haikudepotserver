@@ -74,6 +74,10 @@ Set this to {\tt true} if you would like database schema migrations to be applie
 
 Set this to {\tt false} if you want the system to validate schema migrations.  This can be helpful at development time when the schema is in flux, but should be {\tt true} in production.
 
+\subsubsection{\tt cayenne.query.cache.size}
+
+Cayenne is the ORM system behind this application.  Some queries' results are cached and this configuration item allows the size of the query cache to be configured.
+
 \subsection{Web-Related}
 
 \subsubsection{\tt jawr.debug.on}

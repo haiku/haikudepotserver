@@ -5,14 +5,13 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import com.google.common.base.*;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Ordering;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._NaturalLanguage;
@@ -35,36 +34,49 @@ public class NaturalLanguage extends _NaturalLanguage {
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkNotNull(context);
         SelectQuery query = new SelectQuery(NaturalLanguage.class);
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
         return (List<NaturalLanguage>) context.performQuery(query);
     }
 
     public static List<NaturalLanguage> getAllPopular(ObjectContext context) {
         Preconditions.checkNotNull(context);
-        SelectQuery query = new SelectQuery(
-                NaturalLanguage.class,
-                ExpressionFactory.matchExp(NaturalLanguage.IS_POPULAR_PROPERTY, Boolean.TRUE));
-        query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
-        return (List<NaturalLanguage>) context.performQuery(query);
+        return ImmutableList.copyOf(Iterables.filter(
+                getAll(context),
+                new Predicate<NaturalLanguage>() {
+                    @Override
+                    public boolean apply(NaturalLanguage input) {
+                        return input.getIsPopular();
+                    }
+                }
+        ));
     }
 
     public static List<NaturalLanguage> getAllExceptEnglish(ObjectContext context) {
         Preconditions.checkNotNull(context);
-        SelectQuery query = new SelectQuery(
-                NaturalLanguage.class,
-                ExpressionFactory.noMatchExp(NaturalLanguage.CODE_PROPERTY, CODE_ENGLISH));
-        query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
-        return (List<NaturalLanguage>) context.performQuery(query);
+        return ImmutableList.copyOf(Iterables.filter(
+                getAll(context),
+                new Predicate<NaturalLanguage>() {
+                    @Override
+                    public boolean apply(NaturalLanguage input) {
+                        return !input.getCode().equals(NaturalLanguage.CODE_ENGLISH);
+                    }
+                }
+        ));
     }
 
-    public static Optional<NaturalLanguage> getByCode(ObjectContext context, String code) {
+    public static Optional<NaturalLanguage> getByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<NaturalLanguage>) context.performQuery(new SelectQuery(
-                        NaturalLanguage.class,
-                        ExpressionFactory.matchExp(MediaType.CODE_PROPERTY, code))),
-                null));
+        return Iterables.tryFind(
+                getAll(context),
+                new Predicate<NaturalLanguage>() {
+                    @Override
+                    public boolean apply(NaturalLanguage input) {
+                        return input.getCode().equals(code);
+                    }
+                }
+        );
     }
 
     /**
@@ -73,8 +85,15 @@ public class NaturalLanguage extends _NaturalLanguage {
 
     public static List<String> getAllCodes(ObjectContext context) {
         Preconditions.checkNotNull(context);
-        EJBQLQuery query = new EJBQLQuery("SELECT nl.code FROM " + NaturalLanguage.class.getSimpleName() + " nl");
-        return (List<String>) context.performQuery(query);
+        return Lists.transform(
+                getAll(context),
+                new Function<NaturalLanguage, String>() {
+                    @Override
+                    public String apply(NaturalLanguage input) {
+                        return input.getCode();
+                    }
+                }
+        );
     }
 
     /**

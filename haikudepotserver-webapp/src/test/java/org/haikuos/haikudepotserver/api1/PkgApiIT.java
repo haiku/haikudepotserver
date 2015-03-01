@@ -644,11 +644,17 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+            List<String[]> rules = ImmutableList.of(
+                    new String[] { NaturalLanguage.CODE_ENGLISH, "flourescence" },
+                    new String[] { NaturalLanguage.CODE_FRENCH, "treacle" },
+                    new String[] { NaturalLanguage.CODE_GERMAN, "Packet 1" }
+            );
 
-            Assertions.assertThat(pkg1.getPkgLocalization(NaturalLanguage.CODE_ENGLISH).get().getTitle()).isEqualTo("flourescence");
-            Assertions.assertThat(pkg1.getPkgLocalization(NaturalLanguage.CODE_FRENCH).get().getTitle()).isEqualTo("treacle");
-            Assertions.assertThat(pkg1.getPkgLocalization(NaturalLanguage.CODE_GERMAN).get().getTitle()).isEqualTo("Packet 1");
-
+            for(String[] rule : rules) {
+                Assertions.assertThat(
+                        org.haikuos.haikudepotserver.dataobjects.PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg1, rule[0]).get().getTitle()
+                ).isEqualTo(rule[1]);
+            }
         }
 
     }
