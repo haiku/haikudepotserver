@@ -14,6 +14,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
@@ -37,6 +38,9 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         SelectQuery query = new SelectQuery(
                 Pkg.class,
                 ExpressionFactory.matchExp(Pkg.NAME_PROPERTY, name));
+
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
+        query.setCacheGroups(HaikuDepot.CacheGroup.PKG.name());
 
         return Optional.fromNullable(Iterables.getOnlyElement(
                 (List<Pkg>) context.performQuery(query),
@@ -120,8 +124,8 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             public boolean apply(PkgIcon o) {
                 return
                         o.getMediaType().equals(mediaType)
-                                && (null==size) == (null==o.getSize())
-                                && ((null==size) || size.equals(o.getSize()));
+                                && (null == size) == (null == o.getSize())
+                                && ((null == size) || size.equals(o.getSize()));
             }
         }));
     }

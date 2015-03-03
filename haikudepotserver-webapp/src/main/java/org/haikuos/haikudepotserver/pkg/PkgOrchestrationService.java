@@ -23,6 +23,7 @@ import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.support.*;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
@@ -689,7 +690,7 @@ public class PkgOrchestrationService {
 
         EJBQLQuery query = new EJBQLQuery(queryString.toString());
 
-        final List<String> codes = context.performQuery(query);
+        final List<String> codes = (List<String>) context.performQuery(query);
 
         return Lists.transform(
                 codes,
@@ -1019,6 +1020,7 @@ public class PkgOrchestrationService {
      */
 
     public void importFrom(
+            ServerRuntime serverRuntime,
             ObjectContext objectContext,
             ObjectId repositoryObjectId,
             org.haikuos.pkg.model.Pkg pkg,
@@ -1264,6 +1266,13 @@ public class PkgOrchestrationService {
             }
         }
 
+        // [apl]
+        // If the package is new then we need to drop the cache that maps packages to names.
+
+        if(persistedPkg.getObjectId().isTemporary()) {
+            serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG.name());
+        }
+
         LOGGER.debug("have processed package {}", pkg.toString());
 
     }
@@ -1302,7 +1311,7 @@ public class PkgOrchestrationService {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
             pkgLocalization.setNaturalLanguage(naturalLanguage);
             pkgLocalization.setTitle(title);
-            pkgLocalization.setPkg(pkg);
+            pkg.addToManyTarget(_Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
             return pkgLocalization;
         }
 

@@ -237,26 +237,31 @@ angular.module('haikudepotserver').controller(
 
                 function(chain) {
 
-                    $scope.$watch('pkgs.offset', function() {
-                        refetchPkgs();
+                    $scope.$watch('pkgs.offset', function(newValue, oldValue) {
+                        if(!!oldValue) { // already initialized elsewhere
+                            $log.debug('offset -> refetching pkgs');
+                            refetchPkgs();
+                        }
                     });
 
-                    $scope.$watch('selectedPkgCategory', function() {
-                        var option = $scope.selectedViewCriteriaTypeOption;
+                    $scope.$watch('selectedPkgCategory', function(newValue, oldValue) {
+                        if(!!oldValue) { // already initialized elsewhere
+                            var option = $scope.selectedViewCriteriaTypeOption;
 
-                        if(option && option.code == ViewCriteriaTypes.CATEGORIES) {
-                            refetchPkgsAtFirstPage();
+                            if (option && option.code == ViewCriteriaTypes.CATEGORIES) {
+                                $log.debug('selectedPkgCategory -> refetching pkgs');
+                                refetchPkgsAtFirstPage();
+                            }
                         }
                     });
 
                     // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
 
-                    $scope.$watch('selectedArchitecture', function() {
-
-                        if(undefined != $scope.pkgs.items) {
+                    $scope.$watch('selectedArchitecture', function(newValue, oldValue) {
+                        if(!!oldValue && newValue != oldValue) { // already initialized elsewhere
+                            $log.debug('selectedArchitecture -> refetching pkgs');
                             refetchPkgsAtFirstPage();
                         }
-
                     });
 
                     // this gets hit when the user chooses between the various options such as "all", "search" etc...
@@ -272,6 +277,7 @@ angular.module('haikudepotserver').controller(
                                 case ViewCriteriaTypes.MOSTVIEWED:
                                 case ViewCriteriaTypes.FEATURED:
                                 case ViewCriteriaTypes.ALL:
+                                    $log.debug('selectedViewCriteriaTypeOption -> refetching pkgs');
                                     refetchPkgsAtFirstPage();
                                     break;
 
@@ -279,6 +285,7 @@ angular.module('haikudepotserver').controller(
                                     if(!$scope.pkgCategories) {
                                         refetchPkgCategories();
                                     }
+                                    $log.debug('selectedViewCriteriaTypeOption -> refetching pkgs');
                                     refetchPkgsAtFirstPage();
                                     break;
 

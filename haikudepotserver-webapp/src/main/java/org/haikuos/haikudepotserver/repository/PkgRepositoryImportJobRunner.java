@@ -96,7 +96,14 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
 
                 Pkg pkg = pkgIterator.next();
                 repositoryImportPkgNames.add(pkg.getName());
-                pkgService.importFrom(pkgImportContext, repository.getObjectId(), pkg, shouldPopulatePayloadLength);
+
+                pkgService.importFrom(
+                        serverRuntime,
+                        pkgImportContext,
+                        repository.getObjectId(),
+                        pkg,
+                        shouldPopulatePayloadLength);
+
                 pkgImportContext.commitChanges();
             }
 

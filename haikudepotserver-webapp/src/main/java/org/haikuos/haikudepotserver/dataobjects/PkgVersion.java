@@ -194,9 +194,9 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         return pkgVersionLocalizationOptional.get();
     }
 
-        /**
-         * <p>Renders the copyright entities into a list of strings.</p>
-         */
+    /**
+     * <p>Renders the copyright entities into a list of strings.</p>
+     */
 
     public List<String> getCopyrights() {
         return Lists.transform(

@@ -17,6 +17,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
+import org.haikuos.haikudepotserver.dataobjects.PkgIconImage;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,16 +103,20 @@ public class PkgIconController extends AbstractController implements ServletCont
             throw new MissingOrBadFormat();
         }
 
-        Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
+        Optional<Pkg> pkg = Pkg.getByName(context, pkgName); // cached
 
         if(!pkg.isPresent()) {
             LOGGER.debug("request for icon for package '{}', but no such package was able to be found", pkgName);
             throw new PkgNotFound();
         }
 
-        Optional<PkgIcon> pkgIconOptional = pkg.get().getPkgIcon(mediaTypeOptional.get(), size);
+        Optional<PkgIconImage> pkgIconImageOptional = PkgIconImage.getForPkg(
+                context,
+                pkg.get(),
+                mediaTypeOptional.get(),
+                size);
 
-        if(!pkgIconOptional.isPresent()) {
+        if(!pkgIconImageOptional.isPresent()) {
 
             // if there is no icon, under very specific circumstances, it may be possible to provide one.
 
@@ -139,7 +144,7 @@ public class PkgIconController extends AbstractController implements ServletCont
         }
         else {
 
-            byte[] data = pkgIconOptional.get().getPkgIconImage().get().getData();
+            byte[] data = pkgIconImageOptional.get().getData();
 
             response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
             response.setContentType(mediaTypeOptional.get().getCode());

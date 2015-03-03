@@ -234,7 +234,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultPkg.name = input.getPkg().getName();
                         resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
                         resultPkg.derivedRating = input.getPkg().getDerivedRating();
-                        resultPkg.hasAnyPkgIcons = !input.getPkg().getPkgIcons().isEmpty();
+                        resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, input.getPkg()).isEmpty();
 
                         Optional<PkgLocalization> pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(
                                 context,
@@ -261,10 +261,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.architectureCode = input.getArchitecture().getCode();
                         resultVersion.payloadLength = input.getPayloadLength();
 
-                        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = input.getPkgVersionLocalization(request.naturalLanguageCode);
+                        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
+                                context, input, request.naturalLanguageCode);
 
                         if(!pkgVersionLocalizationOptional.isPresent()) {
-                            pkgVersionLocalizationOptional = input.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
+                            pkgVersionLocalizationOptional = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
+                                    context, input, NaturalLanguage.CODE_ENGLISH);
                         }
 
                         if(pkgVersionLocalizationOptional.isPresent()) {
@@ -681,6 +683,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         pkg.setModifyTimestamp();
 
         context.commitChanges();
+        serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG_ICON.name());
 
         LOGGER.info(
                 "did configure icons for pkg {} (updated {}, removed {})",
@@ -717,6 +720,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         pkg.setModifyTimestamp();
 
         context.commitChanges();
+        serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG_ICON.name());
 
         LOGGER.info("did remove icons for pkg {}", pkg.getName());
 
@@ -837,6 +841,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public UpdatePkgLocalizationResult updatePkgLocalization(UpdatePkgLocalizationRequest updatePkgLocalizationRequest) throws ObjectNotFoundException {
 
         Preconditions.checkArgument(null!=updatePkgLocalizationRequest);
+        assert null!=updatePkgLocalizationRequest;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(updatePkgLocalizationRequest.pkgName), "the package name must be supplied");
 
         final ObjectContext context = serverRuntime.getContext();
@@ -948,6 +953,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         context.commitChanges();
+        serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG_VERSION_LOCALIZATION.name());
 
         LOGGER.info(
                 "did update the localization for pkg {} in architecture {} for {} natural languages",
@@ -962,6 +968,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException {
         Preconditions.checkArgument(null!=getPkgLocalizationsRequest, "a request is required");
+        assert null!=getPkgLocalizationsRequest;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgLocalizationsRequest.pkgName), "a package name is required");
         Preconditions.checkArgument(null!=getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
 
@@ -1294,6 +1301,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(
             QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException {
         Preconditions.checkArgument(null!=request,"the request must be supplied");
+        assert null!=request;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
 
         final ObjectContext context = serverRuntime.getContext();
