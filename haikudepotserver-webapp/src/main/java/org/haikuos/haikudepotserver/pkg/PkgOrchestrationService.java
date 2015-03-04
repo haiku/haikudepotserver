@@ -1020,7 +1020,6 @@ public class PkgOrchestrationService {
      */
 
     public void importFrom(
-            ServerRuntime serverRuntime,
             ObjectContext objectContext,
             ObjectId repositoryObjectId,
             org.haikuos.pkg.model.Pkg pkg,
@@ -1266,13 +1265,6 @@ public class PkgOrchestrationService {
             }
         }
 
-        // [apl]
-        // If the package is new then we need to drop the cache that maps packages to names.
-
-        if(persistedPkg.getObjectId().isTemporary()) {
-            serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG.name());
-        }
-
         LOGGER.debug("have processed package {}", pkg.toString());
 
     }
@@ -1471,6 +1463,7 @@ public class PkgOrchestrationService {
         Preconditions.checkArgument(null!=pkg);
         Preconditions.checkArgument(null!=pkgCategories);
 
+        pkgCategories = Lists.newArrayList(pkgCategories);
         boolean didChange = false;
 
         // now go through and delete any of those pkg relationships to packages that are already present

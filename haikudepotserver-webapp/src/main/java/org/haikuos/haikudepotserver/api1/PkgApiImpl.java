@@ -355,7 +355,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
      * {@link org.apache.cayenne.ObjectContext} to edit.</p>
      */
 
-    private void incrementCounter(final ObjectContext context, PkgVersion pkgVersion) {
+    private void incrementCounter(PkgVersion pkgVersion) {
         String cacheKey = null;
         String remoteIdentifier = getRemoteIdentifier();
         boolean shouldIncrement;
@@ -503,7 +503,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
 
                 if (null != request.incrementViewCounter && request.incrementViewCounter) {
-                    incrementCounter(context, pkgVersionOptional.get());
+                    incrementCounter(pkgVersionOptional.get());
                 }
 
                 result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
@@ -533,7 +533,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
 
                 if (null != request.incrementViewCounter && request.incrementViewCounter) {
-                    incrementCounter(context, pkgVersionOptional.get());
+                    incrementCounter(pkgVersionOptional.get());
                 }
 
                 result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
@@ -683,7 +683,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         pkg.setModifyTimestamp();
 
         context.commitChanges();
-        serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG_ICON.name());
 
         LOGGER.info(
                 "did configure icons for pkg {} (updated {}, removed {})",
@@ -720,7 +719,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         pkg.setModifyTimestamp();
 
         context.commitChanges();
-        serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG_ICON.name());
 
         LOGGER.info("did remove icons for pkg {}", pkg.getName());
 
@@ -872,11 +870,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 updatePkgLocalizationRequest.pkgLocalizations.size()
         );
 
-        // the pkg localization relies on a query caches; this will remove those caches by
-        // cache group.
-
-        serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG_LOCALIZATION.name());
-
         return new UpdatePkgLocalizationResult();
     }
 
@@ -953,7 +946,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         context.commitChanges();
-        serverRuntime.getDataDomain().getQueryCache().removeGroup(HaikuDepot.CacheGroup.PKG_VERSION_LOCALIZATION.name());
 
         LOGGER.info(
                 "did update the localization for pkg {} in architecture {} for {} natural languages",

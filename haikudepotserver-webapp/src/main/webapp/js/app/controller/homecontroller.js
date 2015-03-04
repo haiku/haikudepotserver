@@ -238,7 +238,7 @@ angular.module('haikudepotserver').controller(
                 function(chain) {
 
                     $scope.$watch('pkgs.offset', function(newValue, oldValue) {
-                        if(!!oldValue) { // already initialized elsewhere
+                        if(undefined!=oldValue && null!=oldValue) { // already initialized elsewhere
                             $log.debug('offset -> refetching pkgs');
                             refetchPkgs();
                         }

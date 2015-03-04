@@ -54,7 +54,6 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
         org.haikuos.pkg.model.Pkg pkg = createPkg(minor);
 
         pkgOrchestrationService.importFrom(
-                serverRuntime,
                 context,
                 repository.getObjectId(),
                 pkg,
@@ -107,7 +106,6 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                 // ---------------------------------
 
                 pkgOrchestrationService.importFrom(
-                        serverRuntime,
                         context,
                         repository.getObjectId(),
                         inputPackage,

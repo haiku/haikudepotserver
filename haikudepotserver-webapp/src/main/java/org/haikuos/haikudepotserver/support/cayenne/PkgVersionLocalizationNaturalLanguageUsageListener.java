@@ -10,6 +10,8 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -22,6 +24,8 @@ import javax.annotation.Resource;
  */
 
 public class PkgVersionLocalizationNaturalLanguageUsageListener implements LifecycleListener {
+
+    protected static Logger LOGGER = LoggerFactory.getLogger(PkgVersionLocalizationNaturalLanguageUsageListener.class);
 
     @Resource
     ServerRuntime serverRuntime;

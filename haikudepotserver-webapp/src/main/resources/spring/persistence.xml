@@ -66,5 +66,36 @@
         <property name="password" value="${ldap.password:}"/>
     </bean>
 
+    <!--
+    Setup for query cache removal.  The filter will install itself into the Cayenne runtime and the listeners
+    will keep track of which query cache groups are to be dropped.
+    -->
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter"/>
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG.name()}"/>
+        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.Pkg"/>
+    </bean>
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="groups" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_ICON.name()}"/>
+        <property name="entityClasses">
+            <list>
+                <value>org.haikuos.haikudepotserver.dataobjects.PkgIcon</value>
+                <value>org.haikuos.haikudepotserver.dataobjects.PkgIconImage</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_LOCALIZATION.name()}"/>
+        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.PkgLocalization"/>
+    </bean>
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_VERSION_LOCALIZATION.name()}"/>
+        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization"/>
+    </bean>
 
 </beans>
