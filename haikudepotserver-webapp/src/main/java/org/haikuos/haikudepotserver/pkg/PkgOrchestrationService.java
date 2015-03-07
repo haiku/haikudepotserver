@@ -5,7 +5,10 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.*;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -20,26 +23,30 @@ import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.ObjectIdQuery;
-import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.pkg.model.*;
+import org.haikuos.haikudepotserver.pkg.search.PkgSearchHelper;
+import org.haikuos.haikudepotserver.pkg.search.PkgSearchQuery;
 import org.haikuos.haikudepotserver.support.*;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
-import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
 import org.imgscalr.Scalr;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
+import javax.sql.DataSource;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -68,6 +75,9 @@ public class PkgOrchestrationService {
 
     @Resource
     private PngOptimizationService pngOptimizationService;
+
+    @Resource
+    private DataSource dataSource;
 
     private ImageHelper imageHelper = new ImageHelper();
 
@@ -146,277 +156,9 @@ public class PkgOrchestrationService {
     // ------------------------------
     // SEARCH
 
-    private String prepareWhereClause(
-            List<Object> parameterAccumulator,
-            ObjectContext context,
-            PkgSearchSpecification search) {
-
-        Preconditions.checkNotNull(parameterAccumulator);
-        Preconditions.checkNotNull(search);
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(null!=search.getArchitectures()&&!search.getArchitectures().isEmpty());
-        Preconditions.checkState(null==search.getDaysSinceLatestVersion() || search.getDaysSinceLatestVersion().intValue() > 0);
-
-        List<String> whereExpressions = Lists.newArrayList();
-
-        whereExpressions.add("pv." + PkgVersion.IS_LATEST_PROPERTY + " = true");
-
-        {
-            List<String> architectureWhereExpressions = Lists.newArrayList();
-
-            for(Architecture architecture : search.getArchitectures()) {
-                architectureWhereExpressions.add("(pv." + PkgVersion.ARCHITECTURE_PROPERTY + " = ?" + (parameterAccumulator.size() + 1)+")");
-                parameterAccumulator.add(architecture);
-            }
-
-            whereExpressions.add("(" + Joiner.on(" OR ").join(architectureWhereExpressions) + ")");
-        }
-
-        if(!search.getIncludeInactive()) {
-            whereExpressions.add("pv." + PkgVersion.ACTIVE_PROPERTY + " = true");
-            whereExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY + " = true");
-        }
-
-        if(null!=search.getDaysSinceLatestVersion()) {
-            parameterAccumulator.add(DateTime.now().minusDays(search.getDaysSinceLatestVersion().intValue()).toDate());
-            whereExpressions.add("pv." + PkgVersion.CREATE_TIMESTAMP_PROPERTY + " >= ?" + parameterAccumulator.size());
-        }
-
-        if(!Strings.isNullOrEmpty(search.getExpression())) {
-
-            StringBuilder expressionWhereAssembly = new StringBuilder();
-            expressionWhereAssembly.append("(");
-
-            switch(search.getExpressionType()) {
-
-                case CONTAINS:
-                    parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                    expressionWhereAssembly.append("LOWER(pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
-                    break;
-
-                default:
-                    throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
-
-            }
-
-            // ----------
-
-            // [apl 27.feb.2015] search in the package title as well; dropping back to english if necessary.
-
-            expressionWhereAssembly.append(" OR ");
-
-            // specified natural language localized title
-
-            {
-                expressionWhereAssembly.append("EXISTS(SELECT pl1 FROM ");
-                expressionWhereAssembly.append(PkgLocalization.class.getSimpleName());
-                expressionWhereAssembly.append(" pl1 WHERE pl1." + PkgLocalization.PKG_PROPERTY + " = pv.pkg");
-                parameterAccumulator.add(search.getNaturalLanguage());
-                expressionWhereAssembly.append(" AND pl1." + PkgVersionLocalization.NATURAL_LANGUAGE_PROPERTY + " = ?" + parameterAccumulator.size());
-
-                switch (search.getExpressionType()) {
-
-                    case CONTAINS:
-                        parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                        expressionWhereAssembly.append(" AND LOWER(pl1." + PkgLocalization.TITLE_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
-                        break;
-
-                    default:
-                        throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
-
-                }
-                expressionWhereAssembly.append(")");
-            }
-
-            if(!search.getNaturalLanguage().getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
-                expressionWhereAssembly.append(" OR ");
-
-                // fallback english localized description if necessary
-
-                {
-                    expressionWhereAssembly.append("(");
-
-                    {
-                        expressionWhereAssembly.append("NOT EXISTS(SELECT pl2 FROM ");
-                        expressionWhereAssembly.append(PkgLocalization.class.getSimpleName());
-                        expressionWhereAssembly.append(" pl2 WHERE pl2." + PkgLocalization.PKG_PROPERTY + " = pv.pkg");
-                        parameterAccumulator.add(search.getNaturalLanguage());
-                        expressionWhereAssembly.append(" AND pl2." + PkgLocalization.NATURAL_LANGUAGE_PROPERTY + " = ?" + parameterAccumulator.size());
-                        expressionWhereAssembly.append(")");
-                    }
-
-                    expressionWhereAssembly.append(" AND ");
-
-                    {
-                        expressionWhereAssembly.append("EXISTS(SELECT pl3 FROM ");
-                        expressionWhereAssembly.append(PkgLocalization.class.getSimpleName());
-                        expressionWhereAssembly.append(" pl3 WHERE pl3." + PkgLocalization.PKG_PROPERTY + " = pv.pkg");
-                        parameterAccumulator.add(NaturalLanguage.CODE_ENGLISH);
-                        expressionWhereAssembly.append(" AND pl3." + PkgLocalization.NATURAL_LANGUAGE_PROPERTY + "." + NaturalLanguage.CODE_PROPERTY + " = ?" + parameterAccumulator.size());
-
-                        switch (search.getExpressionType()) {
-
-                            case CONTAINS:
-                                parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                                expressionWhereAssembly.append(" AND LOWER(pl3." + PkgLocalization.TITLE_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
-                                break;
-
-                            default:
-                                throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
-
-                        }
-                        expressionWhereAssembly.append(")");
-                    }
-
-                    expressionWhereAssembly.append(")");
-
-                }
-            }
-
-            // ----------
-
-            // [apl 29.jun.2014] search in the package version descriptions as well.  In this case, try to find the
-            // latest package version on the package.  If this has a localization for the supplied natural language
-            // then search in that; otherwise drop back to english.
-
-            expressionWhereAssembly.append(" OR ");
-
-            // specified natural language localized description
-            {
-                expressionWhereAssembly.append("EXISTS(SELECT pvl1 FROM ");
-                expressionWhereAssembly.append(PkgVersionLocalization.class.getSimpleName());
-                expressionWhereAssembly.append(" pvl1 WHERE pvl1." + PkgVersionLocalization.PKG_VERSION_PROPERTY + " = pv");
-                parameterAccumulator.add(search.getNaturalLanguage());
-                expressionWhereAssembly.append(" AND pvl1." + PkgVersionLocalization.NATURAL_LANGUAGE_PROPERTY + " = ?" + parameterAccumulator.size());
-
-                switch (search.getExpressionType()) {
-
-                    case CONTAINS:
-                        parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                        expressionWhereAssembly.append(" AND LOWER(pvl1." + PkgVersionLocalization.SUMMARY_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
-                        break;
-
-                    default:
-                        throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
-
-                }
-                expressionWhereAssembly.append(")");
-            }
-
-            if(!search.getNaturalLanguage().getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
-                expressionWhereAssembly.append(" OR ");
-
-                // fallback english localized description if necessary
-
-                {
-                    expressionWhereAssembly.append("(");
-
-                    {
-                        expressionWhereAssembly.append("NOT EXISTS(SELECT pvl2 FROM ");
-                        expressionWhereAssembly.append(PkgVersionLocalization.class.getSimpleName());
-                        expressionWhereAssembly.append(" pvl2 WHERE pvl2." + PkgVersionLocalization.PKG_VERSION_PROPERTY + " = pv");
-                        parameterAccumulator.add(search.getNaturalLanguage());
-                        expressionWhereAssembly.append(" AND pvl2." + PkgVersionLocalization.NATURAL_LANGUAGE_PROPERTY + " = ?" + parameterAccumulator.size());
-                        expressionWhereAssembly.append(")");
-                    }
-
-                    expressionWhereAssembly.append(" AND ");
-
-                    {
-                        expressionWhereAssembly.append("EXISTS(SELECT pvl3 FROM ");
-                        expressionWhereAssembly.append(PkgVersionLocalization.class.getSimpleName());
-                        expressionWhereAssembly.append(" pvl3 WHERE pvl3." + PkgVersionLocalization.PKG_VERSION_PROPERTY + " = pv");
-                        parameterAccumulator.add(NaturalLanguage.CODE_ENGLISH);
-                        expressionWhereAssembly.append(" AND pvl3." + PkgVersionLocalization.NATURAL_LANGUAGE_PROPERTY + "." + NaturalLanguage.CODE_PROPERTY + " = ?" + parameterAccumulator.size());
-
-                        switch (search.getExpressionType()) {
-
-                            case CONTAINS:
-                                parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                                expressionWhereAssembly.append(" AND LOWER(pvl3." + PkgVersionLocalization.SUMMARY_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
-                                break;
-
-                            default:
-                                throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
-
-                        }
-                        expressionWhereAssembly.append(")");
-                    }
-
-                    expressionWhereAssembly.append(")");
-
-                }
-            }
-
-            expressionWhereAssembly.append(")");
-
-            // ----------
-
-            whereExpressions.add(expressionWhereAssembly.toString());
-        }
-
-        if(null!=search.getPkgCategory()) {
-            parameterAccumulator.add(search.getPkgCategory());
-            whereExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.PKG_PKG_CATEGORIES_PROPERTY + "." + PkgPkgCategory.PKG_CATEGORY_PROPERTY + " = ?" + parameterAccumulator.size());
-        }
-
-        if(null!=search.getPkgNames()) {
-            if(search.getPkgNames().isEmpty()) {
-                throw new IllegalStateException("list of pkg names is empty; not able to produce ejbql expression");
-            }
-
-            List<String> inParameterList = Lists.newArrayList();
-
-            for(int j=0;j<search.getPkgNames().size();j++) {
-                parameterAccumulator.add(search.getPkgNames().get(j));
-                inParameterList.add("?" + parameterAccumulator.size());
-            }
-
-            whereExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY + " IN (" + Joiner.on(",").join(inParameterList) + ")");
-        }
-
-        return Joiner.on(" AND ").join(whereExpressions);
-    }
-
-    private String prepareOrderClause(
-            ObjectContext context,
-            PkgSearchSpecification search) {
-
-        List<String> orderExpressions = Lists.newArrayList();
-
-        if(null!=search.getSortOrdering()) {
-
-            switch (search.getSortOrdering()) {
-
-                case VERSIONVIEWCOUNTER:
-                    orderExpressions.add("pv." + PkgVersion.VIEW_COUNTER_PROPERTY + " DESC");
-                    break;
-
-                case VERSIONCREATETIMESTAMP:
-                    orderExpressions.add("pv." + PkgVersion.CREATE_TIMESTAMP_PROPERTY + " DESC");
-                    break;
-
-                case PROMINENCE:
-                    orderExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.PROMINENCE_PROPERTY + "." + Prominence.ORDERING_PROPERTY + " ASC");
-
-                case NAME: // gets added anyway...
-                    break;
-
-                default:
-                    throw new IllegalStateException("unhandled sort ordering; " + search.getSortOrdering());
-
-            }
-        }
-
-        orderExpressions.add("pv." + PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY + " ASC");
-
-        return Joiner.on(",").join(orderExpressions);
-    }
-
     public List<PkgVersion> search(
             ObjectContext context,
-            PkgSearchSpecification search,
-            PrefetchTreeNode prefetchTreeNode) {
+            PkgSearchSpecification search) {
 
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(search);
@@ -424,25 +166,54 @@ public class PkgOrchestrationService {
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
 
-        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
-            return Collections.emptyList();
-        }
+        return (List<PkgVersion>) context.performQuery(new PkgSearchQuery(search));
+    }
 
+    private long aggregate(
+            ObjectContext context,
+            PkgSearchSpecification search,
+            String aggregate) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(search);
+
+        StringBuilder sql = new StringBuilder();
         List<Object> parameterAccumulator = Lists.newArrayList();
-        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
-        String orderClause = prepareOrderClause(context, search);
 
-        EJBQLQuery query = new EJBQLQuery("SELECT pv FROM " + PkgVersion.class.getSimpleName() + " AS pv WHERE " + whereClause + " ORDER BY " + orderClause);
-
-        for(int i=0;i<parameterAccumulator.size();i++) {
-            query.setParameter(i+1,parameterAccumulator.get(i));
+        try {
+            sql.append("SELECT ");
+            sql.append(aggregate);
+            sql.append(" FROM\n");
+            PkgSearchHelper.appendSqlSearchFromClause(sql, parameterAccumulator, search);
+            sql.append("WHERE\n");
+            PkgSearchHelper.appendSqlSearchWhereClause(sql, parameterAccumulator, search);
+        }
+        catch(IOException ioe) {
+            throw new IllegalStateException("exception generating the sql", ioe);
         }
 
-        query.setFetchLimit(search.getLimit());
-        query.setFetchOffset(search.getOffset());
+        try(
+                Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 
-        //noinspection unchecked
-        return (List<PkgVersion>) context.performQuery(query);
+            for(int i=0;i<parameterAccumulator.size();i++) {
+                statement.setObject(i+1,parameterAccumulator.get(i));
+            }
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                if(resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+                else {
+                    throw new RuntimeException("expected a single row from the query for the total for the search specification");
+                }
+            }
+
+        }
+        catch(SQLException se) {
+            throw new RuntimeException("unable to get the total for search specification", se);
+        }
+
     }
 
     /**
@@ -452,31 +223,28 @@ public class PkgOrchestrationService {
     public long total(
             ObjectContext context,
             PkgSearchSpecification search) {
+        return aggregate(context, search, "COUNT(DISTINCT pv.id)");
+    }
 
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(search);
+    // ------------------------------
+    // EACH PACKAGE
 
-        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
-            return 0L;
+    private void appendEjbqlAllPkgsWhere(
+            Appendable ejbql,
+            List<Object> parameterList,
+            ObjectContext context,
+            boolean allowSourceOnly) throws IOException {
+
+        ejbql.append("p.active=true\n");
+
+        if(!allowSourceOnly) {
+            ejbql.append("AND EXISTS(");
+            ejbql.append("SELECT pv FROM PkgVersion pv WHERE pv.pkg=p AND pv.active=true AND pv.architecture <> ?");
+            parameterList.add(Architecture.getByCode(context,Architecture.CODE_SOURCE).get());
+            ejbql.append(Integer.toString(parameterList.size()));
+            ejbql.append(")");
         }
 
-        List<Object> parameterAccumulator = Lists.newArrayList();
-        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
-        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(pv) FROM PkgVersion AS pv WHERE " + whereClause);
-
-        for(int i=0;i<parameterAccumulator.size();i++) {
-            ejbQuery.setParameter(i+1, parameterAccumulator.get(i));
-        }
-
-        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
-
-        switch(result.size()) {
-            case 1:
-                return result.get(0).longValue();
-
-            default:
-                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
-        }
     }
 
     /**
@@ -485,74 +253,77 @@ public class PkgOrchestrationService {
 
     public long totalPkg(
             ObjectContext context,
-            PkgSearchSpecification search) {
-
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(search);
-
-        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
-            return 0L;
-        }
-
-        List<Object> parameterAccumulator = Lists.newArrayList();
+            boolean allowSourceOnly) {
+        Preconditions.checkArgument(null!=context, "the object context must be provided");
 
         StringBuilder ejbql = new StringBuilder();
-        ejbql.append("SELECT COUNT(DISTINCT pv.pkg.name) FROM PkgVersion AS pv WHERE ");
-        ejbql.append(prepareWhereClause(parameterAccumulator, context, search));
+        List<Object> parameterList = Lists.newArrayList();
+
+        ejbql.append("SELECT COUNT(p) FROM Pkg p WHERE \n");
+
+        try {
+            appendEjbqlAllPkgsWhere(ejbql, parameterList, context, allowSourceOnly);
+        }
+        catch(IOException ioe) {
+            throw new IllegalStateException("it was not possible to render the ejbql to get the packages", ioe);
+        }
 
         EJBQLQuery query = new EJBQLQuery(ejbql.toString());
 
-        for(int i=0;i<parameterAccumulator.size();i++) {
-            query.setParameter(i + 1, parameterAccumulator.get(i));
+        for(int i=0;i<parameterList.size();i++) {
+            query.setParameter(i+1, parameterList.get(i));
         }
 
-        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(query);
+        List<Object> result = (List<Object>) context.performQuery(query);
 
-        switch(result.size()) {
-            case 1:
-                return result.get(0).longValue();
-
-            default:
-                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+        if(1==result.size()) {
+            return ((Number) result.get(0)).longValue();
         }
+
+        throw new IllegalStateException("expecting one result with the total record count");
     }
 
     /**
      * <p>This will be called for each package in the system.</p>
      * @param c is the callback to invoke.
+     * @param allowSourceOnly when true implies that a package can be processed which only has versions that are for
+     *                        the source architecture.
      * @return the quantity of packages processed.
      */
 
     public long eachPkg(
             ObjectContext context,
-            PkgSearchSpecification search,
+            boolean allowSourceOnly,
             Callback<Pkg> c) {
-
         Preconditions.checkArgument(null!=c, "the callback should be provided to run for each package");
-        Preconditions.checkArgument(null!=search, "the search should be provided to specify the packages to iterate over");
         Preconditions.checkArgument(null!=context, "the object context must be provided");
-
-        if(null!=search.getPkgNames() && search.getPkgNames().isEmpty()) {
-            return 0L;
-        }
-
-        List<Object> parameterAccumulator = Lists.newArrayList();
-
-        StringBuilder ejbql = new StringBuilder();
-        ejbql.append("SELECT DISTINCT p FROM Pkg AS p, PkgVersion AS pv WHERE pv.pkg=p AND ");
-        ejbql.append(prepareWhereClause(parameterAccumulator, context, search));
-        ejbql.append(" ORDER BY p.name ASC");
-
-        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
-
-        for(int i=0;i<parameterAccumulator.size();i++) {
-            query.setParameter(i+1, parameterAccumulator.get(i));
-        }
 
         int offset = 0;
 
+        StringBuilder ejbql = new StringBuilder();
+        List<Object> parameterList = Lists.newArrayList();
+
+        ejbql.append("SELECT p FROM Pkg p WHERE \n");
+
+        try {
+            appendEjbqlAllPkgsWhere(ejbql, parameterList, context, allowSourceOnly);
+        }
+        catch(IOException ioe) {
+            throw new IllegalStateException("it was not possible to render the ejbql to get the packages", ioe);
+        }
+
+        ejbql.append("\nORDER BY p.name ASC");
+
+        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
+
+        for(int i=0;i<parameterList.size();i++) {
+            query.setParameter(i+1, parameterList.get(i));
+        }
+
+        query.setFetchLimit(100);
+
         while(true) {
-            query.setFetchLimit(100); // arbitrary -- might need to tune.
+
             query.setFetchOffset(offset);
 
             List<Pkg> pkgs = (List<Pkg>) context.performQuery(query);
@@ -571,7 +342,6 @@ public class PkgOrchestrationService {
                 }
             }
         }
-
     }
 
     // ------------------------------

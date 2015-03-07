@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,13 +10,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.job.AbstractJobRunner;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
-import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,6 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Collections;
 
 /**
  * <p>This report generates a report that lists the prominence of the packages.</p>
@@ -78,12 +75,9 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
             long startMs = System.currentTimeMillis();
             LOGGER.info("will produce prominence spreadsheet report");
 
-            PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
-            searchSpecification.setArchitectures(Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)));
-
             long count = pkgOrchestrationService.eachPkg(
                     context,
-                    searchSpecification,
+                    false,
                     new Callback<Pkg>() {
                         @Override
                         public boolean process(Pkg pkg) {

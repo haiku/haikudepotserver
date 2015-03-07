@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ import org.apache.directory.api.ldap.model.message.ModifyRequestImpl;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.haikuos.haikudepotserver.dataobjects.User;
-import org.haikuos.haikudepotserver.support.cayenne.LikeHelper;
+import org.haikuos.haikudepotserver.support.LikeHelper;
 import org.haikuos.haikudepotserver.support.ldap.LdapConnectionPoolHolder;
 import org.haikuos.haikudepotserver.user.model.LdapPerson;
 import org.haikuos.haikudepotserver.user.model.UserSearchSpecification;

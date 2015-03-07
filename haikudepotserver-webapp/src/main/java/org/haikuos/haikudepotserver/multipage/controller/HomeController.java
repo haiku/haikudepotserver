@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -160,7 +160,7 @@ public class HomeController {
             searchSpecification.setOffset(totalPkgVersions.intValue());
         }
 
-        List<PkgVersion> pkgVersions = pkgOrchestrationService.search(context, searchSpecification, null);
+        List<PkgVersion> pkgVersions = pkgOrchestrationService.search(context, searchSpecification);
 
         // ------------------------------
         // GENERATE OUTPUT

@@ -15,8 +15,6 @@ import com.google.common.collect.Sets;
 import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.map.Entity;
-import org.apache.cayenne.query.PrefetchTreeNode;
 import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
@@ -219,7 +217,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         SearchPkgsResult result = new SearchPkgsResult();
 
-        List<PkgVersion> searchedPkgVersions = pkgService.search(context,specification,null);
+        List<PkgVersion> searchedPkgVersions = pkgService.search(context,specification);
 
         // if there are more than we asked for then there must be more available.
 
@@ -1091,32 +1089,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 getBulkPkgRequest.filter = Collections.emptyList();
             }
 
-            // use a pre-fetch tree in order to optimize the haul of data back into the application server from
-            // the database depending on what is being asked for.
-
-            PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
-
-            prefetchTreeNode.addPath(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY);
-
-            for(GetBulkPkgRequest.Filter filter : getBulkPkgRequest.filter) {
-                switch(filter) {
-                    case PKGSCREENSHOTS:
-                        prefetchTreeNode.addPath(Joiner.on(Entity.PATH_SEPARATOR).join(
-                                ImmutableList.of(PkgVersion.PKG_PROPERTY, Pkg.PKG_SCREENSHOTS_PROPERTY)));
-                        break;
-
-                    case PKGCATEGORIES:
-                        prefetchTreeNode.addPath(Joiner.on(Entity.PATH_SEPARATOR).join(
-                                ImmutableList.of(PkgVersion.PKG_PROPERTY, Pkg.PKG_PKG_CATEGORIES_PROPERTY)));
-                        break;
-
-                    case PKGICONS:
-                        prefetchTreeNode.addPath(Joiner.on(Entity.PATH_SEPARATOR).join(
-                                ImmutableList.of(PkgVersion.PKG_PROPERTY, Pkg.PKG_ICONS_PROPERTY)));
-                        break;
-                }
-            }
-
             // now search the data.
             PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
             searchSpecification.setArchitectures(transformCodesToArchitectures(context, getBulkPkgRequest.architectureCodes));
@@ -1126,7 +1098,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             searchSpecification.setLimit(Integer.MAX_VALUE);
 
             long preFetchMs = System.currentTimeMillis();
-            final List<PkgVersion> pkgVersions = pkgService.search(context, searchSpecification, prefetchTreeNode);
+            final List<PkgVersion> pkgVersions = pkgService.search(context, searchSpecification);
             final List<PkgLocalization> pkgLocalizations = PkgLocalization.findForPkgs(context, Lists.transform(
                     pkgVersions,
                     new Function<PkgVersion, Pkg>() {

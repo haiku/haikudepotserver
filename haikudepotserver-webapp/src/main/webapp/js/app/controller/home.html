@@ -80,6 +80,12 @@
                                     search-expression="lastRefetchPkgsSearchExpression"
                                     search-expression-type="'CONTAINS'"></highlighted-text>
                         </a>
+                        <span ng-show="shouldExplicitlyShowName(pkg)">
+                            (<highlighted-text
+                                value="pkg.name"
+                                search-expression="lastRefetchPkgsSearchExpression"
+                                search-expression-type="'CONTAINS'"></highlighted-text>)
+                        </span>
                         <div ng-show="shouldShowSummary(pkg)">
                             <small class="muted">
                                 <highlighted-text

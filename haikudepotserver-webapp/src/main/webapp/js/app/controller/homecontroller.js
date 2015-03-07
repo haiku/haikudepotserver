@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -81,6 +81,21 @@ angular.module('haikudepotserver').controller(
                         $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset &&
                     -1 != searchMixins.nextMatchSearchExpression(
                         pkg.versions[0].summary.toLowerCase(),0,
+                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset;
+            };
+
+            // if the search criteria has hit the name, but the name is not being displayed because
+            // there is a title shown then it makes sense to show the name.
+
+            $scope.shouldExplicitlyShowName = function(pkg) {
+                return $scope.lastRefetchPkgsSearchExpression &&
+                    $scope.lastRefetchPkgsSearchExpression.length &&
+                    pkg.title && pkg.title.length &&
+                    -1 == searchMixins.nextMatchSearchExpression(
+                        pkg.title.toLowerCase(),0,
+                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset &&
+                    -1 != searchMixins.nextMatchSearchExpression(
+                        pkg.name,0,
                         $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset;
             };
 

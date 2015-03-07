@@ -12,8 +12,9 @@
     Cayenne logs quite a bit of material out; best to turn that quantity of logging down a bit.
     -->
 
-    <logger name="org.apache.cayenne" level="debug"/>
+    <logger name="org.apache.cayenne" level="info"/>
     <logger name="com.googlecode.flyway" level="debug"/>
+    <logger name="org.haikuos.haikudepotserver.pkg.search" level="info"/>
 
     <root level="info">
         <appender-ref ref="STDOUT" />

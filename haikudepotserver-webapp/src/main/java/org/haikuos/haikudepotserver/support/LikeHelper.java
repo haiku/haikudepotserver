@@ -1,9 +1,9 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.support.cayenne;
+package org.haikuos.haikudepotserver.support;
 
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,15 +11,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.PrefetchTreeNode;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.job.model.JobRunnerException;
 import org.haikuos.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
-import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,14 +78,12 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
 
             // stream out the packages.
 
-            PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
-            searchSpecification.setArchitectures(Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE)));
-
             LOGGER.info("will produce category coverage spreadsheet report");
+
 
             long count = pkgOrchestrationService.eachPkg(
                     context,
-                    searchSpecification,
+                    false,
                     new Callback<Pkg>() {
                         @Override
                         public boolean process(Pkg pkg) {
