@@ -6,7 +6,6 @@
 package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgIcon;

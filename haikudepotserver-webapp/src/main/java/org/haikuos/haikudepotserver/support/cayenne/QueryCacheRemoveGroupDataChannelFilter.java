@@ -1,3 +1,8 @@
+/*
+ * Copyright 2015, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haikuos.haikudepotserver.support.cayenne;
 
 import com.google.common.collect.Sets;
