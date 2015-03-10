@@ -79,6 +79,10 @@ public class NaturalLanguage extends _NaturalLanguage {
         );
     }
 
+    public static NaturalLanguage getEnglish(ObjectContext context) {
+        return getByCode(context, CODE_ENGLISH).get();
+    }
+
     /**
      * <p>This method will return all of the natural language codes in the system.</p>
      */
@@ -94,6 +98,10 @@ public class NaturalLanguage extends _NaturalLanguage {
                     }
                 }
         );
+    }
+
+    public boolean isEnglish() {
+        return CODE_ENGLISH.equals(getCode());
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -79,5 +79,23 @@ public abstract class AbstractSearchSpecification {
         this.expressionType = expressionType;
     }
 
+    /**
+     * <p>This converts the expression into a form that can be used with a SQL like.</p>
+     */
+
+    public String getExpressionAsSqlLike() {
+        if(null==getExpression()) {
+            return null;
+        }
+
+        switch(getExpressionType()) {
+            case CONTAINS:
+                return "%" + LikeHelper.ESCAPER.escape(getExpression()) + "%";
+
+            default:
+                throw new IllegalStateException("unknown expression type; " + getExpressionType().name());
+        }
+
+    }
 
 }

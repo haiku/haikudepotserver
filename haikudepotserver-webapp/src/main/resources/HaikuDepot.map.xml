@@ -679,4 +679,125 @@
 	<obj-relationship name="pkgVersion" source="UserRating" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="user" source="UserRating" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="userRatingStability" source="UserRating" target="UserRatingStability" deleteRule="Nullify" db-relationship-path="user_rating_stability"/>
+	<query name="SearchPkgVersions" factory="org.apache.cayenne.map.SQLTemplateBuilder" root="obj-entity" root-name="PkgVersion">
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+#if($isTotal)
+COUNT(DISTINCT pv.id) AS "total"
+#else
+    #result('pv.active', 'boolean', 'active'),
+    #result('pv.architecture_id', 'long', 'architecture_id'),
+    #result('pv.create_timestamp', 'java.sql.Timestamp', 'create_timestamp'),
+    #result('pv.id', 'long', 'id'),
+    #result('pv.major', 'String', 'major'),
+    #result('pv.minor', 'String', 'minor'),
+    #result('pv.micro', 'String', 'micro'),
+    #result('pv.modify_timestamp', 'java.sql.Timestamp', 'modify_timestamp'),
+    #result('pv.pkg_id', 'long', 'pkg_id'),
+    #result('pv.pre_release', 'String', 'pre_release'),
+    #result('pv.repository_id', 'long', 'repository_id'),
+    #result('pv.revision', 'Integer', 'revision'),
+    #result('pv.view_counter', 'long', 'view_counter'),
+    #result('pv.is_latest', 'boolean', 'is_latest'),
+    #result('pv.payload_length', 'Long', 'payload_length')
+#end
+FROM
+haikudepot.pkg_version pv
+JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+#if($search.architectures)
+JOIN haikudepot.architecture a ON a.id = pv.architecture_id
+#end
+LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_id = p.id
+#if($search.naturalLanguage)
+AND (
+    #bindObjectEqual($search.naturalLanguage,'pl.natural_language_id','id')
+    #if(!$search.naturalLanguage.isEnglish())
+    OR (
+        #bindObjectEqual($englishNaturalLanguage,'pl.natural_language_id','id')
+    AND NOT EXISTS(
+    SELECT plx.id FROM haikudepot.pkg_localization plx
+    WHERE plx.pkg_id=p.id AND #bindObjectEqual($search.naturalLanguage,'plx.natural_language_id','id')
+    )
+    )
+    #end
+)
+#else
+AND #bindObjectEqual($englishNaturalLanguage,'pl.natural_language_id','id')
+#end
+#if($search.pkgCategory)
+JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_id = p.id
+#end
+#if($search.expression)
+LEFT JOIN haikudepot.pkg_version_localization pvl ON pvl.pkg_version_id = pv.id
+    #if($search.naturalLanguage)
+    AND (
+        #bindObjectEqual($search.naturalLanguage,'pvl.natural_language_id','id')
+        #if(!$search.naturalLanguage.isEnglish())
+        OR (
+            #bindObjectEqual($englishNaturalLanguage,'pvl.natural_language_id','id')
+        AND NOT EXISTS(
+        SELECT pvlx.id FROM haikudepot.pkg_version_localization pvlx
+        WHERE pvlx.pkg_version_id=pv.id AND #bindObjectEqual($search.naturalLanguage,'pvlx.natural_language_id','id')
+        )
+        )
+        #end
+    )
+    #else
+    AND #bindObjectEqual($englishNaturalLanguage,'pvl.natural_language_id','id')
+    #end
+#end
+#if($search.sortOrdering.name() == "PROMINENCE")
+LEFT JOIN haikudepot.prominence pr ON p.prominence_id = pr.id
+#end
+WHERE
+pv.is_latest = true
+#if(! $search.includeInactive)
+AND p.active = true
+AND pv.active = true
+#end
+#if($search.architectures)
+AND a.code IN (
+    #foreach( $architecture in $search.architectures )
+        #bind($architecture.code)
+        #if($velocityHasNext)
+        ,
+        #end
+    #end
+)
+#end
+#if($search.daysSinceLatestVersion)
+AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGER') * INTERVAL '1 DAY'
+#end
+#if($search.expression)
+AND (
+LOWER(pvl.summary) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(p.name) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(pl.title) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+)
+#end
+#if($search.pkgCategory)
+AND #bindObjectEqual($search.pkgCategory, 'ppc.pkg_category_id', 'id')
+#end
+#if($search.pkgNames)
+    #if($search.pkgNames.isEmpty())
+    AND true = false
+    #else
+    AND p.name IN (#bind($search.pkgNames))
+    #end
+#end
+#if(!$isTotal)
+ORDER BY
+    #if($search.sortOrdering)
+        #if($search.sortOrdering.name() == "PROMINENCE")
+        pr.ordering ASC,
+        #elseif($search.sortOrdering.name() == "VERSIONVIEWCOUNTER")
+        pv.view_counter DESC,
+        #elseif($search.sortOrdering.name() == "VERSIONCREATETIMESTAMP")
+        pv.create_timestamp DESC,
+        #end
+    #end
+LOWER(COALESCE(pl.title,p.name)) ASC
+OFFSET #bind($search.offset)
+LIMIT #bind($search.limit)
+#end]]></sql>
+	</query>
 </data-map>

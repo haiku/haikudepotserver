@@ -9,26 +9,20 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Uninterruptibles;
+import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.OptimisticLockException;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.cayenne.query.ObjectIdQuery;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.*;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.pkg.model.*;
-import org.haikuos.haikudepotserver.pkg.search.PkgSearchHelper;
-import org.haikuos.haikudepotserver.pkg.search.PkgSearchQuery;
 import org.haikuos.haikudepotserver.support.*;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.imgscalr.Scalr;
@@ -43,10 +37,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -166,54 +156,14 @@ public class PkgOrchestrationService {
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
 
-        return (List<PkgVersion>) context.performQuery(new PkgSearchQuery(search));
-    }
+        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver().getQuery("SearchPkgVersions");
+        Query query = sqlTemplate.createQuery(ImmutableMap.of(
+                "search",search,
+                "isTotal",false,
+                "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
+        ));
 
-    private long aggregate(
-            ObjectContext context,
-            PkgSearchSpecification search,
-            String aggregate) {
-
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(search);
-
-        StringBuilder sql = new StringBuilder();
-        List<Object> parameterAccumulator = Lists.newArrayList();
-
-        try {
-            sql.append("SELECT ");
-            sql.append(aggregate);
-            sql.append(" FROM\n");
-            PkgSearchHelper.appendSqlSearchFromClause(sql, parameterAccumulator, search);
-            sql.append("WHERE\n");
-            PkgSearchHelper.appendSqlSearchWhereClause(sql, parameterAccumulator, search);
-        }
-        catch(IOException ioe) {
-            throw new IllegalStateException("exception generating the sql", ioe);
-        }
-
-        try(
-                Connection connection = dataSource.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql.toString())) {
-
-            for(int i=0;i<parameterAccumulator.size();i++) {
-                statement.setObject(i+1,parameterAccumulator.get(i));
-            }
-
-            try(ResultSet resultSet = statement.executeQuery()) {
-                if(resultSet.next()) {
-                    return resultSet.getLong(1);
-                }
-                else {
-                    throw new RuntimeException("expected a single row from the query for the total for the search specification");
-                }
-            }
-
-        }
-        catch(SQLException se) {
-            throw new RuntimeException("unable to get the total for search specification", se);
-        }
-
+        return (List<PkgVersion>) context.performQuery(query);
     }
 
     /**
@@ -223,7 +173,19 @@ public class PkgOrchestrationService {
     public long total(
             ObjectContext context,
             PkgSearchSpecification search) {
-        return aggregate(context, search, "COUNT(DISTINCT pv.id)");
+
+        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver().getQuery("SearchPkgVersions");
+        SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
+                "search",search,
+                "isTotal",true,
+                "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
+        ));
+        query.setFetchingDataRows(true);
+
+        DataRow dataRow = (DataRow) (context.performQuery(query)).get(0);
+        Number newTotal = (Number) dataRow.get("total");
+
+        return newTotal.longValue();
     }
 
     // ------------------------------
