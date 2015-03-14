@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,9 +14,10 @@ import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.multipage.MultipageConstants;
-import org.haikuos.haikudepotserver.multipage.MultipageHelper;
+import org.haikuos.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haikuos.haikudepotserver.multipage.MultipageObjectNotFoundException;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
+import org.haikuos.haikudepotserver.support.web.WebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,10 +100,10 @@ public class ViewPkgController {
 
         {
             UriComponentsBuilder builder = UriComponentsBuilder.fromPath(MultipageConstants.PATH_MULTIPAGE);
-            String naturalLanguageCode = httpServletRequest.getParameter(MultipageConstants.KEY_NATURALLANGUAGECODE);
+            String naturalLanguageCode = httpServletRequest.getParameter(WebConstants.KEY_NATURALLANGUAGECODE);
 
             if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
-                builder.queryParam(MultipageConstants.KEY_NATURALLANGUAGECODE, naturalLanguageCode);
+                builder.queryParam(WebConstants.KEY_NATURALLANGUAGECODE, naturalLanguageCode);
             }
 
             homeUrl = builder.build().toString();
@@ -111,7 +112,7 @@ public class ViewPkgController {
         ViewPkgVersionData data = new ViewPkgVersionData();
 
         data.setPkgVersion(pkgVersionOptional.get());
-        data.setCurrentNaturalLanguage(MultipageHelper.deriveNaturalLanguage(context, httpServletRequest));
+        data.setCurrentNaturalLanguage(NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest));
         data.setHomeUrl(homeUrl);
 
         ModelAndView result = new ModelAndView("multipage/viewPkgVersion");

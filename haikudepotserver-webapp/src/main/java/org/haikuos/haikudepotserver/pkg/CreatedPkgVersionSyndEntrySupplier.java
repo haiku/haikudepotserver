@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -112,15 +112,17 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                                                     input.getPkg().getName(),
                                                     input.toVersionCoordinates().toString())).toString());
 
+                            // see method for this on "PkgVersion.toCoordinate().pathCom...()"
+
                             entry.setLink(String.format(
                                     "%s/#/pkg/%s/%s/%s/%s/%s/%d/%s",
                                     baseUrl,
                                     input.getPkg().getName(),
                                     input.getMajor(),
-                                    null == input.getMinor() ? "" : input.getMinor(),
-                                    null == input.getMicro() ? "" : input.getMicro(),
-                                    null == input.getPreRelease() ? "" : input.getPreRelease(),
-                                    null == input.getRevision() ? "" : input.getRevision(),
+                                    null == input.getMinor() ? "-" : input.getMinor(),
+                                    null == input.getMicro() ? "-" : input.getMicro(),
+                                    null == input.getPreRelease() ? "-" : input.getPreRelease(),
+                                    null == input.getRevision() ? "-" : input.getRevision(),
                                     input.getArchitecture().getCode()));
 
                             entry.setTitle(messageSource.getMessage(

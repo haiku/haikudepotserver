@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.html.HtmlEscapers;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.multipage.MultipageConstants;
+import org.haikuos.haikudepotserver.support.web.WebConstants;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -59,11 +60,11 @@ public class PkgVersionLinkTag extends RequestContextAwareTag {
                 null == pkgVersion.getRevision() ? "-" : pkgVersion.getRevision().toString(),
                 pkgVersion.getArchitecture().getCode()));
 
-        String naturalLanguageCode = pageContext.getRequest().getParameter(MultipageConstants.KEY_NATURALLANGUAGECODE);
+        String naturalLanguageCode = pageContext.getRequest().getParameter(WebConstants.KEY_NATURALLANGUAGECODE);
 
         if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
             builder.queryParam(
-                    MultipageConstants.KEY_NATURALLANGUAGECODE,
+                    WebConstants.KEY_NATURALLANGUAGECODE,
                     naturalLanguageCode);
         }
 

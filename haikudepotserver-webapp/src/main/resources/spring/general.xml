@@ -51,13 +51,27 @@
     <bean class="org.haikuos.haikudepotserver.repository.PkgRepositoryImportJobRunner"/>
     <bean class="org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner"/>
 
-    <!-- EMAIL -->
+    <!-- OPEN SEARCH -->
 
-    <bean id="freemarkerConfiguration" class="freemarker.template.Configuration">
+    <bean id="opensearchFreemarkerConfiguration" class="freemarker.template.Configuration">
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="localizedLookup" value="false"/>
         <property name="templateLoader">
-            <bean class="org.haikuos.haikudepotserver.mail.MailTemplateLoader"/>
+            <bean class="org.haikuos.haikudepotserver.support.freemarker.LocalizedTemplateLoader">
+                <property name="base" value="classpath:/opensearch/"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- EMAIL -->
+
+    <bean id="emailFreemarkerConfiguration" class="freemarker.template.Configuration">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="localizedLookup" value="false"/>
+        <property name="templateLoader">
+            <bean class="org.haikuos.haikudepotserver.support.freemarker.LocalizedTemplateLoader">
+                <property name="base" value="classpath:/mail/"/>
+            </bean>
         </property>
     </bean>
 

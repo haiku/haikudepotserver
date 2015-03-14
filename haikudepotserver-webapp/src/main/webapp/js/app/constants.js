@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,7 +29,9 @@ angular.module('haikudepotserver')
         MEDIATYPE_HAIKUVECTORICONFILE : 'application/x-vnd.haiku-icon',
 
         PATTERN_USER_NICKNAME : /^[a-z0-9]{4,16}$/,
-        PATTERN_PKG_NAME : /^[^\s/=!<>-]+$/
+        PATTERN_PKG_NAME : /^[^\s/=!<>-]+$/,
+
+        KEY_NATURALLANGUAGECODE : 'natlangcode'
 
 })
 

@@ -13,11 +13,11 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log','$q','$rootScope','$timeout','$window',
+        '$log','$q','$rootScope','$timeout','$window','$location',
         'jsonRpc','pkgScreenshot','errorHandling',
         'constants','referenceData','jobs',
         function(
-            $log,$q,$rootScope,$timeout,$window,
+            $log,$q,$rootScope,$timeout,$window,$location,
             jsonRpc,pkgScreenshot,errorHandling,
             constants,referenceData,jobs) {
 
@@ -435,27 +435,50 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             /**
+             * <p>Does some guess work and creates a list of preferred natural languages.  The most preferred
+             * language is at offset 0, the least preferred language is at the end of the array.</p>
+             */
+
+            function guessedNaturalLanguageCodes() {
+                var result = ['en']; // default to English
+
+                if(window && window.navigator && window.navigator.language) {
+                    var languageMatch = window.navigator.language.match(/^([a-z]{2})($|-.*$)/);
+
+                    if (languageMatch) {
+                        result.unshift(languageMatch[1]);
+                    }
+                }
+
+                var queryParam = $location.search()[constants.KEY_NATURALLANGUAGECODE];
+
+                if(queryParam && queryParam.length) {
+                    var queryParamMatch = queryParam.match(/^[a-z]{2}$/);
+
+                    if(queryParamMatch) {
+                        result.unshift(queryParam);
+                    }
+                }
+
+                return result;
+            }
+
+            /**
              * <p>This function will take a guess at the default natural language by looking at those languages that
              * are to be found in the browser's own list of languages.</p>
              */
 
             function initNaturalLanguageCode() {
-                if(window && window.navigator && window.navigator.language) {
-
-                    var languageMatch = window.navigator.language.match(/^([a-z]{2})($|-.*$)/);
-
-                    if(languageMatch) {
-                        var language = languageMatch[1];
-
-                        referenceData.naturalLanguages().then(
-                            function(naturalLanguages) {
-                                if(_.findWhere(naturalLanguages, { code : language })) {
-                                    naturalLanguageCode(language);
-                                }
+                referenceData.naturalLanguages().then(
+                    function(naturalLanguages) {
+                        naturalLanguageCode(_.find(
+                            guessedNaturalLanguageCodes(),
+                            function (naturalLanguageCode) {
+                                return !!_.findWhere(naturalLanguages, {code: naturalLanguageCode});
                             }
-                        );
+                        ));
                     }
-                }
+                );
             }
 
             initNaturalLanguageCode();

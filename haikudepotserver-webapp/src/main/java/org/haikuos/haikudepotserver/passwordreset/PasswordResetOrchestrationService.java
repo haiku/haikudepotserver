@@ -54,7 +54,7 @@ public class PasswordResetOrchestrationService {
     @Resource
     private AuthenticationService authenticationService;
 
-    @Resource
+    @Resource(name = "emailFreemarkerConfiguration")
     private Configuration freemarkerConfiguration;
 
     @Value("${passwordreset.ttlhours:1}")

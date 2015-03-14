@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,8 +9,8 @@ import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haikuos.haikudepotserver.multipage.MultipageConstants;
-import org.haikuos.haikudepotserver.multipage.MultipageHelper;
+import org.haikuos.haikudepotserver.support.web.NaturalLanguageWebHelper;
+import org.haikuos.haikudepotserver.support.web.WebConstants;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
@@ -39,7 +39,7 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
         ObjectContext context = getObjectContext();
         TagWriter tagWriter = new TagWriter(pageContext.getOut());
         List<NaturalLanguage> naturalLanguages = Lists.newArrayList(NaturalLanguage.getAllPopular(context));
-        NaturalLanguage currentNaturalLanguage = MultipageHelper.deriveNaturalLanguage(
+        NaturalLanguage currentNaturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(
                 context,
                 (HttpServletRequest) pageContext.getRequest());
 
@@ -65,7 +65,7 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
             if(currentNaturalLanguage != naturalLanguage) {
 
                 ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequest();
-                builder.replaceQueryParam(MultipageConstants.KEY_NATURALLANGUAGECODE, naturalLanguage.getCode());
+                builder.replaceQueryParam(WebConstants.KEY_NATURALLANGUAGECODE, naturalLanguage.getCode());
 
                 tagWriter.startTag("a");
                 tagWriter.writeAttribute("href",builder.build().toString());

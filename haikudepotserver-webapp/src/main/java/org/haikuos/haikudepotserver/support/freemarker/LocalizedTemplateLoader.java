@@ -1,9 +1,9 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.mail;
+package org.haikuos.haikudepotserver.support.freemarker;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -22,20 +22,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * <p>This bean provides a repository for email templates that are sent out by the system.  There is a crude
- * mechanism of localization wherein a different template exists for each natural language.  This object
- * fits into the Freemarker templating system.</p>
+ * <p>This bean provides a repository for freemarker templates.  These templates are used for things like
+ * emails.  There is a crude mechanism of localization wherein a different template exists for each natural
+ * language.  This object fits into the Freemarker template system.</p>
  */
 
-public class MailTemplateLoader implements TemplateLoader, ResourceLoaderAware {
+public class LocalizedTemplateLoader implements TemplateLoader, ResourceLoaderAware {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(MailTemplateLoader.class);
-
-    private final static String BASE = "classpath:/mail/";
+    protected static Logger LOGGER = LoggerFactory.getLogger(LocalizedTemplateLoader.class);
 
     private final static Pattern PATTERN_NAME = Pattern.compile("^([a-z0-9]+-[a-z0-9]+)_([a-z]{2,2})$");
 
     private ResourceLoader resourceLoader;
+
+    private String base;
+
+    /**
+     * <p>This is a URL such as "classpath:/mail/".</p>
+     */
+
+    public void setBase(String value) {
+        this.base = value;
+    }
 
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -43,14 +51,14 @@ public class MailTemplateLoader implements TemplateLoader, ResourceLoaderAware {
 
     private Resource getTemplateResource(String naturalLanguageCode, String leafName) {
 
-        Resource rsrc = resourceLoader.getResource(BASE + leafName + "_" + naturalLanguageCode + ".ftl");
+        Resource rsrc = resourceLoader.getResource(base + leafName + "_" + naturalLanguageCode + ".ftl");
 
         if(!rsrc.exists()) {
-            rsrc = resourceLoader.getResource(BASE + leafName + ".ftl");
+            rsrc = resourceLoader.getResource(base + leafName + ".ftl");
         }
 
         if(!rsrc.exists()) {
-            throw new IllegalStateException("unable to find the mail template; " + leafName);
+            throw new IllegalStateException("unable to find the template; " + base + leafName);
         }
 
         return rsrc;

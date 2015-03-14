@@ -1,9 +1,9 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haikuos.haikudepotserver.multipage;
+package org.haikuos.haikudepotserver.support.web;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * <p>Helper (static) methods for the multipage part of the system.</p>
  */
 
-public class MultipageHelper {
+public class NaturalLanguageWebHelper {
 
     /**
      * <p>This will look at parameters on the supplied request and will return a natural language.  It will
@@ -35,7 +35,7 @@ public class MultipageHelper {
         Preconditions.checkNotNull(context);
 
         if(null!=request) {
-            String naturalLanguageCode = request.getParameter(MultipageConstants.KEY_NATURALLANGUAGECODE);
+            String naturalLanguageCode = request.getParameter(WebConstants.KEY_NATURALLANGUAGECODE);
 
             if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
                 Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, naturalLanguageCode);

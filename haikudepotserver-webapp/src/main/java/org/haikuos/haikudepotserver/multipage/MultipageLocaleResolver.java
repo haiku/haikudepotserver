@@ -1,11 +1,12 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.multipage;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.support.web.NaturalLanguageWebHelper;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +20,7 @@ public class MultipageLocaleResolver implements org.springframework.web.servlet.
 
     @Override
     public Locale resolveLocale(HttpServletRequest request) {
-        return MultipageHelper.deriveNaturalLanguage(serverRuntime.getContext(), request).toLocale();
+        return NaturalLanguageWebHelper.deriveNaturalLanguage(serverRuntime.getContext(), request).toLocale();
     }
 
     @Override

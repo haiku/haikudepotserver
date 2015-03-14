@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * <p>This object models the version coordinates of a package.</p>
@@ -47,6 +48,15 @@ public class VersionCoordinates {
 
     public Integer getRevision() {
         return revision;
+    }
+
+    public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+        builder.pathSegment(getMajor());
+        builder.pathSegment(!Strings.isNullOrEmpty(getMinor()) ? getMinor() : "-");
+        builder.pathSegment(!Strings.isNullOrEmpty(getMicro()) ? getMicro() : "-");
+        builder.pathSegment(!Strings.isNullOrEmpty(getPreRelease()) ? getPreRelease() : "-");
+        builder.pathSegment(null!=getRevision() ? Integer.toString(getRevision()) : "-");
+        return builder;
     }
 
     /**

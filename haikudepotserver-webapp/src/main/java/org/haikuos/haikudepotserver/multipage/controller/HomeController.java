@@ -17,7 +17,7 @@ import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.multipage.MultipageConstants;
-import org.haikuos.haikudepotserver.multipage.MultipageHelper;
+import org.haikuos.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haikuos.haikudepotserver.multipage.model.Pagination;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -118,7 +118,7 @@ public class HomeController {
             pkgCategoryOptional = PkgCategory.getByCode(context, pkgCategoryCode);
         }
 
-        searchSpecification.setNaturalLanguage(MultipageHelper.deriveNaturalLanguage(context, httpServletRequest));
+        searchSpecification.setNaturalLanguage(NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest));
 
         switch(null==viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {
 

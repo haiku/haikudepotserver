@@ -15,6 +15,7 @@ web-resources and then this starts the java-script single page environment drive
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <%@include file="/WEB-INF/includes/searchheadlink.jsp"%>
     <%@include file="/WEB-INF/includes/favicons.jsp"%>
 
     <jwr:script src="/bundles/libs.js"></jwr:script>
