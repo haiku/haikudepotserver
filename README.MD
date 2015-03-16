@@ -15,7 +15,7 @@ This web application is an online tool for working with the software packages of
 
 ## Deployments
 
-| * Environment* | *URL* |
+| Environment | URL |
 | --- | --- |
 | Production | https://depot.haiku-os.org/ |
 | Test | https://depot-test.haiku-os.org/ |
@@ -28,17 +28,17 @@ A [mailing list](http://www.freelists.org/list/haiku-depot-web) exists to discus
 
 The core part of the project is a java servlet application and is built using maven.  A module of the project called "haikudepotserver-docs" contains a LaTeX document that outlines how to setup a development environment for the application.  To build the documentation, you should;
 
-# Install a modern LaTeX distribution
-# Install Java (1.7 or better)
-# Install Maven
-# Clone the source tree
-# Set the present working directory to "haikudepotserver-docs" in the source tree
-# Execute "mvn latex:latex"
+1. Install a modern LaTeX distribution
+2. Install Java (1.7 or better)
+3. Install Maven
+4. Clone the source tree
+5. Set the present working directory to "haikudepotserver-docs" in the source tree
+6. Execute "mvn latex:latex"
 
 A PDF document should be generated at "target/docs.pdf".
 
 ## Other Helpful Resources
 
-* [http://www.haiku-os.org/ Haiku OS home page]
-* Home page for [http://bb.haikuports.org/haikuports/wiki/Home HaikuPorts] - for external packages
-* HaikuOS [http://dev.haiku-os.org/wiki/PackageManagement package management] documentation
+* [Haiku OS home page](http://www.haiku-os.org/)
+* Home page for [HaikuPorts](http://bb.haikuports.org/haikuports/wiki/Home) - for external packages
+* HaikuOS [package management](http://dev.haiku-os.org/wiki/PackageManagement) documentation
