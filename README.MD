@@ -1,6 +1,5 @@
 # Haiku Depot Server
 
-
 ## Purpose
 
 This web application is an online tool for working with the software packages of the [Haiku Operating System](http://www.haiku-os.org/).  The web application aims to provide the following functionality;
@@ -43,3 +42,4 @@ A PDF document should be generated at "target/docs.pdf".
 * [Haiku OS home page](http://www.haiku-os.org/)
 * Home page for [HaikuPorts](http://bb.haikuports.org/haikuports/wiki/Home) - for external packages
 * HaikuOS [package management](http://dev.haiku-os.org/wiki/PackageManagement) documentation
+* Usage [help](https://dev.haiku-os.org/wiki/PackageManagement/HaikuDepotServer)
