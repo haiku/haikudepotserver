@@ -2,6 +2,7 @@ package org.haikuos.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.haikuos.haikudepotserver.dataobjects.LocalizationContent;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -15,11 +16,12 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 public abstract class _PkgVersionLocalization extends AbstractDataObject {
 
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String DESCRIPTION_PROPERTY = "description";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String SUMMARY_PROPERTY = "summary";
+    public static final String DESCRIPTION_LOCALIZATION_CONTENT_PROPERTY = "descriptionLocalizationContent";
     public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
     public static final String PKG_VERSION_PROPERTY = "pkgVersion";
+    public static final String SUMMARY_LOCALIZATION_CONTENT_PROPERTY = "summaryLocalizationContent";
+    public static final String TITLE_LOCALIZATION_CONTENT_PROPERTY = "titleLocalizationContent";
 
     public static final String ID_PK_COLUMN = "id";
 
@@ -30,13 +32,6 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
         return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
     }
 
-    public void setDescription(String description) {
-        writeProperty(DESCRIPTION_PROPERTY, description);
-    }
-    public String getDescription() {
-        return (String)readProperty(DESCRIPTION_PROPERTY);
-    }
-
     public void setModifyTimestamp(Date modifyTimestamp) {
         writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
     }
@@ -44,12 +39,14 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
         return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
     }
 
-    public void setSummary(String summary) {
-        writeProperty(SUMMARY_PROPERTY, summary);
+    public void setDescriptionLocalizationContent(LocalizationContent descriptionLocalizationContent) {
+        setToOneTarget(DESCRIPTION_LOCALIZATION_CONTENT_PROPERTY, descriptionLocalizationContent, true);
     }
-    public String getSummary() {
-        return (String)readProperty(SUMMARY_PROPERTY);
+
+    public LocalizationContent getDescriptionLocalizationContent() {
+        return (LocalizationContent)readProperty(DESCRIPTION_LOCALIZATION_CONTENT_PROPERTY);
     }
+
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
         setToOneTarget(NATURAL_LANGUAGE_PROPERTY, naturalLanguage, true);
@@ -66,6 +63,24 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
 
     public PkgVersion getPkgVersion() {
         return (PkgVersion)readProperty(PKG_VERSION_PROPERTY);
+    }
+
+
+    public void setSummaryLocalizationContent(LocalizationContent summaryLocalizationContent) {
+        setToOneTarget(SUMMARY_LOCALIZATION_CONTENT_PROPERTY, summaryLocalizationContent, true);
+    }
+
+    public LocalizationContent getSummaryLocalizationContent() {
+        return (LocalizationContent)readProperty(SUMMARY_LOCALIZATION_CONTENT_PROPERTY);
+    }
+
+
+    public void setTitleLocalizationContent(LocalizationContent titleLocalizationContent) {
+        setToOneTarget(TITLE_LOCALIZATION_CONTENT_PROPERTY, titleLocalizationContent, true);
+    }
+
+    public LocalizationContent getTitleLocalizationContent() {
+        return (LocalizationContent)readProperty(TITLE_LOCALIZATION_CONTENT_PROPERTY);
     }
 
 

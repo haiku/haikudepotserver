@@ -15,13 +15,6 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
 
         public String name;
 
-        /**
-         * <p>This value is localized.</p>
-         * @since 2015-02-26
-         */
-
-        public String title;
-
         public Long modifyTimestamp;
 
         /**
@@ -53,6 +46,13 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public String architectureCode;
         public String summary;
         public Long payloadLength;
+
+        /**
+         * <p>This value is localized.</p>
+         * @since 2015-03-26
+         */
+
+        public String title;
     }
 
 }

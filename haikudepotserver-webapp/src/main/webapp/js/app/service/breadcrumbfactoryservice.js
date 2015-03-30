@@ -328,7 +328,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                     return createViewPkgBreadcrumbItem(
                         pkgVersion.pkg.name,
-                        pkgVersion.pkg.title,
+                        pkgVersion.title,
                         pkgVersion,
                         pkgVersion.architectureCode);
                 },
@@ -348,7 +348,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                     return createViewPkgBreadcrumbItem(
                         pkg.name,
-                        pkg.title,
+                        pkgVersion.title,
                         pkgVersion,
                         pkgVersion.architectureCode);
                 },

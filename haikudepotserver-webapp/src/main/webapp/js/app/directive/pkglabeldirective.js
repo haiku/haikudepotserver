@@ -8,8 +8,8 @@
  */
 
 angular.module('haikudepotserver').directive('pkgLabel',[
-    'standardDirectiveMixins',
-    function(standardDirectiveMixins) {
+    // no injections
+    function() {
         return {
             restrict: 'E',
             link: function ($scope, element, attributes) {
@@ -20,18 +20,23 @@ angular.module('haikudepotserver').directive('pkgLabel',[
 
                 element.replaceWith(containerEl);
 
-                containerEl.on('click', function(event) {
+                containerEl.on('click', function() {
                     showName = !showName;
                     refreshText();
                 });
 
                 function deriveText(pkg) {
+
                     if(pkg) {
-                        if(showName) {
-                            return pkg.name;
+                        if(!showName &&
+                            pkg.versions &&
+                            1==pkg.versions.length &&
+                            pkg.versions[0].title &&
+                            pkg.versions[0].title.length) {
+                            return pkg.versions[0].title;
                         }
 
-                        return pkg.title||pkg.name;
+                        return pkg.name;
                     }
 
                     return '';

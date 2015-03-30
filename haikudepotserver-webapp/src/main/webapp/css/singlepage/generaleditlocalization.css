@@ -45,13 +45,6 @@
     font-weight: bold;
 }
 
-#english-original-cell {
-    width: 30%;
-    border-left : 1px solid black;
-    border-right: 1px solid black;
-    background-color: #EEE;
-}
-
 #translation-cell {
 }
 
@@ -67,24 +60,6 @@
 
 #translation-cell-title {
     width: 100%;
-}
-
-#english-original-cell h1 {
-    text-align: right;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    font-size: 10px;
-    color: grey;
-}
-
-#english-original-cell h2 {
-    margin-top: 4px;
-    margin-bottom:2px;
-}
-
-#english-original-cell p {
-    margin-top: 2px;
-    margin-bottom:8px;
 }
 
 #edit-localization-actions-container {

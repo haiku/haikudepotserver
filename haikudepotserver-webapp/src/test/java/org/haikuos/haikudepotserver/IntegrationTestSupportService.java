@@ -97,11 +97,13 @@ public class IntegrationTestSupportService {
     }
 
     public void addDummyLocalization(ObjectContext context, PkgVersion pkgVersion) {
-        PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-        pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
-        pkgVersionLocalization.setDescription("sample description");
-        pkgVersionLocalization.setSummary("sample summary");
-        pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+        pkgOrchestrationService.updatePkgVersionLocalization(
+                context,
+                pkgVersion,
+                NaturalLanguage.getEnglish(context),
+                "sample title",
+                "sample summary",
+                "sample description");
     }
 
     public StandardTestData createStandardTestData() {
@@ -189,21 +191,21 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86.setPkg(result.pkg1);
         result.pkg1Version2x86.setRepository(result.repository);
 
-        {
-            PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-            pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
-            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish_rockmelon");
-            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish_persimon");
-            result.pkg1Version2x86.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
-        }
+        pkgOrchestrationService.updatePkgVersionLocalization(
+                context,
+                result.pkg1Version2x86,
+                NaturalLanguage.getEnglish(context),
+                null,
+                "pkg1Version2SummaryEnglish_persimon",
+                "pkg1Version2DescriptionEnglish_rockmelon");
 
-        {
-            PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-            pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
-            pkgVersionLocalization.setDescription("pkg1Version2DescriptionSpanish_mango");
-            pkgVersionLocalization.setSummary("pkg1Version2SummarySpanish_feijoa");
-            result.pkg1Version2x86.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
-        }
+        pkgOrchestrationService.updatePkgVersionLocalization(
+                context,
+                result.pkg1Version2x86,
+                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
+                null,
+                "pkg1Version2SummarySpanish_feijoa",
+                "pkg1Version2DescriptionSpanish_mango");
 
         result.pkg1Version2x86_gcc2 = context.newObject(PkgVersion.class);
         result.pkg1Version2x86_gcc2.setActive(Boolean.TRUE);
@@ -217,13 +219,13 @@ public class IntegrationTestSupportService {
 
         // this is the same as the x86 version so that comparisons with English will happen.
 
-        {
-            PkgVersionLocalization pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-            pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
-            pkgVersionLocalization.setDescription("pkg1Version2DescriptionEnglish_guava");
-            pkgVersionLocalization.setSummary("pkg1Version2SummaryEnglish_apple");
-            result.pkg1Version2x86_gcc2.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
-        }
+        pkgOrchestrationService.updatePkgVersionLocalization(
+                context,
+                result.pkg1Version2x86_gcc2,
+                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
+                null,
+                "pkg1Version2SummaryEnglish_apple",
+                "pkg1Version2DescriptionEnglish_guava");
 
         result.pkg2 = context.newObject(Pkg.class);
         result.pkg2.setActive(true);

@@ -157,7 +157,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.total).isEqualTo(1);
         Assertions.assertThat(result.items.size()).isEqualTo(1);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
-        Assertions.assertThat(result.items.get(0).title).isEqualTo("Ping 1");
+        Assertions.assertThat(result.items.get(0).versions.get(0).title).isEqualTo("Ping 1");
         Assertions.assertThat(result.items.get(0).versions.get(0).summary).isEqualTo("pkg1Version2SummarySpanish_feijoa");
     }
 
@@ -236,13 +236,12 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.name).isEqualTo("pkg1");
-        Assertions.assertThat(result.title).isEqualTo("Package 1");
         Assertions.assertThat(result.versions.size()).isEqualTo(1);
+        Assertions.assertThat(result.versions.get(0).title).isEqualTo("Package 1");
         Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
         Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");
         Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
-        Assertions.assertThat(result.versions.get(0).naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
         Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
         Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
     }
@@ -272,7 +271,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");
         Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
-        Assertions.assertThat(result.versions.get(0).naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
         Assertions.assertThat(result.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
         Assertions.assertThat(result.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
     }
@@ -570,61 +568,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(sortedScreenshotsAfter.get(2).getCode()).isEqualTo(sortedScreenshotsBefore.get(1).getCode());
     }
 
-    private void testUpdatePkgVersionLocalization(String naturalLanguageCode) throws Exception {
-        setAuthenticatedUserToRoot();
-
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-
-        UpdatePkgVersionLocalizationsRequest request = new UpdatePkgVersionLocalizationsRequest();
-        request.pkgName = data.pkg1.getName();
-        request.architectureCode = "x86";
-        request.replicateToOtherArchitecturesWithSameEnglishContent = Boolean.TRUE;
-        request.pkgVersionLocalizations = Collections.singletonList(
-                new PkgVersionLocalization(
-                        naturalLanguageCode,
-                        "testSummary",
-                        "testDescription")
-        );
-
-        // ------------------------------------
-        pkgApi.updatePkgVersionLocalization(request);
-        // ------------------------------------
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
-            Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
-                    context,
-                    pkgOptional.get(),
-                    Collections.singletonList(Architecture.getByCode(context, "x86").get()));
-
-            Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization> pkgVersionLocalizationOptional =
-                    pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
-
-            Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
-            Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");
-        }
-
-        // check that the data is copied to other architecture.  A x86_gcc2 package version is known to be
-        // present in the test data.
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
-            Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
-                    context,
-                    pkgOptional.get(),
-                    Collections.singletonList(Architecture.getByCode(context, "x86_gcc2").get()));
-
-            Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization> pkgVersionLocalizationOptional =
-                    pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
-
-            Assertions.assertThat(pkgVersionLocalizationOptional.get().getSummary()).isEqualTo("testSummary");
-            Assertions.assertThat(pkgVersionLocalizationOptional.get().getDescription()).isEqualTo("testDescription");
-        }
-
-    }
-
     @Test
     public void testUpdatePkgLocalization() throws Exception {
         setAuthenticatedUserToRoot();
@@ -634,8 +577,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         UpdatePkgLocalizationRequest request = new UpdatePkgLocalizationRequest();
         request.pkgName = "pkg1";
         request.pkgLocalizations = ImmutableList.of(
-                new PkgLocalization(NaturalLanguage.CODE_ENGLISH, "flourescence"),
-                new PkgLocalization(NaturalLanguage.CODE_FRENCH, "treacle"));
+                new PkgLocalization(NaturalLanguage.CODE_ENGLISH, "flourescence", null, null),
+                new PkgLocalization(NaturalLanguage.CODE_FRENCH, "treacle", null, null));
 
         // ------------------------------------
         pkgApi.updatePkgLocalization(request);
@@ -657,16 +600,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
             }
         }
 
-    }
-
-    @Test
-    public void testUpdatePkgVersionLocalization_existingNaturalLanguage() throws Exception {
-        testUpdatePkgVersionLocalization(NaturalLanguage.CODE_SPANISH);
-    }
-
-    @Test
-    public void testUpdatePkgVersionLocalization_newNaturalLanguage() throws Exception {
-        testUpdatePkgVersionLocalization(NaturalLanguage.CODE_GERMAN);
     }
 
     /**
@@ -801,7 +734,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
         }).get();
 
         Assertions.assertThat(pkg1.name).isEqualTo("pkg1");
-        Assertions.assertThat(pkg1.title).isEqualTo("Package 1");
         Assertions.assertThat(pkg1.modifyTimestamp).isNotNull();
 
         Assertions.assertThat(pkg1.pkgCategoryCodes.size()).isEqualTo(1);
@@ -829,7 +761,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
                 }).isPresent()).isTrue();
 
         Assertions.assertThat(pkg1.versions.size()).isEqualTo(1);
-        Assertions.assertThat(pkg1.versions.get(0).naturalLanguageCode).isEqualTo("en");
+        Assertions.assertThat(pkg1.versions.get(0).title).isEqualTo("Package 1");
         Assertions.assertThat(pkg1.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
         Assertions.assertThat(pkg1.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
         Assertions.assertThat(pkg1.versions.get(0).major).isEqualTo("1");

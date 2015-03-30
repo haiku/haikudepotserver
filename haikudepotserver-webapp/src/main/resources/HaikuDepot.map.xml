@@ -16,6 +16,15 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="localization_content" schema="haikudepot">
+		<db-attribute name="content" type="VARCHAR" isMandatory="true" length="65535"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.localization_content_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="media_type" schema="haikudepot">
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
@@ -105,10 +114,12 @@
 	</db-entity>
 	<db-entity name="pkg_localization" schema="haikudepot">
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="description" type="VARCHAR" length="8192"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="natural_language_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="summary" type="VARCHAR" length="8192"/>
 		<db-attribute name="title" type="VARCHAR" length="1024"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
@@ -206,12 +217,13 @@
 	</db-entity>
 	<db-entity name="pkg_version_localization" schema="haikudepot">
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
-		<db-attribute name="description" type="VARCHAR" length="8192"/>
+		<db-attribute name="description_localization_content_id" type="BIGINT"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="natural_language_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="pkg_version_id" type="BIGINT"/>
-		<db-attribute name="summary" type="VARCHAR" length="8192"/>
+		<db-attribute name="summary_localization_content_id" type="BIGINT"/>
+		<db-attribute name="title_localization_content_id" type="BIGINT"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_localization_seq</db-generator-name>
@@ -328,6 +340,9 @@
 	<obj-entity name="Architecture" className="org.haikuos.haikudepotserver.dataobjects.Architecture" readOnly="true" lock-type="optimistic" dbEntityName="architecture" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
+	<obj-entity name="LocalizationContent" className="org.haikuos.haikudepotserver.dataobjects.LocalizationContent" dbEntityName="localization_content" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="content" type="java.lang.String" db-attribute-path="content"/>
+	</obj-entity>
 	<obj-entity name="MediaType" className="org.haikuos.haikudepotserver.dataobjects.MediaType" readOnly="true" lock-type="optimistic" dbEntityName="media_type" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
@@ -363,7 +378,9 @@
 	</obj-entity>
 	<obj-entity name="PkgLocalization" className="org.haikuos.haikudepotserver.dataobjects.PkgLocalization" lock-type="optimistic" dbEntityName="pkg_localization" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="summary" type="java.lang.String" db-attribute-path="summary"/>
 		<obj-attribute name="title" type="java.lang.String" db-attribute-path="title"/>
 	</obj-entity>
 	<obj-entity name="PkgPkgCategory" className="org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory" dbEntityName="pkg_pkg_category" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
@@ -404,9 +421,7 @@
 	</obj-entity>
 	<obj-entity name="PkgVersionLocalization" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization" lock-type="optimistic" dbEntityName="pkg_version_localization" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="description" type="java.lang.String" lock="true" db-attribute-path="description"/>
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
-		<obj-attribute name="summary" type="java.lang.String" lock="true" db-attribute-path="summary"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionUrl" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl" lock-type="optimistic" dbEntityName="pkg_version_url" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="url" type="java.lang.String" lock="true" db-attribute-path="url"/>
@@ -580,11 +595,20 @@
 	<db-relationship name="pkg_version" source="pkg_version_license" target="pkg_version" toMany="false">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
+	<db-relationship name="description_localization_content" source="pkg_version_localization" target="localization_content" toMany="false">
+		<db-attribute-pair source="description_localization_content_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="natural_language" source="pkg_version_localization" target="natural_language" toMany="false">
 		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_version" source="pkg_version_localization" target="pkg_version" toMany="false">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="summary_localization_content" source="pkg_version_localization" target="localization_content" toMany="false">
+		<db-attribute-pair source="summary_localization_content_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="title_localization_content" source="pkg_version_localization" target="localization_content" toMany="false">
+		<db-attribute-pair source="title_localization_content_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_url_type" source="pkg_version_url" target="pkg_url_type" toMany="false">
 		<db-attribute-pair source="pkg_url_type_id" target="id"/>
@@ -665,8 +689,11 @@
 	<obj-relationship name="repository" source="PkgVersion" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionCopyright" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionLicense" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
+	<obj-relationship name="descriptionLocalizationContent" source="PkgVersionLocalization" target="LocalizationContent" deleteRule="Nullify" db-relationship-path="description_localization_content"/>
 	<obj-relationship name="naturalLanguage" source="PkgVersionLocalization" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionLocalization" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
+	<obj-relationship name="summaryLocalizationContent" source="PkgVersionLocalization" target="LocalizationContent" deleteRule="Nullify" db-relationship-path="summary_localization_content"/>
+	<obj-relationship name="titleLocalizationContent" source="PkgVersionLocalization" target="LocalizationContent" deleteRule="Nullify" db-relationship-path="title_localization_content"/>
 	<obj-relationship name="pkgUrlType" source="PkgVersionUrl" target="PkgUrlType" deleteRule="Nullify" db-relationship-path="pkg_url_type"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionUrl" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="pkgs" source="Publisher" target="Pkg" deleteRule="Deny" db-relationship-path="pkgs"/>
@@ -706,44 +733,28 @@ JOIN haikudepot.pkg p ON p.id = pv.pkg_id
 #if($search.architectures)
 JOIN haikudepot.architecture a ON a.id = pv.architecture_id
 #end
-LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_id = p.id
-#if($search.naturalLanguage)
-AND (
-    #bindObjectEqual($search.naturalLanguage,'pl.natural_language_id','id')
-    #if(!$search.naturalLanguage.isEnglish())
-    OR (
-        #bindObjectEqual($englishNaturalLanguage,'pl.natural_language_id','id')
-    AND NOT EXISTS(
-    SELECT plx.id FROM haikudepot.pkg_localization plx
-    WHERE plx.pkg_id=p.id AND #bindObjectEqual($search.naturalLanguage,'plx.natural_language_id','id')
-    )
-    )
+LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_id = p.id AND
+    #if($search.naturalLanguage)
+        #bindObjectEqual($search.naturalLanguage,'pl_nl.natural_language_id','id')
+    #else
+        #bindObjectEqual($englishNaturalLanguage,'pl_nl.natural_language_id','id')
     #end
-)
+LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_id = p.id AND
+    #bindObjectEqual($englishNaturalLanguage,'pl_en.natural_language_id','id')
+LEFT JOIN haikudepot.pkg_version_localization pvl_nl ON pvl_nl.pkg_version_id = pv.id AND
+#if($search.naturalLanguage)
+    #bindObjectEqual($search.naturalLanguage,'pvl_nl.natural_language_id','id')
 #else
-AND #bindObjectEqual($englishNaturalLanguage,'pl.natural_language_id','id')
+    #bindObjectEqual($englishNaturalLanguage,'pvl_nl.natural_language_id','id')
 #end
+LEFT JOIN haikudepot.localization_content pvl_nl_summary_lc ON pvl_nl_summary_lc.id = pvl_nl.summary_localization_content_id
+LEFT JOIN haikudepot.localization_content pvl_nl_title_lc ON pvl_nl_title_lc.id = pvl_nl.title_localization_content_id
+LEFT JOIN haikudepot.pkg_version_localization pvl_en ON pvl_en.pkg_version_id = pv.id AND
+    #bindObjectEqual($englishNaturalLanguage,'pvl_en.natural_language_id','id')
+LEFT JOIN haikudepot.localization_content pvl_en_summary_lc ON pvl_en_summary_lc.id = pvl_en.summary_localization_content_id
+LEFT JOIN haikudepot.localization_content pvl_en_title_lc ON pvl_en_title_lc.id = pvl_en.title_localization_content_id
 #if($search.pkgCategory)
 JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_id = p.id
-#end
-#if($search.expression)
-LEFT JOIN haikudepot.pkg_version_localization pvl ON pvl.pkg_version_id = pv.id
-    #if($search.naturalLanguage)
-    AND (
-        #bindObjectEqual($search.naturalLanguage,'pvl.natural_language_id','id')
-        #if(!$search.naturalLanguage.isEnglish())
-        OR (
-            #bindObjectEqual($englishNaturalLanguage,'pvl.natural_language_id','id')
-        AND NOT EXISTS(
-        SELECT pvlx.id FROM haikudepot.pkg_version_localization pvlx
-        WHERE pvlx.pkg_version_id=pv.id AND #bindObjectEqual($search.naturalLanguage,'pvlx.natural_language_id','id')
-        )
-        )
-        #end
-    )
-    #else
-    AND #bindObjectEqual($englishNaturalLanguage,'pvl.natural_language_id','id')
-    #end
 #end
 #if($search.sortOrdering.name() == "PROMINENCE")
 LEFT JOIN haikudepot.prominence pr ON p.prominence_id = pr.id
@@ -769,9 +780,9 @@ AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGE
 #end
 #if($search.expression)
 AND (
-LOWER(pvl.summary) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary,pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
 OR LOWER(p.name) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(pl.title) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
 )
 #end
 #if($search.pkgCategory)
@@ -795,7 +806,7 @@ ORDER BY
         pv.create_timestamp DESC,
         #end
     #end
-LOWER(COALESCE(pl.title,p.name)) ASC
+LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC
 OFFSET #bind($search.offset)
 LIMIT #bind($search.limit)
 #end]]></sql>

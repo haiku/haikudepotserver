@@ -4,9 +4,9 @@
 
     <div ng-repeat="translation in translations" class="translation-container">
         <h1>{{translation.naturalLanguage.title}} (<code>{{translation.naturalLanguage.code}}</code>)</h1>
-        <h2><message key="editPkgVersionLocalization.summary.title"></message></h2>
+        <h2><message key="viewPkgVersionLocalization.summary.title"></message></h2>
         <p>{{translation.summary}}</p>
-        <h2><message key="editPkgVersionLocalization.description.title"></message></h2>
+        <h2><message key="viewPkgVersionLocalization.description.title"></message></h2>
         <p><plain-text-content value="translation.description"></plain-text-content></p>
     </div>
 

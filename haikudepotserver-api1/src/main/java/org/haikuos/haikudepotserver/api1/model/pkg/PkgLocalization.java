@@ -11,11 +11,21 @@ public class PkgLocalization {
 
     public String title;
 
+    public String summary;
+
+    public String description;
+
     public PkgLocalization() {
     }
 
-    public PkgLocalization(String naturalLanguageCode, String title) {
+    public PkgLocalization(
+            String naturalLanguageCode,
+            String title,
+            String summary,
+            String description) {
         this.naturalLanguageCode = naturalLanguageCode;
         this.title = title;
+        this.description = description;
+        this.summary = summary;
     }
 }

@@ -140,7 +140,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
                                 SyndContent content = new SyndContentImpl();
                                 content.setType(MediaType.PLAIN_TEXT_UTF_8.type());
-                                content.setValue(pkgVersionLocalizationOptional.get().getSummary());
+                                content.setValue(pkgVersionLocalizationOptional.get().getSummary().orNull());
                                 entry.setDescription(content);
                             }
 

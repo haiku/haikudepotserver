@@ -16,13 +16,6 @@ public class GetPkgResult {
     public String name;
 
     /**
-     * <p>This title is localized.</p>
-     * @since 2015-02-26
-     */
-
-    public String title;
-
-    /**
      * <p>This is the timestamp (millis since epoc) at which the package was last edited.  This is helpful for
      * situations where it is necessary to create a url that will cause the browser to refresh the data.</p>
      */
@@ -52,12 +45,11 @@ public class GetPkgResult {
         public String description;
 
         /**
-         * <p>In the request the client may have requested a specific natural language, but that may not have been
-         * available.  This code indicates the natural language code that was <em>actually</em> used to obtain
-         * material such as the summary and the description.</p>
+         * <p>This title is localized.</p>
+         * @since 2015-03-26
          */
 
-        public String naturalLanguageCode;
+        public String title;
 
         public String repositoryCode;
 

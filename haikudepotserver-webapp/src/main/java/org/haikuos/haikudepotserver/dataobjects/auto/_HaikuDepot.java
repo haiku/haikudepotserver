@@ -9,4 +9,6 @@ package org.haikuos.haikudepotserver.dataobjects.auto;
  * If you need to make any customizations, please use subclass.
  */
 public class _HaikuDepot {
+
+    public static final String SEARCH_PKG_VERSIONS_QUERYNAME = "SearchPkgVersions";
 }

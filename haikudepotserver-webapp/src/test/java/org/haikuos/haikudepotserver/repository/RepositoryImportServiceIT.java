@@ -228,8 +228,8 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                     Assertions.assertThat(PkgVersion.getForPkg(context, pkgVersion.getPkg()).size()).isEqualTo(1);
 
                     PkgVersionLocalization localization = pkgVersion.getPkgVersionLocalization(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get()).get();
-                    Assertions.assertThat(localization.getDescription()).startsWith("FFmpeg is a complete, cro");
-                    Assertions.assertThat(localization.getSummary()).startsWith("Audio and video rec");
+                    Assertions.assertThat(localization.getDescription().get()).startsWith("FFmpeg is a complete, cro");
+                    Assertions.assertThat(localization.getSummary().get()).startsWith("Audio and video rec");
 
                     // the former rubbish copyright is removed
                     List<String> copyrights = pkgVersion.getCopyrights();

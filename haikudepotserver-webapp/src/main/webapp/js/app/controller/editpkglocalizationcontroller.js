@@ -141,36 +141,66 @@ angular.module('haikudepotserver').controller(
                             .then(
                             function(pkgLocalizationsData) {
 
+                                function hasData(translation) {
+                                    return (translation.title && translation.title.length) ||
+                                        (translation.summary && translation.summary.length) ||
+                                        (translation.description && translation.description.length);
+                                }
+
                                 // now merge the data about the various natural languages together with the data about
                                 // the packages existing localizations and we should have enough working data to setup
                                 // an internal data model.
 
                                 $scope.translations = _.filter(
                                     _.map(
-                                    naturalLanguageData,
-                                    function (d) {
+                                        naturalLanguageData,
+                                        function (d) {
 
-                                        var pkgLocalizationData = _.findWhere(
-                                            pkgLocalizationsData.pkgLocalizations,
-                                            { naturalLanguageCode: d.code }
-                                        );
+                                            var pkgLocalizationData = _.findWhere(
+                                                pkgLocalizationsData.pkgLocalizations,
+                                                { naturalLanguageCode: d.code }
+                                            );
 
-                                        return {
-                                            naturalLanguage: d,
-                                            title: pkgLocalizationData ? pkgLocalizationData.title : '',
-                                            wasEdited: false
-                                        };
-                                    }
-                                ),
+                                            return {
+                                                naturalLanguage: d,
+                                                title: pkgLocalizationData ? pkgLocalizationData.title : '',
+                                                summary: pkgLocalizationData ? pkgLocalizationData.summary : '',
+                                                description: pkgLocalizationData ? pkgLocalizationData.description : '',
+                                                wasEdited: false
+                                            };
+                                        }
+                                    ),
                                     function(translation) {
                                         return translation.naturalLanguage.hasData ||
                                             translation.naturalLanguage.hasLocalizationMessages ||
-                                            (translation.title && translation.title.length);
+                                            hasData(translation);
                                     }
                                 );
 
                                 $scope.originalTranslations = angular.copy($scope.translations);
-                                $scope.selectedTranslation = $scope.translations[0];
+
+                                // to default select the translation; try to find the current language if there
+                                // is a stored value for the current language.
+
+                                $scope.selectedTranslation = _.find($scope.translations, function(t) {
+                                   return hasData(t) && t.naturalLanguage.code == userState.naturalLanguageCode();
+                                });
+
+                                if(!$scope.selectedTranslation) {
+                                    $scope.selectedTranslation = _.find($scope.translations, function(t) {
+                                        return hasData(t);
+                                    });
+                                }
+
+                                if(!$scope.selectedTranslation) {
+                                    $scope.selectedTranslation = _.find($scope.translations, function(t) {
+                                        return t.naturalLanguage.code == userState.naturalLanguageCode();
+                                    });
+                                }
+
+                                if(!$scope.selectedTranslation) {
+                                    $scope.selectedTranslation = $scope.translations[0];
+                                }
 
                                 $log.info('did setup translations');
 
@@ -290,7 +320,9 @@ angular.module('haikudepotserver').controller(
                             function(t) {
                                 return {
                                     naturalLanguageCode : t.naturalLanguage.code,
-                                    title : t.title
+                                    title : t.title,
+                                    summary : t.summary,
+                                    description : t.description
                                 };
                             }
                         )
@@ -323,13 +355,25 @@ angular.module('haikudepotserver').controller(
                 'selectedTranslation',
                 function(newValue, oldValue) {
                     if(null!=oldValue) {
+
+                        function compareLocalizationElements(o1,o2) {
+
+                            function norm(s) {
+                                return !s ? '' : s;
+                            }
+
+                            return  norm(o1.title) == norm(o2.title) &&
+                                norm(o1.summary) == norm(o2.summary) &&
+                                norm(o1.description) == norm(o2.description);
+                        }
+
                         if(oldValue.naturalLanguage.code == newValue.naturalLanguage.code &&
-                            oldValue.title != newValue.title) {
+                            !compareLocalizationElements(oldValue,newValue)) {
 
                             // quick check to see if the new values equal the original values.
 
                             var originalTranslation = findOriginalTranslation(newValue.naturalLanguage.code);
-                            $scope.selectedTranslation.wasEdited = (originalTranslation.title != newValue.title);
+                            $scope.selectedTranslation.wasEdited = !compareLocalizationElements(originalTranslation,newValue);
                         }
                     }
                 },

@@ -45,6 +45,22 @@
                             ng-model="selectedTranslation.title"
                             id="translation-cell-title"></textarea>
 
+                    <h2><message key="editPkgLocalization.summary.title"></message></h2>
+                    <textarea
+                            type="text"
+                            ng-model="selectedTranslation.summary"
+                            id="translation-cell-summary"></textarea>
+
+                    <h2><message key="editPkgLocalization.description.title"></message></h2>
+                    <textarea
+                            type="text"
+                            ng-model="selectedTranslation.description"
+                            id="translation-cell-description"></textarea>
+
+                    <p class="text-warning" ng-show="'en'==selectedTranslation.naturalLanguage.code">
+                        <message key="editPkgLocalization.englishNotLikelyToBeUsed"></message>
+                    </p>
+
                 </td>
             </tr>
         </table>

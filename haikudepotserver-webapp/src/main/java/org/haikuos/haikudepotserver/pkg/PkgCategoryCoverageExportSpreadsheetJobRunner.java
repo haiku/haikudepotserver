@@ -95,7 +95,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                             }
 
                             cols.add(pkg.getName());
-                            cols.add(locOptional.isPresent() ? locOptional.get().getSummary() : "");
+                            cols.add(locOptional.isPresent() ? locOptional.get().getSummary().or("") : "");
                             cols.add(pkg.getPkgPkgCategories().isEmpty() ? MARKER : "");
 
                             for (String pkgCategoryCode : pkgCategoryCodes) {

@@ -97,10 +97,28 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
         return Optional.of(locs.get(0));
     }
 
-    public boolean equalsForContent(PkgVersionLocalization other) {
-        return
-                getSummary().equals(other.getSummary())
-                && getDescription().equals(other.getDescription());
+    public Optional<String> getTitle() {
+        if(null != getTitleLocalizationContent()) {
+            return Optional.of(getTitleLocalizationContent().getContent());
+        }
+
+        return Optional.absent();
+    }
+
+    public Optional<String> getSummary() {
+        if(null != getSummaryLocalizationContent()) {
+            return Optional.of(getSummaryLocalizationContent().getContent());
+        }
+
+        return Optional.absent();
+    }
+
+    public Optional<String> getDescription() {
+        if(null != getDescriptionLocalizationContent()) {
+            return Optional.of(getDescriptionLocalizationContent().getContent());
+        }
+
+        return Optional.absent();
     }
 
 }

@@ -24,7 +24,6 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.PkgLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
@@ -189,6 +188,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         final ObjectContext context = serverRuntime.getContext();
 
+        final NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
         PkgSearchSpecification specification = new PkgSearchSpecification();
 
         String exp = request.expression;
@@ -234,19 +234,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultPkg.derivedRating = input.getPkg().getDerivedRating();
                         resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, input.getPkg()).isEmpty();
 
-                        Optional<PkgLocalization> pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(
-                                context,
-                                input.getPkg(),
-                                request.naturalLanguageCode);
-
-                        if(!pkgLocalizationOptional.isPresent()) {
-                            pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(
-                                    context,
-                                    input.getPkg(),
-                                    NaturalLanguage.CODE_ENGLISH);
-                        }
-
-                        resultPkg.title = pkgLocalizationOptional.isPresent() ? pkgLocalizationOptional.get().getTitle() : null;
+                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
+                                context, input, naturalLanguage);
 
                         SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
                         resultVersion.major = input.getMajor();
@@ -258,18 +247,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.viewCounter = input.getViewCounter();
                         resultVersion.architectureCode = input.getArchitecture().getCode();
                         resultVersion.payloadLength = input.getPayloadLength();
-
-                        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
-                                context, input, request.naturalLanguageCode);
-
-                        if(!pkgVersionLocalizationOptional.isPresent()) {
-                            pkgVersionLocalizationOptional = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
-                                    context, input, NaturalLanguage.CODE_ENGLISH);
-                        }
-
-                        if(pkgVersionLocalizationOptional.isPresent()) {
-                            resultVersion.summary = pkgVersionLocalizationOptional.get().getSummary();
-                        }
+                        resultVersion.title = resolvedPkgVersionLocalization.getTitle();
+                        resultVersion.summary = resolvedPkgVersionLocalization.getSummary();
 
                         resultPkg.versions = Collections.singletonList(resultVersion);
 
@@ -287,7 +266,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
      * <p>Given the persistence model object, this method will construct the DTO to be sent back over the wire.</p>
      */
 
-    private GetPkgResult.PkgVersion createGetPkgResultPkgVersion(PkgVersion pkgVersion, NaturalLanguage naturalLanguage) {
+    private GetPkgResult.PkgVersion createGetPkgResultPkgVersion(ObjectContext context, PkgVersion pkgVersion, NaturalLanguage naturalLanguage) {
         Preconditions.checkNotNull(pkgVersion);
         Preconditions.checkNotNull(naturalLanguage);
 
@@ -324,11 +303,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         version.viewCounter = pkgVersion.getViewCounter();
 
-        org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizationOrFallback(naturalLanguage);
+        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, naturalLanguage);
 
-        version.description = pkgVersionLocalization.getDescription();
-        version.summary = pkgVersionLocalization.getSummary();
-        version.naturalLanguageCode = pkgVersionLocalization.getNaturalLanguage().getCode();
+        version.title = resolvedPkgVersionLocalization.getTitle();
+        version.description = resolvedPkgVersionLocalization.getDescription();
+        version.summary = resolvedPkgVersionLocalization.getSummary();
 
         version.urls = Lists.transform(
                 pkgVersion.getPkgVersionUrls(),
@@ -420,14 +399,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             }
         });
 
-        Optional<PkgLocalization> pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg, request.naturalLanguageCode);
-
-        if(!pkgLocalizationOptional.isPresent()) {
-            pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg, NaturalLanguage.CODE_ENGLISH);
-        }
-
-        result.title = pkgLocalizationOptional.isPresent() ? pkgLocalizationOptional.get().getTitle() : null;
-
         switch(request.versionType) {
 
             // might be used to show a history of the versions.  If an architecture is present then it will
@@ -472,7 +443,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 result.versions = Lists.transform(allVersions, new Function<PkgVersion, GetPkgResult.PkgVersion>() {
                     @Override
                     public GetPkgResult.PkgVersion apply(PkgVersion pkgVersion) {
-                        return createGetPkgResultPkgVersion(pkgVersion,naturalLanguage);
+                        return createGetPkgResultPkgVersion(context, pkgVersion,naturalLanguage);
                     }
                 });
 
@@ -505,6 +476,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
 
                 result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
+                        context,
                         pkgVersionOptional.get(),
                         naturalLanguage));
             }
@@ -535,6 +507,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
 
                 result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
+                        context,
                         pkgVersionOptional.get(),
                         naturalLanguage));
             }
@@ -857,7 +830,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     context,
                     pkg,
                     naturalLanguage,
-                    requestPkgVersionLocalization.title);
+                    requestPkgVersionLocalization.title,
+                    requestPkgVersionLocalization.summary,
+                    requestPkgVersionLocalization.description);
         }
 
         context.commitChanges();
@@ -869,90 +844,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         );
 
         return new UpdatePkgLocalizationResult();
-    }
-
-    @Override
-    public UpdatePkgVersionLocalizationsResult updatePkgVersionLocalization(
-            UpdatePkgVersionLocalizationsRequest updatePkgVersionLocalizationRequest) throws ObjectNotFoundException {
-
-        Preconditions.checkNotNull(updatePkgVersionLocalizationRequest);
-        Preconditions.checkNotNull(updatePkgVersionLocalizationRequest.pkgVersionLocalizations);
-        Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgVersionLocalizationRequest.pkgName));
-        Preconditions.checkNotNull(updatePkgVersionLocalizationRequest.replicateToOtherArchitecturesWithSameEnglishContent);
-
-        final ObjectContext context = serverRuntime.getContext();
-        Pkg pkg = getPkg(context, updatePkgVersionLocalizationRequest.pkgName);
-
-        User authUser = obtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITVERSIONLOCALIZATION)) {
-            throw new AuthorizationFailureException();
-        }
-
-        Architecture architecture = getArchitecture(context, updatePkgVersionLocalizationRequest.architectureCode);
-
-        Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
-                context,
-                pkg,
-                Collections.singletonList(architecture));
-
-        if(!pkgVersionOptional.isPresent()) {
-            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());
-        }
-
-        for(org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization requestPkgVersionLocalization : updatePkgVersionLocalizationRequest.pkgVersionLocalizations) {
-            if(requestPkgVersionLocalization.naturalLanguageCode.equals(NaturalLanguage.CODE_ENGLISH)) {
-                throw new IllegalStateException("the natural language to update is not allowed to be english because this is captured from the hpkr file.");
-            }
-        }
-
-        for(org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization requestPkgVersionLocalization : updatePkgVersionLocalizationRequest.pkgVersionLocalizations) {
-
-            NaturalLanguage naturalLanguage = getNaturalLanguage(context, requestPkgVersionLocalization.naturalLanguageCode);
-
-            pkgService.updatePkgVersionLocalization(
-                    context,
-                    pkgVersionOptional.get(),
-                    naturalLanguage,
-                    requestPkgVersionLocalization.summary,
-                    requestPkgVersionLocalization.description);
-
-            if(updatePkgVersionLocalizationRequest.replicateToOtherArchitecturesWithSameEnglishContent) {
-
-                for(Architecture architectureToCopyTo : Architecture.getAll(context)) {
-
-                    if(!architectureToCopyTo.equals(architecture)) { // don't copy the source to the destination.
-
-                        Optional<PkgVersion> pkgVersionOptionalToCopyTo = PkgVersion.getForPkg(
-                                context,
-                                pkg,
-                                architectureToCopyTo,
-                                pkgVersionOptional.get().toVersionCoordinates());
-
-                        if(pkgVersionOptionalToCopyTo.isPresent()) {
-                            pkgService.replicateLocalizationIfEnglishMatches(
-                                    context,
-                                    pkgVersionOptional.get(),
-                                    pkgVersionOptionalToCopyTo.get(),
-                                    Collections.singletonList(naturalLanguage),
-                                    true // override any destination localization already present
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        context.commitChanges();
-
-        LOGGER.info(
-                "did update the localization for pkg {} in architecture {} for {} natural languages",
-                pkg.getName(),
-                architecture.getCode(),
-                updatePkgVersionLocalizationRequest.pkgVersionLocalizations.size()
-        );
-
-        return new UpdatePkgVersionLocalizationsResult();
     }
 
     @Override
@@ -974,6 +865,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 org.haikuos.haikudepotserver.api1.model.pkg.PkgLocalization resultPkgVersionLocalization = new org.haikuos.haikudepotserver.api1.model.pkg.PkgLocalization();
                 resultPkgVersionLocalization.naturalLanguageCode = pkgLocalization.getNaturalLanguage().getCode();
                 resultPkgVersionLocalization.title = pkgLocalization.getTitle();
+                resultPkgVersionLocalization.summary = pkgLocalization.getSummary();
+                resultPkgVersionLocalization.description = pkgLocalization.getDescription();
                 result.pkgLocalizations.add(resultPkgVersionLocalization);
             }
         }
@@ -1025,8 +918,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             if(pkgVersionLocalizationOptional.isPresent()) {
                 org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization resultPkgVersionLocalization = new org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization();
                 resultPkgVersionLocalization.naturalLanguageCode = naturalLanguageCode;
-                resultPkgVersionLocalization.description = pkgVersionLocalizationOptional.get().getDescription();
-                resultPkgVersionLocalization.summary = pkgVersionLocalizationOptional.get().getSummary();
+                resultPkgVersionLocalization.description = pkgVersionLocalizationOptional.get().getDescription().orNull();
+                resultPkgVersionLocalization.summary = pkgVersionLocalizationOptional.get().getSummary().orNull();
                 result.pkgVersionLocalizations.add(resultPkgVersionLocalization);
             }
         }
@@ -1035,6 +928,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     private GetBulkPkgResult.PkgVersion createGetBulkPkgResultPkgVersion(
+            ObjectContext context,
             PkgVersion pkgVersion,
             NaturalLanguage naturalLanguage,
             boolean includeDescription) {
@@ -1052,14 +946,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.architectureCode = pkgVersion.getArchitecture().getCode();
         version.payloadLength = pkgVersion.getPayloadLength();
 
-        org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization pkgVersionLocalization = pkgVersion.getPkgVersionLocalizationOrFallback(naturalLanguage);
+        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, naturalLanguage);
 
         if(includeDescription) {
-            version.description = pkgVersionLocalization.getDescription();
+            version.description = resolvedPkgVersionLocalization.getDescription();
         }
 
-        version.summary = pkgVersionLocalization.getSummary();
-        version.naturalLanguageCode = pkgVersionLocalization.getNaturalLanguage().getCode();
+        version.summary = resolvedPkgVersionLocalization.getSummary();
+        version.title = resolvedPkgVersionLocalization.getTitle();
 
         return version;
 
@@ -1099,15 +993,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             long preFetchMs = System.currentTimeMillis();
             final List<PkgVersion> pkgVersions = pkgService.search(context, searchSpecification);
-            final List<PkgLocalization> pkgLocalizations = PkgLocalization.findForPkgs(context, Lists.transform(
-                    pkgVersions,
-                    new Function<PkgVersion, Pkg>() {
-                        @Override
-                        public Pkg apply(PkgVersion input) {
-                            return input.getPkg();
-                        }
-                    }
-            ));
             long postFetchMs = System.currentTimeMillis();
 
             // now return the data as necessary.
@@ -1122,30 +1007,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                             resultPkg.name = input.getPkg().getName();
                             resultPkg.prominenceOrdering = input.getPkg().getProminence().getOrdering();
                             resultPkg.derivedRating = input.getPkg().getDerivedRating();
-
-                            Optional<PkgLocalization> pkgLocalizationOptional = Iterables.tryFind(
-                                    pkgLocalizations,
-                                    new Predicate<PkgLocalization>() {
-                                        @Override
-                                        public boolean apply(PkgLocalization plInput) {
-                                            return plInput.getNaturalLanguage().getCode().equals(getBulkPkgRequest.naturalLanguageCode) && plInput.getPkg().equals(input.getPkg());
-                                        }
-                                    }
-                            );
-
-                            if(!pkgLocalizationOptional.isPresent()) {
-                                pkgLocalizationOptional = Iterables.tryFind(
-                                        pkgLocalizations,
-                                        new Predicate<PkgLocalization>() {
-                                            @Override
-                                            public boolean apply(PkgLocalization plInput) {
-                                                return plInput.getNaturalLanguage().getCode().equals(NaturalLanguage.CODE_ENGLISH) && plInput.getPkg().equals(input.getPkg());
-                                            }
-                                        }
-                                );
-                            }
-
-                            resultPkg.title = pkgLocalizationOptional.isPresent() ? pkgLocalizationOptional.get().getTitle() : null;
 
                             if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
                                 resultPkg.pkgIcons = Lists.transform(
@@ -1191,6 +1052,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                                 case LATEST:
                                 {
                                     GetBulkPkgResult.PkgVersion resultPkgVersion = createGetBulkPkgResultPkgVersion(
+                                            context,
                                             input,
                                             naturalLanguage,
                                             getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGVERSIONLOCALIZATIONDESCRIPTIONS)

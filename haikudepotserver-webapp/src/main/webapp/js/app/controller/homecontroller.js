@@ -90,9 +90,9 @@ angular.module('haikudepotserver').controller(
             $scope.shouldExplicitlyShowName = function(pkg) {
                 return $scope.lastRefetchPkgsSearchExpression &&
                     $scope.lastRefetchPkgsSearchExpression.length &&
-                    pkg.title && pkg.title.length &&
+                    pkg.versions[0].title && pkg.title.length &&
                     -1 == searchMixins.nextMatchSearchExpression(
-                        pkg.title.toLowerCase(),0,
+                        pkg.versions[0].title.toLowerCase(),0,
                         $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset &&
                     -1 != searchMixins.nextMatchSearchExpression(
                         pkg.name,0,
@@ -437,9 +437,30 @@ angular.module('haikudepotserver').controller(
 
                     jsonRpc.call(constants.ENDPOINT_API_V1_PKG, "searchPkgs", [req]).then(
                         function (result) {
+
+                            // This will either return the title from the package's version or it will return the
+                            // name of the package.
+
+                            function derivedTitle(pkg) {
+                                if(pkg.versions &&
+                                    1==pkg.versions.length &&
+                                    pkg.versions[0].title &&
+                                    pkg.versions[0].title.length) {
+                                    return pkg.versions[0].title;
+                                }
+
+                                return pkg.name;
+                            }
+
                             $scope.pkgs.items = result.items;
                             $scope.pkgs.total = result.total;
+
+                            _.each($scope.pkgs.items, function(p) {
+                                p.derivedTitle = derivedTitle(p);
+                            });
+
                             $log.info('found ' + result.items.length + ' packages from a total of '+result.total);
+
                             amFetchingPkgs = false;
                         },
                         function (err) {
@@ -457,6 +478,7 @@ angular.module('haikudepotserver').controller(
                 function() {
                     updateViewCriteriaTypeOptionsTitles();
                     updatePkgCategoryTitles();
+                    refetchPkgs(); // title may change
                 }
             );
 

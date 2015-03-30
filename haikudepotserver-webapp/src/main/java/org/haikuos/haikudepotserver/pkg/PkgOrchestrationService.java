@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-import javax.sql.DataSource;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -65,9 +64,6 @@ public class PkgOrchestrationService {
 
     @Resource
     private PngOptimizationService pngOptimizationService;
-
-    @Resource
-    private DataSource dataSource;
 
     private ImageHelper imageHelper = new ImageHelper();
 
@@ -911,28 +907,9 @@ public class PkgOrchestrationService {
                     objectContext,
                     persistedPkgVersion,
                     NaturalLanguage.getByCode(objectContext, NaturalLanguage.CODE_ENGLISH).get(),
+                    null, // not supported quite yet
                     pkg.getSummary(),
                     pkg.getDescription());
-        }
-
-        // look back at the previous version of the same package and see if there are localizations.  If there
-        // are then replicate those into this version as well, but only if the english variant exists.  Don't do
-        // this if the package is being updated instead of created.
-
-        if(persistedLatestExistingPkgVersion.isPresent() && persistedPkgVersion.getObjectId().isTemporary()) {
-            int naturalLanguagesReplicated = replicateLocalizationIfEnglishMatches(
-                    objectContext,
-                    persistedLatestExistingPkgVersion.get(),
-                    persistedPkgVersion,
-                    NaturalLanguage.getAllExceptEnglish(objectContext),
-                    false).size();
-
-            if(0!=naturalLanguagesReplicated) {
-                LOGGER.info(
-                        "replicated {} natural language localizations when creating new version of package {}",
-                        naturalLanguagesReplicated,
-                        pkg.getName());
-            }
         }
 
         // now possibly switch the latest flag over to the new one from the old one.
@@ -1004,6 +981,91 @@ public class PkgOrchestrationService {
     // -------------------------------------
     // LOCALIZATION
 
+    private void fill(ResolvedPkgVersionLocalization result, PkgVersionLocalization pvl) {
+        if(null==result.getTitle()) {
+            result.setTitle(pvl.getTitle().orNull());
+        }
+
+        if(null==result.getSummary()) {
+            result.setSummary(pvl.getSummary().orNull());
+        }
+
+        if(null==result.getDescription()) {
+            result.setDescription(pvl.getDescription().orNull());
+        }
+    }
+
+    private void fill(ResolvedPkgVersionLocalization result, PkgLocalization pl) {
+        if(null==result.getTitle()) {
+            result.setTitle(pl.getTitle());
+        }
+
+        if(null==result.getSummary()) {
+            result.setSummary(pl.getSummary());
+        }
+
+        if(null==result.getDescription()) {
+            result.setDescription(pl.getDescription());
+        }
+    }
+
+    /**
+     * <p>For a given package version, this method will look at the various levels of localization and fallback
+     * options to English and will produce an object that represents the best language options.</p>
+     */
+
+    public ResolvedPkgVersionLocalization resolvePkgVersionLocalization(
+            ObjectContext context,
+            PkgVersion pkgVersion,
+            NaturalLanguage naturalLanguage) {
+
+        Preconditions.checkArgument(null!=context);
+        Preconditions.checkArgument(null!=pkgVersion);
+        ResolvedPkgVersionLocalization result = new ResolvedPkgVersionLocalization();
+
+        {
+            Optional<PkgVersionLocalization> pvlNl = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
+                    context, pkgVersion, naturalLanguage.getCode());
+
+            if (pvlNl.isPresent()) {
+                fill(result, pvlNl.get());
+            }
+        }
+
+        if(!result.hasAll()) {
+            Optional<PkgLocalization> plNl = PkgLocalization.getForPkgAndNaturalLanguageCode(
+                    context,
+                    pkgVersion.getPkg(),
+                    naturalLanguage.getCode());
+
+            if(plNl.isPresent()) {
+                fill(result, plNl.get());
+            }
+        }
+
+        if(!result.hasAll()) {
+            Optional<PkgVersionLocalization> pvlEn = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
+                    context, pkgVersion, NaturalLanguage.CODE_ENGLISH);
+
+            if(pvlEn.isPresent()) {
+                fill(result, pvlEn.get());
+            }
+        }
+
+        if(!result.hasAll()) {
+            Optional<PkgLocalization> plNl = PkgLocalization.getForPkgAndNaturalLanguageCode(
+                    context,
+                    pkgVersion.getPkg(),
+                    NaturalLanguage.CODE_ENGLISH);
+
+            if(plNl.isPresent()) {
+                fill(result, plNl.get());
+            }
+        }
+
+        return result;
+    }
+
     /**
      * <p>This method will update the localization defined in the parameters to this method into the data
      * structure for the package.</p>
@@ -1013,18 +1075,29 @@ public class PkgOrchestrationService {
             ObjectContext context,
             Pkg pkg,
             NaturalLanguage naturalLanguage,
-            String title) {
+            String title,
+            String summary,
+            String description) {
 
+        Preconditions.checkArgument(null!=pkg);
         Preconditions.checkNotNull(naturalLanguage);
 
         if(null!=title) {
             title = title.trim();
         }
 
+        if(null!=summary) {
+            summary = summary.trim();
+        }
+
+        if(null!=description) {
+            description = description.trim();
+        }
+
         Optional<PkgLocalization> pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg, naturalLanguage.getCode());
 
-        if(Strings.isNullOrEmpty(title)) {
-            if(!pkgLocalizationOptional.isPresent()) {
+        if(Strings.isNullOrEmpty(title) && Strings.isNullOrEmpty(summary) && Strings.isNullOrEmpty(description)) {
+            if(pkgLocalizationOptional.isPresent()) {
                 context.deleteObject(pkgLocalizationOptional.get());
             }
 
@@ -1035,11 +1108,16 @@ public class PkgOrchestrationService {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
             pkgLocalization.setNaturalLanguage(naturalLanguage);
             pkgLocalization.setTitle(title);
+            pkgLocalization.setSummary(summary);
+            pkgLocalization.setDescription(description);
             pkg.addToManyTarget(_Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
             return pkgLocalization;
         }
 
         pkgLocalizationOptional.get().setTitle(title);
+        pkgLocalizationOptional.get().setSummary(summary);
+        pkgLocalizationOptional.get().setDescription(description);
+
         return pkgLocalizationOptional.get();
     }
 
@@ -1054,10 +1132,15 @@ public class PkgOrchestrationService {
             ObjectContext context,
             PkgVersion pkgVersion,
             NaturalLanguage naturalLanguage,
+            String title,
             String summary,
             String description) {
 
         Preconditions.checkNotNull(naturalLanguage);
+
+        if(null!=title) {
+            title = title.trim();
+        }
 
         if(null!=summary) {
             summary = summary.trim();
@@ -1067,17 +1150,14 @@ public class PkgOrchestrationService {
             description = description.trim();
         }
 
+        boolean titleNullOrEmpty = Strings.isNullOrEmpty(title);
         boolean summaryNullOrEmpty = Strings.isNullOrEmpty(summary);
         boolean descriptionNullOrEmpty = Strings.isNullOrEmpty(description);
 
         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional =
                 pkgVersion.getPkgVersionLocalization(naturalLanguage);
 
-        if(summaryNullOrEmpty != descriptionNullOrEmpty) {
-            throw new IllegalStateException("it is not possible to store a pkg version localization if either of the summary or description are missing");
-        }
-
-        if(summaryNullOrEmpty) {
+        if(titleNullOrEmpty && summaryNullOrEmpty && descriptionNullOrEmpty) {
 
             if(pkgVersionLocalizationOptional.isPresent()) {
                 pkgVersion.removeToManyTarget(
@@ -1089,7 +1169,6 @@ public class PkgOrchestrationService {
             }
 
             return null;
-
         }
         else {
 
@@ -1103,80 +1182,18 @@ public class PkgOrchestrationService {
                 pkgVersionLocalization = pkgVersionLocalizationOptional.get();
             }
 
-            pkgVersionLocalization.setDescription(description);
-            pkgVersionLocalization.setSummary(summary);
+            pkgVersionLocalization.setDescriptionLocalizationContent(
+                    LocalizationContent.getOrCreateLocalizationContent(context, description));
+
+            pkgVersionLocalization.setSummaryLocalizationContent(
+                    LocalizationContent.getOrCreateLocalizationContent(context, summary));
+
+            pkgVersionLocalization.setTitleLocalizationContent(
+                    LocalizationContent.getOrCreateLocalizationContent(context, title));
 
             return pkgVersionLocalization;
         }
 
-    }
-
-    /**
-     * <p>This method will replicate the localization of specific natural languages if and only if the english
-     * language variant is the same.  It will return the natural languages for which the operation was performed.</p>
-     */
-
-    public List<NaturalLanguage> replicateLocalizationIfEnglishMatches(
-            ObjectContext context,
-            PkgVersion pkgVersionSource,
-            PkgVersion pkgVersionDestination,
-            List<NaturalLanguage> naturalLanguages,
-            boolean allowOverrideDestination) {
-
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkgVersionSource);
-        Preconditions.checkNotNull(pkgVersionDestination);
-        Preconditions.checkNotNull(naturalLanguages);
-
-        // check that english is not in the destination languages.
-
-        for(NaturalLanguage naturalLanguage : naturalLanguages) {
-            if(naturalLanguage.getCode().equals(NaturalLanguage.CODE_ENGLISH)) {
-                throw new IllegalStateException("it is not possible to replicate to the english language");
-            }
-        }
-
-        Optional<PkgVersionLocalization> sourceEn = pkgVersionSource.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
-        Optional<PkgVersionLocalization> destinationEn = pkgVersionSource.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
-
-        if(
-                sourceEn.isPresent()
-                        && destinationEn.isPresent()
-                        && sourceEn.get().equalsForContent(destinationEn.get()) ) {
-
-            List<NaturalLanguage> naturalLanguagesEffected = Lists.newArrayList();
-
-            for(NaturalLanguage naturalLanguage : naturalLanguages) {
-
-                Optional<PkgVersionLocalization> sourceOther = pkgVersionSource.getPkgVersionLocalization(naturalLanguage.getCode());
-
-                // if there is no record of the source language then there's nothing to copy so no point in copying.
-
-                if(sourceOther.isPresent()) {
-
-                    Optional<PkgVersionLocalization> destinationOther = pkgVersionDestination.getPkgVersionLocalization(naturalLanguage.getCode());
-
-                    // if there is already a destination language then don't override it unless the client actually
-                    // wants to explicitly override the destination.
-
-                    if(!destinationOther.isPresent() || allowOverrideDestination) {
-
-                        updatePkgVersionLocalization(
-                                context,
-                                pkgVersionDestination,
-                                naturalLanguage,
-                                sourceOther.get().getSummary(),
-                                sourceOther.get().getDescription());
-
-                        naturalLanguagesEffected.add(naturalLanguage);
-                    }
-                }
-            }
-
-            return naturalLanguagesEffected;
-        }
-
-        return Collections.emptyList();
     }
 
     // ------------------------------

@@ -225,14 +225,6 @@
                     <message key="viewPkg.editLocalizationAction.title"></message>
                 </a>
             </li>
-            <li
-                    ng-show="!!pkg.versions[0].isLatest"
-                    pkg="pkg"
-                    show-if-pkg-permission="'PKG_EDITVERSIONLOCALIZATION'">
-                <a href="" ng-click="goEditVersionLocalization()">
-                    <message key="viewPkg.editVersionLocalizationAction.title"></message>
-                </a>
-            </li>
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITPROMINENCE'">
                 <a href="" ng-click="goEditPkgProminence()">
                     <message key="viewPkg.editPkgProminenceAction.title"></message>
@@ -245,7 +237,7 @@
             </li>
             <li>
                 <a href="" ng-click="goViewLocalization()">
-                    <message key="viewPkg.viewLocalizationAction.title"></message>
+                    <message key="viewPkg.viewPkgVersionLocalizationAction.title"></message>
                 </a>
             </li>
         </ul>
