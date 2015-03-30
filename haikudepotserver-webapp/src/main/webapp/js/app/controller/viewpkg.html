@@ -62,8 +62,10 @@
     <div id="pkg-metadata-container">
 
         <dl>
-            <dt ng-show="pkg.title"><message key="viewPkg.name.title"></message></dt>
-            <dd ng-show="pkg.title">{{pkg.name}}</dd>
+            <dt><message key="viewPkg.name.title"></message></dt>
+            <dd>{{pkg.name}}</dd>
+            <dt><message key="viewPkg.version.title"></message></dt>
+            <dd><version-label version="pkg.versions[0]"></version-label></dd>
             <dt><message key="viewPkg.isLatest.title" parameters="[pkg.versions[0].architectureCode]"></message></dt>
             <dd><boolean-indicator state="!!pkg.versions[0].isLatest"></boolean-indicator></dd>
             <dt ng-show="undefined!=pkg.versions[0].payloadLength"><message key="viewPkg.payloadLength.title"></message></dt>
