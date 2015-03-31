@@ -426,8 +426,13 @@ angular.module('haikudepotserver').factory('userState',
                     }
 
                     if(userStateData.naturalLanguageCode != value) {
+                        var oldNaturalLanguageCode = userStateData.naturalLanguageCode;
                         userStateData.naturalLanguageCode = value;
-                        $rootScope.$broadcast('naturalLanguageChange',value);
+                        $rootScope.$broadcast(
+                            'naturalLanguageChange',
+                            value,
+                            oldNaturalLanguageCode
+                        );
                     }
                 }
 

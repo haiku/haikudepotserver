@@ -492,8 +492,10 @@ angular.module('haikudepotserver').controller(
 
             $scope.$on(
                 "naturalLanguageChange",
-                function() {
-                    refetchPkg();
+                function(event, newValue, oldValue) {
+                    if(!!oldValue) {
+                        refetchPkg();
+                    }
                 }
             );
 

@@ -475,10 +475,12 @@ angular.module('haikudepotserver').controller(
 
             $scope.$on(
                 "naturalLanguageChange",
-                function() {
-                    updateViewCriteriaTypeOptionsTitles();
-                    updatePkgCategoryTitles();
-                    refetchPkgs(); // title may change
+                function(event, newValue, oldValue) {
+                    if(!!oldValue) {
+                        updateViewCriteriaTypeOptionsTitles();
+                        updatePkgCategoryTitles();
+                        refetchPkgs(); // title may change
+                    }
                 }
             );
 

@@ -280,12 +280,14 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.$on(
                         'naturalLanguageChange',
-                        function() {
-                            var nlc;
-                            nlc = userState.naturalLanguageCode();
+                        function(event, newValue, oldValue) {
+                            if(!!oldValue) {
+                                var nlc;
+                                nlc = userState.naturalLanguageCode();
 
-                            if($scope.naturalLanguageCode != nlc) {
-                                $scope.naturalLanguageCode = nlc;
+                                if ($scope.naturalLanguageCode != nlc) {
+                                    $scope.naturalLanguageCode = nlc;
+                                }
                             }
                         }
                     );

@@ -115,7 +115,14 @@ angular.module('haikudepotserver')
                     // EVENT AND CHANGE HANDLING
 
                     attributes.$observe('passiveContent', function() { update(); } );
-                    $scope.$on( "naturalLanguageChange", function() { update(); } );
+                    $scope.$on(
+                        'naturalLanguageChange',
+                        function(event, newValue, oldValue) {
+                            if(!!oldValue) {
+                                update();
+                            }
+                        }
+                    );
 
                 }
             }
