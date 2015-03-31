@@ -224,8 +224,8 @@ public class IntegrationTestSupportService {
                 result.pkg1Version2x86_gcc2,
                 NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
                 null,
-                "pkg1Version2SummaryEnglish_apple",
-                "pkg1Version2DescriptionEnglish_guava");
+                "pkg1Version2SummarySpanish_apple",
+                "pkg1Version2DescriptionSpanish_guava");
 
         result.pkg2 = context.newObject(Pkg.class);
         result.pkg2.setActive(true);

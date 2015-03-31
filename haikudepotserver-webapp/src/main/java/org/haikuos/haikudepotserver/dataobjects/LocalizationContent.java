@@ -18,9 +18,23 @@ public class LocalizationContent extends _LocalizationContent {
 
     public static LocalizationContent getOrCreateLocalizationContent(ObjectContext context, String content) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(content), "localization content must be supplied");
+
+        // first check the inserted objects to see if one already exists.
+
+        for(Object newObject : context.newObjects()) {
+            if(LocalizationContent.class.isAssignableFrom(newObject.getClass())) {
+                LocalizationContent newLocalizationContent = (LocalizationContent) newObject;
+
+                if(newLocalizationContent.getContent().equals(content)) {
+                    return newLocalizationContent;
+                }
+            }
+        }
+
         SelectQuery query = new SelectQuery(
                 LocalizationContent.class,
                 ExpressionFactory.matchExp(LocalizationContent.CONTENT_PROPERTY, content));
+
         List<LocalizationContent> results = context.performQuery(query);
 
         switch(results.size()) {

@@ -128,7 +128,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.total).isEqualTo(4); // note includes the "any" package
         Assertions.assertThat(result.items.size()).isEqualTo(2);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
-        Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");
+        Assertions.assertThat(result.items.get(1).name).isEqualTo("pkgany");
     }
 
     /**
@@ -199,9 +199,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = Collections.singletonList("x86_gcc2");
-        request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
-        request.expression = "appl";
+        request.architectureCodes = Collections.singletonList("x86");
+        request.naturalLanguageCode = NaturalLanguage.CODE_FRENCH;
+        request.expression = "persimon";
         request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
         request.limit = 2;
         request.offset = 0;
@@ -213,7 +213,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.total).isEqualTo(1);
         Assertions.assertThat(result.items.size()).isEqualTo(1);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
-        Assertions.assertThat(result.items.get(0).versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_apple");
+        Assertions.assertThat(result.items.get(0).versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
     }
 
     @Test

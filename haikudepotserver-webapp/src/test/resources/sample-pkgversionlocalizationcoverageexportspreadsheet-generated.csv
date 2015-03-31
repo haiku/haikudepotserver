@@ -1,6 +1,6 @@
 "pkg-name","architecture","latest-version-coordinates","en","es"
 "pkg1","x86","1-4","*","*"
-"pkg1","x86_gcc2","1-4","*",""
+"pkg1","x86_gcc2","1-4","","*"
 "pkg2","x86","1.1.2-3","*",""
 "pkg3","x86","1.1.2-3","*",""
 "pkgany","any","123-3","*",""

@@ -1182,14 +1182,20 @@ public class PkgOrchestrationService {
                 pkgVersionLocalization = pkgVersionLocalizationOptional.get();
             }
 
-            pkgVersionLocalization.setDescriptionLocalizationContent(
-                    LocalizationContent.getOrCreateLocalizationContent(context, description));
+            if(!descriptionNullOrEmpty) {
+                pkgVersionLocalization.setDescriptionLocalizationContent(
+                        LocalizationContent.getOrCreateLocalizationContent(context, description));
+            }
 
-            pkgVersionLocalization.setSummaryLocalizationContent(
-                    LocalizationContent.getOrCreateLocalizationContent(context, summary));
+            if(!summaryNullOrEmpty) {
+                pkgVersionLocalization.setSummaryLocalizationContent(
+                        LocalizationContent.getOrCreateLocalizationContent(context, summary));
+            }
 
-            pkgVersionLocalization.setTitleLocalizationContent(
-                    LocalizationContent.getOrCreateLocalizationContent(context, title));
+            if(!titleNullOrEmpty) {
+                pkgVersionLocalization.setTitleLocalizationContent(
+                        LocalizationContent.getOrCreateLocalizationContent(context, title));
+            }
 
             return pkgVersionLocalization;
         }
