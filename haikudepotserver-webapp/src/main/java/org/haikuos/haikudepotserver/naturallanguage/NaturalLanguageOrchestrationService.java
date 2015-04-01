@@ -16,6 +16,8 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Query;
+import org.apache.cayenne.query.QueryCacheStrategy;
+import org.haikuos.haikudepotserver.dataobjects.HaikuDepot;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.UserRating;
@@ -40,23 +42,15 @@ public class NaturalLanguageOrchestrationService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageOrchestrationService.class);
 
+    /**
+     * <p>This data cannot change over the life-span of the application server so
+     * it is cached in memory.</p>
+     */
+
     private Set<String> naturalLanguageCodesWithLocalizationMessages = null;
-
-    private Map<String,Boolean> naturalLanguageCodeHasUserRating = null;
-
-    private Map<String,Boolean> naturalLanguageCodeHasPkgVersionLocalization = null;
 
     @Resource
     private ServerRuntime serverRuntime;
-
-    /**
-     * <p>Useful from integration tests in order to clear caches.</p>
-     */
-
-    public void reset() {
-        naturalLanguageCodeHasUserRating = null;
-        naturalLanguageCodeHasPkgVersionLocalization = null;
-    }
 
     private boolean hasLocalizationMessagesPrimative(NaturalLanguage naturalLanguage) {
 
@@ -125,7 +119,8 @@ public class NaturalLanguageOrchestrationService {
         return naturalLanguageCodesWithLocalizationMessages;
     }
 
-    private Map<String,Boolean> assembleNaturalLanguageCodeUseMap(ObjectContext context, Query codeQuery) {
+    private Map<String,Boolean> assembleNaturalLanguageCodeUseMap(Query codeQuery) {
+        ObjectContext context = serverRuntime.getContext();
         Map<String,Boolean> result = Maps.newConcurrentMap();
         List<String> usedCodes = context.performQuery(codeQuery);
 
@@ -139,28 +134,25 @@ public class NaturalLanguageOrchestrationService {
         return result;
     }
 
+    /**
+     * <p>This method is supplied an EJBQL query that provides a list of the 'true' codes.  It returns
+     * a list of all codes that have the 'true' codes set to true.</p>
+     */
+
+    private Map<String,Boolean> assembleNaturalLanguageCodeUseMap(String ejbqlCodeQuery) {
+        EJBQLQuery query = new EJBQLQuery(ejbqlCodeQuery);
+        query.setCacheGroups(HaikuDepot.CacheGroup.NATURAL_LANGUAGE.name());
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
+        return assembleNaturalLanguageCodeUseMap(query);
+    }
+
+
     private Map<String,Boolean> getNaturalLanguageCodeHasPkgVersionLocalization() {
-
-        if(null==naturalLanguageCodeHasPkgVersionLocalization) {
-            naturalLanguageCodeHasPkgVersionLocalization = assembleNaturalLanguageCodeUseMap(
-                    serverRuntime.getContext(),
-                    new EJBQLQuery("SELECT DISTINCT pvl.naturalLanguage.code FROM " + PkgVersionLocalization.class.getSimpleName() + " pvl")
-            );
-        }
-
-        return naturalLanguageCodeHasPkgVersionLocalization;
+        return assembleNaturalLanguageCodeUseMap("SELECT DISTINCT pvl.naturalLanguage.code FROM " + PkgVersionLocalization.class.getSimpleName() + " pvl");
     }
 
     private Map<String,Boolean> getNaturalLanguageCodeHasUserRating() {
-
-        if(null==naturalLanguageCodeHasUserRating) {
-            naturalLanguageCodeHasUserRating = assembleNaturalLanguageCodeUseMap(
-                    serverRuntime.getContext(),
-                    new EJBQLQuery("SELECT DISTINCT ur.naturalLanguage.code FROM " + UserRating.class.getSimpleName() + " ur")
-            );
-        }
-
-        return naturalLanguageCodeHasUserRating;
+        return assembleNaturalLanguageCodeUseMap("SELECT DISTINCT ur.naturalLanguage.code FROM " + UserRating.class.getSimpleName() + " ur");
     }
 
     /**
@@ -181,27 +173,17 @@ public class NaturalLanguageOrchestrationService {
 
         Boolean userRatingB = getNaturalLanguageCodeHasUserRating().get(naturalLanguageCode);
 
-        if(null!=userRatingB && userRatingB) {
+        if (null != userRatingB && userRatingB) {
             return true;
         }
 
         Boolean pkgVersionLocalizationB = getNaturalLanguageCodeHasPkgVersionLocalization().get(naturalLanguageCode);
 
-        if(null!=pkgVersionLocalizationB && pkgVersionLocalizationB) {
+        if (null != pkgVersionLocalizationB && pkgVersionLocalizationB) {
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * <p>This is invoked from elsewhere in the system in order to update the cached data when an operator has
-     * added a new pkg version localization.  This will be used to update caches on this service.</p>
-     */
-
-    public void setHasPkgVersionLocalization(String naturalLanguageCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-        getNaturalLanguageCodeHasPkgVersionLocalization().put(naturalLanguageCode, Boolean.TRUE);
     }
 
     /**

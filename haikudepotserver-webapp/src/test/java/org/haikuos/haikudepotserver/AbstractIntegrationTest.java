@@ -5,17 +5,22 @@
 
 package org.haikuos.haikudepotserver;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.access.DataNode;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.map.DataMap;
+import org.apache.cayenne.map.DbEntity;
+import org.apache.cayenne.map.ObjEntity;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthenticationHelper;
 import org.haikuos.haikudepotserver.security.AuthenticationService;
-import org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,7 +38,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -139,25 +144,16 @@ public abstract class AbstractIntegrationTest {
 
         LOGGER.info("will prepare for the next test");
 
-        // the natural language caches may be full of data from a prior test.
-
-        naturalLanguageOrchestrationService.reset();
-        LOGGER.info("prep; have cleared out natural language caches");
-
-        // reset the apache cayenne cache before we go behind its back and
-        // clear out the database for the next test.
-
         serverRuntime.getDataDomain().getQueryCache().clear();
         serverRuntime.getDataDomain().getSharedSnapshotCache().clear();
-        LOGGER.info("prep; have cleared out cayenne caches");
+        LOGGER.info("prep; have cleared out caches");
 
-        // get all of the databases that are managed.
+        for(DataNode dataNode : serverRuntime.getDataDomain().getDataNodes()) {
 
-        Map<String,ManagedDatabase> managedDatabases = applicationContext.getBeansOfType(ManagedDatabase.class);
+            LOGGER.info("prep; will clear out data for data node; {}", dataNode.getName());
 
-        for(ManagedDatabase managedDatabase : managedDatabases.values()) {
+            try ( Connection connection = dataNode.getDataSource().getConnection() ) {
 
-            try (Connection connection = managedDatabase.getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
 
                 String databaseProductName = connection.getMetaData().getDatabaseProductName();
@@ -173,20 +169,49 @@ public abstract class AbstractIntegrationTest {
                     throw new IllegalStateException("unable to proceed with integration tests against a database which is not an integration test database");
                 }
 
-                {
-                    String statementString = "DROP SCHEMA "+managedDatabase.getSchema()+" CASCADE";
+                for (DataMap dataMap : dataNode.getDataMaps()) {
 
-                    try (PreparedStatement statement = connection.prepareStatement(statementString)) {
-                        statement.execute();
+                    List<String> truncationNames = Lists.newArrayList();
+
+                    for (ObjEntity objEntity : dataMap.getObjEntities()) {
+
+                        if(!objEntity.isReadOnly() && !objEntity.getName().equals(User.class.getSimpleName())) {
+                            truncationNames.add(objEntity.getDbEntity().getSchema() + "." + objEntity.getDbEntity().getName());
+                        }
+
+                    }
+
+                    if(!truncationNames.isEmpty()) {
+                        String sql = String.format(
+                                "TRUNCATE %s CASCADE",
+                                Joiner.on(',').join(truncationNames));
+
+                        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                            preparedStatement.execute();
+                        }
+                    }
+
+                }
+
+                // special case for the root user because we want to leave the root user in-situ
+
+                {
+                    DbEntity userDbEntity = serverRuntime.getDataDomain().getEntityResolver().getObjEntity(User.class.getSimpleName()).getDbEntity();
+                    String sql = String.format("DELETE FROM %s.%s WHERE nickname <> 'root'", userDbEntity.getSchema(), userDbEntity.getName());
+
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                        preparedStatement.execute();
                     }
                 }
+
+
+                connection.commit();
             }
             catch(SQLException se) {
-                throw new IllegalStateException("a database problem has arisen in preparing for an integration test",se);
+                throw new RuntimeException("unable to clear the data for the data node; " + dataNode.getName(), se);
             }
 
-            managedDatabase.migrate();
-            LOGGER.info("prep; did drop database objects for schema '{}' and re-create them", managedDatabase.getSchema());
+            LOGGER.info("prep; did clear out data for data node; {}", dataNode.getName());
         }
 
         setUnauthenticated();

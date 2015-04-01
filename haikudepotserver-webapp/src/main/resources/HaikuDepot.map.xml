@@ -337,16 +337,16 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
-	<obj-entity name="Architecture" className="org.haikuos.haikudepotserver.dataobjects.Architecture" readOnly="true" lock-type="optimistic" dbEntityName="architecture" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="Architecture" className="org.haikuos.haikudepotserver.dataobjects.Architecture" readOnly="true" dbEntityName="architecture" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
 	<obj-entity name="LocalizationContent" className="org.haikuos.haikudepotserver.dataobjects.LocalizationContent" dbEntityName="localization_content" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="content" type="java.lang.String" db-attribute-path="content"/>
 	</obj-entity>
-	<obj-entity name="MediaType" className="org.haikuos.haikudepotserver.dataobjects.MediaType" readOnly="true" lock-type="optimistic" dbEntityName="media_type" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="MediaType" className="org.haikuos.haikudepotserver.dataobjects.MediaType" readOnly="true" dbEntityName="media_type" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
-	<obj-entity name="NaturalLanguage" className="org.haikuos.haikudepotserver.dataobjects.NaturalLanguage" readOnly="true" lock-type="optimistic" dbEntityName="natural_language" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="NaturalLanguage" className="org.haikuos.haikudepotserver.dataobjects.NaturalLanguage" readOnly="true" dbEntityName="natural_language" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="isPopular" type="java.lang.Boolean" db-attribute-path="is_popular"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
@@ -366,7 +366,7 @@
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
 	</obj-entity>
-	<obj-entity name="PkgCategory" className="org.haikuos.haikudepotserver.dataobjects.PkgCategory" readOnly="true" lock-type="optimistic" dbEntityName="pkg_category" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="PkgCategory" className="org.haikuos.haikudepotserver.dataobjects.PkgCategory" readOnly="true" dbEntityName="pkg_category" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 	</obj-entity>
@@ -397,7 +397,7 @@
 	<obj-entity name="PkgScreenshotImage" className="org.haikuos.haikudepotserver.dataobjects.PkgScreenshotImage" dbEntityName="pkg_screenshot_image" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="data" type="byte[]" db-attribute-path="data"/>
 	</obj-entity>
-	<obj-entity name="PkgUrlType" className="org.haikuos.haikudepotserver.dataobjects.PkgUrlType" readOnly="true" lock-type="optimistic" dbEntityName="pkg_url_type" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="PkgUrlType" className="org.haikuos.haikudepotserver.dataobjects.PkgUrlType" readOnly="true" dbEntityName="pkg_url_type" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
 	<obj-entity name="PkgVersion" className="org.haikuos.haikudepotserver.dataobjects.PkgVersion" lock-type="optimistic" dbEntityName="pkg_version" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
@@ -426,7 +426,7 @@
 	<obj-entity name="PkgVersionUrl" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl" lock-type="optimistic" dbEntityName="pkg_version_url" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="url" type="java.lang.String" lock="true" db-attribute-path="url"/>
 	</obj-entity>
-	<obj-entity name="Prominence" className="org.haikuos.haikudepotserver.dataobjects.Prominence" readOnly="true" lock-type="optimistic" dbEntityName="prominence" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="Prominence" className="org.haikuos.haikudepotserver.dataobjects.Prominence" readOnly="true" dbEntityName="prominence" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 		<obj-attribute name="ordering" type="java.lang.Integer" db-attribute-path="ordering"/>
 	</obj-entity>
@@ -471,7 +471,7 @@
 		<obj-attribute name="rating" type="java.lang.Short" lock="true" db-attribute-path="rating"/>
 		<post-add method-name="onPostAdd"/>
 	</obj-entity>
-	<obj-entity name="UserRatingStability" className="org.haikuos.haikudepotserver.dataobjects.UserRatingStability" readOnly="true" lock-type="optimistic" dbEntityName="user_rating_stability" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="UserRatingStability" className="org.haikuos.haikudepotserver.dataobjects.UserRatingStability" readOnly="true" dbEntityName="user_rating_stability" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 	</obj-entity>
@@ -806,7 +806,9 @@ ORDER BY
         pv.create_timestamp DESC,
         #end
     #end
-LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC
+LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC,
+p.name ASC,
+pv.id ASC
 OFFSET #bind($search.offset)
 LIMIT #bind($search.limit)
 #end]]></sql>

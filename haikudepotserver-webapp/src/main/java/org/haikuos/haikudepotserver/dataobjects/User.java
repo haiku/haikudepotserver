@@ -17,6 +17,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectIdQuery;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
@@ -60,25 +61,27 @@ public class User extends _User implements CreateAndModifyTimestamped {
         List result = context.performQuery(objectIdQuery);
 
         switch(result.size()) {
-            case 0:
-                throw new IllegalStateException("unable to find the user from the objectid; " + objectId.toString());
-
-            case 1:
-                return (User) result.get(0);
-
-            default:
-                throw new IllegalStateException("more than one user returned from an objectid lookup");
+            case 0: throw new IllegalStateException("unable to find the user from the objectid; " + objectId.toString());
+            case 1: return (User) result.get(0);
+            default: throw new IllegalStateException("more than one user returned from an objectid lookup");
         }
     }
 
     public static Optional<User> getByNickname(ObjectContext context, String nickname) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(nickname));
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<User>) context.performQuery(new SelectQuery(
-                        User.class,
-                        ExpressionFactory.matchExp(User.NICKNAME_PROPERTY, nickname))),
-                null));
+
+        SelectQuery query = new SelectQuery(User.class, ExpressionFactory.matchExp(User.NICKNAME_PROPERTY, nickname));
+        query.setCacheGroups(HaikuDepot.CacheGroup.USER.name());
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
+
+        List<User> users = context.performQuery(query);
+
+        switch(users.size()) {
+            case 0: return Optional.absent();
+            case 1: return Optional.of(users.get(0));
+            default: throw new IllegalStateException("found more than one user for nickname; " + nickname);
+        }
     }
 
     // configured as a listener method in the model.

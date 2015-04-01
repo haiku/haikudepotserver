@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,8 +9,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -21,7 +19,6 @@ import com.nimbusds.jwt.SignedJWT;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.ObjectIdQuery;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -33,9 +30,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.security.MessageDigest;
 import java.text.ParseException;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -75,12 +70,6 @@ public class AuthenticationService {
 
     private JWSVerifier jsonWebTokenVerifier = null;
 
-    private Cache<String,ObjectId> userNicknameToObjectIdCache = CacheBuilder
-            .newBuilder()
-            .maximumSize(256)
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build();
-
     @PostConstruct
     public void init() {
 
@@ -117,41 +106,6 @@ public class AuthenticationService {
         this.serverRuntime = serverRuntime;
     }
 
-    /**
-     * <p>This method will map the nickname to an {@link ObjectId} and in this way, it is possible to
-     * pull the {@link org.haikuos.haikudepotserver.dataobjects.User} from the cache in Cayenne rather than re-fetching it from the database.  This
-     * will make a series of API interactions with the system less computationally expensive.</p>
-     */
-
-    private Optional<User> getUserByNickname(final ObjectContext context, final String nickname) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(nickname));
-
-        ObjectId objectId = userNicknameToObjectIdCache.getIfPresent(nickname);
-
-        if(null!=objectId) {
-            List<User> users = context.performQuery(new ObjectIdQuery(
-                    objectId,
-                    false,
-                    ObjectIdQuery.CACHE_NOREFRESH));
-
-            if(1!=users.size()) {
-                throw new IllegalStateException("zero or more than one found for an object-id");
-            }
-
-            return Optional.of(users.get(0));
-        }
-        else {
-            Optional<User> userOptional = User.getByNickname(context, nickname);
-
-            if(userOptional.isPresent()) {
-                userNicknameToObjectIdCache.put(nickname, userOptional.get().getObjectId());
-            }
-
-            return userOptional;
-        }
-    }
-
     public Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear) {
 
         Optional<ObjectId> result = Optional.absent();
@@ -160,7 +114,7 @@ public class AuthenticationService {
 
             ObjectContext objectContext = serverRuntime.getContext();
 
-            Optional<User> userOptional = getUserByNickname(objectContext, nickname);
+            Optional<User> userOptional = User.getByNickname(objectContext, nickname);
 
             if(userOptional.isPresent()) {
                 User user = userOptional.get();
@@ -308,7 +262,7 @@ public class AuthenticationService {
 
                     String nickname = subject.substring(0,subject.length() - SUFFIX_JSONWEBTOKEN_SUBJECT.length());
                     ObjectContext context = serverRuntime.getContext();
-                    Optional<User> userOptional = getUserByNickname(context, nickname);
+                    Optional<User> userOptional = User.getByNickname(context, nickname);
 
                     if(userOptional.isPresent()) {
                         return Optional.of(userOptional.get().getObjectId());

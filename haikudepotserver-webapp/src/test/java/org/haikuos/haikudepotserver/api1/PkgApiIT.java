@@ -128,7 +128,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.total).isEqualTo(4); // note includes the "any" package
         Assertions.assertThat(result.items.size()).isEqualTo(2);
         Assertions.assertThat(result.items.get(0).name).isEqualTo("pkg1");
-        Assertions.assertThat(result.items.get(1).name).isEqualTo("pkgany");
+        Assertions.assertThat(result.items.get(1).name).isEqualTo("pkg2");
     }
 
     /**

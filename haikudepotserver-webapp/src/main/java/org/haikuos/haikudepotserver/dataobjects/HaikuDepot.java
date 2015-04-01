@@ -13,7 +13,9 @@ public class HaikuDepot extends _HaikuDepot {
         PKG_VERSION_LOCALIZATION,
         PKG_LOCALIZATION,
         PKG_ICON,
-        PKG
+        PKG,
+        USER,
+        NATURAL_LANGUAGE
     }
 
     private static HaikuDepot instance;
