@@ -186,14 +186,4 @@ public class NaturalLanguageOrchestrationService {
         return false;
     }
 
-    /**
-     * <p>This is invoked from elsewhere in the system in order to update the cached data when an operator has
-     * added a new user rating.  This will be used to update caches on this service.</p>
-     */
-
-    public void setHasUserRating(String naturalLanguageCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-        getNaturalLanguageCodeHasPkgVersionLocalization().put(naturalLanguageCode, Boolean.TRUE);
-    }
-
 }

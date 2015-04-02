@@ -90,7 +90,7 @@ angular.module('haikudepotserver').controller(
             $scope.shouldExplicitlyShowName = function(pkg) {
                 return $scope.lastRefetchPkgsSearchExpression &&
                     $scope.lastRefetchPkgsSearchExpression.length &&
-                    pkg.versions[0].title && pkg.title.length &&
+                    pkg.versions[0].title && pkg.versions[0].title.length &&
                     -1 == searchMixins.nextMatchSearchExpression(
                         pkg.versions[0].title.toLowerCase(),0,
                         $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset &&
