@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -197,7 +197,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.goLogout = function() {
                         $scope.showActions = false;
-                        userState.user(null);
+                        userState.token(null);
                         breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
                     };
 
@@ -267,13 +267,22 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // when the user logs in or out then the actions may also change; for example, it makes
                     // no sense to show the logout button if nobody is presently logged in.
 
+                    function handleUserChangeSuccess() {
+                        var user = userState.user();
+                        $scope.userNickname = user ? user.nickname : undefined;
+                        updateCanShowRootOperations();
+                    }
+
                     $scope.$on(
                         'userChangeSuccess',
-                        function() {
-                            $scope.userNickname = userState.user() ? userState.user().nickname : undefined;
-                            updateCanShowRootOperations();
-                        }
+                        function() { handleUserChangeSuccess(); }
                     );
+
+                    // this is done here because the user may be taken from local storage in the user state
+                    // service before this banner's lifecycle starts.  Because of this, it would not get
+                    // the 'userChangeSuccess' event caused by the initialization of the user state service.
+
+                    handleUserChangeSuccess();
 
                     // when the natural language changes; maybe because of user choice, default or the user
                     // login | logout, we need to reflect this change in the banner indicator.
@@ -298,7 +307,9 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $scope.$watch(
                         'naturalLanguageCode',
                         function(newValue) {
-                            userState.naturalLanguageCode(newValue);
+                            if (newValue && newValue.length) {
+                                userState.naturalLanguageCode(newValue);
+                            }
                         }
                     );
 

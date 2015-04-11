@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -78,10 +78,7 @@ angular.module('haikudepotserver').controller(
                     function(result) {
                         if(result.token && result.token.length) {
 
-                            userState.user({
-                                nickname : $scope.authenticationDetails.nickname,
-                                token : result.token
-                            });
+                            userState.token(result.token);
 
                             $log.info('successful authentication; '+$scope.authenticationDetails.nickname);
 

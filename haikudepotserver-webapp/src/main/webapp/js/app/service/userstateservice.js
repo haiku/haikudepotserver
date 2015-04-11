@@ -15,60 +15,166 @@ angular.module('haikudepotserver').factory('userState',
     [
         '$log','$q','$rootScope','$timeout','$window','$location',
         'jsonRpc','pkgScreenshot','errorHandling',
-        'constants','referenceData','jobs',
+        'constants','referenceData','jobs','jwt',
         function(
             $log,$q,$rootScope,$timeout,$window,$location,
             jsonRpc,pkgScreenshot,errorHandling,
-            constants,referenceData,jobs) {
+            constants,referenceData,jobs,jwt) {
 
             var SIZE_CHECKED_PERMISSION_CACHE = 25;
             var SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 10;
             var MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 60 * 1000; // 1 min.
 
+            var HDS_TOKEN_KEY = 'hds.userstate.token';
+            var HDS_NATURALLANGUAGECODE_KEY = 'hds.userstate.naturallanguagecode';
+
             var timestampsOfLastTokenRenewals = [];
             var tokenRenewalTimeoutPromise = undefined;
 
+            // this storage is only used if the local storage is not available.
+
             var userStateData = {
+                checkedPermissionCache : [],
+                checkQueue : [],
                 naturalLanguageCode : 'en',
-                user : undefined
+                token : undefined,
+                currentTokenUserNickname : undefined
             };
+
+            // ------------------------------
+            // STATE ACCESSOR
+            // This is a series of getter-setters that either access local storage (shared between
+            // windows) or a data structure within the scope of this service.
+
+            function naturalLanguageCode(value) {
+
+                if(undefined !== value) {
+
+                    if(!value || !value.match(/^[a-z]{2}$/)) {
+                        throw Error('the value \''+value+'\' is not a valid natural language code');
+                    }
+
+                    if(naturalLanguageCode() != value) {
+
+                        var oldNaturalLanguageCode = naturalLanguageCode();
+
+                        if(null==value) {
+
+                            if(window.localStorage) {
+                                window.localStorage.removeItem(HDS_USER_KEY);
+                            }
+
+                            userStateData.naturalLanguageCode = undefined;
+                        }
+                        else {
+
+                            if(window.localStorage) {
+                                window.localStorage.setItem(HDS_NATURALLANGUAGECODE_KEY, value);
+                            }
+
+                            userStateData.naturalLanguageCode = value;
+
+                        }
+
+                        $rootScope.$broadcast(
+                            'naturalLanguageChange',
+                            value,
+                            oldNaturalLanguageCode
+                        );
+                    }
+                }
+
+                if(window.localStorage) {
+                    return window.localStorage.getItem(HDS_NATURALLANGUAGECODE_KEY);
+                }
+
+                return userStateData.naturalLanguageCode;
+            }
+
+            function user() {
+                var tokenValue = token();
+
+                if(tokenValue) {
+                    return { nickname : jwt.tokenNickname(tokenValue) };
+                }
+
+                return undefined;
+            }
+
+            function token(value) {
+
+                if(undefined !== value) {
+
+                    if (null == value) {
+
+                        if (userStateData.currentTokenUserNickname) {
+
+                            if (window.localStorage) {
+                                window.localStorage.removeItem(HDS_TOKEN_KEY);
+                            }
+
+                            $rootScope.$broadcast('userChangeStart', null);
+
+                            userStateData.token = undefined;
+
+                            // remove the Authorization header for HTTP transport
+                            jsonRpc.setHeader('Authorization');
+                            pkgScreenshot.setHeader('Authorization');
+                            jobs.setHeader('Authorization');
+
+                            cancelTokenRenewalTimeout();
+                            userStateData.currentTokenUserNickname = undefined;
+                            resetAuthorization();
+
+                            $rootScope.$broadcast('userChangeSuccess', null);
+                        }
+                    }
+                    else {
+                        if (jwt.millisUntilExpirationForToken(value) <= 0) {
+                            throw Error('at attempt has been made to set a token that has expired already');
+                        }
+
+                        var newUser = { nickname : jwt.tokenNickname(value) };
+
+                        if(!userStateData.currentTokenUserNickname || userStateData.currentTokenUserNickname != newUser.nickname) {
+                            $rootScope.$broadcast('userChangeStart', newUser);
+                        }
+
+                        if (window.localStorage) {
+                            window.localStorage.setItem(HDS_TOKEN_KEY, value);
+                        }
+                        else {
+                            userStateData.token = value;
+                        }
+
+                        var authenticationContent = 'Bearer ' + value;
+
+                        jsonRpc.setHeader('Authorization', authenticationContent);
+                        pkgScreenshot.setHeader('Authorization', authenticationContent);
+                        jobs.setHeader('Authorization', authenticationContent);
+
+                        configureTokenRenewal();
+
+                        if(!userStateData.currentTokenUserNickname || userStateData.currentTokenUserNickname != newUser.nickname) {
+                            $rootScope.$broadcast('userChangeSuccess', newUser);
+                            resetAuthorization();
+                        }
+
+                        userStateData.currentTokenUserNickname = newUser.nickname;
+                    }
+                }
+
+                if(window.localStorage) {
+                    return window.localStorage.getItem(HDS_TOKEN_KEY);
+                }
+
+                return userStateData.token;
+            }
 
             // ------------------------------
             // FOREGROUND / BACKGROUND JWT UPDATING
             // The JWT will eventually expire.  This set of functions is for avoiding that in the case
             // by always fetching a new one just before the old one expires.
-
-            function setToken(token) {
-
-                if(null==token) {
-                    if(userStateData.user) {
-                        userStateData.user.token = undefined;
-                    }
-
-                    // remove the Authorization header for HTTP transport
-                    jsonRpc.setHeader('Authorization');
-                    pkgScreenshot.setHeader('Authorization');
-                }
-                else {
-                    if(millisUntilExpirationForToken(token) <= 0) {
-                        throw Error('at attempt has been made to set a token that has expired already');
-                    }
-
-                    if (userStateData.user && userStateData.user.nickname == tokenNickname(token)) {
-                        userStateData.user.token = token;
-
-                        var authenticationContent = 'Bearer ' + token;
-
-                        jsonRpc.setHeader('Authorization', authenticationContent);
-                        pkgScreenshot.setHeader('Authorization', authenticationContent);
-                        jobs.setHeader('Authorization', authenticationContent);
-                    }
-                    else {
-                       $log.info('cannot set the token because the user state is not compatible with the token');
-                    }
-                }
-
-            }
 
             function cancelTokenRenewalTimeout() {
                 if(tokenRenewalTimeoutPromise) {
@@ -78,16 +184,26 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             function configureTokenRenewal() {
-                if(userStateData.user && userStateData.user.token) {
 
-                    var millisUntilExpiration = millisUntilExpirationForToken(userStateData.user.token);
-                    var millisUntilRenewal = millisUntilExpiration * 0.75;
+                cancelTokenRenewalTimeout();
 
-                    if(millisUntilExpiration > 1000) {
+                if(token()) {
+
+                    var millisUntilExpiration = jwt.millisUntilExpirationForToken(token());
+
+                    if(millisUntilExpiration > 5000) {
+
+                        // the logic here is that the re-establishment of the token should happen before it will
+                        // expire.  If there are many windows open, it is undesirable that they all go and
+                        // re-establish their tokens at once.  To avoid this, some random aspect is introduced
+                        // to reduce the chance of this happening.
+
+                        var millisUntilRenewal = ((millisUntilExpiration - 5000) * 0.75) + (3000 * Math.random());
+
                         $log.info('will schedule token renewal in ~' + Math.ceil(millisUntilRenewal / 1000) + "s");
 
                         tokenRenewalTimeoutPromise = $timeout(function () {
-                                if (millisUntilExpirationForToken(userStateData.user.token) < 0) {
+                                if (jwt.millisUntilExpirationForToken(token()) < 0) {
                                     $log.info('am going to renew token, but it has already expired');
                                     errorHandling.navigateToError(jsonRpc.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
                                 }
@@ -116,13 +232,11 @@ angular.module('haikudepotserver').factory('userState',
                                     jsonRpc.call(
                                         constants.ENDPOINT_API_V1_USER,
                                         'renewToken',
-                                        [
-                                            { token: userStateData.user.token }
-                                        ]
+                                        [ { token: token() } ]
                                     ).then(
                                         function (renewTokenResponse) {
                                             if (renewTokenResponse.token) {
-                                                setToken(renewTokenResponse.token);
+                                                token(renewTokenResponse.token);
                                                 $log.info('did renew the authentication token');
                                                 configureTokenRenewal();
                                             }
@@ -140,6 +254,7 @@ angular.module('haikudepotserver').factory('userState',
                             },
                             millisUntilRenewal
                         );
+
                     }
                     else {
                         $log.warn('will not schedule token renewal as the token has ether already expired or is about to');
@@ -147,107 +262,40 @@ angular.module('haikudepotserver').factory('userState',
                 }
             }
 
-            /**
-             * <p>Returns the number of milliseconds until the expiration date of the supplied token from now.  If
-             * the token has already expired then this function will return a negative value.</p>
-             */
-
-            function millisUntilExpirationForToken(token) {
-                var nowMs = new Date().getTime();
-                var expMs = tokenExpirationDate(token).getTime();
-                return expMs - nowMs;
-            }
-
-            function tokenClaimSet(token) {
-                if(!token||!token.length) {
-                    throw Error('missing json web token');
-                }
-
-                var parts = token.split('.');
-
-                if(3 != parts.length) {
-                    throw Error('json web token should contain three dot-separated parts');
-                }
-
-                return angular.fromJson(window.atob(parts[1]));
-            }
-
-            /**
-             * <p>If a user is authenticated with the system then this will return a non-null value that
-             * represents the date at which the authentication will expire.</p>
-             */
-
-            function tokenExpirationDate(token) {
-                var claimSet = tokenClaimSet(token);
-
-                if(!claimSet || !claimSet.exp || !angular.isNumber(claimSet.exp)) {
-                    throw Error('malformed claim set; unable to get the \'exp\' data');
-                }
-
-                return new Date(claimSet.exp * 1000);
-            }
-
-            /**
-             * <p>The token is a 'json web token' that contains a 'subject'.  In the case of this application,
-             * the subject contains the nickname of the user.</p>
-             */
-
-            function tokenNickname(token) {
-                var claimSet = tokenClaimSet(token);
-
-                if(!claimSet || !claimSet.sub) {
-                    throw Error('malformed claim set; unable to get the \'sub\' data');
-                }
-
-                var sub = '' + claimSet.sub;
-                var suffixIndex = sub.indexOf('@hds');
-
-                if(-1==suffixIndex) {
-                    throw Error('malformed nickname in token; missing suffix');
-                }
-
-                return sub.substring(0,suffixIndex);
-            }
-
             // ------------------------------
-            // USER
+            // USER HANDLING
 
-            function setUser(value) {
+            /**
+             * <p>This function will look to see if there is a token in the local storage.  If there is then
+             * it can load that into the state.</p>
+             */
 
-                $rootScope.$broadcast('userChangeStart',value);
+            function initToken() {
+                var t = token();
 
-                resetAuthorization();
-
-                if(null==value) {
-                    userStateData.user = undefined;
-                    setToken(null);
-                    cancelTokenRenewalTimeout();
-                }
-                else {
-
-                    if(!value.nickname) {
-                        throw Error('the nickname is required when setting a user');
+                if (t) {
+                    if (jwt.millisUntilExpirationForToken(t) > 0) {
+                        token(t);
                     }
-
-                    if(!value.token) {
-                        throw Error('the json web token is required when setting a user');
+                    else {
+                        token(null);
                     }
-
-                    userStateData.user = { nickname : value.nickname };
-                    setToken(value.token);
-                    configureTokenRenewal();
-
-                    $log.info('have set user; '+userStateData.user.nickname);
                 }
-
-                $rootScope.$broadcast('userChangeSuccess',value);
             }
+
+            initToken();
+
+            // this event fires when another window has made a change to the token.
+
+            window.addEventListener('storage', function(e) {
+                if(e.key == HDS_TOKEN_KEY) {
+                    $log.info('did receive token storage change from another window');
+                    token(e.newValue);
+                }
+            });
 
             // ------------------------------
             // AUTHORIZATION
-
-            userStateData.checkedPermissionCache = [];
-            userStateData.checkQueue = [];
 
             function validateTargetAndPermissions(targetAndPermissions) {
                 _.each(targetAndPermissions, function(targetAndPermission) {
@@ -364,7 +412,7 @@ angular.module('haikudepotserver').factory('userState',
                                     if(userStateData.checkedPermissionCache.length > SIZE_CHECKED_PERMISSION_CACHE) {
                                         userStateData.checkedPermissionCache.splice(
                                             SIZE_CHECKED_PERMISSION_CACHE,
-                                                userStateData.checkedPermissionCache.length-SIZE_CHECKED_PERMISSION_CACHE);
+                                            userStateData.checkedPermissionCache.length-SIZE_CHECKED_PERMISSION_CACHE);
                                     }
 
                                     // drop this request now that it has been dealt with and move onto checking the
@@ -417,35 +465,13 @@ angular.module('haikudepotserver').factory('userState',
             // ------------------------------
             // NATURAL LANGUAGE HANDLING
 
-            function naturalLanguageCode(value) {
-
-                if(undefined !== value) {
-
-                    if(!value || !value.match(/^[a-z]{2}$/)) {
-                        throw Error('the value \''+value+'\' is not a valid natural language code');
-                    }
-
-                    if(userStateData.naturalLanguageCode != value) {
-                        var oldNaturalLanguageCode = userStateData.naturalLanguageCode;
-                        userStateData.naturalLanguageCode = value;
-                        $rootScope.$broadcast(
-                            'naturalLanguageChange',
-                            value,
-                            oldNaturalLanguageCode
-                        );
-                    }
-                }
-
-                return userStateData.naturalLanguageCode;
-            }
-
             /**
              * <p>Does some guess work and creates a list of preferred natural languages.  The most preferred
              * language is at offset 0, the least preferred language is at the end of the array.</p>
              */
 
             function guessedNaturalLanguageCodes() {
-                var result = ['en']; // default to English
+                var result = [constants.NATURALLANGUAGECODE_ENGLISH]; // default to English
 
                 if(window && window.navigator && window.navigator.language) {
                     var languageMatch = window.navigator.language.match(/^([a-z]{2})($|-.*$)/);
@@ -474,19 +500,29 @@ angular.module('haikudepotserver').factory('userState',
              */
 
             function initNaturalLanguageCode() {
-                referenceData.naturalLanguages().then(
-                    function(naturalLanguages) {
-                        naturalLanguageCode(_.find(
-                            guessedNaturalLanguageCodes(),
-                            function (naturalLanguageCode) {
-                                return !!_.findWhere(naturalLanguages, {code: naturalLanguageCode});
-                            }
-                        ));
-                    }
-                );
+
+                // if there is an existing natural language code on the local storage then use that
+                // and there is actually no need to initialize the natural language.
+
+                if(!window.localStorage || !window.localStorage.getItem(HDS_NATURALLANGUAGECODE_KEY)) {
+                    naturalLanguageCode(constants.NATURALLANGUAGECODE_ENGLISH);
+                    referenceData.naturalLanguages().then(
+                        function (naturalLanguages) {
+                            naturalLanguageCode(_.find(
+                                guessedNaturalLanguageCodes(),
+                                function (naturalLanguageCode) {
+                                    return !!_.findWhere(naturalLanguages, {code: naturalLanguageCode});
+                                }
+                            ));
+                        }
+                    );
+                }
             }
 
             initNaturalLanguageCode();
+
+            // ------------------------------
+            // PUBLIC INTERFACE
 
             return {
 
@@ -502,17 +538,20 @@ angular.module('haikudepotserver').factory('userState',
                 },
 
                 /**
-                 * <p>Invoked with no argument, this function will return the user.  If it is supplied with null then
-                 * it will set the current user to empty.  If it is supplied with a user value, it will configure the
-                 * user.  The user should consist of the 'nickname' and the 'token'.</p>
+                 * <p>This will obtain the current user.</p>
                  */
 
-                user : function(value) {
-                    if(undefined !== value) {
-                        setUser(value);
-                    }
+                user : function() {
+                    return user();
+                },
 
-                    return userStateData.user;
+                /**
+                 * <p>This function will configure the current user.  The data structure is supposed to hold the
+                 * user's "nickname" as well as a "token" value.  It will return the current user.</p>
+                 */
+
+                token : function(tokenValue) {
+                    return token(tokenValue);
                 },
 
                 /**
@@ -526,14 +565,8 @@ angular.module('haikudepotserver').factory('userState',
                  *     <li>permissionCode</li>
                  * </ul>
                  *
-                 * <p>Returned is a promise which resolves to a list of the requested permissions with an additional
-                 * property "authorized" which can be either true or false.</p>
+                 * <p>Returned is a promise which resolves to a true if all of the queries are true.</p>
                  */
-
-                authorize : function(targetAndPermissions) {
-                    validateTargetAndPermissions(targetAndPermissions);
-                    return check(targetAndPermissions);
-                },
 
                 areAuthorized : function(targetAndPermissions) {
                     validateTargetAndPermissions(targetAndPermissions);
