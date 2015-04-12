@@ -25,7 +25,7 @@ angular.module('haikudepotserver').factory('userState',
             var SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 10;
             var MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 60 * 1000; // 1 min.
 
-            var HDS_TOKEN_KEY = 'hds.userstate.token';
+            var HDS_TOKEN_KEY = constants.STORAGE_TOKEN_KEY;
             var HDS_NATURALLANGUAGECODE_KEY = 'hds.userstate.naturallanguagecode';
 
             var timestampsOfLastTokenRenewals = [];

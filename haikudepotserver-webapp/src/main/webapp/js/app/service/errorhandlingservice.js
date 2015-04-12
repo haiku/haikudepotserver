@@ -8,10 +8,21 @@
  */
 
 angular.module('haikudepotserver').factory('errorHandling',
-    [ '$log','$location','breadcrumbs',
-        function($log,$location,breadcrumbs) {
+    [ '$log','$location','breadcrumbs','constants',
+        function($log,$location,breadcrumbs,constants) {
 
             var haveNavigatedToError = false;
+
+            /**
+             * <p>Local storage might contain some data about the user state; this should
+             * be removed so that the user is effectively logged out.</p>
+             */
+
+            function clearLocalStorage() {
+                if(window.localStorage) {
+                    window.localStorage.removeItem(constants.STORAGE_TOKEN_KEY);
+                }
+            }
 
             /**
              * <p>This function will exit the AngularJS environment into vanilla HTML.</p>
@@ -59,6 +70,11 @@ angular.module('haikudepotserver').factory('errorHandling',
                 handleJsonRpcError : function(jsonRpcErrorEnvelope) {
                     ErrorHandlingService.logJsonRpcError(jsonRpcErrorEnvelope);
                     var code = jsonRpcErrorEnvelope ? jsonRpcErrorEnvelope.code : undefined;
+
+                    if(code == -32803) { // TODO; should be a constant
+                        clearLocalStorage();
+                    }
+
                     navigateToError(code);
                 },
 

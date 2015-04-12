@@ -66,3 +66,20 @@
     margin-top: 16px;
     margin-left: 20%
 }
+
+#any-pkg-version-localization-translations-cell {
+    width: 20%;
+    border-left : 1px dotted lightgray;
+    background-color: #f5f5f5;
+    color: gray;
+}
+
+#any-pkg-version-localization-translations-cell h1 {
+    font-size: 10px;
+    text-align: right;
+    color: gray;
+}
+
+#any-pkg-version-localization-translations-cell h2 {
+    color: gray;
+}

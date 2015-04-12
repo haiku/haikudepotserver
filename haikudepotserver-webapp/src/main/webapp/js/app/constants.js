@@ -6,6 +6,8 @@
 angular.module('haikudepotserver')
     .constant('constants', {
 
+        STORAGE_TOKEN_KEY : 'hds.userstate.token',
+
         NATURALLANGUAGECODE_ENGLISH : 'en',
 
         DELAY_SPINNER : 1000, // millis
