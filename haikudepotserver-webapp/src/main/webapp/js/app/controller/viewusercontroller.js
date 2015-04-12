@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,14 +55,6 @@ angular.module('haikudepotserver').controller(
                     userState.user().nickname == $scope.user.nickname;
             };
 
-            $scope.goChangePassword = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createChangePassword($scope.user));
-            };
-
-            $scope.goEdit = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditUser($scope.user));
-            };
-
             /**
              * <p>This method will logout the user; it will take them to the entry point for the application
              * and in doing so the page will be re-loaded and so their state will be removed.</p>
@@ -85,10 +77,6 @@ angular.module('haikudepotserver').controller(
                     $scope.user &&
                     !$scope.user.active &&
                     $scope.user.nickname != userState.user().nickname;
-            };
-
-            $scope.goListJobs = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createListJobs($scope.user));
             };
 
             function setActive(flag) {

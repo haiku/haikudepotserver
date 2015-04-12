@@ -32,12 +32,24 @@
                 <em>&mdash; did initiate</em>
             </span>
         </li>
-        <li><a href="" ng-click="goRuntimeInformation()">Runtime information</a></li>
+        <li>
+            <a
+                    breadcrumb-link="runtimeInformation"
+                    breadcrumb-link-parameters="[]">
+                Runtime information
+            </a>
+        </li>
         <li><a href="" ng-click="goPaginationControlPlayground()">Pagination playground</a></li>
         <li><a href="" ng-click="goRaiseExceptionInLocalRuntime()">Raise test exception in javascript environment</a></li>
         <li><a href="" ng-click="goRaiseExceptionInServerRuntime()">Raise test exception on server via json-rpc</a></li>
         <li><a href="" ng-click="goPkgCategoryCoverageImportSpreadsheet()">Import package categories</a></li>
-        <li><a href="" ng-click="goJobs()">List jobs</a></li>
+        <li>
+            <a
+                    breadcrumb-link="listJobs"
+                    breadcrumb-link-parameters="[]">
+                List jobs
+            </a>
+        </li>
     </ul>
 
 </div>

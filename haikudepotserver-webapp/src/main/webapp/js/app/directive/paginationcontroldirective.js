@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,8 +8,8 @@
  */
 
 angular.module('haikudepotserver').directive('paginationControl',[
-    '$parse',
-    function($parse) {
+    '$parse','$location',
+    function($parse,$location) {
         return {
             restrict: 'E',
             link : function($scope,element,attributes) {
@@ -41,6 +41,7 @@ angular.module('haikudepotserver').directive('paginationControl',[
                 var totalExpression = attributes['total'];
                 var offsetExpression = attributes['offset'];
                 var maxExpression = attributes['max'];
+                var queryOffsetKey = attributes['queryOffsetKey'];
                 var pageControlEs = [];
 
                 /**
@@ -271,7 +272,7 @@ angular.module('haikudepotserver').directive('paginationControl',[
                 });
 
                 // ---------------------
-                // REFERESH DATA
+                // REFRESH DATA
 
                 function refreshPageControls() {
                     var params = parameters();
@@ -305,6 +306,8 @@ angular.module('haikudepotserver').directive('paginationControl',[
                             pageControlEs[i].attr('pagination-offset','');
                         }
                         else {
+                            var offsetI = (suggestedPages[i] * params.max);
+
                             pageControlEs[i].parent().removeClass('app-hide');
 
                             if(params.page == suggestedPages[i]) {
@@ -314,8 +317,33 @@ angular.module('haikudepotserver').directive('paginationControl',[
                                 pageControlEs[i].removeClass('pagination-control-currentpage');
                             }
 
-                            pageControlEs[i].attr('pagination-offset',''+(suggestedPages[i] * params.max));
+                            pageControlEs[i].attr('pagination-offset',''+offsetI);
                             pageControlEs[i].text('' + (suggestedPages[i] + 1));
+
+                            // it may be possible to add an href to the anchors so that
+                            // one can right-click the page links to get a new tab showing
+                            // that page.
+
+                            if(queryOffsetKey && queryOffsetKey.length) {
+                                var searchI = _.clone($location.search());
+                                searchI[queryOffsetKey] = '' + offsetI;
+
+                                pageControlEs[i].attr('href',_.reduce(
+                                    _.keys(searchI),
+                                    function(memo, key) {
+                                        if('bcguid'==key) {
+                                            return memo;
+                                        }
+                                        else {
+                                            return memo +
+                                                ((-1 == memo.indexOf('?')) ? '?' : '&') +
+                                                encodeURI(key) + '=' + encodeURI(searchI[key]);
+                                        }
+                                    },
+                                    window.location.pathname + '#' + $location.path()
+                                ));
+
+                            }
                         }
 
                     }
@@ -324,6 +352,17 @@ angular.module('haikudepotserver').directive('paginationControl',[
 
                 // ---------------------
                 // EVENT OBSERVATION
+
+                // This event has to be caught so that the links on the pagination show the correct
+                // search items; otherwise they will be initially setup, but if the user chooses to
+                // filter by some other settings (category, search term etc..) then the hyperlink
+                // on the pagination will be wrong.
+
+                if(queryOffsetKey) {
+                    $scope.$on('$routeUpdate', function() {
+                        refreshPageControls();
+                    });
+                }
 
                 if(totalExpression) {
                     $scope.$watch(totalExpression, function () {

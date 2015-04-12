@@ -22,7 +22,10 @@ angular.module('haikudepotserver').directive('pkgLabel',[
 
                 containerEl.on('click', function() {
                     showName = !showName;
-                    refreshText();
+
+                    $scope.$apply(function() {
+                        refreshText();
+                    });
                 });
 
                 function deriveText(pkg) {

@@ -18,8 +18,8 @@
 
 angular.module('haikudepotserver').factory('breadcrumbs',
     [
-        '$rootScope','$location',
-        function($rootScope,$location) {
+        '$rootScope','$location','$log',
+        function($rootScope,$location,$log) {
 
             /**
              * <p>This variable contains the breadcrumb trail.  Inherently, "home" is not on the breadcrumb trail
@@ -64,6 +64,8 @@ angular.module('haikudepotserver').factory('breadcrumbs',
              */
 
             function reset(stackIn) {
+                $log.debug('reset the breadcrumb stack');
+
                 stack = undefined;
 
                 if(stackIn) {

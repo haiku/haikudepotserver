@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -31,7 +31,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                     throw Error('the repository expression should be defined');
                 }
 
-                $scope.$watch(repositoryExpression, function (repository) {
+                $scope.$watch(repositoryExpression, function(repository) {
 
                     function setupForNoHyperlink() {
                         if('span' != containerEl[0].tagName.toLowerCase()) {
@@ -55,6 +55,8 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                         }]).then(function(flag) {
 
                             if(flag) {
+                                breadcrumbItem = breadcrumbFactory.createViewRepository(repository);
+
                                 if ('a' != containerEl[0].tagName.toLowerCase()) {
                                     var anchorEl = angular.element('<a href=""></a>');
                                     containerEl.replaceWith(anchorEl);
@@ -69,10 +71,13 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                                         el.preventDefault();
                                     });
 
+                                    containerEl.attr(
+                                        'href',
+                                        breadcrumbFactory.toFullPath(breadcrumbItem)
+                                    );
+
                                     containerEl.text(repository ? repository.code : '');
                                 }
-
-                                breadcrumbItem = breadcrumbFactory.createViewRepository(repository);
                             }
                             else {
                                 setupForNoHyperlink();

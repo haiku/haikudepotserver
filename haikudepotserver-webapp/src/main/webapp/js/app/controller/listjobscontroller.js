@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -85,21 +85,21 @@ angular.module('haikudepotserver').controller(
                     constants.ENDPOINT_API_V1_JOB,
                     "searchJobs",
                     [{
-                        ownerUserNickname : $routeParams.nickname,
-                        expression : null,
-                        expressionType : 'CONTAINS',
-                        offset : $scope.jobs.offset,
-                        limit : $scope.jobs.max
+                        ownerUserNickname: $routeParams.nickname,
+                        expression: null,
+                        expressionType: 'CONTAINS',
+                        offset: $scope.jobs.offset,
+                        limit: $scope.jobs.max
                     }]
                 ).then(
-                    function(result) {
+                    function (result) {
 
                         // the job label directive requires a data structure with the nickname in it
                         // so re-format the owner user as appropriate.
 
                         $scope.jobs.items = _.map(
                             result.items,
-                            function(item) {
+                            function (item) {
                                 if (item.ownerUserNickname) {
                                     item.ownerUser = {
                                         nickname: item.ownerUserNickname
@@ -110,21 +110,15 @@ angular.module('haikudepotserver').controller(
                             }
                         );
                         $scope.jobs.total = result.total;
-                        $log.info('found '+result.items.length+' jobs');
+                        $log.info('found ' + result.items.length + ' jobs');
                         amFetchingJobs = false;
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
 
             }
-
-            // ---- ACTIONS
-
-            $scope.goViewJob = function(job) {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob(job));
-            };
 
             // ---- EVENTS
 

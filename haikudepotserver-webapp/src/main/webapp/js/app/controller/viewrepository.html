@@ -39,7 +39,11 @@
             </a>
         </li>
         <li repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
-            <a href="" ng-click="goEdit()"><message key="viewRepository.editAction.title"></message></a>
+            <a
+                    breadcrumb-link="editRepository"
+                    breadcrumb-link-parameters="[repository]">
+                <message key="viewRepository.editAction.title"></message>
+            </a>
         </li>
     </ul>
 

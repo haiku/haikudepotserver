@@ -42,12 +42,6 @@ angular.module('haikudepotserver').controller(
                 return $scope.authenticateUserForm[name].$invalid ? ['form-control-group-error'] : [];
             };
 
-            $scope.goInitiatePasswordReset = function() {
-                breadcrumbs.pushAndNavigate(
-                    breadcrumbFactory.createInitiatePasswordReset()
-                );
-            };
-
             $scope.goCreateUser = function() {
                 breadcrumbs.resetAndNavigate([
                     breadcrumbFactory.createHome(),

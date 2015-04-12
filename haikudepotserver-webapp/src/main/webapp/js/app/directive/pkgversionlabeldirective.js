@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -45,14 +45,15 @@ angular.module('haikudepotserver').directive(
                         containerEl.append(hyperlinkEl);
                         textTargetEl = hyperlinkEl;
 
-                        hyperlinkEl.on('click', function(el) {
+                        hyperlinkEl.on('click', function(event) {
                             if(pkgVersionBreadcrumbItem) {
                                 $scope.$apply(function() {
                                     breadcrumbs.pushAndNavigate(pkgVersionBreadcrumbItem);
                                 });
                             }
-                            el.preventDefault();
+                            event.preventDefault();
                         });
+
                     }
 
                     function refresh(pkgVersion) {
@@ -72,6 +73,13 @@ angular.module('haikudepotserver').directive(
                                     ' - ' +
                                     pkgVersion.architectureCode
                             );
+
+                            if('A' == textTargetEl[0].tagName.toUpperCase()) {
+                                textTargetEl.attr(
+                                    'href',
+                                    breadcrumbFactory.toFullPath(pkgVersionBreadcrumbItem)
+                                );
+                            }
 
                         }
                     }

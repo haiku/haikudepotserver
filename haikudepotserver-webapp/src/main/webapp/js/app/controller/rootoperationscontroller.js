@@ -95,14 +95,6 @@ angular.module('haikudepotserver').controller(
                 $location.path('/paginationcontrolplayground').search({});
             };
 
-            $scope.goRuntimeInformation = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createRuntimeInformation());
-            };
-
-            $scope.goJobs = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createListJobs());
-            };
-
             $scope.goPkgCategoryCoverageImportSpreadsheet = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createPkgCategoryCoverageImportSpreadsheet());
             };

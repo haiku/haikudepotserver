@@ -46,6 +46,7 @@
 
             <div class="table-general-pagination-container">
                 <pagination-control
+                        query-offset-key="o"
                         link-count="9"
                         max="pkgs.max"
                         total="pkgs.total"
@@ -74,7 +75,7 @@
                 <tr ng-repeat="pkg in pkgs.items">
                     <td><pkg-icon size="16" pkg="pkg"></pkg-icon></td>
                     <td>
-                        <a href="" ng-click="goViewPkg(pkg)">
+                        <a href="{{viewPkgPath(pkg)}}" ng-click="goViewPkg(pkg,$event)">
                             <highlighted-text
                                     value="pkg.derivedTitle"
                                     search-expression="lastRefetchPkgsSearchExpression"

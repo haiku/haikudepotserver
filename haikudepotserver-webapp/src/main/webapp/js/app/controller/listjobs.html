@@ -32,7 +32,11 @@
                 <tbody>
                 <tr ng-repeat="job in jobs.items">
                     <td>
-                        <a href="" ng-click="goViewJob(job)">{{job.guid|croppedGuid}}</a>
+                        <a
+                                breadcrumb-link="viewJob"
+                                breadcrumb-link-parameters="[job]">
+                            {{job.guid|croppedGuid}}
+                        </a>
                     </td>
                     <td><message key="{{'job.jobtype.' + job.jobTypeCode + '.title'}}"></message></td>
                     <td>

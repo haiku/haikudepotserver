@@ -95,7 +95,8 @@ angular.module('haikudepotserver').factory('userState',
                 var tokenValue = token();
 
                 if(tokenValue) {
-                    return { nickname : jwt.tokenNickname(tokenValue) };
+                    var nickname = jwt.tokenNickname(tokenValue);
+                    return { nickname : nickname };
                 }
 
                 return undefined;
@@ -107,7 +108,7 @@ angular.module('haikudepotserver').factory('userState',
 
                     if (null == value) {
 
-                        if (userStateData.currentTokenUserNickname) {
+                        if (userStateData.currentTokenUserNickname || token()) {
 
                             if (window.localStorage) {
                                 window.localStorage.removeItem(HDS_TOKEN_KEY);
@@ -274,7 +275,9 @@ angular.module('haikudepotserver').factory('userState',
                 var t = token();
 
                 if (t) {
-                    if (jwt.millisUntilExpirationForToken(t) > 0) {
+                    var ms = jwt.millisUntilExpirationForToken(t);
+
+                    if (ms > 0) {
                         token(t);
                     }
                     else {

@@ -59,7 +59,9 @@
             </a>
         </li>
         <li show-if-permission="'REPOSITORY_ADD'">
-            <a href="" ng-click="goAdd()">
+            <a
+                    breadcrumb-link="addRepository"
+                    breadcrumb-link-parameters="[]">
                 <message key="listRepositories.addAction.title"></message>
             </a>
         </li>

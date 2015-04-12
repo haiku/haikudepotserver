@@ -104,7 +104,9 @@
                 <message key="viewPkg.userRating.noResults"></message>
 
                 <span ng-show="isAuthenticated()">
-                    <a href="" ng-click="goAddUserRating()">
+                    <a
+                            breadcrumb-link="addUserRating"
+                            breadcrumb-link-parameters="[pkg]">
                         <message key="viewPkg.userRating.noResults.addAction"></message>
                     </a>
                 </span>
@@ -143,7 +145,9 @@
                 <div class="pkg-userrating-meta">
                     <span class="muted">{{userRating.createTimestamp|date}}</span>
                     |
-                    <a href="" ng-click="goViewUserRating(userRating)">
+                    <a
+                            breadcrumb-link="viewUserRating"
+                            breadcrumb-link-parameters="[userRating]">
                         <message key="viewPkg.userRating.moreAction.title"></message>
                     </a>
                 </div>
@@ -164,7 +168,9 @@
 
             <ul>
                 <li ng-show="isAuthenticated()">
-                    <a href="" ng-click="goAddUserRating()">
+                    <a
+                            breadcrumb-link="addUserRating"
+                            breadcrumb-link-parameters="[pkg]">
                         <message key="viewPkg.userRating.addAction.title"></message>
                     </a>
                 </li>
@@ -190,7 +196,9 @@
 
         <ul>
             <li>
-                <a href="" ng-click="goListPkgVersions()">
+                <a
+                        breadcrumb-link="listPkgVersionsForPkg"
+                        breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.listPkgVersionsAction.title"></message>
                 </a>
             </li>
@@ -206,7 +214,10 @@
                 </a>
             </li>
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITICON'">
-                <a href="" ng-click="goEditIcon()">
+                <a
+                        href=""
+                        breadcrumb-link="editPkgIcon"
+                        breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.editIconAction.title"></message>
                 </a>
             </li>
@@ -216,29 +227,40 @@
                 </a>
             </li>
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITSCREENSHOT'">
-                <a href="" ng-click="goEditScreenshots()">
+                <a
+                        href=""
+                        breadcrumb-link="editPkgScreenshots"
+                        breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.editScreenshotsAction.title"></message>
                 </a>
             </li>
             <li
                     pkg="pkg"
                     show-if-pkg-permission="'PKG_EDITLOCALIZATION'">
-                <a href="" ng-click="goEditLocalization()">
+                <a
+                        breadcrumb-link="editPkgLocalization"
+                        breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.editLocalizationAction.title"></message>
                 </a>
             </li>
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITPROMINENCE'">
-                <a href="" ng-click="goEditPkgProminence()">
+                <a
+                        breadcrumb-link="editPkgProminence"
+                        breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.editPkgProminenceAction.title"></message>
                 </a>
             </li>
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITCATEGORIES'">
-                <a href="" ng-click="goEditPkgCategories()">
+                <a
+                        breadcrumb-link="editPkgCategories"
+                        breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.editPkgCategoriesAction.title"></message>
                 </a>
             </li>
             <li>
-                <a href="" ng-click="goViewLocalization()">
+                <a
+                        breadcrumb-link="viewPkgVersionLocalization"
+                        breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.viewPkgVersionLocalizationAction.title"></message>
                 </a>
             </li>

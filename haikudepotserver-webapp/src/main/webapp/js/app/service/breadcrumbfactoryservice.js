@@ -134,10 +134,37 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                 return item;
             }
 
+            function toFullPath(item) {
+                return _.reduce(
+                    item.search ? _.keys(item.search) : [],
+                    function(memo, key) {
+                        if('bcguid'==key) {
+                            return memo;
+                        }
+                        else {
+                            return memo +
+                                ((-1 == memo.indexOf('?')) ? '?' : '&') +
+                                encodeURI(key) + '=' + encodeURI(item.search[key]);
+                        }
+                    },
+                    window.location.pathname + '#' + item.path
+                );
+            }
+
             return {
 
                 // -----------------
                 // MANIPULATE BREADCRUMB ITEMS
+
+                /**
+                 * <p>The AngularJS route path might be something like "/viewfoo", but to be a full hyperlink this
+                 * would need to be something like "/#/viewfoo".  This function will return a full hyperlink path for
+                 * the route path of this item.</p>
+                 */
+
+                toFullPath: function(item) {
+                    return toFullPath(item);
+                },
 
                 /**
                  * <p>This function will blend in the current location (path and search) to the supplied item.  This
@@ -266,10 +293,6 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
 
                 createViewPkgVersionLocalization : function(pkg) {
                     return createManipulatePkgBreadcrumbItem(pkg, 'viewversionlocalizations', 'viewPkgVersionLocalizations');
-                },
-
-                createEditPkgVersionLocalization : function(pkg) {
-                    return createManipulatePkgBreadcrumbItem(pkg, 'editversionlocalizations', 'editPkgVersionLocalizations');
                 },
 
                 createEditPkgLocalization : function(pkg) {

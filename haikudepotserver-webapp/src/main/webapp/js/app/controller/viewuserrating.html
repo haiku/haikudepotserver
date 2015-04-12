@@ -37,7 +37,9 @@
             </a>
         </li>
         <li ng-show="userRating.active && canEdit">
-            <a href="" ng-click="goEdit()">
+            <a
+                    breadcrumb-link="editUserRating"
+                    breadcrumb-link-parameters="[userRating]">
                 <message key="viewUserRating.editAction.title"></message>
             </a>
         </li>

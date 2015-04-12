@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -65,32 +65,28 @@ angular.module('haikudepotserver').controller(
                 amFetchingRepositories = true;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "searchRepositories",
-                        [{
-                            expression : $scope.searchExpression,
-                            expressionType : 'CONTAINS',
-                            includeInactive : $scope.amShowingInactive,
-                            offset : $scope.repositories.offset,
-                            limit : $scope.repositories.max
-                        }]
-                    ).then(
-                    function(result) {
+                    constants.ENDPOINT_API_V1_REPOSITORY,
+                    "searchRepositories",
+                    [{
+                        expression: $scope.searchExpression,
+                        expressionType: 'CONTAINS',
+                        includeInactive: $scope.amShowingInactive,
+                        offset: $scope.repositories.offset,
+                        limit: $scope.repositories.max
+                    }]
+                ).then(
+                    function (result) {
                         $scope.repositories.items = result.items;
                         $scope.repositories.total = result.total;
-                        $log.info('found '+result.items.length+' repositories');
+                        $log.info('found ' + result.items.length + ' repositories');
                         amFetchingRepositories = false;
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
 
             }
-
-            $scope.goAdd = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddRepository());
-            };
 
             // ---- EVENTS
 

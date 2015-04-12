@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -57,12 +57,19 @@ angular.module('haikudepotserver').directive('userLabel',[
                                         containerEl.text('');
                                         containerEl.append(anchorEl);
 
+                                        var item = breadcrumbFactory.createViewUser(user);
+
                                         anchorEl.on('click', function(event) {
                                             event.preventDefault();
                                             $scope.$apply(function() {
-                                                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewUser(user));
+                                                breadcrumbs.pushAndNavigate(item);
                                             });
                                         });
+
+                                        anchorEl.attr(
+                                            'href',
+                                            breadcrumbFactory.toFullPath(item)
+                                        );
 
                                     }
                                     else {

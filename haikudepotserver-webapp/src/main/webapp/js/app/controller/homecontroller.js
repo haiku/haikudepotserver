@@ -260,7 +260,7 @@ angular.module('haikudepotserver').controller(
                     });
 
                     $scope.$watch('selectedPkgCategory', function(newValue, oldValue) {
-                        if(!!oldValue) { // already initialized elsewhere
+                        if(!!oldValue && oldValue.code != newValue.code) { // already initialized elsewhere
                             var option = $scope.selectedViewCriteriaTypeOption;
 
                             if (option && option.code == ViewCriteriaTypes.CATEGORIES) {
@@ -318,7 +318,18 @@ angular.module('haikudepotserver').controller(
 
             // ---- VIEW PKG + VERSION
 
-            $scope.goViewPkg = function(pkg) {
+            /**
+             * <p>This is used to provide an 'open in tab' link.</p>
+             */
+
+            $scope.viewPkgPath = function(pkg) {
+                return breadcrumbFactory.toFullPath(
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg(pkg)
+                );
+            };
+
+            $scope.goViewPkg = function(pkg,event) {
+                event.stopPropagation();
 
                 breadcrumbs.pushAndNavigate(
                     breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg(pkg)
@@ -380,7 +391,13 @@ angular.module('haikudepotserver').controller(
                     }
 
                     // copy those search values into the breadcrumb
-                    breadcrumbs.peek().search = $location.search();
+                    var item = breadcrumbs.peek();
+
+                    if(!item) {
+                        throw Error('expected the home breadcrumb to be present');
+                    }
+
+                    item.search = $location.search();
 
                     amFetchingPkgs = true;
 

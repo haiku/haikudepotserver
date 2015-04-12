@@ -33,17 +33,23 @@
             </a>
         </li>
         <li user="user" show-if-user-permission="'USER_CHANGEPASSWORD'">
-            <a href="" ng-click="goChangePassword()">
+            <a
+                    breadcrumb-link="changePassword"
+                    breadcrumb-link-parameters="[user]">
                 <message key="viewUser.changePaswordAction.title"></message>
             </a>
         </li>
         <li user="user" show-if-user-permission="'USER_EDIT'">
-            <a href="" ng-click="goEdit()">
+            <a
+                    breadcrumb-link="editUser"
+                    breadcrumb-link-parameters="[user]">
                 <message key="viewUser.editAction.title"></message>
             </a>
         </li>
         <li user="user" show-if-user-permission="'USER_VIEWJOBS'">
-            <a href="" ng-click="goListJobs()">
+            <a
+                    breadcrumb-link="listJobs"
+                    breadcrumb-link-parameters="[user]">
                 <message key="viewUser.listJobsAction.title"></message>
             </a>
         </li>

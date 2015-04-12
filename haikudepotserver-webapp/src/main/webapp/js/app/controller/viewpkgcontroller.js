@@ -350,17 +350,6 @@ angular.module('haikudepotserver').controller(
             }
 
             // ---------------------
-            // RATINGS
-
-            $scope.goAddUserRating = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddUserRating($scope.pkg));
-            };
-
-            $scope.goViewUserRating = function(userRating) {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewUserRating(userRating));
-            };
-
-            // ---------------------
             // ACTIONS FOR PACKAGE
 
             $scope.goPkgFeedBuilder = function() {
@@ -369,37 +358,9 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.pushAndNavigate(item);
             };
 
-            $scope.goListPkgVersions = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createListPkgVersionsForPkg($scope.pkg));
-            };
-
             // this is used to cause an authentication in relation to adding a user rating
             $scope.goAuthenticate = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createAuthenticate());
-            };
-
-            $scope.goEditIcon = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgIcon($scope.pkg));
-            };
-
-            $scope.goEditScreenshots = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgScreenshots($scope.pkg));
-            };
-
-            $scope.goEditLocalization = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgLocalization($scope.pkg));
-            };
-
-            $scope.goEditVersionLocalization = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgVersionLocalization($scope.pkg));
-            };
-
-            $scope.goEditPkgCategories = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgCategories($scope.pkg));
-            };
-
-            $scope.goEditPkgProminence = function() {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditPkgProminence($scope.pkg));
             };
 
             // This is a bit strange; we're cycling through a list of package versions, but
