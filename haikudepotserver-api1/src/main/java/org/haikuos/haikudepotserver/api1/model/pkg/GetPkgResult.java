@@ -67,6 +67,13 @@ public class GetPkgResult {
 
         public Long payloadLength;
 
+        /**
+         * <p>This represents when the package version was created in the HDS system.</p>
+         * @since 2015-04-15
+         */
+
+        public Long createTimestamp;
+
     }
 
 }

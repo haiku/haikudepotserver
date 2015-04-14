@@ -14,6 +14,7 @@
     <table class="table-general">
         <thead>
         <th><message key="listPkgVersionsForPkg.table.pkgVersion.title"></message></th>
+        <th><message key="gen.created.title"></message></th>
         <th><message key="listPkgVersionsForPkg.table.architecture.title"></message></th>
         </thead>
         <tbody>
@@ -23,6 +24,9 @@
                 <span class="muted" ng-show="pkgVersion.isLatest">
                     (<message key="listPkgVersionsForPkg.latest" parameters="[pkgVersion.architectureCode]"></message>)
                 </span>
+            </td>
+            <td>
+                {{pkgVersion.createTimestamp|timestamp}}
             </td>
             <td>
                 {{pkgVersion.architectureCode}}
