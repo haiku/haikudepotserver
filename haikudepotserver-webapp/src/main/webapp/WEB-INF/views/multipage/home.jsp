@@ -84,8 +84,8 @@
 
             <c:if test="${empty data.pkgVersions}">
                 <div class="info-container">
-                    <strong><message key="home.noResults.title"></message>;</strong>
-                    <message key="home.noResults.description"></message>
+                    <strong><spring:message code="home.noResults.title"></spring:message>;</strong>
+                    <spring:message code="home.noResults.description"></spring:message>
                 </div>
             </c:if>
 
