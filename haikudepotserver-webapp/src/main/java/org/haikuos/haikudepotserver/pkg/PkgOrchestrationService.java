@@ -28,6 +28,7 @@ import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -65,6 +66,9 @@ public class PkgOrchestrationService {
     @Resource
     private PngOptimizationService pngOptimizationService;
 
+    @Value("${architecture.default.code}")
+    private String defaultArchitectureCode;
+
     private ImageHelper imageHelper = new ImageHelper();
 
     // ------------------------------
@@ -97,6 +101,59 @@ public class PkgOrchestrationService {
 
     // ------------------------------
     // QUERY
+
+    /**
+     * <p>This method will try to find the latest package version for the supplied package
+     * name.</p>
+     */
+
+    public Optional<PkgVersion> getLatestPkgVersionForPkgName(
+            ObjectContext context,
+            String pkgName) {
+
+        Preconditions.checkArgument(null!=context, "the context must be supplied to lookup the package");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the package name must be supplied");
+
+        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+
+        if(pkgOptional.isPresent()) {
+            return getLatestPkgVersionForPkg(context, pkgOptional.get());
+        }
+
+        return Optional.absent();
+    }
+
+    /**
+     * <p>This method will return the latest version for a package in any architecture.</p>
+     */
+
+    public Optional<PkgVersion> getLatestPkgVersionForPkg(
+            ObjectContext context,
+            Pkg pkg) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+
+        Optional<PkgVersion> pkgVersionOptional = getLatestPkgVersionForPkg(
+                context,
+                pkg,
+                Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode).get()));
+
+        if(!pkgVersionOptional.isPresent()) {
+            List<Architecture> architectures = Architecture.getAllExceptByCode(
+                    context,
+                    ImmutableList.of(Architecture.CODE_SOURCE, defaultArchitectureCode));
+
+            for (int i = 0; i < architectures.size() && !pkgVersionOptional.isPresent(); i++) {
+                pkgVersionOptional = getLatestPkgVersionForPkg(
+                        context,
+                        pkg,
+                        Collections.singletonList(architectures.get(i)));
+            }
+        }
+
+        return pkgVersionOptional;
+    }
 
     /**
      * <p>This method will return the latest PkgVersion for the supplied package.  The version sorting logic to compare

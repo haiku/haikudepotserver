@@ -20,6 +20,7 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -82,7 +83,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         }
 
         if(getDerivedRatingSampleSize() < 0) {
-            validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_SAMPLE_SIZE_PROPERTY,"min"));
+            validationResult.addFailure(new BeanValidationFailure(this, DERIVED_RATING_SAMPLE_SIZE_PROPERTY, "min"));
         }
 
     }
@@ -205,6 +206,10 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             PkgScreenshot pkgScreenshot = screenshots.get(i);
             pkgScreenshot.setOrdering(i+1);
         }
+    }
+
+    public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+        return builder.pathSegment(getName());
     }
 
     @Override

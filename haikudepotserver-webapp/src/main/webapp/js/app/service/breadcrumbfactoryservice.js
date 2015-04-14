@@ -271,7 +271,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                 createListPkgVersionsForPkg : function(pkg) {
                     return applyDefaults({
                         titleKey : 'breadcrumb.listPkgVersionsForPkg.title',
-                        path : '/pkg/'+pkg.name+'/listpkgversions'
+                        path : '/pkg/'+pkg.name
                     });
                 },
 

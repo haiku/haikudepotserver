@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.*;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
@@ -19,6 +20,7 @@ import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -79,15 +81,15 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     @Override
     public void validateForInsert(ValidationResult validationResult) {
 
-        if(null==getActive()) {
+        if (null == getActive()) {
             setActive(true);
         }
 
-        if(null==getViewCounter()) {
+        if (null == getViewCounter()) {
             setViewCounter(0l);
         }
 
-        if(null==getIsLatest()) {
+        if (null == getIsLatest()) {
             setIsLatest(false);
         }
 
@@ -98,44 +100,44 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     protected void validateForSave(ValidationResult validationResult) {
         super.validateForSave(validationResult);
 
-        if(null != getMajor()) {
-            if(!MAJOR_PATTERN.matcher(getMajor()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,MAJOR_PROPERTY,"malformed"));
+        if (null != getMajor()) {
+            if (!MAJOR_PATTERN.matcher(getMajor()).matches()) {
+                validationResult.addFailure(new BeanValidationFailure(this, MAJOR_PROPERTY, "malformed"));
             }
         }
 
-        if(null != getMinor()) {
-            if(!MINOR_PATTERN.matcher(getMinor()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,MINOR_PROPERTY,"malformed"));
+        if (null != getMinor()) {
+            if (!MINOR_PATTERN.matcher(getMinor()).matches()) {
+                validationResult.addFailure(new BeanValidationFailure(this, MINOR_PROPERTY, "malformed"));
             }
         }
 
-        if(null != getMicro()) {
-            if(!MICRO_PATTERN.matcher(getMicro()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,MICRO_PROPERTY,"malformed"));
+        if (null != getMicro()) {
+            if (!MICRO_PATTERN.matcher(getMicro()).matches()) {
+                validationResult.addFailure(new BeanValidationFailure(this, MICRO_PROPERTY, "malformed"));
             }
         }
 
-        if(null != getPreRelease()) {
-            if(!PRE_RELEASE_PATTERN.matcher(getPreRelease()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,PRE_RELEASE_PROPERTY,"malformed"));
+        if (null != getPreRelease()) {
+            if (!PRE_RELEASE_PATTERN.matcher(getPreRelease()).matches()) {
+                validationResult.addFailure(new BeanValidationFailure(this, PRE_RELEASE_PROPERTY, "malformed"));
             }
         }
 
-        if(null != getRevision()) {
-            if(getRevision() <= 0) {
-                validationResult.addFailure(new BeanValidationFailure(this,REVISION_PROPERTY,"lessThanEqualZero"));
+        if (null != getRevision()) {
+            if (getRevision() <= 0) {
+                validationResult.addFailure(new BeanValidationFailure(this, REVISION_PROPERTY, "lessThanEqualZero"));
             }
         }
 
-        if(getViewCounter() < 0) {
-            validationResult.addFailure(new BeanValidationFailure(this,VIEW_COUNTER_PROPERTY,"min"));
+        if (getViewCounter() < 0) {
+            validationResult.addFailure(new BeanValidationFailure(this, VIEW_COUNTER_PROPERTY, "min"));
         }
 
     }
 
     public void incrementViewCounter() {
-        setViewCounter(getViewCounter()+1);
+        setViewCounter(getViewCounter() + 1);
     }
 
     /**
@@ -179,15 +181,15 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public PkgVersionLocalization getPkgVersionLocalizationOrFallbackByCode(final String naturalLanguageCode) {
         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = Optional.absent();
 
-        if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
+        if (!Strings.isNullOrEmpty(naturalLanguageCode)) {
             pkgVersionLocalizationOptional = getPkgVersionLocalization(naturalLanguageCode);
         }
 
-        if(!pkgVersionLocalizationOptional.isPresent()) {
+        if (!pkgVersionLocalizationOptional.isPresent()) {
             pkgVersionLocalizationOptional = getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
         }
 
-        if(!pkgVersionLocalizationOptional.isPresent()) {
+        if (!pkgVersionLocalizationOptional.isPresent()) {
             throw new IllegalStateException("unable to find the fallback localization for " + toString());
         }
 
@@ -241,6 +243,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     /**
      * <p>This method will provide a URL to the actual data of the package.</p>
+     *
      * @return
      */
 
@@ -253,8 +256,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                     packagesBaseUrl.getHost(),
                     packagesBaseUrl.getPort(),
                     packagesBaseUrl.getPath() + "/" + getHpkgFilename());
-        }
-        catch(MalformedURLException mue) {
+        } catch (MalformedURLException mue) {
             throw new IllegalStateException("unable to create the URL to the hpkg data", mue);
         }
     }
@@ -273,22 +275,22 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         builder.append('-');
         builder.append(getMajor());
 
-        if(null!=getMinor()) {
+        if (null != getMinor()) {
             builder.append('.');
             builder.append(getMinor());
         }
 
-        if(null!=getMicro()) {
+        if (null != getMicro()) {
             builder.append('.');
             builder.append(getMicro());
         }
 
-        if(null!=getPreRelease()) {
+        if (null != getPreRelease()) {
             builder.append('~');
             builder.append(getPreRelease());
         }
 
-        if(null!=getRevision()) {
+        if (null != getRevision()) {
             builder.append('-');
             builder.append(getRevision());
         }
@@ -308,6 +310,13 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                 getMicro(),
                 getPreRelease(),
                 getRevision());
+    }
+
+    public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+        getPkg().appendPathSegments(builder);
+        toVersionCoordinates().appendPathSegments(builder);
+        getArchitecture().appendPathSegments(builder);
+        return builder;
     }
 
     public String toStringWithPkgAndArchitecture() {

@@ -124,12 +124,12 @@ public class FeedController {
 
         Preconditions.checkNotNull(response);
 
-        if(null==limit || limit.intValue() > MAX_LIMIT) {
+        if(null==limit || limit > MAX_LIMIT) {
             limit = DEFAULT_LIMIT;
         }
 
         FeedSpecification specification = new FeedSpecification();
-        specification.setLimit(null==limit ? DEFAULT_LIMIT : limit.intValue() > MAX_LIMIT ? MAX_LIMIT : limit.intValue());
+        specification.setLimit(limit > MAX_LIMIT ? MAX_LIMIT : limit);
         specification.setNaturalLanguageCode(!Strings.isNullOrEmpty(naturalLanguageCode) ? naturalLanguageCode : NaturalLanguage.CODE_ENGLISH);
 
         if(Strings.isNullOrEmpty(types)) {

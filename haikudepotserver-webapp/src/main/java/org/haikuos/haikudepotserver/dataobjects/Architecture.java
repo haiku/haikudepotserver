@@ -16,6 +16,7 @@ import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._Architecture;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,14 +54,18 @@ public class Architecture extends _Architecture {
      */
 
     public static List<Architecture> getAllExceptByCode(ObjectContext context, final Collection<String> codes) {
-        Preconditions.checkArgument(null!=context);
-        Preconditions.checkArgument(null!=codes);
+        Preconditions.checkArgument(null != context);
+        Preconditions.checkArgument(null != codes);
         return ImmutableList.copyOf(Iterables.filter(getAll(context), new Predicate<Architecture>() {
             @Override
             public boolean apply(Architecture input) {
                 return !codes.contains(input.getCode());
             }
         }));
+    }
+
+    public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+        return builder.pathSegment(getCode());
     }
 
     @Override

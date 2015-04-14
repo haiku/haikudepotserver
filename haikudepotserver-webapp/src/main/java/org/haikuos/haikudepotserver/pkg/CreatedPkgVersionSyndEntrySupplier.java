@@ -25,12 +25,14 @@ import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haikuos.haikudepotserver.feed.controller.FeedController;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haikuos.haikudepotserver.feed.model.FeedSpecification;
 import org.haikuos.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
 import java.util.Collections;
@@ -112,29 +114,22 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                                                     input.getPkg().getName(),
                                                     input.toVersionCoordinates().toString())).toString());
 
-                            // see method for this on "PkgVersion.toCoordinate().pathCom...()"
-
-                            entry.setLink(String.format(
-                                    "%s/#/pkg/%s/%s/%s/%s/%s/%d/%s",
-                                    baseUrl,
-                                    input.getPkg().getName(),
-                                    input.getMajor(),
-                                    null == input.getMinor() ? "-" : input.getMinor(),
-                                    null == input.getMicro() ? "-" : input.getMicro(),
-                                    null == input.getPreRelease() ? "-" : input.getPreRelease(),
-                                    null == input.getRevision() ? "-" : input.getRevision(),
-                                    input.getArchitecture().getCode()));
+                            {
+                                UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
+                                input.appendPathSegments(builder);
+                                entry.setLink(builder.build().toUriString());
+                            }
 
                             entry.setTitle(messageSource.getMessage(
                                     "feed.createdPkgVersion.atom.title",
-                                    new Object[] { input.toStringWithPkgAndArchitecture() },
+                                    new Object[]{input.toStringWithPkgAndArchitecture()},
                                     new Locale(specification.getNaturalLanguageCode())
                             ));
 
                             {
                                 Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = input.getPkgVersionLocalization(specification.getNaturalLanguageCode());
 
-                                if(!pkgVersionLocalizationOptional.isPresent()) {
+                                if (!pkgVersionLocalizationOptional.isPresent()) {
                                     pkgVersionLocalizationOptional = input.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
                                 }
 
