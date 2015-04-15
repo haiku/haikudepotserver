@@ -29,7 +29,7 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                 check();
 
                 $scope.$watch(pkgExpression, function(newValue) {
-                   pkg = newValue;
+                    pkg = newValue;
                     check();
                 });
 
@@ -38,14 +38,14 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                     check();
                 });
 
-                    function check() {
-                        showOrHideElementAfterCheckPermission(
-                            userState,
-                            element,
-                            permissionCode,
-                            'PKG',
-                            pkg ? pkg.name : undefined);
-                    }
+                function check() {
+                    showOrHideElementAfterCheckPermission(
+                        userState,
+                        element,
+                        permissionCode,
+                        'PKG',
+                        pkg ? pkg.name : undefined);
+                }
 
                 $scope.$on('userChangeSuccess', function() { check(); });
 

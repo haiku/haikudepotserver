@@ -157,8 +157,8 @@ angular.module('haikudepotserver').factory('userState',
                         configureTokenRenewal();
 
                         if(!userStateData.currentTokenUserNickname || userStateData.currentTokenUserNickname != newUser.nickname) {
-                            $rootScope.$broadcast('userChangeSuccess', newUser);
                             resetAuthorization();
+                            $rootScope.$broadcast('userChangeSuccess', newUser);
                         }
 
                         userStateData.currentTokenUserNickname = newUser.nickname;
