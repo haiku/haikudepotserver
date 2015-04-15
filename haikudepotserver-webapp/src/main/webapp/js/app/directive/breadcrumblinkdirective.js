@@ -53,17 +53,19 @@ angular.module('haikudepotserver').directive(
                     }
 
                     elem.on('click', function(event) {
-                        event.preventDefault();
+                        if(0 == event.button) { // left button only.
+                            event.preventDefault();
 
-                        scope.$apply(function() {
-                            var item = createItem();
+                            scope.$apply(function () {
+                                var item = createItem();
 
-                            if(!item) {
-                                throw Error('it was not possible to create a breadcrum item');
-                            }
+                                if (!item) {
+                                    throw Error('it was not possible to create a breadcrum item');
+                                }
 
-                            breadcrumbs.pushAndNavigate(item);
-                        });
+                                breadcrumbs.pushAndNavigate(item);
+                            });
+                        }
                     });
 
                     scope.$watchCollection(parametersExpr, function() { refreshHref(); });
