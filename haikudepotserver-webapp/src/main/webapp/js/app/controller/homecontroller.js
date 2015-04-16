@@ -329,13 +329,13 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.goViewPkg = function(pkg,event) {
-                event.stopPropagation();
+                if(0 == event.button) { // left button only.
+                    event.preventDefault();
 
-                breadcrumbs.pushAndNavigate(
-                    breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg(pkg)
-                );
-
-                return false;
+                    breadcrumbs.pushAndNavigate(
+                        breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg(pkg)
+                    );
+                }
             };
 
             // ---- UPDATE THE RESULTS LOGIC
