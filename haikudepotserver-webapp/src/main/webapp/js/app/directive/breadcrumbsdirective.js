@@ -28,7 +28,8 @@ angular.module('haikudepotserver').directive('breadcrumbs',function() {
                     }
 
                     $scope.shouldShowItems = function() {
-                        return $scope.stack;
+                        return $scope.stack &&
+                                $scope.stack.length > 1;
                     };
 
                     $scope.goItem = function(item) {

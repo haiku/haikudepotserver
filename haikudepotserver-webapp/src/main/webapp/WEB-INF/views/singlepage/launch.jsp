@@ -24,11 +24,14 @@ web-resources and then this starts the java-script single page environment drive
 
 </head>
 
-<body>
-
 <%@include file="/WEB-INF/includes/unsupported.jsp"%>
 
-<banner></banner>
+<c:if test="${param['banner']==null || param['banner']=='true'}">
+    <banner></banner>
+</c:if>
+<c:if test="${param['breadcrumbs']==null || param['breadcrumbs']=='true'}">
+    <breadcrumbs></breadcrumbs>
+</c:if>
 
 <div class="container">
     <div ng-view></div>

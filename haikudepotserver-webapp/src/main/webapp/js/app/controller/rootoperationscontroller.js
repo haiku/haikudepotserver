@@ -92,7 +92,7 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goPaginationControlPlayground = function() {
-                $location.path('/paginationcontrolplayground').search({});
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createPaginationPlayground());
             };
 
             $scope.goPkgCategoryCoverageImportSpreadsheet = function() {

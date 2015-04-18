@@ -433,6 +433,13 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     });
                 },
 
+                createPaginationPlayground : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.paginationPlayground.title',
+                        path : '/paginationcontrolplayground'
+                    });
+                },
+
                 createListJobs : function(user) {
                     return applyDefaults({
                         titleKey : 'breadcrumb.listJobs.title',
