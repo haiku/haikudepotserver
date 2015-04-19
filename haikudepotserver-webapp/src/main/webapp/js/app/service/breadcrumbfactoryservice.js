@@ -134,21 +134,37 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                 return item;
             }
 
-            function toFullPath(item) {
+            function toFullPath(item, query) {
+
+                // this function can be used in a "reduce" in order to apply the query parameters (search)
+                // so they can be added to a path of a URL or to the AngularJS route path.
+
+                function reduceIterator(memo, key) {
+                    if('bcguid'==key) {
+                        return memo;
+                    }
+                    else {
+                        return memo +
+                            ((-1 == memo.indexOf('?')) ? '?' : '&') +
+                            encodeURI(key) + '=' + encodeURI(this[key]); // this = context of the reduce
+                    }
+                }
+
+                // this is a bit hard to read, but it is applying the query to the main part of the path
+                // and the search from the 'item' to the AngularJS part of the path.
+
                 return _.reduce(
                     item.search ? _.keys(item.search) : [],
-                    function(memo, key) {
-                        if('bcguid'==key) {
-                            return memo;
-                        }
-                        else {
-                            return memo +
-                                ((-1 == memo.indexOf('?')) ? '?' : '&') +
-                                encodeURI(key) + '=' + encodeURI(item.search[key]);
-                        }
-                    },
-                    window.location.pathname + '#' + item.path
+                    reduceIterator,
+                    _.reduce(
+                        query ? _.keys(query) : [],
+                        reduceIterator,
+                        window.location.pathname,
+                        query
+                    ) + '#' + item.path,
+                    item.search
                 );
+
             }
 
             return {
@@ -159,11 +175,14 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                 /**
                  * <p>The AngularJS route path might be something like "/viewfoo", but to be a full hyperlink this
                  * would need to be something like "/#/viewfoo".  This function will return a full hyperlink path for
-                 * the route path of this item.</p>
+                 * the route path of this item.  It will include the item's 'search' on the AngularJS portion of the
+                 * path (after the hash).  The optionally supplied 'query' will be applied to the root path (before
+                 * the hash) and will therefore have an influence on the JSP page that generates the 'substrate' for
+                 * the AngularJS application.</p>
                  */
 
-                toFullPath: function(item) {
-                    return toFullPath(item);
+                toFullPath: function(item, query) {
+                    return toFullPath(item, query);
                 },
 
                 /**

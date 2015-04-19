@@ -1,5 +1,11 @@
 <div class="content-container">
 
+    <h3>
+        <pkg-version-label
+                should-link="false"
+                pkg-version="pkgVersion"></pkg-version-label>
+    </h3>
+
     <div ng-repeat="translation in translations" class="translation-container">
         <h1>{{translation.naturalLanguage.title}} (<code>{{translation.naturalLanguage.code}}</code>)</h1>
         <h2><message key="viewPkgVersionLocalization.summary.title"></message></h2>

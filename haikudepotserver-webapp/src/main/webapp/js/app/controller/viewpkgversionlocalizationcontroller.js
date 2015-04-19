@@ -21,6 +21,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.showHelp = false;
             $scope.pkg = undefined;
+            $scope.pkgVersion = undefined;
             $scope.translations = undefined;
 
             $scope.shouldSpin = function() {
@@ -63,6 +64,10 @@ angular.module('haikudepotserver').controller(
 
                                 $scope.pkg = pkg;
                                 var version = $scope.pkg.versions[0];
+
+                                // turn it around so that the data structure is version focussed.
+                                version.pkg = pkg;
+                                $scope.pkgVersion = version;
 
                                 jsonRpc.call(
                                     constants.ENDPOINT_API_V1_PKG,

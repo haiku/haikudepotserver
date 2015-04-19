@@ -251,6 +251,41 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
+            /**
+             * <p>This method will open a new window with the URL to show the localization of any version of this
+             * package as was defined in the HPKR.</p>
+             */
+
+            $scope.goShowAnyPkgVersionLocalizations = function() {
+                var item = breadcrumbFactory.createViewPkgVersionLocalization($scope.pkg);
+                var url = window.location.origin + breadcrumbFactory.toFullPath(
+                        item,
+                        {
+                            'banner': 'false',
+                            'breadcrumbs': 'false'
+                        }
+                    );
+
+                var opts = [
+                    [ 'height', '480' ],
+                    [ 'width',  '640' ],
+                    [ 'menubar', 'false' ],
+                    [ 'location', 'false' ],
+                    [ 'scrollbars', '1' ],
+                    [ 'toolbar', 'false' ],
+                    [ 'personalbar', 'false' ],
+                    [ 'status', 'false' ]
+                ];
+
+                window.open(
+                    url,
+                    _.uniqueId('ShowAnyPkgVersionLocalization'),
+                    _.map(opts, function(o) {
+                        return o.join('=')
+                    }).join(',')
+                );
+            };
+
             // --------------------------
             // ADD A NATURAL LANGUAGE
 

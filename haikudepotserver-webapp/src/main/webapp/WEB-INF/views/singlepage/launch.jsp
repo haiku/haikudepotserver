@@ -37,6 +37,8 @@ web-resources and then this starts the java-script single page environment drive
     <div ng-view></div>
 </div>
 
+<div class="footer"></div>
+
 <%--
 This IFRAME can be used by application logic to cause a download to occur.
 --%>
