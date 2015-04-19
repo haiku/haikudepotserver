@@ -241,23 +241,25 @@ angular.module('haikudepotserver').directive('paginationControl',[
                     pageControlE.on(
                         'click',
                         function(event) {
-                            var newOffsetStr = event.target.getAttribute('pagination-offset');
+                            if(0 == event.button) { // left button only.
 
-                            if(!newOffsetStr || !newOffsetStr.length) {
-                                throw Error('unable to get the selected offset for the target of the pagination event');
-                            }
+                                event.preventDefault();
+                                var newOffsetStr = event.target.getAttribute('pagination-offset');
 
-                            $scope.$apply(function() {
-                                var existingOffset = $scope.$eval(offsetExpression);
-                                var newOffset = parseInt(''+newOffsetStr,10);
-
-                                if(existingOffset != newOffset) {
-                                    $parse(offsetExpression).assign($scope, parseInt('' + newOffsetStr, 10));
+                                if (!newOffsetStr || !newOffsetStr.length) {
+                                    throw Error('unable to get the selected offset for the target of the pagination event');
                                 }
-                            });
 
-                            event.preventDefault();
-                            return false;
+                                $scope.$apply(function () {
+                                    var existingOffset = $scope.$eval(offsetExpression);
+                                    var newOffset = parseInt('' + newOffsetStr, 10);
+
+                                    if (existingOffset != newOffset) {
+                                        $parse(offsetExpression).assign($scope, parseInt('' + newOffsetStr, 10));
+                                    }
+                                });
+
+                            }
                         });
                 }
 
