@@ -5,7 +5,7 @@
         <artifactId>haikudepotserver-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
-        <version>1.0.34-SNAPSHOT</version>
+        <version>1.0.34</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -30,47 +30,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
-            <plugins>
-
-                <plugin>
-                    <groupId>com.agilejava.docbkx</groupId>
-                    <artifactId>docbkx-maven-plugin</artifactId>
-                    <configuration>
-                        <xincludeSupported>true</xincludeSupported>
-                        <highlightSource>true</highlightSource>
-                        <targetDirectory>${basedir}/target/site/</targetDirectory>
-                        <includes>index.xml</includes>
-                        <generateSectionTocLevel>false</generateSectionTocLevel>
-                        <chunkedOutput>true</chunkedOutput>
-                        <chunkSectionDepth>0</chunkSectionDepth>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>build-html</id>
-                            <configuration>
-                                <postProcess>
-                                    <copy todir="${basedir}/target/site/index/images">
-                                        <fileset dir="${basedir}/src/images" />
-                                    </copy>
-                                </postProcess>
-                            </configuration>
-                            <phase>generate-resources</phase>
-                            <goals>
-                                <goal>generate-html</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-            </plugins>
-
-        <resources>
-            <resource>
-                <directory>${project.build.directory}/site/index</directory>
-                <targetPath>META-INF/resources/docs/</targetPath>
-            </resource>
-        </resources>
 
     </build>
 
