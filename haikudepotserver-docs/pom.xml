@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <parent>
+<parent>
         <artifactId>haikudepotserver-parent</artifactId>
         <groupId>org.haikuos</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
@@ -30,6 +30,47 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+            <plugins>
+
+                <plugin>
+                    <groupId>com.agilejava.docbkx</groupId>
+                    <artifactId>docbkx-maven-plugin</artifactId>
+                    <configuration>
+                        <xincludeSupported>true</xincludeSupported>
+                        <highlightSource>true</highlightSource>
+                        <targetDirectory>${basedir}/target/site/</targetDirectory>
+                        <includes>index.xml</includes>
+                        <generateSectionTocLevel>false</generateSectionTocLevel>
+                        <chunkedOutput>true</chunkedOutput>
+                        <chunkSectionDepth>0</chunkSectionDepth>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>build-html</id>
+                            <configuration>
+                                <postProcess>
+                                    <copy todir="${basedir}/target/site/index/images">
+                                        <fileset dir="${basedir}/src/images" />
+                                    </copy>
+                                </postProcess>
+                            </configuration>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>generate-html</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+            </plugins>
+
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/site/index</directory>
+                <targetPath>META-INF/resources/docs/</targetPath>
+            </resource>
+        </resources>
 
     </build>
 
