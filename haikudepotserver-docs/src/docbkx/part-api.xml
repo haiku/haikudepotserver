@@ -1,0 +1,632 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2015, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="api">
+
+    <title>API</title>
+
+    <section>
+        <title>General</title>
+
+        <para>
+            This information applies to all areas of the API for the system; both JSON-RPC and REST packaged.
+        </para>
+
+        <section>
+            <title>Clients</title>
+            <para>
+                A client of this system's API may be a desktop application (eg; Haiku Depot) or may be logic in
+                a web page where the web page is using some java-script to call back to the server.
+            </para>
+        </section>
+
+        <section>
+            <title>API Version</title>
+            <para>
+                The application generally refers to &quot;api 1&quot; in anticipation that at some point there
+                is the <emphasis>possibility</emphasis> that a second, incompatible API may be required.
+            </para>
+        </section>
+
+        <section>
+            <title>Object References</title>
+            <para>
+                When objects such as packages or users are referred to in the API, the database primary key is
+                <emphasis>not</emphasis> used.  Instead either a natural or artifical identifier is employed.  For
+                example, in the case of a package, the package's name may be used.  In the case of a screen-shot,
+                a GUID (unique identifier) will be used to identify a particular screenshot.
+            </para>
+        </section>
+
+        <section>
+            <title>Reference Data</title>
+            <para>
+                Reference data means data in the application that is generally invariant.  Examples include the
+                mime types, natural language, url types and so on.  In these cases, an API will generally provide
+                for access to the list of reference data.  The client is expected to obtain such reference data as
+                necessary and cache reference data locally.
+            </para>
+        </section>
+
+        <section>
+            <title>Date and Time Data</title>
+            <para>
+                The system has only a concept of a &quot;moment in time&quot; which is called a timestamp.  The
+                timestamp is typically communicated as the number of milliseconds elapsed since the epoc represented
+                as a 64bit integer.  The timestamp communicated via the API is always relative to UTC.
+            </para>
+        </section>
+
+        <section>
+            <title>Invocations and Transport</title>
+            <para>
+                The term &quot;invocation&quot; refers to a request-response cycle from the client software into
+                the application server over the HTTP protocol.  Each API invocation is made in a
+                <emphasis>stateless</emphasis> manner in that each invocation is not dependent on the prior
+                invocation.
+            </para>
+        </section>
+
+        <section>
+            <title>Security</title>
+            <para>
+                See the <link linkend="security">security</link> chapter
+                for details on how to authenticate API requests as well as how API requests are authorized.
+            </para>
+        </section>
+
+    </section>
+
+    <section>
+        <title>JSON-RPC API</title>
+
+        <para>
+            Most API is vended as
+            <ulink url="http://www.jsonrpc.org">JSON-RPC</ulink>
+            encoded HTTP POST invocations.  The data transfer objects (DTOs) that describe the request and the
+            response data as well as the APIs' interfaces exist in the &quot;haikudepotserver-api&quot; module in
+            the java package; &quot;org.haikuos.haikudepotserver.api1&quot;.
+        </para>
+
+        <para>
+            The documentation and list of available methods can be obtained by viewing the java interfaces and
+            model objects in that module.
+        </para>
+
+        <example>
+            <title>Example: Get a Package using the JSON-RPC API</title>
+
+            <para>
+                In this example, the client knows the <emphasis>name</emphasis> of the package and would like
+                to get the details of the package.  The java model objects that document the data required in
+                request and the data that can be expected in the response can be found in the project.  The
+                request model is &quot;org.haikuos.haikudepotserver.api1.model.pkg.GetPkgRequest&quot;.  The
+                response model is &quot;org.haikuos.haikudepotserver.api1.model.pkg.GetPkgResult&quot;.  The
+                actual server method that is invoked as a result of this request can be found at
+                &quot;org.haikuos.haikudepotserver.api1.PkgApi#getPkg(..)&quot;.
+            </para>
+
+            <para>
+                You will notice at the top of this interface, there is an annotation that describes the path or
+                &quot;endpoint&quot; for this API.  In this case it is &quot;/api/v1/pkg&quot;.  Given a host
+                and port, this can be extrapolated into a URL that can be used to invoke to this method.
+                An example would be &quot;http://localhost:8080/api/v1/pkg&quot;.
+            </para>
+
+            <para>
+                The invocation is made using the HTTP protocol to such a URL with the method POST.  The Content-Type
+                HTTP header must be set to &quot;application/json&quot; for both the request and the response.
+                The request object would look something like this;
+            </para>
+
+            <para>
+                <programlisting>{
+  &quot;jsonrpc&quot;:&quot;2.0&quot;,
+  &quot;id&quot;:4143431,
+  &quot;method&quot;:&quot;getPkg&quot;,
+  &quot;params&quot;:[{
+    &quot;name&quot;:&quot;apr&quot;,
+    &quot;architectureCode&quot;:&quot;x86&quot;,
+    &quot;versionType&quot;:&quot;NONE&quot;
+  }]
+}
+                </programlisting>
+            </para>
+
+            <para>
+                The &quot;id&quot; value here can be anything.  It must be supplied and is used to correlate a
+                request with a response; the same &quot;id&quot; value that arrives in the request is relayed
+                back in the response.  If a client were using the API in an asynchronous manner then being able
+                to correlate the request and the response is very important.
+            </para>
+            
+            <para>
+                All going well, the following (abridged) form of response would be sent back to the client;
+            </para>
+
+            <para>
+                <programlisting>{
+  &quot;jsonrpc&quot;:&quot;2.0&quot;,
+  &quot;id&quot;:4143431,
+  &quot;result&quot;:{
+    &quot;name&quot;:&quot;apr&quot;,
+    &quot;hasIcon&quot;:true,
+    &quot;canEdit&quot;:false,
+    &quot;versions&quot;:[],
+    &quot;modifyTimestamp&quot;:12345678
+  }
+}
+                </programlisting>
+            </para>
+
+            <para>
+                See the
+                <ulink url="http://www.jsonrpc.org">JSON-RPC</ulink>
+                web site for examples of the response envelope format for the scenario in which an error has
+                arisen in the invocation.
+            </para>
+
+        </example>
+
+        <section>
+            <title>Error Codes</title>
+
+            <para>
+                A set of known JSON-RPC error codes are agreed between the client and server.  See the JSON-RPC
+                specification for known error codes used for transport-related issues such as invalid parameters.
+                Application-specific error codes are documented in the java source at
+                &quot;org.haikuos.haikudepotserver.api1.support.Constants&quot;.
+            </para>
+
+            <para>
+                Some errors such as the validation error (code -32800) may also carry additional data that provides
+                detail as to the nature of the error that has arisen.  Java logic for assembling the error
+                payloads can be found at &quot;org.haikuos.haikudepotserver.api1.support.ErrorResolverImpl&quot;.
+            </para>
+        </section>
+
+    </section>
+
+    <section>
+        <title>REST API</title>
+
+        <para>
+            REST API is generally required where data is inappropriate to encode as JSON-RPC.  This tends to be
+            situations where the data is binary in nature.  An example of this is where a package icon needs
+            to be uploaded.
+        </para>
+
+        <section>
+            <title>Entry Point</title>
+
+            <para>
+                This API will provide the web application's HTML user interface.
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Response Content-Type</term>
+                        <listitem>text/html</listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+        </section>
+
+        <section xml:id="api-importrepositorydata">
+            <title>Import Repository Data</title>
+
+            <para>
+                This API provides a mechanism by which an external client is able to trigger the application to
+                start importing package-related data from a remote repository.  This API is provided as REST
+                because the client is likely to be scripted using a scripting language and REST is the most
+                appropriate protocol to employ in this situation.  This invocation will trigger the import process,
+                but the import process will execute in a background thread in the application server and will not
+                block the client.
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/importrepositorydata</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Response Content-Type</term>
+                        <listitem>text/plain</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Query Parameters</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>code</term>
+                                    <listitem>Identifies the repository from which data should be obtained</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>200</term>
+                                    <listitem>The import job was accepted</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>400</term>
+                                    <listitem>The code was not supplied in the request</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+            <para>
+                An example URL is &quot;http://localhost:8080/importrepositorydata?code=haikuportsprod&quot;
+            </para>
+
+        </section>
+
+        <section>
+            <title>Get Package Icon</title>
+            <para>
+                This API is able to provide the icon for a package.  If there is no icon stored then this method
+                will provide a fall-back image if the &quot;f&quot; query parameter is configured to &quot;true&quot;
+                &#x2014; otherwise it will return a 404 HTTP status code.  Providing a fallback image may not be
+                possible in all cases.  The request will return a &quot;Last-Modified&quot; header.  The timestamps
+                of this header will correlate to the &quot;modifyTimestamp&quot; that is provided in API responses
+                such as &quot;GetPkResult&quot; and &quot;SearchPkgsResult&quot;.  The value for
+                &quot;modifyTimestamp&quot; will be at millisecond resolution, but the HTTP headers will be at
+                second resolution.  The path includes a &quot;mediatype-extension&quot; which can have one of the
+                following values;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>png</listitem>
+                    <listitem>hvif</listitem>
+                </itemizedlist>
+            </para>
+
+            <para>
+                Details of the API;
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET, HEAD</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/pkgicon/&lt;pkgname&gt;.&lt;mediatype-extension&gt;</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Response Content-Type</term>
+                        <listitem>&quot;image/png&quot; or &quot;application/x-vnd.haiku-icon&quot;</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Query Parameters</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>s</term>
+                                    <listitem>Either 16 or 32 for the number of pixels; omitt for hivf files</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>f</term>
+                                    <listitem>&quot;true&quot; will yield a fallback image in the response if possible</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>200</term>
+                                    <listitem>The icon is provided in the response (for GET)</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>415</term>
+                                    <listitem>The path did not include ".png" or the size is invalid</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>400</term>
+                                    <listitem>The package name was not supplied</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>404</term>
+                                    <listitem>The package was not found or no image was present</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+            <para>
+                An example URL for obtaining a bitmap image would be
+                &quot;http://localhost:8080/pkgicon/apr.png?size=32&amp;f=true&quot;.
+            </para>
+
+            <para>
+                An example URL for obtaining a Haiku vector image file image would be
+                &quot;http://localhost:8080/pkgicon/apr.hvif&quot;
+            </para>
+
+        </section>
+
+        <section>
+            <title>Get Screenshot Image</title>
+
+            <para>
+                This API is able to produce an image for a screenshot.  The screenshot is identified in the path
+                by its code.  The response will return a &quot;Last-Modified&quot; header.  The timestamps of
+                this header will correlate to the &quot;modifyTimestamp&quot; that is provided in API responses
+                such as &quot;GetPkResult&quot; and &quot;SearchPkgsResult&quot;.  The value for
+                &quot;modifyTimestamp&quot; will be at millisecond resolution, but the HTTP headers will be at
+                second resolution.  Requests for screenshot image should be accompanied by a target width and height.
+                These values must be within a range of 1..1500.  The image will maintain its aspect ratio as it
+                is scaled to fit within the supplied target width and height.
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET, HEAD</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/pkgscreenshot/&lt;screenshotcode&gt;.png</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Response Content-Type</term>
+                        <listitem>&quot;image/png&quot;</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Query Parameters</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>tw</term>
+                                    <listitem>
+                                        An integer value that describes the width that the image should be scaled to
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>th</term>
+                                    <listitem>
+                                        An integer value that describes the height that the image should be scaled to
+                                    </listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>200</term>
+                                    <listitem>The image data is provided in the response (for GET)</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>415</term>
+                                    <listitem>
+                                        The path did not include &quot;.png&quot; or the target width or height
+                                        is invalid or the length of the data is too large
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>400</term>
+                                    <listitem>The screenshot code was not supplied</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>404</term>
+                                    <listitem>The screenshot was not found</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+            <para>
+                An example URL is
+                &quot;http://localhost:8080/pkgscreenshot/a78hw20fh2p20fh122jd92.png?tw=640&amp;th=480&quot;.
+            </para>
+
+        </section>
+
+        <section>
+            <title>Get Raw Screenshot Image</title>
+
+            <para>
+                This API is able to provide the <emphasis>raw</emphasis> screenshot data.
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/pkgscreenshot/&lt;screenshotcode&gt;/raw</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Response Content-Type</term>
+                        <listitem>As per the stored data</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>200</term>
+                                    <listitem>The image data is provided in the response</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>404</term>
+                                    <listitem>The screenshot was not found for the code supplied</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+            <para>
+                An example URL is &quot;http://localhost:8080/pkgscreenshot/a78hw20fh2p20fh122jd92/raw&quot;.
+            </para>
+
+        </section>
+
+        <section>
+            <title>Add Screenshot Image</title>
+
+            <para>
+                This API is able to add an image as a screenshot for the nominated package.  The screenshot will
+                be ordered last.  The payload of the POST must be a PNG image that is a maximum of 1500x1500
+                pixels and a maximum of 2MB in size.
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>POST</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/pkgscreenshot/&lt;pkgname&gt;/add</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Query Parameters</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>format</term>
+                                    <listitem>
+                                        The string &quot;png&quot; to define the image format.
+                                    </listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>200</term>
+                                    <listitem>The screenshot image was stored</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>415</term>
+                                    <listitem>
+                                        The path did not include &quot;.png&quot; or the size (pixels or data) of
+                                        the image is invalid or the payload is not PNG image data.
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>404</term>
+                                    <listitem>The package identified in the path was not able to be found</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>400</term>
+                                    <listitem>The package name was not supplied</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Specific Response Headers</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>X-HaikuDepotServer-ScreenshotCode</term>
+                                    <listitem>Supplies the code of the newly created screenshot.</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+            <para>
+                An example URL is &quot;http://localhost:8080/pkgscreenshot/apr/add?format=png&quot;.
+            </para>
+
+        </section>
+
+        <section>
+            <title>Medium-Term Maintenance</title>
+
+            <para>
+                Medium-term maintenance includes tasks that should be undertaken every hour or so that clean-up
+                disused resources.  An example is removing expired password-reset tokens from the database.
+                Medium-term maintenance is triggered externally (from a process such as &quot;cron&quot;)
+                rather than on an internal scheduler in order to simplify a multi-instance deployment.
+            </para>
+
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/maintenance/mediumterm</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>200</term>
+                                    <listitem>The maintenance request was accepted</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>*</term>
+                                    <listitem>The maintenance job was not accepted</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+        </section>
+
+    </section>
+
+</chapter>

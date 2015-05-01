@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2015, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="deployment">
+
+    <title>Development</title>
+
+    <para>
+        This section covers how to setup the system for development purposes.  First review
+        <link linkend="prerequisites">prerequisites</link>.  The project consists of a number of modules.
+        &quot;haikudepotserver-webapp&quot; is the application server module.  You should configure a
+        <emphasis>development</emphasis> configuration file at the following location relative to the
+        top-level of the source; &quot;haikudepotserver-webapp/src/main/resources/local.properties&quot;.
+        See the <link linkend="config">configuration</link> chapter for details on the format and keys
+        for this configuration file.
+    </para>
+
+    <para>
+        To start-up the application server for development purposes, issue the following command from the
+        same top level of the project;
+    </para>
+
+    <para>
+        <programlisting>mvn \
+-Dfile.encoding=UTF-8 \
+-Duser.timezone=GMT0 \
+-Djava.awt.headless=true \
+org.apache.tomcat.maven:tomcat7-maven-plugin:2.1:run
+        </programlisting>
+    </para>
+
+    <para>
+        This may take some time to start-up; especially the first time.  Once it has started-up, it should be
+        possible to connect to the application server using the following URL;
+        &quot;http://localhost:8080/&quot;
+    </para>
+
+    <para>
+        There won't be any repositories or data loaded, and because of this, it is not possible to view any
+        data.  See the section on
+        <link linkend="deployment-settinguprepositories">settng up repositories</link>
+        for details on loading-up some data to view.
+    </para>
+
+</chapter>

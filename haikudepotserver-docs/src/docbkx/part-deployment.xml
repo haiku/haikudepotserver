@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2015, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="deployment">
+
+    <title>Deployment</title>
+
+    <para>
+        This section outlines the approximate steps to deploy the web application-server.  The application-server
+        build process produces a &quot;stand-alone&quot; java program.  This build artifact is a packaged
+        &quot;jar&quot; file that contains the
+        <ulink url="http://tomcat.apache.org">Tomcat</ulink>
+        servlet container as well as the web application.  Upon launching, it will unbundle necessary parts and
+        start-up listening on a socket for inbound HTTP requests.
+    </para>
+
+    <warning>
+        <para>
+            The default database installs a user with the nickname of &quot;root&quot; with a known password of
+            &quot;p4mphl3t&quot;.  This password <emphasis>must</emphasis> be changed before the system is made
+            available over a network.
+        </para>
+    </warning>
+
+    <warning>
+        <para>
+            The API-related HTTP traffic into the application server uses basic or token bearer authentication.
+            Either technique exposes authentication details in the request and response.  For this reason it is
+            advised that HTTP traffic to and from the application server be transported as secure HTTP (https)
+            in order to prevent a third party from reading the HTTP headers and extracting this information.
+        </para>
+    </warning>
+
+    <para>
+        Please see
+        <link linkend="prerequisites">prerequisites</link> required for running this software and
+        <link linkend="buildandrelease">information</link> about obtaining a build product and possibly also
+        creating a release version.  The build product that you will require for deployment can be found at
+        &quot;haikudepotserver-webapp/target/haikudepotserver-webapp-1.2.3-war-exec.jar&quot;.
+        The leaf-name will vary depending on the release that is being build.  You should also refer to
+        <link linkend="config">the configuration section</link>
+        for details of the format and keys for the configuration file.  You will need to create a configuration
+        file for your deployment.
+    </para>
+
+    <para>
+        To launch the binary with 256 megabytes of heap memory, issue a command similar to;
+    </para>
+
+    <para>
+        <programlisting>java \
+-Xmx256m \
+-Dfile.encoding=UTF-8 \
+-Duser.timezone=GMT0 \
+-Djava.awt.headless=true \
+-Dconfig.properties=file:///etc/haikudepotserver/config.properties \
+-jar haikudepotserver-webapp-1.2.3-war-exec.jar \
+-resetExtract \
+-extractDirectory /var/cache/haikudepotserver
+        </programlisting>
+    </para>
+
+    <para>
+        By default the logging will be streamed to stdout/stderr.  It is possible to configure this using
+        <ulink url="http://logback.qos.ch/">logback</ulink>
+        logging configuration file.
+    </para>
+
+    <para>
+        There are a handful of other easily-accessed command line options which can be used to fine-tune
+        the deployment.  These can be viewed by executing the binary as follows;
+    </para>
+
+    <para>
+        <programlisting>java \
+-jar haikudepotserver-webapp-1.2.3-war-exec.jar \
+-h
+        </programlisting>
+    </para>
+
+    <section xml:id="deployment-settinguprepositories">
+        <title>Setting Up Repositories</title>
+
+        <para>
+            The application server will pull &quot;.hpkr&quot; files from remote repositories that contain
+            information about the packages at that repository.  Authenticated as root, it is possible to use
+            the &quot;hamburger&quot; link at the top of the home page to get to the repositories, to add a repository
+            and to trigger the import of a repository.  There also exists an HTTP GET invocation
+            (see <link linkend="api-importrepositorydata">here</link> for more information)
+            that can be made to trigger the import of a repository from another system
+            <footnote>
+                <para>
+                    Such as the HPKR assembly process
+                </para>
+            </footnote>
+        </para>
+    </section>
+
+    <section>
+        <title>Maintenance Tasks</title>
+
+        <para>
+            Some maintenance tasks are scheduled.  These tasks are scheduled from outside the application server
+            in order to simplify a multi-instance deployment topology.  A simple approach to this is to schedule
+            using the cron tool.  This would require a &quot;crontab&quot; entry such as;
+            &quot;14 * * * * curl "http://localhost:8080/maintenance/mediumterm&quot;
+        </para>
+
+        <para>
+            The host and port should be adjusted to suit your deployment environment.
+        </para>
+    </section>
+
+    <section>
+        <title>Accessing the Web Environment</title>
+
+        <para>
+            Once running, the web environment will be accessible from; &quot;http://localhost:8080/&quot;
+        </para>
+    </section>
+
+    <section>
+        <title>Deployment with RPM</title>
+
+        <para>
+            The build system, when executed on a linux host, will produce RPMs that can be deployed into an
+            RPM-based linux system.  The RPMs do not have any dependencies and so both java and Postgres
+            database server will need to be installed before the application server can be successfully
+            started --- see
+            <link linkend="prerequisites">prerequisites</link>
+            \ref{prerequisites}.
+            Two RPMs are built;
+        </para>
+
+        <informaltable>
+            <tgroup cols="2">
+                <thead>
+                    <row>
+                        <entry>Variant</entry>
+                        <entry>Module</entry>
+                        <entry>HTTP Port</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry>Production</entry>
+                        <entry>haikudepotserver-rpm-production</entry>
+                        <entry>8801</entry>
+                    </row>
+                    <row>
+                        <entry>Test</entry>
+                        <entry>haikudepotserver-rpm-test</entry>
+                        <entry>8701</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </informaltable>
+
+        <para>
+            The production variant has names and paths that are simply &quot;haikudepotserver&quot; whereas the
+            test variant has names and paths that are of the form &quot;haikudepotserver-test&quot;.  In the
+            instructions that follow, the test variant has been indicated by a suffix &quot;-test&quot;.  Simply
+            remove &quot;-test&quot; to get the non-test variant.
+        </para>
+
+        <para>
+            The RPM is built with the &quot;package&quot; maven goal.  The RPM build product can be found at this
+            path from that module; &quot;../target/rpm/haikudepotserver-test/RPMS/noarch/&quot;
+        </para>
+
+        <section>
+            <title>Installing</title>
+
+            <para>
+                The RPM can be installed with the following command making an obvious reference to the RPM file;
+                &quot;rpm -ivh haikudepotserver-test-1.0.2.rpm&quot;
+            </para>
+
+            <para>
+                The RPM can be uninstalled with the following command;
+                &quot;rpm -e haikudepotserver-test&quot;
+            </para>
+
+            <para>
+                It would be prudent to first ensure that the application server is not running before
+                uninstalling it.
+            </para>
+
+        </section>
+
+        <section>
+            <title>File Locations</title>
+
+            <para>
+                The RPM will install files into the following locations;
+            </para>
+
+            <informaltable>
+                <tgroup cols="2">
+                    <thead>
+                        <row>
+                            <entry>Location</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/var/log/haikudepotserver-test</entry>
+                            <entry>Log files from the application server</entry>
+                        </row>
+                        <row>
+                            <entry>/opt/haikudepotserver-test</entry>
+                            <entry>Application server binary resources</entry>
+                        </row>
+                        <row>
+                            <entry>/var/cache/haikudepotserver-test</entry>
+                            <entry>Operational files for the application server</entry>
+                        </row>
+                        <row>
+                            <entry>/etc/haikudepotserver-test</entry>
+                            <entry>Configuration files</entry>
+                        </row>
+                        <row>
+                            <entry>/etc/logrotate.d/</entry>
+                            <entry>Log rotation configuration</entry>
+                        </row>
+                        <row>
+                            <entry>/etc/init.d/haikudepotserver-test</entry>
+                            <entry>Start and stop script</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+        </section>
+
+        <section>
+            <title>Start and Stop</title>
+
+            <para>
+                The installed application server can be started with the following command, referencing the RPM file;
+                &quot;service haikudepotserver-test start&quot;
+            </para>
+
+            <para>
+                The installed application server can be stopped with the following command;
+                &quot;service haikudepotserver-test stop&quot;
+            </para>
+        </section>
+
+        <section>
+            <title>Automatic Startup and Shutdown</title>
+
+            <para>
+                The installed application server can be configured to startup automatically using the following
+                command;
+                &quot;chkconfig --add haikudepotserver-test}&quot;
+            </para>
+
+            <para>
+                The installed application can later be prevented from automatic startup using the following command;
+                &quot;chkconfig --del haikudepotserver-test}&quot;
+            </para>
+        </section>
+
+        <section>
+            <title>RPM Assembly / Maven</title>
+
+            <figure id="deployment-img-rpmpackageassemblydiagram">
+                <title>The maven modules that are related to the RPM assembly process and how they inter-relate.</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/img-rpmpackageassemblydiagram.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
+            <para>
+                There are a number of inter-related maven modules that work together to generate the RPMs.  These are
+                shown in
+                <link linkend="deployment-img-rpmpackageassemblydiagram">the figure</link>.
+                The blue lines show module inheritance.  A &quot;reactor POM&quot;
+                (not shown here) will prevent the RPM from being assembled unless the build system is on a
+                linux host.  It does this by using a maven profile that is triggered by the operating system type.
+            </para>
+
+            <para>
+                The module &quot;haikudepotserver-rpm-common&quot; provides (purple line) resources for the RPM
+                assembly that are common to the variants (production and test).  This means that the same resources
+                will assemble both variants.  Note that the resources are intended to be
+                <emphasis>filtered</emphasis> in the RPM assembly process so they contain token-replacement
+                strings such as &quot;${rpm.variant}&quot;.  The filtering occurs late in the RPM assembly process.
+                These resources are unpacked in both of the RPM assembly modules
+                &quot;haikudepotserver-rpm-production&quot; and &quot;haikudepotserver-rpm-test&quot;.
+            </para>
+
+            <para>
+                Both of the RPM assembly modules have &quot;haikudepotserver-rpm-parent&quot; as a parent and this
+                parent has the configuration (using a maven plugin called &quot;rpm-maven-plugin&quot;) for the
+                assembly so that the configuration of the assembly is shared between the two assembly modules.
+                The &quot;haikudepotserver-rpm-parent&quot; also introduces a dependency (red line) on the
+                &quot;haikudepotserver-webapp&quot; module in order that the web application build-product can be
+                included in the RPMs.
+            </para>
+
+        </section>
+
+    </section>
+
+</chapter>

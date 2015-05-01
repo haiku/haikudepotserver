@@ -24,6 +24,7 @@
     <mvc:resources mapping="/js/**" location="/js/" cache-period="0"/>
     <mvc:resources mapping="/css/**" location="/css/" />
     <mvc:resources mapping="/img/**" location="/img/" />
+    <mvc:resources mapping="/docs/**" location="/docs/" />
     <mvc:resources mapping="favicon.ico" location="/img/favicon.ico" />
 
     <bean

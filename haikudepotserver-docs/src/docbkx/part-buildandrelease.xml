@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2015, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="buildandrelease">
+
+    <title>Build and Release</title>
+
+    <para>
+        This section covers how to build the application server and how to produce release builds of it.
+    </para>
+
+    <section>
+        <title>Building</title>
+
+        <para>
+            The build process uses the
+            <ulink url="http://maven.apache.org">Apache Maven</ulink>
+            build tool.  This is discussed in the
+            <link linkend="prerequisites">prerequisites</link>
+            section.
+        </para>
+
+        <para>
+            From source code, you can obtain a clean build by issuing the following command from the UNIX shell;
+            &quot;mvn clean &amp;&amp; mvn package&quot;
+        </para>
+
+        <para>
+            Given the state of the source code, this will produce corresponding build artifacts.  Note that this
+            may take some time for the first build because the process will need to download various dependencies
+            from the internet.
+        </para>
+    </section>
+
+        <section>
+            <title>Linux</title>
+            <para>
+                Building on a linux host will also cause the build system to produce an RPM file.  The RPM tooling
+                is required on the build host to make this possible.  More detail about this can be found at
+                <link linkend="prerequisites-buildingonlinux">here</link>.
+            </para>
+        </section>
+
+    <section>
+        <title>Automated Testing</title>
+
+        <para>
+            The build system has a number of automated tests.  To skip automated testing, use the
+            &quot;-DskipTests&quot; flag on the &quot;mvn&quot; command.
+        </para>
+
+        <section xml:id="buildandrelease-automatedtesting-integrationtesting">
+            <title>Integration Testing</title>
+
+            <para>
+                Some of the automated tests are &quot;integration tests&quot;.  The integration tests can be run
+                with the following maven command; &quot;mvn clean &amp;&amp; mvn verify&quot;
+            </para>
+
+            <para>
+                The integration tests <emphasis>require</emphasis> the presence of a specifically configured
+                Postgres database in order to execute.  The database for the execution of integration tests
+                should be available at localhost:5432 where the build is occurring.  The database should be
+                setup as follows;
+            </para>
+
+            <informaltable>
+                <tgroup cols="2">
+                    <tbody>
+                        <row>
+                            <entry>Database name</entry>
+                            <entry>haikudepotserver_integrationtest</entry>
+                        </row>
+                        <row>
+                            <entry>Database owner</entry>
+                            <entry>haikudepotserver_integrationtest</entry>
+                        </row>
+                        <row>
+                            <entry>User</entry>
+                            <entry>haikudepotserver_integrationtest</entry>
+                        </row>
+                        <row>
+                            <entry>User password</entry>
+                            <entry>haikudepotserver_integrationtest</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>
+                The configuration for accessing this database is located in the file &quot;local.properties&quot;
+                within the test resources of the &quot;haikudepotserver-webapp&quot; module, but it should not
+                be necessary to edit this file.  As part of the integration testing process, various tables will
+                be cleared of data prior to the next test.
+            </para>
+        </section>
+    </section>
+
+    <section>
+        <title>Release</title>
+
+        <para>
+            A maven project has a &quot;version&quot; which is either a final version such as &quot;2.3.1&quot;
+            or is a &quot;snapshot&quot; version such as &quot;2.3.2-SNAPSHOT&quot;.  The snapshot version is
+            the work-in-progress for the next release.  Once the snapshot is ready, a release is made wherein
+            that source-code is fixed to the version number without the trailing &quot;-SNAPSHOT&quot; and then
+            the snapshot version is incremented.  The release yields a tag in the source code management system
+            (git) in order to be able to reproduce the source-code for that release against a release version.
+            The tag will have a form such as &quot;haikudepotserver-2.3.2&quot;.
+        </para>
+
+        <section>
+            <title>Undertaking a Release</title>
+
+            <warning>
+            <para>
+                The system was using the maven release plugin, but some issues arose with the maven release plugin
+                and git.  For this reason, a bespoke scripted release process has been developed.  The script does
+                none of the checks and tests that the maven release plugin does.
+            </para>
+            </warning>
+
+            <para>
+                In the following example, the following assumed (ficticious) version numbers are used for
+                demonstration purposes;
+            </para>
+
+            <informaltable>
+                <tgroup cols="2">
+                    <thead>
+                        <row>
+                            <entry>Version</entry>
+                            <entry>Purpose</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>1.2.3-SNAPSHOT</entry>
+                            <entry>The version <emphasis>prior</emphasis> to release</entry>
+                        </row>
+                        <row>
+                            <entry>1.2.3</entry>
+                            <entry>The version of the release</entry>
+                        </row>
+                        <row>
+                            <entry>1.2.4-SNAPSHOT</entry>
+                            <entry>The version <emphasis>after</emphasis> the release</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>
+                The script does perform the following steps;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>Check the current version is of the form 1.2.3-SNAPSHOT</listitem>
+                    <listitem>Check all modules have the same version</listitem>
+                    <listitem>Update all modules to the version 1.2.3</listitem>
+                    <listitem>Git commit</listitem>
+                    <listitem>Git tag</listitem>
+                    <listitem>Update all modules to the version 1.2.4-SNAPSHOT</listitem>
+                    <listitem>Git commit</listitem>
+                </itemizedlist>
+            </para>
+
+            <para>
+                Prior to a release;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>All changes should be committed</listitem>
+                    <listitem>A &quot;verify&quot; goal is run to ensure that automated testing passes</listitem>
+                    <listitem>A &quot;clean&quot; goal is run to clean out any build files</listitem>
+                </itemizedlist>
+            </para>
+
+            <para>
+                The following series of commands would orchestrate the release process;
+            </para>
+
+            <para>
+                <programlisting>python support/hdsrelease.py
+git push
+git push --tags
+                </programlisting>
+            </para>
+
+            <section>
+                <title>Obtaining Source for a Release</title>
+
+                <para>
+                    In order to obtain source code state for a specific release, first &quot;git pull&quot; any
+                    pending changes from the remote repository and then checkout the source at the particular tag;
+                    &quot;git checkout tags/haikudepotserver-2.3.2&quot;.
+                </para>
+
+                <para>
+                    From there it will be possible to create a build product for that particular release by
+                    initiating the build process.
+                </para>
+            </section>
+
+        </section>
+
+    </section>
+
+</chapter>

@@ -38,6 +38,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
     public final static String RESOURCE_MESSAGES = "/messages%s.properties";
+    public final static String RESOURCE_MESSAGES_NATURALLANGUAGE = "/naturallanguagemessages%s.properties";
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -205,6 +206,39 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         return result;
     }
 
+    private void appendFromBase(
+            Map<String,String> result,
+            NaturalLanguage naturalLanguage,
+            String baseFormat) {
+        boolean isEnglish = naturalLanguage.getCode().equals(NaturalLanguage.CODE_ENGLISH);
+
+        String resourcePath = String.format(
+                baseFormat,
+                !isEnglish ? "_" + naturalLanguage.getCode() : "");
+
+        try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
+
+            if(null==inputStream) {
+                LOGGER.debug("attempt to access localization messages; {} -- not found", resourcePath);
+            }
+            else {
+
+                try (InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8)) {
+
+                    Properties properties = new Properties();
+                    properties.load(reader);
+
+                    for (String propertyName : properties.stringPropertyNames()) {
+                        result.put(propertyName, properties.get(propertyName).toString());
+                    }
+                }
+            }
+        }
+        catch(IOException ioe) {
+            throw new RuntimeException("unable to assemble the messages to send for api1 from; "+resourcePath,ioe);
+        }
+    }
+
     @Override
     public GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(getAllMessagesRequest);
@@ -218,39 +252,11 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), getAllMessagesRequest.naturalLanguageCode);
         }
 
-        boolean isEnglish = naturalLanguageOptional.get().getCode().equals(NaturalLanguage.CODE_ENGLISH);
-
-        String resourcePath = String.format(
-                RESOURCE_MESSAGES,
-                !isEnglish ? "_" + naturalLanguageOptional.get().getCode() : "");
-
-        try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
-
-            Map<String, String> map = Maps.newHashMap();
-
-            if(null==inputStream) {
-                LOGGER.info("attempt to access localization messages; {} -- not found", resourcePath);
-            }
-            else {
-
-                try (InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8)) {
-
-                    Properties properties = new Properties();
-                    properties.load(reader);
-
-                    for (String propertyName : properties.stringPropertyNames()) {
-                        map.put(propertyName, properties.get(propertyName).toString());
-                    }
-                }
-            }
-
-            GetAllMessagesResult getAllMessagesResult = new GetAllMessagesResult();
-            getAllMessagesResult.messages = map;
-            return getAllMessagesResult;
-        }
-        catch(IOException ioe) {
-            throw new RuntimeException("unable to assemble the messages to send for api1 from; "+resourcePath,ioe);
-        }
+        GetAllMessagesResult getAllMessagesResult = new GetAllMessagesResult();
+        getAllMessagesResult.messages = Maps.newHashMap();
+        appendFromBase(getAllMessagesResult.messages, naturalLanguageOptional.get(), RESOURCE_MESSAGES);
+        appendFromBase(getAllMessagesResult.messages, naturalLanguageOptional.get(), RESOURCE_MESSAGES_NATURALLANGUAGE);
+        return getAllMessagesResult;
     }
 
     @Override

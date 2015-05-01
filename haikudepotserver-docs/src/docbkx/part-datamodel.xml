@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2015, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="datamodel">
+
+    <title>Data Model</title>
+
+        <figure id="datamodel-diagram">
+            <title>The persisted data model for the application server.</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/img-datamodel.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+    <section xml:id="datamodel-uniqueidentifiers">
+    <title>Unique Identifiers</title>
+    <para>
+        In general, an artifical attribute used to identify instances has a name of &quot;code&quot;.  In some cases,
+        existing nomenclature is already in place and another attribute name has been chosen.  An example of this
+        is the &quot;Pkg&quot; entity which is uniquely identified by its attribute &quot;name&quot;.
+    </para>
+    </section>
+
+</chapter>

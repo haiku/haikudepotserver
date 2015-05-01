@@ -15,10 +15,10 @@ This web application is an online tool for working with the software packages of
 
 ## Deployments
 
-| Environment | URL |
-| --- | --- |
-| Production | https://depot.haiku-os.org/ |
-| Test | https://depot-test.haiku-os.org/ |
+| Environment | Modern Web | Simple Web |
+| --- | --- | --- |
+| Production | https://depot.haiku-os.org/ | https://depot.haiku-os.org/multipage |
+| Test | https://depot-test.haiku-os.org/ | https://depot.haiku-os.org/multipage |
 
 ## Mailing List
 
@@ -26,16 +26,8 @@ A [mailing list](http://www.freelists.org/list/haiku-depot-web) exists to discus
 
 ## Documentation and Development
 
-The core part of the project is a java servlet application and is built using maven.  A module of the project called "haikudepotserver-docs" contains a LaTeX document that outlines how to setup a development environment for the application.  To build the documentation, you should;
-
-1. Install a modern LaTeX distribution
-2. Install Java (1.7 or better)
-3. Install Maven
-4. Clone the source tree
-5. Set the present working directory to "haikudepotserver-docs" in the source tree
-6. Execute "mvn latex:latex"
-
-A PDF document should be generated at "target/docs.pdf".
+Assuming the application server is deployed, you should be able to see relatively recent documentation
+[here](http://depot.haiku-os.org/docs/index.html).
 
 ## Other Helpful Resources
 

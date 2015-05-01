@@ -14,7 +14,6 @@
 
     <dependencies>
 
-        
         <dependency>
             <groupId>org.haikuos</groupId>
             <artifactId>haikudepotserver-packagefile</artifactId>
@@ -25,7 +24,11 @@
             <artifactId>haikudepotserver-api1</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.haikuos</groupId>
+            <artifactId>haikudepotserver-docs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <dependency>
             <groupId>com.google.guava</groupId>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2015, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="userrating">
+
+    <title>User Rating</title>
+
+    <para>
+        A &quot;user rating&quot; is an opinion given by a user of the application-server system about a particular
+        version of a package.  The user rating contains optional details such as;
+    </para>
+
+    <para>
+        <itemizedlist>
+            <listitem>A comment</listitem>
+            <listitem>A rating from zero to five</listitem>
+            <listitem>
+                A stability value;
+                <itemizedlist>
+                    <listitem>Will not start up (nostart)</listitem>
+                    <listitem>Very unstable (veryunstable)</listitem>
+                    <listitem>Unstable but usable (unstablebutusable)</listitem>
+                    <listitem>Mostly stable (mostlystable)</listitem>
+                    <listitem>Stable (stable)</listitem>
+                </itemizedlist>
+            </listitem>
+        </itemizedlist>
+    </para>
+
+    <para>
+        The user rating is always given in the context of a specific package version even though, from the user's
+        perspective, it may apply to the package as a whole.  This is important to give context to the user rating.
+        It is naturally still possible to view all of the user ratings for all or some package versions of a package.
+    </para>
+
+    <para>
+        A user rating is also associated with a &quot;natural language&quot; such as English, German or Japanese so
+        that the language of the comment (if present) can be know.
+    </para>
+
+    <section>
+        <title>Package Rating Derivation</title>
+
+        <para>
+            After some time, a number of users may have submitted user ratings.  After there are sufficient ratings
+            to reach or exceed a sample size minimum, it is possible to derive a rating for the package as a
+            whole --- an aggregate.  If the situation is such that there are an insufficient number of user
+            ratings then the package does not have a rating.  In regard to API responses, this situation will
+            yield a &quot;null&quot; value for a package's rating.  A minimum value can be configured (see
+            <link linkend="config">here</link>) to define this minimum sample size.
+        </para>
+    </section>
+
+    <section>
+        <title>Finding Ratings for the Derivation</title>
+
+        <para>
+            User ratings are only considered for a &quot;number of versions back&quot; up to the present.  The
+            number of versions back is able to be configured (see <link linkend="config">here</link>).  In deciding
+            what constitutes a prior version only the following elements of the version identity are considered;
+        </para>
+
+        <para>
+            <itemizedlist>
+                <listitem>major</listitem>
+                <listitem>minor</listitem>
+                <listitem>micro</listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            There is also no consideration of architecture in relation to the &quot;numer of versions back&quot;.
+        </para>
+
+        <para>
+            For each user who has submitted a user rating, the user ratings are sorted by;
+        </para>
+
+        <para>
+            <orderedlist numeration="arabic">
+                <listitem>
+                    package version
+                    <footnote><para>The ordering semantics are the same as the C++ code in Haiku</para></footnote>
+                </listitem>
+                <listitem>create timestamp</listitem>
+                <listitem>architecture</listitem>
+            </orderedlist>
+        </para>
+
+        <para>
+            This provides a total ordering on the user ratings.  Only the <emphasis>last</emphasis> user rating is
+            considered from this user.  All of the users' user ratings are collected in this way to provide a set
+            of user ratings.
+        </para>
+
+        <para>
+            Taking an example,
+            <footnote><para>Note that this data forms the basis for the main-flow automated testing.</para></footnote>
+            suppose that we have the following table of package versions (major . minor . micro . revision) and
+            user ratings;
+        </para>
+
+        <informaltable>
+            <tgroup cols="7">
+                <thead>
+                    <row>
+                        <entry>Version</entry>
+                        <entry>Architecture</entry>
+                        <entry>User 1</entry>
+                        <entry>User 2</entry>
+                        <entry>User 3</entry>
+                        <entry>User 4</entry>
+                        <entry>User 5</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry>0.0.9</entry>
+                        <entry>x86</entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry>2</entry>
+                    </row>
+                    <row>
+                        <entry>1.0.0</entry>
+                        <entry>x86</entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry>2 &#x2606;</entry>
+                        <entry></entry>
+                        <entry></entry>
+                    </row>
+                    <row>
+                        <entry>1.0.1</entry>
+                        <entry>x86</entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry>1 &#x2606;</entry>
+                        <entry></entry>
+                    </row>
+                    <row>
+                        <entry>1.0.1.1</entry>
+                        <entry>x86</entry>
+                        <entry>3</entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                    </row>
+                    <row>
+                        <entry>1.0.2</entry>
+                        <entry>x86</entry>
+                        <entry>4</entry>
+                        <entry>3 &#x2606;</entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                    </row>
+                    <row>
+                        <entry>1.0.2</entry>
+                        <entry>x86_64</entry>
+                        <entry>1 &#x2606;</entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                        <entry></entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </informaltable>
+
+        <para>
+            In the case of User 1 who has submitted multiple user ratings, the order of input is;
+        </para>
+
+        <para>
+            <itemizedlist>
+                <listitem>1.0.1.1</listitem>
+                <listitem>1.0.2 (x86)</listitem>
+                <listitem>1.0.2 (x86_64)</listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            In this case, with a &quot;versions back&quot; configured as 2, only user ratings that are associated
+            with versions equal to or greater than 1.0.0 will be considered.  This is because, according to the
+            algorithm, the prior versions are 1.0.2, 1.0.1 and 1.0.0 and two back from the current version of 1.0.2
+            yields 1.0.0.
+        </para>
+
+        <para>
+            The rating values which are shown with the &quot;&#x2606;&quot; symbol are the set of rating values that will
+            be used to aggregate a rating value for the package.  With the &quot;minimum number of ratings&quot;
+            configured to 3, a rating could be derived for this package because there are enough samples; it
+            would be 1.75.
+        </para>
+    </section>
+
+    <section>
+        <title>Triggering Derived Rating Calculations</title>
+
+        <para>
+            Each time a user rating is persisted, the derived rating for the package is calculated.  This mechanic
+            utilizes the ORM's &quot;listener&quot; architecture and is driven by the class
+            &quot;UserRatingDerivationTriggerListener&quot;.  In a situation of high-load, the system will prevent
+            excess pressure by queuing the derivations.
+        </para>
+    </section>
+
+    <section>
+        <title>Storage of the Sample Size</title>
+
+        <para>
+            The number of user ratings used to derive a given rating for a package is stored as well as the rating
+            on the &quot;Pkg&quot; entity.
+        </para>
+    </section>
+
+</chapter>

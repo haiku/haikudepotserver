@@ -13,14 +13,26 @@
 
 angular.module('haikudepotserver').directive(
     'autofillFix',[
-        '$timeout',
-        function($timeout) {
+        '$timeout','$log',
+        function($timeout,$log) {
             return {
                 restrict: 'A',
                 replace: true,
                 link: function(scope, elem) {
                     $timeout(function() {
-                        elem[0].dispatchEvent(new CustomEvent('change'));
+                        if(!!window.CustomEvent) {
+                            elem[0].dispatchEvent(new CustomEvent('change'));
+                        }
+                        else {
+
+                            // This is an older, discouraged way to do this, but it may
+                            // work with older browsers.
+
+                            var event = document.createEvent('Event');
+                            if(event)
+                            event.initEvent('change', true, true);
+                            elem[0].dispatchEvent(event);
+                        }
                     },100);
                 }
             };

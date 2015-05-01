@@ -38,7 +38,7 @@ public class ErrorServlet extends HttpServlet {
 
     private final static Map<String,String> BODY_GENERAL = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Something has gone wrong with your use of this web application.",
-            NaturalLanguage.CODE_GERMAN, "Etwas ist falsch gegangen mit Ihre Benutzung des Anwendungs.",
+            NaturalLanguage.CODE_GERMAN, "Bei der Benutzung dieser Web-Anwendung ist was schief gegangen.",
             NaturalLanguage.CODE_RUSSIAN, "Что-то пошло не так во время использования вами данного веб-сайта.");
 
     private final static Map<String,String> BODY_NOTFOUND = ImmutableMap.of(
@@ -119,7 +119,9 @@ public class ErrorServlet extends HttpServlet {
 
         for(String naturalLanguageCode : new String[] {
                 NaturalLanguage.CODE_ENGLISH,
-                NaturalLanguage.CODE_GERMAN }) {
+                NaturalLanguage.CODE_GERMAN,
+                NaturalLanguage.CODE_RUSSIAN
+        }) {
             messageLineAssembly(
                     naturalLanguageCode,
                     out,
