@@ -56,7 +56,7 @@ public class FallbackController {
     @Value("${baseurl}")
     private String baseUrl;
 
-    @Autowired
+    @Autowired(required = false) // so that integration tests run ok
     private ServletContext servletContext;
 
     private String termDebug(String term) {
