@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # =====================================
-# Copyright 2014, Andrew Lindesay
+# Copyright 2014-2015, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -57,11 +57,7 @@ futureVersion = rootPomCurrentVersionPrefix + str(int(rootPomCurrentVersionSuffi
 # ----------------
 # CHECK CURRENT CONSISTENCY
 
-# One of the modules, will have "-parent" on the end and will be the parent.  The others will be
-# subordinate to that in terms of versions.  So, the aim here is to update the actual version of
-# the root and parent pom and then update the parent reference on the other modules.  To start
-# with, it is expected that all of the versions will be consistent and so the process will
-# ensure that this is the case as well.
+# This will make sure that all of the modules have the same version.
 
 print "will check version consistency"
 
@@ -71,13 +67,11 @@ for m in rootPomModuleNames:
 # ----------------
 # RESET THE VERSIONS SANS THE SNAPSHOT
 
-versionE = hdscommon.pomtoplevelelement(rootPomTree, "version")
-versionE.text = releaseVersion
-hdscommon.writepom(rootPomTree, "pom.xml")
-print "top-level: " + releaseVersion + " (updated)"
-
-for m in rootPomModuleNames:
-    hdscommon.updateversionformodule(m, releaseVersion)
+if 0 == subprocess.call(["mvn", "-q", "versions:set", "-DnewVersion=" + releaseVersion, "-DgenerateBackupPoms=false"]):
+    print "versions:set to "+releaseVersion
+else:
+    print "failed version:set to " + releaseVersion
+    sys.exit(1)
 
 # ----------------
 # ADD POMS TO GIT, COMMIT AND TAG
@@ -103,13 +97,11 @@ else:
 # ----------------
 # UPDATE ALL POMS TO NEW SNAPSHOT
 
-versionE = hdscommon.pomtoplevelelement(rootPomTree, "version")
-versionE.text = futureVersion
-hdscommon.writepom(rootPomTree, "pom.xml")
-print "top-level: " + futureVersion + " (updated)"
-
-for m in rootPomModuleNames:
-    hdscommon.updateversionformodule(m, futureVersion)
+if 0 == subprocess.call(["mvn", "-q", "versions:set", "-DnewVersion=" + futureVersion, "-DgenerateBackupPoms=false"]):
+    print "versions:set to "+futureVersion
+else:
+    print "failed version:set to " + futureVersion
+    sys.exit(1)
 
 # ----------------
 # ADD POMS TO GIT, COMMIT

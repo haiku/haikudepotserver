@@ -1,6 +1,6 @@
 
 # =====================================
-# Copyright 2014, Andrew Lindesay
+# Copyright 2014-2015, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -76,15 +76,6 @@ def pomextractversion(tree):
     return pomtoplevelelement(tree, "version").text
 
 
-def writepom(tree, filename):
-    tree.write(
-        filename,
-        xml_declaration=True,
-        encoding='UTF-8',
-        method='xml',
-        default_namespace=extractdefaultnamespace(tree.getroot().tag))
-
-
 # =====================================
 # LOGIC CHUNKS
 
@@ -95,52 +86,21 @@ def ensurecurrentversionconsistencyformodule(modulename, expectedversion):
         print "the 'pom.xml' for module "+modulename+" should be accessible"
         sys.exit(1)
 
-    if modulename == "haikudepotserver-parent":
-        actualversion = pomtoplevelelement(modulepomtree, "version").text
+    parente = pomtoplevelelement(modulepomtree, "parent")
+    namespace = extractdefaultnamespace(parente.tag)
+    versione = parente.find("{"+namespace+"}version")
+
+    if versione is None:
+        print "the parent element of module " + modulename + " has no version specified"
+        sys.exit(1)
+    else:
+        actualversion = versione.text
 
         if actualversion != expectedversion:
-            print("the version of the module "+modulename+" is inconsistent with the expected; " + actualversion)
+            print "the version of the module "+modulename+" is inconsistent with the expected; " + actualversion
             sys.exit(1)
         else:
-            print(modulename + ": " + actualversion + " (ok)")
-
-    else:
-        parente = pomtoplevelelement(modulepomtree, "parent")
-        namespace = extractdefaultnamespace(parente.tag)
-        versione = parente.find("{"+namespace+"}version")
-
-        if versione is None:
-            print "the parent element of module " + modulename + " has no version specified"
-            sys.exit(1)
-        else:
-            actualversion = versione.text
-
-            if actualversion != expectedversion:
-                print "the version of the module "+modulename+" is inconsistent with the expected; " + actualversion
-                sys.exit(1)
-            else:
-                print modulename + ": " + actualversion + " (ok)"
-
-
-def updateversionformodule(modulename, version):
-    filename = modulename + "/pom.xml"
-    modulepomtree = etree.parse(filename)
-
-    if not modulepomtree:
-        print "the 'pom.xml' for module "+modulename+" should be accessible"
-        sys.exit(1)
-
-    if modulename == "haikudepotserver-parent":
-        versione = pomtoplevelelement(modulepomtree, "version")
-        versione.text = version
-    else:
-        parente = pomtoplevelelement(modulepomtree, "parent")
-        namespace = extractdefaultnamespace(parente.tag)
-        versione = parente.find("{"+namespace+"}version")
-        versione.text = version
-
-    writepom(modulepomtree, filename)
-    print modulename + ": " + version + " (updated)"
+            print modulename + ": " + actualversion + " (ok)"
 
 
 # =====================================
