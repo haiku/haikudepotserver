@@ -61,8 +61,7 @@ Distributed under the terms of the MIT License.
 -Dconfig.properties=file:///etc/haikudepotserver/config.properties \
 -jar haikudepotserver-webapp-1.2.3-war-exec.jar \
 -resetExtract \
--extractDirectory /var/cache/haikudepotserver
-        </programlisting>
+-extractDirectory /var/cache/haikudepotserver</programlisting>
     </para>
 
     <para>
@@ -79,8 +78,7 @@ Distributed under the terms of the MIT License.
     <para>
         <programlisting>java \
 -jar haikudepotserver-webapp-1.2.3-war-exec.jar \
--h
-        </programlisting>
+-h</programlisting>
     </para>
 
     <section xml:id="deployment-settinguprepositories">

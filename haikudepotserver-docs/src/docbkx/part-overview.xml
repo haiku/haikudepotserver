@@ -71,8 +71,7 @@ Distributed under the terms of the MIT License.
         <para>
             <programlisting>apt-get install default-jdk
 apt-get install maven
-apt-get install postgresql postgresql-client
-            </programlisting>
+apt-get install postgresql postgresql-client</programlisting>
         </para>
 
         <section xml:id="overview-prerequisites-buildingonlinux">
@@ -85,11 +84,11 @@ apt-get install postgresql postgresql-client
                     <tbody>
                         <row>
                             <entry>RPM-based Linux</entry>
-                            <entry><programlisting>yum install rpm-build</programlisting></entry>
+                            <entry>yum install rpm-build</entry>
                         </row>
                         <row>
                             <entry>Debian-based Linux</entry>
-                            <entry><programlisting>apt-get install rpm</programlisting></entry>
+                            <entry>apt-get install rpm</entry>
                         </row>
                     </tbody>
                 </tgroup>
@@ -112,8 +111,7 @@ apt-get install postgresql postgresql-client
             </para>
 
             <para>
-                <programlisting>listen_address = 'localhost'
-                </programlisting>
+                <programlisting>listen_address = 'localhost'</programlisting>
             </para>
 
             <para>
@@ -127,22 +125,19 @@ apt-get install postgresql postgresql-client
             <para>Create a new database user with the following command;</para>
 
             <para>
-                <programlisting>sudo -u postgres createuser -P -E haikudepotserver
-                </programlisting>
+                <programlisting>sudo -u postgres createuser -P -E haikudepotserver</programlisting>
             </para>
 
             <para>Now create the new database;</para>
 
             <para>
-                <programlisting>sudo -u postgres createdb -O haikudepotserver haikudepotserver
-                </programlisting>
+                <programlisting>sudo -u postgres createdb -O haikudepotserver haikudepotserver</programlisting>
             </para>
 
             <para>You can check the login to the database works by opening a SQL terminal;</para>
 
             <para>
-                <programlisting>psql -h localhost -U haikudepotserver haikudepotserver
-                </programlisting>
+                <programlisting>psql -h localhost -U haikudepotserver haikudepotserver</programlisting>
             </para>
 
             <para>

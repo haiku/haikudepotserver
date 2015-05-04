@@ -190,8 +190,7 @@ Distributed under the terms of the MIT License.
             <para>
                 <programlisting>python support/hdsrelease.py
 git push
-git push --tags
-                </programlisting>
+git push --tags</programlisting>
             </para>
 
             <section>

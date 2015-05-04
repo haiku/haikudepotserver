@@ -25,8 +25,7 @@ Distributed under the terms of the MIT License.
         <para>
             <programlisting># Comment
 key1=value1
-key2=value2
-            </programlisting>
+key2=value2</programlisting>
         </para>
 
         <para>

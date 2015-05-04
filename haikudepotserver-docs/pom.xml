@@ -44,12 +44,16 @@
                         <generateSectionTocLevel>false</generateSectionTocLevel>
                         <chunkedOutput>true</chunkedOutput>
                         <chunkSectionDepth>0</chunkSectionDepth>
+                        <htmlStylesheet>css/haikudepotserver-docs.css</htmlStylesheet>
                     </configuration>
                     <executions>
                         <execution>
                             <id>build-html</id>
                             <configuration>
                                 <postProcess>
+                                    <copy todir="${basedir}/target/site/index/css">
+                                        <fileset dir="${basedir}/src/css" />
+                                    </copy>
                                     <copy todir="${basedir}/target/site/index/images">
                                         <fileset dir="${basedir}/src/images" />
                                     </copy>
