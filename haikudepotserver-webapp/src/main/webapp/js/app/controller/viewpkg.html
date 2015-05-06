@@ -2,7 +2,7 @@
 
     <div id="pkg-title">
         <div id="pkg-title-feed">
-            <img src="/img/feed.svg" ng-click="goPkgFeedBuilder()">
+            <img src="/img/feed.svg" img-downgrade="" ng-click="goPkgFeedBuilder()">
         </div>
         <div id="pkg-title-icon">
             <pkg-icon size="32" pkg="pkg"></pkg-icon>
@@ -40,10 +40,10 @@
             <div class="pkg-screenshot-item-controls-container">
                 {{$index+1}}
                 <a href="{{pkgScreenshot.imageDownloadUrl}}" target="_blank" ng-show="pkgScreenshots.length">
-                    <img src="/img/download.svg">
+                    <img src="/img/download.svg" img-downgrade="">
                 </a>
                 <a href="{{pkgScreenshot.imageLargeUrl}}" target="_blank" ng-show="pkgScreenshots.length">
-                    <img src="/img/newwindow.svg">
+                    <img src="/img/newwindow.svg" img-downgrade="">
                 </a>
             </div>
             <img ng-src="{{pkgScreenshot.imageThumbnailUrl}}">

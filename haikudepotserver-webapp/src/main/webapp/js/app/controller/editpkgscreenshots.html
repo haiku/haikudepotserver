@@ -29,7 +29,7 @@
             <div class="pkg-screenshot-image-container">
                 <img ng-src="{{pkgScreenshot.imageThumbnailUrl}}"></img>
                 <div class="pkg-screenshot-actions-container" ng-show="pkgScreenshots.length > 1">
-                    <a href="" ng-show="0!=$index" ng-click="goOrderUp(pkgScreenshot)"><img src="/img/up.svg"></a>
+                    <a href="" ng-show="0!=$index" ng-click="goOrderUp(pkgScreenshot)"><img src="/img/up.svg" img-downgrade=""></a>
                     <a href="" ng-show="$index < pkgScreenshots.length-1" ng-click="goOrderDown(pkgScreenshot)"><img src="/img/down.svg"></a>
                 </div>
             </div>

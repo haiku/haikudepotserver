@@ -19,11 +19,12 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
 
                     var topLevelE = angular.element('<span class="rating-indicator"></div>');
                     var starEs = [];
+                    var extension = Modernizr.svg ? 'svg' : 'png';
 
                     element.replaceWith(topLevelE);
 
                     for(var i=0;i<5;i++) {
-                        var starE = angular.element('<img src="/img/staroff.svg"/>');
+                        var starE = angular.element('<img src="/img/staroff.'+extension+'"/>');
                         starEs.push(starE);
                         topLevelE.append(starE);
                     }
@@ -58,14 +59,14 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
                                 var starE = starEs[(i / 2) - 1];
 
                                 if (rating >= i) {
-                                    starE.attr('src', '/img/staron.svg');
+                                    starE.attr('src', '/img/staron.'+extension);
                                 }
                                 else {
                                     if (rating >= i - 1) {
-                                        starE.attr('src', '/img/starhalf.svg');
+                                        starE.attr('src', '/img/starhalf.'+extension);
                                     }
                                     else {
-                                        starE.attr('src', '/img/staroff.svg');
+                                        starE.attr('src', '/img/staroff.'+extension);
                                     }
                                 }
                             }

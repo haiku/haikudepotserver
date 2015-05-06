@@ -545,7 +545,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public GetPkgIconsResult getPkgIcons(GetPkgIconsRequest request) throws ObjectNotFoundException {
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied to get the package's icons");
 
         final ObjectContext context = serverRuntime.getContext();
         Pkg pkg = getPkg(context, request.pkgName);

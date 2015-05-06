@@ -15,13 +15,20 @@ These styles are to do with the breadcrumbs that appear under the banner.
     margin: 0;
 }
 
+/*noinspection CssOptimizeSimilarProperties*/
 #breadcrumbs-container ul li {
     display: inline;
-    background: url('/img/breadcrumbseparator.svg') no-repeat;
+    background-repeat: no-repeat;
+    background-image: url('/img/breadcrumbseparator.svg');
+    background-color: transparent;
     background-position: 4px 2px;
     padding: 0 0 0 18px;
     color: white;
     font-size: 12px;
+}
+
+html.nosvg #breadcrumbs-container ul li {
+    background-image: url('/img/breadcrumbseparator.png');
 }
 
 #breadcrumbs-container ul li a {
@@ -32,4 +39,8 @@ These styles are to do with the breadcrumbs that appear under the banner.
     display: inline;
     background: none;
     padding: 0;
+}
+
+html.nosvg #breadcrumbs-container ul li:nth-child(1) {
+    background: none;
 }

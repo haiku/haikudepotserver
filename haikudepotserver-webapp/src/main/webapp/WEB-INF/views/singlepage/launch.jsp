@@ -7,7 +7,7 @@ This is a single page application and this is essentially the 'single page'.  It
 web-resources and then this starts the java-script single page environment driven by the AngularJS library.
 --%>
 
-<html ng-app="haikudepotserver">
+<html ng-app="haikudepotserver" environment-class="">
 
 <head>
 
