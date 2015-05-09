@@ -41,7 +41,7 @@
                 <multipage:pkgIcon pkgVersion="${data.pkgVersion}" size="32"/>
             </div>
             <div id="pkg-title-text">
-                <h1><c:out value="${data.pkgVersion.getPkgVersionLocalizationOrFallbackByCode(data.currentNaturalLanguage.code).summary}"/></h1>
+                <h1><c:out value="${data.pkgVersion.getPkgVersionLocalizationOrFallbackByCode(data.currentNaturalLanguage.code).summary.get()}"/></h1>
                 <div class="muted">
                     <small>
                         <c:out value="${data.pkgVersion.pkg.name}"></c:out>
@@ -70,7 +70,7 @@
 
         <div id="pkg-description-container">
             <p>
-                <multipage:plainTextContent value="${data.pkgVersion.getPkgVersionLocalizationOrFallbackByCode(data.currentNaturalLanguage.code).description}"></multipage:plainTextContent>
+                <multipage:plainTextContent value="${data.pkgVersion.getPkgVersionLocalizationOrFallbackByCode(data.currentNaturalLanguage.code).description.get()}"></multipage:plainTextContent>
             </p>
         </div>
 

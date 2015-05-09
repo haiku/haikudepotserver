@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.multipage.controller;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -22,6 +23,7 @@ import org.haikuos.haikudepotserver.multipage.model.Pagination;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -73,6 +75,9 @@ public class HomeController {
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
 
+    @Value("${architecture.default.code}")
+    private String defaultArchitectureCode;
+
     /**
      * <p>This is the entry point for the home page.  It will look at the parameters supplied and will
      * establish what should be displayed.</p>
@@ -82,12 +87,16 @@ public class HomeController {
     public ModelAndView home(
             HttpServletRequest httpServletRequest,
             @RequestParam(value=KEY_OFFSET, defaultValue = "0") Integer offset,
-            @RequestParam(value=KEY_ARCHITECTURECODE, defaultValue = Architecture.CODE_X86) String architectureCode,
+            @RequestParam(value=KEY_ARCHITECTURECODE, required=false) String architectureCode,
             @RequestParam(value=KEY_PKGCATEGORYCODE, required=false) String pkgCategoryCode,
             @RequestParam(value=KEY_SEARCHEXPRESSION, required=false) String searchExpression,
             @RequestParam(value=KEY_VIEWCRITERIATYPECODE, required=false) ViewCriteriaType viewCriteriaType) {
 
         ObjectContext context = serverRuntime.getContext();
+
+        if(Strings.isNullOrEmpty(architectureCode)) {
+            architectureCode = defaultArchitectureCode;
+        }
 
         // ------------------------------
         // FETCH THE DATA

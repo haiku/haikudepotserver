@@ -112,6 +112,7 @@
                         <thead>
                         <th></th>
                         <th><spring:message code="gen.pkg.title"></spring:message></th>
+                        <th><spring:message code="home.table.payloadlength.title"></spring:message></th>
                         <th><spring:message code="home.table.rating.title"></spring:message></th>
                         <th><spring:message code="home.table.version.title"></spring:message></th>
                         <c:if test="${'MOSTRECENT'==data.viewCriteriaType.name()}">
@@ -131,6 +132,9 @@
                                     <multipage:pkgVersionLink pkgVersion="${pkgVersion}">
                                         <c:out value="${pkgVersion.pkg.name}"></c:out>
                                     </multipage:pkgVersionLink>
+                                </td>
+                                <td>
+                                    <multipage:dataLength length="${pkgVersion.payloadLength}"></multipage:dataLength>
                                 </td>
                                 <td>
                                     <c:if test="${not empty pkgVersion.pkg.derivedRating}">

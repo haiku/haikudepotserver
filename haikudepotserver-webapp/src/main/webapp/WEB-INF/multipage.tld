@@ -20,6 +20,19 @@
     </tag>
 
     <tag>
+        <name>dataLength</name>
+        <tag-class>org.haikuos.haikudepotserver.multipage.markup.DataLengthTag</tag-class>
+        <description>
+            Renders a length of data with sensible units such as KB, MB, TB etc...
+        </description>
+        <attribute>
+            <name>length</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue> <!-- can use SPEL expressions -->
+        </attribute>
+    </tag>
+
+    <tag>
         <name>pkgIcon</name>
         <tag-class>org.haikuos.haikudepotserver.multipage.markup.PkgIconTag</tag-class>
         <description>
