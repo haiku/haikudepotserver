@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotserver.job;
 
 import com.google.common.base.*;
+import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
