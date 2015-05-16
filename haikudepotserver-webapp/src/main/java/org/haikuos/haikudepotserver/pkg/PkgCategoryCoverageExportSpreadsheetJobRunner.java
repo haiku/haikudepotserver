@@ -6,9 +6,7 @@
 package org.haikuos.haikudepotserver.pkg;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
@@ -25,8 +23,10 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>This report is a spreadsheet that covers basic details of each package.</p>
@@ -65,7 +65,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
 
             final List<String> pkgCategoryCodes = getPkgCategoryCodes();
 
-            List<String> headings = Lists.newArrayList();
+            List<String> headings = new ArrayList<>();
             headings.add("pkg-name");
             headings.add("any-summary");
             headings.add("none");
@@ -87,15 +87,15 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                     new Callback<Pkg>() {
                         @Override
                         public boolean process(Pkg pkg) {
-                            List<String> cols = Lists.newArrayList();
-                            Optional<PkgVersionLocalization> locOptional = Optional.absent();
+                            List<String> cols = new ArrayList<>();
+                            Optional<PkgVersionLocalization> locOptional = Optional.empty();
 
                             if(null!=pkg) {
                                 locOptional = PkgVersionLocalization.getAnyPkgVersionLocalizationForPkg(context, pkg);
                             }
 
                             cols.add(pkg.getName());
-                            cols.add(locOptional.isPresent() ? locOptional.get().getSummary().or("") : "");
+                            cols.add(locOptional.isPresent() ? locOptional.get().getSummary().orElse("") : "");
                             cols.add(pkg.getPkgPkgCategories().isEmpty() ? MARKER : "");
 
                             for (String pkgCategoryCode : pkgCategoryCodes) {

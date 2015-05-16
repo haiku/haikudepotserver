@@ -5,18 +5,18 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._UserPasswordResetToken;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class UserPasswordResetToken extends _UserPasswordResetToken {
@@ -38,11 +38,11 @@ public class UserPasswordResetToken extends _UserPasswordResetToken {
     public static Optional<UserPasswordResetToken> getByCode(ObjectContext context, String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<UserPasswordResetToken>) context.performQuery(new SelectQuery(
+        return ((List<UserPasswordResetToken>) context.performQuery(new SelectQuery(
                         UserPasswordResetToken.class,
-                        ExpressionFactory.matchExp(UserPasswordResetToken.CODE_PROPERTY, code))),
-                null));
+                        ExpressionFactory.matchExp(UserPasswordResetToken.CODE_PROPERTY, code))))
+                .stream()
+                .collect(SingleCollector.optional());
     }
 
     @Override

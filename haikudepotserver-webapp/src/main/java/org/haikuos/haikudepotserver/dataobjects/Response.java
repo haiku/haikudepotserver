@@ -5,14 +5,14 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
 import org.haikuos.haikudepotserver.dataobjects.auto._Response;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>This is part of the captcha system.</p>
@@ -21,11 +21,9 @@ import java.util.List;
 public class Response extends _Response {
 
     public static Optional<Response> getByToken(ObjectContext context, String token) {
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<Response>) context.performQuery(new SelectQuery(
+        return ((List<Response>) context.performQuery(new SelectQuery(
                         Response.class,
-                        ExpressionFactory.matchExp(Response.TOKEN_PROPERTY, token))),
-                null));
+                        ExpressionFactory.matchExp(Response.TOKEN_PROPERTY, token)))).stream().collect(SingleCollector.optional());
     }
 
 }

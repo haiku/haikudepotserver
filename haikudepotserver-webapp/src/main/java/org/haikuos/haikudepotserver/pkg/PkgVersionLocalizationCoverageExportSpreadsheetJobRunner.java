@@ -6,11 +6,7 @@
 package org.haikuos.haikudepotserver.pkg;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -35,7 +31,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * <P>This report produces a spreadsheet that outlines for each package, for which natural languages there are
@@ -66,17 +64,10 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
     public List<NaturalLanguage> getNaturalLanguages(ObjectContext context) {
         SelectQuery query = new SelectQuery(NaturalLanguage.class);
         query.addOrdering(new Ordering(NaturalLanguage.CODE_PROPERTY, SortOrder.ASCENDING));
-        return
-                ImmutableList.copyOf(
-                Iterables.filter(
-                        (List<NaturalLanguage>) context.performQuery(query),
-                        new Predicate<NaturalLanguage>() {
-                            @Override
-                            public boolean apply(NaturalLanguage input) {
-                                return naturalLanguageOrchestrationService.hasData(input.getCode());
-                            }
-                        }
-                ));
+        return ((List<NaturalLanguage>) context.performQuery(query))
+                .stream()
+                .filter(nl -> naturalLanguageOrchestrationService.hasData(nl.getCode()))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -5,10 +5,7 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.QueryCacheStrategy;
@@ -17,6 +14,7 @@ import org.haikuos.haikudepotserver.dataobjects.auto._PkgIconImage;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class PkgIconImage extends _PkgIconImage {
 
@@ -40,18 +38,11 @@ public class PkgIconImage extends _PkgIconImage {
             final MediaType mediaType,
             final Integer size) {
 
-        Preconditions.checkArgument(null!=mediaType, "the media type must be provided");
+        Preconditions.checkArgument(null != mediaType, "the media type must be provided");
 
-        return Iterables.tryFind(
-                findForPkg(context, pkg),
-                new Predicate<PkgIconImage>() {
-                    @Override
-                    public boolean apply(PkgIconImage input) {
-                        return input.getPkgIcon().getMediaType().equals(mediaType) &&
-                                Objects.equals(input.getPkgIcon().getSize(), size);
-                    }
-                }
-        );
+        return findForPkg(context, pkg).stream().filter(pii ->
+                pii.getPkgIcon().getMediaType().equals(mediaType) &&
+                Objects.equals(pii.getPkgIcon().getSize(), size)).findFirst();
 
     }
 

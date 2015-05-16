@@ -6,7 +6,6 @@
 package org.haikuos.haikudepotserver.userrating;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.net.MediaType;
@@ -31,6 +30,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Optional;
 
 /**
  * <p>This runner produces a spreadsheet containing details of the user ratings.  It can produce with the following
@@ -75,8 +75,8 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
                 CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
         ) {
 
-            Optional<Pkg> paramPkgOptional = Optional.absent();
-            Optional<User> paramUserOptional = Optional.absent();
+            Optional<Pkg> paramPkgOptional = Optional.empty();
+            Optional<User> paramUserOptional = Optional.empty();
 
             if (!Strings.isNullOrEmpty(specification.getUserNickname())) {
                 paramUserOptional = User.getByNickname(context, specification.getUserNickname());
@@ -116,8 +116,8 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.basicDateTimeNoMillis();
 
             UserRatingSearchSpecification spec = new UserRatingSearchSpecification();
-            spec.setPkg(paramPkgOptional.orNull());
-            spec.setUser(paramUserOptional.orNull());
+            spec.setPkg(paramPkgOptional.orElse(null));
+            spec.setUser(paramUserOptional.orElse(null));
 
             // TODO; provide a prefetch tree into the user, pkgversion.
             int count = userRatingOrchestrationService.each(context, spec, new Callback<UserRating>() {

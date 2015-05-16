@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.multipage.markup;
 
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
@@ -16,6 +15,7 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,7 +38,7 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
 
         ObjectContext context = getObjectContext();
         TagWriter tagWriter = new TagWriter(pageContext.getOut());
-        List<NaturalLanguage> naturalLanguages = Lists.newArrayList(NaturalLanguage.getAllPopular(context));
+        List<NaturalLanguage> naturalLanguages = new ArrayList<>(NaturalLanguage.getAllPopular(context));
         NaturalLanguage currentNaturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(
                 context,
                 (HttpServletRequest) pageContext.getRequest());

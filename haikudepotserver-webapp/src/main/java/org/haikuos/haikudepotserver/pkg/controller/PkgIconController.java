@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.pkg.controller;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -16,7 +15,6 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.dataobjects.PkgIconImage;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
@@ -31,6 +29,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * <p>This controller vends the package icon.  This may be provided by data stored in the database, or it may be

@@ -5,11 +5,11 @@
 
 package org.haikuos.haikudepotserver.job;
 
-import com.google.common.base.Optional;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * <p>This interface is only concerned with the immediate binary data storage of the job data.  This service will be

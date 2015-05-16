@@ -5,10 +5,8 @@
 
 package org.haikuos.haikudepotserver.userrating;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import com.google.common.net.MediaType;
 import com.sun.syndication.feed.synd.SyndContentImpl;
@@ -31,9 +29,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * <p>This class produces RSS feed entries related to user ratings.</p>
@@ -102,7 +102,7 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
                 return Collections.emptyList();
             }
 
-            List<Expression> expressions = Lists.newArrayList();
+            List<Expression> expressions = new ArrayList<>();
 
             if(null!=specification.getPkgNames()) {
                 expressions.add(ExpressionFactory.inExp(
@@ -138,61 +138,57 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
 
             List<UserRating> userRatings = serverRuntime.getContext().performQuery(query);
 
-            return Lists.transform(
-                    userRatings,
-                    new Function<UserRating, SyndEntry>() {
-                        @Override
-                        public SyndEntry apply(UserRating input) {
+            return userRatings
+                    .stream()
+                    .map(ur -> {
+                        SyndEntry entry = new SyndEntryImpl();
+                        entry.setPublishedDate(ur.getCreateTimestamp());
+                        entry.setUpdatedDate(ur.getModifyTimestamp());
+                        entry.setAuthor(ur.getUser().getNickname());
+                        entry.setUri(URI_PREFIX +
+                                Hashing.sha1().hashUnencodedChars(
+                                        String.format(
+                                                "%s_::_%s_::_%s_::_%s",
+                                                this.getClass().getCanonicalName(),
+                                                ur.getPkgVersion().getPkg().getName(),
+                                                ur.getPkgVersion().toVersionCoordinates().toString(),
+                                                ur.getUser().getNickname())).toString());
+                        entry.setLink(String.format(
+                                "%s/#/userrating/%s",
+                                baseUrl,
+                                ur.getCode()));
 
-                            SyndEntry entry = new SyndEntryImpl();
-                            entry.setPublishedDate(input.getCreateTimestamp());
-                            entry.setUpdatedDate(input.getModifyTimestamp());
-                            entry.setAuthor(input.getUser().getNickname());
-                            entry.setUri(URI_PREFIX +
-                                    Hashing.sha1().hashUnencodedChars(
-                                            String.format(
-                                                    "%s_::_%s_::_%s_::_%s",
-                                                    this.getClass().getCanonicalName(),
-                                                    input.getPkgVersion().getPkg().getName(),
-                                                    input.getPkgVersion().toVersionCoordinates().toString(),
-                                                    input.getUser().getNickname())).toString());
-                            entry.setLink(String.format(
-                                    "%s/#/userrating/%s",
-                                    baseUrl,
-                                    input.getCode()));
+                        entry.setTitle(messageSource.getMessage(
+                                "feed.createdUserRating.atom.title",
+                                new Object[]{
+                                        ur.getPkgVersion().toStringWithPkgAndArchitecture(),
+                                        ur.getUser().getNickname()
+                                },
+                                new Locale(specification.getNaturalLanguageCode())
+                        ));
 
-                            entry.setTitle(messageSource.getMessage(
-                                    "feed.createdUserRating.atom.title",
-                                    new Object[]{
-                                            input.getPkgVersion().toStringWithPkgAndArchitecture(),
-                                            input.getUser().getNickname()
-                                    },
-                                    new Locale(specification.getNaturalLanguageCode())
-                            ));
+                        String contentString = ur.getComment();
 
-                            String contentString = input.getComment();
-
-                            if(null!=contentString && contentString.length() > CONTENT_LENGTH) {
-                                contentString = contentString.substring(0,CONTENT_LENGTH) + "...";
-                            }
-
-                            // if there is a rating then express this as a string using unicode
-                            // characters.
-
-                            if(null!=input.getRating()) {
-                                contentString = buildRatingIndicator(input.getRating()) +
-                                        (Strings.isNullOrEmpty(contentString) ? "" : " -- " + contentString);
-                            }
-
-                            SyndContentImpl content = new SyndContentImpl();
-                            content.setType(MediaType.PLAIN_TEXT_UTF_8.type());
-                            content.setValue(contentString);
-                            entry.setDescription(content);
-
-                            return entry;
+                        if (null != contentString && contentString.length() > CONTENT_LENGTH) {
+                            contentString = contentString.substring(0, CONTENT_LENGTH) + "...";
                         }
-                    }
-            );
+
+                        // if there is a rating then express this as a string using unicode
+                        // characters.
+
+                        if (null != ur.getRating()) {
+                            contentString = buildRatingIndicator(ur.getRating()) +
+                                    (Strings.isNullOrEmpty(contentString) ? "" : " -- " + contentString);
+                        }
+
+                        SyndContentImpl content = new SyndContentImpl();
+                        content.setType(MediaType.PLAIN_TEXT_UTF_8.type());
+                        content.setValue(contentString);
+                        entry.setDescription(content);
+
+                        return entry;
+                    })
+                    .collect(Collectors.toList());
 
         }
 

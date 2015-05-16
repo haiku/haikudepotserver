@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.support.logging;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
@@ -19,6 +18,7 @@ import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * <p>This filter is designed to add material from the state of the request into the logging
@@ -99,7 +99,7 @@ public class LoggingFilter implements Filter {
 
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

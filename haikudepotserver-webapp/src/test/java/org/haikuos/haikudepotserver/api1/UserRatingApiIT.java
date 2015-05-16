@@ -5,11 +5,9 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
@@ -18,11 +16,13 @@ import org.haikuos.haikudepotserver.api1.model.userrating.*;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.Optional;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
@@ -213,7 +213,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.size()).isEqualTo(2);
 
         {
-            SearchUserRatingsResult.UserRating userRating = Iterables.find(result.items, new ResultUserRatingFunction("ABCDEF"));
+            SearchUserRatingsResult.UserRating userRating = result.items.stream().filter(i -> i.code.equals("ABCDEF")).collect(SingleCollector.single());
             Assertions.assertThat(userRating.active).isTrue();
             Assertions.assertThat(userRating.comment).isEqualTo("Southern hemisphere winter");
             Assertions.assertThat(userRating.createTimestamp).isNotNull();
@@ -232,7 +232,10 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         }
 
         {
-            SearchUserRatingsResult.UserRating userRating = Iterables.find(result.items, new ResultUserRatingFunction("GHIJKL"));
+            SearchUserRatingsResult.UserRating userRating = result.items
+                    .stream()
+                    .filter(i -> i.code.equals("GHIJKL"))
+                    .collect(SingleCollector.single());
             Assertions.assertThat(userRating.active).isTrue();
             Assertions.assertThat(userRating.comment).isEqualTo("Winter banana apples");
             Assertions.assertThat(userRating.user.nickname).isEqualTo("urtest2");

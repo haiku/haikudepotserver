@@ -5,23 +5,19 @@
 
 package org.haikuos.haikudepotserver.multipage.markup;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import com.google.common.html.HtmlEscapers;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>This tag renders some text with newlines turned into valid HTML structure.</p>
  */
 
 public class PlainTextContentTag extends RequestContextAwareTag {
-
-    private final static Pattern PATTERN_NEWLINE = Pattern.compile("\\n\\d|\\d\\n|\\n");
 
     private String value;
 
@@ -38,17 +34,16 @@ public class PlainTextContentTag extends RequestContextAwareTag {
 
         if (!Strings.isNullOrEmpty(value)) {
 
-            pageContext.getOut().print(Joiner.on("<br/>\n").join(
-                    Iterables.transform(
-                            Splitter.on(PATTERN_NEWLINE).split(value),
-                            new Function<String, String>() {
-                                @Override
-                                public String apply(String input) {
-                                    return HtmlEscapers.htmlEscaper().escape(input);
-                                }
-                            }
+            pageContext.getOut().print(
+                    String.join(
+                            "<br/>\n",
+                            Arrays.asList(value.split("[\n\r]"))
+                                    .stream()
+                                    .map(s -> HtmlEscapers.htmlEscaper().escape(s))
+                                    .collect(Collectors.toList())
                     )
-            ));
+            );
+
         }
 
         return SKIP_BODY;

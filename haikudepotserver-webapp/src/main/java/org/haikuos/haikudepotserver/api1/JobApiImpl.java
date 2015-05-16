@@ -5,13 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.job.*;
@@ -28,8 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class JobApiImpl extends AbstractApiImpl implements JobApi {
@@ -53,7 +51,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
 
         final ObjectContext context = serverRuntime.getContext();
         User authUser = obtainAuthenticatedUser(context);
-        Optional<User> ownerUserOptional = Optional.absent();
+        Optional<User> ownerUserOptional = Optional.empty();
 
         // authorization
 
@@ -83,42 +81,34 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
             result.total = 0L;
         }
         else {
-            final JobStatusToApiJobStatus toApiStatusFn = new JobStatusToApiJobStatus();
-            final ApiJobStatusToJobStatus toStatusFn = new ApiJobStatusToJobStatus();
 
             Set<JobSnapshot.Status> statuses = null;
 
             if(null!=request.statuses) {
-                statuses = ImmutableSet.copyOf(Iterables.transform(request.statuses,toStatusFn));
+                statuses = request.statuses.stream().map(s -> JobSnapshot.Status.valueOf(s.name())).collect(Collectors.toSet());
             }
 
-            result.total = (long) jobOrchestrationService.totalJobs(ownerUserOptional.orNull(), statuses);
-            result.items = Lists.transform(
-                    jobOrchestrationService.findJobs(
-                            ownerUserOptional.orNull(),
+            result.total = (long) jobOrchestrationService.totalJobs(ownerUserOptional.orElse(null), statuses);
+            result.items = jobOrchestrationService.findJobs(
+                            ownerUserOptional.orElse(null),
                             statuses,
                             null == request.offset ? 0 : request.offset,
-                            null == request.limit ? Integer.MAX_VALUE : request.limit),
-                    new Function<JobSnapshot, SearchJobsResult.Job>() {
-                        @Override
-                        public SearchJobsResult.Job apply(JobSnapshot input) {
-                            SearchJobsResult.Job resultJob = new SearchJobsResult.Job();
+                            null == request.limit ? Integer.MAX_VALUE : request.limit).stream().map(js -> {
+                        SearchJobsResult.Job resultJob = new SearchJobsResult.Job();
 
-                            resultJob.guid = input.getGuid();
-                            resultJob.jobStatus = toApiStatusFn.apply(input.getStatus());
-                            resultJob.jobTypeCode = input.getJobTypeCode();
-                            resultJob.ownerUserNickname = input.getOwnerUserNickname();
-                            resultJob.startTimestamp = null == input.getStartTimestamp() ? null : input.getStartTimestamp().getTime();
-                            resultJob.finishTimestamp = null == input.getFinishTimestamp() ? null : input.getFinishTimestamp().getTime();
-                            resultJob.queuedTimestamp = null == input.getQueuedTimestamp() ? null : input.getQueuedTimestamp().getTime();
-                            resultJob.failTimestamp = null == input.getFailTimestamp() ? null : input.getFailTimestamp().getTime();
-                            resultJob.cancelTimestamp = null == input.getCancelTimestamp() ? null : input.getCancelTimestamp().getTime();
-                            resultJob.progressPercent = input.getProgressPercent();
+                        resultJob.guid = js.getGuid();
+                        resultJob.jobStatus = JobStatus.valueOf(js.getStatus().name());
+                        resultJob.jobTypeCode = js.getJobTypeCode();
+                        resultJob.ownerUserNickname = js.getOwnerUserNickname();
+                        resultJob.startTimestamp = null == js.getStartTimestamp() ? null : js.getStartTimestamp().getTime();
+                        resultJob.finishTimestamp = null == js.getFinishTimestamp() ? null : js.getFinishTimestamp().getTime();
+                        resultJob.queuedTimestamp = null == js.getQueuedTimestamp() ? null : js.getQueuedTimestamp().getTime();
+                        resultJob.failTimestamp = null == js.getFailTimestamp() ? null : js.getFailTimestamp().getTime();
+                        resultJob.cancelTimestamp = null == js.getCancelTimestamp() ? null : js.getCancelTimestamp().getTime();
+                        resultJob.progressPercent = js.getProgressPercent();
 
-                            return resultJob;
-                        }
-                    }
-            );
+                        return resultJob;
+                    }).collect(Collectors.toList());
 
             LOGGER.info("search for jobs found {} results", result.items.size());
         }
@@ -169,7 +159,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
         GetJobResult result = new GetJobResult();
 
         result.guid = job.getGuid();
-        result.jobStatus = new JobStatusToApiJobStatus().apply(job.getStatus());
+        result.jobStatus = JobStatus.valueOf(job.getStatus().name());
         result.jobTypeCode = job.getJobTypeCode();
         result.ownerUserNickname = job.getOwnerUserNickname();
         result.startTimestamp = null == job.getStartTimestamp() ? null : job.getStartTimestamp().getTime();
@@ -178,7 +168,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
         result.failTimestamp = null == job.getFailTimestamp() ? null : job.getFailTimestamp().getTime();
         result.cancelTimestamp = null == job.getCancelTimestamp() ? null : job.getCancelTimestamp().getTime();
         result.progressPercent = job.getProgressPercent();
-        result.generatedDatas = Lists.newArrayList();
+        result.generatedDatas = new ArrayList<>();
 
         // could go functional here, but keeping it simple to keep the exception handling simple.
 
@@ -201,24 +191,6 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
         }
 
         return result;
-    }
-
-    private static class ApiJobStatusToJobStatus implements Function<JobStatus, JobSnapshot.Status> {
-
-        @Override
-        public JobSnapshot.Status apply(JobStatus input) {
-            return JobSnapshot.Status.valueOf(input.name());
-        }
-
-    }
-
-    private static class JobStatusToApiJobStatus implements Function<JobSnapshot.Status, JobStatus> {
-
-        @Override
-        public JobStatus apply(JobSnapshot.Status input) {
-            return JobStatus.valueOf(input.name());
-        }
-
     }
 
 }

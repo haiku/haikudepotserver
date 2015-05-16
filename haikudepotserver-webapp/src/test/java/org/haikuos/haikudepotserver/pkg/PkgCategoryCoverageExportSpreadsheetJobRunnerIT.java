@@ -6,22 +6,22 @@
 package org.haikuos.haikudepotserver.pkg;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
-import junit.framework.Assert;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haikuos.haikudepotserver.job.model.JobSnapshot;
 import org.haikuos.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.support.SingleCollector;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
@@ -55,7 +55,12 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunnerIT extends AbstractInt
         Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
         Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
 
-        String dataGuid = Iterables.getOnlyElement(snapshotOptional.get().getGeneratedDataGuids());
+        String dataGuid = snapshotOptional
+                .get()
+                .getGeneratedDataGuids()
+                .stream()
+                .collect(SingleCollector.single());
+
         JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();
         ByteSource expectedByteSource = getResourceByteSource("/sample-pkgcategorycoverageexportspreadsheet-generated.csv");
 

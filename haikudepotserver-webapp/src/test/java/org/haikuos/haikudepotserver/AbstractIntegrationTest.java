@@ -5,10 +5,7 @@
 
 package org.haikuos.haikudepotserver;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
@@ -38,8 +35,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * <p>This superclass of all of the tests has a hook to run before each integration test.  The hook will
@@ -171,7 +170,7 @@ public abstract class AbstractIntegrationTest {
 
                 for (DataMap dataMap : dataNode.getDataMaps()) {
 
-                    List<String> truncationNames = Lists.newArrayList();
+                    List<String> truncationNames = new ArrayList<>();
 
                     for (ObjEntity objEntity : dataMap.getObjEntities()) {
 
@@ -184,7 +183,7 @@ public abstract class AbstractIntegrationTest {
                     if(!truncationNames.isEmpty()) {
                         String sql = String.format(
                                 "TRUNCATE %s CASCADE",
-                                Joiner.on(',').join(truncationNames));
+                                String.join(",", truncationNames));
 
                         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                             preparedStatement.execute();
@@ -237,7 +236,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void setUnauthenticated() {
-        AuthenticationHelper.setAuthenticatedUserObjectId(Optional.<ObjectId>absent());
+        AuthenticationHelper.setAuthenticatedUserObjectId(Optional.<ObjectId>empty());
     }
 
 }

@@ -5,11 +5,11 @@
 
 package org.haikuos.pkg;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.haikuos.pkg.model.*;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 /**
  * <p>This object is algorithm that is able to convert a top level package attribute into a modelled package object

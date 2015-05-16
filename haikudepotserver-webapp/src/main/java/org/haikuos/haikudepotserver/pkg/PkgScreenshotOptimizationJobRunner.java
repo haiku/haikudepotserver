@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * <p>This job runner is able to optimize the screenshot images by using the PNG optimizer.  It is triggered

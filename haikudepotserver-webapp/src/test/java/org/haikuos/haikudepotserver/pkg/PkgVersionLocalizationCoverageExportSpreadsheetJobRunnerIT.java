@@ -6,8 +6,6 @@
 package org.haikuos.haikudepotserver.pkg;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
@@ -16,12 +14,14 @@ import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haikuos.haikudepotserver.job.model.JobSnapshot;
 import org.haikuos.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
@@ -43,14 +43,16 @@ public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends 
         PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification spec = new PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification();
 
         // ------------------------------------
-        Optional<String> guidOptional = jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.NONE);
+        Optional<String> guidOptional = jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE);
         // ------------------------------------
 
         jobOrchestrationService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
         Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
-        String dataGuid = Iterables.getOnlyElement(snapshotOptional.get().getGeneratedDataGuids());
+        String dataGuid = snapshotOptional.get().getGeneratedDataGuids()
+                .stream()
+                .collect(SingleCollector.single());
         JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();
         ByteSource expectedByteSource = getResourceByteSource("/sample-pkgversionlocalizationcoverageexportspreadsheet-generated.csv");
 

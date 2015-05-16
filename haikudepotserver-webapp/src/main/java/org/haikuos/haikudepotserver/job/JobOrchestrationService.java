@@ -5,13 +5,13 @@
 
 package org.haikuos.haikudepotserver.job;
 
-import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.job.model.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**

@@ -13,6 +13,13 @@ public class GetAllArchitecturesResult {
 
     public static class Architecture {
         public String code;
+
+        public Architecture() {
+        }
+
+        public Architecture(String code) {
+            this.code = code;
+        }
     }
 
 }

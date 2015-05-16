@@ -5,13 +5,8 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.QueryCacheStrategy;
@@ -20,13 +15,12 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
@@ -43,9 +37,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         query.setCacheGroups(HaikuDepot.CacheGroup.PKG.name());
 
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<Pkg>) context.performQuery(query),
-                null));
+        return ((List<Pkg>) context.performQuery(query)).stream().collect(SingleCollector.optional());
     }
 
     @Override
@@ -97,7 +89,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final Integer size) {
@@ -107,7 +99,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
         switch(icons.size()) {
             case 0:
-                return Optional.absent();
+                return Optional.empty();
 
             case 1:
                 return Optional.of(icons.get(0));
@@ -119,16 +111,11 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     private List<PkgIcon> getPkgIcons(final MediaType mediaType, final Integer size) {
         Preconditions.checkNotNull(mediaType);
-
-        return Lists.newArrayList(Iterables.filter(getPkgIcons(), new Predicate<PkgIcon>() {
-            @Override
-            public boolean apply(PkgIcon o) {
-                return
-                        o.getMediaType().equals(mediaType)
-                                && (null == size) == (null == o.getSize())
-                                && ((null == size) || size.equals(o.getSize()));
-            }
-        }));
+        return getPkgIcons().stream().filter(pi -> {
+            return pi.getMediaType().equals(mediaType)
+                    && (null == size) == (null == pi.getSize())
+                    && ((null == size) || size.equals(pi.getSize()));
+        }).collect(Collectors.toList());
     }
 
     public void setModifyTimestamp() {
@@ -146,7 +133,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
     }
 
     public List<PkgScreenshot> getSortedPkgScreenshots() {
-        List<PkgScreenshot> screenshots = Lists.newArrayList(getPkgScreenshots());
+        List<PkgScreenshot> screenshots = new ArrayList<>(getPkgScreenshots());
         Collections.sort(screenshots);
         return screenshots;
     }
@@ -155,7 +142,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         List<PkgScreenshot> screenshots = getSortedPkgScreenshots();
 
         if(screenshots.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(screenshots.get(screenshots.size()-1).getOrdering());
@@ -172,33 +159,30 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         Preconditions.checkNotNull(codes);
 
         // first check that there are no duplicates.
-        if(ImmutableSet.copyOf(codes).size() != codes.size()) {
+        if(codes.stream().collect(Collectors.toSet()).size() != codes.size()) {
             throw new IllegalArgumentException("the codes supplied contain duplicates which would interfere with the ordering");
         }
 
-        List<PkgScreenshot> screenshots = Lists.newArrayList(getPkgScreenshots());
+        List<PkgScreenshot> screenshots = new ArrayList<>(getPkgScreenshots());
         Collections.sort(
                 screenshots,
-                new Comparator<PkgScreenshot>() {
-                    @Override
-                    public int compare(PkgScreenshot o1, PkgScreenshot o2) {
-                        int o1i = codes.indexOf(o1.getCode());
-                        int o2i = codes.indexOf(o2.getCode());
+                (o1, o2) -> {
+                    int o1i = codes.indexOf(o1.getCode());
+                    int o2i = codes.indexOf(o2.getCode());
 
-                        if(-1==o1i && -1==o2i) {
-                            return o1.getCode().compareTo(o2.getCode());
-                        }
-
-                        if(-1==o1i) {
-                            o1i = Integer.MAX_VALUE;
-                        }
-
-                        if(-1==o2i) {
-                            o2i = Integer.MAX_VALUE;
-                        }
-
-                        return Integer.compare(o1i,o2i);
+                    if(-1==o1i && -1==o2i) {
+                        return o1.getCode().compareTo(o2.getCode());
                     }
+
+                    if(-1==o1i) {
+                        o1i = Integer.MAX_VALUE;
+                    }
+
+                    if(-1==o2i) {
+                        o2i = Integer.MAX_VALUE;
+                    }
+
+                    return Integer.compare(o1i,o2i);
                 }
         );
 

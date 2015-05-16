@@ -5,13 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
@@ -19,7 +14,6 @@ import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.model.pkg.PkgLocalization;
-import org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
 import org.haikuos.haikudepotserver.api1.support.LimitExceededException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
@@ -33,9 +27,8 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
@@ -44,13 +37,13 @@ import java.util.Set;
 public class PkgApiIT extends AbstractIntegrationTest {
 
     @Resource
-    PkgApi pkgApi;
+    private PkgApi pkgApi;
 
     @Resource
-    PkgOrchestrationService pkgOrchestrationService;
+    private PkgOrchestrationService pkgOrchestrationService;
 
     @Resource
-    PkgOrchestrationService pkgService;
+    private PkgOrchestrationService pkgService;
 
     @Test
     public void testUpdatePkgCategories() throws Exception {
@@ -95,15 +88,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
             Pkg pkg = Pkg.getByName(context, data.pkg1.getName()).get();
 
             Assertions.assertThat(ImmutableSet.of("business", "development")).isEqualTo(
-                    ImmutableSet.copyOf(Iterables.transform(
-                            pkg.getPkgPkgCategories(),
-                            new Function<PkgPkgCategory, String>() {
-                                @Override
-                                public String apply(PkgPkgCategory input) {
-                                    return input.getPkgCategory().getCode();
-                                }
-                            }
-                    ))
+                    pkg.getPkgPkgCategories().stream().map(ppc -> ppc.getPkgCategory().getCode()).collect(Collectors.toSet())
             );
         }
 
@@ -524,13 +509,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         List<PkgScreenshot> sortedScreenshotsAfter = pkgOptional.get().getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(sortedScreenshotsBefore.size()-1);
-
-        Assertions.assertThat(Iterables.tryFind(sortedScreenshotsAfter, new Predicate<PkgScreenshot>() {
-            @Override
-            public boolean apply(PkgScreenshot pkgScreenshot) {
-                return pkgScreenshot.getCode().equals(code1);
-            }
-        }).isPresent()).isFalse();
+        Assertions.assertThat(sortedScreenshotsAfter.stream().filter(s -> s.getCode().equals(code1)).findFirst().isPresent()).isFalse();
     }
 
     /**
@@ -620,20 +599,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(result.pkgLocalizations.size()).isEqualTo(2);
 
-        PkgLocalization en = Iterables.find(result.pkgLocalizations, new Predicate<PkgLocalization>() {
-            @Override
-            public boolean apply(PkgLocalization input) {
-                return input.naturalLanguageCode.equals(NaturalLanguage.CODE_ENGLISH);
-            }
-        });
-
-        PkgLocalization de = Iterables.find(result.pkgLocalizations, new Predicate<PkgLocalization>() {
-            @Override
-            public boolean apply(PkgLocalization input) {
-                return input.naturalLanguageCode.equals(NaturalLanguage.CODE_GERMAN);
-            }
-        });
-
+        PkgLocalization en = result.pkgLocalizations.stream().filter(l -> l.naturalLanguageCode.equals(NaturalLanguage.CODE_ENGLISH)).findFirst().get();
+        PkgLocalization de = result.pkgLocalizations.stream().filter(l -> l.naturalLanguageCode.equals(NaturalLanguage.CODE_GERMAN)).findFirst().get();
         Assertions.assertThat(en.title).isEqualTo("Package 1");
         Assertions.assertThat(de.title).isEqualTo("Packet 1");
     }
@@ -676,7 +643,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.versionType = PkgVersionType.LATEST;
         request.architectureCodes = Collections.singletonList("x86");
         request.naturalLanguageCode = "en";
-        request.pkgNames = Lists.newArrayList();
+        request.pkgNames = new ArrayList<>();
 
         while(request.pkgNames.size() < PkgApi.GETBULKPKG_LIMIT + 1) {
             request.pkgNames.add("pkg");
@@ -712,26 +679,16 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         // check they are all there.
 
-        Set<String> packageNames = ImmutableSet.copyOf(Lists.transform(
-                result.pkgs,
-                new Function<GetBulkPkgResult.Pkg, String>() {
-                    @Override
-                    public String apply(GetBulkPkgResult.Pkg input) {
-                        return input.name;
-                    }
-                }
-        ));
+        Set<String> packageNames = result.pkgs
+                .stream()
+                .map(p -> p.name)
+                .collect(Collectors.toSet());
 
         Assertions.assertThat(packageNames).containsOnly("pkg1","pkg2","pkg3","pkgany");
 
         // now check pkg1 because it has some in-depth data on it.
 
-        GetBulkPkgResult.Pkg pkg1 = Iterables.tryFind(result.pkgs, new Predicate<GetBulkPkgResult.Pkg>() {
-            @Override
-            public boolean apply(GetBulkPkgResult.Pkg input) {
-                return input.name.equals("pkg1");
-            }
-        }).get();
+        GetBulkPkgResult.Pkg pkg1 = result.pkgs.stream().filter(p -> p.name.equals("pkg1")).findFirst().get();
 
         Assertions.assertThat(pkg1.name).isEqualTo("pkg1");
         Assertions.assertThat(pkg1.modifyTimestamp).isNotNull();
@@ -752,13 +709,10 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         // basic check here to make sure that the HPKR data is able to be flagged as being there.
         Assertions.assertThat(pkg1.pkgIcons.size()).isEqualTo(3);
-        Assertions.assertThat(
-                Iterables.tryFind(pkg1.pkgIcons, new Predicate<org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon>() {
-                    @Override
-                    public boolean apply(org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon input) {
-                        return input.mediaTypeCode.equals(org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
-                    }
-                }).isPresent()).isTrue();
+        Assertions.assertThat(pkg1.pkgIcons
+                        .stream()
+                        .filter(pi -> pi.mediaTypeCode.equals(org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE))
+                        .findFirst().isPresent()).isTrue();
 
         Assertions.assertThat(pkg1.versions.size()).isEqualTo(1);
         Assertions.assertThat(pkg1.versions.get(0).title).isEqualTo("Package 1");

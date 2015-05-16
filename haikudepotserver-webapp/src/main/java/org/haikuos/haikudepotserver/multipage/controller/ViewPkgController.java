@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.multipage.controller;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -27,6 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 /**
  * <p>'Page' for showing a version of a package.</p>

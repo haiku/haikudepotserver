@@ -5,16 +5,15 @@
 
 package org.haikuos.pkg.model;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.haikuos.pkg.AttributeContext;
 import org.haikuos.pkg.HpkException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>This is the superclass of the different types (data types) of attributes.</p>
@@ -43,7 +42,7 @@ public abstract class Attribute {
         Preconditions.checkNotNull(attribute);
 
         if(null==childAttributes) {
-            childAttributes = Lists.newArrayList();
+            childAttributes = new ArrayList<>();
         }
 
         childAttributes.add(attribute);
@@ -62,28 +61,12 @@ public abstract class Attribute {
 
     public List<Attribute> getChildAttributes(final AttributeId attributeId) {
         Preconditions.checkNotNull(attributeId);
-        return Lists.newArrayList(Iterables.filter(
-                getChildAttributes(),
-                new Predicate<Attribute>() {
-                    @Override
-                    public boolean apply(Attribute input) {
-                        return input.getAttributeId() == attributeId;
-                    }
-                }
-        ));
+        return getChildAttributes().stream().filter(a -> a.getAttributeId() == attributeId).collect(Collectors.toList());
     }
 
     public Optional<Attribute> getChildAttribute(final AttributeId attributeId) {
         Preconditions.checkNotNull(attributeId);
-        return Iterables.tryFind(
-                getChildAttributes(),
-                new Predicate<Attribute>() {
-                    @Override
-                    public boolean apply(Attribute input) {
-                        return input.getAttributeId() == attributeId;
-                    }
-                }
-        );
+        return getChildAttributes().stream().filter(a -> a.getAttributeId() == attributeId).findFirst();
     }
 
     @Override

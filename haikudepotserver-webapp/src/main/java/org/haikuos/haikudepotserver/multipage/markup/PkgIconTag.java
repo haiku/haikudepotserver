@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.multipage.markup;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -14,6 +13,8 @@ import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Optional;
 
 /**
  * <p>Renders HTML for a package version's icon.</p>

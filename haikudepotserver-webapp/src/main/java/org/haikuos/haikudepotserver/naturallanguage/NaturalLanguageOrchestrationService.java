@@ -5,12 +5,8 @@
 
 package org.haikuos.haikudepotserver.naturallanguage;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -32,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>This service is designed to help with more complex queries around natural languages.</p>
@@ -93,25 +90,12 @@ public class NaturalLanguageOrchestrationService {
         if(null == naturalLanguageCodesWithLocalizationMessages) {
             ObjectContext context = serverRuntime.getContext();
 
-            naturalLanguageCodesWithLocalizationMessages = ImmutableSet.copyOf(
-                    Iterables.transform(
-                            Iterables.filter(
-                                    NaturalLanguage.getAll(context),
-                                    new Predicate<NaturalLanguage>() {
-                                        @Override
-                                        public boolean apply(NaturalLanguage input) {
-                                           return hasLocalizationMessagesPrimative(input);
-                                        }
-                                    }
-                            ),
-                            new Function<NaturalLanguage, String>() {
-                                @Override
-                                public String apply(NaturalLanguage input) {
-                                    return input.getCode();
-                                }
-                            }
-                    )
-            );
+            naturalLanguageCodesWithLocalizationMessages =
+                    NaturalLanguage.getAll(context)
+                            .stream()
+                            .filter(this::hasLocalizationMessagesPrimative)
+                            .map(NaturalLanguage::getCode)
+                            .collect(Collectors.toSet());
 
             LOGGER.info("did find (and cache) {} natural languages with localization", naturalLanguageCodesWithLocalizationMessages.size());
         }

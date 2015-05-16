@@ -5,12 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.repository.*;
@@ -33,6 +29,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi {
@@ -70,7 +68,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 repositoryOptional.get(),
                 Permission.REPOSITORY_IMPORT)) {
             throw new AuthorizationFailureException();
@@ -92,7 +90,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 null,
                 Permission.REPOSITORY_LIST)) {
             throw new AuthorizationFailureException();
@@ -101,7 +99,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         if(null!=request.includeInactive && request.includeInactive) {
             if(!authorizationService.check(
                     context,
-                    tryObtainAuthenticatedUser(context).orNull(),
+                    tryObtainAuthenticatedUser(context).orElse(null),
                     null,
                     Permission.REPOSITORY_LIST_INACTIVE)) {
                 throw new AuthorizationFailureException();
@@ -130,19 +128,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         List<Repository> searchedRepositories = repositoryService.search(context,specification);
 
         result.total = repositoryService.total(context,specification);
-        result.items = Lists.newArrayList(Iterables.transform(
-                searchedRepositories,
-                new Function<Repository, SearchRepositoriesResult.Repository>() {
-                    @Override
-                    public SearchRepositoriesResult.Repository apply(Repository input) {
-                        SearchRepositoriesResult.Repository resultRepository = new SearchRepositoriesResult.Repository();
-                        resultRepository.active = input.getActive();
-                        resultRepository.architectureCode = input.getArchitecture().getCode();
-                        resultRepository.code = input.getCode();
-                        return resultRepository;
-                    }
-                }
-        ));
+        result.items = searchedRepositories.stream().map(sr -> {
+            SearchRepositoriesResult.Repository resultRepository = new SearchRepositoriesResult.Repository();
+            resultRepository.active = sr.getActive();
+            resultRepository.architectureCode = sr.getArchitecture().getCode();
+            resultRepository.code = sr.getCode();
+            return resultRepository;
+        }).collect(Collectors.toList());
 
         return result;
     }
@@ -162,7 +154,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 repositoryOptional.get(),
                 Permission.REPOSITORY_VIEW)) {
             throw new AuthorizationFailureException();
@@ -193,7 +185,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 repositoryOptional.get(),
                 Permission.REPOSITORY_EDIT);
 
@@ -242,7 +234,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 null,
                 Permission.REPOSITORY_ADD)) {
             throw new AuthorizationFailureException();

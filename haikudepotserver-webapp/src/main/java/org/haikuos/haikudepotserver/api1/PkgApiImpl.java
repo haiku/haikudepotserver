@@ -5,13 +5,11 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.*;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -24,7 +22,6 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.dataobjects.PkgLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haikuos.haikudepotserver.job.model.JobData;
@@ -42,11 +39,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>See {@link PkgApi} for details on the methods this API affords.</p>
@@ -110,7 +105,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     private List<Architecture> transformCodesToArchitectures(final ObjectContext context, List<String> codes) throws ObjectNotFoundException {
         Preconditions.checkState(null != codes && !codes.isEmpty(), "the architecture codes must be supplied and at least one architecture is required");
 
-        List<Architecture> result = Lists.newArrayList();
+        List<Architecture> result = new ArrayList<>();
 
         //noinspection ConstantConditions
         for (String code : codes) {
@@ -147,8 +142,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new AuthorizationFailureException();
         }
 
-        List<PkgCategory> pkgCategories = Lists.newArrayList(
-                PkgCategory.getByCodes(context, updatePkgCategoriesRequest.pkgCategoryCodes));
+        List<PkgCategory> pkgCategories = new ArrayList<>(PkgCategory.getByCodes(context, updatePkgCategoriesRequest.pkgCategoryCodes));
 
         if(pkgCategories.size() != updatePkgCategoriesRequest.pkgCategoryCodes.size()) {
             LOGGER.warn(
@@ -222,40 +216,36 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         // if there are more than we asked for then there must be more available.
 
         result.total = pkgService.total(context, specification);
-        result.items = Lists.newArrayList(Iterables.transform(
-                searchedPkgVersions,
-                new Function<PkgVersion, SearchPkgsResult.Pkg>() {
-                    @Override
-                    public SearchPkgsResult.Pkg apply(org.haikuos.haikudepotserver.dataobjects.PkgVersion input) {
+        result.items = searchedPkgVersions
+                .stream()
+                .map(spv -> {
+                    SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
+                    resultPkg.name = spv.getPkg().getName();
+                    resultPkg.modifyTimestamp = spv.getPkg().getModifyTimestamp().getTime();
+                    resultPkg.derivedRating = spv.getPkg().getDerivedRating();
+                    resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
 
-                        SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
-                        resultPkg.name = input.getPkg().getName();
-                        resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
-                        resultPkg.derivedRating = input.getPkg().getDerivedRating();
-                        resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, input.getPkg()).isEmpty();
+                    ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
+                            context, spv, naturalLanguage);
 
-                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
-                                context, input, naturalLanguage);
+                    SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
+                    resultVersion.major = spv.getMajor();
+                    resultVersion.minor = spv.getMinor();
+                    resultVersion.micro = spv.getMicro();
+                    resultVersion.preRelease = spv.getPreRelease();
+                    resultVersion.revision = spv.getRevision();
+                    resultVersion.createTimestamp = spv.getCreateTimestamp().getTime();
+                    resultVersion.viewCounter = spv.getViewCounter();
+                    resultVersion.architectureCode = spv.getArchitecture().getCode();
+                    resultVersion.payloadLength = spv.getPayloadLength();
+                    resultVersion.title = resolvedPkgVersionLocalization.getTitle();
+                    resultVersion.summary = resolvedPkgVersionLocalization.getSummary();
 
-                        SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
-                        resultVersion.major = input.getMajor();
-                        resultVersion.minor = input.getMinor();
-                        resultVersion.micro = input.getMicro();
-                        resultVersion.preRelease = input.getPreRelease();
-                        resultVersion.revision = input.getRevision();
-                        resultVersion.createTimestamp = input.getCreateTimestamp().getTime();
-                        resultVersion.viewCounter = input.getViewCounter();
-                        resultVersion.architectureCode = input.getArchitecture().getCode();
-                        resultVersion.payloadLength = input.getPayloadLength();
-                        resultVersion.title = resolvedPkgVersionLocalization.getTitle();
-                        resultVersion.summary = resolvedPkgVersionLocalization.getSummary();
+                    resultPkg.versions = Collections.singletonList(resultVersion);
 
-                        resultPkg.versions = Collections.singletonList(resultVersion);
-
-                        return resultPkg;
-                    }
-                }
-        ));
+                    return resultPkg;
+                })
+                .collect(Collectors.toList());
 
         LOGGER.info("search for pkgs found {} results", result.items.size());
 
@@ -284,24 +274,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.payloadLength = pkgVersion.getPayloadLength();
         version.repositoryCode = pkgVersion.getRepository().getCode();
         version.architectureCode = pkgVersion.getArchitecture().getCode();
-        version.copyrights = Lists.transform(
-                pkgVersion.getPkgVersionCopyrights(),
-                new Function<PkgVersionCopyright, String>() {
-                    @Override
-                    public String apply(org.haikuos.haikudepotserver.dataobjects.PkgVersionCopyright input) {
-                        return input.getBody();
-                    }
-                });
-
-        version.licenses = Lists.transform(
-                pkgVersion.getPkgVersionLicenses(),
-                new Function<PkgVersionLicense, String>() {
-                    @Override
-                    public String apply(org.haikuos.haikudepotserver.dataobjects.PkgVersionLicense input) {
-                        return input.getBody();
-                    }
-                });
-
+        version.copyrights = pkgVersion.getPkgVersionCopyrights().stream().map(c -> c.getBody()).collect(Collectors.toList());
+        version.licenses = pkgVersion.getPkgVersionLicenses().stream().map(l -> l.getBody()).collect(Collectors.toList());
         version.viewCounter = pkgVersion.getViewCounter();
 
         ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, naturalLanguage);
@@ -310,17 +284,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.description = resolvedPkgVersionLocalization.getDescription();
         version.summary = resolvedPkgVersionLocalization.getSummary();
 
-        version.urls = Lists.transform(
-                pkgVersion.getPkgVersionUrls(),
-                new Function<PkgVersionUrl, org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionUrl>() {
-                    @Override
-                    public org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionUrl apply(PkgVersionUrl input) {
-                        org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionUrl url = new org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionUrl();
-                        url.url = input.getUrl();
-                        url.urlTypeCode = input.getPkgUrlType().getCode();
-                        return url;
-                    }
-                });
+        version.urls =  pkgVersion.getPkgVersionUrls()
+                .stream()
+                .map(u -> new org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionUrl(u.getPkgUrlType().getCode(), u.getUrl()))
+                .collect(Collectors.toList());
 
         return version;
     }
@@ -377,7 +344,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         final ObjectContext context = serverRuntime.getContext();
 
-        Optional<Architecture> architectureOptional = Optional.absent();
+        Optional<Architecture> architectureOptional = Optional.empty();
 
         if(!Strings.isNullOrEmpty(request.architectureCode)) {
             architectureOptional = Architecture.getByCode(context, request.architectureCode);
@@ -393,12 +360,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.derivedRating = pkg.getDerivedRating();
         result.derivedRatingSampleSize = pkg.getDerivedRatingSampleSize();
         result.prominenceOrdering = pkg.getProminence().getOrdering();
-        result.pkgCategoryCodes = Lists.transform(pkg.getPkgPkgCategories(), new Function<PkgPkgCategory, String>() {
-            @Override
-            public String apply(PkgPkgCategory input) {
-                return input.getPkgCategory().getCode();
-            }
-        });
+        result.pkgCategoryCodes = pkg.getPkgPkgCategories()
+                .stream()
+                .map(ppc -> ppc.getPkgCategory().getCode())
+                .collect(Collectors.toList());
 
         switch(request.versionType) {
 
@@ -412,16 +377,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
                 if(architectureOptional.isPresent()) {
                     final Architecture a = architectureOptional.get();
-
-                    allVersions = Lists.newArrayList(Iterables.filter(
-                            allVersions,
-                            new Predicate<PkgVersion>() {
-                                @Override
-                                public boolean apply(PkgVersion pkgVersion) {
-                                    return pkgVersion.getArchitecture().equals(a);
-                                }
-                            }
-                    ));
+                    allVersions = allVersions.stream().filter(v -> v.getArchitecture().equals(a)).collect(Collectors.toList());
                 }
 
                 // now sort those.
@@ -441,13 +397,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     }
                 });
 
-                result.versions = Lists.transform(allVersions, new Function<PkgVersion, GetPkgResult.PkgVersion>() {
-                    @Override
-                    public GetPkgResult.PkgVersion apply(PkgVersion pkgVersion) {
-                        return createGetPkgResultPkgVersion(context, pkgVersion,naturalLanguage);
-                    }
-                });
-
+                result.versions = allVersions
+                        .stream()
+                        .map(v -> createGetPkgResultPkgVersion(context, v, naturalLanguage))
+                        .collect(Collectors.toList());
             }
             break;
 
@@ -533,13 +486,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(mediaTypeCode));
         Preconditions.checkNotNull(size);
 
-        return Iterables.tryFind(pkgIconApis, new Predicate<ConfigurePkgIconRequest.PkgIcon>() {
-            @Override
-            public boolean apply(ConfigurePkgIconRequest.PkgIcon input) {
-                return input.mediaTypeCode.equals(mediaTypeCode) && (null!=input.size) && (input.size.equals(size));
-            }
-        }).isPresent();
-
+        return pkgIconApis
+                .stream()
+                .filter(pi -> pi.mediaTypeCode.equals(mediaTypeCode) && (null!=pi.size) && pi.size.equals(size))
+                .findFirst()
+                .isPresent();
     }
 
     @Override
@@ -551,17 +502,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Pkg pkg = getPkg(context, request.pkgName);
 
         GetPkgIconsResult result = new GetPkgIconsResult();
-        result.pkgIcons = Lists.transform(
-                pkg.getPkgIcons(),
-                new Function<org.haikuos.haikudepotserver.dataobjects.PkgIcon, org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon>() {
-                    @Override
-                    public org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon apply(org.haikuos.haikudepotserver.dataobjects.PkgIcon input) {
-                        return new org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon(
-                                input.getMediaType().getCode(),
-                                input.getSize());
-                    }
-                }
-        );
+        result.pkgIcons = pkg.getPkgIcons()
+                .stream()
+                .map(pi -> new org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon(pi.getMediaType().getCode(), pi.getSize()))
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -586,7 +530,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         int updated = 0;
         int removed = 0;
 
-        Set<org.haikuos.haikudepotserver.dataobjects.PkgIcon> createdOrUpdatedPkgIcons = Sets.newHashSet();
+        Set<org.haikuos.haikudepotserver.dataobjects.PkgIcon> createdOrUpdatedPkgIcons = new HashSet<>();
 
         if(null!=request.pkgIcons && !request.pkgIcons.isEmpty()) {
 
@@ -736,15 +680,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final Pkg pkg = getPkg(context, getPkgScreenshotsRequest.pkgName);
 
         GetPkgScreenshotsResult result = new GetPkgScreenshotsResult();
-        result.items = Lists.transform(
-                pkg.getSortedPkgScreenshots(),
-                new Function<PkgScreenshot, org.haikuos.haikudepotserver.api1.model.pkg.PkgScreenshot>() {
-                    @Override
-                    public org.haikuos.haikudepotserver.api1.model.pkg.PkgScreenshot apply(PkgScreenshot pkgScreenshot) {
-                        return createPkgScreenshot(pkgScreenshot);
-                    }
-                }
-        );
+        result.items = pkg.getSortedPkgScreenshots()
+                .stream()
+                .map(this::createPkgScreenshot)
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -810,7 +749,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public UpdatePkgLocalizationResult updatePkgLocalization(UpdatePkgLocalizationRequest updatePkgLocalizationRequest) throws ObjectNotFoundException {
 
-        Preconditions.checkArgument(null!=updatePkgLocalizationRequest);
+        Preconditions.checkArgument(null != updatePkgLocalizationRequest);
         assert null!=updatePkgLocalizationRequest;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(updatePkgLocalizationRequest.pkgName), "the package name must be supplied");
 
@@ -849,7 +788,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     @Override
     public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException {
-        Preconditions.checkArgument(null!=getPkgLocalizationsRequest, "a request is required");
+        Preconditions.checkArgument(null != getPkgLocalizationsRequest, "a request is required");
         assert null!=getPkgLocalizationsRequest;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgLocalizationsRequest.pkgName), "a package name is required");
         Preconditions.checkArgument(null!=getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
@@ -858,7 +797,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Pkg pkg = getPkg(context, getPkgLocalizationsRequest.pkgName);
 
         GetPkgLocalizationsResult result = new GetPkgLocalizationsResult();
-        result.pkgLocalizations = Lists.newArrayList();
+        result.pkgLocalizations = new ArrayList<>();
         List<PkgLocalization> pkgLocalizations = PkgLocalization.findForPkg(context, pkg);
 
         for(PkgLocalization pkgLocalization : pkgLocalizations) {
@@ -911,7 +850,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         GetPkgVersionLocalizationsResult result = new GetPkgVersionLocalizationsResult();
-        result.pkgVersionLocalizations = Lists.newArrayList();
+        result.pkgVersionLocalizations = new ArrayList<>();
 
         for(String naturalLanguageCode : getPkgVersionLocalizationsRequest.naturalLanguageCodes) {
             Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
@@ -919,8 +858,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             if(pkgVersionLocalizationOptional.isPresent()) {
                 org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization resultPkgVersionLocalization = new org.haikuos.haikudepotserver.api1.model.pkg.PkgVersionLocalization();
                 resultPkgVersionLocalization.naturalLanguageCode = naturalLanguageCode;
-                resultPkgVersionLocalization.description = pkgVersionLocalizationOptional.get().getDescription().orNull();
-                resultPkgVersionLocalization.summary = pkgVersionLocalizationOptional.get().getSummary().orNull();
+                resultPkgVersionLocalization.description = pkgVersionLocalizationOptional.get().getDescription().orElse(null);
+                resultPkgVersionLocalization.summary = pkgVersionLocalizationOptional.get().getSummary().orElse(null);
                 result.pkgVersionLocalizations.add(resultPkgVersionLocalization);
             }
         }
@@ -960,6 +899,65 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     }
 
+    private GetBulkPkgResult.Pkg createBulkPkgResultPkg(
+            ObjectContext context,
+            NaturalLanguage naturalLanguage,
+            GetBulkPkgRequest getBulkPkgRequest,
+            PkgVersion pkgVersion) {
+
+        GetBulkPkgResult.Pkg resultPkg = new GetBulkPkgResult.Pkg();
+        resultPkg.modifyTimestamp = pkgVersion.getPkg().getModifyTimestamp().getTime();
+        resultPkg.name = pkgVersion.getPkg().getName();
+        resultPkg.prominenceOrdering = pkgVersion.getPkg().getProminence().getOrdering();
+        resultPkg.derivedRating = pkgVersion.getPkg().getDerivedRating();
+
+        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
+            resultPkg.pkgIcons = pkgVersion.getPkg().getPkgIcons()
+                    .stream()
+                    .map(pi -> new org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon(pi.getMediaType().getCode(),pi.getSize()))
+                    .collect(Collectors.toList());
+        }
+
+        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGSCREENSHOTS)) {
+            resultPkg.pkgScreenshots = pkgVersion.getPkg().getSortedPkgScreenshots()
+                    .stream()
+                    .map(this::createPkgScreenshot)
+                    .collect(Collectors.toList());
+        }
+
+        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCATEGORIES)) {
+            resultPkg.pkgCategoryCodes = pkgVersion.getPkg().getPkgPkgCategories()
+                    .stream()
+                    .map(pcc -> pcc.getPkgCategory().getCode())
+                    .collect(Collectors.toList());
+        }
+
+        resultPkg.derivedRating = pkgVersion.getPkg().getDerivedRating();
+
+        switch(getBulkPkgRequest.versionType) {
+            case LATEST:
+            {
+                GetBulkPkgResult.PkgVersion resultPkgVersion = createGetBulkPkgResultPkgVersion(
+                        context,
+                        pkgVersion,
+                        naturalLanguage,
+                        getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGVERSIONLOCALIZATIONDESCRIPTIONS)
+                );
+
+                resultPkg.versions = Collections.singletonList(resultPkgVersion);
+            }
+            break;
+
+            case NONE: // no package version data available.
+                break;
+
+            default:
+                throw new IllegalStateException("unsupported version type; "+getBulkPkgRequest.versionType.name());
+        }
+
+        return resultPkg;
+    }
+
     @Override
     public GetBulkPkgResult getBulkPkg(final GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException {
         Preconditions.checkNotNull(getBulkPkgRequest);
@@ -997,83 +995,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             long postFetchMs = System.currentTimeMillis();
 
             // now return the data as necessary.
-            result.pkgs = Lists.transform(
-                    pkgVersions,
-                    new Function<PkgVersion, GetBulkPkgResult.Pkg>() {
-                        @Override
-                        public GetBulkPkgResult.Pkg apply(final PkgVersion input) {
-
-                            GetBulkPkgResult.Pkg resultPkg = new GetBulkPkgResult.Pkg();
-                            resultPkg.modifyTimestamp = input.getPkg().getModifyTimestamp().getTime();
-                            resultPkg.name = input.getPkg().getName();
-                            resultPkg.prominenceOrdering = input.getPkg().getProminence().getOrdering();
-                            resultPkg.derivedRating = input.getPkg().getDerivedRating();
-
-                            if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
-                                resultPkg.pkgIcons = Lists.transform(
-                                        input.getPkg().getPkgIcons(),
-                                        new Function<org.haikuos.haikudepotserver.dataobjects.PkgIcon, org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon>() {
-                                            @Override
-                                            public org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon apply(org.haikuos.haikudepotserver.dataobjects.PkgIcon pkgIcon) {
-                                                return new org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon(
-                                                        pkgIcon.getMediaType().getCode(),
-                                                        pkgIcon.getSize());
-                                            }
-                                        }
-                                );
-                            }
-
-                            if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGSCREENSHOTS)) {
-                                resultPkg.pkgScreenshots = Lists.transform(
-                                        input.getPkg().getSortedPkgScreenshots(),
-                                        new Function<PkgScreenshot, org.haikuos.haikudepotserver.api1.model.pkg.PkgScreenshot>() {
-                                            @Override
-                                            public org.haikuos.haikudepotserver.api1.model.pkg.PkgScreenshot apply(PkgScreenshot pkgScreenshot) {
-                                                return createPkgScreenshot(pkgScreenshot);
-                                            }
-                                        }
-                                );
-                            }
-
-                            if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCATEGORIES)) {
-                                resultPkg.pkgCategoryCodes = Lists.transform(
-                                        input.getPkg().getPkgPkgCategories(),
-                                        new Function<PkgPkgCategory, String>() {
-                                            @Override
-                                            public String apply(PkgPkgCategory input) {
-                                                return input.getPkgCategory().getCode();
-                                            }
-                                        }
-                                );
-                            }
-
-                            resultPkg.derivedRating = input.getPkg().getDerivedRating();
-
-                            switch(getBulkPkgRequest.versionType) {
-                                case LATEST:
-                                {
-                                    GetBulkPkgResult.PkgVersion resultPkgVersion = createGetBulkPkgResultPkgVersion(
-                                            context,
-                                            input,
-                                            naturalLanguage,
-                                            getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGVERSIONLOCALIZATIONDESCRIPTIONS)
-                                    );
-
-                                    resultPkg.versions = Collections.singletonList(resultPkgVersion);
-                                }
-                                break;
-
-                                case NONE: // no package version data available.
-                                    break;
-
-                                default:
-                                    throw new IllegalStateException("unsupported version type; "+getBulkPkgRequest.versionType.name());
-                            }
-
-                            return resultPkg;
-                        }
-                    }
-            );
+            result.pkgs = pkgVersions
+                    .stream()
+                    .map(pv -> createBulkPkgResultPkg(context, naturalLanguage, getBulkPkgRequest, pv))
+                    .collect(Collectors.toList());
 
             LOGGER.debug(
                     "did search and find {} pkg versions for get bulk pkg; fetch in {}ms, marshall in {}ms",
@@ -1127,7 +1052,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(
             QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException {
-        Preconditions.checkArgument(null!=request,"the request must be supplied");
+        Preconditions.checkArgument(null != request, "the request must be supplied");
         assert null!=request;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
 
@@ -1137,7 +1062,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         if(!authorizationService.check(
                 context,
-                user.orNull(),
+                user.orElse(null),
                 null,
                 Permission.BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET)) {
             LOGGER.warn("attempt to import package categories, but was not authorized");
@@ -1159,12 +1084,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         spec.setInputDataGuid(request.inputDataGuid);
 
         return new QueuePkgCategoryCoverageImportSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE).orNull());
+                jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE).orElse(null));
     }
 
     @Override
     public QueuePkgIconSpreadsheetJobResult queuePkgIconSpreadsheetJob(QueuePkgIconSpreadsheetJobRequest request) {
-        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(null != request);
         return queueSimplePkgJob(
                 QueuePkgIconSpreadsheetJobResult.class,
                 PkgIconSpreadsheetJobSpecification.class,
@@ -1246,7 +1171,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new RuntimeException("unable to create the result; " + resultClass.getSimpleName(), e);
         }
 
-        result.guid = jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull();
+        result.guid = jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
         return result;
     }
 

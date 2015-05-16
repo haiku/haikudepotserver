@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Optional;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
@@ -27,6 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",

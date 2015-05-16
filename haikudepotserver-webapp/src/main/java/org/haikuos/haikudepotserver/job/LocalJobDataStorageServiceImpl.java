@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.job;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSink;
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.util.Optional;
 
 /**
  * <p>An implementation of the {@link org.haikuos.haikudepotserver.job.JobDataStorageService}

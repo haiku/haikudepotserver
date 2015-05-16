@@ -5,10 +5,7 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import com.google.common.net.MediaType;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -25,7 +22,6 @@ import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
-import org.haikuos.haikudepotserver.feed.controller.FeedController;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haikuos.haikudepotserver.feed.model.FeedSpecification;
 import org.haikuos.haikudepotserver.feed.model.SyndEntrySupplier;
@@ -35,9 +31,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>This class produces RSS feed entries related to new pkg versions.</p>
@@ -65,7 +60,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                 return Collections.emptyList();
             }
 
-            List<Expression> expressions = Lists.newArrayList();
+            List<Expression> expressions = new ArrayList<>();
 
             if(null!=specification.getPkgNames()) {
                 expressions.add(ExpressionFactory.inExp(
@@ -96,53 +91,49 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
             List<PkgVersion> pkgVersions = serverRuntime.getContext().performQuery(query);
 
-            return Lists.transform(
-                    pkgVersions,
-                    new Function<PkgVersion, SyndEntry>() {
-                        @Override
-                        public SyndEntry apply(PkgVersion input) {
+            return pkgVersions
+                    .stream()
+                    .map(pv -> {
+                        SyndEntry entry = new SyndEntryImpl();
 
-                            SyndEntry entry = new SyndEntryImpl();
+                        entry.setPublishedDate(pv.getCreateTimestamp());
+                        entry.setUpdatedDate(pv.getModifyTimestamp());
+                        entry.setUri(URI_PREFIX +
+                                Hashing.sha1().hashUnencodedChars(
+                                        String.format(
+                                                "%s_::_%s_::_%s",
+                                                this.getClass().getCanonicalName(),
+                                                pv.getPkg().getName(),
+                                                pv.toVersionCoordinates().toString())).toString());
 
-                            entry.setPublishedDate(input.getCreateTimestamp());
-                            entry.setUpdatedDate(input.getModifyTimestamp());
-                            entry.setUri(URI_PREFIX +
-                                    Hashing.sha1().hashUnencodedChars(
-                                            String.format(
-                                                    "%s_::_%s_::_%s",
-                                                    this.getClass().getCanonicalName(),
-                                                    input.getPkg().getName(),
-                                                    input.toVersionCoordinates().toString())).toString());
-
-                            {
-                                UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
-                                input.appendPathSegments(builder);
-                                entry.setLink(builder.build().toUriString());
-                            }
-
-                            entry.setTitle(messageSource.getMessage(
-                                    "feed.createdPkgVersion.atom.title",
-                                    new Object[]{input.toStringWithPkgAndArchitecture()},
-                                    new Locale(specification.getNaturalLanguageCode())
-                            ));
-
-                            {
-                                Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = input.getPkgVersionLocalization(specification.getNaturalLanguageCode());
-
-                                if (!pkgVersionLocalizationOptional.isPresent()) {
-                                    pkgVersionLocalizationOptional = input.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
-                                }
-
-                                SyndContent content = new SyndContentImpl();
-                                content.setType(MediaType.PLAIN_TEXT_UTF_8.type());
-                                content.setValue(pkgVersionLocalizationOptional.get().getSummary().orNull());
-                                entry.setDescription(content);
-                            }
-
-                            return entry;
+                        {
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
+                            pv.appendPathSegments(builder);
+                            entry.setLink(builder.build().toUriString());
                         }
-                    }
-            );
+
+                        entry.setTitle(messageSource.getMessage(
+                                "feed.createdPkgVersion.atom.title",
+                                new Object[]{pv.toStringWithPkgAndArchitecture()},
+                                new Locale(specification.getNaturalLanguageCode())
+                        ));
+
+                        {
+                            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pv.getPkgVersionLocalization(specification.getNaturalLanguageCode());
+
+                            if (!pkgVersionLocalizationOptional.isPresent()) {
+                                pkgVersionLocalizationOptional = pv.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
+                            }
+
+                            SyndContent content = new SyndContentImpl();
+                            content.setType(MediaType.PLAIN_TEXT_UTF_8.type());
+                            content.setValue(pkgVersionLocalizationOptional.get().getSummary().orElse(null));
+                            entry.setDescription(content);
+                        }
+
+                        return entry;
+                    })
+                    .collect(Collectors.toList());
 
         }
 

@@ -6,9 +6,7 @@
 package org.haikuos.haikudepotserver.api1.support;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.googlecode.jsonrpc4j.DefaultErrorResolver;
 import com.googlecode.jsonrpc4j.ErrorResolver;
@@ -17,8 +15,10 @@ import org.apache.cayenne.validation.SimpleValidationFailure;
 import org.haikuos.haikudepotserver.api1.model.authorization.AuthorizationRuleConflictException;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>This class is able to take exceptions and throwables and turn them into valid JSON-RPC errors that can be
@@ -101,21 +101,13 @@ public class ErrorResolverImpl implements ErrorResolver {
             return new JsonError(
                     Constants.ERROR_CODE_VALIDATION,
                     "validationerror",
-                    ImmutableMap.of(
-                            "validationfailures",
-                            Lists.transform(
-                                    validationException.getValidationFailures(),
-                                    new Function<ValidationFailure, Object>() {
-                                        @Override
-                                        public Map<String,String> apply(org.haikuos.haikudepotserver.api1.support.ValidationFailure input) {
-                                            return ImmutableMap.of(
-                                                    "property",input.getProperty(),
-                                                    "message",input.getMessage()
-                                            );
-                                        }
-                                    }
-                            )
-                    )
+                    validationException.getValidationFailures()
+                    .stream()
+                    .map(vf -> ImmutableMap.of(
+                            "property",vf.getProperty(),
+                            "message",vf.getMessage()
+                    ))
+                    .collect(Collectors.toList())
             );
         }
 
@@ -127,32 +119,29 @@ public class ErrorResolverImpl implements ErrorResolver {
             return new JsonError(
                     Constants.ERROR_CODE_VALIDATION,
                     "validationerror",
-                    ImmutableMap.of(
+                    Collections.singletonMap(
                             "validationfailures",
-                            Lists.transform(
-                                    validationException.getValidationResult().getFailures(),
-                                    new Function<org.apache.cayenne.validation.ValidationFailure, Object>() {
-                                        @Override
-                                        public Map<String,String> apply(org.apache.cayenne.validation.ValidationFailure input) {
-                                            if(BeanValidationFailure.class.isAssignableFrom(input.getClass())) {
-                                                BeanValidationFailure beanValidationFailure = (BeanValidationFailure) input;
-                                                Object err = beanValidationFailure.getError();
-                                                return ImmutableMap.of(
-                                                        "property", beanValidationFailure.getProperty(),
-                                                        "message", null!=err ? err.toString() : "");
-                                            }
-
-                                            if(SimpleValidationFailure.class.isAssignableFrom(input.getClass())) {
-                                               SimpleValidationFailure simpleValidationFailure = (SimpleValidationFailure) input;
-                                                return ImmutableMap.of(
-                                                        "property", "",
-                                                        "message", simpleValidationFailure.getDescription());
-                                            }
-
-                                            throw new IllegalStateException("unable to establish data portion of validation exception owing to unknown cayenne validation failure; "+input.getClass().getSimpleName());
+                            validationException.getValidationResult().getFailures()
+                                    .stream()
+                                    .map(f -> {
+                                        if (BeanValidationFailure.class.isAssignableFrom(f.getClass())) {
+                                            BeanValidationFailure beanValidationFailure = (BeanValidationFailure) f;
+                                            Object err = beanValidationFailure.getError();
+                                            return ImmutableMap.of(
+                                                    "property", beanValidationFailure.getProperty(),
+                                                    "message", null != err ? err.toString() : "");
                                         }
-                                    }
-                            )
+
+                                        if (SimpleValidationFailure.class.isAssignableFrom(f.getClass())) {
+                                            SimpleValidationFailure simpleValidationFailure = (SimpleValidationFailure) f;
+                                            return ImmutableMap.of(
+                                                    "property", "",
+                                                    "message", simpleValidationFailure.getDescription());
+                                        }
+
+                                        throw new IllegalStateException("unable to establish data portion of validation exception owing to unknown cayenne validation failure; " + f.getClass().getSimpleName());
+                                    })
+                                    .collect(Collectors.toList())
                     )
             );
         }

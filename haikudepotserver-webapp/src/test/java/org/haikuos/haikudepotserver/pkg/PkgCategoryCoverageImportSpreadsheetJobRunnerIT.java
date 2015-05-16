@@ -5,14 +5,12 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
 import com.google.common.base.Charsets;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
-import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
@@ -23,6 +21,8 @@ import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haikuos.haikudepotserver.job.model.JobSnapshot;
 import org.haikuos.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.support.SingleCollector;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -30,6 +30,7 @@ import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
@@ -56,14 +57,19 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
         ).getGuid());
 
         // ------------------------------------
-        Optional<String> guidOptional = jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.NONE);
+        Optional<String> guidOptional = jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE);
         // ------------------------------------
 
         jobOrchestrationService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
         Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
 
-        String dataGuid = Iterables.getOnlyElement(snapshotOptional.get().getGeneratedDataGuids());
+        String dataGuid = snapshotOptional
+                .get()
+                .getGeneratedDataGuids()
+                .stream()
+                .collect(SingleCollector.single());
+
         JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();
         ByteSource expectedByteSource = getResourceByteSource("/sample-pkgcategorycoverageimportspreadsheet-generated.csv");
 
@@ -79,18 +85,12 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
         {
             ObjectContext context = serverRuntime.getContext();
             Optional<Pkg> pkgOptional = Pkg.getByName(context, "pkg1");
-            Set<String> pkg1PkgCategoryCodes = ImmutableSet.copyOf(Iterables.transform(
-                    pkgOptional.get().getPkgPkgCategories(),
-                    new Function<PkgPkgCategory, String>() {
+            Set<String> pkg1PkgCategoryCodes = pkgOptional.get().getPkgPkgCategories()
+                    .stream()
+                    .map(c -> c.getPkgCategory().getCode())
+                    .collect(Collectors.toSet());
 
-                        @Override
-                        public String apply(PkgPkgCategory input) {
-                            return input.getPkgCategory().getCode();
-                        }
-                    }
-            ));
-
-            Assertions.assertThat(pkg1PkgCategoryCodes).isEqualTo(ImmutableSet.of("audio","graphics"));
+            Assertions.assertThat(pkg1PkgCategoryCodes).isEqualTo(new <String>HashSet(Arrays.asList("audio", "graphics")));
 
         }
 

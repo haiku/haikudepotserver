@@ -5,14 +5,11 @@
 
 package org.haikuos.haikudepotserver.support.web;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
-import net.jawr.web.resource.bundle.factory.util.ServletContextAware;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.dataobjects.MediaType;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.slf4j.Logger;
@@ -32,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
  * <p>If somebody makes a query such as "/apr" then the system should search for that as a package

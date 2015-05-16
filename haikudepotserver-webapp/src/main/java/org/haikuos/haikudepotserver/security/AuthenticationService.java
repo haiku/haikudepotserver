@@ -6,7 +6,6 @@
 package org.haikuos.haikudepotserver.security;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
@@ -30,6 +29,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.security.MessageDigest;
 import java.text.ParseException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -108,7 +108,7 @@ public class AuthenticationService {
 
     public Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear) {
 
-        Optional<ObjectId> result = Optional.absent();
+        Optional<ObjectId> result = Optional.empty();
 
         if(!Strings.isNullOrEmpty(nickname) && !Strings.isNullOrEmpty(passwordClear)) {
 
@@ -121,7 +121,7 @@ public class AuthenticationService {
                 String hash = hashPassword(user, passwordClear);
 
                 if(hash.equals(user.getPasswordHash())) {
-                    result = Optional.fromNullable(userOptional.get().getObjectId());
+                    result = Optional.ofNullable(userOptional.get().getObjectId());
                 }
                 else {
                     LOGGER.info("the authentication for the user; {} failed", nickname);
@@ -213,7 +213,7 @@ public class AuthenticationService {
             return authenticate(signedJwtOptional.get());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -271,7 +271,7 @@ public class AuthenticationService {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -302,7 +302,7 @@ public class AuthenticationService {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

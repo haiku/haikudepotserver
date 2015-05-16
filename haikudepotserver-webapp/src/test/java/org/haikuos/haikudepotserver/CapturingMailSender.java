@@ -5,13 +5,14 @@
 
 package org.haikuos.haikudepotserver;
 
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public class CapturingMailSender implements MailSender {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(CapturingMailSender.class);
 
-    private List<SimpleMailMessage> sentMessages = Lists.newArrayList();
+    private List<SimpleMailMessage> sentMessages = new ArrayList<>();
 
     @Override
     public void send(SimpleMailMessage simpleMessage) throws MailException {
@@ -33,7 +34,7 @@ public class CapturingMailSender implements MailSender {
     @Override
     public void send(SimpleMailMessage[] simpleMessages) throws MailException {
         LOGGER.info("noop; send {} mails", simpleMessages.length);
-        sentMessages.addAll(Lists.newArrayList(simpleMessages));
+        sentMessages.addAll(Arrays.asList(simpleMessages));
     }
 
     public List<SimpleMailMessage> getSentMessages() { return sentMessages; }

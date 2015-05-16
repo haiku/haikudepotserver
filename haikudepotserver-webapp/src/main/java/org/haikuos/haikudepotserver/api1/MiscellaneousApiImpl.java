@@ -5,10 +5,9 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.*;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.miscellaneous.*;
@@ -28,9 +27,8 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class MiscellaneousApiImpl extends AbstractApiImpl implements MiscellaneousApi {
@@ -38,7 +36,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
     public final static String RESOURCE_MESSAGES = "/messages%s.properties";
-    public final static String RESOURCE_MESSAGES_NATURALLANGUAGE = "/naturallanguagemessages%s.properties";
+    public final static String RESOURCE_MESSAGES_NATURALLANGUAGE = "/naturallanguagemessages.properties";
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -65,32 +63,25 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllPkgCategoriesRequest.naturalLanguageCode)
-                ? Optional.<NaturalLanguage>absent()
+                ? Optional.<NaturalLanguage>empty()
                         : NaturalLanguage.getByCode(context, getAllPkgCategoriesRequest.naturalLanguageCode);
 
         return new GetAllPkgCategoriesResult(
-                Lists.transform(
-                        PkgCategory.getAll(context),
-                        new Function<PkgCategory, GetAllPkgCategoriesResult.PkgCategory>() {
-                            @Override
-                            public GetAllPkgCategoriesResult.PkgCategory apply(PkgCategory input) {
-
-                                if(naturalLanguageOptional.isPresent()) {
-                                    return new GetAllPkgCategoriesResult.PkgCategory(
-                                            input.getCode(),
-                                            messageSource.getMessage(
-                                                    input.getTitleKey(),
-                                                    null, // params
-                                                    naturalLanguageOptional.get().toLocale()));
-                                }
-                                else {
-                                    return new GetAllPkgCategoriesResult.PkgCategory(
-                                            input.getCode(),
-                                            input.getName());
-                                }
-                            }
-                        }
-                )
+                PkgCategory.getAll(context).stream().map(pc -> {
+                    if(naturalLanguageOptional.isPresent()) {
+                        return new GetAllPkgCategoriesResult.PkgCategory(
+                                pc.getCode(),
+                                messageSource.getMessage(
+                                        pc.getTitleKey(),
+                                        null, // params
+                                        naturalLanguageOptional.get().toLocale()));
+                    }
+                    else {
+                        return new GetAllPkgCategoriesResult.PkgCategory(
+                                pc.getCode(),
+                                pc.getName());
+                    }
+                }).collect(Collectors.toList())
         );
     }
 
@@ -101,39 +92,34 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllNaturalLanguagesRequest.naturalLanguageCode)
-                        ? Optional.<NaturalLanguage>absent()
+                        ? Optional.<NaturalLanguage>empty()
                         : NaturalLanguage.getByCode(context, getAllNaturalLanguagesRequest.naturalLanguageCode);
 
         return new GetAllNaturalLanguagesResult(
-                Lists.transform(
-                        NaturalLanguage.getAll(context),
-                        new Function<NaturalLanguage, GetAllNaturalLanguagesResult.NaturalLanguage>() {
-                            @Override
-                            public GetAllNaturalLanguagesResult.NaturalLanguage apply(NaturalLanguage input) {
-
-                                if(naturalLanguageOptional.isPresent()) {
-                                    return new GetAllNaturalLanguagesResult.NaturalLanguage(
-                                            input.getCode(),
-                                            messageSource.getMessage(
-                                                    input.getTitleKey(),
-                                                    null, // params
-                                                    naturalLanguageOptional.get().toLocale()),
-                                            input.getIsPopular(),
-                                            naturalLanguageOrchestrationService.hasData(input.getCode()),
-                                            naturalLanguageOrchestrationService.hasLocalizationMessages(input.getCode()));
-                                }
-                                else {
-                                    return new GetAllNaturalLanguagesResult.NaturalLanguage(
-                                            input.getCode(),
-                                            input.getName(),
-                                            input.getIsPopular(),
-                                            naturalLanguageOrchestrationService.hasData(input.getCode()),
-                                            naturalLanguageOrchestrationService.hasLocalizationMessages(input.getCode()));
-                                }
+                NaturalLanguage.getAll(context).stream().map(nl -> {
+                            if(naturalLanguageOptional.isPresent()) {
+                                return new GetAllNaturalLanguagesResult.NaturalLanguage(
+                                        nl.getCode(),
+                                        messageSource.getMessage(
+                                                nl.getTitleKey(),
+                                                null, // params
+                                                naturalLanguageOptional.get().toLocale()),
+                                        nl.getIsPopular(),
+                                        naturalLanguageOrchestrationService.hasData(nl.getCode()),
+                                        naturalLanguageOrchestrationService.hasLocalizationMessages(nl.getCode()));
+                            }
+                            else {
+                                return new GetAllNaturalLanguagesResult.NaturalLanguage(
+                                        nl.getCode(),
+                                        nl.getName(),
+                                        nl.getIsPopular(),
+                                        naturalLanguageOrchestrationService.hasData(nl.getCode()),
+                                        naturalLanguageOrchestrationService.hasLocalizationMessages(nl.getCode()));
                             }
                         }
-                )
+                ).collect(Collectors.toList())
         );
+
     }
 
     @Override
@@ -175,33 +161,11 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllArchitecturesRequest);
         GetAllArchitecturesResult result = new GetAllArchitecturesResult();
         result.architectures =
-                Lists.newArrayList(
-                        Iterables.transform(
-
-                                // we want to explicitly exclude 'source' and 'any' because they are pseudo
-                                // architectures.
-
-                                Iterables.filter(
-                                        Architecture.getAll(serverRuntime.getContext()),
-                                        new Predicate<Architecture>() {
-                                            @Override
-                                            public boolean apply(org.haikuos.haikudepotserver.dataobjects.Architecture input) {
-                                                return
-                                                        !input.getCode().equals(Architecture.CODE_SOURCE)
-                                                                && !input.getCode().equals(Architecture.CODE_ANY);
-                                            }
-                                        }
-                                ),
-                                new Function<Architecture, GetAllArchitecturesResult.Architecture>() {
-                                    @Override
-                                    public GetAllArchitecturesResult.Architecture apply(org.haikuos.haikudepotserver.dataobjects.Architecture input) {
-                                        GetAllArchitecturesResult.Architecture result = new GetAllArchitecturesResult.Architecture();
-                                        result.code = input.getCode();
-                                        return result;
-                                    }
-                                }
-                        )
-                );
+                Architecture.getAll(serverRuntime.getContext())
+                        .stream()
+                        .filter(a -> !a.getCode().equals(Architecture.CODE_SOURCE) && !a.getCode().equals(Architecture.CODE_ANY))
+                        .map(a -> new GetAllArchitecturesResult.Architecture(a.getCode()))
+                        .collect(Collectors.toList());
 
         return result;
     }
@@ -210,11 +174,14 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             Map<String,String> result,
             NaturalLanguage naturalLanguage,
             String baseFormat) {
-        boolean isEnglish = naturalLanguage.getCode().equals(NaturalLanguage.CODE_ENGLISH);
 
-        String resourcePath = String.format(
-                baseFormat,
-                !isEnglish ? "_" + naturalLanguage.getCode() : "");
+        String resourcePath = baseFormat;
+
+        if(null!=naturalLanguage) {
+            resourcePath = String.format(
+                    baseFormat,
+                    "_" + naturalLanguage.getCode());
+        }
 
         try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
 
@@ -253,9 +220,9 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         }
 
         GetAllMessagesResult getAllMessagesResult = new GetAllMessagesResult();
-        getAllMessagesResult.messages = Maps.newHashMap();
+        getAllMessagesResult.messages = new HashMap<>();
         appendFromBase(getAllMessagesResult.messages, naturalLanguageOptional.get(), RESOURCE_MESSAGES);
-        appendFromBase(getAllMessagesResult.messages, naturalLanguageOptional.get(), RESOURCE_MESSAGES_NATURALLANGUAGE);
+        appendFromBase(getAllMessagesResult.messages, null, RESOURCE_MESSAGES_NATURALLANGUAGE);
         return getAllMessagesResult;
     }
 
@@ -266,32 +233,27 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllUserRatingStabilitiesRequest.naturalLanguageCode)
-                        ? Optional.<NaturalLanguage>absent()
+                        ? Optional.<NaturalLanguage>empty()
                         : NaturalLanguage.getByCode(context, getAllUserRatingStabilitiesRequest.naturalLanguageCode);
 
         return new GetAllUserRatingStabilitiesResult(
-                Lists.transform(
-                        UserRatingStability.getAll(context),
-                        new Function<UserRatingStability, GetAllUserRatingStabilitiesResult.UserRatingStability>() {
-                            @Override
-                            public GetAllUserRatingStabilitiesResult.UserRatingStability apply(UserRatingStability input) {
-
-                                if(naturalLanguageOptional.isPresent()) {
-                                    return new GetAllUserRatingStabilitiesResult.UserRatingStability(
-                                            input.getCode(),
-                                            messageSource.getMessage(
-                                                    input.getTitleKey(),
-                                                    null, // params
-                                                    naturalLanguageOptional.get().toLocale()));
-                                }
-                                else {
-                                    return new GetAllUserRatingStabilitiesResult.UserRatingStability(
-                                            input.getCode(),
-                                            input.getName());
-                                }
+                UserRatingStability.getAll(context)
+                        .stream()
+                        .map(urs -> {
+                            if(naturalLanguageOptional.isPresent()) {
+                                return new GetAllUserRatingStabilitiesResult.UserRatingStability(
+                                        urs.getCode(),
+                                        messageSource.getMessage(
+                                                urs.getTitleKey(),
+                                                null, // params
+                                                naturalLanguageOptional.get().toLocale()));
                             }
-                        }
-                )
+
+                            return new GetAllUserRatingStabilitiesResult.UserRatingStability(
+                                    urs.getCode(),
+                                    urs.getName());
+                        })
+                        .collect(Collectors.toList())
         );
     }
 
@@ -301,17 +263,10 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         final ObjectContext context = serverRuntime.getContext();
 
         return new GetAllProminencesResult(
-                Lists.transform(
-                        Prominence.getAll(context),
-                        new Function<Prominence, GetAllProminencesResult.Prominence>() {
-                            @Override
-                            public GetAllProminencesResult.Prominence apply(Prominence input) {
-                                    return new GetAllProminencesResult.Prominence(
-                                            input.getOrdering(),
-                                            input.getName());
-                            }
-                        }
-                )
+                Prominence.getAll(context)
+                .stream()
+                .map(p -> new GetAllProminencesResult.Prominence(p.getOrdering(),p.getName()))
+                .collect(Collectors.toList())
         );
     }
 
@@ -324,15 +279,12 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         specification.setLimit(request.limit);
 
         if(null!=request.supplierTypes) {
-            specification.setSupplierTypes(Lists.transform(
-                    request.supplierTypes,
-                    new Function<GenerateFeedUrlRequest.SupplierType, FeedSpecification.SupplierType>() {
-                        @Override
-                        public FeedSpecification.SupplierType apply(GenerateFeedUrlRequest.SupplierType input) {
-                            return FeedSpecification.SupplierType.valueOf(input.name());
-                        }
-                    }
-            ));
+            specification.setSupplierTypes(
+                    request.supplierTypes
+                    .stream()
+                    .map(st -> FeedSpecification.SupplierType.valueOf(st.name()))
+                    .collect(Collectors.toList())
+            );
         }
 
         if(null!=request.naturalLanguageCode) {
@@ -340,7 +292,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         }
 
         if(null!=request.pkgNames) {
-            List<String> checkedPkgNames = Lists.newArrayList();
+            List<String> checkedPkgNames = new ArrayList<>();
 
             for (String pkgName : request.pkgNames) {
                 Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);

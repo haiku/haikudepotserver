@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.userrating;
 
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
@@ -15,6 +14,7 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @ContextConfiguration({

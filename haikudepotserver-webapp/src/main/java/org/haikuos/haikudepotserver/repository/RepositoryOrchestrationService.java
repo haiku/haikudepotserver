@@ -5,9 +5,7 @@
 
 package org.haikuos.haikudepotserver.repository;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
@@ -17,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +38,7 @@ public class RepositoryOrchestrationService {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
 
-        List<String> whereExpressions = Lists.newArrayList();
+        List<String> whereExpressions = new ArrayList<>();
 
         if(null!=search.getExpression()) {
             switch(search.getExpressionType()) {
@@ -59,7 +58,7 @@ public class RepositoryOrchestrationService {
             whereExpressions.add("r." + Repository.ACTIVE_PROPERTY + " = true");
         }
 
-        return Joiner.on(" AND ").join(whereExpressions);
+        return String.join(" AND ",whereExpressions);
     }
 
     public List<Repository> search(ObjectContext context, RepositorySearchSpecification search) {
@@ -68,7 +67,7 @@ public class RepositoryOrchestrationService {
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
 
-        List<Object> parameterAccumulator = Lists.newArrayList();
+        List<Object> parameterAccumulator = new ArrayList<>();
         String ejbql = "SELECT r FROM " + Repository.class.getSimpleName() + " AS r WHERE " + prepareWhereClause(parameterAccumulator, context, search) + " ORDER BY r." + Repository.CODE_PROPERTY + " ASC";
         EJBQLQuery ejbqlQuery = new EJBQLQuery(ejbql);
 
@@ -87,7 +86,7 @@ public class RepositoryOrchestrationService {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
 
-        List<Object> parameters = Lists.newArrayList();
+        List<Object> parameters = new ArrayList<>();
         EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(r) FROM Repository AS r WHERE " + prepareWhereClause(parameters, context, search));
 
         for(int i=0;i<parameters.size();i++) {

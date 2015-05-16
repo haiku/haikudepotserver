@@ -5,12 +5,8 @@
 
 package org.haikuos.haikudepotserver.support.cayenne;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.ObjectContext;
@@ -22,8 +18,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>This listener can be configured with a query cache group and when something
@@ -78,20 +76,10 @@ public class QueryCacheRemoveGroupListener implements LifecycleListener {
             StringBuilder msg = new StringBuilder();
 
             msg.append("changes in entities (");
-            msg.append(Joiner.on(',').join(
-                    Lists.transform(
-                            entityClasses,
-                            new Function<Class<CayenneDataObject>, Object>() {
-                                @Override
-                                public Object apply(Class<CayenneDataObject> input) {
-                                    return input.getSimpleName();
-                                }
-                            }
-                    )
-            ));
+            msg.append(String.join(",", entityClasses.stream().map(Class::getSimpleName).collect(Collectors.toList())));
 
             msg.append(") remove group caches (");
-            msg.append(Joiner.on(',').join(groups));
+            msg.append(String.join(",",groups));
             msg.append(")");
 
             LOGGER.info(msg.toString());
@@ -112,7 +100,7 @@ public class QueryCacheRemoveGroupListener implements LifecycleListener {
             Set<String> contextGroups = (Set<String>) context.getUserProperty(QueryCacheRemoveGroupDataChannelFilter.KEY_QUERYCACHEREMOVEGROUPS);
 
             if(null==contextGroups) {
-                contextGroups = Sets.newHashSet();
+                contextGroups = new HashSet<>();
                 context.setUserProperty(QueryCacheRemoveGroupDataChannelFilter.KEY_QUERYCACHEREMOVEGROUPS, contextGroups);
             }
 

@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.captcha;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**

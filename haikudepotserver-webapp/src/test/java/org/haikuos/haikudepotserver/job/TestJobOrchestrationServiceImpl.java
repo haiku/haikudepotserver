@@ -5,11 +5,6 @@
 
 package org.haikuos.haikudepotserver.job;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.job.model.*;
@@ -17,9 +12,8 @@ import org.joda.time.DateTime;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>This implementation of {@link org.haikuos.haikudepotserver.job.JobOrchestrationService} has some
@@ -95,7 +89,7 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
             case "finished" : return Optional.of(finishedJob);
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -129,21 +123,10 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     }
 
     private List<Job> filteredJobs(final User user, final Set<JobSnapshot.Status> statuses) {
-        return Lists.newArrayList(
-                Iterables.filter(
-                        ImmutableList.of(
-                                queuedJob,
-                                startedJob,
-                                finishedJob
-                        ),
-                        new Predicate<JobSnapshot>() {
-                            @Override
-                            public boolean apply(JobSnapshot input) {
-                                return matches(input, user, statuses);
-                            }
-                        }
-                )
-        );
+        return Arrays.asList(queuedJob,startedJob,finishedJob)
+                .stream()
+                .filter(j -> matches(j, user, statuses))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -185,17 +168,17 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
 
     @Override
     public Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<JobData> tryGetData(String guid) {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
     public Optional<JobDataWithByteSource> tryObtainData(String guid) throws IOException {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

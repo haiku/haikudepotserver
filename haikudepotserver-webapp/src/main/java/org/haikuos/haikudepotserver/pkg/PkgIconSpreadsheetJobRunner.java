@@ -7,7 +7,6 @@ package org.haikuos.haikudepotserver.pkg;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -27,6 +26,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,7 +71,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
             final List<PkgIconConfiguration> pkgIconConfigurations = pkgOrchestrationService.getInUsePkgIconConfigurations(context);
 
             {
-                List<String> headings = Lists.newArrayList();
+                List<String> headings = new ArrayList<>();
 
                 headings.add("pkg-name");
                 headings.add("no-icons");
@@ -109,7 +109,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                         @Override
                         public boolean process(Pkg pkg) {
 
-                            List<String> cells = Lists.newArrayList();
+                            List<String> cells = new ArrayList<>();
                             cells.add(pkg.getName());
 
                             cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");

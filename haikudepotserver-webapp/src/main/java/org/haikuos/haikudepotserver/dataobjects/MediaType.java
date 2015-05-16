@@ -5,19 +5,18 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._MediaType;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
+import java.util.Optional;
 
 public class MediaType extends _MediaType {
 
@@ -52,21 +51,13 @@ public class MediaType extends _MediaType {
             return getByCode(context, com.google.common.net.MediaType.PNG.toString());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public static Optional<MediaType> getByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Iterables.tryFind(
-                getAll(context),
-                new Predicate<MediaType>() {
-                    @Override
-                    public boolean apply(MediaType input) {
-                        return input.getCode().equals(code);
-                    }
-                }
-        );
+        return getAll(context).stream().filter(mt -> mt.getCode().equals(code)).collect(SingleCollector.optional());
     }
 
 }

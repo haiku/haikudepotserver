@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.pkg.controller;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
@@ -37,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * <p>This controller provides for "open search" style information that is able to inform
@@ -130,7 +130,7 @@ public class PkgSearchController {
         }
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl);
-        Optional<PkgVersion> pkgVersionOptional = Optional.absent();
+        Optional<PkgVersion> pkgVersionOptional = Optional.empty();
 
         if(!Strings.isNullOrEmpty(query) && Pkg.NAME_PATTERN.matcher(query).matches()) {
             ObjectContext context = serverRuntime.getContext();

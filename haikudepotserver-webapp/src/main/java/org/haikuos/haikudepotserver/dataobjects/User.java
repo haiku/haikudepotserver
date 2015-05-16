@@ -5,12 +5,8 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import org.apache.cayenne.ObjectContext;
@@ -28,8 +24,10 @@ import org.haikuos.haikudepotserver.security.model.AuthorizationPkgRule;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class User extends _User implements CreateAndModifyTimestamped {
 
@@ -78,7 +76,7 @@ public class User extends _User implements CreateAndModifyTimestamped {
         List<User> users = context.performQuery(query);
 
         switch(users.size()) {
-            case 0: return Optional.absent();
+            case 0: return Optional.empty();
             case 1: return Optional.of(users.get(0));
             default: throw new IllegalStateException("found more than one user for nickname; " + nickname);
         }
@@ -153,15 +151,10 @@ public class User extends _User implements CreateAndModifyTimestamped {
     public List<? extends AuthorizationPkgRule> getAuthorizationPkgRules(final Pkg pkg) {
         Preconditions.checkNotNull(pkg);
 
-        return ImmutableList.copyOf(Iterables.filter(
-                getPermissionUserPkgs(),
-                new Predicate<PermissionUserPkg>() {
-                    @Override
-                    public boolean apply(PermissionUserPkg input) {
-                        return null==input.getPkg() || input.getPkg().equals(pkg);
-                    }
-                }
-        ));
+        return getPermissionUserPkgs()
+                .stream()
+                .filter(pup -> null == pup.getPkg() || pup.getPkg().equals(pkg))
+                .collect(Collectors.toList());
     }
 
     /**

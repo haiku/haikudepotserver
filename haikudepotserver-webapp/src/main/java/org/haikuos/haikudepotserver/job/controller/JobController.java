@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.job.controller;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
@@ -32,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * <p>The job controller allows for upload and download of binary data related to jobs; for example, there are

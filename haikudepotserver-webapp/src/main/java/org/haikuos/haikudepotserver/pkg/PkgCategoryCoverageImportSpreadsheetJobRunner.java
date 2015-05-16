@@ -2,9 +2,7 @@ package org.haikuos.haikudepotserver.pkg;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.access.Transaction;
@@ -20,8 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class PkgCategoryCoverageImportSpreadsheetJobRunner
@@ -117,7 +114,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                             boolean isNone = MARKER.equals(row[2]);
 
                             Optional<Pkg> pkgOptional = Pkg.getByName(rowContext, pkgName);
-                            List<String> selectedPkgCateogryCodes = Lists.newArrayList();
+                            List<String> selectedPkgCateogryCodes = new ArrayList<>();
 
                             if (pkgOptional.isPresent()) {
 
@@ -161,7 +158,8 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                         // copy the row back verbatim, but with the action result at the
                         // end.
 
-                        List<String> rowOutput = Lists.newArrayList(row);
+                        List<String> rowOutput = new ArrayList<>();
+                        Collections.addAll(rowOutput, row);
 
                         while (rowOutput.size() < headings.length) {
                             rowOutput.add("");

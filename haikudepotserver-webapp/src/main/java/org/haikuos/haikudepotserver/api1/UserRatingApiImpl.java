@@ -5,11 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.userrating.*;
@@ -32,7 +29,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
@@ -109,7 +108,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 null,
                 Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
             throw new AuthorizationFailureException();
@@ -136,7 +135,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 null,
                 Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
             throw new AuthorizationFailureException();
@@ -267,7 +266,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname);
         }
 
-        Optional<UserRatingStability> userRatingStabilityOptional = Optional.absent();
+        Optional<UserRatingStability> userRatingStabilityOptional = Optional.empty();
 
         if(null!=request.userRatingStabilityCode) {
             userRatingStabilityOptional = UserRatingStability.getByCode(context, request.userRatingStabilityCode);
@@ -295,7 +294,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         if(!authorizationService.check(
                 context,
-                authenticatedUserOptional.orNull(),
+                authenticatedUserOptional.orElse(null),
                 pkgOptional.get(),
                 Permission.PKG_CREATEUSERRATING)) {
             throw new AuthorizationFailureException();
@@ -337,7 +336,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setCode(UUID.randomUUID().toString());
-        userRating.setUserRatingStability(userRatingStabilityOptional.orNull());
+        userRating.setUserRatingStability(userRatingStabilityOptional.orElse(null));
         userRating.setUser(userOptional.get());
         userRating.setComment(Strings.emptyToNull(Strings.nullToEmpty(request.comment).trim()));
         userRating.setPkgVersion(pkgVersionOptional.get());
@@ -466,7 +465,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         }
 
-        Optional<Pkg> pkgOptional = Optional.absent();
+        Optional<Pkg> pkgOptional = Optional.empty();
 
         if(null!=request.pkgName) {
             pkgOptional = Pkg.getByName(context, request.pkgName);
@@ -531,26 +530,23 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         final SearchUserRatingsResult result = new SearchUserRatingsResult();
         result.total = userRatingOrchestrationService.total(context, searchSpecification);
-        result.items = Lists.transform(
-                foundUserRatings,
-                new Function<UserRating, SearchUserRatingsResult.UserRating>() {
-                    @Override
-                    public SearchUserRatingsResult.UserRating apply(UserRating input) {
-                        SearchUserRatingsResult.UserRating resultUserRating = new SearchUserRatingsResult.UserRating();
-                        resultUserRating.active = input.getActive();
-                        resultUserRating.code = input.getCode();
-                        resultUserRating.comment = input.getComment();
-                        resultUserRating.createTimestamp = input.getCreateTimestamp().getTime();
-                        resultUserRating.modifyTimestamp = input.getModifyTimestamp().getTime();
-                        resultUserRating.userRatingStabilityCode = null!=input.getUserRatingStability() ? input.getUserRatingStability().getCode() : null;
-                        resultUserRating.naturalLanguageCode = input.getNaturalLanguage().getCode();
-                        resultUserRating.pkgVersion = createPkgVersion(input.getPkgVersion());
-                        resultUserRating.rating = input.getRating();
-                        resultUserRating.user = createUser(input.getUser());
-                        return resultUserRating;
-                    }
-                }
-        );
+        result.items = foundUserRatings
+                .stream()
+                .map(ur -> {
+                    SearchUserRatingsResult.UserRating resultUserRating = new SearchUserRatingsResult.UserRating();
+                    resultUserRating.active = ur.getActive();
+                    resultUserRating.code = ur.getCode();
+                    resultUserRating.comment = ur.getComment();
+                    resultUserRating.createTimestamp = ur.getCreateTimestamp().getTime();
+                    resultUserRating.modifyTimestamp = ur.getModifyTimestamp().getTime();
+                    resultUserRating.userRatingStabilityCode = null!=ur.getUserRatingStability() ? ur.getUserRatingStability().getCode() : null;
+                    resultUserRating.naturalLanguageCode = ur.getNaturalLanguage().getCode();
+                    resultUserRating.pkgVersion = createPkgVersion(ur.getPkgVersion());
+                    resultUserRating.rating = ur.getRating();
+                    resultUserRating.user = createUser(ur.getUser());
+                    return resultUserRating;
+                })
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -575,7 +571,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
             if(!authorizationService.check(
                     context,
-                    user.orNull(),
+                    user.orElse(null),
                     requestUserOptional.get(),
                     Permission.BULK_USERRATINGSPREADSHEETREPORT_USER)) {
                 LOGGER.warn("attempt to access a user rating report for user {}, but this was disallowed", request.userNickname);
@@ -596,7 +592,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
                 if (!authorizationService.check(
                         context,
-                        user.orNull(),
+                        user.orElse(null),
                         requestPkgOptional.get(),
                         Permission.BULK_USERRATINGSPREADSHEETREPORT_PKG)) {
                     LOGGER.warn("attempt to access a user rating report for pkg {}, but this was disallowed", request.pkgName);
@@ -608,7 +604,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             else {
                 if (!authorizationService.check(
                         context,
-                        user.orNull(),
+                        user.orElse(null),
                         null,
                         Permission.BULK_PKGICONSPREADSHEETREPORT)) {
                     LOGGER.warn("attempt to access a pkg icon spreadsheet report, but was unauthorized");
@@ -620,7 +616,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         spec.setOwnerUserNickname(user.get().getNickname());
 
         return new QueueUserRatingSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orNull());
+                jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null));
 
     }
 

@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.pkg.controller;
 
-import com.google.common.base.Optional;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
@@ -20,6 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.Optional;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",

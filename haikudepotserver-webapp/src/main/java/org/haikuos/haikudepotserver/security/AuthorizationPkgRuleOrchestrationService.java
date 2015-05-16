@@ -6,10 +6,7 @@
 package org.haikuos.haikudepotserver.security;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -32,8 +29,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>This service is designed to orchestrate the authorization rules in the system.</p>
@@ -52,7 +51,7 @@ public class AuthorizationPkgRuleOrchestrationService {
             ObjectContext context,
             AuthorizationPkgRuleSearchSpecification specification) {
 
-        List<String> clauses = Lists.newArrayList();
+        List<String> clauses = new ArrayList<>();
 
         if(null!= specification.getPermissions()) {
 
@@ -92,7 +91,7 @@ public class AuthorizationPkgRuleOrchestrationService {
             }
         }
 
-        return Joiner.on(" AND ").join(clauses);
+        return String.join(" AND ", clauses);
     }
 
     public List<AuthorizationPkgRule> search(
@@ -111,7 +110,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         }
 
         StringBuilder queryBuilder = new StringBuilder();
-        List<Object> parameterAccumulator = Lists.newArrayList();
+        List<Object> parameterAccumulator = new ArrayList<>();
         String whereClause = prepareWhereClause(parameterAccumulator, context, specification);
 
         queryBuilder.append("SELECT r FROM ");
@@ -150,7 +149,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         }
 
         StringBuilder queryBuilder = new StringBuilder();
-        List<Object> parameterAccumulator = Lists.newArrayList();
+        List<Object> parameterAccumulator = new ArrayList<>();
         String whereClause = prepareWhereClause(parameterAccumulator, context, specification);
 
         queryBuilder.append("SELECT COUNT(r) FROM ");

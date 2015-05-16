@@ -5,12 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
@@ -37,7 +33,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class UserApiImpl extends AbstractApiImpl implements UserApi {
@@ -76,7 +74,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 null,
                 Permission.USER_SYNCHRONIZE)) {
             throw new AuthorizationFailureException();
@@ -421,7 +419,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         if(!authorizationService.check(
                 context,
-                tryObtainAuthenticatedUser(context).orNull(),
+                tryObtainAuthenticatedUser(context).orElse(null),
                 null,
                 Permission.USER_LIST)) {
             throw new AuthorizationFailureException();
@@ -449,18 +447,12 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         List<User> searchedUsers = userOrchestrationService.search(context,specification);
 
         result.total = userOrchestrationService.total(context,specification);
-        result.items = Lists.newArrayList(Iterables.transform(
-                searchedUsers,
-                new Function<User, SearchUsersResult.User>() {
-                    @Override
-                    public SearchUsersResult.User apply(User user) {
-                        SearchUsersResult.User resultUser = new SearchUsersResult.User();
-                        resultUser.active = user.getActive();
-                        resultUser.nickname = user.getNickname();
-                        return resultUser;
-                    }
-                }
-        ));
+        result.items = searchedUsers.stream().map(u -> {
+            SearchUsersResult.User resultUser = new SearchUsersResult.User();
+            resultUser.active = u.getActive();
+            resultUser.nickname = u.getNickname();
+            return resultUser;
+        }).collect(Collectors.toList());
 
         return result;
 

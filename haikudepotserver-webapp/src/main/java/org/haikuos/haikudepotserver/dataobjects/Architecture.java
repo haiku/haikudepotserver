@@ -5,21 +5,20 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._Architecture;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Architecture extends _Architecture {
 
@@ -37,15 +36,7 @@ public class Architecture extends _Architecture {
     public static Optional<Architecture> getByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Iterables.tryFind(
-                getAll(context),
-                new Predicate<Architecture>() {
-                    @Override
-                    public boolean apply(Architecture input) {
-                        return input.getCode().equals(code);
-                    }
-                }
-        );
+        return getAll(context).stream().filter(a -> a.getCode().equals(code)).collect(SingleCollector.optional());
     }
 
     /**
@@ -55,13 +46,10 @@ public class Architecture extends _Architecture {
 
     public static List<Architecture> getAllExceptByCode(ObjectContext context, final Collection<String> codes) {
         Preconditions.checkArgument(null != context);
+        assert null!=context;
         Preconditions.checkArgument(null != codes);
-        return ImmutableList.copyOf(Iterables.filter(getAll(context), new Predicate<Architecture>() {
-            @Override
-            public boolean apply(Architecture input) {
-                return !codes.contains(input.getCode());
-            }
-        }));
+        assert null!=codes;
+        return getAll(context).stream().filter(a -> !codes.contains(a.getCode())).collect(Collectors.toList());
     }
 
     public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {

@@ -5,11 +5,11 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.DataRow;
@@ -37,11 +37,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -120,7 +118,7 @@ public class PkgOrchestrationService {
             return getLatestPkgVersionForPkg(context, pkgOptional.get());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -180,20 +178,9 @@ public class PkgOrchestrationService {
                         .andExp(ExpressionFactory.inExp(PkgVersion.ARCHITECTURE_PROPERTY, architectures))
         );
 
-        @SuppressWarnings("unchecked") List<PkgVersion> pkgVersions = (List<PkgVersion>) context.performQuery(query);
-
-        switch(pkgVersions.size()) {
-
-            case 0:
-                return Optional.absent();
-
-            case 1:
-                return Optional.of(Iterables.getOnlyElement(pkgVersions));
-
-            default:
-                throw new IllegalStateException("more than one latest version found for pkg '"+pkg.getName()+"'");
-
-        }
+        return ((List<PkgVersion>) context.performQuery(query))
+                .stream()
+                .collect(SingleCollector.optional());
     }
 
     // ------------------------------
@@ -211,8 +198,8 @@ public class PkgOrchestrationService {
 
         SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver().getQuery("SearchPkgVersions");
         Query query = sqlTemplate.createQuery(ImmutableMap.of(
-                "search",search,
-                "isTotal",false,
+                "search", search,
+                "isTotal", false,
                 "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
         ));
 
@@ -272,7 +259,7 @@ public class PkgOrchestrationService {
         Preconditions.checkArgument(null!=context, "the object context must be provided");
 
         StringBuilder ejbql = new StringBuilder();
-        List<Object> parameterList = Lists.newArrayList();
+        List<Object> parameterList = new ArrayList<>();
 
         ejbql.append("SELECT COUNT(p) FROM Pkg p WHERE \n");
 
@@ -316,7 +303,7 @@ public class PkgOrchestrationService {
         int offset = 0;
 
         StringBuilder ejbql = new StringBuilder();
-        List<Object> parameterList = Lists.newArrayList();
+        List<Object> parameterList = new ArrayList<>();
 
         ejbql.append("SELECT p FROM Pkg p WHERE \n");
 
@@ -477,15 +464,10 @@ public class PkgOrchestrationService {
 
         final List<String> codes = (List<String>) context.performQuery(query);
 
-        return Lists.transform(
-                codes,
-                new Function<String, MediaType>() {
-                    @Override
-                    public MediaType apply(String input) {
-                        return MediaType.getByCode(context, input).get();
-                    }
-                }
-        );
+        return codes
+                .stream()
+                .map(c -> MediaType.getByCode(context, c).get())
+                .collect(Collectors.toList());
 
     }
 
@@ -516,7 +498,7 @@ public class PkgOrchestrationService {
 
     public List<PkgIconConfiguration> getInUsePkgIconConfigurations(ObjectContext objectContext) {
         Preconditions.checkState(null!=objectContext,"the object context must be supplied");
-        List<PkgIconConfiguration> result = Lists.newArrayList();
+        List<PkgIconConfiguration> result = new ArrayList<>();
 
         for(MediaType mediaType : getInUsePkgIconMediaTypes(objectContext)) {
             List<Integer> sizes = getInUsePkgIconSizes(objectContext, mediaType);
@@ -782,7 +764,7 @@ public class PkgOrchestrationService {
         queryBuilder.append("=:repository)");
 
         EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-        query.setParameter("repository",repository);
+        query.setParameter("repository", repository);
 
         return ImmutableSet.copyOf(context.performQuery(query));
     }
@@ -819,7 +801,7 @@ public class PkgOrchestrationService {
 
         Optional<org.haikuos.haikudepotserver.dataobjects.Pkg> persistedPkgOptional = org.haikuos.haikudepotserver.dataobjects.Pkg.getByName(objectContext, pkg.getName());
         org.haikuos.haikudepotserver.dataobjects.Pkg persistedPkg;
-        Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersion> persistedLatestExistingPkgVersion = Optional.absent();
+        Optional<org.haikuos.haikudepotserver.dataobjects.PkgVersion> persistedLatestExistingPkgVersion = Optional.empty();
         Architecture architecture = Architecture.getByCode(objectContext, pkg.getArchitecture().name().toLowerCase()).get();
         org.haikuos.haikudepotserver.dataobjects.PkgVersion persistedPkgVersion = null;
 
@@ -854,9 +836,10 @@ public class PkgOrchestrationService {
             );
 
             //noinspection unchecked
-            persistedPkgVersion = Iterables.getOnlyElement(
-                    (List<org.haikuos.haikudepotserver.dataobjects.PkgVersion>) objectContext.performQuery(selectQuery),
-                    null);
+            persistedPkgVersion =
+                    ((List<org.haikuos.haikudepotserver.dataobjects.PkgVersion>) objectContext.performQuery(selectQuery))
+                    .stream()
+                    .collect(SingleCollector.single());
 
             persistedLatestExistingPkgVersion = getLatestPkgVersionForPkg(
                     objectContext,
@@ -1040,15 +1023,15 @@ public class PkgOrchestrationService {
 
     private void fill(ResolvedPkgVersionLocalization result, PkgVersionLocalization pvl) {
         if(null==result.getTitle()) {
-            result.setTitle(pvl.getTitle().orNull());
+            result.setTitle(pvl.getTitle().orElse(null));
         }
 
         if(null==result.getSummary()) {
-            result.setSummary(pvl.getSummary().orNull());
+            result.setSummary(pvl.getSummary().orElse(null));
         }
 
         if(null==result.getDescription()) {
-            result.setDescription(pvl.getDescription().orNull());
+            result.setDescription(pvl.getDescription().orElse(null));
         }
     }
 
@@ -1272,10 +1255,12 @@ public class PkgOrchestrationService {
 
     public boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories) {
         Preconditions.checkArgument(null!=context);
+        assert null!=context;
         Preconditions.checkArgument(null!=pkg);
+        assert null!=pkg;
         Preconditions.checkArgument(null!=pkgCategories);
 
-        pkgCategories = Lists.newArrayList(pkgCategories);
+        pkgCategories = new ArrayList<>(pkgCategories);
         boolean didChange = false;
 
         // now go through and delete any of those pkg relationships to packages that are already present
@@ -1322,7 +1307,9 @@ public class PkgOrchestrationService {
 
         while(true) {
             ObjectContext contextEdit = serverRuntime.getContext();
-            PkgVersion pkgVersionEdit = (PkgVersion) Iterables.getOnlyElement(contextEdit.performQuery(new ObjectIdQuery(pkgVersionOid)));
+            PkgVersion pkgVersionEdit = ((List<PkgVersion>) contextEdit.performQuery(new ObjectIdQuery(pkgVersionOid)))
+                    .stream()
+                    .collect(SingleCollector.single());
             pkgVersionEdit.incrementViewCounter();
 
             try {

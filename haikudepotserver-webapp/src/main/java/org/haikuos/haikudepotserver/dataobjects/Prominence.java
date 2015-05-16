@@ -5,17 +5,17 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._Prominence;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Prominence extends _Prominence {
 
@@ -24,12 +24,9 @@ public class Prominence extends _Prominence {
     public static Optional<Prominence> getByOrdering(ObjectContext context, Integer ordering) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(null!=ordering && ordering >= 0);
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<Prominence>) context.performQuery(new SelectQuery(
+        return ((List<Prominence>) context.performQuery(new SelectQuery(
                         Prominence.class,
-                        ExpressionFactory.matchExp(Prominence.ORDERING_PROPERTY, ordering))),
-                null
-        ));
+                        ExpressionFactory.matchExp(Prominence.ORDERING_PROPERTY, ordering)))).stream().collect(SingleCollector.optional());
     }
 
     public static List<Prominence> getAll(ObjectContext context) {

@@ -5,14 +5,13 @@
 
 package org.haikuos.haikudepotserver.multipage.markup;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import org.haikuos.haikudepotserver.multipage.model.Pagination;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
 
 import javax.servlet.jsp.JspException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,7 +76,7 @@ public class PaginationLinksTag extends RequestContextAwareTag {
 
         Pagination p = getPagination();
 
-        List<String> ulClasses = Lists.newArrayList();
+        List<String> ulClasses = new ArrayList<>();
         ulClasses.add("pagination-control-container");
 
         if(0==p.getPage()) {
@@ -89,14 +88,14 @@ public class PaginationLinksTag extends RequestContextAwareTag {
         }
 
         tagWriter.startTag("ul");
-        tagWriter.writeAttribute("class", Joiner.on(' ').join(ulClasses));
+        tagWriter.writeAttribute("class", String.join(" ", ulClasses));
 
         writeArrow(
                 tagWriter,
                 "paginationleft.png",
                 "pagination-control-left",
                 "<--",
-                0==p.getPage() ? "" : deriveHref(p.getPage()-1));
+                0 == p.getPage() ? "" : deriveHref(p.getPage() - 1));
 
         int[] pageNumbers = p.generateSuggestedPages(null == getLinkCount() ? LINK_COUNT_DEFAULT : getLinkCount());
 

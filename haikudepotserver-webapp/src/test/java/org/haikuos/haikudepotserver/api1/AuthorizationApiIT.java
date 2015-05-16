@@ -5,11 +5,7 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
@@ -26,6 +22,9 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
@@ -51,7 +50,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
 
         CheckAuthorizationRequest request = new CheckAuthorizationRequest();
-        request.targetAndPermissions = Lists.newArrayList();
+        request.targetAndPermissions = new ArrayList<>();
 
         request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
                 AuthorizationTargetType.PKG,
@@ -75,7 +74,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         CheckAuthorizationRequest request = new CheckAuthorizationRequest();
-        request.targetAndPermissions = Lists.newArrayList();
+        request.targetAndPermissions = new ArrayList<>();
 
         request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
                 AuthorizationTargetType.PKG,
@@ -106,7 +105,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         }
 
         CheckAuthorizationRequest request = new CheckAuthorizationRequest();
-        request.targetAndPermissions = Lists.newArrayList();
+        request.targetAndPermissions = new ArrayList<>();
 
         request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
                 AuthorizationTargetType.PKG,
@@ -150,7 +149,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         }
 
         CheckAuthorizationRequest request = new CheckAuthorizationRequest();
-        request.targetAndPermissions = Lists.newArrayList();
+        request.targetAndPermissions = new ArrayList<>();
 
         request.targetAndPermissions.add(new CheckAuthorizationRequest.AuthorizationTargetAndPermission(
                 AuthorizationTargetType.PKG,
@@ -430,15 +429,8 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(result.total).isEqualTo(2);
             Assertions.assertThat(result.items.size()).isEqualTo(2);
 
-            Assertions.assertThat(Sets.newHashSet(Lists.transform(
-                    result.items,
-                    new Function<SearchAuthorizationPkgRulesResult.Rule, String>() {
-                        @Override
-                        public String apply(SearchAuthorizationPkgRulesResult.Rule input) {
-                            return input.pkgName;
-                        }
-                    }
-            ))).isEqualTo(ImmutableSet.of("pkg1", "pkg2"));
+            Assertions.assertThat(result.items.stream().map(o -> o.pkgName).collect(Collectors.toSet()))
+                .isEqualTo(ImmutableSet.of("pkg1", "pkg2"));
         }
 
     }
@@ -463,15 +455,8 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(result.total).isEqualTo(3);
             Assertions.assertThat(result.items.size()).isEqualTo(3);
 
-            Assertions.assertThat(Sets.newHashSet(Lists.transform(
-                    result.items,
-                    new Function<SearchAuthorizationPkgRulesResult.Rule, String>() {
-                        @Override
-                        public String apply(SearchAuthorizationPkgRulesResult.Rule input) {
-                            return input.userNickname;
-                        }
-                    }
-            ))).isEqualTo(ImmutableSet.of("testuser1", "testuser2", "testuser3"));
+            Assertions.assertThat(result.items.stream().map(o -> o.userNickname).collect(Collectors.toSet()))
+                .isEqualTo(ImmutableSet.of("testuser1", "testuser2", "testuser3"));
         }
 
     }

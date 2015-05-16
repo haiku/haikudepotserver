@@ -5,10 +5,8 @@
 
 package org.haikuos.haikudepotserver.pkg;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
-import junit.framework.Assert;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
@@ -17,6 +15,7 @@ import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haikuos.haikudepotserver.job.model.JobSnapshot;
 import org.haikuos.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

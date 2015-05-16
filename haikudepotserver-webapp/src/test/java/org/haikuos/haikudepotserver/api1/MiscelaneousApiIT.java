@@ -5,12 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
@@ -30,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ContextConfiguration({
         "classpath:/spring/servlet-context.xml",
@@ -75,15 +72,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Optional<GetAllUserRatingStabilitiesResult.UserRatingStability> userRatingStabilityOptional =
-                Iterables.tryFind(
-                        result.userRatingStabilities,
-                        new Predicate<GetAllUserRatingStabilitiesResult.UserRatingStability>() {
-                            @Override
-                            public boolean apply(GetAllUserRatingStabilitiesResult.UserRatingStability input) {
-                                return input.code.equals("mostlystable");
-                            }
-                        }
-                );
+                result.userRatingStabilities.stream().filter(urs -> urs.code.equals("mostlystable")).findFirst();
 
         Assertions.assertThat(userRatingStabilityOptional.isPresent()).isTrue();
         Assertions.assertThat(userRatingStabilityOptional.get().name).isEqualTo("Ziemlich stabil");
@@ -128,15 +117,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Optional<GetAllPkgCategoriesResult.PkgCategory> pkgCategoryOptional =
-                Iterables.tryFind(
-                        result.pkgCategories,
-                        new Predicate<GetAllPkgCategoriesResult.PkgCategory>() {
-                            @Override
-                            public boolean apply(GetAllPkgCategoriesResult.PkgCategory input) {
-                                return input.code.equals("education");
-                            }
-                        }
-                );
+                result.pkgCategories.stream().filter(pks -> pks.code.equals("education")).findFirst();
 
         Assertions.assertThat(pkgCategoryOptional.isPresent()).isTrue();
         Assertions.assertThat(pkgCategoryOptional.get().name).isEqualTo("Ausbildung");
@@ -179,15 +160,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Optional<GetAllNaturalLanguagesResult.NaturalLanguage> naturalLanguageOptional =
-                Iterables.tryFind(
-                        result.naturalLanguages,
-                        new Predicate<GetAllNaturalLanguagesResult.NaturalLanguage>() {
-                            @Override
-                            public boolean apply(GetAllNaturalLanguagesResult.NaturalLanguage input) {
-                                return input.code.equalsIgnoreCase("es");
-                            }
-                        }
-                );
+                result.naturalLanguages.stream().filter(nl -> nl.code.equalsIgnoreCase("es")).findFirst();
 
         Assertions.assertThat(naturalLanguageOptional.isPresent()).isTrue();
         Assertions.assertThat(naturalLanguageOptional.get().name).isEqualTo("Espa\u00F1ol");
@@ -231,12 +204,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
     private Optional<GetAllArchitecturesResult.Architecture> isPresent(
             GetAllArchitecturesResult result,
             final String architectureCode) {
-        return Iterables.tryFind(result.architectures, new Predicate<GetAllArchitecturesResult.Architecture>() {
-            @Override
-            public boolean apply(GetAllArchitecturesResult.Architecture architecture) {
-                return architecture.code.equals(architectureCode);
-            }
-        });
+        return result.architectures.stream().filter(a -> a.code.equals(architectureCode)).findFirst();
     }
 
     @Test
@@ -276,7 +244,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         Map<String,String> queryParams = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(url.getQuery());
         Assertions.assertThat(queryParams.get(FeedController.KEY_LIMIT)).isEqualTo("55");
         Assertions.assertThat(queryParams.get(FeedController.KEY_NATURALLANGUAGECODE)).isEqualTo(NaturalLanguage.CODE_GERMAN);
-        Assertions.assertThat(queryParams.get(FeedController.KEY_PKGNAMES)).isEqualTo(Joiner.on('-').join(ImmutableList.of(data.pkg1.getName(), data.pkg2.getName())));
+        Assertions.assertThat(queryParams.get(FeedController.KEY_PKGNAMES)).isEqualTo(String.join("-",data.pkg1.getName(), data.pkg2.getName()));
         Assertions.assertThat(queryParams.get(FeedController.KEY_TYPES)).isEqualTo(GenerateFeedUrlRequest.SupplierType.CREATEDPKGVERSION.name());
 
     }

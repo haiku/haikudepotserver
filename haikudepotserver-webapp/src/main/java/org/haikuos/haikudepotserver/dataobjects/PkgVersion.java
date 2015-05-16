@@ -5,10 +5,8 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.*;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -18,6 +16,7 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -25,7 +24,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestamped {
 
@@ -35,7 +36,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public final static Pattern PRE_RELEASE_PATTERN = Pattern.compile("^[\\w_.]+$");
 
     public static PkgVersion get(ObjectContext context, ObjectId objectId) {
-        return Iterables.getOnlyElement((List<PkgVersion>) context.performQuery(new ObjectIdQuery(objectId)));
+        return ((List<PkgVersion>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
     }
 
     public static List<PkgVersion> getForPkg(
@@ -72,10 +73,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                         ExpressionHelper.toExpression(versionCoordinates))
         );
 
-        //noinspection unchecked
-        return Optional.fromNullable(Iterables.getOnlyElement(
-                (List<PkgVersion>) context.performQuery(query),
-                null));
+        return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
     }
 
     @Override
@@ -160,16 +158,10 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     public Optional<PkgVersionLocalization> getPkgVersionLocalization(final String naturalLanguageCode) {
         Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-
-        return Iterables.tryFind(
-                getPkgVersionLocalizations(),
-                new Predicate<PkgVersionLocalization>() {
-                    @Override
-                    public boolean apply(PkgVersionLocalization input) {
-                        return input.getNaturalLanguage().getCode().equals(naturalLanguageCode);
-                    }
-                }
-        );
+        return getPkgVersionLocalizations()
+                .stream()
+                .filter(pvl -> pvl.getNaturalLanguage().getCode().equals(naturalLanguageCode))
+                .collect(SingleCollector.optional());
     }
 
     /**
@@ -179,7 +171,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     // have to add the 'byCode' for JSP to be able to work with it.
     public PkgVersionLocalization getPkgVersionLocalizationOrFallbackByCode(final String naturalLanguageCode) {
-        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = Optional.absent();
+        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = Optional.empty();
 
         if (!Strings.isNullOrEmpty(naturalLanguageCode)) {
             pkgVersionLocalizationOptional = getPkgVersionLocalization(naturalLanguageCode);
@@ -201,15 +193,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
      */
 
     public List<String> getCopyrights() {
-        return Lists.transform(
-                getPkgVersionCopyrights(),
-                new Function<PkgVersionCopyright, String>() {
-                    @Override
-                    public String apply(PkgVersionCopyright input) {
-                        return input.getBody();
-                    }
-                }
-        );
+        return getPkgVersionCopyrights().stream().map(PkgVersionCopyright::getBody).collect(Collectors.toList());
     }
 
     /**
@@ -217,28 +201,12 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
      */
 
     public List<String> getLicenses() {
-        return Lists.transform(
-                getPkgVersionLicenses(),
-                new Function<PkgVersionLicense, String>() {
-                    @Override
-                    public String apply(PkgVersionLicense input) {
-                        return input.getBody();
-                    }
-                }
-        );
+        return getPkgVersionLicenses().stream().map(PkgVersionLicense::getBody).collect(Collectors.toList());
     }
 
     public Optional<PkgVersionUrl> getPkgVersionUrlForType(final PkgUrlType type) {
         Preconditions.checkNotNull(type);
-        return Iterables.tryFind(
-                getPkgVersionUrls(),
-                new Predicate<PkgVersionUrl>() {
-                    @Override
-                    public boolean apply(PkgVersionUrl input) {
-                        return input.getPkgUrlType().equals(type);
-                    }
-                }
-        );
+        return getPkgVersionUrls().stream().filter(pvu -> pvu.getPkgUrlType().equals(type)).collect(SingleCollector.optional());
     }
 
     /**

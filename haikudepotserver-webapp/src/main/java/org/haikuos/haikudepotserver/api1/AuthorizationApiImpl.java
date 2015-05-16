@@ -5,11 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.authorization.*;
@@ -30,7 +27,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class AuthorizationApiImpl extends AbstractApiImpl implements AuthorizationApi {
@@ -107,7 +107,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
 
         final ObjectContext context = serverRuntime.getContext();
         CheckAuthorizationResult result = new CheckAuthorizationResult();
-        result.targetAndPermissions = Lists.newArrayList();
+        result.targetAndPermissions = new ArrayList<>();
 
         for(CheckAuthorizationRequest.AuthorizationTargetAndPermission targetAndPermission : deriveAuthorizationRequest.targetAndPermissions) {
 
@@ -119,7 +119,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
 
             authorizationTargetAndPermission.authorized = authorizationService.check(
                     context,
-                    tryObtainAuthenticatedUser(context).orNull(),
+                    tryObtainAuthenticatedUser(context).orElse(null),
                     null!=targetAndPermission.targetType ? TargetType.valueOf(targetAndPermission.targetType.name()) : null,
                     targetAndPermission.targetIdentifier,
                     Permission.valueOf(targetAndPermission.permissionCode));
@@ -225,7 +225,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         }
 
         if(null!=request.permissionCodes) {
-            List<org.haikuos.haikudepotserver.dataobjects.Permission> permissions = Lists.newArrayList();
+            List<org.haikuos.haikudepotserver.dataobjects.Permission> permissions = new ArrayList<>();
 
             for(int i=0;i<request.permissionCodes.size();i++) {
                 permissions.add(ensurePermission(context, request.permissionCodes.get(i)));
@@ -240,19 +240,17 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
 
         SearchAuthorizationPkgRulesResult result = new SearchAuthorizationPkgRulesResult();
         result.total = authorizationRulesOrchestrationService.total(context, specification);
-        result.items = Lists.transform(
-                authorizationRulesOrchestrationService.search(context, specification),
-                new Function<AuthorizationPkgRule, SearchAuthorizationPkgRulesResult.Rule>() {
-                    @Override
-                    public SearchAuthorizationPkgRulesResult.Rule apply(AuthorizationPkgRule input) {
-                        SearchAuthorizationPkgRulesResult.Rule rule = new SearchAuthorizationPkgRulesResult.Rule();
-                        rule.permissionCode = input.getPermission().getCode();
-                        rule.userNickname = input.getUser().getNickname();
-                        rule.pkgName = null!=input.getPkg() ? input.getPkg().getName() : null;
-                        return rule;
-                    }
-                }
-        );
+        result.items = authorizationRulesOrchestrationService.search(context, specification)
+                .stream()
+                .map(r -> {
+                            SearchAuthorizationPkgRulesResult.Rule rule = new SearchAuthorizationPkgRulesResult.Rule();
+                            rule.permissionCode = r.getPermission().getCode();
+                            rule.userNickname = r.getUser().getNickname();
+                            rule.pkgName = null != r.getPkg() ? r.getPkg().getName() : null;
+                            return rule;
+                        }
+                )
+                .collect(Collectors.toList());
 
         return result;
     }

@@ -5,12 +5,8 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.QueryCacheStrategy;
@@ -18,10 +14,13 @@ import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.support.Coded;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PkgCategory extends _PkgCategory implements Coded {
 
@@ -36,15 +35,7 @@ public class PkgCategory extends _PkgCategory implements Coded {
     public static Optional<PkgCategory> getByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Iterables.tryFind(
-                getAll(context),
-                new Predicate<PkgCategory>() {
-                    @Override
-                    public boolean apply(PkgCategory input) {
-                        return input.getCode().equals(code);
-                    }
-                }
-        );
+        return getAll(context).stream().filter(pc -> pc.getCode().equals(code)).collect(SingleCollector.optional());
     }
 
     /**
@@ -60,15 +51,7 @@ public class PkgCategory extends _PkgCategory implements Coded {
             return Collections.emptyList();
         }
 
-        return ImmutableList.copyOf(Iterables.filter(
-                getAll(context),
-                new Predicate<PkgCategory>() {
-                    @Override
-                    public boolean apply(PkgCategory input) {
-                        return codes.contains(input.getCode());
-                    }
-                }
-        ));
+        return getAll(context).stream().filter(pc -> codes.contains(pc.getCode())).collect(Collectors.toList());
     }
 
     /**

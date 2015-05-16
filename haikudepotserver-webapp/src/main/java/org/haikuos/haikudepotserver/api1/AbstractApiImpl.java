@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.api1;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
@@ -17,6 +16,7 @@ import org.haikuos.haikudepotserver.security.AbstractUserAuthenticationAware;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 
 /**

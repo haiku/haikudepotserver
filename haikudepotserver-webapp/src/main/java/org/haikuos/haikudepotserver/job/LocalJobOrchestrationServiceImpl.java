@@ -5,8 +5,8 @@
 
 package org.haikuos.haikudepotserver.job;
 
-import com.google.common.base.*;
-import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.AbstractService;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.job.model.*;
 import org.haikuos.haikudepotserver.support.DateTimeHelper;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>This concrete implementation of the {@link org.haikuos.haikudepotserver.job.JobOrchestrationService}
@@ -74,17 +76,11 @@ public class LocalJobOrchestrationServiceImpl
             return Collections.emptySet();
         }
 
-        return ImmutableList.copyOf(
-                Iterables.filter(
-                        jobs.values(),
-                        new Predicate<Job>() {
-                            @Override
-                            public boolean apply(Job input) {
-                                return statuses.contains(input.getStatus());
-                            }
-                        }
-                )
-        );
+        return jobs
+                .values()
+                .stream()
+                .filter(j -> statuses.contains(j.getStatus()))
+                .collect(Collectors.toList());
     }
 
     // ------------------------------
@@ -130,15 +126,7 @@ public class LocalJobOrchestrationServiceImpl
     private Optional<JobRunner> getJobRunner(final String jobTypeCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobTypeCode));
         Preconditions.checkState(null!=jobRunners,"the job runners must be configured - was this started up properly?");
-        return Iterables.tryFind(
-                jobRunners,
-                new Predicate<JobRunner>() {
-                    @Override
-                    public boolean apply(JobRunner input) {
-                        return input.getJobTypeCode().equals(jobTypeCode);
-                    }
-                }
-        );
+        return jobRunners.stream().filter(j -> j.getJobTypeCode().equals(jobTypeCode)).collect(SingleCollector.optional());
     }
 
     private Job submit(JobSpecification specification) {
@@ -204,7 +192,7 @@ public class LocalJobOrchestrationServiceImpl
 
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private void runInternal(JobSpecification specification) {
@@ -250,16 +238,11 @@ public class LocalJobOrchestrationServiceImpl
     private synchronized Optional<Job> tryFindJob(final JobData data) {
         Preconditions.checkArgument(null!=data);
         assert null!=data;
-
-        return Iterables.tryFind(
-                jobs.values(),
-                new Predicate<Job>() {
-                    @Override
-                    public boolean apply(Job input) {
-                        return input.getDataGuids().contains(data.getGuid());
-                    }
-                }
-        );
+        return jobs
+                .values()
+                .stream()
+                .filter(v -> v.getDataGuids().contains(data.getGuid()))
+                .collect(SingleCollector.optional());
     }
 
     /**
@@ -369,27 +352,15 @@ public class LocalJobOrchestrationServiceImpl
             return Collections.emptyList();
         }
 
-        return Lists.newArrayList(
-                Iterables.transform(
-                        Iterables.filter(
-                                jobs.values(),
-                                new Predicate<Job>() {
-                                    @Override
-                                    public boolean apply(Job input) {
-                                        return
-                                                (null == user || user.getNickname().equals(input.getOwnerUserNickname()))
-                                                        && (null == statuses || statuses.contains(input.getStatus()));
-                                    }
-                                }
-                        ),
-                        new Function<Job, Job>() {
-                            @Override
-                            public Job apply(Job input) {
-                                return new Job(input);
-                            }
-                        }
+        return jobs
+                .values()
+                .stream()
+                .filter(v ->
+                                (null == user || user.getNickname().equals(v.getOwnerUserNickname()))
+                                        && (null == statuses || statuses.contains(v.getStatus()))
                 )
-        );
+                .collect(Collectors.toList());
+
     }
 
     @Override
@@ -442,7 +413,7 @@ public class LocalJobOrchestrationServiceImpl
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -454,7 +425,7 @@ public class LocalJobOrchestrationServiceImpl
             return Optional.of(new Job(job));
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -694,7 +665,7 @@ public class LocalJobOrchestrationServiceImpl
             return tryFindJob(jobDataOptional.get());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
@@ -738,15 +709,7 @@ public class LocalJobOrchestrationServiceImpl
     @Override
     public synchronized Optional<JobData> tryGetData(final String guid) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid), "the guid must be supplied");
-        return Iterables.tryFind(
-                datas,
-                new Predicate<JobData>() {
-                    @Override
-                    public boolean apply(JobData input) {
-                        return input.getGuid().equals(guid);
-                    }
-                }
-        );
+        return datas.stream().filter(d -> d.getGuid().equals(guid)).collect(SingleCollector.optional());
     }
 
     @Override
@@ -811,7 +774,7 @@ public class LocalJobOrchestrationServiceImpl
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

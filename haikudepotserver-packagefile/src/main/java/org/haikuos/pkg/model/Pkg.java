@@ -6,8 +6,8 @@
 package org.haikuos.pkg.model;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class Pkg {
         Preconditions.checkNotNull(copyright);
 
         if(null==copyrights) {
-            copyrights = Lists.newArrayList();
+            copyrights = new ArrayList<>();
         }
 
         copyrights.add(copyright);
@@ -99,7 +99,7 @@ public class Pkg {
         Preconditions.checkNotNull(license);
 
         if(null==licenses) {
-            licenses = Lists.newArrayList();
+            licenses = new ArrayList<>();
         }
 
         licenses.add(license);

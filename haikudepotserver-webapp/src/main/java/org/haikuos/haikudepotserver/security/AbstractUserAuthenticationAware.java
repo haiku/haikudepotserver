@@ -5,12 +5,13 @@
 
 package org.haikuos.haikudepotserver.security;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.dataobjects.User;
+
+import java.util.Optional;
 
 /**
  * <p>This class is the superclass for objects that are involved in the request response cycle that would like to
@@ -49,7 +50,7 @@ public abstract class AbstractUserAuthenticationAware {
             return Optional.of(User.getByObjectId(objectContext, authenticatedUserObjectId.get()));
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

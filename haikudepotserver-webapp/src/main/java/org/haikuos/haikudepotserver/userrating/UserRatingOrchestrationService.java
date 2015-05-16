@@ -5,10 +5,8 @@
 
 package org.haikuos.haikudepotserver.userrating;
 
-import com.google.common.base.*;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
@@ -27,10 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>This service is able to provide support for non-trivial operations around user ratings.</p>
@@ -71,7 +67,7 @@ public class UserRatingOrchestrationService {
 
         int count = 0;
         StringBuilder queryExpression = new StringBuilder();
-        List<Object> parameters = Lists.newArrayList();
+        List<Object> parameters = new ArrayList<>();
 
         queryExpression.append("SELECT ur FROM UserRating ur");
 
@@ -124,7 +120,7 @@ public class UserRatingOrchestrationService {
         Preconditions.checkNotNull(context);
         DateTime now = new DateTime();
 
-        List<String> whereExpressions = Lists.newArrayList();
+        List<String> whereExpressions = new ArrayList<>();
 
         whereExpressions.add("ur.user.active = true");
 
@@ -157,7 +153,7 @@ public class UserRatingOrchestrationService {
             whereExpressions.add("ur." + UserRating.USER_PROPERTY + " = ?" + parameterAccumulator.size());
         }
 
-        return Joiner.on(" AND ").join(whereExpressions);
+        return String.join(" AND ", whereExpressions);
 
     }
 
@@ -165,7 +161,7 @@ public class UserRatingOrchestrationService {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
 
-        List<Object> parameters = Lists.newArrayList();
+        List<Object> parameters = new ArrayList<>();
         EJBQLQuery query = new EJBQLQuery("SELECT ur FROM " + UserRating.class.getSimpleName() + " AS ur WHERE " + prepareWhereClause(parameters, context, search) + " ORDER BY ur." + UserRating.CREATE_TIMESTAMP_PROPERTY + " DESC");
         query.setFetchOffset(search.getOffset());
         query.setFetchLimit(search.getLimit());
@@ -182,7 +178,7 @@ public class UserRatingOrchestrationService {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
 
-        List<Object> parameters = Lists.newArrayList();
+        List<Object> parameters = new ArrayList<>();
         EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(ur) FROM UserRating AS ur WHERE " + prepareWhereClause(parameters, context, search));
 
         for(int i=0;i<parameters.size();i++) {
@@ -339,7 +335,7 @@ public class UserRatingOrchestrationService {
 
     /**
      * <p>This method will calculate the user rating for the package.  It may not be possible to generate a
-     * user rating; in which case, an absent {@link com.google.common.base.Optional} is returned.</p>
+     * user rating; in which case, an absent {@link Optional} is returned.</p>
      */
 
     public Optional<DerivedUserRating> userRatingDerivation(ObjectContext context, Pkg pkg) {
@@ -356,15 +352,11 @@ public class UserRatingOrchestrationService {
 
             // convert the package versions into coordinates and sort those.
 
-            List<VersionCoordinates> versionCoordinates = Lists.newArrayList(ImmutableSet.copyOf(Iterables.transform(
-                    pkgVersions,
-                    new Function<PkgVersion, VersionCoordinates>() {
-                        @Override
-                        public VersionCoordinates apply(PkgVersion input) {
-                            return input.toVersionCoordinates().toVersionCoordinatesWithoutPreReleaseOrRevision();
-                        }
-                    }
-            )));
+            List<VersionCoordinates> versionCoordinates = pkgVersions
+                    .stream()
+                    .map(pv -> pv.toVersionCoordinates().toVersionCoordinatesWithoutPreReleaseOrRevision())
+                    .distinct()
+                    .collect(Collectors.toList());
 
             Collections.sort(versionCoordinates, versionCoordinatesComparator);
 
@@ -384,20 +376,16 @@ public class UserRatingOrchestrationService {
 
             {
                 final VersionCoordinatesComparator mainPartsVersionCoordinatesComparator = new VersionCoordinatesComparator(true);
-                pkgVersions = Lists.newArrayList(Iterables.filter(pkgVersions, new Predicate<PkgVersion>() {
-                    @Override
-                    public boolean apply(PkgVersion input) {
-                        return mainPartsVersionCoordinatesComparator.compare(
-                                input.toVersionCoordinates(),
-                                oldestVersionCoordinates) >= 0;
-                    }
-                }));
+                pkgVersions = pkgVersions
+                        .stream()
+                        .filter(pv -> mainPartsVersionCoordinatesComparator.compare(pv.toVersionCoordinates(), oldestVersionCoordinates) >= 0)
+                        .collect(Collectors.toList());
             }
 
             // only one user rating should taken from each user; the latest one.  Get a list of all of the
             // people who have rated these versions.
 
-            List<Short> ratings = Lists.newArrayList();
+            List<Short> ratings = new ArrayList<>();
             List<String> userNicknames = getUserNicknamesWhoHaveRatedPkgVersions(context, pkgVersions);
 
             for(String nickname : userNicknames) {
@@ -427,7 +415,7 @@ public class UserRatingOrchestrationService {
                 });
 
                 if(!userRatingsForUser.isEmpty()) {
-                    UserRating latestUserRatingForUser = Iterables.getLast(userRatingsForUser);
+                    UserRating latestUserRatingForUser = userRatingsForUser.get(userRatingsForUser.size()-1);
 
                     if(null!=latestUserRatingForUser.getRating()) {
                         ratings.add(latestUserRatingForUser.getRating());
@@ -445,7 +433,7 @@ public class UserRatingOrchestrationService {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

@@ -5,13 +5,9 @@
 
 package org.haikuos.haikudepotserver.multipage.controller;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
@@ -33,7 +29,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>Renders the home page of the multi-page (simple) view of the application.</p>
@@ -121,7 +119,7 @@ public class HomeController {
                 )
         );
 
-        Optional<PkgCategory> pkgCategoryOptional = Optional.absent();
+        Optional<PkgCategory> pkgCategoryOptional = Optional.empty();
 
         if(null!=pkgCategoryCode) {
             pkgCategoryOptional = PkgCategory.getByCode(context, pkgCategoryCode);
@@ -181,19 +179,11 @@ public class HomeController {
                 Architecture.CODE_SOURCE
         );
 
-        data.setAllArchitectures(Lists.newArrayList(
-                ImmutableList.copyOf(
-                        Iterables.filter(
-                                Architecture.getAll(context),
-                                new Predicate<Architecture>() {
-                                    @Override
-                                    public boolean apply(Architecture input) {
-                                        return !excludedArchitectureCode.contains(input.getCode());
-                                    }
-                                }
-                        )
-                )
-        ));
+        data.setAllArchitectures(
+                Architecture.getAll(context)
+                        .stream()
+                        .filter(a -> !excludedArchitectureCode.contains(a.getCode()))
+                        .collect(Collectors.toList()));
 
         data.setArchitecture(architectureOptional.get());
 

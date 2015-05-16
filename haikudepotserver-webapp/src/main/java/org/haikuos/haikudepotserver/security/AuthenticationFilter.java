@@ -6,10 +6,8 @@
 package org.haikuos.haikudepotserver.security;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectId;
@@ -20,7 +18,9 @@ import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,7 +61,7 @@ public class AuthenticationFilter implements Filter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String authorizationHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
-        Optional<ObjectId> authenticatedUserObjectId = Optional.absent();
+        Optional<ObjectId> authenticatedUserObjectId = Optional.empty();
 
         if(!Strings.isNullOrEmpty(authorizationHeader)) {
 
@@ -75,7 +75,8 @@ public class AuthenticationFilter implements Filter {
                         byte[] usernamePasswordBytes = Base64.decode(authorizationMatcher.group(2));
 
                         if (null != usernamePasswordBytes && usernamePasswordBytes.length >= 3) {
-                            List<String> parts = Lists.newArrayList(Splitter.on(":").split(new String(usernamePasswordBytes, Charsets.UTF_8)));
+                            List<String> parts = new ArrayList<>();
+                            Splitter.on(":").split(new String(usernamePasswordBytes, Charsets.UTF_8)).forEach(parts::add);
 
                             if (2 == parts.size()) {
                                 authenticatedUserObjectId = authenticationService.authenticateByNicknameAndPassword(parts.get(0), parts.get(1));
@@ -124,7 +125,7 @@ public class AuthenticationFilter implements Filter {
             chain.doFilter(request,response);
         }
         finally {
-            AuthenticationHelper.setAuthenticatedUserObjectId(Optional.<ObjectId>absent());
+            AuthenticationHelper.setAuthenticatedUserObjectId(Optional.<ObjectId>empty());
         }
     }
 

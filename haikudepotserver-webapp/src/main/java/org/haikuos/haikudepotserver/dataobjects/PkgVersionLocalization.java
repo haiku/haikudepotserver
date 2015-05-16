@@ -5,13 +5,9 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -21,9 +17,12 @@ import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class PkgVersionLocalization extends _PkgVersionLocalization implements CreateAndModifyTimestamped {
 
@@ -49,21 +48,15 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
         Preconditions.checkArgument(null!=context, "the context must be supplied");
         Preconditions.checkArgument(null!=pkgVersion, "the pkg version must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code is required");
-
-        return Iterables.tryFind(
-                getForPkgVersion(context, pkgVersion),
-                new Predicate<PkgVersionLocalization>() {
-                    @Override
-                    public boolean apply(PkgVersionLocalization input) {
-                        return input.getNaturalLanguage().getCode().equals(naturalLanguageCode);
-                    }
-                }
-        );
+        return getForPkgVersion(context, pkgVersion)
+                .stream()
+                .filter(pvl -> pvl.getNaturalLanguage().getCode().equals(naturalLanguageCode))
+                .collect(SingleCollector.optional());
     }
 
     public static Optional<PkgVersionLocalization> getAnyPkgVersionLocalizationForPkg(ObjectContext context, Pkg pkg) {
 
-        List<Expression> expressions = Lists.newArrayList();
+        List<Expression> expressions = new ArrayList<>();
         String pvProp = PkgVersionLocalization.PKG_VERSION_PROPERTY;
 
         expressions.add(ExpressionFactory.matchExp(
@@ -91,7 +84,7 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
         List<PkgVersionLocalization> locs = (List<PkgVersionLocalization>) context.performQuery(query);
 
         if(locs.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(locs.get(0));
@@ -102,7 +95,7 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
             return Optional.of(getTitleLocalizationContent().getContent());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<String> getSummary() {
@@ -110,7 +103,7 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
             return Optional.of(getSummaryLocalizationContent().getContent());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<String> getDescription() {
@@ -118,7 +111,7 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
             return Optional.of(getDescriptionLocalizationContent().getContent());
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

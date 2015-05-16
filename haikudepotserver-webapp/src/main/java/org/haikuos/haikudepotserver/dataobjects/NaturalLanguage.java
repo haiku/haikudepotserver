@@ -5,19 +5,20 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.*;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haikuos.haikudepotserver.dataobjects.auto._NaturalLanguage;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <P>This describes a spoken or "natural" language that can be used for localization of the application.  These are
@@ -42,42 +43,18 @@ public class NaturalLanguage extends _NaturalLanguage {
 
     public static List<NaturalLanguage> getAllPopular(ObjectContext context) {
         Preconditions.checkNotNull(context);
-        return ImmutableList.copyOf(Iterables.filter(
-                getAll(context),
-                new Predicate<NaturalLanguage>() {
-                    @Override
-                    public boolean apply(NaturalLanguage input) {
-                        return input.getIsPopular();
-                    }
-                }
-        ));
+        return getAll(context).stream().filter(nl -> nl.getIsPopular()).collect(Collectors.toList());
     }
 
     public static List<NaturalLanguage> getAllExceptEnglish(ObjectContext context) {
         Preconditions.checkNotNull(context);
-        return ImmutableList.copyOf(Iterables.filter(
-                getAll(context),
-                new Predicate<NaturalLanguage>() {
-                    @Override
-                    public boolean apply(NaturalLanguage input) {
-                        return !input.getCode().equals(NaturalLanguage.CODE_ENGLISH);
-                    }
-                }
-        ));
+        return getAll(context).stream().filter(nl -> !nl.getCode().equals(NaturalLanguage.CODE_ENGLISH)).collect(Collectors.toList());
     }
 
     public static Optional<NaturalLanguage> getByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
-        return Iterables.tryFind(
-                getAll(context),
-                new Predicate<NaturalLanguage>() {
-                    @Override
-                    public boolean apply(NaturalLanguage input) {
-                        return input.getCode().equals(code);
-                    }
-                }
-        );
+        return getAll(context).stream().filter(nl -> nl.getCode().equals(code)).collect(SingleCollector.optional());
     }
 
     public static NaturalLanguage getEnglish(ObjectContext context) {
@@ -90,15 +67,7 @@ public class NaturalLanguage extends _NaturalLanguage {
 
     public static List<String> getAllCodes(ObjectContext context) {
         Preconditions.checkNotNull(context);
-        return Lists.transform(
-                getAll(context),
-                new Function<NaturalLanguage, String>() {
-                    @Override
-                    public String apply(NaturalLanguage input) {
-                        return input.getCode();
-                    }
-                }
-        );
+        return getAll(context).stream().map(NaturalLanguage::getCode).collect(Collectors.toList());
     }
 
     public boolean isEnglish() {

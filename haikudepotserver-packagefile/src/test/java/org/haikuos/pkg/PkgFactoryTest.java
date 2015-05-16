@@ -5,8 +5,6 @@
 
 package org.haikuos.pkg;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import org.haikuos.pkg.model.*;
 import org.junit.Test;
 
@@ -76,41 +74,9 @@ public class PkgFactoryTest {
         assertThat(pkg.getVersion().getPreRelease()).isEqualTo("beta");
         assertThat(pkg.getVersion().getRevision()).isEqualTo(8);
 
-        assertThat(Iterables.tryFind(
-                pkg.getCopyrights(),
-                new Predicate<String>() {
-                    @Override
-                    public boolean apply(java.lang.String input) {
-                        return input.equals("Some copyright A");
-                    }
-                }).isPresent()).isTrue();
-
-        assertThat(Iterables.tryFind(
-                pkg.getCopyrights(),
-                new Predicate<String>() {
-                    @Override
-                    public boolean apply(java.lang.String input) {
-                        return input.equals("Some copyright B");
-                    }
-                }).isPresent()).isTrue();
-
-        assertThat(Iterables.tryFind(
-                pkg.getLicenses(),
-                new Predicate<String>() {
-                    @Override
-                    public boolean apply(java.lang.String input) {
-                        return input.equals("Some license A");
-                    }
-                }).isPresent()).isTrue();
-
-        assertThat(Iterables.tryFind(
-                pkg.getLicenses(),
-                new Predicate<String>() {
-                    @Override
-                    public boolean apply(java.lang.String input) {
-                        return input.equals("Some license B");
-                    }
-                }).isPresent()).isTrue();
+        assertThat(pkg.getCopyrights().stream().filter(x -> x.equals("Some copyright A")).findFirst().isPresent()).isTrue();
+        assertThat(pkg.getLicenses().stream().filter(x -> x.equals("Some license A")).findFirst().isPresent()).isTrue();
+        assertThat(pkg.getLicenses().stream().filter(x -> x.equals("Some license B")).findFirst().isPresent()).isTrue();
 
     }
 

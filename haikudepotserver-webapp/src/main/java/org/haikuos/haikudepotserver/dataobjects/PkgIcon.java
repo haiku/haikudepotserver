@@ -5,12 +5,13 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Optional;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgIcon;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PkgIcon extends _PkgIcon {
 
@@ -23,14 +24,7 @@ public class PkgIcon extends _PkgIcon {
      */
 
     public Optional<PkgIconImage> getPkgIconImage() {
-        List<PkgIconImage> images = getPkgIconImages();
-
-        switch(images.size()) {
-            case 0: return Optional.absent();
-            case 1: return Optional.of(images.get(0));
-            default:
-                throw new IllegalStateException("more than one pkg icon image found on an icon image");
-        }
+        return getPkgIconImages().stream().collect(SingleCollector.optional());
     }
 
     @Override

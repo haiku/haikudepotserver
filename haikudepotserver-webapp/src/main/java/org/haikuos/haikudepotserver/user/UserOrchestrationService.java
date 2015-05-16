@@ -5,8 +5,9 @@
 
 package org.haikuos.haikudepotserver.user;
 
-import com.google.common.base.*;
-import com.google.common.collect.Lists;
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.SelectQuery;
@@ -30,7 +31,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>This service undertakes non-trivial operations on users.</p>
@@ -129,7 +132,7 @@ public class UserOrchestrationService {
             throw new org.haikuos.haikudepotserver.user.LdapException("an error arose finding the user in the ldap system; " + nickname, ce);
         }
 
-        return Optional.fromNullable(ldapPerson);
+        return Optional.ofNullable(ldapPerson);
     }
 
     private void accumulateModification(
@@ -212,7 +215,7 @@ public class UserOrchestrationService {
                             ModifyRequest modifyRequest = new ModifyRequestImpl();
                             modifyRequest.setName(ldapPersonOptional.get().getDn());
 
-                            List<Modification> modifications = Lists.newArrayList();
+                            List<Modification> modifications = new ArrayList<>();
 
                             accumulateModification(modifications, LDAP_ATTRIBUTE_KEY_CN, ldapPersonOptional.get().getCn(), user.getNickname());
                             accumulateModification(modifications, LDAP_ATTRIBUTE_KEY_SN, ldapPersonOptional.get().getSn(), user.getNickname());
@@ -383,7 +386,7 @@ public class UserOrchestrationService {
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
 
-        List<String> parts = Lists.newArrayList();
+        List<String> parts = new ArrayList<>();
 
         if(!Strings.isNullOrEmpty(search.getExpression())) {
             switch(search.getExpressionType()) {
@@ -404,7 +407,7 @@ public class UserOrchestrationService {
             parameterAccumulator.add(Boolean.TRUE);
         }
 
-        return Joiner.on(" AND ").join(parts);
+        return String.join(" AND ", parts);
     }
 
     /**
@@ -419,7 +422,7 @@ public class UserOrchestrationService {
         Preconditions.checkNotNull(searchSpecification);
 
         StringBuilder queryBuilder = new StringBuilder("SELECT u FROM User AS u");
-        List<Object> parameters = Lists.newArrayList();
+        List<Object> parameters = new ArrayList<>();
         String where = prepareWhereClause(parameters, context, searchSpecification);
 
         if(!Strings.isNullOrEmpty(where)) {
@@ -454,7 +457,7 @@ public class UserOrchestrationService {
         Preconditions.checkNotNull(searchSpecification);
 
         StringBuilder queryBuilder = new StringBuilder("SELECT COUNT(u) FROM User u");
-        List<Object> parameters = Lists.newArrayList();
+        List<Object> parameters = new ArrayList<>();
         String where = prepareWhereClause(parameters, context, searchSpecification);
 
         if(!Strings.isNullOrEmpty(where)) {

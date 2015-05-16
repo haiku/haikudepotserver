@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.pkg.controller;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
@@ -34,6 +33,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/pkgscreenshot")
@@ -249,7 +249,7 @@ public class PkgScreenshotController extends AbstractController {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user.orNull(), pkg.get(), Permission.PKG_EDITSCREENSHOT)) {
+        if(!authorizationService.check(context, user.orElse(null), pkg.get(), Permission.PKG_EDITSCREENSHOT)) {
             LOGGER.warn("attempt to add a pkg screenshot, but there is no user present or that user is not able to edit the pkg");
             throw new PkgAuthorizationFailure();
         }

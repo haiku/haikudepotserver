@@ -5,11 +5,8 @@
 
 package org.haikuos.haikudepotserver.security;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
@@ -19,9 +16,11 @@ import org.haikuos.haikudepotserver.dataobjects.UserRating;
 import org.haikuos.haikudepotserver.security.model.AuthorizationPkgRule;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.security.model.TargetType;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <P>This class will provide functions around authorization.  Some of the model for this is provided
@@ -150,12 +149,10 @@ public class AuthorizationService {
                 case PKG_EDITPROMINENCE:
                 case PKG_EDITLOCALIZATION: {
                     List<? extends AuthorizationPkgRule> rules = authenticatedUser.getAuthorizationPkgRules((Pkg) target);
-                    if (Iterables.tryFind(rules, new Predicate<AuthorizationPkgRule>() {
-                        @Override
-                        public boolean apply(AuthorizationPkgRule input) {
-                            return input.getPermission().getCode().equalsIgnoreCase(permission.name());
-                        }
-                    }).isPresent()) {
+                    if (rules
+                            .stream()
+                            .filter(r -> r.getPermission().getCode().equalsIgnoreCase(permission.name()))
+                            .collect(SingleCollector.optional()).isPresent()) {
                         return true;
                     }
                 }

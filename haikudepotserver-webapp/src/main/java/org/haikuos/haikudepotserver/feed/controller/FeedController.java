@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.feed.controller;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -13,7 +12,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.FeedException;
@@ -33,10 +31,12 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>This controller produces an ATOM feed of the latest happenings </p>
@@ -89,7 +89,7 @@ public class FeedController {
                     image.setUrl(baseUrl + "/img/haikudepot32.png");
                     feed.setImage(image);
 
-                    List<SyndEntry> entries = Lists.newArrayList();
+                    List<SyndEntry> entries = new ArrayList<>();
 
                     for(SyndEntrySupplier supplier : syndEntrySuppliers) {
                         entries.addAll(supplier.generate(key));
@@ -136,15 +136,12 @@ public class FeedController {
             specification.setSupplierTypes(ImmutableList.copyOf(FeedSpecification.SupplierType.values()));
         }
         else {
-            specification.setSupplierTypes(Lists.transform(
-                    Splitter.on(',').trimResults().omitEmptyStrings().splitToList(types),
-                    new Function<String, FeedSpecification.SupplierType>() {
-                        @Override
-                        public FeedSpecification.SupplierType apply(String input) {
-                            return FeedSpecification.SupplierType.valueOf(input);
-                        }
-                    }
-            ));
+            specification.setSupplierTypes(
+                    Splitter.on(',').trimResults().omitEmptyStrings().splitToList(types)
+                    .stream()
+                    .map(FeedSpecification.SupplierType::valueOf)
+                    .collect(Collectors.toList())
+            );
         }
 
         if(Strings.isNullOrEmpty(pkgNames)) {

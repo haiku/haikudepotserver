@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.repository;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -30,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**

@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.support.web;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -15,6 +14,7 @@ import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**

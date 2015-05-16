@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.passwordreset;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import freemarker.ext.beans.BeansWrapper;
@@ -35,6 +34,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
