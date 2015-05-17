@@ -103,7 +103,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 iframeEl.src = '/secured/jobdata/'+jobData.guid+'/download?hdsbtok=' +
-                userState.user().token +
+                userState.token() +
                 '&rnd=' +
                 _.random(0,1000);
 

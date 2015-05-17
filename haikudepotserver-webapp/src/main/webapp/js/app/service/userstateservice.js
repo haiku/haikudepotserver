@@ -549,8 +549,9 @@ angular.module('haikudepotserver').factory('userState',
                 },
 
                 /**
-                 * <p>This function will configure the current user.  The data structure is supposed to hold the
-                 * user's "nickname" as well as a "token" value.  It will return the current user.</p>
+                 * <p>This function will either set or get the token.  Invoked with no token value, the function
+                 * will return the current token value.  Invoked with a value will set the value and will
+                 * return it.</p>
                  */
 
                 token : function(tokenValue) {
