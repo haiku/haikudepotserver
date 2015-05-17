@@ -277,7 +277,7 @@ table.table-general tbody td {
 }
 
 table.table-general tbody td:nth-child(n+1) {
-    border-left: 1px dotted #444;
+    border-left: 1px solid rgba(0, 0, 0, 0.10);
 }
 
 table.table-general tbody tr:nth-child(even) {
