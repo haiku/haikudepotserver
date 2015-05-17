@@ -15,8 +15,7 @@ angular.module('haikudepotserver').directive(
                 restrict: 'A',
                 link: function(scope, elem, attributes) {
 
-                    elem.on('keypress', function(event) {
-
+                    function handleEvent(event) {
                         if(0x0d == event.keyCode) {
                             event.preventDefault();
 
@@ -26,7 +25,14 @@ angular.module('haikudepotserver').directive(
                                 scope.$apply(expression);
                             }
                         }
+                    }
 
+                    // [apl 17.may.2015] issue #44
+                    // This was working with "keypress" event on Firefox and Chrome, but was not working on Web+
+                    // and QupZilla so changed it to use "keyup"...
+
+                    elem.on('keyup', function(event) {
+                        handleEvent(event);
                     });
 
                 }
