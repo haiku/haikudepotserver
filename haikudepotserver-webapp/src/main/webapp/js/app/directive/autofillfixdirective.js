@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,8 +13,8 @@
 
 angular.module('haikudepotserver').directive(
     'autofillFix',[
-        '$timeout','$log',
-        function($timeout,$log) {
+        '$timeout',
+        function($timeout) {
             return {
                 restrict: 'A',
                 replace: true,
@@ -29,8 +29,9 @@ angular.module('haikudepotserver').directive(
                             // work with older browsers.
 
                             var event = document.createEvent('Event');
-                            if(event)
-                            event.initEvent('change', true, true);
+                            if (event) {
+                                event.initEvent('change', true, true);
+                            }
                             elem[0].dispatchEvent(event);
                         }
                     },100);

@@ -1,7 +1,7 @@
-<div class="modal-backdrop-container" ng-show="show">
-    <div class="modal-container" ng-style="style">
+<div class="modal-backdrop-container" ng-show="show" tabindex="-1" ng-click="goClose($event)">
+    <div class="modal-container" ng-style="style" ng-click="goNoop($event)">
 
-        <div class="modal-banner-container" ng-show="close && close.length" ng-click="goClose()">
+        <div class="modal-banner-container" ng-show="close && close.length" ng-click="goClose($event)">
             <img src="/img/modalclose.svg" img-downgrade=""/>
         </div>
 

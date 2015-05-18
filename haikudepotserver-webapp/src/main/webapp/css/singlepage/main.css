@@ -261,7 +261,7 @@ TABLE
 table.table-general {
     width: 100%;
     border: 1px solid black;
-    border-collapse: collapse;
+    border-spacing: 0;
     clear: both;
 }
 
@@ -276,7 +276,7 @@ table.table-general tbody td {
     padding: 4px;
 }
 
-table.table-general tbody td:nth-child(n+1) {
+table.table-general tbody td:nth-child(n+2) {
     border-left: 1px solid rgba(0, 0, 0, 0.10);
 }
 

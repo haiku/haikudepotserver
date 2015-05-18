@@ -80,6 +80,9 @@ angular.module('haikudepotserver').directive('banner',function() {
                         breadcrumbs.resetAndNavigate([
                             breadcrumbFactory.createHome()
                         ]);
+
+                        $rootScope.$broadcast('didResetToHome');
+
                         return false;
                     };
 

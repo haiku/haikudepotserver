@@ -61,12 +61,7 @@ angular.module('haikudepotserver').controller(
                 }
             );
 
-            $scope.selectedViewCriteriaTypeOption = _.findWhere(
-                $scope.viewCriteriaTypeOptions,
-                {
-                    code : $location.search()[KEY_VIEWCRITERIATYPECODE] ? $location.search()[KEY_VIEWCRITERIATYPECODE] : ViewCriteriaTypes.FEATURED
-                }
-            );
+            $scope.selectedViewCriteriaTypeOption = undefined; // setup with a function a bit further down...
 
             // if the search criteria has an expression that has not hit the package name, but has
             // hit the summary then we need to show the summary as well as the package name.
@@ -110,6 +105,68 @@ angular.module('haikudepotserver').controller(
                 max : PAGESIZE,
                 total : undefined
             };
+
+            function resetSelectedArchitecture() {
+
+                if(!$scope.architectures || !$scope.architectures.length) {
+                    throw Error('the architectures should have been populated');
+                }
+
+                if($location.search()[KEY_ARCHITECTURECODE]) {
+                    $scope.selectedArchitecture = _.findWhere(
+                        $scope.architectures,
+                        { code : $location.search()[KEY_ARCHITECTURECODE] });
+                }
+
+                if(!$scope.selectedArchitecture) {
+                    $scope.selectedArchitecture = _.findWhere(
+                        $scope.architectures,
+                        { code : constants.ARCHITECTURE_CODE_DEFAULT });
+                }
+
+                if(!$scope.selectedArchitecture) {
+                    $scope.selectedArchitecture = $scope.architectures[0];
+                }
+            }
+
+            function resetSelectedPkgCategory() {
+                if(!$scope.pkgCategories || !$scope.pkgCategories.length) {
+                    throw Error('the categories should have been downloaded');
+                }
+
+                if($location.search()[KEY_PKGCATEGORYCODE]) {
+                    $scope.selectedPkgCategory = _.findWhere($scope.pkgCategories, { code : $location.search()[KEY_PKGCATEGORYCODE] });
+                }
+
+                if(!$scope.selectedPkgCategory) {
+                    $scope.selectedPkgCategory = $scope.pkgCategories[0];
+                }
+            }
+
+            function resetSelectedViewCriteriaTypeOption() {
+                $scope.selectedViewCriteriaTypeOption = _.findWhere(
+                    $scope.viewCriteriaTypeOptions,
+                    {
+                        code : $location.search()[KEY_VIEWCRITERIATYPECODE] ? $location.search()[KEY_VIEWCRITERIATYPECODE] : ViewCriteriaTypes.FEATURED
+                    }
+                );
+            }
+
+            resetSelectedViewCriteriaTypeOption();
+
+            /**
+             * <p>This function will reset the page and return it to its default state.</p>
+             */
+
+            function reset() {
+                $scope.searchExpression = '';
+                $scope.lastRefetchPkgsSearchExpression = '';
+                resetSelectedArchitecture();
+                resetSelectedPkgCategory();
+                resetSelectedViewCriteriaTypeOption();
+                clearPkgs();
+                refetchPkgsAtFirstPage();
+            }
 
             function clearPkgs() {
                 $scope.pkgs.items = undefined;
@@ -184,19 +241,7 @@ angular.module('haikudepotserver').controller(
                     referenceData.architectures().then(
                         function(data) {
                             $scope.architectures = data;
-
-                            if($location.search()[KEY_ARCHITECTURECODE]) {
-                                $scope.selectedArchitecture = _.findWhere(data,{ code : $location.search()[KEY_ARCHITECTURECODE] });
-                            }
-
-                            if(!$scope.selectedArchitecture) {
-                                $scope.selectedArchitecture = _.findWhere(data,{ code : constants.ARCHITECTURE_CODE_DEFAULT });
-                            }
-
-                            if(!$scope.selectedArchitecture) {
-                                $scope.selectedArchitecture = $scope.architectures[0];
-                            }
-
+                            resetSelectedArchitecture();
                             fnChain(chain); // carry on...
                         },
                         function() { // error logged already
@@ -222,16 +267,8 @@ angular.module('haikudepotserver').controller(
                                 }
                             );
 
-                            if($location.search()[KEY_PKGCATEGORYCODE]) {
-                                $scope.selectedPkgCategory = _.findWhere($scope.pkgCategories, { code : $location.search()[KEY_PKGCATEGORYCODE] });
-                            }
-
-                            if(!$scope.selectedPkgCategory) {
-                                $scope.selectedPkgCategory = $scope.pkgCategories[0];
-                            }
-
+                            resetSelectedPkgCategory();
                             updatePkgCategoryTitles();
-
                             fnChain(chain); // carry on...
                         },
                         function() {
@@ -498,6 +535,16 @@ angular.module('haikudepotserver').controller(
                         updatePkgCategoryTitles();
                         refetchPkgs(); // title may change
                     }
+                }
+            );
+
+            // this event will fire when somebody clicks on the haiku depot icon at the top left in order to
+            // trigger a return to the home page.
+
+            $scope.$on(
+                'didResetToHome',
+                function() {
+                    reset();
                 }
             );
 
