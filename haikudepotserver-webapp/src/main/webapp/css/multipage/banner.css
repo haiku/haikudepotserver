@@ -26,8 +26,12 @@ Overrides a setting on #banner-title
 }
 
 #banner-multipage-note {
-    font-size: 10pt;
+    font-size: 9pt;
     color: rgba(255,255,255,0.75);
+    margin-left: 256px;
+    text-overflow: ellipsis clip;
+    overflow-y: hidden;
+    max-height: 1.25em;
 }
 
 #banner-container .multipage-natural-language-chooser > a {

@@ -10,6 +10,7 @@
 
     <%@include file="/WEB-INF/includes/searchheadlink.jsp"%>
     <%@include file="/WEB-INF/includes/favicons.jsp"%>
+    <%@include file="includes/generatedstyle.jsp"%>
 
     <%-- will use the same CSS as the main application --%>
     <jwr:style src="/bundles/app.css"></jwr:style>
