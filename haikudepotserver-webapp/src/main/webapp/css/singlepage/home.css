@@ -9,6 +9,7 @@ This specific layout works off the premise that there is only one table on this 
 
 .home .table-general > thead > tr > th:nth-child(3) {
     text-align: right;
+    width:105px;
 }
 
 .home .table-general > tbody > tr > td:nth-child(3) {
@@ -17,6 +18,7 @@ This specific layout works off the premise that there is only one table on this 
 }
 
 .home .table-general > thead > tr > th:nth-child(4) {
+    width:110px;
     text-align: center;
 }
 
@@ -25,6 +27,18 @@ This specific layout works off the premise that there is only one table on this 
     text-align: center;
 }
 
+.home .table-general > thead > tr > th:nth-child(5) {
+    width:196px;
+}
+
 .home .table-general > tbody > tr > td:nth-child(5) {
-    min-width:30%;
+    width:196px;
+}
+
+.home .table-general > thead > tr > th:nth-child(6) {
+    width:196px;
+}
+
+.home .table-general > tbody > tr > td:nth-child(6) {
+    width:196px;
 }
