@@ -211,10 +211,11 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                 // -----------------
                 // CREATE STANDARD BREADCRUMB ITEMS
 
-                createHome : function() {
+                createHome : function(search) {
                     return applyDefaults({
                         titleKey : 'breadcrumb.home.title',
-                        path : '/'
+                        path : '/',
+                        search : search
                     });
                 },
 

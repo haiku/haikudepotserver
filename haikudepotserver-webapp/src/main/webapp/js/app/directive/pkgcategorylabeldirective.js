@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,13 +10,15 @@
 
 angular.module('haikudepotserver').directive('pkgCategoryLabel',[
     '$log',
-    'messageSource','userState',
-    function($log,messageSource,userState) {
+    'messageSource','userState','breadcrumbFactory',
+    function($log,messageSource,userState,breadcrumbFactory) {
         return {
             restrict: 'E',
             link: function ($scope, element, attributes) {
 
-                var el = angular.element('<span></span>');
+                var shouldLink = undefined == attributes['shouldLink'] || 'true' == shouldLink;
+
+                var el = angular.element(shouldLink ? '<a href=""></a>' : '<span></span>');
                 element.replaceWith(el);
 
                 var pkgCategoryExpression = attributes['pkgCategory'];
@@ -27,6 +29,21 @@ angular.module('haikudepotserver').directive('pkgCategoryLabel',[
 
                 $scope.$watch(pkgCategoryExpression, function(newValue) {
                     if(newValue) {
+
+                        // add a hyperlink to allow the user to jump to the home page with a search
+                        // set to this category.
+
+                        if(shouldLink) {
+                            var fullUrl = breadcrumbFactory.toFullPath(
+                                breadcrumbFactory.createHome({
+                                    pkgcat: newValue.code,
+                                    viewcrttyp: 'CATEGORIES'
+                                })
+                            );
+
+                            el.attr('href', fullUrl);
+                        }
+
                         messageSource.get(
                             userState.naturalLanguageCode(),
                             'pkgCategory.' + newValue.code.toLowerCase() + '.title').then(
@@ -40,6 +57,10 @@ angular.module('haikudepotserver').directive('pkgCategoryLabel',[
                         );
                     }
                     else {
+                        if(shouldLink) {
+                            el.attr('href','');
+                        }
+
                         el.text('');
                     }
                 });

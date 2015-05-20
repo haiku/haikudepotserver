@@ -17,7 +17,7 @@
                         ng-change="didChangePkgCategorySelection(pkgCatgeory)"
                         ng-disabled="pkgCategory.disabled"
                         ng-model="pkgCategory.selected">
-                <pkg-category-label pkg-category="pkgCategory"></pkg-category-label>
+                <pkg-category-label should-link="false" pkg-category="pkgCategory"></pkg-category-label>
             </div>
             <p class="muted"><message key="editPkgCategories.categories.maximumThreeNote"></message></p>
         </div>
