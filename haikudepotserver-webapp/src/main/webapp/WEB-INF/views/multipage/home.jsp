@@ -25,6 +25,7 @@
     <div class="content-container home">
 
         <form method="get" action="/multipage">
+            <input type="hidden" name="natlangcode" value="${data.naturalLanguage.code}">
             <div id="search-criteria-container">
                 <div>
                     <select name="arch">

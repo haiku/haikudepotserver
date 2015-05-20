@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
+import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.multipage.MultipageConstants;
@@ -125,7 +126,8 @@ public class HomeController {
             pkgCategoryOptional = PkgCategory.getByCode(context, pkgCategoryCode);
         }
 
-        searchSpecification.setNaturalLanguage(NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest));
+        NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest);
+        searchSpecification.setNaturalLanguage(naturalLanguage);
 
         switch(null==viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {
 
@@ -174,6 +176,8 @@ public class HomeController {
 
         HomeData data = new HomeData();
 
+        data.setNaturalLanguage(naturalLanguage);
+
         final Set<String> excludedArchitectureCode = ImmutableSet.of(
                 Architecture.CODE_ANY,
                 Architecture.CODE_SOURCE
@@ -212,6 +216,8 @@ public class HomeController {
 
     public static class HomeData {
 
+        private NaturalLanguage naturalLanguage;
+
         private List<PkgVersion> pkgVersions;
 
         private List<Architecture> allArchitectures;
@@ -229,6 +235,14 @@ public class HomeController {
         private ViewCriteriaType viewCriteriaType;
 
         private Pagination pagination;
+
+        public NaturalLanguage getNaturalLanguage() {
+            return naturalLanguage;
+        }
+
+        public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
+            this.naturalLanguage = naturalLanguage;
+        }
 
         public List<PkgVersion> getPkgVersions() {
             return pkgVersions;
