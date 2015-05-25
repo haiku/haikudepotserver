@@ -839,7 +839,7 @@ public class PkgOrchestrationService {
             persistedPkgVersion =
                     ((List<org.haikuos.haikudepotserver.dataobjects.PkgVersion>) objectContext.performQuery(selectQuery))
                     .stream()
-                    .collect(SingleCollector.single());
+                    .collect(SingleCollector.optional()).orElse(null);
 
             persistedLatestExistingPkgVersion = getLatestPkgVersionForPkg(
                     objectContext,
