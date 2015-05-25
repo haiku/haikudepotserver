@@ -10,10 +10,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
-import org.haikuos.haikudepotserver.dataobjects.User;
-import org.haikuos.haikudepotserver.dataobjects.UserRating;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
@@ -290,47 +287,92 @@ public class UserRatingOrchestrationService {
         LOGGER.info("did derive and store user ratings for {} packages", pkgNames.size());
     }
 
+    /**
+     * <p>This method will update the user rating aggregate across all appropriate
+     * repositories.</p>
+     */
+
     public void updateUserRatingDerivation(String pkgName) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));
+         Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the name of the package is required");
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
 
-        if(!pkgOptional.isPresent()) {
-            throw new IllegalStateException("user derivation job submitted, but no pkg was found; " + pkgName);
+        StringBuilder builder = new StringBuilder();
+        builder.append("SELECT r.code FROM\n");
+        builder.append(Repository.class.getSimpleName());
+        builder.append(" r\n");
+        builder.append("WHERE EXISTS(SELECT pv.id FROM\n");
+        builder.append(PkgVersion.class.getSimpleName());
+        builder.append(" pv WHERE pv.pkg.name = :name\n");
+        builder.append("ORDER BY r.code DESC");
+
+        EJBQLQuery query = new EJBQLQuery(builder.toString());
+        query.setParameter("name", pkgName);
+        List<String> repositoryCodes = (List<String>) context.performQuery(query);
+
+        for(String repositoryCode : repositoryCodes) {
+            updateUserRatingDerivation(pkgName, repositoryCode);
         }
+    }
+
+    /**
+     * <p>This method will update the stored user rating aggregate (average) for the package for the
+     * specified repository.</p>
+     */
+
+    public void updateUserRatingDerivation(String pkgName, String repositoryCode) {
+        Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));
+        Preconditions.checkState(!Strings.isNullOrEmpty(repositoryCode));
+
+        ObjectContext context = serverRuntime.getContext();
+        Pkg pkg = Pkg.getByName(context, pkgName)
+                .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no pkg was found; " + pkgName));
+        Repository repository = Repository.getByCode(context, repositoryCode)
+                .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no repository was found; " + repositoryCode));
 
         long beforeMillis = System.currentTimeMillis();
-        Optional<DerivedUserRating> rating = userRatingDerivation(context, pkgOptional.get());
+        Optional<DerivedUserRating> rating = userRatingDerivation(context, pkg, repository);
 
-        LOGGER.info(
-                "calculated the user rating for {} in {}ms",
-                pkgOptional.get(),
-                System.currentTimeMillis() - beforeMillis);
+        LOGGER.info("calculated the user rating for {} in {} in {}ms", pkg, repository, System.currentTimeMillis() - beforeMillis);
 
         if(!rating.isPresent()) {
-            LOGGER.info("unable to establish a user rating for {}", pkgOptional.get());
+            LOGGER.info("unable to establish a user rating for {} in {}", pkg, repository);
         }
         else {
             LOGGER.info(
-                    "user rating established for {}; {} (sample {})",
-                    pkgOptional.get(),
+                    "user rating established for {} in {}; {} (sample {})",
+                    pkg,
+                    repository,
                     rating.get().getRating(),
                     rating.get().getSampleSize());
         }
 
+        Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional = pkg.getPkgUserRatingAggregate(repository);
+
         if(rating.isPresent()) {
-            pkgOptional.get().setDerivedRating(rating.get().getRating());
-            pkgOptional.get().setDerivedRatingSampleSize(rating.get().getSampleSize());
+
+            PkgUserRatingAggregate pkgUserRatingAggregate = pkgUserRatingAggregateOptional.orElseGet(() -> {
+                PkgUserRatingAggregate value = context.newObject(PkgUserRatingAggregate.class);
+                value.setRepository(repository);
+                value.setPkg(pkg);
+                return value;
+            });
+
+            pkgUserRatingAggregate.setDerivedRating(rating.get().getRating());
+            pkgUserRatingAggregate.setDerivedRatingSampleSize(rating.get().getSampleSize());
         }
         else {
-            pkgOptional.get().setDerivedRating(null);
-            pkgOptional.get().setDerivedRatingSampleSize(0);
+
+            // if there is no derived user rating then there should also be no database record
+            // for the user rating.
+
+            pkg.removeFromPkgUserRatingAggregates(pkgUserRatingAggregateOptional.get());
+            context.deleteObject(pkgUserRatingAggregateOptional.get());
         }
 
         context.commitChanges();
 
-        LOGGER.info("did persist user rating for {}", pkgOptional.get());
+        LOGGER.info("did update user rating for {} in {}", pkg, repository);
     }
 
     /**
@@ -338,13 +380,13 @@ public class UserRatingOrchestrationService {
      * user rating; in which case, an absent {@link Optional} is returned.</p>
      */
 
-    public Optional<DerivedUserRating> userRatingDerivation(ObjectContext context, Pkg pkg) {
+    public Optional<DerivedUserRating> userRatingDerivation(ObjectContext context, Pkg pkg, Repository repository) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
 
         // haul all of the pkg versions into memory first.
 
-        List<PkgVersion> pkgVersions = PkgVersion.getForPkg(context, pkg);
+        List<PkgVersion> pkgVersions = PkgVersion.getForPkg(context, pkg, repository);
 
         if(!pkgVersions.isEmpty()) {
 

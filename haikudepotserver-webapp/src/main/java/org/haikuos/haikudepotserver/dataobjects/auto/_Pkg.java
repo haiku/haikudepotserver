@@ -7,8 +7,9 @@ import org.haikuos.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.dataobjects.PkgLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory;
+import org.haikuos.haikudepotserver.dataobjects.PkgProminence;
 import org.haikuos.haikudepotserver.dataobjects.PkgScreenshot;
-import org.haikuos.haikudepotserver.dataobjects.Prominence;
+import org.haikuos.haikudepotserver.dataobjects.PkgUserRatingAggregate;
 import org.haikuos.haikudepotserver.dataobjects.Publisher;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -22,16 +23,15 @@ public abstract class _Pkg extends AbstractDataObject {
 
     public static final String ACTIVE_PROPERTY = "active";
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String DERIVED_RATING_PROPERTY = "derivedRating";
-    public static final String DERIVED_RATING_SAMPLE_SIZE_PROPERTY = "derivedRatingSampleSize";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NAME_PROPERTY = "name";
     public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
     public static final String PKG_ICONS_PROPERTY = "pkgIcons";
     public static final String PKG_LOCALIZATIONS_PROPERTY = "pkgLocalizations";
     public static final String PKG_PKG_CATEGORIES_PROPERTY = "pkgPkgCategories";
+    public static final String PKG_PROMINENCES_PROPERTY = "pkgProminences";
     public static final String PKG_SCREENSHOTS_PROPERTY = "pkgScreenshots";
-    public static final String PROMINENCE_PROPERTY = "prominence";
+    public static final String PKG_USER_RATING_AGGREGATES_PROPERTY = "pkgUserRatingAggregates";
     public static final String PUBLISHER_PROPERTY = "publisher";
 
     public static final String ID_PK_COLUMN = "id";
@@ -48,20 +48,6 @@ public abstract class _Pkg extends AbstractDataObject {
     }
     public Date getCreateTimestamp() {
         return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
-    }
-
-    public void setDerivedRating(Float derivedRating) {
-        writeProperty(DERIVED_RATING_PROPERTY, derivedRating);
-    }
-    public Float getDerivedRating() {
-        return (Float)readProperty(DERIVED_RATING_PROPERTY);
-    }
-
-    public void setDerivedRatingSampleSize(Integer derivedRatingSampleSize) {
-        writeProperty(DERIVED_RATING_SAMPLE_SIZE_PROPERTY, derivedRatingSampleSize);
-    }
-    public Integer getDerivedRatingSampleSize() {
-        return (Integer)readProperty(DERIVED_RATING_SAMPLE_SIZE_PROPERTY);
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
@@ -126,6 +112,18 @@ public abstract class _Pkg extends AbstractDataObject {
     }
 
 
+    public void addToPkgProminences(PkgProminence obj) {
+        addToManyTarget(PKG_PROMINENCES_PROPERTY, obj, true);
+    }
+    public void removeFromPkgProminences(PkgProminence obj) {
+        removeToManyTarget(PKG_PROMINENCES_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PkgProminence> getPkgProminences() {
+        return (List<PkgProminence>)readProperty(PKG_PROMINENCES_PROPERTY);
+    }
+
+
     public void addToPkgScreenshots(PkgScreenshot obj) {
         addToManyTarget(PKG_SCREENSHOTS_PROPERTY, obj, true);
     }
@@ -138,12 +136,15 @@ public abstract class _Pkg extends AbstractDataObject {
     }
 
 
-    public void setProminence(Prominence prominence) {
-        setToOneTarget(PROMINENCE_PROPERTY, prominence, true);
+    public void addToPkgUserRatingAggregates(PkgUserRatingAggregate obj) {
+        addToManyTarget(PKG_USER_RATING_AGGREGATES_PROPERTY, obj, true);
     }
-
-    public Prominence getProminence() {
-        return (Prominence)readProperty(PROMINENCE_PROPERTY);
+    public void removeFromPkgUserRatingAggregates(PkgUserRatingAggregate obj) {
+        removeToManyTarget(PKG_USER_RATING_AGGREGATES_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PkgUserRatingAggregate> getPkgUserRatingAggregates() {
+        return (List<PkgUserRatingAggregate>)readProperty(PKG_USER_RATING_AGGREGATES_PROPERTY);
     }
 
 

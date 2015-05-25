@@ -219,10 +219,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.items = searchedPkgVersions
                 .stream()
                 .map(spv -> {
+                    Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional = spv.getPkg().getPkgUserRatingAggregate(spv.getRepositorySource().getRepository());
+
                     SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
                     resultPkg.name = spv.getPkg().getName();
                     resultPkg.modifyTimestamp = spv.getPkg().getModifyTimestamp().getTime();
-                    resultPkg.derivedRating = spv.getPkg().getDerivedRating();
+                    resultPkg.derivedRating = pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating() : null;
                     resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
 
                     ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
@@ -272,7 +274,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         version.createTimestamp = pkgVersion.getCreateTimestamp().getTime();
         version.payloadLength = pkgVersion.getPayloadLength();
-        version.repositoryCode = pkgVersion.getRepository().getCode();
+        version.repositorySourceCode = pkgVersion.getRepositorySource().getCode();
+        version.repositoryCode = pkgVersion.getRepositorySource().getRepository().getCode();
         version.architectureCode = pkgVersion.getArchitecture().getCode();
         version.copyrights = pkgVersion.getPkgVersionCopyrights().stream().map(c -> c.getBody()).collect(Collectors.toList());
         version.licenses = pkgVersion.getPkgVersionLicenses().stream().map(l -> l.getBody()).collect(Collectors.toList());
@@ -750,7 +753,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public UpdatePkgLocalizationResult updatePkgLocalization(UpdatePkgLocalizationRequest updatePkgLocalizationRequest) throws ObjectNotFoundException {
 
         Preconditions.checkArgument(null != updatePkgLocalizationRequest);
-        assert null!=updatePkgLocalizationRequest;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(updatePkgLocalizationRequest.pkgName), "the package name must be supplied");
 
         final ObjectContext context = serverRuntime.getContext();
@@ -789,7 +791,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException {
         Preconditions.checkArgument(null != getPkgLocalizationsRequest, "a request is required");
-        assert null!=getPkgLocalizationsRequest;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgLocalizationsRequest.pkgName), "a package name is required");
         Preconditions.checkArgument(null!=getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
 

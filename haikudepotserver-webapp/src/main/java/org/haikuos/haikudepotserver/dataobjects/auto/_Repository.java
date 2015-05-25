@@ -1,8 +1,9 @@
 package org.haikuos.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
+import java.util.List;
 
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
+import org.haikuos.haikudepotserver.dataobjects.RepositorySource;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -16,9 +17,11 @@ public abstract class _Repository extends AbstractDataObject {
     public static final String ACTIVE_PROPERTY = "active";
     public static final String CODE_PROPERTY = "code";
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
+    public static final String DESCRIPTION_PROPERTY = "description";
+    public static final String INFORMATION_URL_PROPERTY = "informationUrl";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String URL_PROPERTY = "url";
-    public static final String ARCHITECTURE_PROPERTY = "architecture";
+    public static final String NAME_PROPERTY = "name";
+    public static final String REPOSITORY_SOURCES_PROPERTY = "repositorySources";
 
     public static final String ID_PK_COLUMN = "id";
 
@@ -43,6 +46,20 @@ public abstract class _Repository extends AbstractDataObject {
         return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
     }
 
+    public void setDescription(String description) {
+        writeProperty(DESCRIPTION_PROPERTY, description);
+    }
+    public String getDescription() {
+        return (String)readProperty(DESCRIPTION_PROPERTY);
+    }
+
+    public void setInformationUrl(String informationUrl) {
+        writeProperty(INFORMATION_URL_PROPERTY, informationUrl);
+    }
+    public String getInformationUrl() {
+        return (String)readProperty(INFORMATION_URL_PROPERTY);
+    }
+
     public void setModifyTimestamp(Date modifyTimestamp) {
         writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
     }
@@ -50,19 +67,22 @@ public abstract class _Repository extends AbstractDataObject {
         return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
     }
 
-    public void setUrl(String url) {
-        writeProperty(URL_PROPERTY, url);
+    public void setName(String name) {
+        writeProperty(NAME_PROPERTY, name);
     }
-    public String getUrl() {
-        return (String)readProperty(URL_PROPERTY);
-    }
-
-    public void setArchitecture(Architecture architecture) {
-        setToOneTarget(ARCHITECTURE_PROPERTY, architecture, true);
+    public String getName() {
+        return (String)readProperty(NAME_PROPERTY);
     }
 
-    public Architecture getArchitecture() {
-        return (Architecture)readProperty(ARCHITECTURE_PROPERTY);
+    public void addToRepositorySources(RepositorySource obj) {
+        addToManyTarget(REPOSITORY_SOURCES_PROPERTY, obj, true);
+    }
+    public void removeFromRepositorySources(RepositorySource obj) {
+        removeToManyTarget(REPOSITORY_SOURCES_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<RepositorySource> getRepositorySources() {
+        return (List<RepositorySource>)readProperty(REPOSITORY_SOURCES_PROPERTY);
     }
 
 

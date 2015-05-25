@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.dataobjects.RepositorySource;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haikuos.haikudepotserver.job.AbstractJobRunner;
@@ -27,6 +28,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -57,33 +59,67 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
         Preconditions.checkNotNull(specification);
 
         ObjectContext mainContext = serverRuntime.getContext();
-        Repository repository = Repository.getByCode(mainContext, specification.getCode()).get();
+        Repository repository = Repository.getByCode(mainContext, specification.getRepositoryCode()).get();
+        List<RepositorySource> repositorySources = RepositorySource.findActiveByRepository(mainContext, repository);
+
+        if(repositorySources.isEmpty()) {
+            LOGGER.warn("did not import for repository {} as there are no sources", specification.getRepositoryCode());
+        }
+        else {
+
+            // start a cayenne long-running txn
+            Transaction transaction = serverRuntime.getDataDomain().createTransaction();
+            Transaction.bindThreadTransaction(transaction);
+
+            try {
+                for (RepositorySource repositorySource : repositorySources) {
+                    runForRepositorySource(mainContext, repositorySource);
+                }
+            }
+            catch (Throwable th) {
+                transaction.setRollbackOnly();
+                LOGGER.error("a problem has arisen processing a repository file for repository " + repository.getCode(), th);
+            } finally {
+                Transaction.bindThreadTransaction(null);
+
+                if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
+                    try {
+                        transaction.rollback();
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    private void runForRepositorySource(ObjectContext mainContext, RepositorySource repositorySource) {
         URL url;
 
         try {
-            url = new URL(repository.getUrl());
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("the repository "+specification.getCode()+" has a malformed url; "+repository.getUrl(),mue);
+            url = new URL(repositorySource.getUrl());
+        } catch (MalformedURLException mue) {
+            throw new IllegalStateException(
+                    "the repository source " + repositorySource + " for repository " +
+                            repositorySource.getRepository().getCode() + " has a malformed url; " + repositorySource.getUrl(),
+                    mue);
         }
 
         // now shift the URL's data into a temporary file and then process it.
         File temporaryFile = null;
 
-        // start a cayenne long-running txn
-        Transaction transaction = serverRuntime.getDataDomain().createTransaction();
-        Transaction.bindThreadTransaction(transaction);
-
         try {
-            temporaryFile = File.createTempFile(specification.getCode()+"__import",".hpkr");
+            temporaryFile = File.createTempFile(repositorySource.getCode() + "__import", ".hpkr");
             Resources.asByteSource(url).copyTo(Files.asByteSink(temporaryFile));
 
-            LOGGER.debug("did copy data for repository {} ({}) to temporary file", specification.getCode(), url.toString());
+            LOGGER.debug("did copy data for repository source {} ({}) to temporary file", repositorySource, url.toString());
 
             org.haikuos.pkg.HpkrFileExtractor fileExtractor = new org.haikuos.pkg.HpkrFileExtractor(temporaryFile);
 
             long startTimeMs = System.currentTimeMillis();
-            LOGGER.info("will process data for repository {}", specification.getCode());
+            LOGGER.info("will process data for repository source {}", repositorySource.getCode());
 
             // import any packages that are in the repository.
 
@@ -99,7 +135,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
 
                 pkgService.importFrom(
                         pkgImportContext,
-                        repository.getObjectId(),
+                        repositorySource.getObjectId(),
                         pkg,
                         shouldPopulatePayloadLength);
 
@@ -112,58 +148,42 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
             // repository and then if the package simply doesn't exist in that repository any more, mark all of
             // those versions are inactive.
 
-            for (String persistedPkgName : pkgService.fetchPkgNamesWithAnyPkgVersionAssociatedWithRepository(
+            for (String persistedPkgName : pkgService.fetchPkgNamesWithAnyPkgVersionAssociatedWithRepositorySource(
                     mainContext,
-                    repository)) {
+                    repositorySource)) {
                 if (!repositoryImportPkgNames.contains(persistedPkgName)) {
 
                     ObjectContext removalContext = serverRuntime.getContext();
-                    Repository removalRepository = Repository.get(removalContext, repository.getObjectId());
+                    RepositorySource removalRepositorySource = RepositorySource.get(removalContext, repositorySource.getObjectId());
 
-                    int changes = pkgService.deactivatePkgVersionsForPkgAssociatedWithRepository(
+                    int changes = pkgService.deactivatePkgVersionsForPkgAssociatedWithRepositorySource(
                             removalContext,
                             org.haikuos.haikudepotserver.dataobjects.Pkg.getByName(removalContext, persistedPkgName).get(),
-                            removalRepository);
+                            removalRepositorySource);
 
                     if (changes > 0) {
                         removalContext.commitChanges();
-                        LOGGER.info("did remove all versions of package {} from repository {} because this package is no longer in the repository", persistedPkgName, repository.toString());
+                        LOGGER.info("did remove all versions of package {} from repository source {} because this package is no longer in the repository", persistedPkgName, repositorySource.toString());
                     }
 
                 }
             }
 
-            LOGGER.info("did process data for repository {} in {}ms", specification.getCode(), System.currentTimeMillis() - startTimeMs);
+            LOGGER.info("did process data for repository source {} in {}ms", repositorySource, System.currentTimeMillis() - startTimeMs);
 
-            transaction.commit();
         }
-        catch(Throwable th) {
-
-            transaction.setRollbackOnly();
-            LOGGER.error("a problem has arisen processing a repository file for repository " + specification.getCode() + " from url '" + url.toString() + "'", th);
-
+        catch (Throwable th) {
+            throw new RuntimeException("a problem has arisen processing a repository file for repository source " + repositorySource + " from url '" + url.toString() + "'", th);
         }
         finally {
 
-            if(null!=temporaryFile && temporaryFile.exists()) {
-                if(!temporaryFile.delete()) {
+            if (null != temporaryFile && temporaryFile.exists()) {
+                if (!temporaryFile.delete()) {
                     LOGGER.error("unable to delete the file; {}" + temporaryFile.getAbsolutePath());
                 }
             }
 
-            Transaction.bindThreadTransaction(null);
-
-            if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
-                try {
-                    transaction.rollback();
-                }
-                catch(Exception e) {
-                    // ignore
-                }
-            }
-
         }
-
     }
 
 }

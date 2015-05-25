@@ -9,7 +9,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgVersionCopyright;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLicense;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
-import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.dataobjects.RepositorySource;
 import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -37,7 +37,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
     public static final String PKG_VERSION_LICENSES_PROPERTY = "pkgVersionLicenses";
     public static final String PKG_VERSION_LOCALIZATIONS_PROPERTY = "pkgVersionLocalizations";
     public static final String PKG_VERSION_URLS_PROPERTY = "pkgVersionUrls";
-    public static final String REPOSITORY_PROPERTY = "repository";
+    public static final String REPOSITORY_SOURCE_PROPERTY = "repositorySource";
 
     public static final String ID_PK_COLUMN = "id";
 
@@ -184,12 +184,12 @@ public abstract class _PkgVersion extends AbstractDataObject {
     }
 
 
-    public void setRepository(Repository repository) {
-        setToOneTarget(REPOSITORY_PROPERTY, repository, true);
+    public void setRepositorySource(RepositorySource repositorySource) {
+        setToOneTarget(REPOSITORY_SOURCE_PROPERTY, repositorySource, true);
     }
 
-    public Repository getRepository() {
-        return (Repository)readProperty(REPOSITORY_PROPERTY);
+    public RepositorySource getRepositorySource() {
+        return (RepositorySource)readProperty(REPOSITORY_SOURCE_PROPERTY);
     }
 
 

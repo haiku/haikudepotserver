@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-public class Repository extends _Repository implements CreateAndModifyTimestamped, Coded {
+public class Repository extends _Repository implements CreateAndModifyTimestamped, Coded, Comparable<Repository> {
 
     public static Repository get(ObjectContext context, ObjectId objectId) {
         return ((List<Repository>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
@@ -45,82 +45,20 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
             }
         }
 
-        if(null != getUrl()) {
+        if(null != getInformationUrl()) {
             try {
-                new URL(getUrl());
+                new URL(getInformationUrl());
             }
             catch(MalformedURLException mue) {
-                validationResult.addFailure(new BeanValidationFailure(this,URL_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this,INFORMATION_URL_PROPERTY,"malformed"));
             }
         }
 
     }
 
-    /**
-     * <p>This is the URL at which one might find the packages for this repository.</p>
-     */
-
-    public URL getPackagesBaseURL() {
-        URL base = getBaseURL();
-
-        try {
-            return new URL(
-                    base.getProtocol(),
-                    base.getHost(),
-                    base.getPort(),
-                    base.getPath() + "/packages");
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("unable to reform a url",mue);
-        }
-
-    }
-
-    /**
-     * <p>Other files are able to be found in the repository.  This method provides a root for these
-     * files.</p>
-     */
-
-    private URL getBaseURL() {
-        URL url;
-
-        try {
-            url = new URL(getUrl());
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("malformed url should not be stored in a repository");
-        }
-
-        String path = url.getPath();
-
-        if(Strings.isNullOrEmpty(path)) {
-            throw new IllegalStateException("malformed url; no path component to the hpkr data");
-        }
-
-        int lastSlash = path.lastIndexOf('/');
-
-        if(lastSlash == path.length()-1) {
-            throw new IllegalStateException("malformed url; no path component to the hpkr data");
-        }
-        else {
-            if(-1==lastSlash) {
-                path = "";
-            }
-            else {
-                path = path.substring(0,lastSlash);
-            }
-        }
-
-        try {
-            return new URL(
-                    url.getProtocol(),
-                    url.getHost(),
-                    url.getPort(),
-                    path);
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("unable to reform a url",mue);
-        }
+    @Override
+    public int compareTo(Repository o) {
+        return getCode().compareTo(o.getCode());
     }
 
     @Override

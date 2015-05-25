@@ -7,6 +7,7 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -41,14 +42,18 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     public static List<PkgVersion> getForPkg(
             ObjectContext context,
-            Pkg pkg) {
+            Pkg pkg,
+            Repository repository) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
 
         SelectQuery query = new SelectQuery(
                 PkgVersion.class,
-                ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE))
+                ExpressionHelper.andAll(ImmutableList.of(
+                    ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg),
+                    ExpressionFactory.matchExp(PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY, repository),
+                    ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE)
+                ))
         );
 
         //noinspection unchecked
@@ -216,7 +221,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
      */
 
     public URL getHpkgURL() {
-        URL packagesBaseUrl = getRepository().getPackagesBaseURL();
+        URL packagesBaseUrl = getRepositorySource().getPackagesBaseURL();
 
         try {
             return new URL(

@@ -717,19 +717,19 @@ public class PkgOrchestrationService {
      * @return the quantity of package versions that were deactivated.
      */
 
-    public int deactivatePkgVersionsForPkgAssociatedWithRepository(
+    public int deactivatePkgVersionsForPkgAssociatedWithRepositorySource(
             ObjectContext context,
             Pkg pkg,
-            final Repository repository) {
+            final RepositorySource repositorySource) {
 
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(repository);
+        Preconditions.checkNotNull(repositorySource);
 
         int count = 0;
 
         for(PkgVersion pkgVersion : PkgVersion.getForPkg(context, pkg)) {
-            if(pkgVersion.getRepository().equals(repository)) {
+            if(pkgVersion.getRepositorySource().equals(repositorySource)) {
                 if(pkgVersion.getActive()) {
                     pkgVersion.setActive(false);
                     count++;
@@ -745,12 +745,12 @@ public class PkgOrchestrationService {
      * repository.</p>
      */
 
-    public Set<String> fetchPkgNamesWithAnyPkgVersionAssociatedWithRepository(
+    public Set<String> fetchPkgNamesWithAnyPkgVersionAssociatedWithRepositorySource(
             ObjectContext context,
-            Repository repository) {
+            RepositorySource repositorySource) {
 
         Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(repository);
+        Preconditions.checkNotNull(repositorySource);
 
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append("SELECT p.name FROM ");
@@ -760,11 +760,11 @@ public class PkgOrchestrationService {
         queryBuilder.append(" pv WHERE pv.");
         queryBuilder.append(PkgVersion.PKG_PROPERTY);
         queryBuilder.append("=p AND pv.");
-        queryBuilder.append(PkgVersion.REPOSITORY_PROPERTY);
-        queryBuilder.append("=:repository)");
+        queryBuilder.append(PkgVersion.REPOSITORY_SOURCE_PROPERTY);
+        queryBuilder.append("=:repositorySource)");
 
         EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-        query.setParameter("repository", repository);
+        query.setParameter("repositorySource", repositorySource);
 
         return ImmutableSet.copyOf(context.performQuery(query));
     }
@@ -779,6 +779,29 @@ public class PkgOrchestrationService {
     }
 
     /**
+     * <p>This method will either find the existing pkg prominence with respect to the
+     * repository or will create one and return it.</p>
+     */
+
+    private PkgProminence ensurePkgProminence(
+            ObjectContext objectContext,
+            Pkg pkg,
+            Repository repository) {
+        Optional<PkgProminence> pkgProminenceOptional = pkg.getPkgProminence(repository);
+
+        if(!pkgProminenceOptional.isPresent()) {
+            PkgProminence pkgProminence = objectContext.newObject(PkgProminence.class);
+            pkgProminence.setPkg(pkg);
+            pkgProminence.setRepository(repository);
+            pkgProminence.setProminence(Prominence.getByOrdering(objectContext, Prominence.ORDERING_LAST).get());
+            return pkgProminence;
+        }
+
+        return pkgProminenceOptional.get();
+    }
+
+
+    /**
      * <p>This method will import the package described by the 'pkg' parameter by locating the package and
      * either creating it or updating it as necessary.</p>
      * @param pkg imports into the local database from this package model.
@@ -788,14 +811,14 @@ public class PkgOrchestrationService {
 
     public void importFrom(
             ObjectContext objectContext,
-            ObjectId repositoryObjectId,
+            ObjectId repositorySourceObjectId,
             org.haikuos.pkg.model.Pkg pkg,
             boolean populatePayloadLength) {
 
         Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(repositoryObjectId);
+        Preconditions.checkNotNull(repositorySourceObjectId);
 
-        Repository repository = Repository.get(objectContext, repositoryObjectId);
+        RepositorySource repositorySource = RepositorySource.get(objectContext, repositorySourceObjectId);
 
         // first, check to see if the package is there or not.
 
@@ -810,13 +833,13 @@ public class PkgOrchestrationService {
             persistedPkg = objectContext.newObject(org.haikuos.haikudepotserver.dataobjects.Pkg.class);
             persistedPkg.setName(pkg.getName());
             persistedPkg.setActive(Boolean.TRUE);
-            persistedPkg.setProminence(Prominence.getByOrdering(objectContext, Prominence.ORDERING_LAST).get());
-
+            ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
             LOGGER.info("the package {} did not exist; will create", pkg.getName());
         }
         else {
 
             persistedPkg = persistedPkgOptional.get();
+            ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
 
             // if we know that the package exists then we should look for the version.
 
@@ -855,7 +878,7 @@ public class PkgOrchestrationService {
             persistedPkgVersion.setMicro(pkg.getVersion().getMicro());
             persistedPkgVersion.setPreRelease(pkg.getVersion().getPreRelease());
             persistedPkgVersion.setRevision(pkg.getVersion().getRevision());
-            persistedPkgVersion.setRepository(repository);
+            persistedPkgVersion.setRepositorySource(repositorySource);
             persistedPkgVersion.setArchitecture(architecture);
             persistedPkgVersion.setPkg(persistedPkg);
 

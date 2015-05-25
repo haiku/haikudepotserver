@@ -11,11 +11,15 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
+import org.haikuos.haikudepotserver.dataobjects.PkgProminence;
+import org.haikuos.haikudepotserver.dataobjects.PkgUserRatingAggregate;
+import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.job.AbstractJobRunner;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
 import org.haikuos.haikudepotserver.support.Callback;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,6 +28,10 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>This report generates a report that lists the prominence of the packages.</p>
@@ -45,7 +53,6 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
     public void run(JobOrchestrationService jobOrchestrationService, PkgProminenceAndUserRatingSpreadsheetJobSpecification specification) throws IOException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
@@ -64,6 +71,7 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
 
             writer.writeNext(new String[]{
                     "pkg-name",
+                    "repository-code",
                     "prominence-name",
                     "prominence-ordering",
                     "derived-rating",
@@ -82,15 +90,41 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
                         @Override
                         public boolean process(Pkg pkg) {
 
-                            writer.writeNext(
-                                    new String[]{
-                                            pkg.getName(),
-                                            pkg.getProminence().getName(),
-                                            pkg.getProminence().getOrdering().toString(),
-                                            null == pkg.getDerivedRating() ? "" : pkg.getDerivedRating().toString(),
-                                            null == pkg.getDerivedRating() ? "" : pkg.getDerivedRatingSampleSize().toString()
-                                    }
-                            );
+                            List<PkgProminence> pkgProminences = PkgProminence.findByPkg(context, pkg);
+                            List<PkgUserRatingAggregate> pkgUserRatingAggregates = PkgUserRatingAggregate.findByPkg(context, pkg);
+                            List<Repository> repositories = Stream.concat(
+                                    pkgProminences.stream().map(PkgProminence::getRepository),
+                                    pkgUserRatingAggregates.stream().map(PkgUserRatingAggregate::getRepository)
+                            ).distinct().sorted().collect(Collectors.toList());
+
+                            if(repositories.isEmpty()) {
+                                writer.writeNext(new String[]{ pkg.getName(),"","","","","" });
+                            }
+                            else {
+                                for(Repository repository : repositories) {
+
+                                    Optional<PkgProminence> pkgProminenceOptional = pkgProminences
+                                            .stream()
+                                            .filter(pp -> pp.getRepository().equals(repository))
+                                            .collect(SingleCollector.optional());
+
+                                    Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional = pkgUserRatingAggregates
+                                            .stream()
+                                            .filter(pura -> pura.getRepository().equals(repository))
+                                            .collect(SingleCollector.optional());
+
+                                    writer.writeNext(
+                                            new String[]{
+                                                    pkg.getName(),
+                                                    repository.getCode(),
+                                                    pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getName() : "",
+                                                    pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getOrdering().toString() : "",
+                                                    pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating().toString() : "",
+                                                    pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRatingSampleSize().toString() : ""
+                                            }
+                                    );
+                                }
+                            }
 
                             return true;
                         }

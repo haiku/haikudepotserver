@@ -68,12 +68,9 @@
 	<db-entity name="pkg" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
-		<db-attribute name="derived_rating" type="FLOAT"/>
-		<db-attribute name="derived_rating_sample_size" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
-		<db-attribute name="prominence_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="publisher_id" type="BIGINT"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
@@ -137,6 +134,17 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="pkg_prominence" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="prominence_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>pkg_prominence_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="pkg_screenshot" schema="haikudepot">
 		<db-attribute name="code" type="CHAR" isMandatory="true" length="36"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
@@ -170,6 +178,20 @@
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_url_type_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="pkg_user_rating_aggregate" schema="haikudepot">
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="derived_rating" type="FLOAT" isMandatory="true"/>
+		<db-attribute name="derived_rating_sample_size" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>pkg_user_rating_aggregate_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -268,15 +290,28 @@
 	</db-entity>
 	<db-entity name="repository" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
-		<db-attribute name="architecture_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="description" type="VARCHAR" length="1024"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="information_url" type="VARCHAR" length="4096"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
-		<db-attribute name="url" type="VARCHAR" isMandatory="true" length="1024"/>
+		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.repository_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="repository_source" schema="haikudepot">
+		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="url" type="VARCHAR" isMandatory="true" length="1024"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.repository_source_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -361,8 +396,6 @@
 	<obj-entity name="Pkg" className="org.haikuos.haikudepotserver.dataobjects.Pkg" lock-type="optimistic" dbEntityName="pkg" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="derivedRating" type="java.lang.Float" db-attribute-path="derived_rating"/>
-		<obj-attribute name="derivedRatingSampleSize" type="java.lang.Integer" lock="true" db-attribute-path="derived_rating_sample_size"/>
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
 	</obj-entity>
@@ -385,6 +418,8 @@
 	</obj-entity>
 	<obj-entity name="PkgPkgCategory" className="org.haikuos.haikudepotserver.dataobjects.PkgPkgCategory" dbEntityName="pkg_pkg_category" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 	</obj-entity>
+	<obj-entity name="PkgProminence" className="org.haikuos.haikudepotserver.dataobjects.PkgProminence" lock-type="optimistic" dbEntityName="pkg_prominence" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	</obj-entity>
 	<obj-entity name="PkgScreenshot" className="org.haikuos.haikudepotserver.dataobjects.PkgScreenshot" lock-type="optimistic" dbEntityName="pkg_screenshot" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
@@ -399,6 +434,12 @@
 	</obj-entity>
 	<obj-entity name="PkgUrlType" className="org.haikuos.haikudepotserver.dataobjects.PkgUrlType" readOnly="true" dbEntityName="pkg_url_type" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
+	</obj-entity>
+	<obj-entity name="PkgUserRatingAggregate" className="org.haikuos.haikudepotserver.dataobjects.PkgUserRatingAggregate" lock-type="optimistic" dbEntityName="pkg_user_rating_aggregate" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="derivedRating" type="java.lang.Float" db-attribute-path="derived_rating"/>
+		<obj-attribute name="derivedRatingSampleSize" type="java.lang.Integer" db-attribute-path="derived_rating_sample_size"/>
+		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 	</obj-entity>
 	<obj-entity name="PkgVersion" className="org.haikuos.haikudepotserver.dataobjects.PkgVersion" lock-type="optimistic" dbEntityName="pkg_version" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
@@ -440,10 +481,17 @@
 		<obj-attribute name="siteUrl" type="java.lang.String" lock="true" db-attribute-path="site_url"/>
 	</obj-entity>
 	<obj-entity name="Repository" className="org.haikuos.haikudepotserver.dataobjects.Repository" lock-type="optimistic" dbEntityName="repository" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="active" type="java.lang.Boolean" db-attribute-path="active"/>
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
+		<obj-attribute name="informationUrl" type="java.lang.String" db-attribute-path="information_url"/>
+		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+	</obj-entity>
+	<obj-entity name="RepositorySource" className="org.haikuos.haikudepotserver.dataobjects.RepositorySource" lock-type="optimistic" dbEntityName="repository_source" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="url" type="java.lang.String" lock="true" db-attribute-path="url"/>
 	</obj-entity>
 	<obj-entity name="User" className="org.haikuos.haikudepotserver.dataobjects.User" lock-type="optimistic" dbEntityName="user" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
@@ -517,11 +565,14 @@
 	<db-relationship name="pkg_pkg_categories" source="pkg" target="pkg_pkg_category" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
+	<db-relationship name="pkg_prominences" source="pkg" target="pkg_prominence" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
+	</db-relationship>
 	<db-relationship name="pkg_screenshots" source="pkg" target="pkg_screenshot" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
-	<db-relationship name="prominence" source="pkg" target="prominence" toMany="false">
-		<db-attribute-pair source="prominence_id" target="id"/>
+	<db-relationship name="pkg_user_rating_aggregates" source="pkg" target="pkg_user_rating_aggregate" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
 	<db-relationship name="publisher" source="pkg" target="publisher" toMany="false">
 		<db-attribute-pair source="publisher_id" target="id"/>
@@ -553,6 +604,15 @@
 	<db-relationship name="pkg_category" source="pkg_pkg_category" target="pkg_category" toMany="false">
 		<db-attribute-pair source="pkg_category_id" target="id"/>
 	</db-relationship>
+	<db-relationship name="pkg" source="pkg_prominence" target="pkg" toMany="false">
+		<db-attribute-pair source="pkg_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="prominence" source="pkg_prominence" target="prominence" toMany="false">
+		<db-attribute-pair source="prominence_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="repository" source="pkg_prominence" target="repository" toMany="false">
+		<db-attribute-pair source="repository_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="pkg" source="pkg_screenshot" target="pkg" toMany="false">
 		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
@@ -564,6 +624,12 @@
 	</db-relationship>
 	<db-relationship name="pkg_screenshot" source="pkg_screenshot_image" target="pkg_screenshot" toMany="false">
 		<db-attribute-pair source="pkg_screenshot_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg" source="pkg_user_rating_aggregate" target="pkg" toMany="false">
+		<db-attribute-pair source="pkg_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="repository" source="pkg_user_rating_aggregate" target="repository" toMany="false">
+		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="architecture" source="pkg_version" target="architecture" toMany="false">
 		<db-attribute-pair source="architecture_id" target="id"/>
@@ -583,7 +649,7 @@
 	<db-relationship name="pkg_version_urls" source="pkg_version" target="pkg_version_url" toMany="true">
 		<db-attribute-pair source="id" target="pkg_version_id"/>
 	</db-relationship>
-	<db-relationship name="repository" source="pkg_version" target="repository" toMany="false">
+	<db-relationship name="repository" source="pkg_version" target="repository_source" toMany="false">
 		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="user_ratings" source="pkg_version" target="user_rating" toMany="true">
@@ -616,17 +682,26 @@
 	<db-relationship name="pkg_version" source="pkg_version_url" target="pkg_version" toMany="false">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkgs" source="prominence" target="pkg" toMany="true">
+	<db-relationship name="pkg_prominences" source="prominence" target="pkg_prominence" toMany="true">
 		<db-attribute-pair source="id" target="prominence_id"/>
 	</db-relationship>
 	<db-relationship name="pkgs" source="publisher" target="pkg" toMany="true">
 		<db-attribute-pair source="id" target="publisher_id"/>
 	</db-relationship>
-	<db-relationship name="architecture" source="repository" target="architecture" toMany="false">
-		<db-attribute-pair source="architecture_id" target="id"/>
-	</db-relationship>
-	<db-relationship name="pkg_versions" source="repository" target="pkg_version" toMany="true">
+	<db-relationship name="repository_sources" source="repository" target="repository_source" toMany="true">
 		<db-attribute-pair source="id" target="repository_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel" source="repository" target="pkg_prominence" toMany="true">
+		<db-attribute-pair source="id" target="repository_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel1" source="repository" target="pkg_user_rating_aggregate" toMany="true">
+		<db-attribute-pair source="id" target="repository_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_versions" source="repository_source" target="pkg_version" toMany="true">
+		<db-attribute-pair source="id" target="repository_id"/>
+	</db-relationship>
+	<db-relationship name="repository" source="repository_source" target="repository" toMany="false">
+		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="natural_language" source="user" target="natural_language" toMany="false">
 		<db-attribute-pair source="natural_language_id" target="id"/>
@@ -665,8 +740,9 @@
 	<obj-relationship name="pkgIcons" source="Pkg" target="PkgIcon" deleteRule="Cascade" db-relationship-path="pkg_icons"/>
 	<obj-relationship name="pkgLocalizations" source="Pkg" target="PkgLocalization" deleteRule="Cascade" db-relationship-path="pkg_localizations"/>
 	<obj-relationship name="pkgPkgCategories" source="Pkg" target="PkgPkgCategory" deleteRule="Cascade" db-relationship-path="pkg_pkg_categories"/>
+	<obj-relationship name="pkgProminences" source="Pkg" target="PkgProminence" deleteRule="Cascade" db-relationship-path="pkg_prominences"/>
 	<obj-relationship name="pkgScreenshots" source="Pkg" target="PkgScreenshot" deleteRule="Cascade" db-relationship-path="pkg_screenshots"/>
-	<obj-relationship name="prominence" source="Pkg" target="Prominence" deleteRule="Nullify" db-relationship-path="prominence"/>
+	<obj-relationship name="pkgUserRatingAggregates" source="Pkg" target="PkgUserRatingAggregate" deleteRule="Cascade" db-relationship-path="pkg_user_rating_aggregates"/>
 	<obj-relationship name="publisher" source="Pkg" target="Publisher" deleteRule="Nullify" db-relationship-path="publisher"/>
 	<obj-relationship name="mediaType" source="PkgIcon" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
 	<obj-relationship name="pkg" source="PkgIcon" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
@@ -676,17 +752,22 @@
 	<obj-relationship name="pkg" source="PkgLocalization" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkg" source="PkgPkgCategory" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgCategory" source="PkgPkgCategory" target="PkgCategory" deleteRule="Nullify" db-relationship-path="pkg_category"/>
+	<obj-relationship name="pkg" source="PkgProminence" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
+	<obj-relationship name="prominence" source="PkgProminence" target="Prominence" deleteRule="Nullify" db-relationship-path="prominence"/>
+	<obj-relationship name="repository" source="PkgProminence" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="pkg" source="PkgScreenshot" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgScreenshotImages" source="PkgScreenshot" target="PkgScreenshotImage" deleteRule="Deny" db-relationship-path="pkg_screenshot_images"/>
 	<obj-relationship name="mediaType" source="PkgScreenshotImage" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
 	<obj-relationship name="pkgScreenshot" source="PkgScreenshotImage" target="PkgScreenshot" deleteRule="Nullify" db-relationship-path="pkg_screenshot"/>
+	<obj-relationship name="pkg" source="PkgUserRatingAggregate" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
+	<obj-relationship name="repository" source="PkgUserRatingAggregate" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="architecture" source="PkgVersion" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>
 	<obj-relationship name="pkg" source="PkgVersion" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgVersionCopyrights" source="PkgVersion" target="PkgVersionCopyright" deleteRule="Deny" db-relationship-path="pkg_version_copyrights"/>
 	<obj-relationship name="pkgVersionLicenses" source="PkgVersion" target="PkgVersionLicense" deleteRule="Deny" db-relationship-path="pkg_version_licenses"/>
 	<obj-relationship name="pkgVersionLocalizations" source="PkgVersion" target="PkgVersionLocalization" deleteRule="Nullify" db-relationship-path="pkg_version_localizations"/>
 	<obj-relationship name="pkgVersionUrls" source="PkgVersion" target="PkgVersionUrl" deleteRule="Deny" db-relationship-path="pkg_version_urls"/>
-	<obj-relationship name="repository" source="PkgVersion" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
+	<obj-relationship name="repositorySource" source="PkgVersion" target="RepositorySource" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionCopyright" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionLicense" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="descriptionLocalizationContent" source="PkgVersionLocalization" target="LocalizationContent" deleteRule="Nullify" db-relationship-path="description_localization_content"/>
@@ -697,7 +778,8 @@
 	<obj-relationship name="pkgUrlType" source="PkgVersionUrl" target="PkgUrlType" deleteRule="Nullify" db-relationship-path="pkg_url_type"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionUrl" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="pkgs" source="Publisher" target="Pkg" deleteRule="Deny" db-relationship-path="pkgs"/>
-	<obj-relationship name="architecture" source="Repository" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>
+	<obj-relationship name="repositorySources" source="Repository" target="RepositorySource" deleteRule="Deny" db-relationship-path="repository_sources"/>
+	<obj-relationship name="repository" source="RepositorySource" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="naturalLanguage" source="User" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
 	<obj-relationship name="permissionUserPkgs" source="User" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="untitledRel1"/>
 	<obj-relationship name="userPasswordResetTokens" source="User" target="UserPasswordResetToken" deleteRule="Cascade" db-relationship-path="untitledRel"/>

@@ -51,6 +51,7 @@ public class GetPkgResult {
 
         public String title;
 
+        public String repositorySourceCode;
         public String repositoryCode;
 
         public List<String> licenses;

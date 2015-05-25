@@ -19,6 +19,11 @@ Distributed under the terms of the MIT License.
             </mediaobject>
         </figure>
 
+    <para>
+        In the diagram above, the diagram does not show &quot;modifyTimestamp&quot; nor does it show
+        &quot;createTimestamp&quot;.
+    </para>
+
     <section xml:id="datamodel-uniqueidentifiers">
     <title>Unique Identifiers</title>
     <para>

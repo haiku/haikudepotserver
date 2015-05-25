@@ -47,10 +47,6 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             setActive(true);
         }
 
-        if(null==getDerivedRatingSampleSize()) {
-            setDerivedRatingSampleSize(0);
-        }
-
         super.validateForInsert(validationResult);
     }
 
@@ -64,20 +60,14 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             }
         }
 
-        if(null != getDerivedRating()) {
-            if(getDerivedRating() < 0f) {
-                validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_PROPERTY,"min"));
-            }
+    }
 
-            if(getDerivedRating() > 5f) {
-                validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_PROPERTY,"max"));
-            }
-        }
-
-        if(getDerivedRatingSampleSize() < 0) {
-            validationResult.addFailure(new BeanValidationFailure(this, DERIVED_RATING_SAMPLE_SIZE_PROPERTY, "min"));
-        }
-
+    public Optional<PkgUserRatingAggregate> getPkgUserRatingAggregate(Repository repository) {
+        Preconditions.checkArgument(null!=repository);
+        return getPkgUserRatingAggregates()
+                .stream()
+                .filter(pura -> pura.getRepository().equals(repository))
+                .collect(SingleCollector.optional());
     }
 
     public Optional<PkgPkgCategory> getPkgPkgCategory(String pkgCategoryCode) {
@@ -194,6 +184,14 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
         return builder.pathSegment(getName());
+    }
+
+    public Optional<PkgProminence> getPkgProminence(Repository repository) {
+        Preconditions.checkArgument(null != repository, "the repository must be provided");
+        return getPkgProminences()
+                .stream()
+                .filter(pp -> pp.getRepository().equals(repository))
+                .collect(SingleCollector.optional());
     }
 
     @Override
