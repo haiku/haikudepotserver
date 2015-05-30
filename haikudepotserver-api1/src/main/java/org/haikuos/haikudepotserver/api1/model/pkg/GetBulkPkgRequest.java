@@ -1,5 +1,5 @@
 /*
-* Copyright 2014, Andrew Lindesay
+* Copyright 2014-2015, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -19,6 +19,13 @@ public class GetBulkPkgRequest {
     };
 
     public List<String> pkgNames;
+
+    /**
+     * <p>Data is returned in relation to the repository code supplied.</p>
+     * @since 2015-05-27
+     */
+
+    public List<String> repositoryCodes;
 
     public List<String> architectureCodes;
 

@@ -195,6 +195,8 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
         }
 
+        Repository repository = getRepository(context, null==request.repositoryCode ? Repository.CODE_DEFAULT : request.repositoryCode);
+
         VersionCoordinates versionCoordinates = new VersionCoordinates(
                 request.pkgVersionMajor,
                 request.pkgVersionMinor,
@@ -205,10 +207,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
                 context,
                 pkgOptional.get(),
+                repository,
                 architecture,
                 versionCoordinates);
 
-        if(!pkgVersionOptional.isPresent()) {
+        if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
             throw new ObjectNotFoundException(
                     PkgVersion.class.getSimpleName(),
                     request.pkgName + "@" + versionCoordinates.toString());
@@ -259,6 +262,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
+        Repository repository = getRepository(context, null==request.repositoryCode ? Repository.CODE_DEFAULT : request.repositoryCode);
 
         Optional<User> userOptional = User.getByNickname(context, request.userNickname);
 
@@ -309,6 +313,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
+                        repository,
                         Collections.singletonList(architecture));
                 break;
 
@@ -475,10 +480,23 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             }
         }
 
+        Optional<Repository> repositoryOptional = Optional.empty();
+
+        if(!Strings.isNullOrEmpty(request.repositoryCode)) {
+            repositoryOptional = Optional.of(getRepository(
+                    context,
+                    request.repositoryCode));
+            searchSpecification.setRepository(repositoryOptional.get());
+        }
+
         // if there is a major version specified then we must be requesting a specific package version,
         // otherwise we will constrain based on the architecture and/or the package name.
 
         if(null!=request.pkgVersionMajor) {
+
+            if(!repositoryOptional.isPresent()) {
+                throw new IllegalStateException("the repository is required when a pkg version is specified");
+            }
 
             if(!pkgOptional.isPresent()) {
                 throw new IllegalStateException("the pkg is required when a pkg version is specified");
@@ -491,6 +509,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
                     context,
                     pkgOptional.get(),
+                    repositoryOptional.get(),
                     architecture,
                     new VersionCoordinates(
                             request.pkgVersionMajor,
@@ -499,7 +518,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                             request.pkgVersionPreRelease,
                             request.pkgVersionRevision));
 
-            if(!pkgVersionOptional.isPresent()) {
+            if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
                 throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(),"");
             }
 

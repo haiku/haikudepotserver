@@ -8,6 +8,8 @@ package org.haikuos.haikudepotserver.repository;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.haikuos.haikudepotserver.dataobjects.Pkg;
+import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haikuos.haikudepotserver.support.LikeHelper;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>This service provides non-trivial operations and processes around repositories.</p>
@@ -26,6 +30,50 @@ import java.util.List;
 public class RepositoryOrchestrationService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryOrchestrationService.class);
+
+    // ------------------------------
+    // HELPERS
+
+    /**
+     * <p>If the package is associated with a single active repository then this method will return it; otherwise
+     * it will return an empty Optional.</p>
+     */
+
+    public Optional<Repository> tryGetSingleActiveRepositoryForPkg(
+            ObjectContext context,
+            Pkg pkg) {
+        List<Repository> repositories = getRepositoriesForPkg(context, pkg)
+                .stream()
+                .filter(Repository::getActive)
+                .collect(Collectors.toList());
+
+        return (1==repositories.size()) ? Optional.of(repositories.get(0)) : Optional.<Repository>empty();
+    }
+
+    /**
+     * <p>Returns all of the repositories that contain this package.</p>
+     */
+
+    public List<Repository> getRepositoriesForPkg(
+            ObjectContext context,
+            Pkg pkg) {
+        Preconditions.checkArgument(null!=context);
+        Preconditions.checkArgument(null!=pkg);
+
+        StringBuilder ejbql = new StringBuilder();
+
+        ejbql.append("SELECT DISTINCT r FROM\n");
+        ejbql.append(Repository.class.getSimpleName());
+        ejbql.append(" r WHERE EXISTS (SELECT pv FROM \n");
+        ejbql.append(PkgVersion.class.getSimpleName());
+        ejbql.append(" pv WHERE pv.repositorySource.repository=r)");
+
+        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
+        query.setParameter("pkg", pkg);
+
+        return (List<Repository>) context.performQuery(query);
+
+    }
 
     // ------------------------------
     // SEARCH

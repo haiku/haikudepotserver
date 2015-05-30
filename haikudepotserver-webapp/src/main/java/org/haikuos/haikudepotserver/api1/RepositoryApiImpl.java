@@ -14,15 +14,14 @@ import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.api1.support.ValidationException;
 import org.haikuos.haikudepotserver.api1.support.ValidationFailure;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haikuos.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
-import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -81,7 +80,6 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         return new TriggerImportRepositoryResult();
     }
 
-
     @Override
     public SearchRepositoriesResult searchRepositories(SearchRepositoriesRequest request) {
         Preconditions.checkNotNull(request);
@@ -131,7 +129,6 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.items = searchedRepositories.stream().map(sr -> {
             SearchRepositoriesResult.Repository resultRepository = new SearchRepositoriesResult.Repository();
             resultRepository.active = sr.getActive();
-            resultRepository.architectureCode = sr.getArchitecture().getCode();
             resultRepository.code = sr.getCode();
             return resultRepository;
         }).collect(Collectors.toList());
@@ -162,11 +159,20 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         GetRepositoryResult result = new GetRepositoryResult();
         result.active = repositoryOptional.get().getActive();
-        result.architectureCode = repositoryOptional.get().getArchitecture().getCode();
         result.code = repositoryOptional.get().getCode();
         result.createTimestamp = repositoryOptional.get().getCreateTimestamp().getTime();
         result.modifyTimestamp = repositoryOptional.get().getModifyTimestamp().getTime();
-        result.url = repositoryOptional.get().getUrl();
+        result.informationalUrl = repositoryOptional.get().getInformationUrl();
+        result.repositorySources = repositoryOptional.get().getRepositorySources()
+                .stream()
+                .map(rs -> {
+                    GetRepositoryResult.RepositorySource resultRs = new GetRepositoryResult.RepositorySource();
+                    resultRs.active = rs.getActive();
+                    resultRs.code = rs.getCode();
+                    resultRs.url = rs.getUrl();
+                    return resultRs;
+                })
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -203,9 +209,9 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
                     break;
 
-                case URL:
-                    repositoryOptional.get().setUrl(updateRepositoryRequest.url);
-                    LOGGER.info("did set the url on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.url);
+                case INFORMATIONALURL:
+                    repositoryOptional.get().setInformationUrl(updateRepositoryRequest.informationalUrl);
+                    LOGGER.info("did set the informational url on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.informationalUrl);
                     break;
 
                 default:
@@ -240,12 +246,6 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new AuthorizationFailureException();
         }
 
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context, createRepositoryRequest.architectureCode);
-
-        if(!architectureOptional.isPresent()) {
-            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), createRepositoryRequest.architectureCode);
-        }
-
         // the code must be supplied.
 
         if(Strings.isNullOrEmpty(createRepositoryRequest.code)) {
@@ -265,9 +265,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Repository repository = context.newObject(Repository.class);
 
         repository.setCode(createRepositoryRequest.code);
-        repository.setActive(Boolean.TRUE);
-        repository.setUrl(createRepositoryRequest.url);
-        repository.setArchitecture(architectureOptional.get());
+        repository.setName(createRepositoryRequest.name);
+        repository.setInformationUrl(createRepositoryRequest.informationalUrl);
 
         context.commitChanges();
 

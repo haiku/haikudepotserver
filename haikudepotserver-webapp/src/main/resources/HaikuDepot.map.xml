@@ -141,7 +141,7 @@
 		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>pkg_prominence_seq</db-generator-name>
+			<db-generator-name>haikudepot.pkg_prominence_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -182,16 +182,14 @@
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_user_rating_aggregate" schema="haikudepot">
-		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="derived_rating" type="FLOAT" isMandatory="true"/>
 		<db-attribute name="derived_rating_sample_size" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
-			<db-generator-name>pkg_user_rating_aggregate_seq</db-generator-name>
+			<db-generator-name>haikudepot.pkg_user_rating_aggregate_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -208,7 +206,7 @@
 		<db-attribute name="payload_length" type="BIGINT"/>
 		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="pre_release" type="VARCHAR" length="255"/>
-		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="repository_source_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="revision" type="INTEGER"/>
 		<db-attribute name="view_counter" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
@@ -436,10 +434,8 @@
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
 	<obj-entity name="PkgUserRatingAggregate" className="org.haikuos.haikudepotserver.dataobjects.PkgUserRatingAggregate" lock-type="optimistic" dbEntityName="pkg_user_rating_aggregate" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="derivedRating" type="java.lang.Float" db-attribute-path="derived_rating"/>
 		<obj-attribute name="derivedRatingSampleSize" type="java.lang.Integer" db-attribute-path="derived_rating_sample_size"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 	</obj-entity>
 	<obj-entity name="PkgVersion" className="org.haikuos.haikudepotserver.dataobjects.PkgVersion" lock-type="optimistic" dbEntityName="pkg_version" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
@@ -649,8 +645,8 @@
 	<db-relationship name="pkg_version_urls" source="pkg_version" target="pkg_version_url" toMany="true">
 		<db-attribute-pair source="id" target="pkg_version_id"/>
 	</db-relationship>
-	<db-relationship name="repository" source="pkg_version" target="repository_source" toMany="false">
-		<db-attribute-pair source="repository_id" target="id"/>
+	<db-relationship name="repository_source" source="pkg_version" target="repository_source" toMany="false">
+		<db-attribute-pair source="repository_source_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="user_ratings" source="pkg_version" target="user_rating" toMany="true">
 		<db-attribute-pair source="id" target="pkg_version_id"/>
@@ -698,7 +694,7 @@
 		<db-attribute-pair source="id" target="repository_id"/>
 	</db-relationship>
 	<db-relationship name="pkg_versions" source="repository_source" target="pkg_version" toMany="true">
-		<db-attribute-pair source="id" target="repository_id"/>
+		<db-attribute-pair source="id" target="repository_source_id"/>
 	</db-relationship>
 	<db-relationship name="repository" source="repository_source" target="repository" toMany="false">
 		<db-attribute-pair source="repository_id" target="id"/>
@@ -767,7 +763,7 @@
 	<obj-relationship name="pkgVersionLicenses" source="PkgVersion" target="PkgVersionLicense" deleteRule="Deny" db-relationship-path="pkg_version_licenses"/>
 	<obj-relationship name="pkgVersionLocalizations" source="PkgVersion" target="PkgVersionLocalization" deleteRule="Nullify" db-relationship-path="pkg_version_localizations"/>
 	<obj-relationship name="pkgVersionUrls" source="PkgVersion" target="PkgVersionUrl" deleteRule="Deny" db-relationship-path="pkg_version_urls"/>
-	<obj-relationship name="repositorySource" source="PkgVersion" target="RepositorySource" deleteRule="Nullify" db-relationship-path="repository"/>
+	<obj-relationship name="repositorySource" source="PkgVersion" target="RepositorySource" deleteRule="Nullify" db-relationship-path="repository_source"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionCopyright" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="pkgVersion" source="PkgVersionLicense" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="descriptionLocalizationContent" source="PkgVersionLocalization" target="LocalizationContent" deleteRule="Nullify" db-relationship-path="description_localization_content"/>
@@ -803,7 +799,7 @@ COUNT(DISTINCT pv.id) AS "total"
     #result('pv.modify_timestamp', 'java.sql.Timestamp', 'modify_timestamp'),
     #result('pv.pkg_id', 'long', 'pkg_id'),
     #result('pv.pre_release', 'String', 'pre_release'),
-    #result('pv.repository_id', 'long', 'repository_id'),
+    #result('pv.repository_source_id', 'long', 'repository_source_id'),
     #result('pv.revision', 'Integer', 'revision'),
     #result('pv.view_counter', 'long', 'view_counter'),
     #result('pv.is_latest', 'boolean', 'is_latest'),
@@ -812,6 +808,10 @@ COUNT(DISTINCT pv.id) AS "total"
 FROM
 haikudepot.pkg_version pv
 JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+#if($search.repositories)
+JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
+JOIN haikudepot.repository r ON rs.repository_id = r.id
+#end
 #if($search.architectures)
 JOIN haikudepot.architecture a ON a.id = pv.architecture_id
 #end
@@ -846,6 +846,16 @@ pv.is_latest = true
 #if(! $search.includeInactive)
 AND p.active = true
 AND pv.active = true
+#end
+#if($search.repositories)
+AND r.code IN (
+    #foreach( $repository in $search.repositories )
+        #bind($repository.code)
+        #if($velocityHasNext)
+        ,
+        #end
+    #end
+)
 #end
 #if($search.architectures)
 AND a.code IN (

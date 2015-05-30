@@ -36,7 +36,7 @@ import java.util.Set;
  * database.  It will copy the data into a local file and then work through it there.</p>
  *
  * <p>The system works by the caller lodging a request to update from a remote repository.  The request may be
- * later superceeded by another request for the same repository.  When the import process has capacity then it
+ * later superseded by another request for the same repository.  When the import process has capacity then it
  * will undertake the import process.</p>
  */
 
@@ -75,6 +75,8 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
                 for (RepositorySource repositorySource : repositorySources) {
                     runForRepositorySource(mainContext, repositorySource);
                 }
+
+                transaction.commit();
             }
             catch (Throwable th) {
                 transaction.setRollbackOnly();

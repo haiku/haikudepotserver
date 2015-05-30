@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.dataobjects.*;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -24,7 +25,10 @@ import java.util.concurrent.TimeUnit;
 public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
     @Resource
-    UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingOrchestrationService userRatingOrchestrationService;
+
+    @Resource
+    private PkgOrchestrationService pkgOrchestrationService;
 
     // -------------------
     // SETUP
@@ -44,12 +48,12 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
     private PkgVersion createTestUserRatingPkgVersion(
             ObjectContext context,
-            Repository repository, Pkg pkg, Architecture architecture,
+            RepositorySource repositorySource, Pkg pkg, Architecture architecture,
             Integer major, Integer minor, Integer micro, Integer revision,
             boolean isLatest) {
         PkgVersion pkgVersion = context.newObject(PkgVersion.class);
         pkgVersion.setIsLatest(isLatest);
-        pkgVersion.setRepository(repository);
+        pkgVersion.setRepositorySource(repositorySource);
         pkgVersion.setRevision(revision);
         pkgVersion.setArchitecture(architecture);
         pkgVersion.setMajor(Integer.toString(major));
@@ -63,13 +67,14 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
         UserRatingTestData userRatingTestData = new UserRatingTestData();
 
-        Repository repository = Repository.getByCode(context, "testrepository").get();
+        Repository repository = Repository.getByCode(context, "testrepo").get();
+        RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc").get();
         Architecture x86 = Architecture.getByCode(context, "x86").get();
         Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2").get();
 
         userRatingTestData.pkg = context.newObject(Pkg.class);
         userRatingTestData.pkg.setName("urtestpkg");
-        userRatingTestData.pkg.setProminence(Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get());
+        pkgOrchestrationService.ensurePkgProminence(context, userRatingTestData.pkg, repository, Prominence.ORDERING_LAST);
 
         userRatingTestData.user1 = integrationTestSupportService.createBasicUser(context,"urtestuser1","password");
         userRatingTestData.user2 = integrationTestSupportService.createBasicUser(context,"urtestuser2","password");
@@ -77,12 +82,12 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         userRatingTestData.user4 = integrationTestSupportService.createBasicUser(context,"urtestuser4","password");
         userRatingTestData.user5 = integrationTestSupportService.createBasicUser(context,"urtestuser5","password");
 
-        userRatingTestData.pkgVersion_0_0_9__x86 = createTestUserRatingPkgVersion(context, repository, userRatingTestData.pkg, x86, 0, 0, 9, null, false);
-        userRatingTestData.pkgVersion_1_0_0__x86 = createTestUserRatingPkgVersion(context, repository, userRatingTestData.pkg, x86, 1, 0, 0, null, false);
-        userRatingTestData.pkgVersion_1_0_1__x86 = createTestUserRatingPkgVersion(context, repository, userRatingTestData.pkg, x86, 1, 0, 1, null, false);
-        userRatingTestData.pkgVersion_1_0_1_1__x86 = createTestUserRatingPkgVersion(context, repository, userRatingTestData.pkg, x86, 1, 0, 1, 1, false);
-        userRatingTestData.pkgVersion_1_0_2__x86 = createTestUserRatingPkgVersion(context, repository, userRatingTestData.pkg, x86, 1, 0, 2, null, false);
-        userRatingTestData.pkgVersion_1_0_2__x86_64 = createTestUserRatingPkgVersion(context, repository, userRatingTestData.pkg, x86_gcc2, 1, 0, 2, null, false);
+        userRatingTestData.pkgVersion_0_0_9__x86 = createTestUserRatingPkgVersion(context, repositorySource, userRatingTestData.pkg, x86, 0, 0, 9, null, false);
+        userRatingTestData.pkgVersion_1_0_0__x86 = createTestUserRatingPkgVersion(context, repositorySource, userRatingTestData.pkg, x86, 1, 0, 0, null, false);
+        userRatingTestData.pkgVersion_1_0_1__x86 = createTestUserRatingPkgVersion(context, repositorySource, userRatingTestData.pkg, x86, 1, 0, 1, null, false);
+        userRatingTestData.pkgVersion_1_0_1_1__x86 = createTestUserRatingPkgVersion(context, repositorySource, userRatingTestData.pkg, x86, 1, 0, 1, 1, false);
+        userRatingTestData.pkgVersion_1_0_2__x86 = createTestUserRatingPkgVersion(context, repositorySource, userRatingTestData.pkg, x86, 1, 0, 2, null, false);
+        userRatingTestData.pkgVersion_1_0_2__x86_64 = createTestUserRatingPkgVersion(context, repositorySource, userRatingTestData.pkg, x86_gcc2, 1, 0, 2, null, false);
 
         return userRatingTestData;
     }
@@ -115,7 +120,10 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         context.commitChanges();
 
         // ----------------------------
-        Optional<UserRatingOrchestrationService.DerivedUserRating> result = userRatingOrchestrationService.userRatingDerivation(context, userRatingData.pkg);
+        Optional<UserRatingOrchestrationService.DerivedUserRating> result = userRatingOrchestrationService.userRatingDerivation(
+                context,
+                userRatingData.pkg,
+                Repository.getByCode(context, "testrepo").get());
         // ----------------------------
 
         Assertions.assertThat(result.isPresent()).isTrue();

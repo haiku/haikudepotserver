@@ -1,5 +1,5 @@
 /*
-* Copyright 2014, Andrew Lindesay
+* Copyright 2014-2015, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -8,6 +8,12 @@ package org.haikuos.haikudepotserver.api1.model.userrating;
 import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
 
 public class CreateUserRatingRequest {
+
+    /**
+     * @since 2015-05-27
+     */
+
+    public String repositoryCode;
 
     public String naturalLanguageCode;
 

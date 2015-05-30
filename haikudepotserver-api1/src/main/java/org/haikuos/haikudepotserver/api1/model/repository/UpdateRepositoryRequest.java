@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,14 +11,14 @@ public class UpdateRepositoryRequest {
 
     public enum Filter {
         ACTIVE,
-        URL
-    };
+        INFORMATIONALURL
+    }
 
     public String code;
 
     public Boolean active;
 
-    public String url;
+    public String informationalUrl;
 
     public List<Filter> filter;
 

@@ -154,6 +154,7 @@ public abstract class AbstractIntegrationTest {
             try ( Connection connection = dataNode.getDataSource().getConnection() ) {
 
                 connection.setAutoCommit(false);
+                connection.rollback();
 
                 String databaseProductName = connection.getMetaData().getDatabaseProductName();
 

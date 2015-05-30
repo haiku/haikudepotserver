@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,13 @@ import java.util.List;
 public class GetPkgVersionLocalizationsRequest {
 
     public String pkgName;
+
+    /**
+     * <p>This repository code identifies a repository from which to get the package version from</p>
+     * @since 2015-05-27
+     */
+
+    public String repositoryCode;
 
     public List<String> naturalLanguageCodes;
 

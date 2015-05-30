@@ -6,12 +6,16 @@
 package org.haikuos.haikudepotserver.support.web;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.dataobjects.Pkg;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
+import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -50,6 +55,9 @@ public class FallbackController {
 
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
+
+    @Resource
+    private RepositoryOrchestrationService repositoryOrchestrationService;
 
     @Value("${baseurl}")
     private String baseUrl;
@@ -78,6 +86,26 @@ public class FallbackController {
         }
     }
 
+    private Optional<PkgVersion> tryGetPkgVesion(ObjectContext context, String term) {
+        if(!Strings.isNullOrEmpty(term)) {
+            Optional<Pkg> pkgOptional = Pkg.getByName(context, term);
+
+            if(pkgOptional.isPresent()) {
+                List<Repository> repositories = repositoryOrchestrationService.getRepositoriesForPkg(context, pkgOptional.get());
+
+                if(!repositories.isEmpty()) {
+                    return pkgOrchestrationService.getLatestPkgVersionForPkg(
+                            context,
+                            pkgOptional.get(),
+                            repositories.get(0));
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
     @RequestMapping(value = "/{"+KEY_TERM+"}", method = RequestMethod.GET)
     public void fallback(
             HttpServletResponse response,
@@ -91,9 +119,7 @@ public class FallbackController {
         }
         else {
 
-            Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkgName(
-                    context,
-                    term);
+            Optional<PkgVersion> pkgVersionOptional = tryGetPkgVesion(context, term);
 
             if (pkgVersionOptional.isPresent()) {
                 UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");

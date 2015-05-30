@@ -107,7 +107,8 @@ public class PkgOrchestrationService {
 
     public Optional<PkgVersion> getLatestPkgVersionForPkgName(
             ObjectContext context,
-            String pkgName) {
+            String pkgName,
+            Repository repository) {
 
         Preconditions.checkArgument(null!=context, "the context must be supplied to lookup the package");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the package name must be supplied");
@@ -115,7 +116,7 @@ public class PkgOrchestrationService {
         Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
 
         if(pkgOptional.isPresent()) {
-            return getLatestPkgVersionForPkg(context, pkgOptional.get());
+            return getLatestPkgVersionForPkg(context, pkgOptional.get(), repository);
         }
 
         return Optional.empty();
@@ -127,7 +128,8 @@ public class PkgOrchestrationService {
 
     public Optional<PkgVersion> getLatestPkgVersionForPkg(
             ObjectContext context,
-            Pkg pkg) {
+            Pkg pkg,
+            Repository repository) {
 
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
@@ -135,6 +137,7 @@ public class PkgOrchestrationService {
         Optional<PkgVersion> pkgVersionOptional = getLatestPkgVersionForPkg(
                 context,
                 pkg,
+                repository,
                 Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode).get()));
 
         if(!pkgVersionOptional.isPresent()) {
@@ -146,6 +149,7 @@ public class PkgOrchestrationService {
                 pkgVersionOptional = getLatestPkgVersionForPkg(
                         context,
                         pkg,
+                        repository,
                         Collections.singletonList(architectures.get(i)));
             }
         }
@@ -154,33 +158,32 @@ public class PkgOrchestrationService {
     }
 
     /**
-     * <p>This method will return the latest PkgVersion for the supplied package.  The version sorting logic to compare
-     * version is quite complex.  For this reason it is basically implemented in java code.  An initial SQL statement
-     * is executed to get meta-data for all of the possible versions.  This meta data then drives a sort and the sort
-     * is able to provide the primary key for the latest version which is then faulted as a data object.</p>
+     * <p>This method will return the latest PkgVersion for the supplied package.</p>
      */
 
     public Optional<PkgVersion> getLatestPkgVersionForPkg(
             ObjectContext context,
             Pkg pkg,
+            Repository repository,
             final List<Architecture> architectures) {
 
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(architectures);
         Preconditions.checkState(!architectures.isEmpty());
+        Preconditions.checkArgument(null!=repository);
 
-        SelectQuery query = new SelectQuery(
-                PkgVersion.class,
-                ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg)
-                        .andExp(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE))
-                        .andExp(ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE))
-                        .andExp(ExpressionFactory.inExp(PkgVersion.ARCHITECTURE_PROPERTY, architectures))
-        );
+        List<Expression> expressions = new ArrayList<>();
+        expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg));
+        expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
+        expressions.add(ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE));
+        expressions.add(ExpressionFactory.inExp(PkgVersion.ARCHITECTURE_PROPERTY, architectures));
+        expressions.add(ExpressionFactory.matchExp(
+                PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
+                repository));
 
-        return ((List<PkgVersion>) context.performQuery(query))
-                .stream()
-                .collect(SingleCollector.optional());
+        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
+        return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
     }
 
     // ------------------------------
@@ -728,7 +731,7 @@ public class PkgOrchestrationService {
 
         int count = 0;
 
-        for(PkgVersion pkgVersion : PkgVersion.getForPkg(context, pkg)) {
+        for(PkgVersion pkgVersion : PkgVersion.getForPkg(context, pkg, repositorySource, false)) { // active only
             if(pkgVersion.getRepositorySource().equals(repositorySource)) {
                 if(pkgVersion.getActive()) {
                     pkgVersion.setActive(false);
@@ -783,17 +786,39 @@ public class PkgOrchestrationService {
      * repository or will create one and return it.</p>
      */
 
-    private PkgProminence ensurePkgProminence(
+    public PkgProminence ensurePkgProminence(
             ObjectContext objectContext,
             Pkg pkg,
             Repository repository) {
+        return ensurePkgProminence(objectContext, pkg, repository, Prominence.ORDERING_LAST);
+    }
+
+    public PkgProminence ensurePkgProminence(
+            ObjectContext objectContext,
+            Pkg pkg,
+            Repository repository,
+            Integer ordering) {
+        Preconditions.checkArgument(null!=ordering && ordering > 0, "an ordering must be suppied");
+        return ensurePkgProminence(
+                objectContext, pkg, repository,
+                Prominence.getByOrdering(objectContext, ordering).get());
+    }
+
+    public PkgProminence ensurePkgProminence(
+            ObjectContext objectContext,
+            Pkg pkg,
+            Repository repository,
+            Prominence prominence) {
+        Preconditions.checkArgument(null!=prominence);
+        Preconditions.checkArgument(null!=repository);
+        Preconditions.checkArgument(null!=pkg);
         Optional<PkgProminence> pkgProminenceOptional = pkg.getPkgProminence(repository);
 
         if(!pkgProminenceOptional.isPresent()) {
             PkgProminence pkgProminence = objectContext.newObject(PkgProminence.class);
-            pkgProminence.setPkg(pkg);
+            pkg.addToManyTarget(Pkg.PKG_PROMINENCES_PROPERTY, pkgProminence, true);
             pkgProminence.setRepository(repository);
-            pkgProminence.setProminence(Prominence.getByOrdering(objectContext, Prominence.ORDERING_LAST).get());
+            pkgProminence.setProminence(prominence);
             return pkgProminence;
         }
 
@@ -805,6 +830,7 @@ public class PkgOrchestrationService {
      * <p>This method will import the package described by the 'pkg' parameter by locating the package and
      * either creating it or updating it as necessary.</p>
      * @param pkg imports into the local database from this package model.
+     * @param repositorySourceObjectId the {@link ObjectId} of the source of the package data.
      * @param populatePayloadLength is able to signal to the import process that the length of the package should be
      *                              populated.
      */
@@ -819,6 +845,14 @@ public class PkgOrchestrationService {
         Preconditions.checkNotNull(repositorySourceObjectId);
 
         RepositorySource repositorySource = RepositorySource.get(objectContext, repositorySourceObjectId);
+
+        if(!repositorySource.getActive()) {
+            throw new IllegalStateException("it is not possible to import from a repository source that is not active; " + repositorySource);
+        }
+
+        if(!repositorySource.getRepository().getActive()) {
+            throw new IllegalStateException("it is not possible to import from a repository that is not active; " + repositorySource.getRepository());
+        }
 
         // first, check to see if the package is there or not.
 
@@ -843,30 +877,17 @@ public class PkgOrchestrationService {
 
             // if we know that the package exists then we should look for the version.
 
-            List<Expression> expressions = ImmutableList.of(
-                    ExpressionFactory.matchExp(
-                            org.haikuos.haikudepotserver.dataobjects.PkgVersion.PKG_PROPERTY,
-                            persistedPkg
-                    ),
-                    ExpressionHelper.toExpression(toVersionCoordinates(pkg.getVersion())),
-                    ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture)
-            );
-
-
-            SelectQuery selectQuery = new SelectQuery(
-                    org.haikuos.haikudepotserver.dataobjects.PkgVersion.class,
-                    ExpressionHelper.andAll(expressions)
-            );
-
-            //noinspection unchecked
-            persistedPkgVersion =
-                    ((List<org.haikuos.haikudepotserver.dataobjects.PkgVersion>) objectContext.performQuery(selectQuery))
-                    .stream()
-                    .collect(SingleCollector.single());
+            persistedPkgVersion = PkgVersion.getForPkg(
+                    objectContext,
+                    persistedPkg,
+                    repositorySource.getRepository(),
+                    architecture,
+                    toVersionCoordinates(pkg.getVersion())).orElse(null);
 
             persistedLatestExistingPkgVersion = getLatestPkgVersionForPkg(
                     objectContext,
                     persistedPkg,
+                    repositorySource.getRepository(),
                     Collections.singletonList(architecture));
         }
 

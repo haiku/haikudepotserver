@@ -1,14 +1,11 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haikuos.haikudepotserver.userrating.model;
 
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
-import org.haikuos.haikudepotserver.dataobjects.User;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
 
 /**
@@ -21,11 +18,21 @@ public class UserRatingSearchSpecification extends AbstractSearchSpecification {
 
     private Pkg pkg;
 
+    private Repository repository;
+
     private Architecture architecture;
 
     private PkgVersion pkgVersion;
 
     private Integer daysSinceCreated;
+
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public void setRepository(Repository repository) {
+        this.repository = repository;
+    }
 
     public User getUser() {
         return user;

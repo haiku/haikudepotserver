@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -123,6 +123,15 @@ public class UserRatingOrchestrationService {
 
         if (!search.getIncludeInactive()) {
             whereExpressions.add("ur." + UserRating.ACTIVE_PROPERTY + " = true");
+        }
+
+        if(null != search.getRepository()) {
+            parameterAccumulator.add(search.getRepository());
+            whereExpressions.add(
+                    "ur."
+                            + UserRating.PKG_VERSION_PROPERTY + "."
+                            + PkgVersion.REPOSITORY_SOURCE_PROPERTY + "."
+                            + RepositorySource.REPOSITORY_PROPERTY + " = ?" + parameterAccumulator.size());
         }
 
         if (null != search.getDaysSinceCreated()) {
@@ -386,7 +395,7 @@ public class UserRatingOrchestrationService {
 
         // haul all of the pkg versions into memory first.
 
-        List<PkgVersion> pkgVersions = PkgVersion.getForPkg(context, pkg, repository);
+        List<PkgVersion> pkgVersions = PkgVersion.getForPkg(context, pkg, repository, false); // active only
 
         if(!pkgVersions.isEmpty()) {
 

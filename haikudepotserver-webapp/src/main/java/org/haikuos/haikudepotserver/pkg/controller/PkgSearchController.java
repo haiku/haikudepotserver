@@ -15,10 +15,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.OpenSearchDescription;
 import org.haikuos.haikudepotserver.support.web.NaturalLanguageWebHelper;
@@ -140,6 +137,7 @@ public class PkgSearchController {
                 pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
+                        Repository.getByCode(context, Repository.CODE_DEFAULT).get(), // TODO - user interface for choosing?
                         Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode).get()));
             }
         }

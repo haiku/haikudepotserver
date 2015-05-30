@@ -5,7 +5,6 @@
 
 package org.haikuos.haikudepotserver.dataobjects;
 
-import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -25,6 +24,13 @@ import java.util.Optional;
 
 public class Repository extends _Repository implements CreateAndModifyTimestamped, Coded, Comparable<Repository> {
 
+    /**
+     * <p>Prior to mid 2015 there was no 'proper' concept of a repository and so to allow for clients
+     * continuing to use the API without specifying a depot, this one can be used as a fallback.</p>
+     */
+
+    public final static String CODE_DEFAULT = "haikuports";
+
     public static Repository get(ObjectContext context, ObjectId objectId) {
         return ((List<Repository>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
     }
@@ -33,6 +39,15 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
         return ((List<Repository>) context.performQuery(new SelectQuery(
                     Repository.class,
                     ExpressionFactory.matchExp(Repository.CODE_PROPERTY, code)))).stream().collect(SingleCollector.optional());
+    }
+
+    @Override
+    public void validateForInsert(ValidationResult validationResult) {
+        if(null==getActive()) {
+            setActive(Boolean.TRUE);
+        }
+
+        super.validateForInsert(validationResult);
     }
 
     @Override

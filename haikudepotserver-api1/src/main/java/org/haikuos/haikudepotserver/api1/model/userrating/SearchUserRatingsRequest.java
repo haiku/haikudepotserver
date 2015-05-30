@@ -1,5 +1,5 @@
 /*
-* Copyright 2014, Andrew Lindesay
+* Copyright 2014-2015, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -13,6 +13,12 @@ import org.haikuos.haikudepotserver.api1.support.AbstractSearchRequest;
  */
 
 public class SearchUserRatingsRequest extends AbstractSearchRequest {
+
+    /**
+     * @since 2015-05-27
+     */
+
+    public String repositoryCode;
 
     /**
      * <p>When supplied, will constrain the search to only show user ratings that belong to

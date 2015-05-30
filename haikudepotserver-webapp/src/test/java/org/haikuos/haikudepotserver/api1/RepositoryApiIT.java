@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -68,23 +68,29 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(result.total).isEqualTo(1);
         Assertions.assertThat(result.items.size()).isEqualTo(1);
-        Assertions.assertThat(result.items.get(0).code).isEqualTo("testrepository");
+        Assertions.assertThat(result.items.get(0).code).isEqualTo("testrepo");
     }
 
     @Test
     public void getRepositoryTest() throws Exception {
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
 
         GetRepositoryRequest request = new GetRepositoryRequest();
-        request.code = "testrepository";
+        request.code = "testrepo";
 
         // ------------------------------------
         GetRepositoryResult result = repositoryApi.getRepository(request);
         // ------------------------------------
 
         Assertions.assertThat(result.active).isTrue();
-        Assertions.assertThat(result.architectureCode).isEqualTo("x86");
-        Assertions.assertThat(result.url).startsWith("file:///");
+        Assertions.assertThat(result.code).isEqualTo("testrepo");
+        Assertions.assertThat(result.informationalUrl).isEqualTo("http://example1.haikuos.org/");
+        Assertions.assertThat(result.repositorySources.size()).isEqualTo(1);
+
+        GetRepositoryResult.RepositorySource repositorySource = result.repositorySources.get(0);
+        Assertions.assertThat(repositorySource.code).isEqualTo("testreposrc");
+        Assertions.assertThat(repositorySource.active).isTrue();
+        Assertions.assertThat(repositorySource.url).startsWith("file:///");
     }
 
     @Test
@@ -92,20 +98,20 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         CreateRepositoryRequest request = new CreateRepositoryRequest();
-        request.architectureCode = "x86";
-        request.code = "integrationtest";
-        request.url = "http://www.somewhere.co.nz";
+        request.code = "differentrepo";
+        request.name = "Different Repo";
+        request.informationalUrl = "http://zink.haikuos.org";
 
         // ------------------------------------
         repositoryApi.createRepository(request);
         // ------------------------------------
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Repository> repositoryAfterOptional = Repository.getByCode(context,"integrationtest");
+        Optional<Repository> repositoryAfterOptional = Repository.getByCode(context,"differentrepo");
         Assertions.assertThat(repositoryAfterOptional.get().getActive()).isTrue();
-        Assertions.assertThat(repositoryAfterOptional.get().getArchitecture().getCode()).isEqualTo("x86");
-        Assertions.assertThat(repositoryAfterOptional.get().getCode()).isEqualTo("integrationtest");
-        Assertions.assertThat(repositoryAfterOptional.get().getUrl()).isEqualTo("http://www.somewhere.co.nz");
+        Assertions.assertThat(repositoryAfterOptional.get().getCode()).isEqualTo("differentrepo");
+        Assertions.assertThat(repositoryAfterOptional.get().getName()).isEqualTo("Different Repo");
+        Assertions.assertThat(repositoryAfterOptional.get().getInformationUrl()).isEqualTo("http://zink.haikuos.org");
     }
 
     @Test
@@ -114,9 +120,8 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         CreateRepositoryRequest request = new CreateRepositoryRequest();
-        request.architectureCode = "x86";
         request.code = data.repository.getCode();
-        request.url = "http://www.somewhere.co.nz";
+        request.informationalUrl = "http://zink.haikuos.org";
 
         try {
             // ------------------------------------

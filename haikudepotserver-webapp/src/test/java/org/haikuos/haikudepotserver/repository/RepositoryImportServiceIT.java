@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ import org.haikuos.haikudepotserver.dataobjects.PkgUrlType;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl;
+import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
@@ -45,7 +46,10 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
     public final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
 
     @Resource
-    JobOrchestrationService jobOrchestrationService;
+    private JobOrchestrationService jobOrchestrationService;
+
+    @Resource
+    private PkgOrchestrationService pkgOrchestrationService;
 
     private void verifyPackage(
             ObjectContext context,
@@ -72,11 +76,16 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.getContext();
+
                 Repository repository = context.newObject(Repository.class);
-                repository.setActive(Boolean.TRUE);
                 repository.setCode("test");
-                repository.setUrl("file://" + temporaryFile.getAbsolutePath());
-                repository.setArchitecture(Architecture.getByCode(context, "x86").get());
+                repository.setName("Test Repository");
+
+                RepositorySource repositorySource = context.newObject(RepositorySource.class);
+                repositorySource.setCode("testsrc");
+                repositorySource.setUrl("file://" + temporaryFile.getAbsolutePath());
+                repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
+
                 context.commitChanges();
             }
 
@@ -84,11 +93,16 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.getContext();
+
                 Repository repository = context.newObject(Repository.class);
-                repository.setActive(Boolean.TRUE);
                 repository.setCode("test2");
-                repository.setUrl("file://noop.hpkr");
-                repository.setArchitecture(Architecture.getByCode(context, "x86").get());
+                repository.setName("Test 2");
+
+                RepositorySource repositorySource = context.newObject(RepositorySource.class);
+                repositorySource.setCode("testsrc2");
+                repositorySource.setUrl("file://noop.hpkr");
+                repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
+
                 context.commitChanges();
             }
 
@@ -98,7 +112,8 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.getContext();
                 Pkg pkg = context.newObject(Pkg.class);
-                pkg.setProminence(Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get());
+                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
+                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
                 pkg.setName("taranaki");
 
                 // this one should get deactivated
@@ -109,8 +124,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setMinor("2");
                     pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
                     pkgVersion.setIsLatest(true);
-                    pkgVersion.setActive(true); // to be sure!
-                    pkgVersion.setRepository(Repository.getByCode(context, "test").get());
+                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc").get());
                 }
 
                 // this one should remain
@@ -121,8 +135,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setMinor("3");
                     pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
                     pkgVersion.setIsLatest(true);
-                    pkgVersion.setActive(true); // to be sure!
-                    pkgVersion.setRepository(Repository.getByCode(context, "test2").get());
+                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc2").get());
                 }
 
                 context.commitChanges();
@@ -137,7 +150,8 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 ObjectContext context = serverRuntime.getContext();
 
                 Pkg pkg = context.newObject(Pkg.class);
-                pkg.setProminence(Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get());
+                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
+                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
                 pkg.setName("ffmpeg");
 
                 PkgVersion pkgVersion = context.newObject(PkgVersion.class);
@@ -149,7 +163,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
                 pkgVersion.setIsLatest(true);
                 pkgVersion.setActive(false); // to be sure!
-                pkgVersion.setRepository(Repository.getByCode(context, "test").get());
+                pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc").get());
 
                 PkgVersionUrl pkgVersionUrl = context.newObject(PkgVersionUrl.class);
                 pkgVersionUrl.setPkgUrlType(PkgUrlType.getByCode(context, org.haikuos.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase()).get());
@@ -215,7 +229,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 Assertions.assertThat(pkgVersions.size()).isEqualTo(2);
 
                 for(PkgVersion pkgVersion : pkgVersions) {
-                    boolean isTestRepository = pkgVersion.getRepository().getCode().equals("test");
+                    boolean isTestRepository = pkgVersion.getRepositorySource().getRepository().getCode().equals("test");
                     Assertions.assertThat(pkgVersion.getActive()).isEqualTo(!isTestRepository);
                 }
 
@@ -225,7 +239,12 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                     PkgVersion pkgVersion = PkgVersion.get(context, originalFfmpegPkgOid);
                     Assertions.assertThat(pkgVersion.getActive()).isTrue();
                     Assertions.assertThat(pkgVersion.getIsLatest()).isTrue();
-                    Assertions.assertThat(PkgVersion.getForPkg(context, pkgVersion.getPkg()).size()).isEqualTo(1);
+                    Assertions.assertThat(PkgVersion.getForPkg(
+                            context,
+                            pkgVersion.getPkg(),
+                            Repository.getByCode(context, "test").get(),
+                            true).size())
+                            .isEqualTo(1); // include inactive
 
                     PkgVersionLocalization localization = pkgVersion.getPkgVersionLocalization(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get()).get();
                     Assertions.assertThat(localization.getDescription().get()).startsWith("FFmpeg is a complete, cro");

@@ -10,10 +10,7 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
-import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.support.FileHelper;
 import org.haikuos.pkg.model.Pkg;
 import org.haikuos.pkg.model.PkgArchitecture;
@@ -50,7 +47,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
     private void importTestPackageWithMinor(String minor) {
         ObjectContext context = serverRuntime.getContext();
-        Repository repository = Repository.getByCode(context, "testrepository").get();
+        Repository repository = Repository.getByCode(context, "testrepo").get();
         org.haikuos.pkg.model.Pkg pkg = createPkg(minor);
 
         pkgOrchestrationService.importFrom(
@@ -83,8 +80,8 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.getContext();
-                Repository repository = Repository.getByCode(context, "testrepository").get();
-                repositoryDirectory = new File(repository.getPackagesBaseURL().getPath());
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc").get();
+                repositoryDirectory = new File(repositorySource.getPackagesBaseURL().getPath());
 
                 if (!repositoryDirectory.mkdirs()) {
                     throw new IllegalStateException("unable to create the on-disk repository");
@@ -101,13 +98,13 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.getContext();
-                Repository repository = Repository.getByCode(context, "testrepository").get();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc").get();
 
                 // ---------------------------------
 
                 pkgOrchestrationService.importFrom(
                         context,
-                        repository.getObjectId(),
+                        repositorySource.getObjectId(),
                         inputPackage,
                         true); // <--- NOTE
 
@@ -124,6 +121,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                 org.haikuos.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
                         context,
                         pkg,
+                        Repository.getByCode(context, "testrepo").get(),
                         Collections.singletonList(
                                 Architecture.getByCode(context, "x86").get()
                         )).get();

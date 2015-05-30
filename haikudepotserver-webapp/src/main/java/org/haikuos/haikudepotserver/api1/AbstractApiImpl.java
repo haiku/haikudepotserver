@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import org.apache.cayenne.ObjectContext;
 import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.security.AbstractUserAuthenticationAware;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -53,6 +54,44 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
         }
 
         return naturalLanguageOptional.get();
+    }
+
+    /**
+     * <p>Obtains and returns the repository based on the supplied code.  It will throw a runtime exception if the code
+     * is not supplied or if no repository was able to be found for the code supplied.</p>
+     */
+
+    protected Repository getRepository(ObjectContext context, String repositoryCode) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(repositoryCode), "a repository code is required to search for the repository");
+        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
+
+        if(!repositoryOptional.isPresent()) {
+            throw new ObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode);
+        }
+
+        return repositoryOptional.get();
+    }
+
+    /**
+     * <p>If the code is null or empty, this will return an empty optional.  If it is present then it will try to look
+     * it up.  If it then fails to find a repository for this code, it will throw an exception.</p>
+     */
+
+    protected Optional<Repository> maybeGetRepository(ObjectContext context, String repositoryCode) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null != context, "the object context must be supplied");
+
+        if(!Strings.isNullOrEmpty(repositoryCode)) {
+            Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
+
+            if(!repositoryOptional.isPresent()) {
+                throw new ObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode);
+            }
+
+            return repositoryOptional;
+        }
+
+        return Optional.empty();
     }
 
     /**

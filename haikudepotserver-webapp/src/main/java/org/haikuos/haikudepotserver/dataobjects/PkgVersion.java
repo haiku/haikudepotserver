@@ -7,9 +7,9 @@ package org.haikuos.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.SelectQuery;
@@ -24,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -43,18 +44,55 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public static List<PkgVersion> getForPkg(
             ObjectContext context,
             Pkg pkg,
-            Repository repository) {
+            Repository repository,
+            boolean includeInactive) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null!=repository, "a repository must be supplied to give context to obtaining a pkg version for a pkg");
+        return getForPkg(context, pkg, null, repository, includeInactive);
+    }
+
+    public static List<PkgVersion> getForPkg(
+            ObjectContext context,
+            Pkg pkg,
+            RepositorySource repositorySource,
+            boolean includeInactive) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null!=repositorySource, "a repository source must be supplied to give context to obtaining a pkg version for a pkg");
+        return getForPkg(context, pkg, repositorySource, null, includeInactive);
+    }
+
+    private static List<PkgVersion> getForPkg(
+            ObjectContext context,
+            Pkg pkg,
+            RepositorySource repositorySource,
+            Repository repository,
+            boolean includeInactive) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
 
-        SelectQuery query = new SelectQuery(
-                PkgVersion.class,
-                ExpressionHelper.andAll(ImmutableList.of(
-                    ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg),
-                    ExpressionFactory.matchExp(PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY, repository),
-                    ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE)
-                ))
-        );
+        List<Expression> expressions = new ArrayList<>();
+
+        expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg));
+
+        if(!includeInactive) {
+            expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
+        }
+
+        if (null != repositorySource) {
+            expressions.add(ExpressionFactory.matchExp(
+                    PkgVersion.REPOSITORY_SOURCE_PROPERTY,
+                    repositorySource));
+        }
+
+        if (null != repository) {
+            expressions.add(ExpressionFactory.matchExp(
+                    PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
+                    repository));
+        }
+
+        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
 
         //noinspection unchecked
         return (List<PkgVersion>) context.performQuery(query);
@@ -63,21 +101,26 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public static Optional<PkgVersion> getForPkg(
             ObjectContext context,
             Pkg pkg,
+            Repository repository,
             Architecture architecture,
             VersionCoordinates versionCoordinates) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(architecture);
-        Preconditions.checkNotNull(versionCoordinates);
 
-        SelectQuery query = new SelectQuery(
-                PkgVersion.class,
-                ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE)).andExp(
-                        ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture)).andExp(
-                        ExpressionHelper.toExpression(versionCoordinates))
-        );
+        Preconditions.checkArgument(null!=context);
+        Preconditions.checkArgument(null!=pkg);
+        Preconditions.checkArgument(null!=architecture);
+        Preconditions.checkArgument(null!=versionCoordinates && null!=versionCoordinates.getMajor(), "missing or malformed version coordinates");
+        Preconditions.checkArgument(null!=repository, "the repository is required to lookup a package version");
 
+        List<Expression> expressions = new ArrayList<>();
+
+        expressions.add(ExpressionHelper.toExpression(versionCoordinates));
+        expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg));
+        expressions.add(ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture));
+        expressions.add(ExpressionFactory.matchExp(
+                PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
+                repository));
+
+        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
         return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
     }
 

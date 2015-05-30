@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,6 +23,13 @@ public class SearchPkgsRequest extends AbstractSearchRequest {
     }
 
     public List<String> architectureCodes;
+
+    /**
+     * <p>This field specifies the repositories that the search will look for packages in.</p>
+     * @since 2015-05-30
+     */
+
+    public List<String> repositoryCodes;
 
     public String pkgCategoryCode;
 

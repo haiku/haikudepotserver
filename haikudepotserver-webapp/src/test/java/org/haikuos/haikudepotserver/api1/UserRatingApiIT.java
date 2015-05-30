@@ -46,6 +46,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         userRating.setPkgVersion(pkgOrchestrationService.getLatestPkgVersionForPkg(
                 context,
                 Pkg.getByName(context, "pkg1").get(),
+                Repository.getByCode(context, "testrepo").get(),
                 Collections.singletonList(Architecture.getByCode(context, "x86").get())).get());
         userRating.setRating((short) 3);
         userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_VERYUNSTABLE).get());
@@ -130,6 +131,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         request.pkgVersionArchitectureCode = "x86";
         request.pkgVersionMajor = "1";
         request.pkgVersionMicro = "2";
+        request.repositoryCode = "testrepo";
         request.pkgVersionMinor = null;
         request.pkgVersionRevision = 4;
         request.pkgVersionPreRelease = null;
@@ -157,6 +159,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         CreateUserRatingRequest request = new CreateUserRatingRequest();
         request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
         request.userNickname = "testuser";
+        request.repositoryCode = "testrepo";
         request.userRatingStabilityCode = UserRatingStability.CODE_VERYUNSTABLE;
         request.comment = "The supermarket has gone crazy";
         request.rating = (short) 5;
@@ -202,6 +205,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         SearchUserRatingsRequest request = new SearchUserRatingsRequest();
         request.pkgName = "pkg3";
         request.offset = 0;
+        request.repositoryCode = "testrepo";
         request.limit = Integer.MAX_VALUE;
         request.daysSinceCreated = 10;
 

@@ -20,6 +20,7 @@ import org.haikuos.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haikuos.haikudepotserver.job.model.JobRunnerException;
 import org.haikuos.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
+import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haikuos.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,9 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
     private PkgOrchestrationService pkgOrchestrationService;
 
     @Resource
+    private RepositoryOrchestrationService repositoryOrchestrationService;
+
+    @Resource
     private NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
 
     /**
@@ -77,9 +81,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
             throws IOException, JobRunnerException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
-        assert null!=specification;
 
         final ObjectContext context = serverRuntime.getContext();
 
@@ -102,16 +104,21 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
                 CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
         ) {
 
-            final String[] cells = new String[3 + naturalLanguages.size()];
+            final String[] cells = new String[4 + naturalLanguages.size()];
 
             // headers
 
-            cells[0] = "pkg-name";
-            cells[1] = "architecture";
-            cells[2] = "latest-version-coordinates";
+            {
+                int c = 0;
 
-            for(int i=0;i<naturalLanguages.size();i++) {
-                cells[3 + i] = naturalLanguages.get(i).getCode();
+                cells[c++] = "pkg-name";
+                cells[c++] = "repository";
+                cells[c++] = "architecture";
+                cells[c++] = "latest-version-coordinates";
+
+                for (NaturalLanguage naturalLanguage : naturalLanguages) {
+                    cells[c++] = naturalLanguage.getCode();
+                }
             }
 
             long startMs = System.currentTimeMillis();
@@ -132,27 +139,34 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
                         @Override
                         public boolean process(Pkg pkg) {
 
-                            for (Architecture architecture : architectures) {
+                            for(Repository repository : repositoryOrchestrationService.getRepositoriesForPkg(context, pkg)) {
 
-                                Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
-                                        context,
-                                        pkg,
-                                        Collections.singletonList(architecture));
+                                for (Architecture architecture : architectures) {
 
-                                if (pkgVersionOptional.isPresent()) {
+                                    Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                                            context,
+                                            pkg,
+                                            repository,
+                                            Collections.singletonList(architecture));
 
-                                    cells[0] = pkg.getName();
-                                    cells[1] = architecture.getCode();
-                                    cells[2] = pkgVersionOptional.get().toVersionCoordinates().toString();
+                                    if (pkgVersionOptional.isPresent()) {
+                                        int c = 0;
 
-                                    for (int i = 0; i < naturalLanguages.size(); i++) {
-                                        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguages.get(i));
-                                        cells[3 + i] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
+                                        cells[c++] = pkg.getName();
+                                        cells[c++] = pkgVersionOptional.get().getRepositorySource().getRepository().getCode();
+                                        cells[c++] = architecture.getCode();
+                                        cells[c++] = pkgVersionOptional.get().toVersionCoordinates().toString();
+
+                                        for (NaturalLanguage naturalLanguage : naturalLanguages) {
+                                            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguage);
+                                            cells[c++] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
+                                        }
+
+                                        writer.writeNext(cells);
+
                                     }
-
-                                    writer.writeNext(cells);
-
                                 }
+
                             }
 
                             jobOrchestrationService.setJobProgressPercent(

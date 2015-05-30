@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haikuos.haikudepotserver.pkg.model;
 import org.haikuos.haikudepotserver.dataobjects.Architecture;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
+import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.support.AbstractSearchSpecification;
 
 import java.util.List;
@@ -28,6 +29,12 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     private List<String> pkgNames;
 
+    /**
+     * @since 2015-05-27
+     */
+
+    private List<Repository> repositories;
+
     private List<Architecture> architectures;
 
     private PkgCategory pkgCategory;
@@ -37,6 +44,14 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
     private SortOrdering sortOrdering;
 
     private NaturalLanguage naturalLanguage;
+
+    public List<Repository> getRepositories() {
+        return repositories;
+    }
+
+    public void setRepositories(List<Repository> repositories) {
+        this.repositories = repositories;
+    }
 
     public NaturalLanguage getNaturalLanguage() {
         return naturalLanguage;

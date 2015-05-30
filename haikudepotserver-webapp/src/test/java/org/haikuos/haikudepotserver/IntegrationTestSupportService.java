@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * <p>This class is designed to help out with creating some common test data that can be re-used between tests.</p>
@@ -126,17 +127,21 @@ public class IntegrationTestSupportService {
         Architecture any = Architecture.getByCode(context, "any").get();
 
         result.repository = context.newObject(Repository.class);
-        result.repository.setActive(Boolean.TRUE);
-        result.repository.setCode("testrepository");
-        result.repository.setArchitecture(x86);
-        result.repository.setUrl("file://" + platformTmpDirPath + "/repository");
+        result.repository.setCode("testrepo");
+        result.repository.setName("Test Repository");
+        result.repository.setInformationUrl("http://example1.haikuos.org/");
+
+        result.repositorySource = context.newObject(RepositorySource.class);
+        result.repositorySource.setCode("testreposrc");
+        result.repositorySource.setRepository(result.repository);
+        result.repositorySource.setUrl("file://" + platformTmpDirPath + "/repository");
 
         result.pkg1 = context.newObject(Pkg.class);
         result.pkg1.setActive(true);
         result.pkg1.setName("pkg1");
-        result.pkg1.setDerivedRating(3.5f);
-        result.pkg1.setDerivedRatingSampleSize(4);
-        result.pkg1.setProminence(prominence);
+        pkgOrchestrationService.ensurePkgProminence(context, result.pkg1, result.repository, prominence.getOrdering());
+
+        ensureUserRatingAggregate(context, result.pkg1, result.repository, 3.5f, 4);
 
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
@@ -178,7 +183,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version1x86.setRevision(3);
         result.pkg1Version1x86.setIsLatest(false);
         result.pkg1Version1x86.setPkg(result.pkg1);
-        result.pkg1Version1x86.setRepository(result.repository);
+        result.pkg1Version1x86.setRepositorySource(result.repositorySource);
         addDummyLocalization(context, result.pkg1Version1x86);
 
         result.pkg1Version2x86 = context.newObject(PkgVersion.class);
@@ -189,7 +194,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86.setRevision(4);
         result.pkg1Version2x86.setIsLatest(true);
         result.pkg1Version2x86.setPkg(result.pkg1);
-        result.pkg1Version2x86.setRepository(result.repository);
+        result.pkg1Version2x86.setRepositorySource(result.repositorySource);
 
         pkgOrchestrationService.updatePkgVersionLocalization(
                 context,
@@ -215,7 +220,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86_gcc2.setRevision(4);
         result.pkg1Version2x86_gcc2.setIsLatest(true);
         result.pkg1Version2x86_gcc2.setPkg(result.pkg1);
-        result.pkg1Version2x86_gcc2.setRepository(result.repository);
+        result.pkg1Version2x86_gcc2.setRepositorySource(result.repositorySource);
 
         // this is the same as the x86 version so that comparisons with English will happen.
 
@@ -230,7 +235,7 @@ public class IntegrationTestSupportService {
         result.pkg2 = context.newObject(Pkg.class);
         result.pkg2.setActive(true);
         result.pkg2.setName("pkg2");
-        result.pkg2.setProminence(prominence);
+        pkgOrchestrationService.ensurePkgProminence(context, result.pkg2, result.repository, prominence);
 
         result.pkg2Version1 = context.newObject(PkgVersion.class);
         result.pkg2Version1.setActive(Boolean.TRUE);
@@ -241,13 +246,13 @@ public class IntegrationTestSupportService {
         result.pkg2Version1.setRevision(3);
         result.pkg2Version1.setIsLatest(true);
         result.pkg2Version1.setPkg(result.pkg2);
-        result.pkg2Version1.setRepository(result.repository);
+        result.pkg2Version1.setRepositorySource(result.repositorySource);
         addDummyLocalization(context, result.pkg2Version1);
 
         result.pkg3 = context.newObject(Pkg.class);
         result.pkg3.setActive(true);
         result.pkg3.setName("pkg3");
-        result.pkg3.setProminence(prominence);
+        pkgOrchestrationService.ensurePkgProminence(context, result.pkg3, result.repository, prominence);
 
         result.pkg3Version1 = context.newObject(PkgVersion.class);
         result.pkg3Version1.setActive(Boolean.TRUE);
@@ -258,13 +263,13 @@ public class IntegrationTestSupportService {
         result.pkg3Version1.setRevision(3);
         result.pkg3Version1.setIsLatest(true);
         result.pkg3Version1.setPkg(result.pkg3);
-        result.pkg3Version1.setRepository(result.repository);
+        result.pkg3Version1.setRepositorySource(result.repositorySource);
         addDummyLocalization(context, result.pkg3Version1);
 
         result.pkgAny = context.newObject(Pkg.class);
         result.pkgAny.setActive(true);
         result.pkgAny.setName("pkgany");
-        result.pkgAny.setProminence(prominence);
+        pkgOrchestrationService.ensurePkgProminence(context, result.pkgAny, result.repository, prominence);
 
         result.pkgAnyVersion1 = context.newObject(PkgVersion.class);
         result.pkgAnyVersion1.setActive(Boolean.TRUE);
@@ -274,7 +279,7 @@ public class IntegrationTestSupportService {
         result.pkgAnyVersion1.setRevision(3);
         result.pkgAnyVersion1.setIsLatest(true);
         result.pkgAnyVersion1.setPkg(result.pkgAny);
-        result.pkgAnyVersion1.setRepository(result.repository);
+        result.pkgAnyVersion1.setRepositorySource(result.repositorySource);
         addDummyLocalization(context, result.pkgAnyVersion1);
 
         context.commitChanges();
@@ -282,6 +287,23 @@ public class IntegrationTestSupportService {
         LOGGER.info("did create standard test data");
 
         return result;
+    }
+
+    public void ensureUserRatingAggregate(ObjectContext context, Pkg pkg, Repository repository, Float rating, Integer sampleSize) {
+        Optional<PkgUserRatingAggregate> aggregateOptional = pkg.getPkgUserRatingAggregate(repository);
+        PkgUserRatingAggregate aggregate;
+
+        if(!aggregateOptional.isPresent()) {
+            aggregate = context.newObject(PkgUserRatingAggregate.class);
+            pkg.addToManyTarget(Pkg.PKG_USER_RATING_AGGREGATES_PROPERTY, aggregate, true);
+            aggregate.setRepository(repository);
+        }
+        else {
+            aggregate = aggregateOptional.get();
+        }
+
+        aggregate.setDerivedRating(rating);
+        aggregate.setDerivedRatingSampleSize(sampleSize);
     }
 
     public User createBasicUser(ObjectContext context, String nickname, String password) {
@@ -305,7 +327,12 @@ public class IntegrationTestSupportService {
         ObjectContext context = serverRuntime.getContext();
         Pkg pkg = Pkg.getByName(context, "pkg3").get();
         Architecture x86 = Architecture.getByCode(context, "x86").get();
-        PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(context, pkg, Collections.singletonList(x86)).get();
+        PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                context,
+                pkg,
+                Repository.getByCode(context, "testrepo").get(),
+                Collections.singletonList(x86)).get();
+
         NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get();
 
         {
@@ -362,6 +389,7 @@ public class IntegrationTestSupportService {
     public static class StandardTestData {
 
         public Repository repository;
+        public RepositorySource repositorySource;
 
         public Pkg pkg1;
         public PkgVersion pkg1Version1x86;

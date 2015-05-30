@@ -8,10 +8,7 @@ package org.haikuos.haikudepotserver.multipage.controller;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.multipage.MultipageConstants;
 import org.haikuos.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haikuos.haikudepotserver.multipage.MultipageObjectNotFoundException;
@@ -89,10 +86,11 @@ public class ViewPkgController {
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
                 context,
                 pkgOptional.get(),
+                Repository.getByCode(context, Repository.CODE_DEFAULT).get(),
                 architectureOptional.get(),
                 coordinates);
 
-        if(!pkgVersionOptional.isPresent()) {
+        if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
             throw new MultipageObjectNotFoundException(PkgVersion.class.getSimpleName(), pkgName + "...");
         }
 
