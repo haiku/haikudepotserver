@@ -13,6 +13,15 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 public interface RepositoryApi {
 
     /**
+     * <p>This method will return a list of all of the repositories which exist in the system.
+     * Minimal data is returned and it is expected that the caller will use the
+     * {@link #getRepository(GetRepositoryRequest)} to get specific details for repositories
+     * for which finer detail is required.</p>
+     */
+
+    GetRepositoriesResult getRepositories(GetRepositoriesRequest getRepositoriesRequest);
+
+    /**
      * <p>This method will search the repositories according to the supplied criteria and will
      * return a list of those found.  Any user is able to see the repositories.</p>
      */

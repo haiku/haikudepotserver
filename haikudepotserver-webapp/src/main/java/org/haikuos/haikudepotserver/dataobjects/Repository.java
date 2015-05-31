@@ -41,6 +41,16 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
                     ExpressionFactory.matchExp(Repository.CODE_PROPERTY, code)))).stream().collect(SingleCollector.optional());
     }
 
+    /**
+     * <p>Returns all active repositories.</p>
+     */
+
+    public static List<Repository> getAll(ObjectContext context) {
+        return context.performQuery(new SelectQuery(
+                Repository.class,
+                ExpressionFactory.matchExp(Repository.ACTIVE_PROPERTY, Boolean.TRUE)));
+    }
+
     @Override
     public void validateForInsert(ValidationResult validationResult) {
         if(null==getActive()) {

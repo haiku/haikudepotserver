@@ -53,6 +53,18 @@ public class GetBulkPkgResult {
 
         public String title;
 
+        /**
+         * @since 2015-04-31
+         */
+
+        public String repositorySourceCode;
+
+        /**
+         * @since 2015-04-31
+         */
+
+        public String repositoryCode;
+
         public String summary;
         public String description;
 

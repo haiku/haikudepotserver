@@ -48,6 +48,22 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     @Resource
     private JobOrchestrationService jobOrchestrationService;
 
+    @Override
+    public GetRepositoriesResult getRepositories(GetRepositoriesRequest getRepositoriesRequest) {
+        Preconditions.checkArgument(null!=getRepositoriesRequest);
+        GetRepositoriesResult result = new GetRepositoriesResult();
+        result.repositories = Repository.getAll(serverRuntime.getContext())
+                .stream()
+                .map(r -> {
+                    GetRepositoriesResult.Repository resultRepository = new GetRepositoriesResult.Repository();
+                    resultRepository.code = r.getCode();
+                    resultRepository.name = r.getName();
+                    return resultRepository;
+                })
+                .collect(Collectors.toList());
+        return result;
+    }
+
     // note; no integration test for this one.
     @Override
     public TriggerImportRepositoryResult triggerImportRepository(

@@ -53,6 +53,18 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
          */
 
         public String title;
+
+        /**
+         * @since 2015-04-31
+         */
+
+        public String repositorySourceCode;
+
+        /**
+         * @since 2015-04-31
+         */
+
+        public String repositoryCode;
     }
 
 }

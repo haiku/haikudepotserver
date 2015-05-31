@@ -27,7 +27,6 @@ import org.haikuos.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haikuos.haikudepotserver.job.model.JobData;
 import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.*;
-import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
@@ -248,6 +247,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     resultVersion.payloadLength = spv.getPayloadLength();
                     resultVersion.title = resolvedPkgVersionLocalization.getTitle();
                     resultVersion.summary = resolvedPkgVersionLocalization.getSummary();
+                    resultVersion.repositorySourceCode = spv.getRepositorySource().getCode();
+                    resultVersion.repositoryCode = spv.getRepositorySource().getRepository().getCode();
 
                     resultPkg.versions = Collections.singletonList(resultVersion);
 
@@ -892,6 +893,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         GetBulkPkgResult.PkgVersion version = new GetBulkPkgResult.PkgVersion();
 
+        version.repositorySourceCode = pkgVersion.getRepositorySource().getCode();
+        version.repositoryCode = pkgVersion.getRepositorySource().getRepository().getCode();
         version.major = pkgVersion.getMajor();
         version.minor = pkgVersion.getMinor();
         version.micro = pkgVersion.getMicro();

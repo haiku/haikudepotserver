@@ -29,7 +29,20 @@ import java.util.Optional;
 public class RepositoryApiIT extends AbstractIntegrationTest {
 
     @Resource
-    RepositoryApi repositoryApi;
+    private RepositoryApi repositoryApi;
+
+    @Test
+    public void testGetRepositories() {
+        integrationTestSupportService.createStandardTestData();
+
+        // ------------------------------------
+        GetRepositoriesResult result = repositoryApi.getRepositories(new GetRepositoriesRequest());
+        // ------------------------------------
+
+        Assertions.assertThat(result.repositories.size()).isEqualTo(1);
+        Assertions.assertThat(result.repositories.get(0).code).isEqualTo("testrepo");
+
+    }
 
     @Test
     public void testUpdateRepository() throws ObjectNotFoundException {
