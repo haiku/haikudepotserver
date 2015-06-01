@@ -1,8 +1,12 @@
 <div id="breadcrumbs-container" ng-show="shouldShowItems()">
     <ul>
         <li ng-repeat="item in stack" ng-class="listItemClass(item)">
-            <a href="" ng-click="goItem(item)" ng-show="!isItemActive(item)"><message key="{{item.titleKey}}" parameters="item.titleParameters"></message></a>
-            <span ng-show="isItemActive(item)"><message key="{{item.titleKey}}" parameters="item.titleParameters"></message></span>
+            <a breadcrumbs-stack-item-link="item" ng-show="!isItemActive(item)">
+                <message key="{{item.titleKey}}" parameters="item.titleParameters"></message>
+            </a>
+            <span ng-show="isItemActive(item)">
+                <message key="{{item.titleKey}}" parameters="item.titleParameters"></message>
+            </span>
         </li>
     </ul>
 </div>

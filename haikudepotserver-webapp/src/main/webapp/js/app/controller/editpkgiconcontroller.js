@@ -211,31 +211,55 @@ angular.module('haikudepotserver').controller(
 
                 function checkHasCompletedFileReaderProcessing() {
 
-                    // data urls can come in a number of forms.  This function will strip ut the data material and
+                    // data:[<MIME-type>][;charset=<encoding>][;base64],<data>
+
+                    /**
+                     * This is a recursive function that consumes the start of the data url in order to discover
+                     * the base64 data string.
+                     * @param {string} u
+                     * @param {number} offset
+                     */
+
+                    function indexToStartOfBase64(u,offset) {
+
+                        if(!u||!u.length) {
+                            throw Error('the data url must be supplied to convert to base64');
+                        }
+
+                        if(offset >= u.length) {
+                            throw Error('unexpected end of data url');
+                        }
+
+                        if(0==offset && 0 == u.indexOf('data:')) {
+                            return indexToStartOfBase64(u,5);
+                        }
+
+                        if(offset == u.indexOf('base64,',offset)) {
+                            return offset + 7;
+                        }
+
+                        var semicolonI = u.indexOf(';',offset + 8);
+
+                        if(-1==semicolonI) {
+
+                            var uTrimmed = u;
+
+                            if(uTrimmed.length > 32) {
+                                uTrimmed = uTrimmed.substring(0,28) + '...';
+                            }
+
+                            throw Error('unexpected end of data url; ' + uTrimmed);
+                        }
+
+                        return indexToStartOfBase64(u,semicolonI+1);
+                    }
+
+                    // data urls can come in a number of forms.  This function will strip out the data material and
                     // just get at the base64.  If the data is not base64, it will throw an exception.  Maybe a more
                     // elaborate handling will be required?
 
                     function dataUrlToBase64(u) {
-
-                        if(!u) {
-                            throw Error('the data url must be supplied to convert to base64');
-                        }
-
-                        if(0!= u.indexOf('data:')) {
-                            throw Error('the data url was unable to be converted to base64 because it does not look like a data url');
-                        }
-
-                        var commaI = u.indexOf(',');
-
-                        if(-1==commaI) {
-                            throw Error('expecting comma in data url to preceed the base64 data');
-                        }
-
-                        if(!_.indexOf(u.substring(5,commaI).split(';'),'base64')) {
-                            throw Error('expecting base64 to appear in the data url');
-                        }
-
-                        return u.substring(commaI+1);
+                        return u.substring(indexToStartOfBase64(u,0));
                     }
 
                    if(2==readerIconBitmap16.readyState
