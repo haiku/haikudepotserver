@@ -5,7 +5,8 @@
 
 /**
  * <p>This directive will adjust a hyperlink to which it is associated such that clicking on the hyperlink will
- * take you to the breadcrumb.  The 'breadcrumb factory' is able to produce breadcrumb items.  The name of the
+ * take you to the breadcrumb.  The 'breadcrumb factory' is able to produce breadcrumb items.  Here a 'key' is
+ * provided which indicates to the 'breadcrumb factory' which items to create.  The name of the
  * methods on that service are of the form "createCompletePasswordReset" so the key that should be provided here
  * is of the form "completePasswordReset".</p>
  *
@@ -60,7 +61,7 @@ angular.module('haikudepotserver').directive(
                                 var item = createItem();
 
                                 if (!item) {
-                                    throw Error('it was not possible to create a breadcrum item');
+                                    throw Error('it was not possible to create a breadcrumb item');
                                 }
 
                                 breadcrumbs.pushAndNavigate(item);
