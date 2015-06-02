@@ -9,10 +9,12 @@ angular.module('haikudepotserver').controller(
         '$log','$scope','$rootScope','$q','$location',
         'jsonRpc','constants','userState','messageSource','errorHandling',
         'referenceData','breadcrumbs','breadcrumbFactory','searchMixins',
+        'repository',
         function(
             $log,$scope,$rootScope,$q,$location,
             jsonRpc,constants,userState,messageSource,errorHandling,
-            referenceData,breadcrumbs,breadcrumbFactory,searchMixins) {
+            referenceData,breadcrumbs,breadcrumbFactory,searchMixins,
+            repository) {
 
             angular.extend(this,searchMixins);
 
@@ -40,6 +42,8 @@ angular.module('haikudepotserver').controller(
             $scope.selectedViewCriteriaTypeOption = undefined;
             $scope.searchExpression = $location.search()[KEY_SEARCHEXPRESSION] ? $location.search()[KEY_SEARCHEXPRESSION] : '';
             $scope.lastRefetchPkgsSearchExpression = '';
+            $scope.repositories = undefined; // pulled in with a promise later...
+            $scope.selectedRepositories = undefined;
             $scope.architectures = undefined; // pulled in with a promise later...
             $scope.selectedArchitecture = undefined;
             $scope.pkgCategories = undefined; // pulled in with a promise later...
@@ -235,6 +239,22 @@ angular.module('haikudepotserver').controller(
             }
 
             fnChain([
+
+                // fetch the repositories
+                function(chain) {
+                    repository.getRepositories().then(
+                        function(data) {
+                            $scope.repositories = data.repositories;
+                            $scope.selectedRepositories = _.filter($scope.repositories, function(r) {
+                                return r.code == constants.REPOSITORY_CODE_DEFAULT;
+                            });
+                            fnChain(chain); // carry on...
+                        },
+                        function() { // error logged already
+                            errorHandling.navigateToError();
+                        }
+                    );
+                },
 
                 // fetch the architectures
                 function(chain) {
@@ -438,7 +458,12 @@ angular.module('haikudepotserver').controller(
 
                     amFetchingPkgs = true;
 
+                    //$log.info('repos; ' + $scope.selectedRepositories);
+
                     var req = {
+                        repositoryCodes : _.map($scope.selectedRepositories, function(r) {
+                            return r.code;
+                        }),
                         architectureCodes: [
                             'any',
                             $scope.selectedArchitecture.code

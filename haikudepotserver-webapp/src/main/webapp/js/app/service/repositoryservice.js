@@ -51,9 +51,11 @@ angular.module('haikudepotserver').factory('repository',
             }
 
             return {
+
                 getRepositories : function() {
                     return getRepositories();
                 }
+
             };
 
         }

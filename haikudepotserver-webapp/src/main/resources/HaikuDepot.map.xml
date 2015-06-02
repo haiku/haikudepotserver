@@ -785,7 +785,7 @@
 	<obj-relationship name="user" source="UserRating" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="userRatingStability" source="UserRating" target="UserRatingStability" deleteRule="Nullify" db-relationship-path="user_rating_stability"/>
 	<query name="SearchPkgVersions" factory="org.apache.cayenne.map.SQLTemplateBuilder" root="obj-entity" root-name="PkgVersion">
-		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+		<sql><![CDATA[SELECT
 #if($isTotal)
 COUNT(DISTINCT pv.id) AS "total"
 #else
@@ -808,9 +808,9 @@ COUNT(DISTINCT pv.id) AS "total"
 FROM
 haikudepot.pkg_version pv
 JOIN haikudepot.pkg p ON p.id = pv.pkg_id
-#if($search.repositories)
-JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
-JOIN haikudepot.repository r ON rs.repository_id = r.id
+#if($search.repositories || $search.sortOrdering.name() == "PROMINENCE")
+  JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
+  JOIN haikudepot.repository r ON rs.repository_id = r.id
 #end
 #if($search.architectures)
 JOIN haikudepot.architecture a ON a.id = pv.architecture_id
@@ -839,7 +839,128 @@ LEFT JOIN haikudepot.localization_content pvl_en_title_lc ON pvl_en_title_lc.id 
 JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_id = p.id
 #end
 #if($search.sortOrdering.name() == "PROMINENCE")
-LEFT JOIN haikudepot.prominence pr ON p.prominence_id = pr.id
+LEFT JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
+LEFT JOIN haikudepot.prominence pr ON ppr.prominence_id = pr.id
+#end
+WHERE
+pv.is_latest = true
+#if(! $search.includeInactive)
+AND p.active = true
+AND pv.active = true
+#end
+#if($search.repositories)
+AND r.code IN (
+    #foreach( $repository in $search.repositories )
+        #bind($repository.code)
+        #if($velocityHasNext)
+        ,
+        #end
+    #end
+)
+#end
+#if($search.architectures)
+AND a.code IN (
+    #foreach( $architecture in $search.architectures )
+        #bind($architecture.code)
+        #if($velocityHasNext)
+        ,
+        #end
+    #end
+)
+#end
+#if($search.daysSinceLatestVersion)
+AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGER') * INTERVAL '1 DAY'
+#end
+#if($search.expression)
+AND (
+LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary,pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(p.name) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+)
+#end
+#if($search.pkgCategory)
+AND #bindObjectEqual($search.pkgCategory, 'ppc.pkg_category_id', 'id')
+#end
+#if($search.pkgNames)
+    #if($search.pkgNames.isEmpty())
+    AND true = false
+    #else
+    AND p.name IN (#bind($search.pkgNames))
+    #end
+#end
+#if(!$isTotal)
+ORDER BY
+    #if($search.sortOrdering)
+        #if($search.sortOrdering.name() == "PROMINENCE")
+        pr.ordering ASC,
+        #elseif($search.sortOrdering.name() == "VERSIONVIEWCOUNTER")
+        pv.view_counter DESC,
+        #elseif($search.sortOrdering.name() == "VERSIONCREATETIMESTAMP")
+        pv.create_timestamp DESC,
+        #end
+    #end
+LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC,
+p.name ASC,
+pv.id ASC
+OFFSET #bind($search.offset)
+LIMIT #bind($search.limit)
+#end]]></sql>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+#if($isTotal)
+COUNT(DISTINCT pv.id) AS "total"
+#else
+    #result('pv.active', 'boolean', 'active'),
+    #result('pv.architecture_id', 'long', 'architecture_id'),
+    #result('pv.create_timestamp', 'java.sql.Timestamp', 'create_timestamp'),
+    #result('pv.id', 'long', 'id'),
+    #result('pv.major', 'String', 'major'),
+    #result('pv.minor', 'String', 'minor'),
+    #result('pv.micro', 'String', 'micro'),
+    #result('pv.modify_timestamp', 'java.sql.Timestamp', 'modify_timestamp'),
+    #result('pv.pkg_id', 'long', 'pkg_id'),
+    #result('pv.pre_release', 'String', 'pre_release'),
+    #result('pv.repository_source_id', 'long', 'repository_source_id'),
+    #result('pv.revision', 'Integer', 'revision'),
+    #result('pv.view_counter', 'long', 'view_counter'),
+    #result('pv.is_latest', 'boolean', 'is_latest'),
+    #result('pv.payload_length', 'Long', 'payload_length')
+#end
+FROM
+haikudepot.pkg_version pv
+JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+#if($search.repositories || $search.sortOrdering.name() == "PROMINENCE")
+  JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
+  JOIN haikudepot.repository r ON rs.repository_id = r.id
+#end
+#if($search.architectures)
+JOIN haikudepot.architecture a ON a.id = pv.architecture_id
+#end
+LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_id = p.id AND
+    #if($search.naturalLanguage)
+        #bindObjectEqual($search.naturalLanguage,'pl_nl.natural_language_id','id')
+    #else
+        #bindObjectEqual($englishNaturalLanguage,'pl_nl.natural_language_id','id')
+    #end
+LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_id = p.id AND
+    #bindObjectEqual($englishNaturalLanguage,'pl_en.natural_language_id','id')
+LEFT JOIN haikudepot.pkg_version_localization pvl_nl ON pvl_nl.pkg_version_id = pv.id AND
+#if($search.naturalLanguage)
+    #bindObjectEqual($search.naturalLanguage,'pvl_nl.natural_language_id','id')
+#else
+    #bindObjectEqual($englishNaturalLanguage,'pvl_nl.natural_language_id','id')
+#end
+LEFT JOIN haikudepot.localization_content pvl_nl_summary_lc ON pvl_nl_summary_lc.id = pvl_nl.summary_localization_content_id
+LEFT JOIN haikudepot.localization_content pvl_nl_title_lc ON pvl_nl_title_lc.id = pvl_nl.title_localization_content_id
+LEFT JOIN haikudepot.pkg_version_localization pvl_en ON pvl_en.pkg_version_id = pv.id AND
+    #bindObjectEqual($englishNaturalLanguage,'pvl_en.natural_language_id','id')
+LEFT JOIN haikudepot.localization_content pvl_en_summary_lc ON pvl_en_summary_lc.id = pvl_en.summary_localization_content_id
+LEFT JOIN haikudepot.localization_content pvl_en_title_lc ON pvl_en_title_lc.id = pvl_en.title_localization_content_id
+#if($search.pkgCategory)
+JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_id = p.id
+#end
+#if($search.sortOrdering.name() == "PROMINENCE")
+LEFT JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
+LEFT JOIN haikudepot.prominence pr ON ppr.prominence_id = pr.id
 #end
 WHERE
 pv.is_latest = true
