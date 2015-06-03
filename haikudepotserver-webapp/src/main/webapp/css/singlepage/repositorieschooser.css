@@ -1,0 +1,12 @@
+
+.repositories-chooser-repositories-container {
+    height: 235px;
+    width: 100%;
+    overflow-y: scroll;
+    border: 1px lightgray solid;
+}
+
+.repositories-chooser-actions-container {
+    margin-top: 12px;
+    text-align: right;
+}

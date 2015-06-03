@@ -9,7 +9,7 @@ angular.module('haikudepotserver').controller(
         '$log','$scope','$rootScope','$q','$location',
         'jsonRpc','constants','userState','messageSource','errorHandling',
         'referenceData','breadcrumbs','breadcrumbFactory','searchMixins',
-        'repository',
+        'repositoryService',
         function(
             $log,$scope,$rootScope,$q,$location,
             jsonRpc,constants,userState,messageSource,errorHandling,
@@ -24,6 +24,7 @@ angular.module('haikudepotserver').controller(
             var KEY_OFFSET = 'o';
             var KEY_ARCHITECTURECODE = 'arch';
             var KEY_PKGCATEGORYCODE = 'pkgcat';
+            var KEY_REPOSITORYCODES = 'repos';
             var KEY_SEARCHEXPRESSION = 'srchexpr';
             var KEY_VIEWCRITERIATYPECODE = 'viewcrttyp';
 
@@ -110,6 +111,47 @@ angular.module('haikudepotserver').controller(
                 total : undefined
             };
 
+            function resetSelectedRepositories() {
+
+                if(!$scope.repositories || !$scope.repositories.length) {
+                    throw Error('the repositories should have been populated');
+                }
+
+                var repositoryCodesStr = $location.search()[KEY_REPOSITORYCODES];
+
+                if(repositoryCodesStr && repositoryCodesStr.length) {
+                    $scope.selectedRepositories = _.map(
+                        _.filter(
+                            _.map(repositoryCodesStr.split(','),function(c) { return c.trim(); }),
+                            function(c) {
+                                return c.length;
+                            }
+                        ),
+                        function(c) {
+                            var repository = _.findWhere($scope.repositories, { code : c });
+
+                            if(!repository) {
+                                throw new Error('unable to find the repository for; ' + c);
+                            }
+
+                            return repository;
+                        }
+                    );
+                }
+
+                if(!$scope.selectedRepositories || !$scope.selectedRepositories.length) {
+                    $scope.selectedRepositories = _.filter(
+                        $scope.repositories,
+                        function(r) { return r.code == constants.REPOSITORY_CODE_DEFAULT; }
+                    );
+                }
+
+                if(!$scope.selectedRepositories || !$scope.selectedRepositories.length) {
+                    throw Error('unable to ascertain the selected repositories');
+                }
+
+            }
+
             function resetSelectedArchitecture() {
 
                 if(!$scope.architectures || !$scope.architectures.length) {
@@ -165,6 +207,7 @@ angular.module('haikudepotserver').controller(
             function reset() {
                 $scope.searchExpression = '';
                 $scope.lastRefetchPkgsSearchExpression = '';
+                resetSelectedRepositories();
                 resetSelectedArchitecture();
                 resetSelectedPkgCategory();
                 resetSelectedViewCriteriaTypeOption();
@@ -244,10 +287,8 @@ angular.module('haikudepotserver').controller(
                 function(chain) {
                     repository.getRepositories().then(
                         function(data) {
-                            $scope.repositories = data.repositories;
-                            $scope.selectedRepositories = _.filter($scope.repositories, function(r) {
-                                return r.code == constants.REPOSITORY_CODE_DEFAULT;
-                            });
+                            $scope.repositories = data;
+                            resetSelectedRepositories();
                             fnChain(chain); // carry on...
                         },
                         function() { // error logged already
@@ -418,7 +459,7 @@ angular.module('haikudepotserver').controller(
                 // stop via a conditional because when the architecture is selected (fetched itself) then it will
                 // automatically attempt this refetch again.
 
-                if($scope.selectedArchitecture) {
+                if($scope.selectedArchitecture && $scope.selectedRepositories) {
 
                     // store the parameters for reproducing the page.
 
@@ -429,6 +470,16 @@ angular.module('haikudepotserver').controller(
                         $location.search(KEY_OFFSET, null);
                     }
 
+                    $location.search(
+                        KEY_REPOSITORYCODES,
+                        _.map(
+                            $scope.selectedRepositories,
+                            function(r) {
+                                $log.info('*A*; ' + r);
+                                return r.code;
+                            }
+                        ).join(',')
+                    );
                     $location.search(KEY_ARCHITECTURECODE,$scope.selectedArchitecture.code);
                     $location.search(KEY_SEARCHEXPRESSION,$scope.searchExpression);
                     $location.search(KEY_VIEWCRITERIATYPECODE,$scope.selectedViewCriteriaTypeOption.code);

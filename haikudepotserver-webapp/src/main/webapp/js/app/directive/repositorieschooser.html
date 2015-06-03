@@ -1,0 +1,38 @@
+<span>
+
+    <a href="" ng-click="goShowChooser()">
+        <span ng-repeat="repository in repositories">
+         [{{repository.name}}]
+        </span>
+    </a>
+
+    <modal-container show="showChooser" width="320" close="goHideChooser()">
+
+        <div ng-show="!possibleRepositoryOptions">
+            Loading...
+        </div>
+
+        <div ng-show="!!possibleRepositoryOptions" class="repositories-chooser-container">
+            <div class="repositories-chooser-repositories-container">
+                <div ng-repeat="aRepositoryOption in possibleRepositoryOptions">
+                    <input
+                            type="checkbox"
+                            ng-model="aRepositoryOption.selected">
+                    {{aRepositoryOption.repository.name}}
+                </div>
+            </div>
+
+            <div class="repositories-chooser-actions-container">
+                <button
+                        ng-disabled="!isValid()"
+                        ng-click="goConfirm()"
+                        type="submit"
+                        class="main-action">
+                    <message key="gen.ok"></message>
+                </button>
+            </div>
+        </div>
+
+    </modal-container>
+
+</span>

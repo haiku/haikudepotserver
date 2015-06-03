@@ -7,7 +7,7 @@
  * <p>This service provides functionality for accessing and updating the repositories.</p>
  */
 
-angular.module('haikudepotserver').factory('repository',
+angular.module('haikudepotserver').factory('repositoryService',
     [
         '$log','$q','jsonRpc','userState','errorHandling',
         'constants',
@@ -37,7 +37,8 @@ angular.module('haikudepotserver').factory('repository',
                     ).then(
                         function (result) {
                             $log.info('fetched ' + result.repositories.length + ' repositories');
-                            deferred.resolve(result);
+                            this.repositories = result.repositories;
+                            deferred.resolve(result.repositories);
                         },
                         function (err) {
                             errorHandling.logJsonRpcError(err ? err.error : null);
