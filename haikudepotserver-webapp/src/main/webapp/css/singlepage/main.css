@@ -404,14 +404,14 @@ SEARCH BAR
     font-size: 10px;
 }
 
-#search-criteria-container button {
+#search-criteria-container > div > button {
     font-size: 10px;
     background-color: rgb(253,207,49);
     border: 1px solid black;
     border-radius: 3px;
 }
 
-#search-criteria-container button[disabled] {
+#search-criteria-container > div > button[disabled] {
     border: 1px solid rgba(0, 0, 0, 0.30);
 }
 
