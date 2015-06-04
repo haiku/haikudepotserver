@@ -39,6 +39,12 @@ import java.util.Optional;
 @Controller
 public class FallbackController {
 
+    private enum FallbackType {
+        FAVICON,
+        APPLETOUCH,
+        PKG
+    }
+
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgOrchestrationService.class);
 
     public final static String KEY_TERM = "term";
@@ -65,6 +71,37 @@ public class FallbackController {
         return term;
     }
 
+    private void redirectToPkg(HttpServletResponse response, String term) throws IOException {
+        ObjectContext context = serverRuntime.getContext();
+
+        Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkgName(
+                context,
+                term);
+
+        if (pkgVersionOptional.isPresent()) {
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
+            pkgVersionOptional.get().appendPathSegments(builder);
+            UriComponents uriComponents = builder.build();
+
+            response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+            response.setHeader(HttpHeaders.LOCATION, uriComponents.toUriString());
+
+            PrintWriter w = response.getWriter();
+            w.format("redirecting to; %s", uriComponents.toUriString());
+            w.flush();
+
+            LOGGER.info("did redirect to a package for; {}", term);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+
+            PrintWriter w = response.getWriter();
+            w.format("unable to find an entity for; %s", termDebug(term));
+            w.flush();
+
+            LOGGER.info("did not find a package for; {}", termDebug(term));
+        }
+    }
+
     private void streamFavicon(HttpServletResponse response) throws IOException {
         Preconditions.checkState(null!=servletContext, "the servlet context must be supplied");
         response.setContentType(com.google.common.net.MediaType.ICO.toString());
@@ -78,45 +115,42 @@ public class FallbackController {
         }
     }
 
+    private FallbackType getFallbackType(String term) {
+        if(term.equals(VALUE_FAVICON)) {
+            return FallbackType.FAVICON;
+        }
+
+        if(term.startsWith("apple-touch-icon")) {
+            return FallbackType.APPLETOUCH;
+        }
+
+        return FallbackType.PKG;
+    }
+
     @RequestMapping(value = "/{"+KEY_TERM+"}", method = RequestMethod.GET)
     public void fallback(
             HttpServletResponse response,
             @PathVariable(value = KEY_TERM) String term)
             throws IOException {
 
-        ObjectContext context = serverRuntime.getContext();
+        switch(getFallbackType(term)) {
 
-        if(term.equalsIgnoreCase(VALUE_FAVICON)) {
-            streamFavicon(response);
-        }
-        else {
-
-            Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkgName(
-                    context,
-                    term);
-
-            if (pkgVersionOptional.isPresent()) {
-                UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
-                pkgVersionOptional.get().appendPathSegments(builder);
-                UriComponents uriComponents = builder.build();
-
-                response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-                response.setHeader(HttpHeaders.LOCATION, uriComponents.toUriString());
-
-                PrintWriter w = response.getWriter();
-                w.format("redirecting to; %s", uriComponents.toUriString());
-                w.flush();
-
-                LOGGER.info("did redirect to a package for; {}", term);
-            } else {
+            case APPLETOUCH:
+                LOGGER.debug("unhandled apple touch icon -> 404; {}", term);
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                break;
 
-                PrintWriter w = response.getWriter();
-                w.format("unable to find an entity for; %s", termDebug(term));
-                w.flush();
+            case FAVICON:
+                streamFavicon(response);
+                break;
 
-                LOGGER.info("did not find a package for; {}", termDebug(term));
-            }
+            case PKG:
+                redirectToPkg(response, term);
+                break;
+
+            default:
+                LOGGER.error("unable to handle the fallback; {}", term);
+
         }
 
     }
