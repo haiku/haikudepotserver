@@ -238,7 +238,7 @@ angular.module('haikudepotserver').controller(
                             return offset + 7;
                         }
 
-                        var semicolonI = u.indexOf(';',offset + 8);
+                        var semicolonI = u.indexOf(';',offset);
 
                         if(-1==semicolonI) {
 
