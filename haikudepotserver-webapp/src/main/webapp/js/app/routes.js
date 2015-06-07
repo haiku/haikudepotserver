@@ -8,7 +8,7 @@ angular.module('haikudepotserver').config(
         '$routeProvider',
         function($routeProvider) {
             // eg; '/pkg/apr/1/4/6/3/7/x86'
-            var pkgVersionPrefix = '/pkg/:name/:major/:minor?/:micro?/:preRelease?/:revision?/:architectureCode';
+            var pkgVersionPrefix = '/pkg/:name/:repositoryCode/:major/:minor?/:micro?/:preRelease?/:revision?/:architectureCode';
 
             $routeProvider
                 .when('/rootoperations',{controller:'RootOperationsController',templateUrl:'/js/app/controller/rootoperations.html'})

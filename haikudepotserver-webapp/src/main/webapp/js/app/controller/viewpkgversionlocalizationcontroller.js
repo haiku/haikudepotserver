@@ -74,6 +74,7 @@ angular.module('haikudepotserver').controller(
                                     'getPkgVersionLocalizations',
                                     [{
                                         pkgName: $routeParams.name,
+                                        repositoryCode : $routeParams.repositoryCode,
                                         major : version.major,
                                         minor : version.minor,
                                         micro : version.micro,

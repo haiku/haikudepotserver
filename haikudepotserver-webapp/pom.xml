@@ -224,7 +224,46 @@
                 </executions>
             </plugin>
 
-            
+
+            <!--
+            This plugin handles jasmine java-script tests that can be
+            executed as part of the 'test' lifecycle.
+            -->
+
+            <plugin>
+                <groupId>com.github.searls</groupId>
+                <artifactId>jasmine-maven-plugin</artifactId>
+
+                <configuration>
+
+                    <!--
+                    http://gotofritz.net/blog/geekery/configuration-jasmine-maven-plugin/
+                    http://searls.github.io/jasmine-maven-plugin/test-mojo.html
+                    -->
+
+                    <preloadSources>
+                        <source>/webjars/momentjs/${web-momentjs.versionbase}/min/moment.min.js</source>
+                        <source>/webjars/underscorejs/${web-underscorejs.versionbase}/underscore-min.js</source>
+                        <source>/webjars/angularjs/${web-angularjs.versionbase}/angular.min.js</source>
+                        <source>/webjars/angularjs/${web-angularjs.versionbase}/angular-route.min.js</source>
+                        <source>/webjars/angularjs/${web-angularjs.versionbase}/angular-mocks.js</source>
+                        <source>/webjars/modernizr/${web-modernizr.versionbase}/modernizr.min.js</source>
+                    </preloadSources>
+
+                    <jsSrcDir>${project.basedir}/src/main/webapp/js/app</jsSrcDir>
+                    <jsTestSrcDir>${project.basedir}/src/test/javascript</jsTestSrcDir>
+
+                    <!--<sourceExcludes>-->
+                        <!--<exclude>haikudepotserver.js</exclude>-->
+                    <!--</sourceExcludes>-->
+
+                    <webDriverClassName>org.openqa.selenium.firefox.FirefoxDriver</webDriverClassName>
+                    <haltOnFailure>true</haltOnFailure>
+                    <skipTests>false</skipTests>
+
+                </configuration>
+
+            </plugin>
 
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>

@@ -27,7 +27,6 @@ angular.module('haikudepotserver').directive('modalContainer',[
                     // model is open, the model can be closed.
 
                     elem.on('keyup', function(event) {
-                        window.console.info('*A*')
                         if(27 == event.keyCode) { // 27 = escape
                             $scope.$apply(function() {
                                 $scope.goClose(event);

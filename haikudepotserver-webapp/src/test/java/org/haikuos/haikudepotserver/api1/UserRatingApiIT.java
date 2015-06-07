@@ -224,6 +224,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.modifyTimestamp).isNotNull();
             Assertions.assertThat(userRating.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
             Assertions.assertThat(userRating.pkgVersion.pkg.name).isEqualTo("pkg3");
+            Assertions.assertThat(userRating.pkgVersion.repositoryCode).isEqualTo("testrepo");
             Assertions.assertThat(userRating.pkgVersion.architectureCode).isEqualTo("x86");
             Assertions.assertThat(userRating.pkgVersion.major).isEqualTo("1");
             Assertions.assertThat(userRating.pkgVersion.micro).isEqualTo("2");

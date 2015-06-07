@@ -62,13 +62,25 @@
         <dl>
             <dt><message key="viewPkg.name.title"></message></dt>
             <dd>{{pkg.name}}</dd>
+            <dt ng-show="pkg.versions[0].repository"><message key="viewPkg.repository.title"></message></dt>
+            <dd ng-show="pkg.versions[0].repository"><repository-label repository="pkg.versions[0].repository"></repository-label></dd>
+            <dt ng-show="pkg.versions[0].repository"><message key="viewPkg.repositorySource.title"></message></dt>
+            <dd ng-show="pkg.versions[0].repository">{{pkg.versions[0].repositorySourceCode}}</dd>
             <dt><message key="viewPkg.version.title"></message></dt>
             <dd><version-label version="pkg.versions[0]"></version-label></dd>
-            <dt><message key="viewPkg.isLatest.title" parameters="[pkg.versions[0].architectureCode]"></message></dt>
-            <dd><boolean-indicator state="!!pkg.versions[0].isLatest"></boolean-indicator></dd>
+            <dt><message key="viewPkg.isLatest.title"></message></dt>
+            <dd>
+                <boolean-indicator state="!!pkg.versions[0].isLatest"></boolean-indicator>
+                <span class="muted" ng-show="pkg.versions[0].repository">
+                    (<message
+                        key="viewPkg.isLatest.context"
+                        parameters="[pkg.versions[0].architectureCode,pkg.versions[0].repository.name]"></message>)
+                </span>
+            </dd>
             <dt ng-show="undefined!=pkg.versions[0].payloadLength"><message key="viewPkg.payloadLength.title"></message></dt>
             <dd ng-show="undefined!=pkg.versions[0].payloadLength">
-                {{pkg.versions[0].payloadLength|dataLength}} <span class="muted">({{pkg.versions[0].payloadLength}} B)</span>
+                {{pkg.versions[0].payloadLength|dataLength}}
+                <span class="muted">({{pkg.versions[0].payloadLength}} B)</span>
             </dd>
             <dt ng-show="undefined!=pkg.versions[0].sourcePkg"><message key="viewPkg.sourceAvailable.title"></message></dt>
             <dd ng-show="undefined!=pkg.versions[0].sourcePkg">

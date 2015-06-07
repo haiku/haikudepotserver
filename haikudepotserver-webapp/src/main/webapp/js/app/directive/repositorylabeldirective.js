@@ -76,7 +76,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                                         breadcrumbFactory.toFullPath(breadcrumbItem)
                                     );
 
-                                    containerEl.text(repository ? repository.code : '');
+                                    containerEl.text(repository ? repository.name : '');
                                 }
                             }
                             else {

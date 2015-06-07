@@ -185,6 +185,10 @@ button.main-action[disabled] {
     border: 2px solid darkgray;
 }
 
+button > img {
+    vertical-align: middle;
+}
+
 .form-error-container {
     padding-top: 4px;
     color: red;
@@ -409,6 +413,19 @@ SEARCH BAR
     background-color: rgb(253,207,49);
     border: 1px solid black;
     border-radius: 3px;
+    padding: 2px;
+}
+
+#search-criteria-container > div > span > button {
+    font-size: 10px;
+    background-color: rgb(253,207,49);
+    border: 1px solid black;
+    border-radius: 3px;
+    padding: 2px;
+}
+
+#search-criteria-container > div {
+    font-size: 10px;
 }
 
 #search-criteria-container > div > button[disabled] {

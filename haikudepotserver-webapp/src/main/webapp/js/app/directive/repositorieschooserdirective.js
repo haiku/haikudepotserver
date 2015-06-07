@@ -20,17 +20,47 @@ angular.module('haikudepotserver').directive(
             },
             controller: [
                 '$scope', '$log',
-                'referenceData','errorHandling','messageSource','userState','repositoryService',
+                'referenceData','errorHandling','messageSource','userState','repositoryService','miscService',
                 function(
                     $scope,$log,
-                    referenceData,errorHandling,messageSource,userState,repositoryService) {
+                    referenceData,errorHandling,messageSource,userState,repositoryService,miscService) {
 
+                    var MAX_LABEL_LENGTH = 32;
                     var min = !!min && min.length ? parseInt('' + $scope.min) : 0;
                     $scope.showChooser = false;
+                    $scope.label = '?';
                     $scope.possibleRepositoryOptions = undefined;
 
                     function reset() {
                         $scope.possibleRepositoryOptions = undefined;
+                    }
+
+                    // creates a 'pretty' label from the list of repositories.
+
+                    function createRepositoriesLabel() {
+                        var l = $scope.repositories ? $scope.repositories.length : 0;
+
+                        if(0 == l) {
+                            return '?';
+                        }
+
+                        if(1 == l) {
+                            return repositories[0].name;
+                        }
+
+                        var scratch = _.map(repositories, function(r) {
+                            return {
+                                'original' : r.name
+                            };
+                        });
+
+                        miscService.abbreviate(scratch,'original','abbreviated');
+
+                        if(l < 4) {
+                            return _.pluck(scratch, 'abbreviated').join(', ');
+                        }
+
+                        return _.pluck(scratch.splice(0,4), 'abbreviated').join(', ') + '\u2026';
                     }
 
                     function refreshRepositoryOptions() {
@@ -96,7 +126,17 @@ angular.module('haikudepotserver').directive(
 
                         reset();
                         $scope.showChooser = false;
-                    }
+                    };
+
+                    // keep an eye on the list of repositories; if the list changes then create a new label that is
+                    // constructed from the list of abbreviations.
+
+                    $scope.$watch(
+                        'repositories',
+                        function(newValue) {
+                            $scope.label = createRepositoriesLabel();
+                        }
+                    );
 
                 }
             ]

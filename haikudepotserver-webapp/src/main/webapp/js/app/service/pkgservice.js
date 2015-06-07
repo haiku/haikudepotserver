@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,12 +17,21 @@ angular.module('haikudepotserver').factory('pkg',
 
             /**
              * <p>This function will fetch the package from the standard package version request params.</p>
+             * @param {string} pkgName
+             * @param {string} repositoryCode
+             * @param {Object} versionCoordinates
+             * @param {string} architectureCode
+             * @param {boolean} incrementCounter
              */
 
-            function getPkgWithSpecificVersion(pkgName, versionCoordinates, architectureCode, incrementCounter) {
+            function getPkgWithSpecificVersion(pkgName, repositoryCode, versionCoordinates, architectureCode, incrementCounter) {
 
                 if(!pkgName||!pkgName.length) {
                     throw Error('pkg name must be supplied');
+                }
+
+                if(!repositoryCode||!repositoryCode.length) {
+                    throw Error('the repository code must be supplied');
                 }
 
                 if(!versionCoordinates||!versionCoordinates.major) {
@@ -40,6 +49,7 @@ angular.module('haikudepotserver').factory('pkg',
                     'getPkg',
                     [{
                         name : pkgName,
+                        repositoryCode: repositoryCode,
                         versionType : 'SPECIFIC',
                         incrementViewCounter : !!incrementCounter,
                         architectureCode : architectureCode,
@@ -67,7 +77,8 @@ angular.module('haikudepotserver').factory('pkg',
             /**
              * <p>This assumes some standard names in the route params and pull out the details required to
              * get the package and its version.</p>
-             * @param routeParams
+             * @param {Object} routeParams
+             * @param {boolean} incrementCounter
              */
 
             function getPkgWithSpecificVersionFromRouteParams(routeParams, incrementCounter) {
@@ -86,6 +97,7 @@ angular.module('haikudepotserver').factory('pkg',
 
                 return getPkgWithSpecificVersion(
                     routeParams.name,
+                    routeParams.repositoryCode,
                     {
                         major : hyphenToNull(routeParams.major),
                         minor : hyphenToNull(routeParams.minor),

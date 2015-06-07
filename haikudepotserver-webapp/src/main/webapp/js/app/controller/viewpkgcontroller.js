@@ -9,12 +9,12 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location','$routeParams','$rootScope','$timeout',
         'jsonRpc','constants','userState','errorHandling',
         'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
-        'pkg','breadcrumbFactory',
+        'pkg','breadcrumbFactory','repositoryService',
         function(
             $scope,$log,$location,$routeParams,$rootScope,$timeout,
             jsonRpc,constants,userState,errorHandling,
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
-            pkg,breadcrumbFactory) {
+            pkg,breadcrumbFactory,repositoryService) {
 
             var MAXCHARS_USERRATING_COMMENT = 256;
             var MAXLINES_USERRATING_COMMENT = 4;
@@ -92,6 +92,7 @@ angular.module('haikudepotserver').controller(
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
+                        refetchRepository();
                         refetchPkgScreenshots();
                         refetchPkgIconMetaData();
                         refetchPkgCategories();
@@ -104,6 +105,26 @@ angular.module('haikudepotserver').controller(
                     }
                 );
 
+            }
+
+            function refetchRepository() {
+                repositoryService.getRepositories().then(
+                    function(data) {
+                        var repository = _.findWhere(
+                            data,
+                            { code : $scope.pkg.versions[0].repositoryCode }
+                        );
+
+                        if(!repository) {
+                            throw Error('unknown repository; ' + $scope.pkg.versions[0].repositoryCode);
+                        }
+
+                        $scope.pkg.versions[0].repository = repository;
+                    },
+                    function() {
+                        throw Error('unable to get all of the repositories');
+                    }
+                );
             }
 
             function refetchProminence() {

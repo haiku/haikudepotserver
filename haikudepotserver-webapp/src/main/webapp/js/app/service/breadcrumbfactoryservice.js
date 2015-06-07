@@ -15,11 +15,19 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
             /**
              * <p>Many of the URLs related to packages stem from the same base URL.  This function
              * will create that base URL.</p>
+             * @param {string} pkgName
+             * @param {string} repositoryCode
+             * @param {Object} versionCoordinates
+             * @param {string} architectureCode
              */
 
-            function generateBaseUrlForPkg(pkgName,versionCoordinates,architectureCode) {
+            function generateBaseUrlForPkg(pkgName,repositoryCode,versionCoordinates,architectureCode) {
                 if(!pkgName||!pkgName.length) {
                     throw Error('the package name must be supplied');
+                }
+
+                if(!repositoryCode||!repositoryCode.length) {
+                    throw Error('the repository code must be supplied');
                 }
 
                 if(!versionCoordinates||!versionCoordinates.major) {
@@ -33,6 +41,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                 var parts = [
                     'pkg',
                     pkgName,
+                    repositoryCode,
                     versionCoordinates.major,
                     versionCoordinates.minor ? versionCoordinates.minor : '-',
                     versionCoordinates.micro ? versionCoordinates.micro : '-',
@@ -49,11 +58,11 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
              * based on the details provided.</p>
              */
 
-            function createViewPkgBreadcrumbItem(pkgName,pkgTitle,versionCoordinates,architectureCode) {
+            function createViewPkgBreadcrumbItem(pkgName,pkgTitle,repositoryCode,versionCoordinates,architectureCode) {
                 return applyDefaults({
                     titleKey : 'breadcrumb.viewPkg.title',
                     titleParameters : [ pkgTitle||pkgName ],
-                    path : generateBaseUrlForPkg(pkgName,versionCoordinates,architectureCode)
+                    path : generateBaseUrlForPkg(pkgName,repositoryCode,versionCoordinates,architectureCode)
                 });
             }
 
@@ -87,6 +96,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     titleKey : 'breadcrumb.'+titlePortion+'.title',
                     path : generateBaseUrlForPkg(
                         pkgWithVersion0.name,
+                        pkgVersion.repositoryCode,
                         pkgVersion,
                         pkgVersion.architectureCode) + '/' + pathSuffix
                 });
@@ -372,6 +382,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return createViewPkgBreadcrumbItem(
                         pkgVersion.pkg.name,
                         pkgVersion.title,
+                        pkgVersion.repositoryCode,
                         pkgVersion,
                         pkgVersion.architectureCode);
                 },
@@ -392,6 +403,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return createViewPkgBreadcrumbItem(
                         pkg.name,
                         pkgVersion.title,
+                        pkgVersion.repositoryCode,
                         pkgVersion,
                         pkgVersion.architectureCode);
                 },

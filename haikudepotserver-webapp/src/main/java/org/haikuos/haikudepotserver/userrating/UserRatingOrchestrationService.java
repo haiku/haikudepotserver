@@ -310,9 +310,10 @@ public class UserRatingOrchestrationService {
         builder.append("SELECT r.code FROM\n");
         builder.append(Repository.class.getSimpleName());
         builder.append(" r\n");
-        builder.append("WHERE EXISTS(SELECT pv.id FROM\n");
+        builder.append("WHERE EXISTS(SELECT pv FROM\n");
         builder.append(PkgVersion.class.getSimpleName());
         builder.append(" pv WHERE pv.pkg.name = :name\n");
+        builder.append(" AND pv.repositorySource.repository = r)\n");
         builder.append("ORDER BY r.code DESC");
 
         EJBQLQuery query = new EJBQLQuery(builder.toString());
@@ -375,8 +376,10 @@ public class UserRatingOrchestrationService {
             // if there is no derived user rating then there should also be no database record
             // for the user rating.
 
-            pkg.removeFromPkgUserRatingAggregates(pkgUserRatingAggregateOptional.get());
-            context.deleteObject(pkgUserRatingAggregateOptional.get());
+            if(pkgUserRatingAggregateOptional.isPresent()) {
+                pkg.removeFromPkgUserRatingAggregates(pkgUserRatingAggregateOptional.get());
+                context.deleteObject(pkgUserRatingAggregateOptional.get());
+            }
         }
 
         context.commitChanges();

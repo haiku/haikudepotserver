@@ -9,10 +9,12 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$routeParams',
         'jsonRpc','constants','errorHandling',
         'breadcrumbs','breadcrumbFactory','pkg','userState',
+        'repositoryService',
         function(
             $scope,$log,$routeParams,
             jsonRpc,constants,errorHandling,
-            breadcrumbs,breadcrumbFactory,pkg,userState) {
+            breadcrumbs,breadcrumbFactory,pkg,userState,
+            repositoryService) {
 
             $scope.pkg = undefined;
 
@@ -54,6 +56,24 @@ angular.module('haikudepotserver').controller(
                             });
 
                         refreshBreadcrumbItems();
+
+                        // add repositories in.
+
+                        var repositories = repositoryService.getRepositories().then(
+                            function(repositories) {
+                                _.each($scope.pkg.versions, function(pv) {
+                                    pv.repository = _.findWhere(repositories, {code : pv.repositoryCode });
+
+                                    if(!pv.repository) {
+                                        throw Error('the repository was not able to be found for the code "' + pv.repositoryCode + '"');
+                                    }
+                                });
+                            },
+                            function() {
+                                $log.error('unable to get the repositories');
+                                errorHandling.navigateToError();
+                            }
+                        );
                     },
                     function() {
                         errorHandling.handleJsonRpcError();

@@ -1,5 +1,5 @@
 /*
-* Copyright 2014, Andrew Lindesay
+* Copyright 2014-2015, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -63,6 +63,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     private AbstractUserRatingResult.PkgVersion createPkgVersion(PkgVersion pkgVersion) {
         Preconditions.checkNotNull(pkgVersion);
         AbstractUserRatingResult.PkgVersion result = new AbstractUserRatingResult.PkgVersion();
+        result.repositoryCode = pkgVersion.getRepositorySource().getRepository().getCode();
         result.architectureCode = pkgVersion.getArchitecture().getCode();
         result.major = pkgVersion.getMajor();
         result.minor = pkgVersion.getMinor();

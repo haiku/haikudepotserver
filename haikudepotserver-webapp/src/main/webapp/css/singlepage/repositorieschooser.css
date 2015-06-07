@@ -10,3 +10,13 @@
     margin-top: 12px;
     text-align: right;
 }
+
+#search-criteria-container .repositories-chooser-label {
+    margin-left: 2px;
+    margin-right: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    background-color: rgba(255, 255, 255, 0.4);
+}

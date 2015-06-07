@@ -13,6 +13,7 @@
         <thead>
         <th><message key="listPkgVersionsForPkg.table.pkgVersion.title"></message></th>
         <th><message key="gen.created.title"></message></th>
+        <th><message key="listPkgVersionsForPkg.table.repository.title"></message></th>
         <th><message key="listPkgVersionsForPkg.table.architecture.title"></message></th>
         </thead>
         <tbody>
@@ -20,11 +21,14 @@
             <td>
                 <pkg-version-label pkg-version="pkgVersion"></pkg-version-label>
                 <span class="muted" ng-show="pkgVersion.isLatest">
-                    (<message key="listPkgVersionsForPkg.latest" parameters="[pkgVersion.architectureCode]"></message>)
+                    (<message key="listPkgVersionsForPkg.latest"></message>)
                 </span>
             </td>
             <td>
                 {{pkgVersion.createTimestamp|timestamp}}
+            </td>
+            <td>
+                <repository-label repository="pkgVersion.repository"></repository-label>
             </td>
             <td>
                 {{pkgVersion.architectureCode}}

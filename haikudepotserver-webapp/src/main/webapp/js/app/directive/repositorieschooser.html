@@ -1,10 +1,10 @@
 <span>
 
-    <a href="" ng-click="goShowChooser()">
-        <span ng-repeat="repository in repositories">
-         [{{repository.name}}]
-        </span>
-    </a>
+    <span class="repositories-chooser-label">{{label}}</span>
+
+    <button href="" ng-click="goShowChooser()">
+        <img src="/img/choose.svg" img-downgrade=""/>
+    </button>
 
     <modal-container show="showChooser" width="320" close="goHideChooser()">
 

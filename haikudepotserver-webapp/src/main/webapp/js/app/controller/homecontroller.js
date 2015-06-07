@@ -475,7 +475,6 @@ angular.module('haikudepotserver').controller(
                         _.map(
                             $scope.selectedRepositories,
                             function(r) {
-                                $log.info('*A*; ' + r);
                                 return r.code;
                             }
                         ).join(',')

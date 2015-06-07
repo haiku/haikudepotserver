@@ -9,10 +9,12 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
         'breadcrumbs','breadcrumbFactory','userState','pkg',
+        'miscService',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgIcon,errorHandling,
-            breadcrumbs,breadcrumbFactory,userState,pkg) {
+            breadcrumbs,breadcrumbFactory,userState,pkg,
+            miscService) {
 
             var ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
@@ -211,65 +213,14 @@ angular.module('haikudepotserver').controller(
 
                 function checkHasCompletedFileReaderProcessing() {
 
-                    // data:[<MIME-type>][;charset=<encoding>][;base64],<data>
-
-                    /**
-                     * This is a recursive function that consumes the start of the data url in order to discover
-                     * the base64 data string.
-                     * @param {string} u
-                     * @param {number} offset
-                     */
-
-                    function indexToStartOfBase64(u,offset) {
-
-                        if(!u||!u.length) {
-                            throw Error('the data url must be supplied to convert to base64');
-                        }
-
-                        if(offset >= u.length) {
-                            throw Error('unexpected end of data url');
-                        }
-
-                        if(0==offset && 0 == u.indexOf('data:')) {
-                            return indexToStartOfBase64(u,5);
-                        }
-
-                        if(offset == u.indexOf('base64,',offset)) {
-                            return offset + 7;
-                        }
-
-                        var semicolonI = u.indexOf(';',offset);
-
-                        if(-1==semicolonI) {
-
-                            var uTrimmed = u;
-
-                            if(uTrimmed.length > 32) {
-                                uTrimmed = uTrimmed.substring(0,28) + '...';
-                            }
-
-                            throw Error('unexpected end of data url; ' + uTrimmed);
-                        }
-
-                        return indexToStartOfBase64(u,semicolonI+1);
-                    }
-
-                    // data urls can come in a number of forms.  This function will strip out the data material and
-                    // just get at the base64.  If the data is not base64, it will throw an exception.  Maybe a more
-                    // elaborate handling will be required?
-
-                    function dataUrlToBase64(u) {
-                        return u.substring(indexToStartOfBase64(u,0));
-                    }
-
                    if(2==readerIconBitmap16.readyState
                        && 2==readerIconBitmap32.readyState
                        && (!readerHvif || 2==readerHvif.readyState)) {
 
                        handleStorePkgIcons(
-                           dataUrlToBase64(readerIconBitmap16.result),
-                           dataUrlToBase64(readerIconBitmap32.result),
-                           readerHvif ? dataUrlToBase64(readerHvif.result) : null);
+                           miscService.stripBase64FromDataUrl(readerIconBitmap16.result),
+                           miscService.stripBase64FromDataUrl(readerIconBitmap32.result),
+                           readerHvif ? miscService.stripBase64FromDataUrl(readerHvif.result) : null);
                    }
                 }
 
