@@ -145,6 +145,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.items = searchedRepositories.stream().map(sr -> {
             SearchRepositoriesResult.Repository resultRepository = new SearchRepositoriesResult.Repository();
             resultRepository.active = sr.getActive();
+            resultRepository.name = sr.getName();
             resultRepository.code = sr.getCode();
             return resultRepository;
         }).collect(Collectors.toList());
@@ -176,6 +177,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         GetRepositoryResult result = new GetRepositoryResult();
         result.active = repositoryOptional.get().getActive();
         result.code = repositoryOptional.get().getCode();
+        result.name = repositoryOptional.get().getName();
         result.createTimestamp = repositoryOptional.get().getCreateTimestamp().getTime();
         result.modifyTimestamp = repositoryOptional.get().getModifyTimestamp().getTime();
         result.informationalUrl = repositoryOptional.get().getInformationUrl();

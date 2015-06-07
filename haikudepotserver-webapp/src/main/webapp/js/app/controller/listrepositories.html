@@ -35,14 +35,12 @@
             <table class="table-general">
                 <thead>
                 <th><message key="listRepositories.table.active.title"></message></th>
-                <th><message key="listRepositories.table.code.title"></message></th>
-                <th><message key="gen.architecture.title"></message></th>
+                <th><message key="listRepositories.table.label.title"></message></th>
                 </thead>
                 <tbody>
                 <tr ng-repeat="repository in repositories.items">
                     <td><active-indicator state="repository.active"></active-indicator></td>
                     <td><repository-label repository="repository"></repository-label></td>
-                    <td><code>{{repository.architectureCode}}</code></td>
                 </tr>
                 </tbody>
             </table>

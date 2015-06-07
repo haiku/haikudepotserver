@@ -12,8 +12,14 @@ public class SearchRepositoriesResult extends AbstractSearchResult<SearchReposit
     public static class Repository {
 
         public Boolean active;
+
         public String code;
-        public String architectureCode;
+
+        /**
+         * @since 2015-07-07
+         */
+
+        public String name;
 
     }
 

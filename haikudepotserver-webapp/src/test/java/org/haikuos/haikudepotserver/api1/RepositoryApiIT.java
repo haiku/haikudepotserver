@@ -66,8 +66,8 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void searchPkgsTest() {
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+    public void searchRepositoriesTest() {
+        integrationTestSupportService.createStandardTestData();
 
         SearchRepositoriesRequest request = new SearchRepositoriesRequest();
         request.expression = "test";
@@ -82,6 +82,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.total).isEqualTo(1);
         Assertions.assertThat(result.items.size()).isEqualTo(1);
         Assertions.assertThat(result.items.get(0).code).isEqualTo("testrepo");
+        Assertions.assertThat(result.items.get(0).name).isEqualTo("Test Repository");
     }
 
     @Test

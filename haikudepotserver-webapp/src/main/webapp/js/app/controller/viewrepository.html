@@ -6,12 +6,14 @@
     </div>
 
     <dl>
+        <dt><message key="viewRepository.name.title"></message></dt>
+        <dd>{{repository.name}}</dd>
         <dt><message key="gen.code.title"></message></dt>
         <dd><code>{{repository.code}}</code>&nbsp;</dd>
         <dt><message key="viewRepository.active.title"></message></dt>
         <dd><active-indicator state="repository.active"></active-indicator>&nbsp;</dd>
-        <dt><message key="viewRepository.url.title"></message></dt>
-        <dd><a href="{{repository.code}}">{{repository.url}}</a></dd>
+        <dt><message key="viewRepository.informationalUrl.title"></message></dt>
+        <dd><a ng-href="repository.informationalUrl">{{repository.informationalUrl}}</a></dd>
         <dt><message key="gen.created.title"></message></dt>
         <dd>{{repository.createTimestamp|timestamp}}</dd>
         <dt><message key="gen.modified.title"></message></dt>
