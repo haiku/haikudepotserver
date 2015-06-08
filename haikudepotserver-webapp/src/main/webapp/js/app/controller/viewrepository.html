@@ -5,6 +5,8 @@
         <message key="viewRepository.importTriggered.description"></message>
     </div>
 
+    <h1>{{repository.name}}</h1>
+
     <dl>
         <dt><message key="viewRepository.name.title"></message></dt>
         <dd>{{repository.name}}</dd>
@@ -12,15 +14,47 @@
         <dd><code>{{repository.code}}</code>&nbsp;</dd>
         <dt><message key="viewRepository.active.title"></message></dt>
         <dd><active-indicator state="repository.active"></active-indicator>&nbsp;</dd>
-        <dt><message key="viewRepository.informationalUrl.title"></message></dt>
-        <dd><a ng-href="repository.informationalUrl">{{repository.informationalUrl}}</a></dd>
+        <dt ng-show="repository.informationUrl"><message key="viewRepository.informationUrl.title"></message></dt>
+        <dd ng-show="repository.informationUrl"><a ng-href="repository.informationUrl">{{repository.informationUrl}}</a></dd>
         <dt><message key="gen.created.title"></message></dt>
         <dd>{{repository.createTimestamp|timestamp}}</dd>
         <dt><message key="gen.modified.title"></message></dt>
         <dd>{{repository.modifyTimestamp|timestamp}}</dd>
     </dl>
 
+    <h2>Repository Sources</h2>
+
+    <div ng-show="!repository.repositorySources || !repository.repositorySources.length" class="info-container">
+        <strong><message key="viewRepository.repositorySources.none.title"></message>;</strong>
+        <message key="viewRepository.repositorySources.none.description"></message>
+    </div>
+
+    <table class="table-general table-repository-sources">
+        <thead>
+        <th><message key="viewRepository.repositorySources.table.active.title"></message></th>
+        <th><message key="viewRepository.repositorySources.table.code.title"></message></th>
+        <th><message key="viewRepository.repositorySources.table.url.title"></message></th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="repositorySource in repository.repositorySources">
+            <td><active-indicator state="repositorySource.active"></active-indicator></td>
+            <td><code>{{repositorySource.code}}</code></td>
+            <td><a href="repositorySource.url">{{repositorySource.url}}</a></td>
+        </tr>
+        </tbody>
+    </table>
+
     <ul>
+        <li ng-show="!amShowingInactiveRepositorySources" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goShowInactiveRepositorySources()">
+                <message key="viewRepository.showInactiveRepositorySourcesAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="amShowingInactiveRepositorySources" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goHideInactiveRepositorySources()">
+                <message key="viewRepository.hideInactiveRepositorySourcesAction.title"></message>
+            </a>
+        </li>
         <li ng-show="canDeactivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goDeactivate()">
                 <message key="viewRepository.deactivateAction.title"></message>

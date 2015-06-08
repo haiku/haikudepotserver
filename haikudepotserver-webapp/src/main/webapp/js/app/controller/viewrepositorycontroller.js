@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,6 +16,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.repository = undefined;
             $scope.didTriggerImportRepository = false;
+            $scope.amShowingInactiveRepositorySources = false;
             var amUpdatingActive = false;
 
             refetchRepository();
@@ -29,14 +30,14 @@ angular.module('haikudepotserver').controller(
                 amUpdatingActive = true;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "updateRepository",
-                        [{
-                            code : $routeParams.code,
-                            active : flag,
-                            filter : [ 'ACTIVE' ]
-                        }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_REPOSITORY,
+                    "updateRepository",
+                    [{
+                        code : $routeParams.code,
+                        active : flag,
+                        filter : [ 'ACTIVE' ]
+                    }]
+                ).then(
                     function() {
                         amUpdatingActive = false;
                         $scope.repository.active = flag;
@@ -68,6 +69,27 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepository($scope.repository));
             };
 
+            $scope.goShowInactiveRepositorySources = function() {
+                $scope.amShowingInactiveRepositorySources = true;
+                refetchRepository();
+            };
+
+            /**
+             * This function will stop the display of repository sources that are inactive.  It does not
+             * re-fetch from the database, but will instead filter in-memory.
+             */
+
+            $scope.goHideInactiveRepositorySources = function() {
+                $scope.amShowingInactiveRepositorySources = false;
+
+                $scope.repository.repositorySources = _.filter(
+                    $scope.repository.repositorySources,
+                    function(rs) {
+                        return rs.active;
+                    }
+                );
+            };
+
             /**
              * <p>This function will initiate an import of a repository.  These run sequentially so it may not happen
              * immediately; it may be queued to go later.</p>
@@ -75,10 +97,10 @@ angular.module('haikudepotserver').controller(
 
             $scope.goTriggerImport = function() {
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "triggerImportRepository",
-                        [{ code: $routeParams.code }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_REPOSITORY,
+                    "triggerImportRepository",
+                    [{ code: $routeParams.code }]
+                ).then(
                     function() {
                         $log.info('triggered import for repository; '+$scope.repository.code);
                         $scope.didTriggerImportRepository = true;
@@ -106,10 +128,13 @@ angular.module('haikudepotserver').controller(
                 $scope.repository = undefined;
 
                 jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "getRepository",
-                        [{ code: $routeParams.code }]
-                    ).then(
+                    constants.ENDPOINT_API_V1_REPOSITORY,
+                    "getRepository",
+                    [{
+                        code: $routeParams.code,
+                        includeInactiveRepositorySources : $scope.amShowingInactiveRepositorySources
+                    }]
+                ).then(
                     function(result) {
                         $scope.repository = result;
                         $log.info('found '+$scope.repository.code+' repository');

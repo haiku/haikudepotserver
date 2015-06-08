@@ -6,6 +6,7 @@
 package org.haikuos.haikudepotserver.repository;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
@@ -106,7 +107,7 @@ public class RepositoryOrchestrationService {
             whereExpressions.add("r." + Repository.ACTIVE_PROPERTY + " = true");
         }
 
-        return String.join(" AND ",whereExpressions);
+        return String.join(" AND ", whereExpressions);
     }
 
     public List<Repository> search(ObjectContext context, RepositorySearchSpecification search) {
@@ -116,8 +117,24 @@ public class RepositoryOrchestrationService {
         Preconditions.checkState(search.getLimit() > 0);
 
         List<Object> parameterAccumulator = new ArrayList<>();
-        String ejbql = "SELECT r FROM " + Repository.class.getSimpleName() + " AS r WHERE " + prepareWhereClause(parameterAccumulator, context, search) + " ORDER BY r." + Repository.CODE_PROPERTY + " ASC";
-        EJBQLQuery ejbqlQuery = new EJBQLQuery(ejbql);
+
+        StringBuilder ejbql = new StringBuilder();
+        ejbql.append("SELECT r FROM ");
+        ejbql.append(Repository.class.getSimpleName());
+        ejbql.append(" r ");
+
+        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
+
+        if(!Strings.isNullOrEmpty(whereClause)) {
+            ejbql.append(" WHERE ");
+            ejbql.append(whereClause);
+        }
+
+        ejbql.append(" ORDER BY r.");
+        ejbql.append(Repository.CODE_PROPERTY);
+        ejbql.append(" ASC");
+
+        EJBQLQuery ejbqlQuery = new EJBQLQuery(ejbql.toString());
 
         for(int i=0;i<parameterAccumulator.size();i++) {
             ejbqlQuery.setParameter(i+1, parameterAccumulator.get(i));
@@ -135,7 +152,18 @@ public class RepositoryOrchestrationService {
         Preconditions.checkNotNull(context);
 
         List<Object> parameters = new ArrayList<>();
-        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(r) FROM Repository AS r WHERE " + prepareWhereClause(parameters, context, search));
+
+        StringBuilder ejbql = new StringBuilder();
+        ejbql.append("SELECT COUNT(r) FROM Repository AS r");
+
+        String whereClause = prepareWhereClause(parameters, context, search);
+
+        if(!Strings.isNullOrEmpty(whereClause)) {
+            ejbql.append(" WHERE ");
+            ejbql.append(whereClause);
+        }
+
+        EJBQLQuery ejbQuery = new EJBQLQuery(ejbql.toString());
 
         for(int i=0;i<parameters.size();i++) {
             ejbQuery.setParameter(i+1, parameters.get(i));

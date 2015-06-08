@@ -23,7 +23,7 @@ public class GetRepositoryResult {
 
     public Long modifyTimestamp;
 
-    public String informationalUrl;
+    public String informationUrl;
 
     public List<RepositorySource> repositorySources;
 

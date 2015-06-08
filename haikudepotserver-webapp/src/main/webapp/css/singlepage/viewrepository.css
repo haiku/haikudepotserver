@@ -1,0 +1,13 @@
+/*
+Column 1 is the active indicator.
+*/
+
+table.table-repository-sources > thead > tr > th:nth-child(1) {
+    width: 38px;
+    text-align: center;
+}
+
+table.table-repository-sources > tbody > tr > td:nth-child(1) {
+    width: 38px;
+    text-align: center;
+}

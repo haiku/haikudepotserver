@@ -2,15 +2,12 @@
 This specific layout works off the premise that there is only one table on this page.
 */
 
-.list-repositories .table-general > tbody > tr > td:nth-child(1) {
-    width: 10%;
+.list-repositories table.table-general > thead > tr > th:nth-child(1) {
+    width: 38px;
     text-align: center;
 }
 
-.list-repositories .table-general > tbody > tr > td:nth-child(2) {
-    width:60%;
-}
-
-.list-repositories .table-general > tbody > tr > td:nth-child(3) {
-    width:30%;
+.list-repositories table.table-general > tbody > tr > td:nth-child(1) {
+    width: 38px;
+    text-align: center;
 }

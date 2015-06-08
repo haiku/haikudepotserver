@@ -15,34 +15,35 @@
                     ng-change="codeChanged()"
                     ng-required="true"
                     ng-pattern="/^[a-z0-9]{2,16}$/"
-                    ng-model="workingRepository.code"></input>
+                    ng-model="workingRepository.code"/>
             <error-messages key-prefix="addEditRepository.code" error="addEditRepositoryForm.code.$error"></error-messages>
         </div>
 
-        <label for="code"><message key="gen.architecture.title"></message></label>
-        <div class="form-control-group">
-            <div ng-show="amEditing" class="form-control-group-static">
-                <code>{{workingRepository.architecture.code}}</code>
-            </div>
-            <select
-                    ng-show="!amEditing"
-                    ng-model="workingRepository.architecture"
-                    ng-options="anArchitecture.code for anArchitecture in architectures">
-            </select>
-        </div>
-
-        <label for="url"><message key="addEditRepository.url.title"></message></label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('url')">
+        <label for="name"><message key="addEditRepository.name.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('name')">
             <input
-                    id="url"
+                    id="name"
                     type="text"
                     size="64"
-                    name="url"
+                    name="name"
                     autocomplete="off"
-                    ng-change="urlChanged()"
                     ng-required="true"
-                    ng-model="workingRepository.url"></input>
-            <error-messages key-prefix="addEditRepository.url" error="addEditRepositoryForm.url.$error"></error-messages>
+                    ng-model="workingRepository.name"/>
+            <error-messages key-prefix="addEditRepository.name" error="addEditRepositoryForm.name.$error"></error-messages>
+        </div>
+
+        <label for="informationUrl"><message key="addEditRepository.informationUrl.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('informationUrl')">
+            <input
+                    id="informationUrl"
+                    type="text"
+                    size="64"
+                    name="informationUrl"
+                    autocomplete="off"
+                    ng-change="informationUrlChanged()"
+                    ng-required="false"
+                    ng-model="workingRepository.informationUrl"/>
+            <error-messages key-prefix="addEditRepository.informationUrl" error="addEditRepositoryForm.informationUrl.$error"></error-messages>
         </div>
 
         <div class="form-action-container">

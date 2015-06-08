@@ -98,7 +98,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(result.active).isTrue();
         Assertions.assertThat(result.code).isEqualTo("testrepo");
-        Assertions.assertThat(result.informationalUrl).isEqualTo("http://example1.haikuos.org/");
+        Assertions.assertThat(result.informationUrl).isEqualTo("http://example1.haikuos.org/");
         Assertions.assertThat(result.repositorySources.size()).isEqualTo(1);
 
         GetRepositoryResult.RepositorySource repositorySource = result.repositorySources.get(0);
@@ -114,7 +114,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         CreateRepositoryRequest request = new CreateRepositoryRequest();
         request.code = "differentrepo";
         request.name = "Different Repo";
-        request.informationalUrl = "http://zink.haikuos.org";
+        request.informationUrl = "http://zink.haikuos.org";
 
         // ------------------------------------
         repositoryApi.createRepository(request);
@@ -135,7 +135,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         CreateRepositoryRequest request = new CreateRepositoryRequest();
         request.code = data.repository.getCode();
-        request.informationalUrl = "http://zink.haikuos.org";
+        request.informationUrl = "http://zink.haikuos.org";
 
         try {
             // ------------------------------------

@@ -9,6 +9,6 @@ public class CreateRepositoryRequest {
 
     public String code;
     public String name;
-    public String informationalUrl;
+    public String informationUrl;
 
 }

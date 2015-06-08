@@ -11,14 +11,21 @@ public class UpdateRepositoryRequest {
 
     public enum Filter {
         ACTIVE,
-        INFORMATIONALURL
+        NAME,
+        INFORMATIONURL
     }
 
     public String code;
 
+    /**
+     * @since 2015-06-08
+     */
+
+    public String name;
+
     public Boolean active;
 
-    public String informationalUrl;
+    public String informationUrl;
 
     public List<Filter> filter;
 

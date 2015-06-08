@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,12 +13,11 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,referenceData) {
 
             $scope.workingRepository = undefined;
-            $scope.architectures = undefined;
             $scope.amEditing = !!$routeParams.code;
             var amSaving = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.architectures || undefined == $scope.workingRepository || amSaving;
+                return undefined == $scope.workingRepository || amSaving;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
@@ -33,8 +32,8 @@ angular.module('haikudepotserver').controller(
                 $scope.addEditRepositoryForm.code.$setValidity('unique',true);
             };
 
-            $scope.urlChanged = function() {
-                $scope.addEditRepositoryForm.url.$setValidity('malformed',true);
+            $scope.informationalUrlChanged = function() {
+                $scope.addEditRepositoryForm.informationUrl.$setValidity('malformed',true);
             };
 
             function refreshBreadcrumbItems() {
@@ -62,14 +61,7 @@ angular.module('haikudepotserver').controller(
                         [{ code : $routeParams.code }]
                     ).then(
                         function(result) {
-                            $scope.workingRepository = {
-                                code : result.code,
-                                url : result.url,
-                                architecture : _.find(
-                                    $scope.architectures, function(a) {
-                                        return a.code == result.architectureCode;
-                                    })
-                            };
+                            $scope.workingRepository = _.clone(result);
                             refreshBreadcrumbItems();
                             $log.info('fetched repository; '+result.code);
                         },
@@ -79,27 +71,13 @@ angular.module('haikudepotserver').controller(
                     );
                 }
                 else {
-                    $scope.workingRepository = {
-                        architecture : $scope.architectures[0]
-                    };
+                    $scope.workingRepository = {};
                     refreshBreadcrumbItems();
                 }
             }
 
-            function refreshArchitectures() {
-                referenceData.architectures().then(
-                    function(data) {
-                        $scope.architectures = data;
-                        refreshRepository();
-                    },
-                    function() { // error logged already
-                        errorHandling.navigateToError();
-                    }
-                );
-            }
-
             function refreshData() {
-                refreshArchitectures();
+                refreshRepository();
             }
 
             refreshData();
@@ -117,8 +95,9 @@ angular.module('haikudepotserver').controller(
                             constants.ENDPOINT_API_V1_REPOSITORY,
                             "updateRepository",
                             [{
-                                filter : [ 'URL' ],
-                                url : $scope.workingRepository.url,
+                                filter : [ 'INFORMATIONURL', 'NAME' ],
+                                informationUrl : $scope.workingRepository.informationUrl,
+                                name : $scope.workingRepository.name,
                                 code : $scope.workingRepository.code
                             }]
                         ).then(
@@ -149,8 +128,8 @@ angular.module('haikudepotserver').controller(
                             constants.ENDPOINT_API_V1_REPOSITORY,
                             "createRepository",
                             [{
-                                architectureCode : $scope.workingRepository.architecture.code,
-                                url : $scope.workingRepository.url,
+                                informationUrl : $scope.workingRepository.informationUrl,
+                                name : $scope.workingRepository.name,
                                 code : $scope.workingRepository.code
                             }]
                         ).then(

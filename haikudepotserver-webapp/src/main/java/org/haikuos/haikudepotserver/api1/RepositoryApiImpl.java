@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,6 +15,7 @@ import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haikuos.haikudepotserver.api1.support.ValidationException;
 import org.haikuos.haikudepotserver.api1.support.ValidationFailure;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.dataobjects.RepositorySource;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haikuos.haikudepotserver.repository.RepositoryOrchestrationService;
@@ -180,9 +181,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.name = repositoryOptional.get().getName();
         result.createTimestamp = repositoryOptional.get().getCreateTimestamp().getTime();
         result.modifyTimestamp = repositoryOptional.get().getModifyTimestamp().getTime();
-        result.informationalUrl = repositoryOptional.get().getInformationUrl();
+        result.informationUrl = repositoryOptional.get().getInformationUrl();
         result.repositorySources = repositoryOptional.get().getRepositorySources()
                 .stream()
+                .filter(
+                        rs -> rs.getActive() ||
+                                (null != getRepositoryRequest.includeInactiveRepositorySources &&
+                                        getRepositoryRequest.includeInactiveRepositorySources)
+                )
                 .map(rs -> {
                     GetRepositoryResult.RepositorySource resultRs = new GetRepositoryResult.RepositorySource();
                     resultRs.active = rs.getActive();
@@ -215,6 +221,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         for(UpdateRepositoryRequest.Filter filter : updateRepositoryRequest.filter) {
             switch(filter) {
+
                 case ACTIVE:
                     if(null==updateRepositoryRequest.active) {
                         throw new IllegalStateException("the active flag must be supplied");
@@ -225,11 +232,34 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                         LOGGER.info("did set the active flag on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.active);
                     }
 
+                    if(!updateRepositoryRequest.active) {
+                        for(RepositorySource repositorySource : repositoryOptional.get().getRepositorySources()) {
+                            if(repositorySource.getActive()) {
+                                repositorySource.setActive(false);
+                                LOGGER.info("did set the active flag on the repository source {} to false", repositorySource.getCode());
+                            }
+                        }
+                    }
+
                     break;
 
-                case INFORMATIONALURL:
-                    repositoryOptional.get().setInformationUrl(updateRepositoryRequest.informationalUrl);
-                    LOGGER.info("did set the informational url on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.informationalUrl);
+                case NAME:
+                    if(null==updateRepositoryRequest.name) {
+                        throw new IllegalStateException("the name must be supplied to update the repository");
+                    }
+
+                    String name = updateRepositoryRequest.name.trim();
+
+                    if(0==name.length()) {
+                        throw new ValidationException(new ValidationFailure(Repository.NAME_PROPERTY, "invalid"));
+                    }
+
+                    repositoryOptional.get().setName(name);
+                    break;
+
+                case INFORMATIONURL:
+                    repositoryOptional.get().setInformationUrl(updateRepositoryRequest.informationUrl);
+                    LOGGER.info("did set the information url on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.informationUrl);
                     break;
 
                 default:
@@ -284,7 +314,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         repository.setCode(createRepositoryRequest.code);
         repository.setName(createRepositoryRequest.name);
-        repository.setInformationUrl(createRepositoryRequest.informationalUrl);
+        repository.setInformationUrl(createRepositoryRequest.informationUrl);
 
         context.commitChanges();
 
