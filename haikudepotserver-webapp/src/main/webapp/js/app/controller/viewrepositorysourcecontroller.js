@@ -63,6 +63,10 @@ angular.module('haikudepotserver').controller(
                 updateActive(false);
             };
 
+            $scope.goEdit = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepositorySource($scope.repositorySource));
+            };
+
             //
             //$scope.goEdit = function() {
             //    breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepository($scope.repository));

@@ -199,4 +199,29 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
     }
 
+    @Test
+    public void testCreateRepositorySource() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+        setAuthenticatedUserToRoot();
+
+        CreateRepositorySourceRequest request = new CreateRepositorySourceRequest();
+        request.code = "testreposrcxx";
+        request.repositoryCode = "testrepo";
+        request.url = "http://testtest.haiku-os.org";
+
+        // ------------------------------------
+        repositoryApi.createRepositorySource(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, "testreposrcxx");
+            Assertions.assertThat(repositorySourceOptional.get().getActive()).isTrue();
+            Assertions.assertThat(repositorySourceOptional.get().getUrl()).isEqualTo("http://testtest.haiku-os.org");
+            Assertions.assertThat(repositorySourceOptional.get().getRepository().getCode()).isEqualTo("testrepo");
+            Assertions.assertThat(repositorySourceOptional.get().getCode()).isEqualTo("testreposrcxx");
+        }
+
+    }
+
 }

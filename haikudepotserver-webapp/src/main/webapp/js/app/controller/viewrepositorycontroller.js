@@ -81,6 +81,10 @@ angular.module('haikudepotserver').controller(
                 refetchRepository();
             };
 
+            $scope.goAddRepositorySource = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddRepositorySource($scope.repository));
+            };
+
             /**
              * This function will stop the display of repository sources that are inactive.  It does not
              * re-fetch from the database, but will instead filter in-memory.

@@ -55,6 +55,11 @@
                 <message key="viewRepository.hideInactiveRepositorySourcesAction.title"></message>
             </a>
         </li>
+        <li repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goAddRepositorySource()">
+                <message key="viewRepository.addRepositorySourceAction.title"></message>
+            </a>
+        </li>
         <li ng-show="canDeactivate()" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goDeactivate()">
                 <message key="viewRepository.deactivateAction.title"></message>

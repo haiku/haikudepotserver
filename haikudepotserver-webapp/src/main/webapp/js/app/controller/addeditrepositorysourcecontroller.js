@@ -1,10 +1,10 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 angular.module('haikudepotserver').controller(
-    'AddEditRepositoryController',
+    'AddEditRepositorySourceController',
     [
         '$scope','$log','$routeParams',
         'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling','referenceData',
@@ -12,16 +12,16 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$routeParams,
             jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,referenceData) {
 
-            $scope.workingRepository = undefined;
-            $scope.amEditing = !!$routeParams.code;
+            $scope.workingRepositorySource = undefined;
+            $scope.amEditing = !!$routeParams.repositorySourceCode;
             var amSaving = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.workingRepository || amSaving;
+                return undefined == $scope.workingRepositorySource || amSaving;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
-                return $scope.addEditRepositoryForm[name].$invalid ? ['form-control-group-error'] : [];
+                return $scope.addEditRepositorySourceForm[name].$invalid ? ['form-control-group-error'] : [];
             };
 
             // the validity of this field may have been set to false because of the
@@ -29,41 +29,44 @@ angular.module('haikudepotserver').controller(
             // the code changes so that validation does not apply.
 
             $scope.codeChanged = function() {
-                $scope.addEditRepositoryForm.code.$setValidity('unique',true);
+                $scope.addEditRepositorySourceForm.code.$setValidity('unique',true);
             };
 
-            $scope.informationalUrlChanged = function() {
-                $scope.addEditRepositoryForm.informationUrl.$setValidity('malformed',true);
+            $scope.urlChanged = function() {
+                $scope.addEditRepositorySourceForm.url.$setValidity('malformed',true);
             };
 
             function refreshBreadcrumbItems() {
 
+                var repository = { code : $routeParams.repositoryCode };
+
                 var b = [
                     breadcrumbFactory.createHome(),
-                    breadcrumbFactory.createListRepositories()
+                    breadcrumbFactory.createListRepositories(),
+                    breadcrumbFactory.createViewRepository(repository)
                 ];
 
                 if($scope.amEditing) {
-                    b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditRepository($scope.workingRepository)));
+                    b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditRepositorySource($scope.workingRepositorySource)));
                 }
                 else {
-                    b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAddRepository()));
+                    b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAddRepositorySource(repository)));
                 }
 
                 breadcrumbs.mergeCompleteStack(b);
             }
 
-            function refreshRepository() {
-                if($routeParams.code) {
+            function refreshRepositorySource() {
+                if($routeParams.repositorySourceCode) {
                     jsonRpc.call(
                         constants.ENDPOINT_API_V1_REPOSITORY,
-                        "getRepository",
-                        [{ code : $routeParams.code }]
+                        "getRepositorySource",
+                        [{ code : $routeParams.repositorySourceCode }]
                     ).then(
                         function(result) {
-                            $scope.workingRepository = _.clone(result);
+                            $scope.workingRepositorySource = _.clone(result);
                             refreshBreadcrumbItems();
-                            $log.info('fetched repository; '+result.code);
+                            $log.info('fetched repository source; '+result.code);
                         },
                         function(err) {
                             errorHandling.handleJsonRpcError(err);
@@ -71,38 +74,39 @@ angular.module('haikudepotserver').controller(
                     );
                 }
                 else {
-                    $scope.workingRepository = {};
+                    $scope.workingRepositorySource = {
+                        repositoryCode : $routeParams.repositoryCode
+                    };
                     refreshBreadcrumbItems();
                 }
             }
 
             function refreshData() {
-                refreshRepository();
+                refreshRepositorySource();
             }
 
             refreshData();
 
             $scope.goSave = function() {
 
-                if($scope.addEditRepositoryForm.$invalid) {
-                    throw Error('expected the save of a repository to only to be possible if the form is valid');
+                if($scope.addEditRepositorySourceForm.$invalid) {
+                    throw Error('expected the save of a repository source to only to be possible if the form is valid');
                 }
 
                 amSaving = true;
 
                 if($scope.amEditing) {
                     jsonRpc.call(
-                            constants.ENDPOINT_API_V1_REPOSITORY,
-                            "updateRepository",
-                            [{
-                                filter : [ 'INFORMATIONURL', 'NAME' ],
-                                informationUrl : $scope.workingRepository.informationUrl,
-                                name : $scope.workingRepository.name,
-                                code : $scope.workingRepository.code
-                            }]
-                        ).then(
+                        constants.ENDPOINT_API_V1_REPOSITORY,
+                        "updateRepositorySource",
+                        [{
+                            filter : [ 'URL' ],
+                            url : $scope.workingRepositorySource.url,
+                            code : $routeParams.repositorySourceCode
+                        }]
+                    ).then(
                         function() {
-                            $log.info('did update repository; '+$scope.workingRepository.code);
+                            $log.info('did update repository source; '+$routeParams.repositorySourceCode);
                             breadcrumbs.popAndNavigate();
                         },
                         function(err) {
@@ -110,8 +114,8 @@ angular.module('haikudepotserver').controller(
                             switch(err.code) {
                                 case jsonRpc.errorCodes.VALIDATION:
                                     errorHandling.handleValidationFailures(
-                                        err.data,
-                                        $scope.addEditRepositoryForm);
+                                        err.data.validationfailures,
+                                        $scope.addEditRepositorySourceForm);
                                     break;
 
                                 default:
@@ -125,18 +129,18 @@ angular.module('haikudepotserver').controller(
                 }
                 else {
                     jsonRpc.call(
-                            constants.ENDPOINT_API_V1_REPOSITORY,
-                            "createRepository",
-                            [{
-                                informationUrl : $scope.workingRepository.informationUrl,
-                                name : $scope.workingRepository.name,
-                                code : $scope.workingRepository.code
-                            }]
-                        ).then(
+                        constants.ENDPOINT_API_V1_REPOSITORY,
+                        "createRepositorySource",
+                        [{
+                            url : $scope.workingRepositorySource.url,
+                            repositoryCode : $scope.workingRepositorySource.repositoryCode,
+                            code : $scope.workingRepositorySource.code
+                        }]
+                    ).then(
                         function() {
-                            $log.info('did create repository; '+$scope.workingRepository.code);
+                            $log.info('did create repository source; '+$scope.workingRepositorySource.code);
                             breadcrumbs.pop();
-                            breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepository($scope.workingRepository));
+                            breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepositorySource($scope.workingRepositorySource));
                         },
                         function(err) {
 
@@ -144,7 +148,7 @@ angular.module('haikudepotserver').controller(
                                 case jsonRpc.errorCodes.VALIDATION:
                                     errorHandling.handleValidationFailures(
                                         err.data,
-                                        $scope.addEditRepositoryForm);
+                                        $scope.addEditRepositorySourceForm);
                                     break;
 
                                 default:

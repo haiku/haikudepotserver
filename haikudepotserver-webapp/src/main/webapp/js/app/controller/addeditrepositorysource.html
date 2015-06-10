@@ -1,0 +1,51 @@
+<div class="content-container">
+    <form name="addEditRepositorySourceForm" novalidate="novalidate">
+
+        <label for="code"><message key="gen.code.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('code')">
+            <div ng-show="amEditing" class="form-control-group-static">
+                <code>{{workingRepositorySource.code}}</code>
+            </div>
+            <input
+                    id="code"
+                    type="text"
+                    name="code"
+                    autocomplete="off"
+                    ng-show="!amEditing"
+                    ng-change="codeChanged()"
+                    ng-required="true"
+                    ng-pattern="/^[a-z0-9]{2,16}$/"
+                    ng-model="workingRepositorySource.code"/>
+            <error-messages key-prefix="addEditRepositorySource.code" error="addEditRepositorySourceForm.code.$error"></error-messages>
+        </div>
+
+        <label for="url"><message key="addEditRepositorySource.url.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('url')">
+            <input
+                    id="url"
+                    type="text"
+                    size="64"
+                    name="url"
+                    autocomplete="off"
+                    ng-change="urlChanged()"
+                    ng-required="true"
+                    ng-model="workingRepositorySource.url"/>
+            <error-messages key-prefix="addEditRepositorySource.url" error="addEditRepositorySourceForm.url.$error"></error-messages>
+        </div>
+
+        <div class="form-action-container">
+            <button
+                    ng-disabled="addEditRepositorySourceForm.$invalid"
+                    ng-click="goSave()"
+                    type="submit"
+                    class="main-action">
+                <span ng-show="amEditing"><message key="addEditRepositorySource.saveChangesAction.title"></message></span>
+                <span ng-show="!amEditing"><message key="addEditRepositorySource.addAction.title"></message></span>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

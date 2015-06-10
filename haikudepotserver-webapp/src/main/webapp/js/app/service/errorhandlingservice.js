@@ -94,6 +94,11 @@ angular.module('haikudepotserver').factory('errorHandling',
                  */
 
                 handleValidationFailures : function(validationFailures, form) {
+
+                    if(!form) {
+                        throw Error('a form must be provided to populate in the validation failures');
+                    }
+
                     var result = true;
 
                     if(validationFailures) {

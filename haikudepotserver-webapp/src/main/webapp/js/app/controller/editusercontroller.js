@@ -103,7 +103,7 @@ angular.module('haikudepotserver').controller(
                         switch(err.code) {
                             case jsonRpc.errorCodes.VALIDATION:
                                 errorHandling.handleValidationFailures(
-                                    err.data.validationfailures,
+                                    err.data,
                                     $scope.editUserForm);
                                 break;
 

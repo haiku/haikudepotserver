@@ -161,8 +161,8 @@ angular.module('haikudepotserver').controller(
                                 // actually there shouldn't really be any validation problems except that the oldPasswordClear
                                 // not match to the user for which the change password operation is being performed.
 
-                                if(err.data && err.data.validationfailures) {
-                                    _.each(err.data.validationfailures, function(vf) {
+                                if(err.data && err.data) {
+                                    _.each(err.data, function(vf) {
                                         var model = $scope.changePasswordForm[vf.property];
 
                                         if(model) {

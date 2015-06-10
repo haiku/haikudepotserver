@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -396,6 +397,48 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         return new UpdateRepositorySourceResult();
 
+    }
+
+    @Override
+    public CreateRepositorySourceResult createRepositorySource(CreateRepositorySourceRequest request) throws ObjectNotFoundException {
+
+        Preconditions.checkArgument(null!=request, "the request must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "the code for the new repository source must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository for the new repository source must be identified");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.url), "the url for the new repository source must be identified");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<Repository> repositoryOptional = Repository.getByCode(context, request.repositoryCode);
+
+        if(!repositoryOptional.isPresent()) {
+            throw new ObjectNotFoundException(Repository.class.getSimpleName(), request.repositoryCode);
+        }
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orElse(null),
+                repositoryOptional.get(),
+                Permission.REPOSITORY_EDIT)) {
+            throw new AuthorizationFailureException();
+        }
+
+        Optional<RepositorySource> existingRepositorySourceOptional = RepositorySource.getByCode(context, request.code);
+
+        if(existingRepositorySourceOptional.isPresent()) {
+            throw new ValidationException(new ValidationFailure(RepositorySource.CODE_PROPERTY, "unique"));
+        }
+
+        RepositorySource repositorySource = context.newObject(RepositorySource.class);
+        repositorySource.setRepository(repositoryOptional.get());
+        repositorySource.setUrl(request.url);
+        repositorySource.setCode(request.code);
+        repositoryOptional.get().setModifyTimestamp(new Date());
+        context.commitChanges();
+
+        LOGGER.info("did create a new repository source '{}' on the repository '{}'", repositorySource, repositoryOptional.get());
+
+        return new CreateRepositorySourceResult();
     }
 
 }

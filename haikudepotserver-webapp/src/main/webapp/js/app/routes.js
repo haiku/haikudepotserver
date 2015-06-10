@@ -19,6 +19,8 @@ angular.module('haikudepotserver').config(
                 .when('/pkg/feed/builder',{controller:'PkgFeedBuilderController',templateUrl:'/js/app/controller/pkgfeedbuilder.html'})
                 .when('/paginationcontrolplayground',{controller:'PaginationControlPlayground',templateUrl:'/js/app/controller/paginationcontrolplayground.html'})
                 .when('/repositories/add',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})
+                .when('/repository/:repositoryCode/sources/add',{controller:'AddEditRepositorySourceController',templateUrl:'/js/app/controller/addeditrepositorysource.html'})
+                .when('/repository/:repositoryCode/source/:repositorySourceCode/edit',{controller:'AddEditRepositorySourceController',templateUrl:'/js/app/controller/addeditrepositorysource.html'})
                 .when('/repository/:repositoryCode/source/:repositorySourceCode',{controller:'ViewRepositorySourceController',templateUrl:'/js/app/controller/viewrepositorysource.html'})
                 .when('/repository/:code/edit',{controller:'AddEditRepositoryController',templateUrl:'/js/app/controller/addeditrepository.html'})
                 .when('/repository/:code',{controller:'ViewRepositoryController', templateUrl:'/js/app/controller/viewrepository.html'})

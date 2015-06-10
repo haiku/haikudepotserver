@@ -137,7 +137,7 @@ angular.module('haikudepotserver').controller(
 
                             case jsonRpc.errorCodes.VALIDATION:
                                 _.each(
-                                    err.data.validationfailures,
+                                    err.data,
                                     function(item) {
                                         if('user'==item.property) {
                                             $scope.addRuleForm.userNickname.$setValidity(item.message,false);

@@ -148,8 +148,8 @@ angular.module('haikudepotserver').controller(
                                 // may already be in use.  We can deal with this one and then pass the rest to the
                                 // default handler.
 
-                                if(err.data && err.data.validationfailures) {
-                                    _.each(err.data.validationfailures, function(vf) {
+                                if(err.data && err.data) {
+                                    _.each(err.data, function(vf) {
                                         var model = $scope.createUserForm[vf.property];
 
                                         if(model) {
