@@ -348,6 +348,23 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     });
                 },
 
+                createViewRepositorySource : function(repositorySource) {
+                    if(!repositorySource) {
+                        throw Error('a repository source must be provided');
+                    }
+
+                    var repositoryCode = repositorySource.repository ? repositorySource.repository.code : repositorySource.repositoryCode;
+
+                    if(!repositoryCode) {
+                        throw Error('a repository code must be able to be supplied from a repository source');
+                    }
+
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.viewRepositorySource.title',
+                        path : '/repository/' + repositoryCode + '/source/' + repositorySource.code
+                    });
+                },
+
                 createListRepositories : function() {
                     return applyDefaults({
                         titleKey : 'breadcrumb.listRepositories.title',

@@ -89,8 +89,11 @@ angular.module('haikudepotserver').controller(
 
                 pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, true).then(
                     function(result) {
+
                         $scope.pkg = result;
+
                         $log.info('found '+result.name+' pkg');
+
                         refreshBreadcrumbItems();
                         refetchRepository();
                         refetchPkgScreenshots();
@@ -99,6 +102,7 @@ angular.module('haikudepotserver').controller(
                         refetchUserRatings();
                         refetchProminence();
                         refetchIsSourcePkgAvailable();
+
                     },
                     function() {
                         errorHandling.navigateToError(); // already logged
@@ -120,6 +124,11 @@ angular.module('haikudepotserver').controller(
                         }
 
                         $scope.pkg.versions[0].repository = repository;
+                        $scope.pkg.versions[0].repositorySource = {
+                            code : $scope.pkg.versions[0].repositorySourceCode,
+                            repository : repository
+                        };
+
                     },
                     function() {
                         throw Error('unable to get all of the repositories');

@@ -63,9 +63,13 @@
             <dt><message key="viewPkg.name.title"></message></dt>
             <dd>{{pkg.name}}</dd>
             <dt ng-show="pkg.versions[0].repository"><message key="viewPkg.repository.title"></message></dt>
-            <dd ng-show="pkg.versions[0].repository"><repository-label repository="pkg.versions[0].repository"></repository-label></dd>
+            <dd ng-show="pkg.versions[0].repository">
+                <repository-label repository="pkg.versions[0].repository"></repository-label>
+            </dd>
             <dt ng-show="pkg.versions[0].repository"><message key="viewPkg.repositorySource.title"></message></dt>
-            <dd ng-show="pkg.versions[0].repository"><code>{{pkg.versions[0].repositorySourceCode}}</code></dd>
+            <dd ng-show="pkg.versions[0].repository">
+                <repository-source-label repository-source="pkg.versions[0].repositorySource"></repository-source-label>
+            </dd>
             <dt><message key="viewPkg.version.title"></message></dt>
             <dd><version-label version="pkg.versions[0]"></version-label></dd>
             <dt><message key="viewPkg.isLatest.title"></message></dt>

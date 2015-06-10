@@ -56,4 +56,18 @@ public interface RepositoryApi {
 
     CreateRepositoryResult createRepository(CreateRepositoryRequest createRepositoryRequest) throws ObjectNotFoundException;
 
+    /**
+     * <p>Returns details of the repository source.</p>
+     * @throws ObjectNotFoundException is the repository source is not available.
+     */
+
+    GetRepositorySourceResult getRepositorySource(GetRepositorySourceRequest request) throws ObjectNotFoundException;
+
+    /**
+     * <p>Allows the repository source to be updated.</p>
+     * @throws ObjectNotFoundException if the repository source was not able to be found given the code supplied.
+     */
+
+    UpdateRepositorySourceResult updateRepositorySource(UpdateRepositorySourceRequest request) throws ObjectNotFoundException;
+
 }

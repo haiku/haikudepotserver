@@ -5,6 +5,8 @@
 
 package org.haikuos.haikudepotserver.api1;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
@@ -15,11 +17,13 @@ import org.haikuos.haikudepotserver.api1.support.ValidationException;
 import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
+import org.haikuos.haikudepotserver.dataobjects.RepositorySource;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Optional;
 
 @ContextConfiguration({
@@ -149,6 +153,50 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(ve.getValidationFailures().get(0).getMessage()).isEqualTo("unique");
             Assertions.assertThat(ve.getValidationFailures().get(0).getProperty()).isEqualTo(Repository.CODE_PROPERTY);
         }
+    }
+
+    @Test
+    public void testGetRepositorySource() throws Exception {
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+
+        GetRepositorySourceRequest request = new GetRepositorySourceRequest();
+        request.code = data.pkg1Version1x86.getRepositorySource().getCode();
+
+        // ------------------------------------
+        GetRepositorySourceResult result = repositoryApi.getRepositorySource(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.active).isTrue();
+        Assertions.assertThat(result.code).isEqualTo("testreposrc");
+        Assertions.assertThat(result.repositoryCode).isEqualTo("testrepo");
+        Assertions.assertThat(result.url).startsWith("file://");
+
+    }
+
+    @Test
+    public void testUpdateRepositorySource() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+        setAuthenticatedUserToRoot();
+
+        UpdateRepositorySourceRequest request = new UpdateRepositorySourceRequest();
+        request.code = "testreposrc";
+        request.active = false;
+        request.url = "http://test-example2.haiku-os.org";
+        request.filter = ImmutableList.of(
+                UpdateRepositorySourceRequest.Filter.ACTIVE,
+                UpdateRepositorySourceRequest.Filter.URL);
+
+        // ------------------------------------
+        repositoryApi.updateRepositorySource(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            RepositorySource repositorySourceAfter = RepositorySource.getByCode(context, "testreposrc").get();
+            Assertions.assertThat(repositorySourceAfter.getUrl()).isEqualTo("http://test-example2.haiku-os.org");
+            Assertions.assertThat(repositorySourceAfter.getActive()).isFalse();
+        }
+
     }
 
 }

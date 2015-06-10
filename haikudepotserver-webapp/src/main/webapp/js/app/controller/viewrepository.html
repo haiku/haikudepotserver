@@ -38,7 +38,7 @@
         <tbody>
         <tr ng-repeat="repositorySource in repository.repositorySources">
             <td><active-indicator state="repositorySource.active"></active-indicator></td>
-            <td><code>{{repositorySource.code}}</code></td>
+            <td><repository-source-label repository-source="repositorySource"></repository-source-label></td>
             <td><a href="repositorySource.url">{{repositorySource.url}}</a></td>
         </tr>
         </tbody>

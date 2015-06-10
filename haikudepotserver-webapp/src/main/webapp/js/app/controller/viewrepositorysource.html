@@ -1,0 +1,30 @@
+<div class="content-container">
+
+    <dl>
+        <dt><message key="gen.code.title"></message></dt>
+        <dd><code>{{repositorySource.code}}</code>&nbsp;</dd>
+        <dt><message key="viewRepositorySource.active.title"></message></dt>
+        <dd><active-indicator state="repositorySource.active"></active-indicator>&nbsp;</dd>
+        <dt><message key="viewRepositorySource.url.title"></message></dt>
+        <dd><a ng-href="repositorySource.url">{{repositorySource.url}}</a></dd>
+        <dt><message key="viewRepositorySource.repository.title"></message></dt>
+        <dd><repository-label repository="repositorySource.repository"></repository-label></dd>
+    </dl>
+
+    <ul>
+        <li ng-show="canDeactivate()" repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goDeactivate()">
+                <message key="viewRepositorySource.deactivateAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="canReactivate()" repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goReactivate()">
+                <message key="viewRepositorySource.reactivateAction.title"></message>
+            </a>
+        </li>
+    </ul>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

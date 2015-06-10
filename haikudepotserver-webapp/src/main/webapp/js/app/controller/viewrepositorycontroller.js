@@ -41,6 +41,13 @@ angular.module('haikudepotserver').controller(
                     function() {
                         amUpdatingActive = false;
                         $scope.repository.active = flag;
+
+                        if(!flag) {
+                            _.each($scope.repository.repositorySources, function(rs) {
+                               rs.active = false;
+                            });
+                        }
+
                         $log.info('did set the active flag on '+$scope.repository.code+' to '+flag);
                     },
                     function(err) {
@@ -137,6 +144,13 @@ angular.module('haikudepotserver').controller(
                 ).then(
                     function(result) {
                         $scope.repository = result;
+
+                        // This is required for the repository source to be used with various directives etc...
+
+                        _.each($scope.repository.repositorySources, function(rs) {
+                           rs.repositoryCode = result.code;
+                        });
+
                         $log.info('found '+$scope.repository.code+' repository');
                         refreshBreadcrumbItems();
                     },

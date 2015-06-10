@@ -321,5 +321,81 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         return new CreateRepositoryResult();
     }
 
+    @Override
+    public GetRepositorySourceResult getRepositorySource(GetRepositorySourceRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code));
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, request.code);
+
+        if(!repositorySourceOptional.isPresent()) {
+            throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
+        }
+
+        GetRepositorySourceResult result = new GetRepositorySourceResult();
+        result.active = repositorySourceOptional.get().getActive();
+        result.code = repositorySourceOptional.get().getCode();
+        result.repositoryCode = repositorySourceOptional.get().getRepository().getCode();
+        result.url = repositorySourceOptional.get().getUrl();
+        return result;
+    }
+
+    @Override
+    public UpdateRepositorySourceResult updateRepositorySource(UpdateRepositorySourceRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "a code is required to identify the repository source to update");
+        Preconditions.checkArgument(null!=request.filter, "filters must be provided to specify what aspects of the repository source should be updated");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, request.code);
+
+        if(!repositorySourceOptional.isPresent()) {
+            throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
+        }
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orElse(null),
+                repositorySourceOptional.get().getRepository(),
+                Permission.REPOSITORY_EDIT)) {
+            throw new AuthorizationFailureException();
+        }
+
+        for(UpdateRepositorySourceRequest.Filter filter : request.filter) {
+
+            switch(filter) {
+
+                case ACTIVE:
+                    if(null==request.active) {
+                        throw new IllegalArgumentException("the active field must be provided if the request requires it to be updated");
+                    }
+                    repositorySourceOptional.get().setActive(request.active);
+                    LOGGER.info("did set the repository source {} active to {}", repositorySourceOptional.get(), request.active);
+                    break;
+
+                case URL:
+                    repositorySourceOptional.get().setUrl(request.url);
+                    break;
+
+                default:
+                    throw new IllegalStateException("unhandled filter; " + filter.name());
+
+            }
+
+        }
+
+        if(context.hasChanges()) {
+            context.commitChanges();
+        }
+        else {
+            LOGGER.info("update repository source {} with no changes made", repositorySourceOptional.get());
+        }
+
+        return new UpdateRepositorySourceResult();
+
+    }
 
 }
