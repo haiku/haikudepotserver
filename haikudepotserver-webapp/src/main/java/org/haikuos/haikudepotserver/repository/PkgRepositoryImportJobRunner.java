@@ -66,32 +66,43 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
             LOGGER.warn("did not import for repository {} as there are no sources", specification.getRepositoryCode());
         }
         else {
-
-            // start a cayenne long-running txn
-            Transaction transaction = serverRuntime.getDataDomain().createTransaction();
-            Transaction.bindThreadTransaction(transaction);
-
-            try {
-                for (RepositorySource repositorySource : repositorySources) {
-                    runForRepositorySource(mainContext, repositorySource);
-                }
-
-                transaction.commit();
+            if(null!=specification.getRepositorySourceCodes() && specification.getRepositorySourceCodes().isEmpty()) {
+                LOGGER.warn("specification contains an empty set of repository source codes");
             }
-            catch (Throwable th) {
-                transaction.setRollbackOnly();
-                LOGGER.error("a problem has arisen processing a repository file for repository " + repository.getCode(), th);
-            } finally {
-                Transaction.bindThreadTransaction(null);
+            else {
 
-                if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
-                    try {
-                        transaction.rollback();
-                    } catch (Exception e) {
-                        // ignore
+                // start a cayenne long-running txn
+                Transaction transaction = serverRuntime.getDataDomain().createTransaction();
+                Transaction.bindThreadTransaction(transaction);
+
+                try {
+                    for (RepositorySource repositorySource : repositorySources) {
+                        if(
+                                null==specification.getRepositorySourceCodes() ||
+                                        specification.getRepositorySourceCodes().contains(repositorySource.getCode())) {
+                            runForRepositorySource(mainContext, repositorySource);
+                        }
+                        else {
+                            LOGGER.info("skipping repository source; {}", repositorySource.getCode());
+                        }
                     }
-                }
 
+                    transaction.commit();
+                } catch (Throwable th) {
+                    transaction.setRollbackOnly();
+                    LOGGER.error("a problem has arisen processing a repository file for repository " + repository.getCode(), th);
+                } finally {
+                    Transaction.bindThreadTransaction(null);
+
+                    if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
+                        try {
+                            transaction.rollback();
+                        } catch (Exception e) {
+                            // ignore
+                        }
+                    }
+
+                }
             }
         }
 

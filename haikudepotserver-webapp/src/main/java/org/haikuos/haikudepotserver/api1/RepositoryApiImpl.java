@@ -23,14 +23,13 @@ import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpeci
 import org.haikuos.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -73,14 +72,15 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throws ObjectNotFoundException {
 
         Preconditions.checkNotNull(triggerImportRepositoryRequest);
-        Preconditions.checkState(!Strings.isNullOrEmpty(triggerImportRepositoryRequest.code));
+        Preconditions.checkState(!Strings.isNullOrEmpty(triggerImportRepositoryRequest.repositoryCode));
+        Preconditions.checkArgument(null==triggerImportRepositoryRequest.repositorySourceCodes || !triggerImportRepositoryRequest.repositorySourceCodes.isEmpty(), "bad repository sources");
 
         final ObjectContext context = serverRuntime.getContext();
 
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, triggerImportRepositoryRequest.code);
+        Optional<Repository> repositoryOptional = Repository.getByCode(context, triggerImportRepositoryRequest.repositoryCode);
 
         if(!repositoryOptional.isPresent()) {
-            throw new ObjectNotFoundException(Repository.class.getSimpleName(), triggerImportRepositoryRequest.code);
+            throw new ObjectNotFoundException(Repository.class.getSimpleName(), triggerImportRepositoryRequest.repositoryCode);
         }
 
         if(!authorizationService.check(
@@ -91,8 +91,35 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new AuthorizationFailureException();
         }
 
+        Set<RepositorySource> repositorySources = null;
+
+        if(null!=triggerImportRepositoryRequest.repositorySourceCodes) {
+
+            repositorySources = new HashSet<>();
+
+             for(String repositorySourceCode : triggerImportRepositoryRequest.repositorySourceCodes) {
+                 Optional<RepositorySource> repositorySourceOptional = repositoryOptional.get()
+                         .getRepositorySources()
+                         .stream()
+                         .filter(rs -> rs.getCode().equals(repositorySourceCode))
+                         .collect(SingleCollector.optional());
+
+                 if(!repositorySourceOptional.isPresent()) {
+                     throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), repositorySourceCode);
+                 }
+
+                 repositorySources.add(repositorySourceOptional.get());
+             }
+        }
+
         jobOrchestrationService.submit(
-                new PkgRepositoryImportJobSpecification(repositoryOptional.get().getCode()),
+                new PkgRepositoryImportJobSpecification(
+                        repositoryOptional.get().getCode(),
+                        null==repositorySources ? null : repositorySources
+                                .stream()
+                                .map(RepositorySource::getCode)
+                                .collect(Collectors.toSet())
+                ),
                 JobOrchestrationService.CoalesceMode.QUEUED);
 
         return new TriggerImportRepositoryResult();

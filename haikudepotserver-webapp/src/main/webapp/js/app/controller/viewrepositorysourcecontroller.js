@@ -14,6 +14,7 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,userState,errorHandling,breadcrumbs,
             breadcrumbFactory) {
 
+            $scope.didTriggerImportRepositorySource = false;
             $scope.repositorySource = undefined;
             var amUpdatingActive = false;
 
@@ -47,6 +48,12 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
+            $scope.canTriggerImport = function() {
+                return $scope.repositorySource &&
+                    $scope.repositorySource.active &&
+                    $scope.repositorySource.repository.active;
+            };
+
             $scope.canReactivate = function() {
                 return $scope.repositorySource && !$scope.repositorySource.active && !amUpdatingActive;
             };
@@ -65,6 +72,34 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEdit = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepositorySource($scope.repositorySource));
+            };
+
+            /**
+             * <p>This function will initiate an import of a repository.  These run sequentially so it may not happen
+             * immediately; it may be queued to go later.</p>
+             */
+
+            $scope.goTriggerImport = function() {
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_REPOSITORY,
+                    "triggerImportRepository",
+                    [{
+                        repositoryCode: $scope.repositorySource.repository.code,
+                        repositorySourceCodes : [ $scope.repositorySource.code ]
+                    }]
+                ).then(
+                    function() {
+                        $log.info('triggered import for repository source; '+$scope.repositorySource.code);
+                        $scope.didTriggerImportRepositorySource = true;
+                        $timeout(function() {
+                            $scope.didTriggerImportRepositorySource = false;
+                        }, 3000)
+
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             };
 
             //

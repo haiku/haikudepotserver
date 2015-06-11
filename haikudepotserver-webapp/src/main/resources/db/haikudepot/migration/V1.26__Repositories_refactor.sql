@@ -124,7 +124,11 @@ INSERT INTO haikudepot.pkg_prominence (id, pkg_id, repository_id, prominence_id)
 
 ALTER TABLE haikudepot.pkg DROP COLUMN prominence_id;
 
+-- STEP 4; UPDATE CODES A BIT
 
+UPDATE haikudepot.repository_source SET code='haikuportsx8664' WHERE code='haikuports64';
+UPDATE haikudepot.repository_source SET code='haikuportsx86' WHERE code='haikuports';
+UPDATE haikudepot.repository_source SET code='haikuportsx86gcc2' WHERE code='haikuportsgcc2';
 
 
 

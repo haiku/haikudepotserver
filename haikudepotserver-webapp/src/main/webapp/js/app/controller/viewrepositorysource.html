@@ -1,5 +1,10 @@
 <div class="content-container">
 
+    <div class="info-container" ng-show="didTriggerImportRepositorySource">
+        <strong><message key="viewRepositorySource.importTriggered.title"></message> :</strong>
+        <message key="viewRepositorySource.importTriggered.description"></message>
+    </div>
+
     <dl>
         <dt><message key="gen.code.title"></message></dt>
         <dd><code>{{repositorySource.code}}</code>&nbsp;</dd>
@@ -20,6 +25,11 @@
         <li ng-show="canReactivate()" repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goReactivate()">
                 <message key="viewRepositorySource.reactivateAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="canTriggerImport()" repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_IMPORT'">
+            <a href="" ng-click="goTriggerImport()">
+                <message key="viewRepositorySource.triggerImportAction.title"></message>
             </a>
         </li>
         <li repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">

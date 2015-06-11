@@ -110,7 +110,10 @@ angular.module('haikudepotserver').controller(
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_REPOSITORY,
                     "triggerImportRepository",
-                    [{ code: $routeParams.code }]
+                    [{
+                        repositoryCode: $routeParams.code,
+                        repositorySourceCode : null
+                    }]
                 ).then(
                     function() {
                         $log.info('triggered import for repository; '+$scope.repository.code);
