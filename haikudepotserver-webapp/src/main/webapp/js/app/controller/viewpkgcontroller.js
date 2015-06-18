@@ -276,6 +276,7 @@ angular.module('haikudepotserver').controller(
                             {
                                 offset: $scope.userRatings.offset,
                                 limit: $scope.userRatings.max,
+                                repositoryCode: $scope.pkg.versions[0].repositoryCode,
                                 pkgName: $scope.pkg.name
                             }
                         ]
@@ -461,7 +462,10 @@ angular.module('haikudepotserver').controller(
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_USERRATING,
                     'queueUserRatingSpreadsheetJob',
-                    [{ pkgName: $routeParams.name }]
+                    [{
+                        pkgName: $routeParams.name,
+                        repositoryCode : $scope.pkg.versions[0].repositoryCode
+                    }]
                 ).then(
                     function(data) {
                         if(data.guid && data.guid.length) {

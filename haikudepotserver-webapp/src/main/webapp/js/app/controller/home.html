@@ -70,6 +70,7 @@
                 <th><message key="gen.pkg.title"></message></th>
                 <th><message key="home.table.payloadlength.title"></message></th>
                 <th><message key="home.table.rating.title"></message></th>
+                <th ng-show="shouldShowRepositoryTableColumn()"><message key="home.table.repository.title"></message></th>
                 <th><message key="home.table.version.title"></message></th>
                 <th ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><message key="home.table.approximateVersionDate.title"></message></th>
                 <th ng-show="'MOSTVIEWED'==selectedViewCriteriaTypeOption.code"><message key="home.table.versionViewCounter.title"></message></th>
@@ -106,6 +107,9 @@
                         <span ng-show="shouldShowDerivedRating(pkg)">
                             <rating-indicator rating="{{pkg.derivedRating}}"></rating-indicator>
                         </span>
+                    </td>
+                    <td class="muted" ng-show="shouldShowRepositoryTableColumn()">
+                        <repository-label repository="pkg.versions[0].repository" should-link="false"></repository-label>
                     </td>
                     <td><version-label version="pkg.versions[0]"></version-label></td>
                     <td ng-show="'MOSTRECENT'==selectedViewCriteriaTypeOption.code"><span class="muted">{{pkg.versions[0].createTimestamp|timestamp}}</span></td>

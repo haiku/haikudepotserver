@@ -581,6 +581,10 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Optional<User> user = tryObtainAuthenticatedUser(context);
         UserRatingSpreadsheetJobSpecification spec = new UserRatingSpreadsheetJobSpecification();
 
+        if(!Strings.isNullOrEmpty(request.repositoryCode)) {
+            spec.setRepositoryCode(getRepository(context, request.repositoryCode).getCode());
+        }
+
         if(!Strings.isNullOrEmpty(request.userNickname)) {
             Optional<User> requestUserOptional = User.getByNickname(context, request.userNickname);
 
@@ -626,8 +630,8 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                         context,
                         user.orElse(null),
                         null,
-                        Permission.BULK_PKGICONSPREADSHEETREPORT)) {
-                    LOGGER.warn("attempt to access a pkg icon spreadsheet report, but was unauthorized");
+                        Permission.BULK_USERRATINGSPREADSHEETREPORT_PKG)) {
+                    LOGGER.warn("attempt to access a user rating report, but was unauthorized");
                     throw new AuthorizationFailureException();
                 }
             }

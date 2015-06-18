@@ -16,13 +16,13 @@ angular.module('haikudepotserver').controller(
             breadcrumbs,referenceData,
             pkg,breadcrumbFactory) {
 
-            $scope.pkg = undefined;
+            $scope.pkgVersion = undefined;
             $scope.amSaving = false;
             $scope.selectedProminence = undefined;
             $scope.prominences = undefined;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.pkg || undefined == $scope.prominences || $scope.amSaving;
+                return undefined == $scope.pkgVersion || undefined == $scope.prominences || $scope.amSaving;
             };
 
             // pulls the pkg data back from the server so that it can be used to
@@ -31,7 +31,8 @@ angular.module('haikudepotserver').controller(
             function refetchPkg() {
                 pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
                     function(result) {
-                        $scope.pkg = result;
+                        $scope.pkgVersion = result.versions[0];
+                        $scope.pkgVersion.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
 
@@ -53,9 +54,12 @@ angular.module('haikudepotserver').controller(
                                     }
                                 );
 
+                                // the prominence here is on the package, but relates to the repository requested
+                                // when the package was retrieved from the server.
+
                                 $scope.selectedProminence = _.findWhere(
                                     $scope.prominences,
-                                    { ordering : $scope.pkg.prominenceOrdering }
+                                    { ordering : $scope.pkgVersion.pkg.prominenceOrdering }
                                 );
 
                             },
@@ -76,8 +80,8 @@ angular.module('haikudepotserver').controller(
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbFactory.createHome(),
-                    breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg($scope.pkg),
-                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditPkgProminence($scope.pkg))
+                    breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg($scope.pkgVersion.pkg),
+                    breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditPkgProminence($scope.pkgVersion.pkg))
                 ]);
             }
 
@@ -89,12 +93,13 @@ angular.module('haikudepotserver').controller(
                     constants.ENDPOINT_API_V1_PKG,
                     'updatePkgProminence',
                     [{
-                        pkgName : $scope.pkg.name,
+                        pkgName : $scope.pkgVersion.pkg.name,
+                        repositoryCode : $scope.pkgVersion.repositoryCode,
                         prominenceOrdering : $scope.selectedProminence.ordering
                     }]
                 ).then(
                     function() {
-                        $log.info('have updated the prominence for pkg '+$scope.pkg.name);
+                        $log.info('have updated the prominence for pkg '+$scope.pkgVersion.pkg.name);
                         breadcrumbs.popAndNavigate();
                     },
                     function(err) {

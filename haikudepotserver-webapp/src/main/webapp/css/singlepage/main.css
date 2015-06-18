@@ -424,10 +424,6 @@ SEARCH BAR
     padding: 2px;
 }
 
-#search-criteria-container > div {
-    font-size: 10px;
-}
-
 #search-criteria-container > div > button[disabled] {
     border: 1px solid rgba(0, 0, 0, 0.30);
 }

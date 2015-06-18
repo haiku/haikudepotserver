@@ -30,6 +30,10 @@ public class GetPkgResult {
 
     public Integer derivedRatingSampleSize;
 
+    /**
+     * <p>This relates to the repository requested.</p>
+     */
+
     public Integer prominenceOrdering;
 
     public static class PkgVersion {

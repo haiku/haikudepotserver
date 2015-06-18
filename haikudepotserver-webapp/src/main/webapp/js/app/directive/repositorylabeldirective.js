@@ -33,6 +33,20 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
 
                 $scope.$watch(repositoryExpression, function(repository) {
 
+                    function deriveTitle(repository) {
+                        if(repository) {
+                            if (repository.name) {
+                                return repository.name;
+                            }
+
+                            if (repository.code) {
+                                return repository.code;
+                            }
+                        }
+
+                        return '?';
+                    }
+
                     function setupForNoHyperlink() {
                         if('span' != containerEl[0].tagName.toLowerCase()) {
                             var el = angular.element('<span></span>');
@@ -41,7 +55,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                         }
 
                         breadcrumbItem = undefined;
-                        containerEl.text(repository ? repository.code : '');
+                        containerEl.text(deriveTitle(repository));
                     }
 
                     // we may want an anchor or we may want simple text.
@@ -76,7 +90,7 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
                                         breadcrumbFactory.toFullPath(breadcrumbItem)
                                     );
 
-                                    containerEl.text(repository ? repository.name : '');
+                                    containerEl.text(deriveTitle(repository));
                                 }
                             }
                             else {

@@ -7,6 +7,7 @@ angular.module('haikudepotserver')
     .constant('constants', {
 
         STORAGE_TOKEN_KEY : 'hds.userstate.token',
+        STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY : 'hds.repo.prefcodes',
 
         NATURALLANGUAGECODE_ENGLISH : 'en',
 

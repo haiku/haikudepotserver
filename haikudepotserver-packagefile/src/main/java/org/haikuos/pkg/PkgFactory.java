@@ -6,6 +6,7 @@
 package org.haikuos.pkg;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.haikuos.pkg.model.*;
 
 import java.math.BigInteger;
@@ -106,9 +107,11 @@ public class PkgFactory {
             result.setSummary(getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_SUMMARY));
             result.setDescription(getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_DESCRIPTION));
 
-            result.setHomePageUrl(new PkgUrl(
-                    getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_URL),
-                    PkgUrlType.HOMEPAGE));
+            String packageUrl = getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_URL);
+
+            if(!Strings.isNullOrEmpty(packageUrl)) {
+                result.setHomePageUrl(new PkgUrl(packageUrl,PkgUrlType.HOMEPAGE));
+            }
 
             // get the architecture.
 

@@ -15,7 +15,7 @@ public class PkgUserRatingAggregate extends _PkgUserRatingAggregate {
     public static List<PkgUserRatingAggregate> findByPkg(ObjectContext context, Pkg pkg) {
         Preconditions.checkNotNull(context);
         Preconditions.checkArgument(null != pkg, "a package is required to identify the pkg user rating aggregates to return");
-        SelectQuery query = new SelectQuery(PkgCategory.class, ExpressionFactory.matchExp(PKG_PROPERTY, pkg));
+        SelectQuery query = new SelectQuery(PkgUserRatingAggregate.class, ExpressionFactory.matchExp(PKG_PROPERTY, pkg));
         return (List<PkgUserRatingAggregate>) context.performQuery(query);
     }
 

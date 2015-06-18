@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
+import org.haikuos.haikudepotserver.dataobjects.Repository;
 import org.haikuos.haikudepotserver.dataobjects.User;
 import org.haikuos.haikudepotserver.dataobjects.UserRating;
 import org.haikuos.haikudepotserver.job.AbstractJobRunner;
@@ -58,7 +59,6 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
     public void run(JobOrchestrationService jobOrchestrationService, UserRatingSpreadsheetJobSpecification specification) throws IOException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
@@ -77,6 +77,15 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
 
             Optional<Pkg> paramPkgOptional = Optional.empty();
             Optional<User> paramUserOptional = Optional.empty();
+            Optional<Repository> paramRepositoryOptional = Optional.empty();
+
+            if (!Strings.isNullOrEmpty(specification.getRepositoryCode())) {
+                paramRepositoryOptional = Repository.getByCode(context, specification.getRepositoryCode());
+
+                if(!paramRepositoryOptional.isPresent()) {
+                    throw new IllegalStateException("unable to find the repository; " + specification.getRepositoryCode());
+                }
+            }
 
             if (!Strings.isNullOrEmpty(specification.getUserNickname())) {
                 paramUserOptional = User.getByNickname(context, specification.getUserNickname());
@@ -96,6 +105,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
 
             writer.writeNext(new String[]{
                     "pkg-name",
+                    "repository-code",
                     "architecture-code",
                     "version-coordinates",
                     "user-nickname",
@@ -118,6 +128,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             UserRatingSearchSpecification spec = new UserRatingSearchSpecification();
             spec.setPkg(paramPkgOptional.orElse(null));
             spec.setUser(paramUserOptional.orElse(null));
+            spec.setRepository(paramRepositoryOptional.orElse(null));
 
             // TODO; provide a prefetch tree into the user, pkgversion.
             int count = userRatingOrchestrationService.each(context, spec, new Callback<UserRating>() {
@@ -127,12 +138,13 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
                     writer.writeNext(
                             new String[]{
                                     userRating.getPkgVersion().getPkg().getName(),
+                                    userRating.getPkgVersion().getRepositorySource().getRepository().getCode(),
                                     userRating.getPkgVersion().getArchitecture().getCode(),
                                     userRating.getPkgVersion().toVersionCoordinates().toString(),
                                     userRating.getUser().getNickname(),
                                     dateTimeFormatter.print(userRating.getCreateTimestamp().getTime()),
                                     dateTimeFormatter.print(userRating.getModifyTimestamp().getTime()),
-                                    userRating.getRating().toString(),
+                                    null != userRating.getRating() ? userRating.getRating().toString() : "",
                                     null != userRating.getUserRatingStability() ? userRating.getUserRatingStability().getCode() : "",
                                     userRating.getNaturalLanguage().getCode(),
                                     userRating.getComment(),

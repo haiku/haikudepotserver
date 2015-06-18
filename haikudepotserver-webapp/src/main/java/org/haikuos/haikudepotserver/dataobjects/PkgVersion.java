@@ -44,6 +44,15 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public static List<PkgVersion> getForPkg(
             ObjectContext context,
             Pkg pkg,
+            boolean includeInactive) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(pkg);
+        return getForPkg(context, pkg, null, null, includeInactive);
+    }
+
+    public static List<PkgVersion> getForPkg(
+            ObjectContext context,
+            Pkg pkg,
             Repository repository,
             boolean includeInactive) {
         Preconditions.checkNotNull(context);

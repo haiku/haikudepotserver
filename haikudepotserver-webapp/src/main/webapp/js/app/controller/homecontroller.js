@@ -14,7 +14,7 @@ angular.module('haikudepotserver').controller(
             $log,$scope,$rootScope,$q,$location,
             jsonRpc,constants,userState,messageSource,errorHandling,
             referenceData,breadcrumbs,breadcrumbFactory,searchMixins,
-            repository) {
+            repositoryService) {
 
             angular.extend(this,searchMixins);
 
@@ -103,6 +103,10 @@ angular.module('haikudepotserver').controller(
                 return angular.isNumber(pkg.derivedRating);
             };
 
+            $scope.shouldShowRepositoryTableColumn = function() {
+                return $scope.selectedRepositories && $scope.selectedRepositories.length > 1;
+            };
+
             // pagination
             $scope.pkgs = {
                 items : undefined,
@@ -148,17 +152,20 @@ angular.module('haikudepotserver').controller(
                     }
 
                     if (!$scope.selectedRepositories || !$scope.selectedRepositories.length) {
-                        $scope.selectedRepositories = _.filter(
-                            $scope.repositories,
-                            function (r) {
-                                return r.code == constants.REPOSITORY_CODE_DEFAULT;
+                        repositoryService.preferentialSearchRepositories().then(
+                            function(data) {
+                                if(!data || !data.length) {
+                                    throw Error('unable to establish the preferential search repositories');
+                                }
+
+                                $scope.selectedRepositories = data;
+                            },
+                            function() {
+                                throw Error('unable to ascertain the preferential search repositories');
                             }
                         );
                     }
 
-                    if (!$scope.selectedRepositories || !$scope.selectedRepositories.length) {
-                        throw Error('unable to ascertain the selected repositories');
-                    }
                 }
                 else {
                     $scope.selectedRepositories = [];
@@ -298,7 +305,7 @@ angular.module('haikudepotserver').controller(
 
                 // fetch the repositories
                 function(chain) {
-                    repository.getRepositories().then(
+                    repositoryService.getRepositories().then(
                         function(data) {
                             $scope.repositories = data;
                             resetSelectedRepositories();
@@ -366,6 +373,18 @@ angular.module('haikudepotserver').controller(
                     $scope.$watch('pkgs.offset', function(newValue, oldValue) {
                         if(undefined!=oldValue && null!=oldValue) { // already initialized elsewhere
                             $log.debug('offset -> refetching pkgs');
+                            refetchPkgs();
+                        }
+                    });
+
+                    $scope.$watch('selectedRepositories', function(newValue, oldValue) {
+                        if(undefined!=oldValue && null!=oldValue) { // already initialized elsewhere
+                            $log.debug('selectedRepositories -> refetching pkgs');
+
+                            if (newValue && newValue.length) {
+                                repositoryService.preferentialSearchRepositories(newValue);
+                            }
+
                             refetchPkgs();
                         }
                     });
@@ -521,8 +540,6 @@ angular.module('haikudepotserver').controller(
 
                     amFetchingPkgs = true;
 
-                    //$log.info('repos; ' + $scope.selectedRepositories);
-
                     var req = {
                         repositoryCodes : _.map($scope.selectedRepositories, function(r) {
                             return r.code;
@@ -599,6 +616,14 @@ angular.module('haikudepotserver').controller(
 
                             _.each($scope.pkgs.items, function(p) {
                                 p.derivedTitle = derivedTitle(p);
+                            });
+
+                            repositoryService.getRepositories().then(function(repositories) {
+                                _.each($scope.pkgs.items, function(p) {
+                                    _.each(p.versions, function(pv) {
+                                       pv.repository = _.findWhere(repositories, { code : pv.repositoryCode });
+                                    });
+                                })
                             });
 
                             $log.info('found ' + result.items.length + ' packages from a total of '+result.total);

@@ -37,15 +37,15 @@ angular.module('haikudepotserver').directive(
 
                     // creates a 'pretty' label from the list of repositories.
 
-                    function createRepositoriesLabel() {
-                        var l = $scope.repositories ? $scope.repositories.length : 0;
+                    function createRepositoriesLabel(repositories) {
+                        var l = repositories ? repositories.length : 0;
 
                         if(0 == l) {
                             return '?';
                         }
 
-                        if(1 == l) {
-                            return repositories[0].name;
+                        if(l < 3) {
+                            return _.pluck(repositories, 'name').join(', ');
                         }
 
                         var scratch = _.map(repositories, function(r) {
@@ -134,7 +134,7 @@ angular.module('haikudepotserver').directive(
                     $scope.$watch(
                         'repositories',
                         function(newValue) {
-                            $scope.label = createRepositoriesLabel();
+                            $scope.label = createRepositoriesLabel(newValue);
                         }
                     );
 

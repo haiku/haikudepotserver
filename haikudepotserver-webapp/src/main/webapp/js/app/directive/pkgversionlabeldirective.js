@@ -66,13 +66,20 @@ angular.module('haikudepotserver').directive(
 
                             pkgVersionBreadcrumbItem = breadcrumbFactory.createViewPkgWithSpecificVersionFromPkgVersion(pkgVersion);
 
-                            textTargetEl.text(
-                                    pkgVersion.pkg.name +
-                                    ' - ' +
-                                    pkgVersionElementsToString(pkgVersion) +
-                                    ' - ' +
-                                    pkgVersion.architectureCode
-                            );
+                            var parts = [
+                                pkgVersion.pkg.name,
+                                ' - ',
+                                pkgVersionElementsToString(pkgVersion),
+                                ' - ',
+                                pkgVersion.architectureCode
+                            ];
+
+                            if(pkgVersion.repositoryCode) {
+                                parts.push(' @ ');
+                                parts.push(pkgVersion.repositoryCode);
+                            }
+
+                            textTargetEl.text(parts.join(''));
 
                             if('A' == textTargetEl[0].tagName.toUpperCase()) {
                                 textTargetEl.attr(

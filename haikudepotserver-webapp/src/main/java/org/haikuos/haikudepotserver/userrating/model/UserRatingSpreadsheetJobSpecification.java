@@ -16,6 +16,16 @@ public class UserRatingSpreadsheetJobSpecification extends AbstractJobSpecificat
 
     private String pkgName;
 
+    private String repositoryCode;
+
+    public String getRepositoryCode() {
+        return repositoryCode;
+    }
+
+    public void setRepositoryCode(String repositoryCode) {
+        this.repositoryCode = repositoryCode;
+    }
+
     public String getUserNickname() {
         return userNickname;
     }
@@ -39,8 +49,9 @@ public class UserRatingSpreadsheetJobSpecification extends AbstractJobSpecificat
 
             return
                     Objects.equals(otherSpec.getPkgName(), getPkgName())
-                    && Objects.equals(otherSpec.getUserNickname(), getUserNickname())
-                    && Objects.equals(otherSpec.getOwnerUserNickname(), getOwnerUserNickname());
+                            && Objects.equals(otherSpec.getRepositoryCode(), getRepositoryCode())
+                            && Objects.equals(otherSpec.getUserNickname(), getUserNickname())
+                            && Objects.equals(otherSpec.getOwnerUserNickname(), getOwnerUserNickname());
         }
 
         return false;

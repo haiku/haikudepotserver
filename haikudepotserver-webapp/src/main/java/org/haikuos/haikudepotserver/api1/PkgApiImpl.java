@@ -14,6 +14,7 @@ import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
+import org.haikuos.haikudepotserver.api1.model.PkgVersionType;
 import org.haikuos.haikudepotserver.api1.model.pkg.*;
 import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haikuos.haikudepotserver.api1.support.BadPkgIconException;
@@ -361,7 +362,16 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         Pkg pkg = getPkg(context, request.name);
-        Repository repository = getRepository(context, Strings.isNullOrEmpty(request.repositoryCode) ? Repository.CODE_DEFAULT : request.repositoryCode);
+        Repository repository = null;
+
+        if(!Strings.isNullOrEmpty(request.repositoryCode)) {
+            repository = getRepository(context, request.repositoryCode);
+        }
+
+        // TODO; should be removed after some time; not supplying a repository should not be allowed.
+        if(null==repository && request.versionType != PkgVersionType.ALL) {
+            repository =  getRepository(context, Repository.CODE_DEFAULT);
+        }
 
         final NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
 
@@ -374,16 +384,20 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 .map(ppc -> ppc.getPkgCategory().getCode())
                 .collect(Collectors.toList());
 
+        if(null!=repository) {
             Optional<PkgUserRatingAggregate> userRatingAggregate = pkg.getPkgUserRatingAggregate(repository);
 
-            if(userRatingAggregate.isPresent()) {
+            if (userRatingAggregate.isPresent()) {
                 result.derivedRating = userRatingAggregate.get().getDerivedRating();
                 result.derivedRatingSampleSize = userRatingAggregate.get().getDerivedRatingSampleSize();
             }
+        }
 
+        if(null != repository) {
             result.prominenceOrdering = pkg.getPkgProminence(repository)
                     .map(pp -> pp.getProminence().getOrdering())
                     .orElse(null);
+        }
 
         switch(request.versionType) {
 
@@ -393,7 +407,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             case ALL: {
 
-                List<PkgVersion> allVersions = PkgVersion.getForPkg(context, pkg, repository, false); // active only
+                List<PkgVersion> allVersions;
+
+                if(null==repository) {
+                    allVersions = PkgVersion.getForPkg(context, pkg, false); // active only
+                }
+                else {
+                    allVersions = PkgVersion.getForPkg(context, pkg, repository, false); // active only
+                }
 
                 if(architectureOptional.isPresent()) {
                     final Architecture a = architectureOptional.get();
