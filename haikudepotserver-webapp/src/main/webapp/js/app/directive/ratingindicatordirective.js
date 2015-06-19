@@ -24,7 +24,7 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
                     element.replaceWith(topLevelE);
 
                     for(var i=0;i<5;i++) {
-                        var starE = angular.element('<img src="/img/staroff.'+extension+'"/>');
+                        var starE = angular.element('<img width="16" height="16" src="/img/staroff.'+extension+'"/>');
                         starEs.push(starE);
                         topLevelE.append(starE);
                     }

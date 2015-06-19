@@ -630,7 +630,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                         context,
                         user.orElse(null),
                         null,
-                        Permission.BULK_USERRATINGSPREADSHEETREPORT_PKG)) {
+                        Permission.BULK_USERRATINGSPREADSHEETREPORT_ALL)) {
                     LOGGER.warn("attempt to access a user rating report, but was unauthorized");
                     throw new AuthorizationFailureException();
                 }

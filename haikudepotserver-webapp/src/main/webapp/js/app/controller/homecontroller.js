@@ -371,21 +371,21 @@ angular.module('haikudepotserver').controller(
                 function(chain) {
 
                     $scope.$watch('pkgs.offset', function(newValue, oldValue) {
-                        if(undefined!=oldValue && null!=oldValue) { // already initialized elsewhere
-                            $log.debug('offset -> refetching pkgs');
+                        if(undefined!=oldValue && null!=oldValue && newValue!=oldValue) { // already initialized elsewhere
+                            $log.debug('offset change -> refetching pkgs');
                             refetchPkgs();
                         }
                     });
 
                     $scope.$watch('selectedRepositories', function(newValue, oldValue) {
-                        if(undefined!=oldValue && null!=oldValue) { // already initialized elsewhere
+                        if(oldValue && (newValue.length != oldValue.length || _.difference(newValue,oldValue).length)) { // already initialized elsewhere
                             $log.debug('selectedRepositories -> refetching pkgs');
 
                             if (newValue && newValue.length) {
                                 repositoryService.preferentialSearchRepositories(newValue);
                             }
 
-                            refetchPkgs();
+                            refetchPkgsAtFirstPage();
                         }
                     });
 
@@ -597,6 +597,8 @@ angular.module('haikudepotserver').controller(
                     jsonRpc.call(constants.ENDPOINT_API_V1_PKG, "searchPkgs", [req]).then(
                         function (result) {
 
+                            $log.debug('searching for packages has returned ' + result.items.length + ' results on the current page');
+
                             // This will either return the title from the package's version or it will return the
                             // name of the package.
 
@@ -634,6 +636,9 @@ angular.module('haikudepotserver').controller(
                             errorHandling.handleJsonRpcError(err);
                         }
                     );
+                }
+                else {
+                    $log.debug('am not refreshing packages because not all prerequisite data is present');
                 }
 
             }

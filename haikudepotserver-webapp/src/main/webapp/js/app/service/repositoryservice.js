@@ -37,7 +37,7 @@ angular.module('haikudepotserver').factory('repositoryService',
                     ).then(
                         function (result) {
                             $log.info('fetched ' + result.repositories.length + ' repositories');
-                            this.repositories = result.repositories;
+                            repositories = result.repositories;
                             deferred.resolve(result.repositories);
                         },
                         function (err) {

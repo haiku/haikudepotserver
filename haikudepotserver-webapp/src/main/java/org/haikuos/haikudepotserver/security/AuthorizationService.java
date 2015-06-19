@@ -129,7 +129,7 @@ public class AuthorizationService {
         Preconditions.checkNotNull(objectContext);
         Preconditions.checkState(
                 deriveTargetType(target) == permission.getRequiredTargetType(),
-                "during checking authorization, the target object type " + deriveTargetType(target) + " does not match the expected type "  + permission.getRequiredTargetType());
+                "during checking authorization, the target object type " + deriveTargetType(target) + " does not match the expected type "  + permission.getRequiredTargetType() + " for permission " + permission);
 
         // if the authenticated user is not active then there should not be a situation arising where
         // an authorization check is being made.
