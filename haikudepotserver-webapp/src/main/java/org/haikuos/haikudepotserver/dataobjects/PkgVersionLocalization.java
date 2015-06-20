@@ -78,7 +78,8 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
                 ExpressionHelper.andAll(expressions),
                 ImmutableList.of(
                         new Ordering(pvProp + "." + PkgVersion.IS_LATEST_PROPERTY,SortOrder.DESCENDING),
-                        new Ordering(pvProp + "." + PkgVersion.ARCHITECTURE_PROPERTY, SortOrder.DESCENDING)
+                        new Ordering(pvProp + "." + PkgVersion.ARCHITECTURE_PROPERTY, SortOrder.DESCENDING),
+                        new Ordering(PkgVersionLocalization.NATURAL_LANGUAGE_PROPERTY + "." + NaturalLanguage.CODE_PROPERTY, SortOrder.ASCENDING)
                 ));
 
         List<PkgVersionLocalization> locs = (List<PkgVersionLocalization>) context.performQuery(query);

@@ -80,7 +80,6 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
 
             LOGGER.info("will produce category coverage spreadsheet report");
 
-
             long count = pkgOrchestrationService.eachPkg(
                     context,
                     false,

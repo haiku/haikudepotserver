@@ -8,11 +8,18 @@ package org.haikuos.haikudepotserver.repository.controller;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haikuos.haikudepotserver.dataobjects.Repository;
+import org.haikuos.haikudepotserver.dataobjects.RepositorySource;
 import org.haikuos.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
 
 /**
  * <p>This is the HTTP endpoint from which external systems are able to trigger a repository to be scanned for
@@ -29,51 +38,64 @@ import java.io.IOException;
  */
 
 @Controller
-@RequestMapping("/importrepositorydata")
+@RequestMapping("/repository")
 public class RepositoryImportController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryImportController.class);
 
-    public final static String KEY_CODE = "code";
+    public final static String KEY_REPOSITORYCODE = "repositoryCode";
+    public final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
 
     @Resource
     private JobOrchestrationService jobOrchestrationService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public void fetch(
-            HttpServletResponse response,
-            @RequestParam(value = KEY_CODE, required = false) String repositoryCode) {
+    @Resource
+    private ServerRuntime serverRuntime;
 
-        try {
-            if(Strings.isNullOrEmpty(repositoryCode)) {
-                LOGGER.warn("attempt to import repository data service with no repository code supplied");
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
-                response.getWriter().print(String.format("expected '%s' to have been a query argument to this resource\n",KEY_CODE));
-            }
-            else {
-                jobOrchestrationService.submit(
-                        new PkgRepositoryImportJobSpecification(repositoryCode),
-                        JobOrchestrationService.CoalesceMode.QUEUED);
+    @RequestMapping(value = "{"+KEY_REPOSITORYCODE+"}/import",  method = RequestMethod.GET)
+    public ResponseEntity<String> fetchRepository(
+            @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode) {
 
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
-                response.getWriter().print(String.format("accepted import repository job for repository %s\n",repositoryCode));
-            }
+        ObjectContext context = serverRuntime.getContext();
+        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
+
+        if(!repositoryOptional.isPresent()) {
+            return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
         }
-        catch(Throwable th) {
-            LOGGER.error("failed to accept import repository job", th);
 
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
+        jobOrchestrationService.submit(
+                new PkgRepositoryImportJobSpecification(repositoryCode),
+                JobOrchestrationService.CoalesceMode.QUEUED);
 
-            try {
-                response.getWriter().print(String.format("failed to accept import repository job for repository %s\n",repositoryCode));
-            }
-            catch(IOException ioe) {
-                /* ignore */
-            }
+        return ResponseEntity.ok("repository import submitted");
+
+    }
+
+    @RequestMapping(value = "{"+KEY_REPOSITORYCODE+"}/source/{"+KEY_REPOSITORYSOURCECODE+"}/import",  method = RequestMethod.GET)
+    public ResponseEntity<String> fetchRepository(
+            @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode,
+            @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode) {
+
+        ObjectContext context = serverRuntime.getContext();
+        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
+
+        if(!repositoryOptional.isPresent()) {
+            return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
         }
+
+        Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, repositorySourceCode);
+
+        if(
+                !repositorySourceOptional.isPresent()
+                        || !repositoryOptional.get().equals(repositorySourceOptional.get().getRepository())) {
+            return new ResponseEntity<>("repository source not found", HttpStatus.NOT_FOUND);
+        }
+
+        jobOrchestrationService.submit(
+                new PkgRepositoryImportJobSpecification(repositoryCode, Collections.singleton(repositorySourceCode)),
+                JobOrchestrationService.CoalesceMode.QUEUED);
+
+        return ResponseEntity.ok("repository source import submitted");
     }
 
 }

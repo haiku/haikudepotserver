@@ -245,22 +245,15 @@ Distributed under the terms of the MIT License.
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/importrepositorydata</listitem>
+                        <listitem>/repository/&lt;repositorycode&gt;/import</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/repository/&lt;repositorycode&gt;/source/&lt;repositorysourcecode&gt;/import</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Response Content-Type</term>
                         <listitem>text/plain</listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>Query Parameters</term>
-                        <listitem>
-                            <variablelist>
-                                <varlistentry>
-                                    <term>code</term>
-                                    <listitem>Identifies the repository from which data should be obtained</listitem>
-                                </varlistentry>
-                            </variablelist>
-                        </listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Expected HTTP Status Codes</term>
@@ -271,8 +264,8 @@ Distributed under the terms of the MIT License.
                                     <listitem>The import job was accepted</listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term>400</term>
-                                    <listitem>The code was not supplied in the request</listitem>
+                                    <term>404</term>
+                                    <listitem>The repository or source was not able to be found.</listitem>
                                 </varlistentry>
                             </variablelist>
                         </listitem>
@@ -281,7 +274,7 @@ Distributed under the terms of the MIT License.
             </para>
 
             <para>
-                An example URL is &quot;http://localhost:8080/importrepositorydata?code=haikuportsprod&quot;
+                An example URL is &quot;http://localhost:8080/repository/haikudepot/import&quot;
             </para>
 
         </section>
