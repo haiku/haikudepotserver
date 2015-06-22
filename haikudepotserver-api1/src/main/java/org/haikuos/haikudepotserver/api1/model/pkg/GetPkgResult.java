@@ -55,7 +55,12 @@ public class GetPkgResult {
 
         public String title;
 
+        /**
+         * @since 2015-06-22
+         */
+
         public String repositorySourceCode;
+
         public String repositoryCode;
 
         public List<String> licenses;

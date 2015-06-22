@@ -25,6 +25,10 @@ public class GetRepositoryResult {
 
     public String informationUrl;
 
+    /**
+     * @since 2015-06-22
+     */
+
     public List<RepositorySource> repositorySources;
 
     public static class RepositorySource {
