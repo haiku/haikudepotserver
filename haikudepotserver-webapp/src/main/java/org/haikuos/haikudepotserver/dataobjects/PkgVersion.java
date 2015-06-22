@@ -268,8 +268,6 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     /**
      * <p>This method will provide a URL to the actual data of the package.</p>
-     *
-     * @return
      */
 
     public URL getHpkgURL() {

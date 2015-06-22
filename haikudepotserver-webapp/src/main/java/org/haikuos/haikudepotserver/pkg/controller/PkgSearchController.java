@@ -79,9 +79,7 @@ public class PkgSearchController {
             HttpServletRequest request
     ) throws IOException {
         Preconditions.checkArgument(null!=response);
-        assert null!=response;
         Preconditions.checkArgument(null!=request);
-        assert null!=request;
 
         ObjectContext context = serverRuntime.getContext();
         OpenSearchDescription model = new OpenSearchDescription();

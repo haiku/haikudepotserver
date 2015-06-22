@@ -6,7 +6,6 @@
 package org.haikuos.haikudepotserver.api1;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
@@ -23,7 +22,6 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Optional;
 
 @ContextConfiguration({

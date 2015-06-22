@@ -54,19 +54,20 @@
             </div>
         </div>
 
-        <c:if test="${data.pkgVersion.isLatest && not empty data.pkgVersion.pkg.derivedRating}">
-            <div class="pkg-rating-indicator-container">
-                <multipage:ratingIndicator value="${data.pkgVersion.pkg.derivedRating}"></multipage:ratingIndicator>
-              <span class="pkg-ratings-indicator-sample">
-                <small>
-                    <spring:message
-                            code="viewPkg.derivedUserRating.sampleSize"
-                            arguments="${data.pkgVersion.pkg.derivedRatingSampleSize}">
-                    </spring:message>
-                </small>
-              </span>
-            </div>
-        </c:if>
+        <%-- TODO; sort this out --%>
+        <%--<c:if test="${data.pkgVersion.isLatest && not empty data.pkgVersion.pkg.derivedRating}">--%>
+            <%--<div class="pkg-rating-indicator-container">--%>
+                <%--<multipage:ratingIndicator value="${data.pkgVersion.pkg.derivedRating}"></multipage:ratingIndicator>--%>
+              <%--<span class="pkg-ratings-indicator-sample">--%>
+                <%--<small>--%>
+                    <%--<spring:message--%>
+                            <%--code="viewPkg.derivedUserRating.sampleSize"--%>
+                            <%--arguments="${data.pkgVersion.pkg.derivedRatingSampleSize}">--%>
+                    <%--</spring:message>--%>
+                <%--</small>--%>
+              <%--</span>--%>
+            <%--</div>--%>
+        <%--</c:if>--%>
 
         <div id="pkg-description-container">
             <p>

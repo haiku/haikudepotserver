@@ -139,9 +139,11 @@
                                     <multipage:dataLength length="${pkgVersion.payloadLength}"></multipage:dataLength>
                                 </td>
                                 <td>
-                                    <c:if test="${not empty pkgVersion.pkg.derivedRating}">
-                                        <multipage:ratingIndicator value="${pkgVersion.pkg.derivedRating}"></multipage:ratingIndicator>
-                                    </c:if>
+                                    TODO
+                                    <%-- TODO - sort this out --%>
+                                    <%--<c:if test="${not empty pkgVersion.pkg.derivedRating}">--%>
+                                        <%--<multipage:ratingIndicator value="${pkgVersion.pkg.derivedRating}"></multipage:ratingIndicator>--%>
+                                    <%--</c:if>--%>
                                 </td>
                                 <td>
                                     <multipage:pkgVersionLabel pkgVersion="${pkgVersion}"></multipage:pkgVersionLabel>

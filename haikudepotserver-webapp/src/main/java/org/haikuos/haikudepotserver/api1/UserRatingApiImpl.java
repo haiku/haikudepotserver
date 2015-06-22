@@ -196,6 +196,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
         }
 
+        // TODO; remove after some time
         Repository repository = getRepository(context, null==request.repositoryCode ? Repository.CODE_DEFAULT : request.repositoryCode);
 
         VersionCoordinates versionCoordinates = new VersionCoordinates(
