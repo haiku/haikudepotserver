@@ -44,6 +44,9 @@ public class RatingIndicatorTag extends RequestContextAwareTag {
             for(int i=0;i<5;i++) {
                 tagWriter.startTag("img");
 
+                tagWriter.writeAttribute("height", "16");
+                tagWriter.writeAttribute("width", "16");
+
                 switch(value) {
 
                     case 1:

@@ -44,9 +44,21 @@ public class ViewPkgController {
         return null;
     }
 
-    @RequestMapping(value = "{name}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
+    private boolean hasSource(ObjectContext context, PkgVersion pkgVersion) {
+        Optional<Pkg> sourcePkgOptional = Pkg.getByName(context, pkgVersion.getPkg().getName() + "_source");
+        return sourcePkgOptional.isPresent() &&
+                PkgVersion.getForPkg(
+                context,
+                sourcePkgOptional.get(),
+                pkgVersion.getRepositorySource().getRepository(),
+                Architecture.getByCode(context, Architecture.CODE_SOURCE).get(),
+                pkgVersion.toVersionCoordinates()).isPresent();
+    }
+
+    @RequestMapping(value = "{name}/{repositoryCode}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
     public ModelAndView viewPkg(
             HttpServletRequest httpServletRequest,
+            @PathVariable(value="repositoryCode") String repositoryCode,
             @PathVariable(value="name") String pkgName,
             @PathVariable(value="major") String major,
             @PathVariable(value="minor") String minor,
@@ -76,6 +88,12 @@ public class ViewPkgController {
             throw new MultipageObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode);
         }
 
+        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
+
+        if(!repositoryOptional.isPresent()) {
+            throw new MultipageObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode);
+        }
+
         VersionCoordinates coordinates = new VersionCoordinates(
                 Strings.emptyToNull(major),
                 Strings.emptyToNull(minor),
@@ -86,7 +104,7 @@ public class ViewPkgController {
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
                 context,
                 pkgOptional.get(),
-                Repository.getByCode(context, Repository.CODE_DEFAULT).get(),
+                repositoryOptional.get(),
                 architectureOptional.get(),
                 coordinates);
 
@@ -112,6 +130,7 @@ public class ViewPkgController {
         data.setPkgVersion(pkgVersionOptional.get());
         data.setCurrentNaturalLanguage(NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest));
         data.setHomeUrl(homeUrl);
+        data.setIsSourceAvailable(hasSource(context, pkgVersionOptional.get()));
 
         ModelAndView result = new ModelAndView("multipage/viewPkgVersion");
         result.addObject("data", data);
@@ -132,6 +151,16 @@ public class ViewPkgController {
         private NaturalLanguage currentNaturalLanguage;
 
         private String homeUrl;
+
+        private Boolean isSourceAvailable;
+
+        public Boolean getIsSourceAvailable() {
+            return isSourceAvailable;
+        }
+
+        public void setIsSourceAvailable(Boolean isSourceAvailable) {
+            this.isSourceAvailable = isSourceAvailable;
+        }
 
         public PkgVersion getPkgVersion() {
             return pkgVersion;

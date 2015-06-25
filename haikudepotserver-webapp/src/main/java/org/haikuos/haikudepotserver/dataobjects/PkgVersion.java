@@ -57,7 +57,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             boolean includeInactive) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
-        Preconditions.checkArgument(null!=repository, "a repository must be supplied to give context to obtaining a pkg version for a pkg");
+        Preconditions.checkArgument(null != repository, "a repository must be supplied to give context to obtaining a pkg version for a pkg");
         return getForPkg(context, pkg, null, repository, includeInactive);
     }
 
@@ -68,7 +68,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             boolean includeInactive) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
-        Preconditions.checkArgument(null!=repositorySource, "a repository source must be supplied to give context to obtaining a pkg version for a pkg");
+        Preconditions.checkArgument(null != repositorySource, "a repository source must be supplied to give context to obtaining a pkg version for a pkg");
         return getForPkg(context, pkg, repositorySource, null, includeInactive);
     }
 
@@ -114,8 +114,8 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             Architecture architecture,
             VersionCoordinates versionCoordinates) {
 
-        Preconditions.checkArgument(null!=context);
-        Preconditions.checkArgument(null!=pkg);
+        Preconditions.checkArgument(null != context);
+        Preconditions.checkArgument(null != pkg);
         Preconditions.checkArgument(null!=architecture);
         Preconditions.checkArgument(null!=versionCoordinates && null!=versionCoordinates.getMajor(), "missing or malformed version coordinates");
         Preconditions.checkArgument(null!=repository, "the repository is required to lookup a package version");
@@ -264,6 +264,30 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
     public Optional<PkgVersionUrl> getPkgVersionUrlForType(final PkgUrlType type) {
         Preconditions.checkNotNull(type);
         return getPkgVersionUrls().stream().filter(pvu -> pvu.getPkgUrlType().equals(type)).collect(SingleCollector.optional());
+    }
+
+    public Optional<PkgUserRatingAggregate> getPkgUserRatingAggregate() {
+        return getPkg().getPkgUserRatingAggregate(getRepositorySource().getRepository());
+    }
+
+    public Optional<Float> getDerivedAggregatedUserRating() {
+        Optional<PkgUserRatingAggregate> aggregateOptional = getPkgUserRatingAggregate();
+
+        if(aggregateOptional.isPresent()) {
+            return Optional.of(aggregateOptional.get().getDerivedRating());
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<Integer> getDerivedAggregatedUserRatingSampleSize() {
+        Optional<PkgUserRatingAggregate> aggregateOptional = getPkgUserRatingAggregate();
+
+        if(aggregateOptional.isPresent()) {
+            return Optional.of(aggregateOptional.get().getDerivedRatingSampleSize());
+        }
+
+        return Optional.empty();
     }
 
     /**

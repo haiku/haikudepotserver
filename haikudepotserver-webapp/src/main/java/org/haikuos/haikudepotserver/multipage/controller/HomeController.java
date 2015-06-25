@@ -10,10 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haikuos.haikudepotserver.dataobjects.Architecture;
-import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haikuos.haikudepotserver.dataobjects.PkgCategory;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.haikuos.haikudepotserver.multipage.MultipageConstants;
 import org.haikuos.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haikuos.haikudepotserver.multipage.model.Pagination;
@@ -29,6 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,6 +59,7 @@ public class HomeController {
 
     // these should correspond to the single-page keys for the home page.
     public final static String KEY_OFFSET = "o";
+    public final static String KEY_REPOSITORIESCODES = "repos";
     public final static String KEY_ARCHITECTURECODE = "arch";
     public final static String KEY_PKGCATEGORYCODE = "pkgcat";
     public final static String KEY_SEARCHEXPRESSION = "srchexpr";
@@ -86,6 +85,7 @@ public class HomeController {
     public ModelAndView home(
             HttpServletRequest httpServletRequest,
             @RequestParam(value=KEY_OFFSET, defaultValue = "0") Integer offset,
+            @RequestParam(value=KEY_REPOSITORIESCODES, required=false) String repositoryCodes,
             @RequestParam(value=KEY_ARCHITECTURECODE, required=false) String architectureCode,
             @RequestParam(value=KEY_PKGCATEGORYCODE, required=false) String pkgCategoryCode,
             @RequestParam(value=KEY_SEARCHEXPRESSION, required=false) String searchExpression,
@@ -97,6 +97,10 @@ public class HomeController {
             architectureCode = defaultArchitectureCode;
         }
 
+        if(null==repositoryCodes) {
+            repositoryCodes = Repository.CODE_DEFAULT;
+        }
+
         // ------------------------------
         // FETCH THE DATA
 
@@ -106,6 +110,23 @@ public class HomeController {
         searchSpecification.setLimit(PAGESIZE);
         searchSpecification.setExpression(searchExpression);
         searchSpecification.setExpressionType(AbstractSearchSpecification.ExpressionType.CONTAINS);
+
+        Optional<Repository> repositoryOptional = Optional.empty();
+
+        if(0!=repositoryCodes.length()) {
+            repositoryOptional = Repository.getByCode(context, repositoryCodes);
+
+            if (!repositoryOptional.isPresent()) {
+                throw new IllegalStateException("unable to obtain the repository; " + repositoryCodes);
+            }
+        }
+
+        if(repositoryOptional.isPresent()) {
+            searchSpecification.setRepositories(Collections.singletonList(repositoryOptional.get()));
+        }
+        else {
+            searchSpecification.setRepositories(Repository.getAll(context));
+        }
 
         Optional<Architecture> architectureOptional = Architecture.getByCode(context, architectureCode);
 
@@ -190,7 +211,9 @@ public class HomeController {
                         .collect(Collectors.toList()));
 
         data.setArchitecture(architectureOptional.get());
+        data.setRepository(repositoryOptional.orElse(null));
 
+        data.setAllRepositories(Repository.getAll(context));
         data.setAllPkgCategories(PkgCategory.getAll(context));
         data.setPkgCategory(pkgCategoryOptional.isPresent() ? pkgCategoryOptional.get() : PkgCategory.getAll(context).get(0));
 
@@ -220,6 +243,8 @@ public class HomeController {
 
         private List<PkgVersion> pkgVersions;
 
+        private List<Repository> allRepositories;
+
         private List<Architecture> allArchitectures;
 
         private List<PkgCategory> allPkgCategories;
@@ -228,6 +253,8 @@ public class HomeController {
 
         private Architecture architecture;
 
+        private Repository repository;
+
         private PkgCategory pkgCategory;
 
         private String searchExpression;
@@ -235,6 +262,14 @@ public class HomeController {
         private ViewCriteriaType viewCriteriaType;
 
         private Pagination pagination;
+
+        public Repository getRepository() {
+            return repository;
+        }
+
+        public void setRepository(Repository repository) {
+            this.repository = repository;
+        }
 
         public NaturalLanguage getNaturalLanguage() {
             return naturalLanguage;
@@ -250,6 +285,14 @@ public class HomeController {
 
         public void setPkgVersions(List<PkgVersion> pkgVersions) {
             this.pkgVersions = pkgVersions;
+        }
+
+        public List<Repository> getAllRepositories() {
+            return allRepositories;
+        }
+
+        public void setAllRepositories(List<Repository> allRepositories) {
+            this.allRepositories = allRepositories;
         }
 
         public List<Architecture> getAllArchitectures() {

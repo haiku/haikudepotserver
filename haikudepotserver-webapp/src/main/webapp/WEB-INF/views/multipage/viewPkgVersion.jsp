@@ -10,8 +10,9 @@
 
     <%@include file="/WEB-INF/includes/searchheadlink.jsp"%>
     <%@include file="/WEB-INF/includes/favicons.jsp"%>
+    <%@include file="includes/generatedstyle.jsp"%>
 
-    <%-- will use the same CSS as the main application --%>
+<%-- will use the same CSS as the main application --%>
     <jwr:style src="/bundles/app.css"></jwr:style>
 
 </head>
@@ -54,26 +55,66 @@
             </div>
         </div>
 
-        <%-- TODO; sort this out --%>
-        <%--<c:if test="${data.pkgVersion.isLatest && not empty data.pkgVersion.pkg.derivedRating}">--%>
-            <%--<div class="pkg-rating-indicator-container">--%>
-                <%--<multipage:ratingIndicator value="${data.pkgVersion.pkg.derivedRating}"></multipage:ratingIndicator>--%>
-              <%--<span class="pkg-ratings-indicator-sample">--%>
-                <%--<small>--%>
-                    <%--<spring:message--%>
-                            <%--code="viewPkg.derivedUserRating.sampleSize"--%>
-                            <%--arguments="${data.pkgVersion.pkg.derivedRatingSampleSize}">--%>
-                    <%--</spring:message>--%>
-                <%--</small>--%>
-              <%--</span>--%>
-            <%--</div>--%>
-        <%--</c:if>--%>
+        <c:if test="${data.pkgVersion.isLatest && data.pkgVersion.pkgUserRatingAggregate.present}">
+            <div class="pkg-rating-indicator-container">
+                <multipage:ratingIndicator value="${data.pkgVersion.derivedAggregatedUserRating.get()}"></multipage:ratingIndicator>
+              <span class="pkg-ratings-indicator-sample">
+                <small>
+                    <spring:message
+                            code="viewPkg.derivedUserRating.sampleSize"
+                            arguments="${data.pkgVersion.derivedAggregatedUserRatingSampleSize.get()}">
+                    </spring:message>
+                </small>
+              </span>
+            </div>
+        </c:if>
 
         <div id="pkg-description-container">
             <p>
                 <multipage:plainTextContent value="${data.pkgVersion.getPkgVersionLocalizationOrFallbackByCode(data.currentNaturalLanguage.code).description.get()}"></multipage:plainTextContent>
             </p>
         </div>
+
+        <div id="pkg-metadata-container">
+
+            <dl>
+                <dt><spring:message code="viewPkg.name.title"/></dt>
+                <dd><c:out value="${data.pkgVersion.pkg.name}"/></dd>
+                <dt><spring:message code="viewPkg.repository.title"/></dt>
+                <dd><c:out value="${data.pkgVersion.repositorySource.repository.name}"/></dd>
+                <dt><spring:message code="viewPkg.repositorySource.title"/></dt>
+                <dd><c:out value="${data.pkgVersion.repositorySource.code}"/></dd>
+                <dt><spring:message code="viewPkg.version.title"/></dt>
+                <dd><multipage:pkgVersionLabel pkgVersion="${data.pkgVersion}"/></dd>
+                <c:if test="${not empty data.pkgVersion.payloadLength}">
+                    <dt><spring:message code="viewPkg.payloadLength.title"/></dt>
+                    <dd>
+                        <multipage:dataLength length="${data.pkgVersion.payloadLength}"/>
+                        <span class="muted">(<c:out value="${data.pkgVersion.payloadLength}"/> B)</span>
+                    </dd>
+                </c:if>
+                <dt><spring:message code="viewPkg.sourceAvailable.title"></spring:message></dt>
+                <dd><spring:message code="gen.${data.isSourceAvailable ? 'yes' : 'no'}"/></dd>
+                <dt><spring:message code="viewPkg.categories.title"></spring:message></dt>
+                <dd>
+                    <c:if test="${empty data.pkgVersion.pkg.pkgPkgCategories}">
+                        <spring:message code="viewPkg.categories.none"></spring:message>
+                    </c:if>
+                    <c:if test="${not empty data.pkgVersion.pkg.pkgPkgCategories}">
+                         <c:forEach
+                                 items="${data.pkgVersion.pkg.pkgPkgCategories}"
+                                 varStatus="pkgPkgCategoryStatus"
+                                 var="pkgPkgCategory"><c:if test="${not pkgPkgCategoryStatus.first}">,</c:if>
+                             <spring:message code="pkgCategory.${pkgPkgCategory.pkgCategory.code.toLowerCase()}.title"/>
+                         </c:forEach>
+                    </c:if>
+                </dd>
+                <dt><spring:message code="viewPkg.versionViews.title"/></dt>
+                <dd><c:out value="${data.pkgVersion.viewCounter}"></c:out></dd>
+            </dl>
+
+        </div>
+
 
     </div>
 

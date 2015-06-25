@@ -28,6 +28,26 @@
             <input type="hidden" name="natlangcode" value="${data.naturalLanguage.code}">
             <div id="search-criteria-container">
                 <div>
+                    <select name="repos">
+                        <option value=""
+                                <c:if test="${empty data.repository}">
+                                    selected="selected"
+                                </c:if>
+                                >
+                            <spring:message code="multipage.home.allrepositories"></spring:message>
+                        </option>
+                        <c:forEach items="${data.allRepositories}" var="aRepository">
+                            <option
+                                    <c:if test="${aRepository == data.repository}">
+                                        selected="selected"
+                                    </c:if>
+                                    value="${aRepository.code}">
+                                <c:out value="${aRepository.name}"></c:out>
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+                <div>
                     <select name="arch">
                         <c:forEach items="${data.allArchitectures}" var="anArchitecture">
                             <option
@@ -116,6 +136,16 @@
                         <th><spring:message code="gen.pkg.title"></spring:message></th>
                         <th><spring:message code="home.table.payloadlength.title"></spring:message></th>
                         <th><spring:message code="home.table.rating.title"></spring:message></th>
+                        <c:if test="${'MOSTRECENT'==data.viewCriteriaType.name()}">
+                            <th>
+                                        <span class="muted">
+                                            <multipage:timestamp value="${pkgVersion.createTimestamp}"></multipage:timestamp>
+                                        </span>
+                            </th>
+                        </c:if>
+                        <c:if test="${empty data.repository}">
+                        <th><spring:message code="home.table.repository.title"></spring:message></th>
+                        </c:if>
                         <th><spring:message code="home.table.version.title"></spring:message></th>
                         <c:if test="${'MOSTRECENT'==data.viewCriteriaType.name()}">
                             <th><spring:message code="home.table.approximateVersionDate.title"></spring:message></th>
@@ -139,12 +169,15 @@
                                     <multipage:dataLength length="${pkgVersion.payloadLength}"></multipage:dataLength>
                                 </td>
                                 <td>
-                                    TODO
-                                    <%-- TODO - sort this out --%>
-                                    <%--<c:if test="${not empty pkgVersion.pkg.derivedRating}">--%>
-                                        <%--<multipage:ratingIndicator value="${pkgVersion.pkg.derivedRating}"></multipage:ratingIndicator>--%>
-                                    <%--</c:if>--%>
+                                    <c:if test="${pkgVersion.derivedAggregatedUserRating.present}">
+                                        <multipage:ratingIndicator value="${pkgVersion.derivedAggregatedUserRating.get()}"></multipage:ratingIndicator>
+                                    </c:if>
                                 </td>
+                                <c:if test="${empty data.repository}">
+                                    <td class="muted">
+                                        <c:out value="${pkgVersion.repositorySource.repository.name}"/>
+                                    </td>
+                                </c:if>
                                 <td>
                                     <multipage:pkgVersionLabel pkgVersion="${pkgVersion}"></multipage:pkgVersionLabel>
                                 </td>
