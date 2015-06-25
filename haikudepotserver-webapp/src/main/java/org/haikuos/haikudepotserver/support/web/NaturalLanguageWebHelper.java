@@ -10,6 +10,8 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Iterator;
@@ -22,6 +24,8 @@ import java.util.regex.Pattern;
  */
 
 public class NaturalLanguageWebHelper {
+
+    protected static Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageWebHelper.class);
 
     /**
      * <p>This will look at parameters on the supplied request and will return a natural language.  It will
@@ -40,11 +44,12 @@ public class NaturalLanguageWebHelper {
             if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
                 Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, naturalLanguageCode);
 
-                if(!naturalLanguageOptional.isPresent() && naturalLanguageOptional.get().getIsPopular()) {
-                    throw new IllegalStateException("the natural language for code " + naturalLanguageCode + " was not able to be found");
+                if(naturalLanguageOptional.isPresent()) {
+                    return naturalLanguageOptional.get();
                 }
-
-                return naturalLanguageOptional.get();
+                else {
+                   LOGGER.info("the natural language '{}' was specified, but was not able to be found", naturalLanguageCode);
+                }
             }
 
             // see if we can deduce it from the locale.
