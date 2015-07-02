@@ -12,11 +12,19 @@ import org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersionUrl extends AbstractDataObject {
 
+    public static final String NAME_PROPERTY = "name";
     public static final String URL_PROPERTY = "url";
     public static final String PKG_URL_TYPE_PROPERTY = "pkgUrlType";
     public static final String PKG_VERSION_PROPERTY = "pkgVersion";
 
     public static final String ID_PK_COLUMN = "id";
+
+    public void setName(String name) {
+        writeProperty(NAME_PROPERTY, name);
+    }
+    public String getName() {
+        return (String)readProperty(NAME_PROPERTY);
+    }
 
     public void setUrl(String url) {
         writeProperty(URL_PROPERTY, url);

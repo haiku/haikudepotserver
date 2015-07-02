@@ -976,10 +976,12 @@ public class PkgOrchestrationService {
             if (null != pkg.getHomePageUrl()) {
                 if(homeUrlOptional.isPresent()) {
                     homeUrlOptional.get().setUrl(pkg.getHomePageUrl().getUrl());
+                    homeUrlOptional.get().setName(pkg.getHomePageUrl().getName());
                 }
                 else {
                     PkgVersionUrl persistedPkgVersionUrl = objectContext.newObject(PkgVersionUrl.class);
                     persistedPkgVersionUrl.setUrl(pkg.getHomePageUrl().getUrl());
+                    persistedPkgVersionUrl.setName(pkg.getHomePageUrl().getName());
                     persistedPkgVersionUrl.setPkgUrlType(pkgUrlType);
                     persistedPkgVersionUrl.setPkgVersion(persistedPkgVersion);
                 }

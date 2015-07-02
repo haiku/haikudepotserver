@@ -252,6 +252,7 @@
 	</db-entity>
 	<db-entity name="pkg_version_url" schema="haikudepot">
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="name" type="VARCHAR" length="1024"/>
 		<db-attribute name="pkg_url_type_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="pkg_version_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="url" type="VARCHAR" isMandatory="true" length="1024"/>
@@ -461,6 +462,7 @@
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionUrl" className="org.haikuos.haikudepotserver.dataobjects.PkgVersionUrl" lock-type="optimistic" dbEntityName="pkg_version_url" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
 		<obj-attribute name="url" type="java.lang.String" lock="true" db-attribute-path="url"/>
 	</obj-entity>
 	<obj-entity name="Prominence" className="org.haikuos.haikudepotserver.dataobjects.Prominence" readOnly="true" dbEntityName="prominence" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">

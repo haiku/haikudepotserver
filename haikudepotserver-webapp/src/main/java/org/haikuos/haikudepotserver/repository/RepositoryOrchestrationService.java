@@ -36,22 +36,6 @@ public class RepositoryOrchestrationService {
     // HELPERS
 
     /**
-     * <p>If the package is associated with a single active repository then this method will return it; otherwise
-     * it will return an empty Optional.</p>
-     */
-
-    public Optional<Repository> tryGetSingleActiveRepositoryForPkg(
-            ObjectContext context,
-            Pkg pkg) {
-        List<Repository> repositories = getRepositoriesForPkg(context, pkg)
-                .stream()
-                .filter(Repository::getActive)
-                .collect(Collectors.toList());
-
-        return (1==repositories.size()) ? Optional.of(repositories.get(0)) : Optional.<Repository>empty();
-    }
-
-    /**
      * <p>Returns all of the repositories that contain this package.</p>
      */
 

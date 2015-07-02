@@ -1,0 +1,1 @@
+ALTER TABLE haikudepot.pkg_version_url ADD COLUMN name VARCHAR(1024);
