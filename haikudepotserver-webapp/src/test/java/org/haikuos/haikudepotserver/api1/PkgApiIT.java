@@ -275,6 +275,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.name = "pkg9";
         request.versionType = PkgVersionType.LATEST;
         request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
+        request.repositoryCode = "testrepo";
 
         try {
 
@@ -651,6 +652,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.architectureCodes = Collections.singletonList("x86");
         request.naturalLanguageCode = "en";
         request.pkgNames = new ArrayList<>();
+        request.repositoryCodes = Collections.singletonList(Repository.CODE_DEFAULT);
 
         while(request.pkgNames.size() < PkgApi.GETBULKPKG_LIMIT + 1) {
             request.pkgNames.add("pkg");

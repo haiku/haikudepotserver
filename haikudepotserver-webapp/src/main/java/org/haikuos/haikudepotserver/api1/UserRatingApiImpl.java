@@ -180,6 +180,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.userNickname), "the user nickname must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode), "the pkg version architecture code must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionMajor),"the package version major code must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
 
         final ObjectContext context = serverRuntime.getContext();
 
@@ -196,8 +197,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
         }
 
-        // TODO; remove after some time
-        Repository repository = getRepository(context, null==request.repositoryCode ? Repository.CODE_DEFAULT : request.repositoryCode);
+        Repository repository = getRepository(context, request.repositoryCode);
 
         VersionCoordinates versionCoordinates = new VersionCoordinates(
                 request.pkgVersionMajor,
@@ -238,7 +238,8 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode));
-        Preconditions.checkNotNull(null!=request.pkgVersionType);
+        Preconditions.checkNotNull(null != request.pkgVersionType);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
 
         if(null!=request.comment) {
             request.comment = Strings.emptyToNull(request.comment.trim());
@@ -264,7 +265,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
-        Repository repository = getRepository(context, null==request.repositoryCode ? Repository.CODE_DEFAULT : request.repositoryCode);
+        Repository repository = getRepository(context, request.repositoryCode);
 
         Optional<User> userOptional = User.getByNickname(context, request.userNickname);
 

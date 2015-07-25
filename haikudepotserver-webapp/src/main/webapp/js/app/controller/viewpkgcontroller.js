@@ -190,6 +190,7 @@ angular.module('haikudepotserver').controller(
                         incrementViewCounter : false,
                         architectureCode : 'source',
                         naturalLanguageCode: constants.NATURALLANGUAGECODE_ENGLISH,
+                        repositoryCode: pv.repositoryCode,
                         major: pv.major,
                         minor : pv.minor,
                         micro : pv.micro,

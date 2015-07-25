@@ -352,6 +352,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(request.name), "request pkg name is required");
         Preconditions.checkNotNull(request.versionType);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
+        Preconditions.checkArgument(request.versionType != PkgVersionType.ALL && !Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
 
         final ObjectContext context = serverRuntime.getContext();
 
@@ -366,11 +367,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         if(!Strings.isNullOrEmpty(request.repositoryCode)) {
             repository = getRepository(context, request.repositoryCode);
-        }
-
-        // TODO; should be removed after some time; not supplying a repository should not be allowed.
-        if(null==repository && request.versionType != PkgVersionType.ALL) {
-            repository =  getRepository(context, Repository.CODE_DEFAULT);
         }
 
         final NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
@@ -1008,7 +1004,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public GetBulkPkgResult getBulkPkg(final GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException {
         Preconditions.checkNotNull(getBulkPkgRequest);
         Preconditions.checkState(null != getBulkPkgRequest.architectureCodes, "architecture codes must be non-null");
-        Preconditions.checkArgument(null == getBulkPkgRequest.repositoryCodes || !getBulkPkgRequest.repositoryCodes.isEmpty(), "the repositories should be supplied or be null (temporarily)");
+        Preconditions.checkArgument(null != getBulkPkgRequest.repositoryCodes && !getBulkPkgRequest.repositoryCodes.isEmpty(), "the repositories should be supplied");
         Preconditions.checkNotNull(getBulkPkgRequest.pkgNames);
 
         if(getBulkPkgRequest.pkgNames.size() > GETBULKPKG_LIMIT) {
@@ -1037,9 +1033,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             searchSpecification.setArchitectures(transformCodesToArchitectures(context, getBulkPkgRequest.architectureCodes));
             searchSpecification.setPkgNames(getBulkPkgRequest.pkgNames);
             searchSpecification.setNaturalLanguage(getNaturalLanguage(context, getBulkPkgRequest.naturalLanguageCode));
-            searchSpecification.setRepositories(transformCodesToRepositories(
-                    context,
-                    null == getBulkPkgRequest.repositoryCodes ? Collections.singletonList(Repository.CODE_DEFAULT) : getBulkPkgRequest.repositoryCodes));
+            searchSpecification.setRepositories(transformCodesToRepositories(context,getBulkPkgRequest.repositoryCodes));
 
             searchSpecification.setLimit(0);
             searchSpecification.setLimit(Integer.MAX_VALUE);
