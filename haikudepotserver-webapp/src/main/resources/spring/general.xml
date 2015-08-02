@@ -45,6 +45,9 @@
     <!-- SUNDRY -->
 
     <bean class="org.haikuos.haikudepotserver.support.RuntimeInformationService"/>
+    <bean
+            id="desktopApplicationMinimumVersionFilter"
+            class="org.haikuos.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter"/>
 
     <!-- JOBS -->
 

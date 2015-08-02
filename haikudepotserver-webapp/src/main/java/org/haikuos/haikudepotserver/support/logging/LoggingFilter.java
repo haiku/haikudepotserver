@@ -69,7 +69,7 @@ public class LoggingFilter implements Filter {
 
         if(!Strings.isNullOrEmpty(userAgent)) {
 
-            if(userAgent.equals(USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT)) {
+            if(userAgent.startsWith("HaikuDepot/")) {
                 return Optional.of(Agent.HAIKUDEPOT);
             }
 
@@ -95,6 +95,10 @@ public class LoggingFilter implements Filter {
                 }
 
                 return Optional.of(Agent.SAFARI);
+            }
+
+            if(userAgent.equals(USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT)) {
+                return Optional.of(Agent.HAIKUDEPOT);
             }
 
         }

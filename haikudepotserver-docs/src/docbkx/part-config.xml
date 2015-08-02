@@ -74,6 +74,17 @@ key2=value2</programlisting>
                 </para>
             </section>
 
+            <section>
+                <title>desktop.application.version.min</title>
+                <para>
+                    This optional value can be configured to specify a minimum version value for the
+                    HaikuDepot desktop application.  If a version of the desktop application attempts to
+                    communicate with the server with a version lower than this value then the server
+                    will return a 412 (precondition failed) HTTP status and a header that describes the
+                    minimum version required.
+                </para>
+            </section>
+
         </section>
 
         <section>

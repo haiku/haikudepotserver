@@ -82,7 +82,7 @@ public class FallbackController {
     private void redirectToPkg(HttpServletResponse response, String term) throws IOException {
         ObjectContext context = serverRuntime.getContext();
 
-        Optional<PkgVersion> pkgVersionOptional = tryGetPkgVesion(context, term);
+        Optional<PkgVersion> pkgVersionOptional = tryGetPkgVersion(context, term);
 
         if (pkgVersionOptional.isPresent()) {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
@@ -133,7 +133,7 @@ public class FallbackController {
         return FallbackType.PKG;
     }
 
-    private Optional<PkgVersion> tryGetPkgVesion(ObjectContext context, String term) {
+    private Optional<PkgVersion> tryGetPkgVersion(ObjectContext context, String term) {
         if(!Strings.isNullOrEmpty(term)) {
             Optional<Pkg> pkgOptional = Pkg.getByName(context, term);
 

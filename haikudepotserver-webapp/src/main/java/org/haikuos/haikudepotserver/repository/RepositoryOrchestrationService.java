@@ -51,7 +51,9 @@ public class RepositoryOrchestrationService {
         ejbql.append(Repository.class.getSimpleName());
         ejbql.append(" r WHERE EXISTS (SELECT pv FROM \n");
         ejbql.append(PkgVersion.class.getSimpleName());
-        ejbql.append(" pv WHERE pv.repositorySource.repository=r)");
+        ejbql.append(" pv WHERE pv.repositorySource.repository=r");
+        ejbql.append(" AND pv.pkg=:pkg");
+        ejbql.append(")");
 
         EJBQLQuery query = new EJBQLQuery(ejbql.toString());
         query.setParameter("pkg", pkg);

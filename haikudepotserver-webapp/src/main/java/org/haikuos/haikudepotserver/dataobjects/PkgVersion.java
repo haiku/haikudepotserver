@@ -361,6 +361,7 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
         getPkg().appendPathSegments(builder);
+        getRepositorySource().getRepository().appendPathSegments(builder);
         toVersionCoordinates().appendPathSegments(builder);
         getArchitecture().appendPathSegments(builder);
         return builder;

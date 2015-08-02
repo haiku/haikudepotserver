@@ -16,6 +16,7 @@ import org.haikuos.haikudepotserver.dataobjects.auto._Repository;
 import org.haikuos.haikudepotserver.dataobjects.support.Coded;
 import org.haikuos.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haikuos.haikudepotserver.support.SingleCollector;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -79,6 +80,10 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
             }
         }
 
+    }
+
+    public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+        return builder.pathSegment(getCode());
     }
 
     @Override
