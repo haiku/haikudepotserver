@@ -77,6 +77,10 @@ angular.module('haikudepotserver').controller(
                 goBasicPkgReport('queuePkgVersionLocalizationCoverageExportSpreadsheetJob');
             };
 
+            $scope.goPkgLocalizationCoverageExportSpreadsheet = function() {
+                goBasicPkgReport('queuePkgLocalizationCoverageExportSpreadsheetJob');
+            };
+
             $scope.goPkgCategoryCoverageExportSpreadsheet = function() {
                 goBasicPkgReport('queuePkgCategoryCoverageExportSpreadsheetJob');
             };

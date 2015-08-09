@@ -204,10 +204,6 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         return getPkgVersionLocalization(naturalLanguage.getCode());
     }
 
-    public PkgVersionLocalization getPkgVersionLocalizationOrFallback(final NaturalLanguage naturalLanguage) {
-        return getPkgVersionLocalizationOrFallbackByCode(naturalLanguage.getCode());
-    }
-
     /**
      * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
      * English language data is hard-coded into the package payload, english will always be available.</p>

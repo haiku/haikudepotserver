@@ -223,6 +223,8 @@ apt-get install postgresql postgresql-client</programlisting>
                 Haiku Depot Server to use the deployed hvif2png tool.
             </para>
 
+        </section>
+
     </section>
 
 </chapter>

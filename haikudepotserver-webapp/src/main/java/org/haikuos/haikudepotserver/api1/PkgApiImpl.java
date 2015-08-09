@@ -1079,7 +1079,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     @Override
     public UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) throws ObjectNotFoundException {
-        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(null != request);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "the package name must be supplied on the request");
         Preconditions.checkArgument(null != request.prominenceOrdering, "the presence ordering must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code is required when updating a package prominence");
@@ -1202,6 +1202,15 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult.class,
                 PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification.class,
                 Permission.BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET);
+    }
+
+    @Override
+    public QueuePkgLocalizationCoverageExportSpreadsheetJobResult queuePkgLocalizationCoverageExportSpreadsheetJob(QueuePkgLocalizationCoverageExportSpreadsheetJobRequest request) {
+        Preconditions.checkArgument(null!=request, "a request objects is required");
+        return queueSimplePkgJob(
+                QueuePkgLocalizationCoverageExportSpreadsheetJobResult.class,
+                PkgLocalizationCoverageExportSpreadsheetJobSpecification.class,
+                Permission.BULK_PKGLOCALIZATIONCOVERAGEEXPORTSPREADSHEET);
     }
 
     private <R extends AbstractQueueJobResult> R queueSimplePkgJob(

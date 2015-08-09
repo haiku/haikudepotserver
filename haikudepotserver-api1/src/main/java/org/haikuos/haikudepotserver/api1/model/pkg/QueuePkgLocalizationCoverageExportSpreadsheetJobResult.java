@@ -7,12 +7,13 @@ package org.haikuos.haikudepotserver.api1.model.pkg;
 
 import org.haikuos.haikudepotserver.api1.model.AbstractQueueJobResult;
 
-public class QueuePkgVersionPayloadLengthPopulationJobResult extends AbstractQueueJobResult {
+public class QueuePkgLocalizationCoverageExportSpreadsheetJobResult extends AbstractQueueJobResult {
 
-    public QueuePkgVersionPayloadLengthPopulationJobResult() {
+
+    public QueuePkgLocalizationCoverageExportSpreadsheetJobResult() {
     }
 
-    public QueuePkgVersionPayloadLengthPopulationJobResult(String guid) {
+    public QueuePkgLocalizationCoverageExportSpreadsheetJobResult(String guid) {
         this.guid = guid;
     }
 

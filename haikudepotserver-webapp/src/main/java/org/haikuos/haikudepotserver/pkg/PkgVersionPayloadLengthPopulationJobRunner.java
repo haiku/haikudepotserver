@@ -47,9 +47,7 @@ public class PkgVersionPayloadLengthPopulationJobRunner
     public void run(JobOrchestrationService jobOrchestrationService, PkgVersionPayloadLengthPopulationJobSpecification specification) throws IOException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
-        assert null!=specification;
 
         ObjectContext context = serverRuntime.getContext();
 

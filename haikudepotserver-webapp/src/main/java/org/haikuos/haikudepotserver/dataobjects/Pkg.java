@@ -63,7 +63,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
     }
 
     public Optional<PkgUserRatingAggregate> getPkgUserRatingAggregate(Repository repository) {
-        Preconditions.checkArgument(null!=repository);
+        Preconditions.checkArgument(null != repository);
         return getPkgUserRatingAggregates()
                 .stream()
                 .filter(pura -> pura.getRepository().equals(repository))
@@ -180,6 +180,28 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
             PkgScreenshot pkgScreenshot = screenshots.get(i);
             pkgScreenshot.setOrdering(i+1);
         }
+    }
+
+    /**
+     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
+     * English language data is hard-coded into the package payload, english will always be available.</p>
+     */
+
+    public Optional<PkgLocalization> getPkgLocalization(final NaturalLanguage naturalLanguage) {
+        return getPkgLocalization(naturalLanguage.getCode());
+    }
+
+    /**
+     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
+     * English language data is hard-coded into the package payload, english will always be available.</p>
+     */
+
+    public Optional<PkgLocalization> getPkgLocalization(final String naturalLanguageCode) {
+        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
+        return getPkgLocalizations()
+                .stream()
+                .filter(pl -> pl.getNaturalLanguage().getCode().equals(naturalLanguageCode))
+                .collect(SingleCollector.optional());
     }
 
     public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {

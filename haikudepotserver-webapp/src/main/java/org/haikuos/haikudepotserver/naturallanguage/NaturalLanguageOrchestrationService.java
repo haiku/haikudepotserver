@@ -13,10 +13,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Query;
 import org.apache.cayenne.query.QueryCacheStrategy;
-import org.haikuos.haikudepotserver.dataobjects.HaikuDepot;
-import org.haikuos.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization;
-import org.haikuos.haikudepotserver.dataobjects.UserRating;
+import org.haikuos.haikudepotserver.dataobjects.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -130,6 +127,9 @@ public class NaturalLanguageOrchestrationService {
         return assembleNaturalLanguageCodeUseMap(query);
     }
 
+    private Map<String,Boolean> getNaturalLanguageCodeHasPkgLocalization() {
+        return assembleNaturalLanguageCodeUseMap("SELECT DISTINCT pl.naturalLanguage.code FROM " + PkgLocalization.class.getSimpleName() + " pl");
+    }
 
     private Map<String,Boolean> getNaturalLanguageCodeHasPkgVersionLocalization() {
         return assembleNaturalLanguageCodeUseMap("SELECT DISTINCT pvl.naturalLanguage.code FROM " + PkgVersionLocalization.class.getSimpleName() + " pvl");
@@ -164,6 +164,12 @@ public class NaturalLanguageOrchestrationService {
         Boolean pkgVersionLocalizationB = getNaturalLanguageCodeHasPkgVersionLocalization().get(naturalLanguageCode);
 
         if (null != pkgVersionLocalizationB && pkgVersionLocalizationB) {
+            return true;
+        }
+
+        Boolean pkgLocalizationB = getNaturalLanguageCodeHasPkgLocalization().get(naturalLanguageCode);
+
+        if (null != pkgLocalizationB && pkgLocalizationB) {
             return true;
         }
 
