@@ -15,7 +15,7 @@ import org.haikuos.haikudepotserver.job.AbstractJobRunner;
 import org.haikuos.haikudepotserver.job.JobOrchestrationService;
 import org.haikuos.haikudepotserver.job.model.JobRunnerException;
 import org.haikuos.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecification;
-import org.haikuos.haikudepotserver.support.PngOptimizationService;
+import org.haikuos.haikudepotserver.support.png.PngOptimizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -53,7 +53,7 @@ public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScr
 
         long startMs = System.currentTimeMillis();
 
-        if(pngOptimizationService.isConfigured()) {
+        if(pngOptimizationService.identityOptimization()) {
             LOGGER.info("will optimize {} screenshot images", specification.getPkgScreenshotCodes().size());
 
             for (String pkgScreenshotCode : specification.getPkgScreenshotCodes()) {

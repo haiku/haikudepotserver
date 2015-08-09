@@ -5,30 +5,25 @@
 
 package org.haikuos.haikudepotserver.pkg.controller;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haikuos.haikudepotserver.dataobjects.Pkg;
-import org.haikuos.haikudepotserver.dataobjects.PkgIconImage;
+import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
+import org.haikuos.haikudepotserver.pkg.RenderedPkgIconRepository;
 import org.haikuos.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.ServletContextAware;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
 
 /**
@@ -39,10 +34,12 @@ import java.util.Optional;
  */
 
 @Controller
-@RequestMapping("/pkgicon")
-public class PkgIconController extends AbstractController implements ServletContextAware {
+public class PkgIconController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconController.class);
+
+    public final static String SEGMENT_PKGICON = "pkgicon";
+    public final static String SEGMENT_GENERICPKGICON = "genericpkgicon.png";
 
     public final static String KEY_PKGNAME = "pkgname";
     public final static String KEY_FORMAT = "format";
@@ -52,33 +49,58 @@ public class PkgIconController extends AbstractController implements ServletCont
     @Resource
     private ServerRuntime serverRuntime;
 
-    private ServletContext servletContext;
+    @Resource
+    private RenderedPkgIconRepository renderedPkgIconRepository;
 
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
+    private long startupMillis = System.currentTimeMillis();
+
+    private int normalizeSize(Integer size) {
+        Preconditions.checkArgument(null!=size, "the size must be provided");
+
+        if(size < RenderedPkgIconRepository.SIZE_MIN) {
+            return RenderedPkgIconRepository.SIZE_MIN;
+        }
+
+        if(size > RenderedPkgIconRepository.SIZE_MAX) {
+            return RenderedPkgIconRepository.SIZE_MAX;
+        }
+
+        return size;
     }
 
-    private LoadingCache<Integer, byte[]> genericBitmapIcons = CacheBuilder.newBuilder()
-            .maximumSize(10)
-            .build(
-                    new CacheLoader<Integer, byte[]>() {
-                        public byte[] load(@SuppressWarnings("NullableProblems") Integer size) {
-                            String resource = String.format("img/generic%d.png", size);
+    /**
+     * @param isAsFallback is true if the request was originally for a package, but fell back to this generic.
+     */
 
-                            try (InputStream inputStream = servletContext.getResourceAsStream(resource)) {
+    private void handleGenericHeadOrGet(
+            RequestMethod requestMethod,
+            HttpServletResponse response,
+            Integer size,
+            boolean isAsFallback)
+            throws IOException {
 
-                                if(null==inputStream) {
-                                    throw new IllegalStateException(String.format("the resource; %s was not able to be found, but should be in the application build product", resource));
-                                }
-                                else {
-                                    return ByteStreams.toByteArray(inputStream);
-                                }
-                            }
-                            catch(IOException ioe) {
-                                throw new IllegalStateException("unable to read the generic icon",ioe);
-                            }
-                        }
-                    });
+        if(null==size) {
+            size = 64; // largest natural size
+        }
+
+        size = normalizeSize(size);
+        byte[] data = renderedPkgIconRepository.renderGeneric(size);
+        response.setHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(data.length));
+        response.setContentType(MediaType.PNG.toString());
+
+        if(isAsFallback) {
+            response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+            response.setHeader(HttpHeaders.PRAGMA, "no-cache");
+            response.setHeader(HttpHeaders.EXPIRES, "0");
+        }
+        else {
+            response.setDateHeader(HttpHeaders.LAST_MODIFIED, startupMillis);
+        }
+
+        if(requestMethod == RequestMethod.GET) {
+            response.getOutputStream().write(data);
+        }
+    }
 
     private void handleHeadOrGet(
             RequestMethod requestMethod,
@@ -89,19 +111,15 @@ public class PkgIconController extends AbstractController implements ServletCont
             Boolean fallback)
             throws IOException {
 
+        if(null==format) {
+            throw new MissingOrBadFormat();
+        }
+
         if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
             throw new MissingPkgName();
         }
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<org.haikuos.haikudepotserver.dataobjects.MediaType> mediaTypeOptional
-                = org.haikuos.haikudepotserver.dataobjects.MediaType.getByExtension(context, format);
-
-        if(!mediaTypeOptional.isPresent()) {
-            LOGGER.warn("attempt to request icon of format '{}', but this format was not recognized", format);
-            throw new MissingOrBadFormat();
-        }
-
         Optional<Pkg> pkg = Pkg.getByName(context, pkgName); // cached
 
         if(!pkg.isPresent()) {
@@ -109,53 +127,88 @@ public class PkgIconController extends AbstractController implements ServletCont
             throw new PkgNotFound();
         }
 
-        Optional<PkgIconImage> pkgIconImageOptional = PkgIconImage.getForPkg(
-                context,
-                pkg.get(),
-                mediaTypeOptional.get(),
-                size);
+        switch(format) {
 
-        if(!pkgIconImageOptional.isPresent()) {
+            case org.haikuos.haikudepotserver.dataobjects.MediaType.EXTENSION_HAIKUVECTORICONFILE:
+                Optional<PkgIcon> hvifPkgIcon = pkg.get().getPkgIcon(
+                        org.haikuos.haikudepotserver.dataobjects.MediaType.getByExtension(context, format).get(),
+                        null);
 
-            // if there is no icon, under very specific circumstances, it may be possible to provide one.
+                if(hvifPkgIcon.isPresent()) {
+                    byte[] data = hvifPkgIcon.get().getPkgIconImage().get().getData();
+                    response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
+                    response.setContentType(org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
+                    response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
 
-            if(
-                    (null!=fallback)
-                            && fallback
-                            && mediaTypeOptional.get().getCode().equals(MediaType.PNG.toString())
-                            && (null!=size)
-                            && (16==size || 32==size)) {
+                    if(requestMethod == RequestMethod.GET) {
+                        response.getOutputStream().write(data);
+                    }
+                }
+                else {
+                    throw new PkgIconNotFound();
+                }
+                break;
 
-                byte[] data = genericBitmapIcons.getUnchecked(size);
-                response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
-                response.setHeader(HttpHeaders.CACHE_CONTROL,"public, max-age=3600");
-                response.setContentType(mediaTypeOptional.get().getCode());
+            case org.haikuos.haikudepotserver.dataobjects.MediaType.EXTENSION_PNG:
 
-                if(requestMethod == RequestMethod.GET) {
-                    response.getOutputStream().write(data);
+                if(null==size) {
+                    throw new IllegalArgumentException("the size must be provided when requesting a PNG");
                 }
 
-            }
-            else {
-                throw new PkgIconNotFound();
-            }
+                size = normalizeSize(size);
+                Optional<byte[]> pngImageData = renderedPkgIconRepository.render(size, context, pkg.get());
+
+                if(!pngImageData.isPresent()) {
+                    if((null==fallback) || !fallback) {
+                        throw new PkgIconNotFound();
+                    }
+
+                    handleGenericHeadOrGet(requestMethod, response, size, true);
+                }
+                else {
+                    byte[] data = pngImageData.get();
+                    response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
+                    response.setContentType(MediaType.PNG.toString());
+                    response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
+
+                    if(requestMethod == RequestMethod.GET) {
+                        response.getOutputStream().write(data);
+                    }
+                }
+                break;
+
+            default:
+                throw new IllegalStateException("unexpected format; " + format);
 
         }
-        else {
 
-            byte[] data = pkgIconImageOptional.get().getData();
-
-            response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
-            response.setContentType(mediaTypeOptional.get().getCode());
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
-
-            if(requestMethod == RequestMethod.GET) {
-                response.getOutputStream().write(data);
-            }
-        }
     }
 
-    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
+    @RequestMapping(value = "/" + SEGMENT_GENERICPKGICON, method = RequestMethod.HEAD)
+    public void handleGenericHead(
+            HttpServletResponse response,
+            @RequestParam(value = KEY_SIZE, required = false) Integer size)
+            throws IOException {
+        handleGenericHeadOrGet(
+                RequestMethod.HEAD,
+                response,
+                size,
+                false);
+    }
+
+    @RequestMapping(value = "/" + SEGMENT_GENERICPKGICON, method = RequestMethod.GET)
+    public void handleGenericGet(
+            HttpServletResponse response,
+            @RequestParam(value = KEY_SIZE, required = false) Integer size)
+            throws IOException {
+        handleGenericHeadOrGet(
+                RequestMethod.GET,
+                response,
+                size,
+                false);
+    }
+
+    @RequestMapping(value = "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
     public void handleHead(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size,
@@ -172,7 +225,7 @@ public class PkgIconController extends AbstractController implements ServletCont
                 fallback);
     }
 
-    @RequestMapping(value = "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
+    @RequestMapping(value = "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
     public void handleGet(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size,

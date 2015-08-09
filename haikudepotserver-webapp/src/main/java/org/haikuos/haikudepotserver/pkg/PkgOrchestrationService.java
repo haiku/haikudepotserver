@@ -25,6 +25,7 @@ import org.haikuos.haikudepotserver.dataobjects.auto._Pkg;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.support.*;
 import org.haikuos.haikudepotserver.support.cayenne.ExpressionHelper;
+import org.haikuos.haikudepotserver.support.png.PngOptimizationService;
 import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,9 @@ public class PkgOrchestrationService {
 
     protected static int SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
     protected static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
+
+    @Resource
+    private RenderedPkgIconRepository renderedPkgIconRepository;
 
     @Resource
     private PngOptimizationService pngOptimizationService;
@@ -387,7 +391,7 @@ public class PkgOrchestrationService {
                 throw new BadPkgIconException();
             }
 
-            if(!pngSize.areSides(16) && !pngSize.areSides(32)) {
+            if(!pngSize.areSides(16) && !pngSize.areSides(32) && !pngSize.areSides(64)) {
                 LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it must be either 32x32 or 16x16 px, but was {}", pkg.getName(), pngSize.toString());
                 throw new BadPkgIconException();
             }
@@ -397,16 +401,11 @@ public class PkgOrchestrationService {
                 throw new BadPkgIconException();
             }
 
-            if(pngOptimizationService.isConfigured()) {
-                try {
-                    imageData = pngOptimizationService.optimize(imageData);
-                }
-                catch(IOException ioe) {
-                    throw new RuntimeException("the png optimization process has failed; ", ioe);
-                }
+            try {
+                imageData = pngOptimizationService.optimize(imageData);
             }
-            else {
-                LOGGER.info("skipping png optimization because the service is not configured");
+            catch(IOException ioe) {
+                throw new RuntimeException("the png optimization process has failed; ", ioe);
             }
 
             size = pngSize.width;
@@ -442,6 +441,7 @@ public class PkgOrchestrationService {
 
         pkgIconImage.setData(imageData);
         pkg.setModifyTimestamp(new java.util.Date());
+        renderedPkgIconRepository.evict(context, pkg);
 
         if(null!=size) {
             LOGGER.info("the icon {}px for package {} has been updated", size, pkg.getName());
@@ -1301,9 +1301,7 @@ public class PkgOrchestrationService {
 
     public boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories) {
         Preconditions.checkArgument(null!=context);
-        assert null!=context;
         Preconditions.checkArgument(null!=pkg);
-        assert null!=pkg;
         Preconditions.checkArgument(null!=pkgCategories);
 
         pkgCategories = new ArrayList<>(pkgCategories);

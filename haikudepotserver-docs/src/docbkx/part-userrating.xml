@@ -39,6 +39,10 @@ Distributed under the terms of the MIT License.
     </para>
 
     <para>
+        User ratings' aggregates are considered in the context of a single repository.
+    </para>
+
+    <para>
         A user rating is also associated with a &quot;natural language&quot; such as English, German or Japanese so
         that the language of the comment (if present) can be know.
     </para>

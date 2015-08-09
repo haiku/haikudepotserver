@@ -44,6 +44,8 @@
 
     <!-- SUNDRY -->
 
+    <bean class="org.haikuos.haikudepotserver.support.png.PngOptimizationServiceFactory"/>
+    <bean class="org.haikuos.haikudepotserver.support.hvif.HvifRenderingServiceFactory"/>
     <bean class="org.haikuos.haikudepotserver.support.RuntimeInformationService"/>
     <bean
             id="desktopApplicationMinimumVersionFilter"

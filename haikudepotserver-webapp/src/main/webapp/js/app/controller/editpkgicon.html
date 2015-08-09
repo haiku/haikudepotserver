@@ -15,24 +15,90 @@
             </div>
         </div>
 
-        <label for="icon-bitmap-16-file"><message key="editPkgIcon.iconBitmap16File.title"></message></label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconBitmap16File')">
-            <input id="icon-bitmap-16-file" name="iconBitmap16File" type="file" ng-model="editPkgIcon.iconBitmap16File" file-supply required></input>
+        <label><message key="editPkgIcon.vectorOrBitmap.title"></message></label>
+        <div class="form-control-group">
+            <input type="radio" ng-model="editPkgIcon.vectorOrBitmap" name="vectorOrBitmap" value="vector">
+            <message key="editPkgIcon.vectorOrBitmap.vector.title"></message>
+            <span class="muted">(hvif)</span>
+            &nbsp;&nbsp;&nbsp;
+            <input type="radio" ng-model="editPkgIcon.vectorOrBitmap" name="vectorOrBitmap" value="bitmap">
+            <message key="editPkgIcon.vectorOrBitmap.bitmap.title"></message>
+            <span class="muted">(png)</span>
+        </div>
+
+        <label
+                ng-show="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                for="icon-bitmap-16-file">
+            <message key="editPkgIcon.iconBitmap16File.title"></message>
+        </label>
+        <div
+                ng-show="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                class="form-control-group"
+                ng-class="deriveFormControlsContainerClasses('iconBitmap16File')">
+            <input
+                    id="icon-bitmap-16-file"
+                    name="iconBitmap16File"
+                    type="file"
+                    ng-model="editPkgIcon.iconBitmap16File"
+                    ng-required="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                    file-supply></input>
             <error-messages key-prefix="editPkgIcon.iconBitmap16File" error="editPkgIconForm.iconBitmap16File.$error"></error-messages>
         </div>
 
-        <label for="icon-bitmap-32-file"><message key="editPkgIcon.iconBitmap32File.title"></message></label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconBitmap32File')">
-            <input id="icon-bitmap-32-file" name="iconBitmap32File" type="file" ng-model="editPkgIcon.iconBitmap32File" file-supply required></input>
+        <label
+                ng-show="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                for="icon-bitmap-32-file">
+            <message key="editPkgIcon.iconBitmap32File.title"></message>
+        </label>
+        <div
+                ng-show="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                class="form-control-group"
+                ng-class="deriveFormControlsContainerClasses('iconBitmap32File')">
+            <input
+                    id="icon-bitmap-32-file"
+                    name="iconBitmap32File"
+                    type="file"
+                    ng-model="editPkgIcon.iconBitmap32File"
+                    ng-required="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                    file-supply></input>
             <error-messages key-prefix="editPkgIcon.iconBitmap32File" error="editPkgIconForm.iconBitmap32File.$error"></error-messages>
         </div>
 
-        <label for="icon-hvif-file"><message key="editPkgIcon.iconHvifFile.title"></message></label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('iconHvifFile')">
-            <input id="icon-hvif-file" name="iconHvifFile" type="file" ng-model="editPkgIcon.iconHvifFile" file-supply></input>
-            <span ng-show="editPkgIcon.iconHvifFile">
-                (<a href="" ng-click="goClearIconHvifFile()"><message key="editPkgIcon.iconHvifFile.clearAction.title"></message></a>)
-            </span>
+        <label
+                ng-show="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                for="icon-bitmap-64-file">
+            <message key="editPkgIcon.iconBitmap64File.title"></message>
+        </label>
+        <div
+                ng-show="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                class="form-control-group"
+                ng-class="deriveFormControlsContainerClasses('iconBitmap64File')">
+            <input
+                    id="icon-bitmap-64-file"
+                    name="iconBitmap64File"
+                    type="file"
+                    ng-model="editPkgIcon.iconBitmap64File"
+                    ng-required="editPkgIcon.vectorOrBitmap == 'bitmap'"
+                    file-supply></input>
+            <error-messages key-prefix="editPkgIcon.iconBitmap64File" error="editPkgIconForm.iconBitmap64File.$error"></error-messages>
+        </div>
+
+        <label
+                ng-show="editPkgIcon.vectorOrBitmap == 'vector'"
+                for="icon-hvif-file">
+            <message key="editPkgIcon.iconHvifFile.title"></message>
+        </label>
+        <div
+                ng-show="editPkgIcon.vectorOrBitmap == 'vector'"
+                class="form-control-group"
+                ng-class="deriveFormControlsContainerClasses('iconHvifFile')">
+            <input
+                    id="icon-hvif-file"
+                    name="iconHvifFile"
+                    type="file"
+                    ng-model="editPkgIcon.iconHvifFile"
+                    ng-required="editPkgIcon.vectorOrBitmap == 'vector'"
+                    file-supply></input>
             <error-messages key-prefix="editPkgIcon.iconHvifFile" error="editPkgIconForm.iconHvifFile.$error"></error-messages>
         </div>
 

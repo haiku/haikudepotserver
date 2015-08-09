@@ -10,14 +10,14 @@ Distributed under the terms of the MIT License.
 
     <title>Data Model</title>
 
-        <figure id="datamodel-diagram">
-            <title>The persisted data model for the application server.</title>
-            <mediaobject>
-                <imageobject>
-                    <imagedata fileref="images/img-datamodel.png" format="PNG"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
+    <figure id="datamodel-diagram">
+        <title>The persisted data model for the application server.</title>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="images/img-datamodel.png" format="PNG"/>
+            </imageobject>
+        </mediaobject>
+    </figure>
 
     <para>
         In the diagram above, the diagram does not show &quot;modifyTimestamp&quot; nor does it show
@@ -25,12 +25,22 @@ Distributed under the terms of the MIT License.
     </para>
 
     <section xml:id="datamodel-uniqueidentifiers">
-    <title>Unique Identifiers</title>
-    <para>
-        In general, an artifical attribute used to identify instances has a name of &quot;code&quot;.  In some cases,
-        existing nomenclature is already in place and another attribute name has been chosen.  An example of this
-        is the &quot;Pkg&quot; entity which is uniquely identified by its attribute &quot;name&quot;.
-    </para>
+        <title>Unique Identifiers</title>
+        <para>
+            In general, an artifical attribute used to identify instances has a name of &quot;code&quot;.  In some cases,
+            existing nomenclature is already in place and another attribute name has been chosen.  An example of this
+            is the &quot;Pkg&quot; entity which is uniquely identified by its attribute &quot;name&quot;.
+        </para>
+    </section>
+
+    <section>
+        <title>Repositories</title>
+        <para>
+            Repositories are sources of packages.  A repository has a number of repository sources which are URLs
+            that Haiku Depot Server can extract HPKR data from in order to get a catalog of what packages are
+            available for that repository.  Package versions are &quot;siloed&quot; between repositories however
+            some data such as localization, iconography and screenshots are shared.
+        </para>
     </section>
 
 </chapter>

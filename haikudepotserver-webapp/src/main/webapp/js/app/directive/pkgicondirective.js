@@ -33,23 +33,39 @@ angular.module('haikudepotserver').directive('pkgIcon',
                         throw Error('preposterous value for size; ' + size);
                     }
 
+                    var pkg;
                     var el = angular.element('<img src="" width="' + size + '" height="' + size + '"></img>');
                     element.replaceWith(el);
 
-                    $scope.$watch(pkgExpression, function(pkg) {
-                        var url = '/img/generic'+size+'.png';
+                    function setupImageSrc() {
+                        if(pkg) {
+                            var dprSize = Math.floor(size * (window.devicePixelRatio ? window.devicePixelRatio : 1.0));
+                            var url = pkgIcon.genericUrl(dprSize);
 
-                        if (pkg) {
-                            if (!pkg.name||!pkg.name.length) {
-                                throw Error('the package is expected to have a name in order to derive an icon url');
+                            if (pkg) {
+                                if (!pkg.name || !pkg.name.length) {
+                                    throw Error('the package is expected to have a name in order to derive an icon url');
+                                }
+
+                                if (undefined == pkg.hasAnyPkgIcons || pkg.hasAnyPkgIcons) {
+                                    url = pkgIcon.url(pkg, constants.MEDIATYPE_PNG, dprSize);
+                                }
                             }
 
-                            if(undefined == pkg.hasAnyPkgIcons || pkg.hasAnyPkgIcons) {
-                                url = pkgIcon.url(pkg, constants.MEDIATYPE_PNG, size);
-                            }
+                            el.attr('src', url);
                         }
+                        else {
+                            el.attr('src','');
+                        }
+                    }
 
-                        el.attr('src', url);
+                    $scope.$watch(pkgExpression, function(newPkg) {
+                        pkg = newPkg;
+                        setupImageSrc();
+                    });
+
+                    $scope.$on('windowDidResize', function() {
+                        setupImageSrc();
                     });
                 }
             }

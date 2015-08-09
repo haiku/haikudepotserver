@@ -183,6 +183,46 @@ apt-get install postgresql postgresql-client</programlisting>
 
         </section>
 
+        <section xml:id="overview-prerequisites-hvif2png">
+        <title>hvif2png Rendering Tool</title>
+
+            <para>
+                Software on the Haiku operating system tends to use the HVIF file format for representing icons.  This
+                format is vector-art based rather than bitmaps.  To render icons clearly at any size, Haiku Depot
+                Server uses an external tool to render the HVIF data into PNG images for display on the web browser.
+                Part of the <ulink url="https://www.haiku-os.org/development">Haiku Source Code</ulink> includes
+                a tool called &quot;hvif2png&quot; that can be used for this purpose.
+            </para>
+
+            <para>
+                Work through building Haiku operating system from source and then build the hvif2png tool using
+                &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  This will yield the hvif2png tool as a
+                build artifact.  To install this on a development or deployment host, you will either need to
+                generate an RPM package for installation into an RPM-based linux environment or a tar-ball to install
+                onto other *NIX like environments such as MacOS-X or debian.  The two scripts that yield the RPM or
+                tar-ball are included in the Haiku operating system source code;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>/build/scripts/build_hvif2png_tarball</listitem>
+                    <listitem>/build/scripts/build_hvif2png_rpm</listitem>
+                </itemizedlist>
+            </para>
+
+            <para>
+                The only argument to these scripts is the &quot;generated&quot; directory where the Haiku operating
+                system build products are situated.  It will yield a tar-ball or RPM in the generated directory in the
+                &quot;tmp&quot; directory.  The tarball can be unpacked anywhere on the target deployment or
+                development host.  The RPM deploys to &quot;/opt/hvif2png/...&quot;.
+            </para>
+
+            <para>
+                You can
+                <link linkend="config-general-hvif2png">configure</link>
+                Haiku Depot Server to use the deployed hvif2png tool.
+            </para>
+
     </section>
 
 </chapter>

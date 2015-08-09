@@ -30,6 +30,7 @@ import org.haikuos.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haikuos.haikudepotserver.pkg.model.*;
 import org.haikuos.haikudepotserver.security.AuthorizationService;
 import org.haikuos.haikudepotserver.security.model.Permission;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 import org.haikuos.haikudepotserver.support.VersionCoordinates;
 import org.haikuos.haikudepotserver.support.VersionCoordinatesComparator;
 import org.slf4j.Logger;
@@ -569,10 +570,23 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         if(null!=request.pkgIcons && !request.pkgIcons.isEmpty()) {
 
-            if(
-                    !contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 16)
-                            || !contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 32)) {
-                throw new IllegalStateException("pkg icons must contain a 16x16px and 32x32px png icon variant");
+            // either we have an HVIF icon or we have bitmaps.  If there if an HVIF one then we should
+            // not have any other variants.  If there are bitmaps then we need 16, 32 and 64 sizes.
+
+            if(request.pkgIcons
+                    .stream()
+                    .filter(pi -> pi.mediaTypeCode.equals(MediaType.MEDIATYPE_HAIKUVECTORICONFILE))
+                    .collect(SingleCollector.optional()).isPresent()) {
+                if(request.pkgIcons.size() > 1) {
+                    throw new IllegalStateException("if an hvif icon is supplied then there should be no other variants.");
+                }
+            }
+            else {
+                if(!contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 16)
+                    || !contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 32)
+                    || !contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 64) ) {
+                    throw new IllegalStateException("there should be three bitmap icons supplied in sizes 16, 32 and 64");
+                }
             }
 
             for(ConfigurePkgIconRequest.PkgIcon pkgIconApi : request.pkgIcons) {

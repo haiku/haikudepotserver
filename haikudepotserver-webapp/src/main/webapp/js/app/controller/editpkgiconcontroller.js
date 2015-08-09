@@ -22,8 +22,10 @@ angular.module('haikudepotserver').controller(
             $scope.pkg = undefined;
             $scope.amSaving = false;
             $scope.editPkgIcon = {
+                vectorOrBitmap : 'vector',
                 iconBitmap16File : undefined, // bitmap
                 iconBitmap32File : undefined, // bitmap
+                iconBitmap64File : undefined, // bitmap
                 iconHvifFile : undefined // vector 'Haiku Vector Icon Format'
             };
 
@@ -77,6 +79,10 @@ angular.module('haikudepotserver').controller(
                 model.$setValidity('badsize',undefined==file || (file.size > 4 && file.size < ICON_SIZE_LIMIT));
             }
 
+            function iconBitmap64FileDidChange() {
+                validateBitmapIconFile($scope.editPkgIcon.iconBitmap64File, $scope.editPkgIconForm['iconBitmap64File']);
+            }
+
             function iconBitmap32FileDidChange() {
                 validateBitmapIconFile($scope.editPkgIcon.iconBitmap32File, $scope.editPkgIconForm['iconBitmap32File']);
             }
@@ -84,6 +90,10 @@ angular.module('haikudepotserver').controller(
             function iconBitmap16FileDidChange() {
                 validateBitmapIconFile($scope.editPkgIcon.iconBitmap16File, $scope.editPkgIconForm['iconBitmap16File']);
             }
+
+            $scope.$watch('editPkgIcon.iconBitmap64File', function() {
+                iconBitmap64FileDidChange();
+            });
 
             $scope.$watch('editPkgIcon.iconBitmap32File', function() {
                 iconBitmap32FileDidChange();
@@ -101,10 +111,6 @@ angular.module('haikudepotserver').controller(
                 $scope.showHelp =true;
             };
 
-            $scope.goClearIconHvifFile = function() {
-                $scope.editPkgIcon.iconHvifFile = undefined;
-            };
-
             // This function will take the data from the form and load in the new pkg icons
 
             $scope.goStorePkgIcons = function() {
@@ -115,34 +121,14 @@ angular.module('haikudepotserver').controller(
 
                 $scope.amSaving = true;
 
-                function handleStorePkgIcons(base64IconBitmap16, base64IconBitmap32, base64IconHvif) {
-
-                    var pkgIcons = [
-                        {
-                            mediaTypeCode : constants.MEDIATYPE_PNG,
-                            size : 16,
-                            dataBase64 : base64IconBitmap16
-                        },
-                        {
-                            mediaTypeCode : constants.MEDIATYPE_PNG,
-                            size : 32,
-                            dataBase64 : base64IconBitmap32
-                        }
-                    ];
-
-                    if(base64IconHvif) {
-                        pkgIcons.push({
-                            mediaTypeCode : constants.MEDIATYPE_HAIKUVECTORICONFILE,
-                            dataBase64 : base64IconHvif
-                        });
-                    }
+                function handleStorePkgIcons(preparedIconInputs) {
 
                     jsonRpc.call(
                             constants.ENDPOINT_API_V1_PKG,
                             "configurePkgIcon",
                             [{
                                 pkgName: $routeParams.name,
-                                pkgIcons: pkgIcons
+                                pkgIcons: preparedIconInputs
                             }]
                         ).then(
                         function() {
@@ -170,6 +156,10 @@ angular.module('haikudepotserver').controller(
 
                                                     case 32:
                                                         $scope.editPkgIconForm['iconBitmap32File'].$setValidity('badformatorsize',false);
+                                                        break;
+
+                                                    case 64:
+                                                        $scope.editPkgIconForm['iconBitmap64File'].$setValidity('badformatorsize',false);
                                                         break;
 
                                                     default:
@@ -205,44 +195,57 @@ angular.module('haikudepotserver').controller(
 
                 }
 
-                // pull in all of the data as base64-ized data URLs
-
-                var readerIconBitmap16 = new FileReader();
-                var readerIconBitmap32 = new FileReader();
-                var readerHvif = $scope.editPkgIcon.iconHvifFile ? new FileReader() : undefined;
+                var iconInputs = [];
 
                 function checkHasCompletedFileReaderProcessing() {
 
-                   if(2==readerIconBitmap16.readyState
-                       && 2==readerIconBitmap32.readyState
-                       && (!readerHvif || 2==readerHvif.readyState)) {
+                    _.each(iconInputs, function(iconInput) {
+                       if(iconInput.reader && 2 == iconInput.reader.readyState) {
+                           iconInput.dataBase64 = miscService.stripBase64FromDataUrl(iconInput.reader.result);
+                           iconInput.reader = undefined;
+                       }
+                    });
 
-                       handleStorePkgIcons(
-                           miscService.stripBase64FromDataUrl(readerIconBitmap16.result),
-                           miscService.stripBase64FromDataUrl(readerIconBitmap32.result),
-                           readerHvif ? miscService.stripBase64FromDataUrl(readerHvif.result) : null);
-                   }
+                    if (!_.find(iconInputs, function (iconInput) {
+                            return iconInput.reader;
+                        })) {
+                        handleStorePkgIcons(iconInputs);
+                    }
                 }
 
-                readerIconBitmap16.onloadend = function() {
-                    checkHasCompletedFileReaderProcessing();
-                };
+                function fileReaderSetup(reader, file) {
+                    reader.onloadend = function() { checkHasCompletedFileReaderProcessing(); };
+                    reader.readAsDataURL(file);
+                    return reader;
+                }
 
-                readerIconBitmap16.readAsDataURL($scope.editPkgIcon.iconBitmap16File);
-
-                readerIconBitmap32.onloadend = function() {
-                    checkHasCompletedFileReaderProcessing();
-                };
-
-                readerIconBitmap32.readAsDataURL($scope.editPkgIcon.iconBitmap32File);
-
-                if($scope.editPkgIcon.iconHvifFile) {
-
-                    readerHvif.onloadend = function() {
-                        checkHasCompletedFileReaderProcessing();
+                function bitmapIconInputSetup(size, file) {
+                    return {
+                        reader : fileReaderSetup(new FileReader(), file),
+                        mediaTypeCode : constants.MEDIATYPE_PNG,
+                        size: size
                     };
+                }
 
-                    readerHvif.readAsDataURL($scope.editPkgIcon.iconHvifFile);
+                // pull in all of the data as base64-ized data URLs
+
+                switch($scope.editPkgIcon.vectorOrBitmap) {
+
+                    case 'vector':
+                        iconInputs.push({
+                            reader : fileReaderSetup(new FileReader(), $scope.editPkgIcon.iconHvifFile),
+                            mediaTypeCode : constants.MEDIATYPE_HAIKUVECTORICONFILE
+                        });
+                        break;
+
+                    case 'bitmap':
+                        iconInputs.push(bitmapIconInputSetup(16,$scope.editPkgIcon.iconBitmap16File));
+                        iconInputs.push(bitmapIconInputSetup(32,$scope.editPkgIcon.iconBitmap32File));
+                        iconInputs.push(bitmapIconInputSetup(64,$scope.editPkgIcon.iconBitmap64File));
+                        break;
+
+                    default:
+                        throw Error('unknown vectorOrBitmap value');
                 }
 
             }; // goStorePkgIcons

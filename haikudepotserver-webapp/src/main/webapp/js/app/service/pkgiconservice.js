@@ -15,7 +15,18 @@ angular.module('haikudepotserver').factory('pkgIcon',
             return {
 
                 /**
+                 * <p>Produces a URL to a generic application icon in the desired size.</p>
+                 * @param size is the size of the image desired.  The server will attempt to meet this size.
+                 * @return a url to provide the desired image.
+                 */
+
+                genericUrl : function(size) {
+                    return '/genericpkgicon.png?s=' + size;
+                },
+
+                /**
                  * <p>This function will provide a URL to the packages' icon.</p>
+                 * @param pkg is the package for which the icon url should be generated.
                  */
 
                 url : function(pkg, mediaTypeCode, size) {
@@ -36,7 +47,7 @@ angular.module('haikudepotserver').factory('pkgIcon',
                             break;
 
                         case constants.MEDIATYPE_PNG: {
-                            if(!size || !(32==size||16==size)) {
+                            if(!size || size <= 0) {
                                 throw Error('the size is not valid for obtaining the package icon url');
                             }
 

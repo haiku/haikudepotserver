@@ -7,33 +7,28 @@ package org.haikuos.haikudepotserver.support;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
- * <p>This class provides a service to optimize PNG images.</p>
+ * <p>An abstract superclass for services that are able to call out to another piece of software to
+ * perform some task such as render an HVIF or optimize a PNG.  This only really deals with very
+ * simple situations.</p>
  */
 
-@Service
-public class PngOptimizationService {
+public abstract class AbstractExternalToolService<T> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PngOptimizationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AbstractExternalToolService.class);
 
-    @Value("${optipng.path:}")
-    private String optiPngPath;
-
-    public boolean isConfigured() {
-        return !Strings.isNullOrEmpty(optiPngPath);
-    }
+    protected static long TIMEOUT = 30 * 1000;
 
     private void quietlyDeleteTemporaryFile(File f) {
         if(f.exists()) {
@@ -46,11 +41,14 @@ public class PngOptimizationService {
         }
     }
 
-    public byte[] optimize(byte[] input) throws IOException {
-        Preconditions.checkArgument(null!=input && 0!=input.length, "the input is not specified");
+    public abstract List<String> createArguments(T context, File temporaryInputFile, File temporaryOutputFile);
+
+    public byte[] execute(T context, byte[] input) throws IOException {
+        Preconditions.checkArgument(null != input && 0 != input.length, "the input is not specified");
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        optimize(
+        execute(
+                context,
                 ByteSource.wrap(input),
                 new ByteSink() {
                     @Override
@@ -63,13 +61,13 @@ public class PngOptimizationService {
         return baos.toByteArray();
     }
 
-    public void optimize(
+    public void execute(
+            T context,
             ByteSource inputSource,
             ByteSink outputSink) throws IOException {
 
-        Preconditions.checkArgument(null!=inputSource, "the input source must be supplied");
+        Preconditions.checkArgument(null != inputSource, "the input source must be supplied");
         Preconditions.checkArgument(null!=outputSink, "the output sink must be supplied");
-        Preconditions.checkState(isConfigured(), "the service is not suitably configured to optimize png data");
 
         long startMs = System.currentTimeMillis();
 
@@ -79,12 +77,10 @@ public class PngOptimizationService {
         try {
             inputSource.copyTo(Files.asByteSink(temporaryInputFile));
 
-            Process process = new ProcessBuilder(
-                    optiPngPath, "-o5",
-                    "-out", temporaryOutputFile.getAbsolutePath(),
-                    temporaryInputFile.getAbsolutePath()).start();
+            List<String> args = createArguments(context, temporaryInputFile, temporaryOutputFile);
+            Process process = new ProcessBuilder(args).start();
 
-            LOGGER.info("did start optipng");
+            LOGGER.debug("did start " + args.get(0));
 
             try (
                     InputStream inputStream = process.getErrorStream();
@@ -102,22 +98,25 @@ public class PngOptimizationService {
             }
 
             try {
-                if (0 != process.waitFor()) {
-                    throw new RuntimeException("unable to optimize the png data");
+                if (process.waitFor(TIMEOUT, TimeUnit.MILLISECONDS)) {
+                    if(0 != process.exitValue()) {
+                        throw new RuntimeException("unable to execute " + args.get(0));
+                    }
+                }
+                else {
+                    process.destroyForcibly();
+                    throw new RuntimeException("unable to run " + args.get(0) + " as it has timed-out");
                 }
             }
             catch(InterruptedException ie) {
-                throw new RuntimeException("interrupted waiting for the optipng process to complete", ie);
+                throw new RuntimeException("interrupted waiting for the " + args.get(0) + " process to complete", ie);
             }
 
             // check the difference between the source and the destination.
 
-            long inputLength = temporaryInputFile.length();
-            long outputLength = temporaryOutputFile.length();
-
             LOGGER.info(
-                    "did finish optipng; reduced by {}% ({}ms)",
-                    ((inputLength - outputLength) * 100) / inputLength,
+                    "did finish {} ({}ms)",
+                    args.get(0),
                     (System.currentTimeMillis() - startMs));
 
             Files.asByteSource(temporaryOutputFile).copyTo(outputSink);

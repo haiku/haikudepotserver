@@ -64,6 +64,17 @@ key2=value2</programlisting>
                 </para>
             </section>
 
+            <section xml:id="config-general-hvif2png">
+                <title>hvif2png.path</title>
+                <para>
+                    This is a system path to the
+                    <link linkend="overview-prerequisites-hvif2png">hvif2png</link> tool.
+                    This tool is used to render HVIF icon data to PNG images that can be displayed on the web
+                    site.  This value is optional, but if absent, no icons for packages will shown.  Instead,
+                    placebo icons will be displayed.
+                </para>
+            </section>
+
             <section>
                 <title>optipng.path</title>
                 <para>
