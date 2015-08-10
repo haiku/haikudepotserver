@@ -193,21 +193,23 @@ apt-get install postgresql postgresql-client</programlisting>
                 Part of the <ulink url="https://www.haiku-os.org/development">Haiku Source Code</ulink> includes
                 a tool called &quot;hvif2png&quot; that can be used for this purpose.
             </para>
-
             <para>
                 Work through building Haiku operating system from source and then build the hvif2png tool using
                 &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  Note that you may need to install the
                 &quot;libpng&quot; libraries for this to build and yield the hvif2png tool as a
-                build artifact.  To install this on a development or deployment host, you will either need to
+                build artifact.
+            </para>
+            <para>
+                To install this on a development or deployment host, you will either need to
                 generate an RPM package for installation into an RPM-based linux environment or a tar-ball to install
                 onto other *NIX like environments such as MacOS-X or debian.  The two scripts that yield the RPM or
-                tar-ball are included in the Haiku operating system source code;
+                tar-ball are included in the Haiku Depot Server source at;
             </para>
 
             <para>
                 <itemizedlist>
-                    <listitem>/build/scripts/build_hvif2png_tarball</listitem>
-                    <listitem>/build/scripts/build_hvif2png_rpm</listitem>
+                    <listitem>support/buildhvif2pngrpm.sh</listitem>
+                    <listitem>support/buildhvif2pngtarball.sh</listitem>
                 </itemizedlist>
             </para>
 
@@ -215,7 +217,8 @@ apt-get install postgresql postgresql-client</programlisting>
                 The only argument to these scripts is the &quot;generated&quot; directory where the Haiku operating
                 system build products are situated.  It will yield a tar-ball or RPM in the generated directory in the
                 &quot;tmp&quot; directory.  The tarball can be unpacked anywhere on the target deployment or
-                development host.  The RPM deploys to &quot;/opt/hvif2png/...&quot;.
+                development host.  The RPM deploys to &quot;/opt/hvif2png/...&quot; on the machine where it is
+                installed.
             </para>
 
             <para>
