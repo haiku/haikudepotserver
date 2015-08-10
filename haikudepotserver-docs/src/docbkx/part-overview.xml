@@ -196,7 +196,8 @@ apt-get install postgresql postgresql-client</programlisting>
 
             <para>
                 Work through building Haiku operating system from source and then build the hvif2png tool using
-                &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  This will yield the hvif2png tool as a
+                &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  Note that you may need to install the
+                &quot;libpng&quot; libraries for this to build and yield the hvif2png tool as a
                 build artifact.  To install this on a development or deployment host, you will either need to
                 generate an RPM package for installation into an RPM-based linux environment or a tar-ball to install
                 onto other *NIX like environments such as MacOS-X or debian.  The two scripts that yield the RPM or
