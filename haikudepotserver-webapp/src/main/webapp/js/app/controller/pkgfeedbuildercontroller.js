@@ -170,15 +170,15 @@ angular.module('haikudepotserver').controller(
 
             $scope.goBuild = function() {
                 build();
-            }
+            };
 
             $scope.goEdit = function() {
                 $scope.feedUrl = undefined;
-            }
+            };
 
             $scope.goRemovePkg = function(pkg) {
                 $scope.feedSettings.pkgs = _.without($scope.feedSettings.pkgs,pkg);
-            }
+            };
 
             /**
              * <P>This is made invalid as part of searching for the package.  If the package name is
@@ -188,7 +188,7 @@ angular.module('haikudepotserver').controller(
             $scope.$watch('pkgChooserName', function() {
                 $scope.feedForm.pkgChooserName.$setValidity('notfound',true);
                 $scope.feedForm.pkgChooserName.$setValidity('included',true);
-            })
+            });
 
             $scope.goAddPkg = function() {
 

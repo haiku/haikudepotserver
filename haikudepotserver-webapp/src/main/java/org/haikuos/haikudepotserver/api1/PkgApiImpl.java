@@ -353,7 +353,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(request.name), "request pkg name is required");
         Preconditions.checkNotNull(request.versionType);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
-        Preconditions.checkArgument(request.versionType != PkgVersionType.ALL && !Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
+        Preconditions.checkArgument(
+                EnumSet.of(PkgVersionType.NONE, PkgVersionType.ALL).contains(request.versionType)
+                        || !Strings.isNullOrEmpty(request.repositoryCode),
+                "the repository code should be supplied of the version request is not ALL or NONE");
 
         final ObjectContext context = serverRuntime.getContext();
 
@@ -381,7 +384,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 .map(ppc -> ppc.getPkgCategory().getCode())
                 .collect(Collectors.toList());
 
-        if(null!=repository) {
+        if(null != repository) {
             Optional<PkgUserRatingAggregate> userRatingAggregate = pkg.getPkgUserRatingAggregate(repository);
 
             if (userRatingAggregate.isPresent()) {
