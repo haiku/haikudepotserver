@@ -10,6 +10,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.haikuos.haikudepotserver.dataobjects.PkgIcon;
 import org.haikuos.haikudepotserver.dataobjects.PkgVersion;
+import org.haikuos.haikudepotserver.pkg.controller.PkgIconController;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -43,33 +44,14 @@ public class PkgIconTag extends RequestContextAwareTag {
     }
 
     private String getUrl() {
-        ObjectContext context = getPkgVersion().getObjectContext();
-        Optional<org.haikuos.haikudepotserver.dataobjects.MediaType> pngOptional =
-                org.haikuos.haikudepotserver.dataobjects.MediaType.getByCode(context, MediaType.PNG.toString());
-        Optional<PkgIcon> pkgIconOptional = pkgVersion.getPkg().getPkgIcon(pngOptional.get(), getSize());
-
-        if(pkgIconOptional.isPresent()) {
-            return
-                    UriComponentsBuilder.newInstance()
-                    .pathSegment("pkgicon", getPkgVersion().getPkg().getName() + ".png")
-                    .queryParam("f","true")
-                            .queryParam("s",Integer.toString(getSize()))
-                    .queryParam("m",Long.toString(getPkgVersion().getPkg().getModifyTimestamp().getTime()))
-                    .build()
-                    .toString();
-        }
-        else {
-            switch(size) {
-                case 16:
-                    return "/img/generic16.png";
-
-                case 32:
-                    return "/img/generic32.png";
-
-                default:
-                    throw new IllegalStateException("unknown size for default icon");
-            }
-        }
+        return
+                UriComponentsBuilder.newInstance()
+                        .pathSegment(PkgIconController.SEGMENT_PKGICON, getPkgVersion().getPkg().getName() + ".png")
+                        .queryParam(PkgIconController.KEY_FALLBACK,"true")
+                        .queryParam(PkgIconController.KEY_SIZE, Integer.toString(getSize()))
+                        .queryParam("m", Long.toString(getPkgVersion().getPkg().getModifyTimestamp().getTime()))
+                        .build()
+                        .toString();
     }
 
     @Override
