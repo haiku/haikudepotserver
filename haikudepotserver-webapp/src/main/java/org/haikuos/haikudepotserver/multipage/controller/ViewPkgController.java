@@ -55,6 +55,23 @@ public class ViewPkgController {
                 pkgVersion.toVersionCoordinates()).isPresent();
     }
 
+    // TODO; Legacy - perhaps remove by late 2015?
+    @RequestMapping(value = "{name}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
+    public ModelAndView viewPkg_legacyNoRepository(
+            HttpServletRequest httpServletRequest,
+            @PathVariable(value="name") String pkgName,
+            @PathVariable(value="major") String major,
+            @PathVariable(value="minor") String minor,
+            @PathVariable(value="micro") String micro,
+            @PathVariable(value="preRelease") String preRelease,
+            @PathVariable(value="revision") String revisionStr,
+            @PathVariable(value="architectureCode") String architectureCode) throws MultipageObjectNotFoundException {
+          return viewPkg(
+                  httpServletRequest,
+                  Repository.CODE_DEFAULT,
+                  pkgName, major, minor, micro, preRelease, revisionStr, architectureCode);
+    }
+
     @RequestMapping(value = "{name}/{repositoryCode}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
     public ModelAndView viewPkg(
             HttpServletRequest httpServletRequest,
