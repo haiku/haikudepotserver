@@ -27,6 +27,10 @@ as well as the status of the authenticated user.
     background-size: 32px 32px;
 }
 
+#banner-title:hover {
+    background-image: url('/img/haikudepot-lightoverlay.svg') , url('/img/haikudepot.svg');
+}
+
 html.nosvg #banner-title {
     background-image: url('/img/haikudepot32.png');
     background-size: auto;
@@ -40,6 +44,11 @@ html.nosvg #banner-title {
     font-weight: bold;
     font-size: 24px;
     vertical-align: middle;
+}
+
+#banner-title div:hover {
+    text-decoration: underline;
+    text-decoration-color: white;
 }
 
 #banner-actions {

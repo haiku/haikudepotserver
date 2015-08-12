@@ -26,5 +26,3 @@ angular.module('haikudepotserver').directive(
         }
     ]
 );
-
-didResetToHome
