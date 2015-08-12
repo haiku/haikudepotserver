@@ -217,8 +217,8 @@
                 </a>
             </li>
 
-            <li>
-                <a target="_blank" ng-show="homePageLink()" href="{{homePageLink()}}">
+            <li ng-show="homePageLink()">
+                <a target="_blank" href="{{homePageLink()}}">
                     <message key="viewPkg.visitWebSiteAction.title"></message>
                 </a>
             </li>
