@@ -53,7 +53,7 @@ public class OptipngPngOptimizationServiceImpl
     @Override
     public byte[] optimize(byte[] input) throws IOException {
         byte[] out = execute(new Context(), input);
-        LOGGER.info("png optimized by {}%", (out.length*100 / input.length));
+        LOGGER.debug("png optimized by {}%", (out.length*100 / input.length));
         return out;
     }
 

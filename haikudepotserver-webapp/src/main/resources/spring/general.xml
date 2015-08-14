@@ -103,4 +103,16 @@
         </property>
     </bean>
 
+    <!-- SINGLE PAGE TEMPLATE STATS -->
+
+    <bean
+            id="singlePageTemplateFrequencyMetrics"
+            class="org.haikuos.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics"/>
+
+    <bean
+            id="singlePageTemplateFrequencyMetricsFilter"
+            class="org.haikuos.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetricsFilter">
+        <property name="metrics" ref="singlePageTemplateFrequencyMetrics"></property>
+    </bean>
+
 </beans>

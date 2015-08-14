@@ -38,8 +38,8 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
 
     private Cache<String, Cache<Integer, Optional<byte[]>>> cache = CacheBuilder
             .newBuilder()
-            .maximumSize(500)
-            .expireAfterAccess(1, TimeUnit.HOURS)
+            .maximumSize(256)
+            .expireAfterAccess(12, TimeUnit.HOURS)
             .build();
 
     /**

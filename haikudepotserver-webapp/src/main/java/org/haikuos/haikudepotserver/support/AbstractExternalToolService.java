@@ -114,7 +114,7 @@ public abstract class AbstractExternalToolService<T> {
 
             // check the difference between the source and the destination.
 
-            LOGGER.info(
+            LOGGER.debug(
                     "did finish {} ({}ms)",
                     args.get(0),
                     (System.currentTimeMillis() - startMs));

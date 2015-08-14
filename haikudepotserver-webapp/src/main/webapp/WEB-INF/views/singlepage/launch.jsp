@@ -1,6 +1,7 @@
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="jwr" uri="http://jawr.net/tags" %>
+<%@ taglib prefix="singlepage" uri="/WEB-INF/singlepage.tld"%>
 
 <%--
 This is a single page application and this is essentially the 'single page'.  It boots-up some libraries and other
@@ -21,6 +22,10 @@ web-resources and then this starts the java-script single page environment drive
     <jwr:script src="/bundles/libs.js"></jwr:script>
     <jwr:script src="/bundles/app.js"></jwr:script>
     <jwr:style src="/bundles/app.css"></jwr:style>
+
+    <c:forEach items="${topTemplates}" var="topTemplate">
+        <singlepage:embeddedtemplate template="${topTemplate}"></singlepage:embeddedtemplate>
+    </c:forEach>
 
 </head>
 
