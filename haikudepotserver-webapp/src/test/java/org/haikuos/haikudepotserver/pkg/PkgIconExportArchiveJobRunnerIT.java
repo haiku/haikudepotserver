@@ -116,7 +116,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
             Assertions.assertThat(foundPkg1Filenames).contains(
                     "16.png",
                     "32.png",
-                    "icon.hvif");
+                    "64.png");
 
         }
 

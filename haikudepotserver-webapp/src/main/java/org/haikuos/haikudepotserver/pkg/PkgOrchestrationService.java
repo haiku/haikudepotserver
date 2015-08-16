@@ -62,6 +62,15 @@ public class PkgOrchestrationService {
     protected static int SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
     protected static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
+    /**
+     * <p>This appears at the end of the package name to signify that it is a development package
+     * for another package.</p>
+     */
+
+    protected static String SUFFIX_PKG_DEVELOPMENT = "_devel";
+
+    protected static String SUFFIX_SUMMARY_DEVELOPMENT = " (development files)";
+
     @Resource
     private RenderedPkgIconRepository renderedPkgIconRepository;
 
@@ -450,6 +459,8 @@ public class PkgOrchestrationService {
             LOGGER.info("the icon for package {} has been updated", pkg.getName());
         }
 
+        propagateDataFromPkgToDevelPkg(context, pkg);
+
         return pkgIconOptional.get();
     }
 
@@ -638,7 +649,7 @@ public class PkgOrchestrationService {
      */
 
     public long payloadLength(PkgVersion pkgVersion) throws IOException {
-        Preconditions.checkArgument(null!=pkgVersion);
+        Preconditions.checkArgument(null != pkgVersion);
 
         long result = -1;
         URL pkgVersionHpkgURL = pkgVersion.getHpkgURL();
@@ -825,6 +836,69 @@ public class PkgOrchestrationService {
         return pkgProminenceOptional.get();
     }
 
+    /**
+     * <p>Some meta-data can be copied from a master package into the "_devel" package.  This method will see if
+     * there is a devel package and will do the copy if there is one.</p>
+     */
+
+    public void propagateDataFromPkgToDevelPkg(
+            ObjectContext objectContext,
+            Pkg pkg) {
+
+        Preconditions.checkArgument(null!=objectContext);
+        Preconditions.checkArgument(null!=pkg);
+
+        if(!pkg.getName().endsWith(SUFFIX_PKG_DEVELOPMENT)) {
+            Optional<Pkg> develPkgOptional = Pkg.getByName(objectContext, pkg.getName() + SUFFIX_PKG_DEVELOPMENT);
+
+            if (develPkgOptional.isPresent()) {
+                propagateDataFromPkgToDevelPkg(objectContext, pkg, develPkgOptional.get());
+            }
+        }
+    }
+
+    /**
+     * <p>Some meta-data can be copied from the master package to a sub-ordinate package.  An example is a "_devel"
+     * package which carries the development files for a master package.  This method will replicate the necessary
+     * data out to the subordinate package as necessary.</p>
+     */
+
+    public void propagateDataFromPkgToDevelPkg(
+            ObjectContext objectContext,
+            Pkg pkg,
+            Pkg develPkg) {
+
+        Preconditions.checkArgument(null!=objectContext);
+        Preconditions.checkArgument(null!=pkg);
+        Preconditions.checkArgument(null!=develPkg);
+
+        for(PkgLocalization pkgLocalization : pkg.getPkgLocalizations()) {
+            updatePkgLocalization(
+                    objectContext,
+                    develPkg,
+                    pkgLocalization.getNaturalLanguage(),
+                    pkgLocalization.getTitle(),
+                    pkgLocalization.getSummary() + SUFFIX_SUMMARY_DEVELOPMENT,
+                    pkgLocalization.getDescription());
+        }
+
+        for(PkgIcon pkgIcon : pkg.getPkgIcons()) {
+            try {
+                storePkgIconImage(
+                        new ByteArrayInputStream(pkgIcon.getPkgIconImage().get().getData()),
+                        pkgIcon.getMediaType(),
+                        pkgIcon.getSize(),
+                        objectContext,
+                        develPkg);
+            }
+            catch(Throwable th) {
+                LOGGER.error(
+                        "was unable to update the icon from pkg " + pkg.getName() + " to " + develPkg.getName(),
+                        th);
+            }
+        }
+
+    }
 
     /**
      * <p>This method will import the package described by the 'pkg' parameter by locating the package and
@@ -869,6 +943,22 @@ public class PkgOrchestrationService {
             persistedPkg.setActive(Boolean.TRUE);
             ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
             LOGGER.info("the package {} did not exist; will create", pkg.getName());
+
+            // if the package did not exist and is being created now and it is a "_devel" package then
+            // it is a good idea to see if there is an already existing package without the "_devel"
+            // in the name (as suffix) and copy its fallback localization.  Same applies to iconography.
+
+            if(pkg.getName().endsWith(SUFFIX_PKG_DEVELOPMENT)) {
+                String n = pkg.getName();
+
+                Optional<Pkg> rootPkgOptional = Pkg.getByName(
+                        objectContext,
+                        n.substring(0,n.length() - SUFFIX_PKG_DEVELOPMENT.length()));
+
+                if(rootPkgOptional.isPresent()) {
+                    propagateDataFromPkgToDevelPkg(objectContext, rootPkgOptional.get(), persistedPkg);
+                }
+            }
         }
         else {
 
@@ -1106,7 +1196,7 @@ public class PkgOrchestrationService {
             NaturalLanguage naturalLanguage) {
 
         Preconditions.checkArgument(null!=context);
-        Preconditions.checkArgument(null!=pkgVersion);
+        Preconditions.checkArgument(null != pkgVersion);
         ResolvedPkgVersionLocalization result = new ResolvedPkgVersionLocalization();
 
         {
@@ -1180,7 +1270,8 @@ public class PkgOrchestrationService {
             description = description.trim();
         }
 
-        Optional<PkgLocalization> pkgLocalizationOptional = PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg, naturalLanguage.getCode());
+        // was using the static method, but won't work with temporary objects.
+        Optional<PkgLocalization> pkgLocalizationOptional = pkg.getPkgLocalization(naturalLanguage);
 
         if(Strings.isNullOrEmpty(title) && Strings.isNullOrEmpty(summary) && Strings.isNullOrEmpty(description)) {
             if(pkgLocalizationOptional.isPresent()) {
@@ -1203,6 +1294,11 @@ public class PkgOrchestrationService {
         pkgLocalizationOptional.get().setTitle(title);
         pkgLocalizationOptional.get().setSummary(summary);
         pkgLocalizationOptional.get().setDescription(description);
+
+        // riding off the back of this, if there is a "_devel" package of the same name
+        // then its localization should be configured at the same time.
+
+        propagateDataFromPkgToDevelPkg(context, pkg);
 
         return pkgLocalizationOptional.get();
     }

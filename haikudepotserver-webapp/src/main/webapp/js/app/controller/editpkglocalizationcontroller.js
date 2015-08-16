@@ -82,6 +82,10 @@ angular.module('haikudepotserver').controller(
                 $scope.showHelp = true;
             };
 
+            $scope.isDevel = function() {
+                return $scope.pkg && pkg.isDevel($scope.pkg.name);
+            };
+
             $scope.goChooseTranslation = function(translation) {
                 if(!translation) {
                     throw Error('the translation must be provided to select');

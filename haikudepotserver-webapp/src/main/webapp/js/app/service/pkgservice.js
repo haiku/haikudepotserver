@@ -16,6 +16,15 @@ angular.module('haikudepotserver').factory('pkg',
             constants) {
 
             /**
+             * <p>This function will say if the package is a development package.</p>
+             * @param {string} name
+             */
+
+            function isDevel(name) {
+                return name && name.indexOf('_devel') == name.length - 6;
+            }
+
+            /**
              * <p>This function will fetch the package from the standard package version request params.</p>
              * @param {string} pkgName
              * @param {string} repositoryCode
@@ -112,6 +121,10 @@ angular.module('haikudepotserver').factory('pkg',
             return {
                 getPkgWithSpecificVersionFromRouteParams : function(routeParams, incrementCounter) {
                     return getPkgWithSpecificVersionFromRouteParams(routeParams, incrementCounter);
+                },
+
+                isDevel : function(name) {
+                    return isDevel(name);
                 }
             };
 

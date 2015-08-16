@@ -91,10 +91,11 @@ public class IntegrationTestSupportService {
         }
     }
 
-    private void addPkgIcons(ObjectContext objectContext, Pkg pkg) {
+    private void addPkgBitmapIcons(ObjectContext objectContext, Pkg pkg) {
         addPngPkgIcon(objectContext, pkg, 16);
         addPngPkgIcon(objectContext, pkg, 32);
-        addHvifPkgIcon(objectContext, pkg);
+        addPngPkgIcon(objectContext, pkg, 64);
+//        addHvifPkgIcon(objectContext, pkg);
     }
 
     public void addDummyLocalization(ObjectContext context, PkgVersion pkgVersion) {
@@ -173,7 +174,7 @@ public class IntegrationTestSupportService {
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
         addPkgScreenshot(context,result.pkg1);
-        addPkgIcons(context, result.pkg1);
+        addPkgBitmapIcons(context, result.pkg1);
 
         result.pkg1Version1x86 = context.newObject(PkgVersion.class);
         result.pkg1Version1x86.setActive(Boolean.FALSE);

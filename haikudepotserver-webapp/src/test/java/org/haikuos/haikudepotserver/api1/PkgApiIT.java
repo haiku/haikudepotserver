@@ -39,12 +39,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
     @Resource
     private PkgApi pkgApi;
 
-    @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
-
-    @Resource
-    private PkgOrchestrationService pkgService;
-
     @Test
     public void testUpdatePkgCategories() throws Exception {
 
@@ -333,8 +327,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
                         32,
                         Base64.encodeBytes(sampleHvif)),
                 new ConfigurePkgIconRequest.PkgIcon(
-                        org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE,
-                        null,
+                        MediaType.PNG.toString(),
+                        64,
                         Base64.encodeBytes(sampleHvif)));
 
         try {
@@ -355,20 +349,19 @@ public class PkgApiIT extends AbstractIntegrationTest {
         }
     }
 
-
     /**
      * <p>This test will configure the icons for the package.</p>
      */
 
     @Test
-    public void testConfigurePkgIcon_ok() throws Exception {
+    public void testConfigurePkgIcon_ok_bitmap() throws Exception {
 
         setAuthenticatedUserToRoot();
         integrationTestSupportService.createStandardTestData();
 
         byte[] sample16 = getResourceData("/sample-16x16.png");
         byte[] sample32 = getResourceData("/sample-32x32.png");
-        byte[] sampleHvif = getResourceData("/sample.hvif");
+        byte[] sample64 = getResourceData("/sample-64x64.png");
 
         ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
 
@@ -383,9 +376,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
                         32,
                         Base64.encodeBytes(sample32)),
                 new ConfigurePkgIconRequest.PkgIcon(
-                        org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE,
-                        null,
-                        Base64.encodeBytes(sampleHvif)));
+                        MediaType.PNG.toString(),
+                        64,
+                        Base64.encodeBytes(sample64)));
 
         // ------------------------------------
         pkgApi.configurePkgIcon(request);
@@ -400,11 +393,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
                     objectContext,
                     MediaType.PNG.toString()).get();
 
-            org.haikuos.haikudepotserver.dataobjects.MediaType mediaTypeHvif
-                    = org.haikuos.haikudepotserver.dataobjects.MediaType.getByCode(
-                    objectContext,
-                    org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get();
-
             Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(3);
 
             Optional<org.haikuos.haikudepotserver.dataobjects.PkgIcon> pkgIcon16Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 16);
@@ -412,6 +400,48 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
             Optional<org.haikuos.haikudepotserver.dataobjects.PkgIcon> pkgIcon32Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 32);
             Assertions.assertThat(pkgIcon32Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample32);
+
+            Optional<org.haikuos.haikudepotserver.dataobjects.PkgIcon> pkgIcon64Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 64);
+            Assertions.assertThat(pkgIcon64Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample64);
+        }
+    }
+
+
+    /**
+     * <p>This test will configure the icons for the package.</p>
+     */
+
+    @Test
+    public void testConfigurePkgIcon_ok_hvif() throws Exception {
+
+        setAuthenticatedUserToRoot();
+        integrationTestSupportService.createStandardTestData();
+
+        byte[] sampleHvif = getResourceData("/sample.hvif");
+
+        ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
+
+        request.pkgName = "pkg1";
+        request.pkgIcons = Collections.singletonList(
+                new ConfigurePkgIconRequest.PkgIcon(
+                        org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE,
+                        null,
+                        Base64.encodeBytes(sampleHvif)));
+
+        // ------------------------------------
+        pkgApi.configurePkgIcon(request);
+        // ------------------------------------
+
+        {
+            ObjectContext objectContext = serverRuntime.getContext();
+            Optional<Pkg> pkgOptionalafter = Pkg.getByName(objectContext, "pkg1");
+
+            org.haikuos.haikudepotserver.dataobjects.MediaType mediaTypeHvif
+                    = org.haikuos.haikudepotserver.dataobjects.MediaType.getByCode(
+                    objectContext,
+                    org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get();
+
+            Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(1);
 
             Optional<org.haikuos.haikudepotserver.dataobjects.PkgIcon> pkgIconHvifOptional = pkgOptionalafter.get().getPkgIcon(mediaTypeHvif, null);
             Assertions.assertThat(pkgIconHvifOptional.get().getPkgIconImage().get().getData()).isEqualTo(sampleHvif);
@@ -721,7 +751,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(pkg1.pkgIcons.size()).isEqualTo(3);
         Assertions.assertThat(pkg1.pkgIcons
                         .stream()
-                        .filter(pi -> pi.mediaTypeCode.equals(org.haikuos.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE))
+                        .filter(pi -> pi.mediaTypeCode.equals(MediaType.PNG.toString()))
                         .findFirst().isPresent()).isTrue();
 
         Assertions.assertThat(pkg1.versions.size()).isEqualTo(1);

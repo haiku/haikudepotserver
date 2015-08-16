@@ -10,6 +10,7 @@ import org.fest.assertions.Assertions;
 import org.haikuos.haikudepotserver.AbstractIntegrationTest;
 import org.haikuos.haikudepotserver.IntegrationTestSupportService;
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -39,7 +40,7 @@ public class PkgIconControllerIT extends AbstractIntegrationTest {
     @Test
     public void testGet() throws Exception {
 
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createStandardTestData();
         byte[] imageData = getIconData();
 
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -53,8 +54,13 @@ public class PkgIconControllerIT extends AbstractIntegrationTest {
                 true);
         // -----------------------------------
 
+        Assertions.assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         Assertions.assertThat(response.getContentType()).isEqualTo(MediaType.PNG.toString());
-        Assertions.assertThat(response.getContentAsByteArray()).isEqualTo(imageData);
+
+        byte[] responseBytes = response.getContentAsByteArray();
+
+        Assertions.assertThat(responseBytes.length).isEqualTo(imageData.length);
+        Assertions.assertThat(responseBytes).isEqualTo(imageData);
 
     }
 

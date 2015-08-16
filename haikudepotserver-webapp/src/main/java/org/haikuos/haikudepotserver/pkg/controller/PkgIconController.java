@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Optional;
 
 /**
@@ -172,7 +173,9 @@ public class PkgIconController extends AbstractController {
                     response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
 
                     if(requestMethod == RequestMethod.GET) {
-                        response.getOutputStream().write(data);
+                        OutputStream outputStream = response.getOutputStream();
+                        outputStream.write(data);
+                        outputStream.flush();
                     }
                 }
                 break;
