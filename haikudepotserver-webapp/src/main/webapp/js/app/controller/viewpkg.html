@@ -46,7 +46,10 @@
                     <img src="/img/newwindow.svg" img-downgrade="">
                 </a>
             </div>
-            <img ng-src="{{pkgScreenshot.imageThumbnailUrl}}">
+            <img
+                    width="{{pkgScreenshot.thumbnailWidth}}"
+                    height="{{pkgScreenshot.thumbnailHeight}}"
+                    ng-src="{{pkgScreenshot.imageThumbnailUrl}}">
         </div>
 
     </div>

@@ -20,9 +20,9 @@ angular.module('haikudepotserver').controller(
             var MAXLINES_USERRATING_COMMENT = 4;
             var PAGESIZE_USERRATING = 12;
 
+            var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
             var SCREENSHOT_THUMBNAIL_TARGETWIDTH = 320;
             var SCREENSHOT_THUMBNAIL_TARGETHEIGHT = 240;
-            var SCREENSHOT_MAX_TARGETHEIGHT = 1500;
 
             $scope.didDeriveAndStoreUserRating = false;
             $scope.didDeriveAndStoreUserRatingTimeout = undefined;
@@ -353,14 +353,29 @@ angular.module('haikudepotserver').controller(
                     [{ pkgName: $scope.pkg.name }]
                 ).then(
                     function(result) {
+
+                        var factor = window.devicePixelRatio ? window.devicePixelRatio : 1.0;
+
                         $scope.pkgScreenshots = _.map(result.items, function(item) {
+
+                            var scale = Math.min(
+                                SCREENSHOT_THUMBNAIL_TARGETWIDTH / item.width,
+                                SCREENSHOT_THUMBNAIL_TARGETHEIGHT / item.height);
+
+                            var adjustedThumbnailWidth = Math.floor(scale * item.width);
+                            var adjustedThumbnailHeight = Math.floor(scale * item.height);
+                            var adjustedThumbnailBitmapWidth = Math.floor(adjustedThumbnailWidth * factor);
+                            var adjustedThumbnailBitmapHeight = Math.floor(adjustedThumbnailHeight * factor);
+
                             return {
                                 code : item.code,
+                                thumbnailWidth: adjustedThumbnailWidth,
+                                thumbnailHeight: adjustedThumbnailHeight,
                                 imageThumbnailUrl : pkgScreenshot.url(
                                     $scope.pkg,
                                     item.code,
-                                    SCREENSHOT_THUMBNAIL_TARGETWIDTH,
-                                    SCREENSHOT_THUMBNAIL_TARGETHEIGHT),
+                                    adjustedThumbnailBitmapWidth,
+                                    adjustedThumbnailBitmapHeight),
                                 imageDownloadUrl : pkgScreenshot.rawUrl(
                                     $scope.pkg,
                                     item.code),

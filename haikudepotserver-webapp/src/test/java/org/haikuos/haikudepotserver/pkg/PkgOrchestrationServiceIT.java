@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
-import javax.print.DocFlavor;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
