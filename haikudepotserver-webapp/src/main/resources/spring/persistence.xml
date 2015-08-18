@@ -89,8 +89,18 @@
     </bean>
 
     <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_USER_RATING_AGGREGATE.name()}"/>
+        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.PkgUserRatingAggregate"/>
+    </bean>
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
         <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG.name()}"/>
         <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.Pkg"/>
+    </bean>
+
+    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).REPOSITORY.name()}"/>
+        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.Repository"/>
     </bean>
 
     <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">

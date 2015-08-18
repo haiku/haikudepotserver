@@ -35,9 +35,6 @@ public class QueryCacheRemoveGroupListener implements LifecycleListener {
     @Resource
     private ServerRuntime serverRuntime;
 
-    @Resource
-    private QueryCacheRemoveGroupDataChannelFilter dataChannelFilter;
-
     private List<String> groups;
 
     private List<Class<CayenneDataObject>> entityClasses;

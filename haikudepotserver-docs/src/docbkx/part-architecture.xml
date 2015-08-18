@@ -107,6 +107,19 @@ Distributed under the terms of the MIT License.
             </para>
 
             <section>
+                <title>Cayenne Query Caches</title>
+
+                <para>
+                    Caching data uses the Cayenne query caches.  These are defined on the
+                    &quot;HaikuDepot#CacheGroup&quot; enum and are used in various Cayenne queries.  An example
+                    would be on &quot;PkgIconImage#findForPkg(..)&quot;.  The caches are cleared by listening for
+                    any change on the entity by using a listener.  These are configured as Spring beans in the
+                    &quot;persistence.xml&quot; file.  This is fairly liberal cache eviction, but will work well
+                    for the time being.
+                </para>
+            </section>
+
+            <section>
                 <title>Migration</title>
 
                 <para>

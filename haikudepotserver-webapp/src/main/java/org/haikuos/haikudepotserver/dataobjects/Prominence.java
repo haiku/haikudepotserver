@@ -23,7 +23,7 @@ public class Prominence extends _Prominence {
 
     public static Optional<Prominence> getByOrdering(ObjectContext context, Integer ordering) {
         Preconditions.checkNotNull(context);
-        Preconditions.checkState(null!=ordering && ordering >= 0);
+        Preconditions.checkState(null != ordering && ordering >= 0);
         return ((List<Prominence>) context.performQuery(new SelectQuery(
                         Prominence.class,
                         ExpressionFactory.matchExp(Prominence.ORDERING_PROPERTY, ordering)))).stream().collect(SingleCollector.optional());

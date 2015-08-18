@@ -14,7 +14,9 @@ public class HaikuDepot extends _HaikuDepot {
         PKG_LOCALIZATION,
         PKG_ICON,
         PKG,
+        PKG_USER_RATING_AGGREGATE,
         USER,
+        REPOSITORY,
         NATURAL_LANGUAGE
     }
 

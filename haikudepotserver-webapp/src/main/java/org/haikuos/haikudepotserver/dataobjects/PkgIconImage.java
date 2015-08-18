@@ -32,18 +32,4 @@ public class PkgIconImage extends _PkgIconImage {
         return (List<PkgIconImage>) context.performQuery(query);
     }
 
-    public static Optional<PkgIconImage> getForPkg(
-            ObjectContext context,
-            Pkg pkg,
-            final MediaType mediaType,
-            final Integer size) {
-
-        Preconditions.checkArgument(null != mediaType, "the media type must be provided");
-
-        return findForPkg(context, pkg).stream().filter(pii ->
-                pii.getPkgIcon().getMediaType().equals(mediaType) &&
-                Objects.equals(pii.getPkgIcon().getSize(), size)).findFirst();
-
-    }
-
 }

@@ -176,7 +176,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public SearchPkgsResult searchPkgs(final SearchPkgsRequest request) throws ObjectNotFoundException {
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(null!=request.architectureCodes && !request.architectureCodes.isEmpty(),"architecture codes must be supplied and at least one is required");
+        Preconditions.checkState(null != request.architectureCodes && !request.architectureCodes.isEmpty(), "architecture codes must be supplied and at least one is required");
         Preconditions.checkState(null!=request.repositoryCodes && !request.repositoryCodes.isEmpty(),"repository codes must be supplied and at least one is required");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkNotNull(request.limit);
@@ -218,7 +218,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         SearchPkgsResult result = new SearchPkgsResult();
 
-        List<PkgVersion> searchedPkgVersions = pkgService.search(context,specification);
+        List<PkgVersion> searchedPkgVersions = pkgService.search(context, specification);
 
         // if there are more than we asked for then there must be more available.
 
@@ -226,7 +226,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.items = searchedPkgVersions
                 .stream()
                 .map(spv -> {
-                    Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional = spv.getPkg().getPkgUserRatingAggregate(spv.getRepositorySource().getRepository());
+                    Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional =
+                            PkgUserRatingAggregate.getByPkgAndRepository(
+                                    context,
+                                    spv.getPkg(),
+                                    spv.getRepositorySource().getRepository());
 
                     SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
                     resultPkg.name = spv.getPkg().getName();
@@ -841,7 +845,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException {
         Preconditions.checkArgument(null != getPkgLocalizationsRequest, "a request is required");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgLocalizationsRequest.pkgName), "a package name is required");
-        Preconditions.checkArgument(null!=getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
+        Preconditions.checkArgument(null != getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
 
         final ObjectContext context = serverRuntime.getContext();
         Pkg pkg = getPkg(context, getPkgLocalizationsRequest.pkgName);
@@ -960,22 +964,26 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         resultPkg.modifyTimestamp = pkgVersion.getPkg().getModifyTimestamp().getTime();
         resultPkg.name = pkgVersion.getPkg().getName();
 
-        resultPkg.prominenceOrdering = pkgVersion
-                .getPkg()
+        Pkg pkg = pkgVersion.getPkg();
+
+        resultPkg.prominenceOrdering = pkg
                 .getPkgProminence(pkgVersion.getRepositorySource().getRepository())
                 .map(pp -> pp.getProminence().getOrdering())
                 .orElse(null);
 
-        resultPkg.derivedRating = pkgVersion
-                .getPkg()
-                .getPkgUserRatingAggregate(pkgVersion.getRepositorySource().getRepository())
-                .map(PkgUserRatingAggregate::getDerivedRating)
+        resultPkg.derivedRating =
+                PkgUserRatingAggregate.getByPkgAndRepository(
+                        context,
+                        pkg, pkgVersion.getRepositorySource().getRepository())
+                .map(pkgUserRatingAggregate -> pkgUserRatingAggregate.getDerivedRating())
                 .orElse(null);
 
         if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
-            resultPkg.pkgIcons = pkgVersion.getPkg().getPkgIcons()
+            resultPkg.pkgIcons = PkgIconImage.findForPkg(context, pkg)
                     .stream()
-                    .map(pi -> new org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon(pi.getMediaType().getCode(),pi.getSize()))
+                    .map(pii -> new org.haikuos.haikudepotserver.api1.model.pkg.PkgIcon(
+                            pii.getPkgIcon().getMediaType().getCode(),
+                            pii.getPkgIcon().getSize()))
                     .collect(Collectors.toList());
         }
 
@@ -1056,7 +1064,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             searchSpecification.setLimit(Integer.MAX_VALUE);
 
             long preFetchMs = System.currentTimeMillis();
+
+            // TODO; cause the sub-data such as the package and the other subordinate data to be pre-fetched to avoid excessive small faults.
+
             final List<PkgVersion> pkgVersions = pkgService.search(context, searchSpecification);
+
             long postFetchMs = System.currentTimeMillis();
 
             // now return the data as necessary.

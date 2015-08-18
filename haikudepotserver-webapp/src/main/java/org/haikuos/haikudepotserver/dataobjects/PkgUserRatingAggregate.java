@@ -8,19 +8,34 @@ package org.haikuos.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haikuos.haikudepotserver.dataobjects.auto._PkgUserRatingAggregate;
+import org.haikuos.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PkgUserRatingAggregate extends _PkgUserRatingAggregate {
+
+    public static Optional<PkgUserRatingAggregate> getByPkgAndRepository(
+            ObjectContext context,
+            Pkg pkg,
+            Repository repository) {
+        return findByPkg(context, pkg)
+                .stream()
+                .filter(pura -> pura.getRepository().equals(repository))
+                .collect(SingleCollector.optional());
+    }
 
     public static List<PkgUserRatingAggregate> findByPkg(ObjectContext context, Pkg pkg) {
         Preconditions.checkNotNull(context);
         Preconditions.checkArgument(null != pkg, "a package is required to identify the pkg user rating aggregates to return");
         SelectQuery query = new SelectQuery(PkgUserRatingAggregate.class, ExpressionFactory.matchExp(PKG_PROPERTY, pkg));
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
+        query.setCacheGroups(HaikuDepot.CacheGroup.PKG_USER_RATING_AGGREGATE.name());
         return (List<PkgUserRatingAggregate>) context.performQuery(query);
     }
 

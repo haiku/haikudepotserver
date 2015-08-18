@@ -9,6 +9,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectIdQuery;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
@@ -36,10 +37,14 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
         return ((List<Repository>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
     }
 
+    // This approach of getting them all and then filtering them may not work if there are
+    // quite a large number of repositories, but this eventuality is unlikely.
+
     public static Optional<Repository> getByCode(ObjectContext context, String code) {
-        return ((List<Repository>) context.performQuery(new SelectQuery(
-                    Repository.class,
-                    ExpressionFactory.matchExp(Repository.CODE_PROPERTY, code)))).stream().collect(SingleCollector.optional());
+        return getAll(context)
+                .stream()
+                .filter(r -> r.getCode().equals(code))
+                .collect(SingleCollector.optional());
     }
 
     /**
@@ -47,9 +52,14 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
      */
 
     public static List<Repository> getAll(ObjectContext context) {
-        return context.performQuery(new SelectQuery(
+        SelectQuery query = new SelectQuery(
                 Repository.class,
-                ExpressionFactory.matchExp(Repository.ACTIVE_PROPERTY, Boolean.TRUE)));
+                ExpressionFactory.matchExp(Repository.ACTIVE_PROPERTY, Boolean.TRUE));
+
+        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
+        query.setCacheGroups(HaikuDepot.CacheGroup.REPOSITORY.name());
+
+        return context.performQuery(query);
     }
 
     @Override
