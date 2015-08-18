@@ -12,7 +12,7 @@
     Cayenne logs quite a bit of material out; best to turn that quantity of logging down a bit.
     -->
 
-    <logger name="org.apache.cayenne" level="warn"/>
+    <logger name="org.apache.cayenne" level="info"/>
     <logger name="com.googlecode.flyway" level="warn"/>
     <logger name="org.haikuos.haikudepotserver.pkg.search" level="info"/>
 

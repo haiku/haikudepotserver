@@ -9,9 +9,11 @@
  */
 
 angular.module('haikudepotserver').directive('pkgCategoryLabel',[
-    '$log',
-    'messageSource','userState','breadcrumbFactory',
-    function($log,messageSource,userState,breadcrumbFactory) {
+    '$log','$rootScope',
+    'messageSource','userState','breadcrumbFactory','breadcrumbs',
+    function(
+        $log,$rootScope,
+        messageSource,userState,breadcrumbFactory,breadcrumbs) {
         return {
             restrict: 'E',
             link: function ($scope, element, attributes) {
@@ -34,14 +36,23 @@ angular.module('haikudepotserver').directive('pkgCategoryLabel',[
                         // set to this category.
 
                         if(shouldLink) {
-                            var fullUrl = breadcrumbFactory.toFullPath(
-                                breadcrumbFactory.createHome({
-                                    pkgcat: newValue.code,
-                                    viewcrttyp: 'CATEGORIES'
-                                })
-                            );
+                            var breadcrumbItem = breadcrumbFactory.createHome({
+                                pkgcat: newValue.code,
+                                viewcrttyp: 'CATEGORIES'
+                            });
 
-                            el.attr('href', fullUrl);
+                            el.on('click', function(event) {
+
+                                event.preventDefault();
+
+                                $scope.$apply(function() {
+                                    breadcrumbs.resetAndNavigate([breadcrumbItem]);
+                                    $rootScope.$broadcast('didResetToHome');
+                                });
+
+                            });
+
+                            el.attr('href', breadcrumbFactory.toFullPath(breadcrumbItem));
                         }
 
                         messageSource.get(
