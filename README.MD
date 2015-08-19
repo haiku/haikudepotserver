@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This web application is an online tool for working with the software packages of the [Haiku operating system](https://www.haiku-os.org/).  The web application aims to provide the following functionality:
+This web application is an online tool for working with the software packages of the [Haiku operating system](https://www.haiku-os.org).  The web application aims to provide the following functionality:
 
 * An internet-accessible catalog of the packages.
 * A repository of _additional data_ related to packages that is not included in the standard package format - such as;
@@ -17,8 +17,8 @@ This web application is an online tool for working with the software packages of
 
 | Environment | Modern Web | Simple Web |
 | --- | --- | --- |
-| Production | https://depot.haiku-os.org/ | https://depot.haiku-os.org/multipage |
-| Test | https://depot-test.haiku-os.org/ | https://depot-test.haiku-os.org/multipage |
+| Production | https://depot.haiku-os.org | https://depot.haiku-os.org/multipage |
+| Test | https://depot-test.haiku-os.org | https://depot-test.haiku-os.org/multipage |
 
 ## Mailing List
 
@@ -31,7 +31,7 @@ Assuming the application server is deployed, you should be able to see relativel
 
 ## Other Helpful Resources
 
-* [Haiku homepage](http://www.haiku-os.org/)
-* [HaikuPorts homepage](http://bb.haikuports.org/haikuports/wiki/Home) (for external packages)
+* [Haiku homepage](http://www.haiku-os.org)
+* [HaikuPorts homepage](https://github.com/haikuports/haikuports/wiki) (for external packages)
 * Haiku [package management documentation](http://dev.haiku-os.org/wiki/PackageManagement)
 * [Usage help](https://dev.haiku-os.org/wiki/PackageManagement/HaikuDepotServer)
