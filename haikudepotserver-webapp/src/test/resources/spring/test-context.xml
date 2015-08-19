@@ -6,16 +6,16 @@
 
     <import resource="general.xml"/>
 
-    <bean class="org.haikuos.haikudepotserver.IntegrationTestSupportService"/>
-    <bean class="org.haikuos.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
-    <bean class="org.haikuos.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
-    <bean id="mailSender" class="org.haikuos.haikudepotserver.CapturingMailSender"/>
+    <bean class="org.haiku.haikudepotserver.IntegrationTestSupportService"/>
+    <bean class="org.haiku.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
+    <bean class="org.haiku.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
+    <bean id="mailSender" class="org.haiku.haikudepotserver.CapturingMailSender"/>
 
-    <bean class="org.haikuos.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
+    <bean class="org.haiku.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
           init-method="startAsyncAndAwaitRunning"
           destroy-method="stopAsyncAndAwaitTerminated">
         <property name="jobDataStorageService">
-            <bean class="org.haikuos.haikudepotserver.job.LocalJobDataStorageServiceImpl"></bean>
+            <bean class="org.haiku.haikudepotserver.job.LocalJobDataStorageServiceImpl"></bean>
         </property>
     </bean>
 

@@ -3,7 +3,7 @@
 
     <parent>
         <artifactId>haikudepotserver-parent</artifactId>
-        <groupId>org.haikuos</groupId>
+        <groupId>org.haiku</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
         <version>1.0.50-SNAPSHOT</version>
     </parent>
@@ -54,8 +54,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <name>haikudepotserver${rpm.variant}</name>
-                    <group>haikuos</group>
-                    <packager>haikuos</packager>
+                    <group>haiku</group>
+                    <packager>haiku</packager>
                     <version>${project.version}</version>
                     <copyright>MIT</copyright>
                     <defineStatements>
@@ -144,7 +144,7 @@
                             <groupname>haikudepotserver${rpm.variant}</groupname>
                             <dependency>
                                 <includes>
-                                    <include>org.haikuos:haikudepotserver-webapp</include>
+                                    <include>org.haiku:haikudepotserver-webapp</include>
                                 </includes>
                                 <stripVersion>true</stripVersion>
                             </dependency>

@@ -69,10 +69,10 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.googlecode.jsonrpc4j.ErrorResolver.JsonError;
-import org.haikuos.haikudepotserver.api1.support.AuthorizationFailureException;
-import org.haikuos.haikudepotserver.api1.support.CaptchaBadResponseException;
-import org.haikuos.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haikuos.haikudepotserver.api1.support.ValidationException;
+import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
+import org.haiku.haikudepotserver.api1.support.CaptchaBadResponseException;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api1.support.ValidationException;
 
 /**
  * A JSON-RPC request server reads JSON-RPC requests from an

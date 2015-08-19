@@ -23,14 +23,14 @@
     This manages database migrations (upgrades)
     -->
 
-    <bean class="org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase" init-method="init">
+    <bean class="org.haiku.haikudepotserver.support.db.migration.ManagedDatabase" init-method="init">
         <property name="dataSource" ref="dataSource"/>
         <property name="migrate" value="${flyway.migrate}"/>
         <property name="schema" value="haikudepot"/>
         <property name="validateOnMigrate" value="${flyway.validateOnMigrate:true}"/>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.db.migration.ManagedDatabase" init-method="init">
+    <bean class="org.haiku.haikudepotserver.support.db.migration.ManagedDatabase" init-method="init">
         <property name="dataSource" ref="dataSource"/>
         <property name="migrate" value="${flyway.migrate}"/>
         <property name="schema" value="captcha"/>
@@ -45,10 +45,10 @@
         <constructor-arg index="0" value="cayenne-haikudepotserver.xml"/>
         <constructor-arg index="1">
             <list>
-                <bean class="org.haikuos.haikudepotserver.support.cayenne.ConfigureDataSourceModule">
+                <bean class="org.haiku.haikudepotserver.support.cayenne.ConfigureDataSourceModule">
                     <property name="dataSource" ref="dataSource"/>
                 </bean>
-                <bean class="org.haikuos.haikudepotserver.support.cayenne.ConfigureCachingModule">
+                <bean class="org.haiku.haikudepotserver.support.cayenne.ConfigureCachingModule">
                     <property name="queryCacheSize" value="${cayenne.query.cache.size:250}"></property>
                 </bean>
             </list>
@@ -59,7 +59,7 @@
     LDAP
     -->
 
-    <bean class="org.haikuos.haikudepotserver.support.ldap.LdapConnectionPoolFactory">
+    <bean class="org.haiku.haikudepotserver.support.ldap.LdapConnectionPoolFactory">
         <property name="host" value="${ldap.host:}"/>
         <property name="port" value="${ldap.port:}"/>
         <property name="userDn" value="${ldap.user.dn:}"/>
@@ -71,56 +71,56 @@
     will keep track of which query cache groups are to be dropped.
     -->
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter"/>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).NATURAL_LANGUAGE.name()}"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).NATURAL_LANGUAGE.name()}"/>
         <property name="entityClasses">
             <list>
-                <value>org.haikuos.haikudepotserver.dataobjects.UserRating</value>
-                <value>org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization</value>
+                <value>org.haiku.haikudepotserver.dataobjects.UserRating</value>
+                <value>org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization</value>
             </list>
         </property>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).USER.name()}"/>
-        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.User"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).USER.name()}"/>
+        <property name="entityClass" value="org.haiku.haikudepotserver.dataobjects.User"/>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_USER_RATING_AGGREGATE.name()}"/>
-        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.PkgUserRatingAggregate"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_USER_RATING_AGGREGATE.name()}"/>
+        <property name="entityClass" value="org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate"/>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG.name()}"/>
-        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.Pkg"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG.name()}"/>
+        <property name="entityClass" value="org.haiku.haikudepotserver.dataobjects.Pkg"/>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).REPOSITORY.name()}"/>
-        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.Repository"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).REPOSITORY.name()}"/>
+        <property name="entityClass" value="org.haiku.haikudepotserver.dataobjects.Repository"/>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="groups" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_ICON.name()}"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="groups" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_ICON.name()}"/>
         <property name="entityClasses">
             <list>
-                <value>org.haikuos.haikudepotserver.dataobjects.PkgIcon</value>
-                <value>org.haikuos.haikudepotserver.dataobjects.PkgIconImage</value>
+                <value>org.haiku.haikudepotserver.dataobjects.PkgIcon</value>
+                <value>org.haiku.haikudepotserver.dataobjects.PkgIconImage</value>
             </list>
         </property>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_LOCALIZATION.name()}"/>
-        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.PkgLocalization"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_LOCALIZATION.name()}"/>
+        <property name="entityClass" value="org.haiku.haikudepotserver.dataobjects.PkgLocalization"/>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
-        <property name="group" value="#{T(org.haikuos.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_VERSION_LOCALIZATION.name()}"/>
-        <property name="entityClass" value="org.haikuos.haikudepotserver.dataobjects.PkgVersionLocalization"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
+        <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).PKG_VERSION_LOCALIZATION.name()}"/>
+        <property name="entityClass" value="org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization"/>
     </bean>
 
 </beans>

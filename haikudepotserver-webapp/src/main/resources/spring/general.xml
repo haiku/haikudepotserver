@@ -8,9 +8,9 @@
 
     <context:annotation-config/>
 
-    <context:component-scan base-package="org.haikuos.haikudepotserver">
+    <context:component-scan base-package="org.haiku.haikudepotserver">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-        <context:exclude-filter type="regex" expression="org\.haikuos\.haikudepotserver\.api.*"/>
+        <context:exclude-filter type="regex" expression="org\.haiku\.haikudepotserver\.api.*"/>
     </context:component-scan>
 
     <import resource="properties.xml"/>
@@ -21,40 +21,40 @@
     <!--
     This should only need to be directly accessed for the purposes of integration testing.
     -->
-    <bean id="captchaRepository" class="org.haikuos.haikudepotserver.captcha.DatabaseCaptchaRepository">
+    <bean id="captchaRepository" class="org.haiku.haikudepotserver.captcha.DatabaseCaptchaRepository">
         <property name="serverRuntime" ref="haikuDepotServerRuntime"/>
         <property name="expirySeconds" value="${captcha.expiryseconds:120}"/>
     </bean>
 
-    <bean class="org.haikuos.haikudepotserver.captcha.CaptchaService">
+    <bean class="org.haiku.haikudepotserver.captcha.CaptchaService">
         <property name="captchaAlgorithm">
-            <bean class="org.haikuos.haikudepotserver.captcha.SimpleMathProblemCaptchaAlgorithm"/>
+            <bean class="org.haiku.haikudepotserver.captcha.SimpleMathProblemCaptchaAlgorithm"/>
         </property>
         <property name="captchaRepository" ref="captchaRepository"/>
     </bean>
 
     <!-- SECURITY -->
 
-    <bean id="authenticationFilter" class="org.haikuos.haikudepotserver.security.AuthenticationFilter"/>
+    <bean id="authenticationFilter" class="org.haiku.haikudepotserver.security.AuthenticationFilter"/>
 
     <!-- LOGGING -->
 
-    <bean id="loggingFilter" class="org.haikuos.haikudepotserver.support.logging.LoggingFilter"/>
-    <bean class="org.haikuos.haikudepotserver.support.logging.LoggingSetupOrchestration" init-method="init"/>
+    <bean id="loggingFilter" class="org.haiku.haikudepotserver.support.logging.LoggingFilter"/>
+    <bean class="org.haiku.haikudepotserver.support.logging.LoggingSetupOrchestration" init-method="init"/>
 
     <!-- SUNDRY -->
 
-    <bean class="org.haikuos.haikudepotserver.support.png.PngOptimizationServiceFactory"/>
-    <bean class="org.haikuos.haikudepotserver.support.hvif.HvifRenderingServiceFactory"/>
-    <bean class="org.haikuos.haikudepotserver.support.RuntimeInformationService"/>
+    <bean class="org.haiku.haikudepotserver.support.png.PngOptimizationServiceFactory"/>
+    <bean class="org.haiku.haikudepotserver.support.hvif.HvifRenderingServiceFactory"/>
+    <bean class="org.haiku.haikudepotserver.support.RuntimeInformationService"/>
     <bean
             id="desktopApplicationMinimumVersionFilter"
-            class="org.haikuos.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter"/>
+            class="org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter"/>
 
     <!-- JOBS -->
 
-    <bean class="org.haikuos.haikudepotserver.repository.PkgRepositoryImportJobRunner"/>
-    <bean class="org.haikuos.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.repository.PkgRepositoryImportJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner"/>
 
     <!-- OPEN SEARCH -->
 
@@ -62,7 +62,7 @@
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="localizedLookup" value="false"/>
         <property name="templateLoader">
-            <bean class="org.haikuos.haikudepotserver.support.freemarker.LocalizedTemplateLoader">
+            <bean class="org.haiku.haikudepotserver.support.freemarker.LocalizedTemplateLoader">
                 <property name="base" value="classpath:/opensearch/"/>
             </bean>
         </property>
@@ -74,7 +74,7 @@
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="localizedLookup" value="false"/>
         <property name="templateLoader">
-            <bean class="org.haikuos.haikudepotserver.support.freemarker.LocalizedTemplateLoader">
+            <bean class="org.haiku.haikudepotserver.support.freemarker.LocalizedTemplateLoader">
                 <property name="base" value="classpath:/mail/"/>
             </bean>
         </property>
@@ -107,11 +107,11 @@
 
     <bean
             id="singlePageTemplateFrequencyMetrics"
-            class="org.haikuos.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics"/>
+            class="org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics"/>
 
     <bean
             id="singlePageTemplateFrequencyMetricsFilter"
-            class="org.haikuos.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetricsFilter">
+            class="org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetricsFilter">
         <property name="metrics" ref="singlePageTemplateFrequencyMetrics"></property>
     </bean>
 

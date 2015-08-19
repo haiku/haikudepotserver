@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-// WebPositive, the browser for HaikuOS informs the Modernizr that it is able to handle SVG,
+// WebPositive, the browser for Haiku informs the Modernizr that it is able to handle SVG,
 // but it is not able to.  Detect WebPositive and force Modernizr to not support SVG.
 
 (function() {

@@ -1,18 +1,18 @@
 # This LDIF file contains the instructions to setup the LDAP server for use with HDS.
 
-dn: ou=people,dc=haiku-os,dc=org
+dn: ou=people,dc=haiku,dc=org
 changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: people
 
-dn: ou=services,dc=haiku-os,dc=org
+dn: ou=services,dc=haiku,dc=org
 changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: services
 
-dn: cn=haikudepotserver,ou=services,dc=haiku-os,dc=org
+dn: cn=haikudepotserver,ou=services,dc=haiku,dc=org
 changetype: add
 objectClass: uidObject
 objectClass: top

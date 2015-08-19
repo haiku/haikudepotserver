@@ -9,7 +9,7 @@
 
     <servlet>
         <servlet-name>error-servlet</servlet-name>
-        <servlet-class>org.haikuos.haikudepotserver.support.web.ErrorServlet</servlet-class>
+        <servlet-class>org.haiku.haikudepotserver.support.web.ErrorServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -18,7 +18,7 @@
         <servlet-class>net.jawr.web.servlet.JawrServlet</servlet-class>
         <init-param>
             <param-name>configPropertiesSourceClass</param-name>
-            <param-value>org.haikuos.haikudepotserver.support.web.SpringProvidedConfigPropertiesSource</param-value>
+            <param-value>org.haiku.haikudepotserver.support.web.SpringProvidedConfigPropertiesSource</param-value>
         </init-param>
         <init-param>
             <param-name>mapping</param-name>
@@ -36,7 +36,7 @@
         <servlet-class>net.jawr.web.servlet.JawrServlet</servlet-class>
         <init-param>
             <param-name>configPropertiesSourceClass</param-name>
-            <param-value>org.haikuos.haikudepotserver.support.web.SpringProvidedConfigPropertiesSource</param-value>
+            <param-value>org.haiku.haikudepotserver.support.web.SpringProvidedConfigPropertiesSource</param-value>
         </init-param>
         <init-param>
             <param-name>mapping</param-name>
@@ -89,7 +89,7 @@
     </listener>
 
     <listener>
-        <listener-class>org.haikuos.haikudepotserver.support.web.SessionListener</listener-class>
+        <listener-class>org.haiku.haikudepotserver.support.web.SessionListener</listener-class>
     </listener>
 
     <filter>

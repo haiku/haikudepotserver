@@ -6,15 +6,15 @@
 
     <import resource="general.xml"/>
 
-    <bean class="org.haikuos.haikudepotserver.IntegrationTestSupportService"/>
-    <bean class="org.haikuos.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
-    <bean class="org.haikuos.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
-    <bean id="mailSender" class="org.haikuos.haikudepotserver.CapturingMailSender"/>
+    <bean class="org.haiku.haikudepotserver.IntegrationTestSupportService"/>
+    <bean class="org.haiku.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
+    <bean class="org.haiku.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
+    <bean id="mailSender" class="org.haiku.haikudepotserver.CapturingMailSender"/>
 
     <!--
     Artificial job orchestration service that has some known fake jobs in known states.
     -->
 
-    <bean class="org.haikuos.haikudepotserver.job.TestJobOrchestrationServiceImpl"/>
+    <bean class="org.haiku.haikudepotserver.job.TestJobOrchestrationServiceImpl"/>
 
 </beans>

@@ -42,7 +42,7 @@ Distributed under the terms of the MIT License.
     <section xml:id="overview-icon">
         <title>Icon</title>
         <para>
-            The icon for this project has been copied from the HaikuDepot application in the Haiku-OS source code
+            The icon for this project has been copied from the HaikuDepot application in the Haiku source code
             repository and converted into SVG and PDF where appropriate.  Details of this are in the
             &quot;haikudepotserver-webapp&quot; project as a &quot;README.TXT&quot; file.
         </para>
@@ -167,7 +167,7 @@ apt-get install postgresql postgresql-client</programlisting>
                 <orderedlist numeration="arabic">
                     <listitem>
                         Edit the &quot;example&quot; partition to be &quot;hikudepotserver&quot; and change the suffix
-                        to be &quot;dc=haiku-os,dc=org&quot;.
+                        to be &quot;dc=haiku,dc=org&quot;.
                     </listitem>
                     <listitem>Disallow anonymous access</listitem>
                     <listitem>Disable password policy</listitem>

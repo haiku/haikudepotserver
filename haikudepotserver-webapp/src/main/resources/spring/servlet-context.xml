@@ -10,11 +10,11 @@
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
-    <context:component-scan base-package="org.haikuos.haikudepotserver">
+    <context:component-scan base-package="org.haiku.haikudepotserver">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
-        <context:exclude-filter type="regex" expression="org\.haikuos\.haikudepotserver\.support\.cayenne\..*"/>
+        <context:exclude-filter type="regex" expression="org\.haiku\.haikudepotserver\.support\.cayenne\..*"/>
     </context:component-scan>
 
     <mvc:annotation-driven/>
@@ -38,7 +38,7 @@
         </property>
     </bean>
 
-    <bean id="localeResolver" class="org.haikuos.haikudepotserver.multipage.MultipageLocaleResolver"/>
+    <bean id="localeResolver" class="org.haiku.haikudepotserver.multipage.MultipageLocaleResolver"/>
 
 <!--
 The presence of this will get the JSON-RPC APIs activated without needing
@@ -47,10 +47,10 @@ to do it manually.
 
     <bean class="com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceExporter">
         <property name="errorResolver">
-            <bean class="org.haikuos.haikudepotserver.api1.support.ErrorResolverImpl"/>
+            <bean class="org.haiku.haikudepotserver.api1.support.ErrorResolverImpl"/>
         </property>
         <property name="objectMapper">
-            <bean class="org.haikuos.haikudepotserver.api1.support.ObjectMapperFactory"/>
+            <bean class="org.haiku.haikudepotserver.api1.support.ObjectMapperFactory"/>
         </property>
     </bean>
 

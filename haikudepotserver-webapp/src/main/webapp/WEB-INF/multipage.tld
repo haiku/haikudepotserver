@@ -7,7 +7,7 @@
 
     <tag>
         <name>paginationLinks</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.PaginationLinksTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.PaginationLinksTag</tag-class>
         <description>
             Displays a series of links that allow the user to choose one page from a number of pages
             of data.
@@ -21,7 +21,7 @@
 
     <tag>
         <name>dataLength</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.DataLengthTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.DataLengthTag</tag-class>
         <description>
             Renders a length of data with sensible units such as KB, MB, TB etc...
         </description>
@@ -34,7 +34,7 @@
 
     <tag>
         <name>pkgIcon</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.PkgIconTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.PkgIconTag</tag-class>
         <description>
             Renders an image tag with the image of a package.
         </description>
@@ -51,7 +51,7 @@
 
     <tag>
         <name>pkgVersionLabel</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.PkgVersionLabelTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.PkgVersionLabelTag</tag-class>
         <description>
             Renders a label indicating the version of a package
         </description>
@@ -64,7 +64,7 @@
 
     <tag>
         <name>pkgVersionLink</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.PkgVersionLinkTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.PkgVersionLinkTag</tag-class>
         <description>
             A hyperlink that references the page that renders the pkg version
         </description>
@@ -77,7 +77,7 @@
 
     <tag>
         <name>timestamp</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.TimestampTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.TimestampTag</tag-class>
         <description>
             Renders a string indicating a timestamp
         </description>
@@ -90,7 +90,7 @@
 
     <tag>
         <name>ratingIndicator</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.RatingIndicatorTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.RatingIndicatorTag</tag-class>
         <description>
             Renders a series of images indicating the rating aggregate [0..5]
         </description>
@@ -103,7 +103,7 @@
 
     <tag>
         <name>naturalLanguageChooser</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.NaturalLanguageChooserTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.NaturalLanguageChooserTag</tag-class>
         <description>
             Allows the user to select their natural language.
         </description>
@@ -111,7 +111,7 @@
 
     <tag>
         <name>plainTextContent</name>
-        <tag-class>org.haikuos.haikudepotserver.multipage.markup.PlainTextContentTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.PlainTextContentTag</tag-class>
         <description>
             Renders text that may contain newlines niely in html form.
         </description>

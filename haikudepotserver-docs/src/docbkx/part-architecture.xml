@@ -92,7 +92,7 @@ Distributed under the terms of the MIT License.
                 transaction per request&quot;.  The entities are described in a model file <footnote><para>
                 There is a desktop-application editor for this model file.</para></footnote>.
                 &quot;cayenne-haikudepotserver.xml&quot; and the java objects that represent those entities in the
-                running application are in the package &quot;org.haikuos.haikudepotserver.dataobjects&quot;.  The
+                running application are in the package &quot;org.haiku.haikudepotserver.dataobjects&quot;.  The
                 application server has no formal DAO layer; queries are simply made from the ORM context.  Static
                 methods on concrete entity objects provide easy access to common queries and
                 &quot;...OrchestrationServices&quot; beans such as PkgOrchestrationService,

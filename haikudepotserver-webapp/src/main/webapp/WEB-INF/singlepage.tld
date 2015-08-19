@@ -7,7 +7,7 @@
 
     <tag>
         <name>embeddedtemplate</name>
-        <tag-class>org.haikuos.haikudepotserver.singlepage.markup.EmeddedSinglePageTemplateTag</tag-class>
+        <tag-class>org.haiku.haikudepotserver.singlepage.markup.EmeddedSinglePageTemplateTag</tag-class>
         <description>
             Renders a single page template as a script tag.
         </description>

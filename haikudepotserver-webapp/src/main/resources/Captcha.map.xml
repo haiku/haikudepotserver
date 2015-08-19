@@ -4,9 +4,9 @@
 	 xsi:schemaLocation="http://cayenne.apache.org/schema/3.0/modelMap http://cayenne.apache.org/schema/3.0/modelMap.xsd"
 	 project-version="6">
 	<property name="defaultLockType" value="optimistic"/>
-	<property name="defaultPackage" value="org.haikuos.haikudepotserver.dataobjects"/>
+	<property name="defaultPackage" value="org.haiku.haikudepotserver.dataobjects"/>
 	<property name="defaultSchema" value="captcha"/>
-	<property name="defaultSuperclass" value="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject"/>
+	<property name="defaultSuperclass" value="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject"/>
 	<db-entity name="response" schema="captcha">
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
@@ -18,7 +18,7 @@
 			<db-key-cache-size>10</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
-	<obj-entity name="Response" className="org.haikuos.haikudepotserver.dataobjects.Response" lock-type="optimistic" dbEntityName="response" superClassName="org.haikuos.haikudepotserver.dataobjects.support.AbstractDataObject">
+	<obj-entity name="Response" className="org.haiku.haikudepotserver.dataobjects.Response" lock-type="optimistic" dbEntityName="response" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="response" type="java.lang.String" lock="true" db-attribute-path="response"/>
 		<obj-attribute name="token" type="java.lang.String" lock="true" db-attribute-path="token"/>

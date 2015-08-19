@@ -3,7 +3,7 @@
 
     <parent>
         <artifactId>haikudepotserver-parent</artifactId>
-        <groupId>org.haikuos</groupId>
+        <groupId>org.haiku</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
         <version>1.0.50-SNAPSHOT</version>
     </parent>
@@ -15,17 +15,17 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.haikuos</groupId>
+            <groupId>org.haiku</groupId>
             <artifactId>haikudepotserver-packagefile</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.haikuos</groupId>
+            <groupId>org.haiku</groupId>
             <artifactId>haikudepotserver-api1</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.haikuos</groupId>
+            <groupId>org.haiku</groupId>
             <artifactId>haikudepotserver-docs</artifactId>
             <version>${project.version}</version>
         </dependency>

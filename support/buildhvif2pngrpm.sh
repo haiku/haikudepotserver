@@ -91,8 +91,8 @@ Version: 1.${version}
 Release: 1
 Summary: hvif2png
 License: MIT
-Group: haikuos
-Packager: haikuos
+Group: haiku
+Packager: haiku
 autoprov: yes
 autoreq: yes
 BuildArch: $(arch)

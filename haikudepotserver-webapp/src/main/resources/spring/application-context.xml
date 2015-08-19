@@ -7,11 +7,11 @@
 
     <!-- JOB-MANAGEMENT -->
 
-    <bean class="org.haikuos.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
+    <bean class="org.haiku.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
           init-method="startAsyncAndAwaitRunning"
           destroy-method="stopAsyncAndAwaitTerminated">
         <property name="jobDataStorageService">
-            <bean class="org.haikuos.haikudepotserver.job.LocalJobDataStorageServiceImpl"></bean>
+            <bean class="org.haiku.haikudepotserver.job.LocalJobDataStorageServiceImpl"></bean>
         </property>
     </bean>
 
@@ -22,14 +22,14 @@
     package entity.
     -->
 
-    <bean class="org.haikuos.haikudepotserver.userrating.UserRatingDerivationJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.userrating.UserRatingDerivationJobRunner"/>
 
     <!--
     Picks up on Cayenne ORM events around user ratings and triggers the background update
     of the packages' user ratings.
     -->
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.UserRatingDerivationTriggerListener"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.UserRatingDerivationTriggerListener"/>
 
     <!-- LDAP -->
 
@@ -37,14 +37,14 @@
     Processes requests to synchronize the HDS database into LDAP
     -->
 
-    <bean class="org.haikuos.haikudepotserver.user.LdapSynchronizeUsersJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.user.LdapSynchronizeUsersJobRunner"/>
 
     <!--
     Picks up on Cayenne ORM events around user changes so that LDAP can (optionally) be
     updated with changes.
     -->
 
-    <bean class="org.haikuos.haikudepotserver.support.cayenne.LdapUserUpdateListener"/>
+    <bean class="org.haiku.haikudepotserver.support.cayenne.LdapUserUpdateListener"/>
 
     <!-- EMAIL -->
 

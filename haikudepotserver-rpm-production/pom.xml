@@ -3,7 +3,7 @@
 
     <parent>
         <artifactId>haikudepotserver-rpm-parent</artifactId>
-        <groupId>org.haikuos</groupId>
+        <groupId>org.haiku</groupId>
         <relativePath>../haikudepotserver-rpm-parent</relativePath>
         <version>1.0.50-SNAPSHOT</version>
     </parent>

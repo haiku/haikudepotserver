@@ -14,7 +14,7 @@
 
     <logger name="org.apache.cayenne" level="info"/>
     <logger name="com.googlecode.flyway" level="warn"/>
-    <logger name="org.haikuos.haikudepotserver.pkg.search" level="info"/>
+    <logger name="org.haiku.haikudepotserver.pkg.search" level="info"/>
 
     <root level="info">
         <appender-ref ref="STDOUT" />

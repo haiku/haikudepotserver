@@ -90,7 +90,7 @@ Distributed under the terms of the MIT License.
             <ulink url="http://www.jsonrpc.org">JSON-RPC</ulink>
             encoded HTTP POST invocations.  The data transfer objects (DTOs) that describe the request and the
             response data as well as the APIs' interfaces exist in the &quot;haikudepotserver-api&quot; module in
-            the java package; &quot;org.haikuos.haikudepotserver.api1&quot;.
+            the java package; &quot;org.haiku.haikudepotserver.api1&quot;.
         </para>
 
         <para>
@@ -105,10 +105,10 @@ Distributed under the terms of the MIT License.
                 In this example, the client knows the <emphasis>name</emphasis> of the package and would like
                 to get the details of the package.  The java model objects that document the data required in
                 request and the data that can be expected in the response can be found in the project.  The
-                request model is &quot;org.haikuos.haikudepotserver.api1.model.pkg.GetPkgRequest&quot;.  The
-                response model is &quot;org.haikuos.haikudepotserver.api1.model.pkg.GetPkgResult&quot;.  The
+                request model is &quot;org.haiku.haikudepotserver.api1.model.pkg.GetPkgRequest&quot;.  The
+                response model is &quot;org.haiku.haikudepotserver.api1.model.pkg.GetPkgResult&quot;.  The
                 actual server method that is invoked as a result of this request can be found at
-                &quot;org.haikuos.haikudepotserver.api1.PkgApi#getPkg(..)&quot;.
+                &quot;org.haiku.haikudepotserver.api1.PkgApi#getPkg(..)&quot;.
             </para>
 
             <para>
@@ -178,13 +178,13 @@ Distributed under the terms of the MIT License.
                 A set of known JSON-RPC error codes are agreed between the client and server.  See the JSON-RPC
                 specification for known error codes used for transport-related issues such as invalid parameters.
                 Application-specific error codes are documented in the java source at
-                &quot;org.haikuos.haikudepotserver.api1.support.Constants&quot;.
+                &quot;org.haiku.haikudepotserver.api1.support.Constants&quot;.
             </para>
 
             <para>
                 Some errors such as the validation error (code -32800) may also carry additional data that provides
                 detail as to the nature of the error that has arisen.  Java logic for assembling the error
-                payloads can be found at &quot;org.haikuos.haikudepotserver.api1.support.ErrorResolverImpl&quot;.
+                payloads can be found at &quot;org.haiku.haikudepotserver.api1.support.ErrorResolverImpl&quot;.
             </para>
         </section>
 
