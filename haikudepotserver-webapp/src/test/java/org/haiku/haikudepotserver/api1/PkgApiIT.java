@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.api1.model.pkg.*;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization;
+import org.haiku.haikudepotserver.api1.model.pkg.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;

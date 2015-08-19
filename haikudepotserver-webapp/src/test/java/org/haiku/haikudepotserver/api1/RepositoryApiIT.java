@@ -8,6 +8,8 @@ package org.haiku.haikudepotserver.api1;
 import com.google.common.collect.ImmutableList;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.SelectQuery;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
 import org.haiku.haikudepotserver.api1.model.repository.*;
@@ -17,6 +19,7 @@ import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -61,9 +64,12 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, data.repository.getCode());
-        Assertions.assertThat(repositoryOptional.isPresent()).isTrue();
-        Assertions.assertThat(repositoryOptional.get().getActive()).isFalse();
+        Repository repository = (Repository) context.performQuery(new SelectQuery(
+                Repository.class,
+                ExpressionFactory.matchExp(Repository.CODE_PROPERTY, data.repository.getCode())
+        )).stream().collect(SingleCollector.single());
+
+        Assertions.assertThat(repository.getActive()).isFalse();
 
     }
 
