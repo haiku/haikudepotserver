@@ -68,20 +68,12 @@ angular.module('haikudepotserver').controller(
 
             $scope.selectedViewCriteriaTypeOption = undefined; // setup with a function a bit further down...
 
-            // if the search criteria has an expression that has not hit the package name, but has
-            // hit the summary then we need to show the summary as well as the package name.
+            // This was only showing the summary when the search hit was in the summary, but will now
+            // show the summary if there is one.
 
             $scope.shouldShowSummary = function(pkg) {
-                return $scope.lastRefetchPkgsSearchExpression &&
-                    $scope.lastRefetchPkgsSearchExpression.length &&
-                    pkg.versions[0].summary &&
-                    pkg.versions[0].summary.length &&
-                    -1 == searchMixins.nextMatchSearchExpression(
-                        pkg.name,0,
-                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset &&
-                    -1 != searchMixins.nextMatchSearchExpression(
-                        pkg.versions[0].summary.toLowerCase(),0,
-                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset;
+                return pkg.versions[0].summary &&
+                    pkg.versions[0].summary.length;
             };
 
             // if the search criteria has hit the name, but the name is not being displayed because
