@@ -24,16 +24,16 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring.version>4.1.4.RELEASE</spring.version>
+        <spring.version>4.2.0.RELEASE</spring.version>
         <postgresql.version>9.4-1200-jdbc41</postgresql.version>
 
-        <web-angularjs.versionbase>1.3.15</web-angularjs.versionbase>
+        <web-angularjs.versionbase>1.4.3-1</web-angularjs.versionbase>
         <web-angularjs.versionextension />
 
         <web-underscorejs.versionbase>1.8.3</web-underscorejs.versionbase>
         <web-underscorejs.versionextension></web-underscorejs.versionextension>
 
-        <web-momentjs.versionbase>2.10.2</web-momentjs.versionbase>
+        <web-momentjs.versionbase>2.10.6</web-momentjs.versionbase>
         <web-momentjs.versionextension />
 
         <web-modernizr.versionbase>2.8.3</web-modernizr.versionbase>
