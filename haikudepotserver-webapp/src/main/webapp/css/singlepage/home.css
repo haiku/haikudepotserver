@@ -3,7 +3,7 @@ This specific layout works off the premise that there is only one table on this 
 */
 
 .home .table-general > tbody > tr > td:nth-child(1) {
-    width:18px;
+    width:26px;
     text-align: center;
 }
 
