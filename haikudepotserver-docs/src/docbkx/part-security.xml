@@ -16,6 +16,15 @@ Distributed under the terms of the MIT License.
         in isolation.
     </para>
 
+    <warning>
+        <para>
+            Note that if you are using Haiku in a virtualized environment such as
+            <ulink url="https://www.virtualbox.org/">VirtualBox</ulink>, you need to ensure that the virtualization
+            system exposes UTC-relative time to the Haiku guest operating system, that Haiku is configured
+            (see "Time Preferences") to use a GMT hardware clock and that your time-zone is set.
+        </para>
+    </warning>
+
     <section xml:id="security-authentication">
         <title>Authentication</title>
 
