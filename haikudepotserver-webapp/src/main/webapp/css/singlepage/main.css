@@ -389,6 +389,10 @@ SEARCH BAR
     border: 1px solid black;
 }
 
+#search-criteria-container button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
 #search-criteria-container label {
     font-size: 10px;
     white-space: nowrap;

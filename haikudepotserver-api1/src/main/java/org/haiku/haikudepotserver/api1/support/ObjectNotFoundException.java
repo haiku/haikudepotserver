@@ -44,7 +44,7 @@ public class ObjectNotFoundException extends Exception {
         String identifierString = getIdentifier().toString();
 
         return String.format(
-                "the entity '%s' was not able to be found with the identifier '%s'",
+                "not-found; %s:%s",
                 getEntityName(),
                 0==identifierString.length() ? "???" : identifierString);
     }

@@ -46,7 +46,7 @@ html.nosvg #banner-title {
     vertical-align: middle;
 }
 
-#banner-title div:hover {
+#banner-title:hover div {
     text-decoration: underline;
     text-decoration-color: white;
 }
@@ -84,6 +84,10 @@ leaching into the modal that allows for language selection.
     padding-left: 2px;
     padding-right: 2px;
     vertical-align: middle;
+}
+
+#banner-actions button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
 #banner-warning-non-production {
