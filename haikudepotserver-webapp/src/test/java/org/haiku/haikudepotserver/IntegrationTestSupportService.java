@@ -103,9 +103,9 @@ public class IntegrationTestSupportService {
                 context,
                 pkgVersion,
                 NaturalLanguage.getEnglish(context),
-                "sample title",
-                "sample summary",
-                "sample description");
+                "sample title " + pkgVersion.getPkg().getName(),
+                "sample summary " + pkgVersion.getPkg().getName(),
+                "sample description " + pkgVersion.getPkg().getName());
     }
 
     public StandardTestData createStandardTestData() {

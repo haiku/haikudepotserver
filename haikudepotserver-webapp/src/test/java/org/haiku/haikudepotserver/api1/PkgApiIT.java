@@ -143,34 +143,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     /**
-     * <p>This test will check that the search is able to find text in the content of the package
-     * version localization where the localization is a specific language other than english.  This
-     * test will not find anything because it is looking for a keyword in the english test, but is
-     * searching for spanish.</p>
-     */
-
-    @Test
-    public void searchPkgsTest_localizationDescriptionNotEnglish_noHit() throws ObjectNotFoundException {
-        integrationTestSupportService.createStandardTestData();
-
-        SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = Collections.singletonList("x86");
-        request.repositoryCodes = Collections.singletonList("testrepo");
-        request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
-        request.expression = "persim";
-        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
-        request.limit = 2;
-        request.offset = 0;
-
-        // ------------------------------------
-        SearchPkgsResult result = pkgApi.searchPkgs(request);
-        // ------------------------------------
-
-        Assertions.assertThat(result.total).isEqualTo(0);
-        Assertions.assertThat(result.items.size()).isEqualTo(0);
-    }
-
-    /**
      * <p>This test checks where the client is searching for a package in a specific language, but
      * there is no localization for that specific language.  In this case, </p>
      * @throws ObjectNotFoundException
