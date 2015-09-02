@@ -242,7 +242,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
 
                     ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
-                            context, spv, naturalLanguage);
+                            context, spv, specification.getExpressionAsPattern(), naturalLanguage);
 
                     SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
                     resultVersion.major = spv.getMajor();
@@ -297,7 +297,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.licenses = pkgVersion.getPkgVersionLicenses().stream().map(PkgVersionLicense::getBody).collect(Collectors.toList());
         version.viewCounter = pkgVersion.getViewCounter();
 
-        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, naturalLanguage);
+        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
+                pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
 
         version.title = resolvedPkgVersionLocalization.getTitle();
         version.description = resolvedPkgVersionLocalization.getDescription();
@@ -944,7 +945,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.architectureCode = pkgVersion.getArchitecture().getCode();
         version.payloadLength = pkgVersion.getPayloadLength();
 
-        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, naturalLanguage);
+        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
+                pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
 
         if(includeDescription) {
             version.description = resolvedPkgVersionLocalization.getDescription();

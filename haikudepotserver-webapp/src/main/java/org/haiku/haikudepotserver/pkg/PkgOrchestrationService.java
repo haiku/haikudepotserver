@@ -43,6 +43,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -1160,54 +1161,63 @@ public class PkgOrchestrationService {
     // -------------------------------------
     // LOCALIZATION
 
-    private void fill(ResolvedPkgVersionLocalization result, PkgVersionLocalization pvl) {
-        if(null==result.getTitle()) {
-            result.setTitle(pvl.getTitle().orElse(null));
+    private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgVersionLocalization pvl) {
+        if(Strings.isNullOrEmpty(result.getTitle())
+            && !Strings.isNullOrEmpty(pvl.getTitle().orElse(null))
+            && (null==pattern || pattern.matcher(pvl.getTitle().get()).matches())) {
+            result.setTitle(pvl.getTitle().get());
         }
 
-        if(null==result.getSummary()) {
+        if(Strings.isNullOrEmpty(result.getSummary())
+            && !Strings.isNullOrEmpty(pvl.getSummary().orElse(null))
+            && (null==pattern || pattern.matcher(pvl.getSummary().get()).matches()) ) {
             result.setSummary(pvl.getSummary().orElse(null));
         }
 
-        if(null==result.getDescription()) {
+        if(Strings.isNullOrEmpty(result.getDescription())
+            && !Strings.isNullOrEmpty(pvl.getDescription().orElse(null))
+            && (null==pattern || pattern.matcher(pvl.getDescription().get()).matches()) ) {
             result.setDescription(pvl.getDescription().orElse(null));
         }
     }
 
-    private void fill(ResolvedPkgVersionLocalization result, PkgLocalization pl) {
-        if(null==result.getTitle()) {
+    private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgLocalization pl) {
+        if(Strings.isNullOrEmpty(result.getTitle())
+                && !Strings.isNullOrEmpty(pl.getTitle())
+                && (null==pattern || pattern.matcher(pl.getTitle()).matches())) {
             result.setTitle(pl.getTitle());
         }
 
-        if(null==result.getSummary()) {
+        if(Strings.isNullOrEmpty(result.getSummary())
+                && !Strings.isNullOrEmpty(pl.getSummary())
+                && (null==pattern || pattern.matcher(pl.getSummary()).matches())) {
             result.setSummary(pl.getSummary());
         }
 
-        if(null==result.getDescription()) {
+        if(Strings.isNullOrEmpty(result.getDescription())
+            && !Strings.isNullOrEmpty(pl.getDescription())
+            && (null==pattern || pattern.matcher(pl.getDescription()).matches())) {
             result.setDescription(pl.getDescription());
         }
     }
 
-    /**
-     * <p>For a given package version, this method will look at the various levels of localization and fallback
-     * options to English and will produce an object that represents the best language options.</p>
-     */
-
-    public ResolvedPkgVersionLocalization resolvePkgVersionLocalization(
+    private void fillResolvedPkgVersionLocalization(
+            ResolvedPkgVersionLocalization result,
             ObjectContext context,
             PkgVersion pkgVersion,
+            Pattern searchPattern,
             NaturalLanguage naturalLanguage) {
 
+        Preconditions.checkArgument(null!=result);
         Preconditions.checkArgument(null!=context);
-        Preconditions.checkArgument(null != pkgVersion);
-        ResolvedPkgVersionLocalization result = new ResolvedPkgVersionLocalization();
+        Preconditions.checkArgument(null!=pkgVersion);
 
-        {
+        if(!result.hasAll()) {
             Optional<PkgVersionLocalization> pvlNl = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
                     context, pkgVersion, naturalLanguage.getCode());
 
             if (pvlNl.isPresent()) {
-                fill(result, pvlNl.get());
+                fill(result, searchPattern, pvlNl.get());
             }
         }
 
@@ -1218,7 +1228,7 @@ public class PkgOrchestrationService {
                     naturalLanguage.getCode());
 
             if(plNl.isPresent()) {
-                fill(result, plNl.get());
+                fill(result, searchPattern, plNl.get());
             }
         }
 
@@ -1227,21 +1237,41 @@ public class PkgOrchestrationService {
                     context, pkgVersion, NaturalLanguage.CODE_ENGLISH);
 
             if(pvlEn.isPresent()) {
-                fill(result, pvlEn.get());
+                fill(result, searchPattern, pvlEn.get());
             }
         }
 
         if(!result.hasAll()) {
-            Optional<PkgLocalization> plNl = PkgLocalization.getForPkgAndNaturalLanguageCode(
+            Optional<PkgLocalization> plEn = PkgLocalization.getForPkgAndNaturalLanguageCode(
                     context,
                     pkgVersion.getPkg(),
                     NaturalLanguage.CODE_ENGLISH);
 
-            if(plNl.isPresent()) {
-                fill(result, plNl.get());
+            if(plEn.isPresent()) {
+                fill(result, searchPattern, plEn.get());
             }
         }
 
+        if(null!=searchPattern) {
+            fillResolvedPkgVersionLocalization(result, context, pkgVersion, null, naturalLanguage);
+        }
+    }
+
+    /**
+     * <p>For a given package version, this method will look at the various levels of localization and fallback
+     * options to English and will produce an object that represents the best language options.</p>
+     *
+     * <p>If the pattern is provided, any localization for the provided natural language will be taken first if
+     * it matches, otherwise the english version will be tried.</p>
+     */
+
+    public ResolvedPkgVersionLocalization resolvePkgVersionLocalization(
+            ObjectContext context,
+            PkgVersion pkgVersion,
+            Pattern searchPattern,
+            NaturalLanguage naturalLanguage) {
+        ResolvedPkgVersionLocalization result = new ResolvedPkgVersionLocalization();
+        fillResolvedPkgVersionLocalization(result,context,pkgVersion,searchPattern,naturalLanguage);
         return result;
     }
 

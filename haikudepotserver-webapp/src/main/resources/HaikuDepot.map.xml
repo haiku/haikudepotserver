@@ -410,10 +410,10 @@
 	</obj-entity>
 	<obj-entity name="PkgLocalization" className="org.haiku.haikudepotserver.dataobjects.PkgLocalization" lock-type="optimistic" dbEntityName="pkg_localization" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
+		<obj-attribute name="description" type="java.lang.String" lock="true" db-attribute-path="description"/>
 		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
-		<obj-attribute name="summary" type="java.lang.String" db-attribute-path="summary"/>
-		<obj-attribute name="title" type="java.lang.String" db-attribute-path="title"/>
+		<obj-attribute name="summary" type="java.lang.String" lock="true" db-attribute-path="summary"/>
+		<obj-attribute name="title" type="java.lang.String" lock="true" db-attribute-path="title"/>
 	</obj-entity>
 	<obj-entity name="PkgPkgCategory" className="org.haiku.haikudepotserver.dataobjects.PkgPkgCategory" dbEntityName="pkg_pkg_category" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 	</obj-entity>
@@ -875,8 +875,10 @@ AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGE
 #end
 #if($search.expression)
 AND (
-LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary,pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+   LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
 OR LOWER(p.name) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
 )
 #end
@@ -885,7 +887,7 @@ AND #bindObjectEqual($search.pkgCategory, 'ppc.pkg_category_id', 'id')
 #end
 #if($search.pkgNames)
     #if($search.pkgNames.isEmpty())
-    AND true = false
+	AND true = false
     #else
     AND p.name IN (#bind($search.pkgNames))
     #end
@@ -901,8 +903,17 @@ ORDER BY
         pv.create_timestamp DESC,
         #end
     #end
+#if($search.expression)
+CASE
+	WHEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+		THEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title))
+	WHEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+		THEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name))
+	ELSE LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name))
+END ASC
+#else
 LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC,
-p.name ASC,
+#end
 pv.id ASC
 OFFSET #bind($search.offset)
 LIMIT #bind($search.limit)
@@ -995,8 +1006,10 @@ AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGE
 #end
 #if($search.expression)
 AND (
-LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary,pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+   LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
 OR LOWER(p.name) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
 )
 #end
@@ -1005,7 +1018,7 @@ AND #bindObjectEqual($search.pkgCategory, 'ppc.pkg_category_id', 'id')
 #end
 #if($search.pkgNames)
     #if($search.pkgNames.isEmpty())
-    AND true = false
+	AND true = false
     #else
     AND p.name IN (#bind($search.pkgNames))
     #end
@@ -1021,8 +1034,17 @@ ORDER BY
         pv.create_timestamp DESC,
         #end
     #end
+#if($search.expression)
+CASE
+	WHEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+		THEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title))
+	WHEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+		THEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name))
+	ELSE LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name))
+END ASC,
+#else
 LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC,
-p.name ASC,
+#end
 pv.id ASC
 OFFSET #bind($search.offset)
 LIMIT #bind($search.limit)

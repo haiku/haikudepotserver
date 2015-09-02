@@ -46,7 +46,7 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
             final String naturalLanguageCode) {
 
         Preconditions.checkArgument(null!=context, "the context must be supplied");
-        Preconditions.checkArgument(null!=pkgVersion, "the pkg version must be supplied");
+        Preconditions.checkArgument(null != pkgVersion, "the pkg version must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code is required");
         return getForPkgVersion(context, pkgVersion)
                 .stream()

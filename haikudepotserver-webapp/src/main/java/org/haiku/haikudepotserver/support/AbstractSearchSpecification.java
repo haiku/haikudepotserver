@@ -5,6 +5,8 @@
 
 package org.haiku.haikudepotserver.support;
 
+import java.util.regex.Pattern;
+
 /**
  * <p>Various services are able to perform a search function to return lists of objects.  In order to specify the
  * search, those services would use an abstract subclass of this class.  This class provides the basic search
@@ -77,6 +79,25 @@ public abstract class AbstractSearchSpecification {
 
     public void setExpressionType(ExpressionType expressionType) {
         this.expressionType = expressionType;
+    }
+
+    /**
+     * <p>Returns the expression as a regular expression that can be interpreted with the {@link Pattern}
+     * class.</p>
+     */
+
+    public Pattern getExpressionAsPattern() {
+        if(null==getExpression()) {
+            return null;
+        }
+
+        switch(getExpressionType()) {
+            case CONTAINS:
+                return Pattern.compile(".*" + Pattern.quote(getExpression()) + ".*");
+
+            default:
+                throw new IllegalStateException("unknown expression type; " + getExpressionType().name());
+        }
     }
 
     /**
