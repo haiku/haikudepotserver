@@ -29,8 +29,6 @@ This specific layout works off the premise that there is only one table on this 
     text-align: center;
 }
 
-/* 5th = Version */
-
 .home .table-general > thead > tr > th:nth-child(5) {
     width:196px;
 }
@@ -39,12 +37,14 @@ This specific layout works off the premise that there is only one table on this 
     width:196px;
 }
 
+/* 6th = Version */
+
 .home .table-general > thead > tr > th:nth-child(6) {
-    width:196px;
+    width:216px;
 }
 
 .home .table-general > tbody > tr > td:nth-child(6) {
-    width:196px;
+    width:216px;
 }
 
 .home .table-general > thead > tr > th:nth-child(7) {
