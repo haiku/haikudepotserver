@@ -22,9 +22,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RepositorySource extends _RepositorySource {
+
+    public final static Pattern CODE_PATTERN = Pattern.compile("^[a-z0-9]{2,16}_[a-z0-9_]+$");
 
     public static RepositorySource get(ObjectContext context, ObjectId objectId) {
         return ((List<RepositorySource>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
@@ -66,7 +69,7 @@ public class RepositorySource extends _RepositorySource {
         super.validateForSave(validationResult);
 
         if(null != getCode()) {
-            if(!CODE_PATTERN.matcher(getCode()).matches()) {
+            if(!RepositorySource.CODE_PATTERN.matcher(getCode()).matches()) {
                 validationResult.addFailure(new BeanValidationFailure(this,CODE_PROPERTY,"malformed"));
             }
         }

@@ -29,6 +29,7 @@ as well as the status of the authenticated user.
 
 #banner-title:hover {
     background-image: url('/img/haikudepot-lightoverlay.svg') , url('/img/haikudepot.svg');
+    cursor: pointer;
 }
 
 html.nosvg #banner-title {
@@ -49,6 +50,7 @@ html.nosvg #banner-title {
 #banner-title:hover div {
     text-decoration: underline;
     text-decoration-color: white;
+    cursor: pointer;
 }
 
 #banner-actions {
@@ -88,6 +90,7 @@ leaching into the modal that allows for language selection.
 
 #banner-actions button:hover {
     background-color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
 }
 
 #banner-warning-non-production {
