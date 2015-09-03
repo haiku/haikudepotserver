@@ -15,13 +15,16 @@ angular.module('haikudepotserver').factory('pkg',
             $log,$q,jsonRpc,userState,errorHandling,
             constants) {
 
+            var SUFFIX_DEVEL = "_devel";
+
             /**
              * <p>This function will say if the package is a development package.</p>
              * @param {string} name
              */
 
             function isDevel(name) {
-                return name && name.indexOf('_devel') == name.length - 6;
+                var i = name.indexOf(SUFFIX_DEVEL);
+                return name && (-1 != i) && (i == (name.length - SUFFIX_DEVEL.length));
             }
 
             /**
