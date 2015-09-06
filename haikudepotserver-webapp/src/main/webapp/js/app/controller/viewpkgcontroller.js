@@ -30,6 +30,7 @@ angular.module('haikudepotserver').controller(
             $scope.pkg = undefined;
             $scope.pkgScreenshots = undefined;
             $scope.pkgIconHvifUrl = undefined;
+            $scope.pkgHpkgUrl = undefined;
             $scope.pkgCategories = undefined;
             $scope.userRatings = {
                 items : undefined,
@@ -83,6 +84,30 @@ angular.module('haikudepotserver').controller(
                 ]);
             }
 
+            function refreshHpkgUrl() {
+
+                function nullToHyphen(s) {
+                    if(!s) {
+                        return '-';
+                    }
+
+                    return '' + s;
+                }
+
+                $scope.pkgHpkgUrl = [
+                    '__pkgdownload',
+                    $scope.pkg.name,
+                    $scope.pkg.versions[0].repositoryCode,
+                    nullToHyphen($scope.pkg.versions[0].major),
+                    nullToHyphen($scope.pkg.versions[0].minor),
+                    nullToHyphen($scope.pkg.versions[0].micro),
+                    nullToHyphen($scope.pkg.versions[0].preRelease),
+                    nullToHyphen($scope.pkg.versions[0].revision),
+                    $scope.pkg.versions[0].architectureCode,
+                    'package.hpkg'
+                ].join('/');
+            }
+
             function refetchPkg() {
 
                 $scope.pkg = undefined;
@@ -95,6 +120,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('found '+result.name+' pkg');
 
                         refreshBreadcrumbItems();
+                        refreshHpkgUrl();
                         refetchRepository();
                         refetchPkgScreenshots();
                         refetchPkgIconMetaData();

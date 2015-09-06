@@ -239,8 +239,13 @@
                 </a>
             </li>
             <li ng-show="pkgIconHvifUrl">
-                <a href="{{pkgIconHvifUrl}}">
+                <a ng-href="{{pkgIconHvifUrl}}">
                     <message key="viewPkg.downloadIconHvifAction.title"></message>
+                </a>
+            </li>
+            <li ng-show="pkgHpkgUrl">
+                <a ng-href="{{pkgHpkgUrl}}">
+                    <message key="viewPkg.downloadHpkgAction.title"></message>
                 </a>
             </li>
             <li pkg="pkg" show-if-pkg-permission="'PKG_EDITSCREENSHOT'">
