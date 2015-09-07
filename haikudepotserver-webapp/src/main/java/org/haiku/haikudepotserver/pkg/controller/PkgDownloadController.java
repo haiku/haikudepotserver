@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
@@ -29,6 +30,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Optional;
 
@@ -127,18 +129,33 @@ public class PkgDownloadController {
             throw new RequestObjectNotFound();
         }
 
-        response.setContentType(MediaType.OCTET_STREAM.toString());
-        response.setHeader(
-                HttpHeaders.CONTENT_DISPOSITION,
-                String.format(
-                        "attachment; filename=\"%s\"",
-                        pkgVersionOptional.get().getHpkgFilename())
-        );
-
         URL url = pkgVersionOptional.get().getHpkgURL();
-        try (InputStream inputStream = url.openStream()) {
-            LOGGER.info("downloaded package version; {}", pkgVersionOptional.get());
-            ByteStreams.copy(inputStream, response.getOutputStream());
+
+        // if it is an HTTP URL then it should be possible to redirect the browser to that URL
+        // instead of piping it through the application server.
+
+        if(ImmutableSet.of("http","https").contains(url.getProtocol())) {
+            response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+            response.setHeader(HttpHeaders.LOCATION, url.toString());
+            response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
+
+            PrintWriter writer = response.getWriter();
+            writer.print(url.toString());
+            writer.flush();
+        }
+        else {
+            response.setContentType(MediaType.OCTET_STREAM.toString());
+            response.setHeader(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    String.format(
+                            "attachment; filename=\"%s\"",
+                            pkgVersionOptional.get().getHpkgFilename())
+            );
+
+            try (InputStream inputStream = url.openStream()) {
+                LOGGER.info("downloaded package version; {}", pkgVersionOptional.get());
+                ByteStreams.copy(inputStream, response.getOutputStream());
+            }
         }
     }
 
