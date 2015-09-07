@@ -14,6 +14,7 @@ import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.repository.model.RepositoryImportException;
 import org.haiku.pkg.HpkrFileExtractor;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
@@ -109,7 +110,10 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
 
     }
 
-    private void runForRepositorySource(ObjectContext mainContext, RepositorySource repositorySource) {
+    private void runForRepositorySource(
+            ObjectContext mainContext,
+            RepositorySource repositorySource)
+            throws RepositoryImportException {
         URL url;
 
         try {
@@ -153,7 +157,12 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
                         pkg,
                         shouldPopulatePayloadLength);
 
-                pkgImportContext.commitChanges();
+                try {
+                    pkgImportContext.commitChanges();
+                }
+                catch(Throwable th) {
+                    throw new RepositoryImportException("unable to store package [" + pkg.toString() + "]", th);
+                }
             }
 
             // [apl 6.aug.2014] #5

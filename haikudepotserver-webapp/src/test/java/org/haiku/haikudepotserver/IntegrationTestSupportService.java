@@ -133,7 +133,7 @@ public class IntegrationTestSupportService {
         result.repository.setInformationUrl("http://example1.haiku.org/");
 
         result.repositorySource = context.newObject(RepositorySource.class);
-        result.repositorySource.setCode("testreposrc");
+        result.repositorySource.setCode("testreposrc_xyz");
         result.repositorySource.setRepository(result.repository);
         result.repositorySource.setUrl("file://" + platformTmpDirPath + "/repository");
 

@@ -173,7 +173,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
             integrationTestSupportService.createStandardTestData();
 
             ObjectContext context = serverRuntime.getContext();
-            RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc").get();
+            RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
             respositorySourceObjectId = repositorySource.getObjectId();
         }
 
@@ -271,7 +271,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.getContext();
-                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc").get();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
                 repositoryDirectory = new File(repositorySource.getPackagesBaseURL().getPath());
 
                 if (!repositoryDirectory.mkdirs()) {
@@ -289,7 +289,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.getContext();
-                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc").get();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
 
                 // ---------------------------------
 

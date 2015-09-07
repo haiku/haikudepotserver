@@ -82,7 +82,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 repository.setName("Test Repository");
 
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
-                repositorySource.setCode("testsrc");
+                repositorySource.setCode("testsrc_xyz");
                 repositorySource.setUrl("file://" + temporaryFile.getAbsolutePath());
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
 
@@ -99,7 +99,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 repository.setName("Test 2");
 
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
-                repositorySource.setCode("testsrc2");
+                repositorySource.setCode("testsrc2_xyz");
                 repositorySource.setUrl("file://noop.hpkr");
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
 
@@ -124,7 +124,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setMinor("2");
                     pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
                     pkgVersion.setIsLatest(true);
-                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc").get());
+                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
                 }
 
                 // this one should remain
@@ -135,7 +135,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setMinor("3");
                     pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
                     pkgVersion.setIsLatest(true);
-                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc2").get());
+                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc2_xyz").get());
                 }
 
                 context.commitChanges();
@@ -163,7 +163,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
                 pkgVersion.setIsLatest(true);
                 pkgVersion.setActive(false); // to be sure!
-                pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc").get());
+                pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
 
                 PkgVersionUrl pkgVersionUrl = context.newObject(PkgVersionUrl.class);
                 pkgVersionUrl.setPkgUrlType(PkgUrlType.getByCode(context, org.haiku.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase()).get());

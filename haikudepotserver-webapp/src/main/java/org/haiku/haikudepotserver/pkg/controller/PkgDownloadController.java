@@ -6,7 +6,9 @@
 package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
+import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
@@ -17,11 +19,11 @@ import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -66,7 +68,7 @@ public class PkgDownloadController {
                     "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
                     KEY_MICRO + "}/{" + KEY_PRERELEASE + "}/{" + KEY_REVISION + "}/{" + KEY_ARCHITECTURECODE + "}/package.hpkg",
             method = RequestMethod.GET)
-    public ResponseEntity download(
+    public void download(
             HttpServletResponse response,
             @PathVariable(value = KEY_PKGNAME) String pkgName,
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode,
@@ -75,7 +77,9 @@ public class PkgDownloadController {
             @PathVariable(value = KEY_MICRO) String micro,
             @PathVariable(value = KEY_PRERELEASE) String prerelease,
             @PathVariable(value = KEY_REVISION) String revisionStr,
-            @PathVariable(value = KEY_ARCHITECTURECODE) String architectureCode) throws IOException {
+            @PathVariable(value = KEY_ARCHITECTURECODE) String architectureCode)
+            throws
+            IOException, RequestObjectNotFound {
 
         Preconditions.checkArgument(null!=response, "the response is required");
 
@@ -85,21 +89,21 @@ public class PkgDownloadController {
 
         if(!pkgOptional.isPresent()) {
             LOGGER.info("unable to find the package; {}", pkgName);
-            return ResponseEntity.notFound().build();
+            throw new RequestObjectNotFound();
         }
 
         Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
 
         if(!repositoryOptional.isPresent()) {
             LOGGER.info("unable to find the repository; {}", repositoryCode);
-            return ResponseEntity.notFound().build();
+            throw new RequestObjectNotFound();
         }
 
         Optional<Architecture> architectureOptional = Architecture.getByCode(context, architectureCode);
 
         if(!architectureOptional.isPresent()) {
             LOGGER.info("unable to find the architecture; {}", architectureCode);
-            return ResponseEntity.notFound().build();
+            throw new RequestObjectNotFound();
         }
 
         revisionStr = hyphenToNull(revisionStr);
@@ -120,23 +124,25 @@ public class PkgDownloadController {
 
         if(!pkgVersionOptional.isPresent()) {
             LOGGER.info("unable to find the pkg version; {}, {}", pkgName, versionCoordinates);
-            return ResponseEntity.notFound().build();
+            throw new RequestObjectNotFound();
         }
 
-        URL url = pkgVersionOptional.get().getHpkgURL();
-        InputStream inputStream = url.openStream();
-        org.springframework.http.HttpHeaders httpHeaders = new org.springframework.http.HttpHeaders();
-        httpHeaders.setContentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.set(
+        response.setContentType(MediaType.OCTET_STREAM.toString());
+        response.setHeader(
                 HttpHeaders.CONTENT_DISPOSITION,
                 String.format(
                         "attachment; filename=\"%s\"",
                         pkgVersionOptional.get().getHpkgFilename())
         );
 
-        LOGGER.info("downloaded package version; {}", pkgVersionOptional.get());
-
-        return new ResponseEntity<>(inputStream, httpHeaders, HttpStatus.OK);
+        URL url = pkgVersionOptional.get().getHpkgURL();
+        try (InputStream inputStream = url.openStream()) {
+            LOGGER.info("downloaded package version; {}", pkgVersionOptional.get());
+            ByteStreams.copy(inputStream, response.getOutputStream());
+        }
     }
+
+    @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
+    public class RequestObjectNotFound extends RuntimeException {}
 
 }

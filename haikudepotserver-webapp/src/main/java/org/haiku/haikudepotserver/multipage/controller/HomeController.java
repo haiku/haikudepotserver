@@ -125,7 +125,7 @@ public class HomeController {
             searchSpecification.setRepositories(Collections.singletonList(repositoryOptional.get()));
         }
         else {
-            searchSpecification.setRepositories(Repository.getAll(context));
+            searchSpecification.setRepositories(Repository.getAllActive(context));
         }
 
         Optional<Architecture> architectureOptional = Architecture.getByCode(context, architectureCode);
@@ -213,7 +213,7 @@ public class HomeController {
         data.setArchitecture(architectureOptional.get());
         data.setRepository(repositoryOptional.orElse(null));
 
-        data.setAllRepositories(Repository.getAll(context));
+        data.setAllRepositories(Repository.getAllActive(context));
         data.setAllPkgCategories(PkgCategory.getAll(context));
         data.setPkgCategory(pkgCategoryOptional.isPresent() ? pkgCategoryOptional.get() : PkgCategory.getAll(context).get(0));
 

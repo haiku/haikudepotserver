@@ -110,7 +110,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.repositorySources.size()).isEqualTo(1);
 
         GetRepositoryResult.RepositorySource repositorySource = result.repositorySources.get(0);
-        Assertions.assertThat(repositorySource.code).isEqualTo("testreposrc");
+        Assertions.assertThat(repositorySource.code).isEqualTo("testreposrc_xyz");
         Assertions.assertThat(repositorySource.active).isTrue();
         Assertions.assertThat(repositorySource.url).startsWith("file:///");
     }
@@ -171,7 +171,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.active).isTrue();
-        Assertions.assertThat(result.code).isEqualTo("testreposrc");
+        Assertions.assertThat(result.code).isEqualTo("testreposrc_xyz");
         Assertions.assertThat(result.repositoryCode).isEqualTo("testrepo");
         Assertions.assertThat(result.url).startsWith("file://");
 
@@ -183,7 +183,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         UpdateRepositorySourceRequest request = new UpdateRepositorySourceRequest();
-        request.code = "testreposrc";
+        request.code = "testreposrc_xyz";
         request.active = false;
         request.url = "http://test-example2.haiku-os.org";
         request.filter = ImmutableList.of(
@@ -196,7 +196,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            RepositorySource repositorySourceAfter = RepositorySource.getByCode(context, "testreposrc").get();
+            RepositorySource repositorySourceAfter = RepositorySource.getByCode(context, "testreposrc_xyz").get();
             Assertions.assertThat(repositorySourceAfter.getUrl()).isEqualTo("http://test-example2.haiku-os.org");
             Assertions.assertThat(repositorySourceAfter.getActive()).isFalse();
         }
@@ -209,7 +209,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         CreateRepositorySourceRequest request = new CreateRepositorySourceRequest();
-        request.code = "testreposrcxx";
+        request.code = "testreposrcxx_xyz";
         request.repositoryCode = "testrepo";
         request.url = "http://testtest.haiku-os.org";
 
@@ -219,11 +219,11 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, "testreposrcxx");
+            Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, "testreposrcxx_xyz");
             Assertions.assertThat(repositorySourceOptional.get().getActive()).isTrue();
             Assertions.assertThat(repositorySourceOptional.get().getUrl()).isEqualTo("http://testtest.haiku-os.org");
             Assertions.assertThat(repositorySourceOptional.get().getRepository().getCode()).isEqualTo("testrepo");
-            Assertions.assertThat(repositorySourceOptional.get().getCode()).isEqualTo("testreposrcxx");
+            Assertions.assertThat(repositorySourceOptional.get().getCode()).isEqualTo("testreposrcxx_xyz");
         }
 
     }

@@ -50,11 +50,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     private JobOrchestrationService jobOrchestrationService;
 
     @Override
-    public GetRepositoriesResult getRepositories(GetRepositoriesRequest getRepositoriesRequest) {
+    public GetRepositoriesResult getRepositories(final GetRepositoriesRequest getRepositoriesRequest) {
         Preconditions.checkArgument(null!=getRepositoriesRequest);
         GetRepositoriesResult result = new GetRepositoriesResult();
+        boolean includeInactive = null!=getRepositoriesRequest.includeInactive && getRepositoriesRequest.includeInactive;
         result.repositories = Repository.getAll(serverRuntime.getContext())
                 .stream()
+                .filter(r -> includeInactive || r.getActive())
                 .map(r -> {
                     GetRepositoriesResult.Repository resultRepository = new GetRepositoriesResult.Repository();
                     resultRepository.code = r.getCode();

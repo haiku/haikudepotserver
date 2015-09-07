@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Repository extends _Repository implements CreateAndModifyTimestamped, Coded, Comparable<Repository> {
 
@@ -48,14 +49,16 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
                 .collect(SingleCollector.optional());
     }
 
-    /**
-     * <p>Returns all active repositories.</p>
-     */
+    public static List<Repository> getAllActive(ObjectContext context) {
+        return getAll(context).stream().filter(r -> r.getActive()).collect(Collectors.toList());
+    }
+
+        /**
+         * <p>Returns all active repositories.</p>
+         */
 
     public static List<Repository> getAll(ObjectContext context) {
-        SelectQuery query = new SelectQuery(
-                Repository.class,
-                ExpressionFactory.matchExp(Repository.ACTIVE_PROPERTY, Boolean.TRUE));
+        SelectQuery query = new SelectQuery(Repository.class);
 
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         query.setCacheGroups(HaikuDepot.CacheGroup.REPOSITORY.name());
