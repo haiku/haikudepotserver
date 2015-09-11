@@ -84,6 +84,13 @@ public class GetPkgResult {
 
         public Long createTimestamp;
 
+        /**
+         * <p>Is true if the package version has a source package available.</p>
+         * @since 2015-09-10
+         */
+
+        public Boolean hasSource;
+
     }
 
 }

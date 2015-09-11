@@ -43,7 +43,7 @@ public class PkgDownloadController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgDownloadController.class);
 
-    public final static String SEGMENT_PKGICON = "__pkgdownload";
+    public final static String SEGMENT_PKGDOWNLOAD = "__pkgdownload";
 
     public final static String KEY_PKGNAME = "pkgName";
     public final static String KEY_REPOSITORYCODE = "repositoryCode";
@@ -66,7 +66,7 @@ public class PkgDownloadController {
     }
 
     @RequestMapping(
-            value = "/" + SEGMENT_PKGICON +
+            value = "/" + SEGMENT_PKGDOWNLOAD +
                     "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
                     KEY_MICRO + "}/{" + KEY_PRERELEASE + "}/{" + KEY_REVISION + "}/{" + KEY_ARCHITECTURECODE + "}/package.hpkg",
             method = RequestMethod.GET)
@@ -153,7 +153,7 @@ public class PkgDownloadController {
             );
 
             try (InputStream inputStream = url.openStream()) {
-                LOGGER.info("downloaded package version; {}", pkgVersionOptional.get());
+                LOGGER.info("downloaded package version; {} - {}", pkgOptional.get().getName(), pkgVersionOptional.get());
                 ByteStreams.copy(inputStream, response.getOutputStream());
             }
         }

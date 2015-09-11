@@ -288,6 +288,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.revision = pkgVersion.getRevision();
         version.preRelease = pkgVersion.getPreRelease();
 
+        version.hasSource = pkgOrchestrationService.getCorrespondingSourcePkgVersion(context, pkgVersion).isPresent();
         version.createTimestamp = pkgVersion.getCreateTimestamp().getTime();
         version.payloadLength = pkgVersion.getPayloadLength();
         version.repositorySourceCode = pkgVersion.getRepositorySource().getCode();

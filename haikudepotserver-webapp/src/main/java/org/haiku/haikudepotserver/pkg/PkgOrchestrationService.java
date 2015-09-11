@@ -203,6 +203,44 @@ public class PkgOrchestrationService {
         return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
     }
 
+    /**
+     * <p>Given a {@link PkgVersion}, see if there is a corresponding source package.</p>
+     */
+
+    public Optional<PkgVersion> getCorrespondingSourcePkgVersion(
+            ObjectContext context,
+            PkgVersion pkgVersion) {
+
+        Preconditions.checkArgument(null!=context, "a context is required");
+        Preconditions.checkArgument(null != pkgVersion, "a pkg version is required");
+
+        Optional<Pkg> pkgSourceOptional = Pkg.getByName(context, pkgVersion.getPkg().getName() + "_source");
+
+        if(pkgSourceOptional.isPresent()) {
+
+            Architecture sourceArchitecture = Architecture.getByCode(
+                    context,
+                    Architecture.CODE_SOURCE).get();
+
+            SelectQuery query = new SelectQuery(
+                    PkgVersion.class,
+                    ExpressionHelper.andAll(ImmutableList.of(
+                            ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkgSourceOptional.get()),
+                            ExpressionFactory.matchExp(
+                                    PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
+                                    pkgVersion.getRepositorySource().getRepository()),
+                            ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE),
+                            ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, sourceArchitecture),
+                            ExpressionHelper.toExpression(pkgVersion.toVersionCoordinates(), null)
+                    ))
+            );
+
+            return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
+        }
+
+        return Optional.empty();
+    }
+
     // ------------------------------
     // SEARCH
 
@@ -1163,20 +1201,20 @@ public class PkgOrchestrationService {
 
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgVersionLocalization pvl) {
         if(Strings.isNullOrEmpty(result.getTitle())
-            && !Strings.isNullOrEmpty(pvl.getTitle().orElse(null))
-            && (null==pattern || pattern.matcher(pvl.getTitle().get()).matches())) {
+                && !Strings.isNullOrEmpty(pvl.getTitle().orElse(null))
+                && (null==pattern || pattern.matcher(pvl.getTitle().get()).matches())) {
             result.setTitle(pvl.getTitle().get());
         }
 
         if(Strings.isNullOrEmpty(result.getSummary())
-            && !Strings.isNullOrEmpty(pvl.getSummary().orElse(null))
-            && (null==pattern || pattern.matcher(pvl.getSummary().get()).matches()) ) {
+                && !Strings.isNullOrEmpty(pvl.getSummary().orElse(null))
+                && (null==pattern || pattern.matcher(pvl.getSummary().get()).matches()) ) {
             result.setSummary(pvl.getSummary().orElse(null));
         }
 
         if(Strings.isNullOrEmpty(result.getDescription())
-            && !Strings.isNullOrEmpty(pvl.getDescription().orElse(null))
-            && (null==pattern || pattern.matcher(pvl.getDescription().get()).matches()) ) {
+                && !Strings.isNullOrEmpty(pvl.getDescription().orElse(null))
+                && (null==pattern || pattern.matcher(pvl.getDescription().get()).matches()) ) {
             result.setDescription(pvl.getDescription().orElse(null));
         }
     }
@@ -1195,8 +1233,8 @@ public class PkgOrchestrationService {
         }
 
         if(Strings.isNullOrEmpty(result.getDescription())
-            && !Strings.isNullOrEmpty(pl.getDescription())
-            && (null==pattern || pattern.matcher(pl.getDescription()).matches())) {
+                && !Strings.isNullOrEmpty(pl.getDescription())
+                && (null==pattern || pattern.matcher(pl.getDescription()).matches())) {
             result.setDescription(pl.getDescription());
         }
     }

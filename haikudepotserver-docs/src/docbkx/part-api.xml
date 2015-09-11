@@ -245,11 +245,11 @@ Distributed under the terms of the MIT License.
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/repository/&lt;repositorycode&gt;/import</listitem>
+                        <listitem>/__repository/&lt;repositorycode&gt;/import</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/repository/&lt;repositorycode&gt;/source/&lt;repositorysourcecode&gt;/import</listitem>
+                        <listitem>/__repository/&lt;repositorycode&gt;/source/&lt;repositorysourcecode&gt;/import</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Response Content-Type</term>
@@ -596,7 +596,11 @@ Distributed under the terms of the MIT License.
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/maintenance/mediumterm</listitem>
+                        <listitem>/__maintenance/hourly</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/__maintenance/daily</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Expected HTTP Status Codes</term>

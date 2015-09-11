@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,6 +43,18 @@ public class UserPasswordResetToken extends _UserPasswordResetToken {
                         ExpressionFactory.matchExp(UserPasswordResetToken.CODE_PROPERTY, code))))
                 .stream()
                 .collect(SingleCollector.optional());
+    }
+
+    /**
+     * <p>This method will return true if the system has any {@link UserPasswordResetToken} objects
+     * stored.  There is no need to perform maintenance tasks for this if not.</p>
+     */
+
+    public static boolean hasAny(ObjectContext context) {
+        Preconditions.checkArgument(null!=context, "a context must be provided");
+        SelectQuery query = new SelectQuery(UserPasswordResetToken.class);
+        query.setFetchLimit(1);
+        return 0 != context.performQuery(query).size();
     }
 
     @Override
