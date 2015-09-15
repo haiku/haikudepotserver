@@ -11,6 +11,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.googlecode.jsonrpc4j.Base64;
+import freemarker.template.utility.StringUtil;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.AbstractQueueJobResult;
@@ -1007,6 +1008,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     .collect(Collectors.toList());
         }
 
+        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCHANGELOG)) {
+            Optional<PkgChangelog> pkgChangelogOptional = pkg.getPkgChangelog();
+
+            if (pkgChangelogOptional.isPresent()) {
+                resultPkg.pkgChangelogContent = Strings.emptyToNull(pkgChangelogOptional.get().getContent());
+            }
+        }
+
         switch(getBulkPkgRequest.versionType) {
             case LATEST:
             {
@@ -1136,7 +1145,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     @Override
     public QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request) {
-        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(null != request);
         return queueSimplePkgJob(
                 QueuePkgCategoryCoverageExportSpreadsheetJobResult.class,
                 PkgCategoryCoverageExportSpreadsheetJobSpecification.class,
@@ -1277,5 +1286,47 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return result;
     }
 
+    @Override
+    public GetPkgChangelogResult getPkgChangelog(GetPkgChangelogRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request, "a request must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
+
+
+
+        ObjectContext context = serverRuntime.getContext();
+        Optional<PkgChangelog> pkgChangelogOptional = getPkg(context, request.pkgName).getPkgChangelog();
+        GetPkgChangelogResult result = new GetPkgChangelogResult();
+
+        if(pkgChangelogOptional.isPresent()) {
+            result.content = pkgChangelogOptional.get().getContent();
+        }
+
+        return result;
+    }
+
+    @Override
+    public UpdatePkgChangelogResult updatePkgChangelog(UpdatePkgChangelogRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request, "a request must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
+
+        ObjectContext context = serverRuntime.getContext();
+        User authUser = obtainAuthenticatedUser(context);
+        Pkg pkg = getPkg(context, request.pkgName);
+
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITCHANGELOG)) {
+            throw new AuthorizationFailureException();
+        }
+
+        String newContent = request.content;
+
+        if(null!=newContent) {
+            newContent = Strings.emptyToNull(newContent.trim());
+        }
+
+        pkgOrchestrationService.updatePkgChangelog(context, pkg, newContent);
+        context.commitChanges();
+
+        return new UpdatePkgChangelogResult();
+    }
 
 }

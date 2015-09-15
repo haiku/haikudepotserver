@@ -16,6 +16,7 @@ public class GetBulkPkgRequest {
         PKGCATEGORIES,
         PKGICONS,
         PKGVERSIONLOCALIZATIONDESCRIPTIONS,
+        PKGCHANGELOG
     };
 
     public List<String> pkgNames;

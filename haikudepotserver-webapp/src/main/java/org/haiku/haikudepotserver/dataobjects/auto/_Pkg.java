@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
+import org.haiku.haikudepotserver.dataobjects.PkgChangelog;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgPkgCategory;
@@ -26,6 +27,7 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NAME_PROPERTY = "name";
     public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
+    public static final String PKG_CHANGELOGS_PROPERTY = "pkgChangelogs";
     public static final String PKG_ICONS_PROPERTY = "pkgIcons";
     public static final String PKG_LOCALIZATIONS_PROPERTY = "pkgLocalizations";
     public static final String PKG_PKG_CATEGORIES_PROPERTY = "pkgPkgCategories";
@@ -73,6 +75,18 @@ public abstract class _Pkg extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PermissionUserPkg> getPermissionUserPkgs() {
         return (List<PermissionUserPkg>)readProperty(PERMISSION_USER_PKGS_PROPERTY);
+    }
+
+
+    public void addToPkgChangelogs(PkgChangelog obj) {
+        addToManyTarget(PKG_CHANGELOGS_PROPERTY, obj, true);
+    }
+    public void removeFromPkgChangelogs(PkgChangelog obj) {
+        removeToManyTarget(PKG_CHANGELOGS_PROPERTY, obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PkgChangelog> getPkgChangelogs() {
+        return (List<PkgChangelog>)readProperty(PKG_CHANGELOGS_PROPERTY);
     }
 
 

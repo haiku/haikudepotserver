@@ -705,6 +705,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(pkg1.name).isEqualTo("pkg1");
         Assertions.assertThat(pkg1.modifyTimestamp).isNotNull();
 
+        Assertions.assertThat(pkg1.pkgChangelogContent).isEqualTo("Stadt\nKarlsruhe");
+
         Assertions.assertThat(pkg1.pkgCategoryCodes.size()).isEqualTo(1);
         Assertions.assertThat(pkg1.pkgCategoryCodes.get(0)).isEqualTo("graphics");
 
@@ -759,6 +761,70 @@ public class PkgApiIT extends AbstractIntegrationTest {
             Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
             Repository repository = Repository.getByCode(context, "testrepo").get();
             Assertions.assertThat(pkg1.getPkgProminence(repository).get().getProminence().getOrdering()).isEqualTo(200);
+        }
+
+    }
+
+    @Test
+    public void testeGetPkgChangelog() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+
+        GetPkgChangelogRequest request = new GetPkgChangelogRequest();
+        request.pkgName = "pkg1";
+
+        // ------------------------------------
+        GetPkgChangelogResult result = pkgApi.getPkgChangelog(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.content).isEqualTo("Stadt\nKarlsruhe");
+    }
+
+    /**
+     * <p>This will override the change log that was there with the new value.</p>
+     */
+
+    @Test
+    public void testUpdatePkgChangelog_withContent() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+        setAuthenticatedUserToRoot();
+
+        UpdatePkgChangelogRequest request = new UpdatePkgChangelogRequest();
+        request.pkgName = "pkg1";
+        request.content = "  das Zimmer  ";
+
+        // ------------------------------------
+        pkgApi.updatePkgChangelog(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Pkg pkgAfter = Pkg.getByName(context, "pkg1").get();
+            Assertions.assertThat(pkgAfter.getPkgChangelog().get().getContent()).isEqualTo("das Zimmer");
+        }
+
+    }
+
+    /**
+     * <p>Writing in no content will mean that the change log that was there is now removed.</p>
+     */
+
+    @Test
+    public void testUpdatePkgChangelog_withNoContent() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+        setAuthenticatedUserToRoot();
+
+        UpdatePkgChangelogRequest request = new UpdatePkgChangelogRequest();
+        request.pkgName = "pkg1";
+        request.content = "";
+
+        // ------------------------------------
+        pkgApi.updatePkgChangelog(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Pkg pkgAfter = Pkg.getByName(context, "pkg1").get();
+            Assertions.assertThat(pkgAfter.getPkgChangelog().isPresent()).isFalse();
         }
 
     }

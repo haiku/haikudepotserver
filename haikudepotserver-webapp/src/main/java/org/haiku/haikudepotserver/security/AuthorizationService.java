@@ -147,6 +147,7 @@ public class AuthorizationService {
                 case PKG_EDITSCREENSHOT:
                 case PKG_EDITCATEGORIES:
                 case PKG_EDITPROMINENCE:
+                case PKG_EDITCHANGELOG:
                 case PKG_EDITLOCALIZATION: {
                     List<? extends AuthorizationPkgRule> rules = authenticatedUser.getAuthorizationPkgRules((Pkg) target);
                     if (rules
@@ -203,6 +204,7 @@ public class AuthorizationService {
             case PKG_EDITSCREENSHOT:
             case PKG_EDITCATEGORIES:
             case PKG_EDITLOCALIZATION:
+            case PKG_EDITCHANGELOG:
             case PKG_EDITPROMINENCE:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 

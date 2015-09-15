@@ -405,6 +405,48 @@ public class PkgOrchestrationService {
     }
 
     // ------------------------------
+    // CHANGE LOG
+
+    /**
+     * <p>Performs necessary modifications to the package so that the changelog is updated
+     * with the new content supplied.</p>
+     */
+
+    public void updatePkgChangelog(
+            ObjectContext context,
+            Pkg pkg,
+            String newContent) {
+
+        Preconditions.checkArgument(null!=context, "the context is not supplied");
+        Preconditions.checkArgument(null!=pkg, "the pkg is not supplied");
+
+        Optional<PkgChangelog> pkgChangelogOptional = pkg.getPkgChangelog();
+
+        if(null!=newContent) {
+            newContent = newContent.trim().replace("\r\n", "\n"); // windows to unix newline.
+        }
+
+        if(pkgChangelogOptional.isPresent()) {
+            if(null==newContent) {
+                context.deleteObject(pkgChangelogOptional.get());
+                LOGGER.info("did remove the changelog for; {}", pkg);
+            }
+            else {
+                pkgChangelogOptional.get().setContent(newContent);
+                LOGGER.info("did update the changelog for; {}",pkg);
+            }
+        }
+        else {
+            if(null!=newContent) {
+                PkgChangelog pkgChangelog = context.newObject(PkgChangelog.class);
+                pkgChangelog.setPkg(pkg);
+                pkgChangelog.setContent(newContent);
+                LOGGER.info("did add a new changelog for; {}", pkg);
+            }
+        }
+    }
+
+    // ------------------------------
     // ICONS
 
     /**

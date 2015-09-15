@@ -183,6 +183,14 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
     }
 
     /**
+     * <p>If there is a change-log then this will return it, otherwise it will return an empty optional.</p>
+     */
+
+    public Optional<PkgChangelog> getPkgChangelog() {
+        return getPkgChangelogs().stream().collect(SingleCollector.optional());
+    }
+
+    /**
      * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
      * English language data is hard-coded into the package payload, english will always be available.</p>
      */

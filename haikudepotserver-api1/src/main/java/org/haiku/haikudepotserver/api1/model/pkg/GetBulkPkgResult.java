@@ -34,6 +34,12 @@ public class GetBulkPkgResult {
 
         public Integer prominenceOrdering;
 
+        /**
+         * @since 2015-09-15
+         */
+
+        public String pkgChangelogContent;
+
     }
 
     public static class PkgVersion {

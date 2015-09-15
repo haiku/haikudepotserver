@@ -201,4 +201,22 @@ public interface PkgApi {
 
     QueuePkgLocalizationCoverageExportSpreadsheetJobResult queuePkgLocalizationCoverageExportSpreadsheetJob(QueuePkgLocalizationCoverageExportSpreadsheetJobRequest request);
 
+    /**
+     * <p>The package might have a change log associated with it.  This is just a long string with notes
+     * about what versions were released and what changed in those releases.  If there is no change log
+     * stored for this package, a NULL value may be returned in {@link GetPkgChangelogResult#content}.
+     * </p>
+     */
+
+    GetPkgChangelogResult getPkgChangelog(GetPkgChangelogRequest request) throws ObjectNotFoundException;
+
+    /**
+     * <p>The package is able to have a change log associated with it.  This method will update the change
+     * log.  If the change log content is supplied as NULL or an empty string then the change log may be
+     * removed.</p>
+     * @throws ObjectNotFoundException if the package is not able to be found.
+     */
+
+    UpdatePkgChangelogResult updatePkgChangelog(UpdatePkgChangelogRequest request) throws ObjectNotFoundException;
+
 }

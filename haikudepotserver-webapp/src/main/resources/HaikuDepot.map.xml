@@ -88,6 +88,18 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="pkg_changelog" schema="haikudepot">
+		<db-attribute name="content" type="VARCHAR" isMandatory="true" length="65535"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.pkg_changelog_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="pkg_icon" schema="haikudepot">
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="media_type_id" type="BIGINT" isMandatory="true"/>
@@ -402,6 +414,11 @@
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 	</obj-entity>
+	<obj-entity name="PkgChangelog" className="org.haiku.haikudepotserver.dataobjects.PkgChangelog" dbEntityName="pkg_changelog" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="content" type="java.lang.String" db-attribute-path="content"/>
+		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+	</obj-entity>
 	<obj-entity name="PkgIcon" className="org.haiku.haikudepotserver.dataobjects.PkgIcon" lock-type="optimistic" dbEntityName="pkg_icon" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="size" type="java.lang.Integer" db-attribute-path="size"/>
 	</obj-entity>
@@ -554,6 +571,9 @@
 	<db-relationship name="permission_user_pkgs" source="pkg" target="permission_user_pkg" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
+	<db-relationship name="pkg_changelogs" source="pkg" target="pkg_changelog" toMany="true">
+		<db-attribute-pair source="id" target="pkg_id"/>
+	</db-relationship>
 	<db-relationship name="pkg_icons" source="pkg" target="pkg_icon" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
@@ -577,6 +597,9 @@
 	</db-relationship>
 	<db-relationship name="pkg_pkg_categories" source="pkg_category" target="pkg_pkg_category" toMany="true">
 		<db-attribute-pair source="id" target="pkg_category_id"/>
+	</db-relationship>
+	<db-relationship name="pkg" source="pkg_changelog" target="pkg" toMany="false">
+		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="media_type" source="pkg_icon" target="media_type" toMany="false">
 		<db-attribute-pair source="media_type_id" target="id"/>
@@ -735,6 +758,7 @@
 	<obj-relationship name="pkg" source="PermissionUserPkg" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="user" source="PermissionUserPkg" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="permissionUserPkgs" source="Pkg" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="permission_user_pkgs"/>
+	<obj-relationship name="pkgChangelogs" source="Pkg" target="PkgChangelog" deleteRule="Cascade" db-relationship-path="pkg_changelogs"/>
 	<obj-relationship name="pkgIcons" source="Pkg" target="PkgIcon" deleteRule="Cascade" db-relationship-path="pkg_icons"/>
 	<obj-relationship name="pkgLocalizations" source="Pkg" target="PkgLocalization" deleteRule="Cascade" db-relationship-path="pkg_localizations"/>
 	<obj-relationship name="pkgPkgCategories" source="Pkg" target="PkgPkgCategory" deleteRule="Cascade" db-relationship-path="pkg_pkg_categories"/>
@@ -742,6 +766,7 @@
 	<obj-relationship name="pkgScreenshots" source="Pkg" target="PkgScreenshot" deleteRule="Cascade" db-relationship-path="pkg_screenshots"/>
 	<obj-relationship name="pkgUserRatingAggregates" source="Pkg" target="PkgUserRatingAggregate" deleteRule="Cascade" db-relationship-path="pkg_user_rating_aggregates"/>
 	<obj-relationship name="publisher" source="Pkg" target="Publisher" deleteRule="Nullify" db-relationship-path="publisher"/>
+	<obj-relationship name="pkg" source="PkgChangelog" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="mediaType" source="PkgIcon" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
 	<obj-relationship name="pkg" source="PkgIcon" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgIconImages" source="PkgIcon" target="PkgIconImage" deleteRule="Deny" db-relationship-path="pkg_icon_images"/>

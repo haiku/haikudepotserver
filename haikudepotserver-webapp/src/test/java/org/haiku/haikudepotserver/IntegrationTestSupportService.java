@@ -141,6 +141,7 @@ public class IntegrationTestSupportService {
         result.pkg1.setActive(true);
         result.pkg1.setName("pkg1");
         pkgOrchestrationService.ensurePkgProminence(context, result.pkg1, result.repository, prominence.getOrdering());
+        pkgOrchestrationService.updatePkgChangelog(context, result.pkg1, "Stadt\r\nKarlsruhe\r\n");
 
         ensureUserRatingAggregate(context, result.pkg1, result.repository, 3.5f, 4);
 
