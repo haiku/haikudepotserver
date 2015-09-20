@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -122,21 +122,36 @@ public class NaturalStringComparator implements Comparator<String> {
             Preconditions.checkNotNull(source);
             Preconditions.checkNotNull(pos);
 
+            // skip any whitespace.
+
+            while (pos.getIndex() < source.length() && Character.isWhitespace(source.charAt(pos.getIndex()))) {
+                pos.setIndex(pos.getIndex() + 1);
+            }
+
+            // if the end has been met then return end.
+
             if(pos.getIndex() >= source.length()) {
                 return new NaturalChunk(NaturalChunk.Type.END, source, pos.getIndex(), 0);
             }
 
             NaturalChunk.Type type = Character.isDigit(source.charAt(pos.getIndex())) ? NaturalChunk.Type.NUMBER : NaturalChunk.Type.ASCII;
 
-            // if the type is numeric then skip past any initial zeros.
+            // if the type is numeric then skip past any initial zeros, but don't do this if it
+            // is actually only zeros before it hits something that is not a zero or a non-numeric.
 
             if(NaturalChunk.Type.NUMBER == type) {
-                while (pos.getIndex() < source.length() && '0'==source.charAt(pos.getIndex())) {
-                    pos.setIndex(pos.getIndex() + 1);
+
+                int i = pos.getIndex();
+
+                while(i < source.length() && '0'==source.charAt(i)) {
+                    i++;
                 }
 
-                if(pos.getIndex() >= source.length()) {
-                    return new NaturalChunk(NaturalChunk.Type.END, source, pos.getIndex(), 0);
+                if(i >= source.length() || !isCharacterOf(NaturalChunk.Type.NUMBER, source.charAt(i))) {
+                    pos.setIndex(i-1);
+                }
+                else {
+                    pos.setIndex(i);
                 }
             }
 

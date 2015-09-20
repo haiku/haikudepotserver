@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,13 @@ import org.junit.Test;
 public class NaturalStringComparatorTest {
 
     private NaturalStringComparator naturalStringComparator = new NaturalStringComparator();
+
+    @Test
+    public void testLeadingZero() {
+        Assertions.assertThat(naturalStringComparator.compare("9p0","0p1")).isGreaterThan(0);
+        Assertions.assertThat(naturalStringComparator.compare("00p0","09p1")).isLessThan(0);
+        Assertions.assertThat(naturalStringComparator.compare("00p0","0p0")).isEqualTo(0);
+    }
 
     @Test
     public void testSimpleNumbers() {

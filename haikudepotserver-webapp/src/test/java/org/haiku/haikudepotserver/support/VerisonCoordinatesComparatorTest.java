@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,6 +15,67 @@ import org.junit.Test;
 public class VerisonCoordinatesComparatorTest {
 
     private VersionCoordinatesComparator versionCoordinatesComparator = new VersionCoordinatesComparator();
+
+    @Test
+    public void testCarootcertificatesVersionComparison() {
+        VersionCoordinates older = new VersionCoordinates(
+                "2014_08_13",
+                null,
+                null,
+                null,
+                1);
+
+        VersionCoordinates newer = new VersionCoordinates(
+                "2015_02_25",
+                null,
+                null,
+                null,
+                1);
+
+        Assertions.assertThat(versionCoordinatesComparator.compare(newer,older)).isGreaterThan(0);
+    }
+
+    @Test
+    public void testOpensslVersionComparison_a() {
+
+        VersionCoordinates newer = new VersionCoordinates(
+                "6",
+                "9p1",
+                null,
+                null,
+                1);
+
+        VersionCoordinates older = new VersionCoordinates(
+                "6",
+                "0p1",
+                null,
+                null,
+                8);
+
+        Assertions.assertThat(versionCoordinatesComparator.compare(newer,older)).isGreaterThan(0);
+
+    }
+
+    @Test
+    public void testOpensslVersionComparison_b() {
+
+        VersionCoordinates newer = new VersionCoordinates(
+                "6",
+                "4p1",
+                null,
+                null,
+                1);
+
+        VersionCoordinates older = new VersionCoordinates(
+                "6",
+                "2p1",
+                null,
+                null,
+                8);
+
+        Assertions.assertThat(versionCoordinatesComparator.compare(newer,older)).isGreaterThan(0);
+
+    }
 
     @Test
     public void testVersionComparison() {
