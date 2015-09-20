@@ -1,0 +1,25 @@
+<div class="content-container">
+
+    <h3><message key="viewPkgChangelog.title" parameters="[pkg.name]"></message></h3>
+
+    <div ng-show="!pkg.changelog.content">
+        <message key="viewPkgChangelog.none"></message>
+    </div>
+
+    <div ng-show="pkg.changelog.content" class="changelog-container">
+        <p><plain-text-content value="pkg.changelog.content"></plain-text-content></p>
+    </div>
+
+    <ul>
+    <li pkg="pkg" show-if-pkg-permission="'PKG_EDITCHANGELOG'">
+        <a
+                breadcrumb-link="editPkgChangelog"
+                breadcrumb-link-parameters="[pkg]">
+            <message key="viewPkgChangelog.editAction.title"></message>
+        </a>
+    </li>
+    </ul>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>

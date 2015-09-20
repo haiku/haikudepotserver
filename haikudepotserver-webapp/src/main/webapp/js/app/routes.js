@@ -47,6 +47,8 @@ angular.module('haikudepotserver').config(
                 .when(pkgVersionPrefix+'/editcategories',{controller:'EditPkgCategoriesController', templateUrl:'/js/app/controller/editpkgcategories.html'})
                 .when(pkgVersionPrefix+'/editprominence',{controller:'EditPkgProminenceController', templateUrl:'/js/app/controller/editpkgprominence.html'})
                 .when(pkgVersionPrefix+'/viewversionlocalizations',{controller:'ViewPkgVersionLocalizationController', templateUrl:'/js/app/controller/viewpkgversionlocalization.html'})
+                .when(pkgVersionPrefix+'/viewchangelog',{controller:'ViewPkgChangelogController', templateUrl:'/js/app/controller/viewpkgchangelog.html'})
+                .when(pkgVersionPrefix+'/editchangelog',{controller:'EditPkgChangelogController', templateUrl:'/js/app/controller/editpkgchangelog.html'})
                 .when(pkgVersionPrefix+'/editlocalizations',{controller:'EditPkgLocalizationController', templateUrl:'/js/app/controller/editpkglocalization.html'})
                 .when(pkgVersionPrefix+'/adduserrating',{controller:'AddEditUserRatingController', templateUrl:'/js/app/controller/addedituserrating.html'})
                 .when('/',{controller:'HomeController',templateUrl:'/js/app/controller/home.html',reloadOnSearch:false})

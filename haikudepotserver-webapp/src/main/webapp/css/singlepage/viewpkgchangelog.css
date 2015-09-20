@@ -1,0 +1,7 @@
+.changelog-container {
+    background-color: #F4F4F4;
+    padding: 16px;
+    margin-bottom: 4px;
+    border: 1px lightgray solid;
+    font-family: 'DejaVu Sans Mono', monospace;
+}

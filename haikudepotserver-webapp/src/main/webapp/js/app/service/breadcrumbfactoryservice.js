@@ -353,6 +353,14 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return createManipulatePkgBreadcrumbItem(pkg, 'viewversionlocalizations', 'viewPkgVersionLocalizations');
                 },
 
+                createViewPkgChangelog : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'viewchangelog', 'viewPkgChangelog');
+                },
+
+                createEditPkgChangelog : function(pkg) {
+                    return createManipulatePkgBreadcrumbItem(pkg, 'editchangelog', 'editPkgChangelog');
+                },
+
                 createEditPkgLocalization : function(pkg) {
                     return createManipulatePkgBreadcrumbItem(pkg, 'editlocalizations', 'editPkgLocalizations');
                 },

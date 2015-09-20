@@ -1,0 +1,30 @@
+<div class="content-container">
+
+    <h3><message key="editPkgChangelog.title" parameters="[pkg.name]"></message></h3>
+
+    <form name="editPkgChangelogForm" novalidate="novalidate">
+
+        <textarea
+                rows="24"
+                name="content"
+                ng-model="changelog.content"></textarea>
+
+        <error-messages
+                key-prefix="editPkgChangelog.content"
+                error="editPkgChangelogForm.content.$error"></error-messages>
+
+        <div class="edit-pkg-changelog-actions-container">
+            <button
+                    ng-click="goSave()"
+                    type="submit"
+                    class="main-action">
+                <message key="editPkgChangelog.action.title"></message>
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

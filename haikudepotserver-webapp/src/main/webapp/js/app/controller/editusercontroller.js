@@ -12,11 +12,9 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
-        'referenceData','messageSource',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,
-            referenceData,messageSource) {
+            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
             $scope.workingUser = undefined;
             var amSaving = false;
@@ -103,7 +101,7 @@ angular.module('haikudepotserver').controller(
                         switch(err.code) {
                             case jsonRpc.errorCodes.VALIDATION:
                                 errorHandling.handleValidationFailures(
-                                    err.data,
+                                    err.data.validationfailures,
                                     $scope.editUserForm);
                                 break;
 
