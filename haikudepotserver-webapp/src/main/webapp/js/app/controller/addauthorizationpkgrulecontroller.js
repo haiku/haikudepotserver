@@ -32,7 +32,7 @@ angular.module('haikudepotserver').controller(
                     'pkg_editcategories',
                     'pkg_editprominence',
                     'pkg_editlocalization',
-                    'pkg_editversionlocalization'
+                    'pkg_editchangelog'
                 ],
                 function(permissionCode) {
                     var result = {
