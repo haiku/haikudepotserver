@@ -15,7 +15,7 @@
         <dt><message key="viewRepository.active.title"></message></dt>
         <dd><active-indicator state="repository.active"></active-indicator>&nbsp;</dd>
         <dt ng-show="repository.informationUrl"><message key="viewRepository.informationUrl.title"></message></dt>
-        <dd ng-show="repository.informationUrl"><a ng-href="repository.informationUrl">{{repository.informationUrl}}</a></dd>
+        <dd ng-show="repository.informationUrl"><a ng-href="{{repository.informationUrl}}">{{repository.informationUrl}}</a></dd>
         <dt><message key="gen.created.title"></message></dt>
         <dd>{{repository.createTimestamp|timestamp}}</dd>
         <dt><message key="gen.modified.title"></message></dt>

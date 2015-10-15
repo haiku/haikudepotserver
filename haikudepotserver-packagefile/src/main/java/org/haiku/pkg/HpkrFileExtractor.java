@@ -35,7 +35,7 @@ public class HpkrFileExtractor implements Closeable {
 
         super();
         Preconditions.checkNotNull(file);
-        Preconditions.checkState(file.isFile() && file.exists());
+        Preconditions.checkState(file.isFile() && file.exists(), "the file does not exist or is not a file");
 
         this.file = file;
         this.header = readHeader();
