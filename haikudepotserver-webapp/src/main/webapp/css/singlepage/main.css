@@ -379,6 +379,35 @@ a moment.
     padding-top: 120px;
 }
 
+.spinner-img circle {
+    stroke: black;
+    stroke-width: 1;
+    fill: white;
+    animation-name: spinner-img-c;
+    animation-duration: 1s;
+    animation-timing-function: ease;
+    animation-iteration-count: infinite;
+}
+
+.spinner-img circle.spinner-img-c0 {
+    animation-delay: 0s;
+}
+
+.spinner-img circle.spinner-img-c1 {
+    animation-delay: 0.25s;
+}
+
+.spinner-img circle.spinner-img-c2 {
+    animation-delay: 0.5s;
+}
+
+@keyframes spinner-img-c {
+    0% { fill:white }
+    25% { fill:black }
+    50% { fill:white }
+    100% { fill:white }
+}
+
 /*
 ==================================
 SEARCH BAR

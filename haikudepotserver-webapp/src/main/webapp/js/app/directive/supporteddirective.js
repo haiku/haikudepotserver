@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,8 +10,8 @@
  */
 
 angular.module('haikudepotserver').directive('supported',[
-    '$log',
-    function($log) {
+    // no injections
+    function() {
         return {
             restrict: 'E',
             link : function($scope,element,attributes) {
