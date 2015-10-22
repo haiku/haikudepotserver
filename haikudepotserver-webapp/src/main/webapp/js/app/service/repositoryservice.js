@@ -41,7 +41,7 @@ angular.module('haikudepotserver').factory('repositoryService',
                             deferred.resolve(result.repositories);
                         },
                         function (err) {
-                            errorHandling.logJsonRpcError(err ? err.error : null);
+                            errorHandling.logJsonRpcError(err);
                             deferred.reject();
                         }
                     );

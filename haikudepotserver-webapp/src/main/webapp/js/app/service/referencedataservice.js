@@ -72,7 +72,7 @@ angular.module('haikudepotserver').factory('referenceData',
                             delete queues[what];
                         },
                         function(err) {
-                            errorHandling.logJsonRpcError(err ? err.error : null,'issue obtaining data for the misc method; '+what);
+                            errorHandling.logJsonRpcError(err,'issue obtaining data for the misc method; '+what);
                             deferred.reject(err);
                         }
                     );

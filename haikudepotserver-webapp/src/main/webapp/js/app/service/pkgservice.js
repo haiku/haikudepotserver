@@ -78,7 +78,7 @@ angular.module('haikudepotserver').factory('pkg',
                         deferred.resolve(result);
                     },
                     function(err) {
-                        errorHandling.logJsonRpcError(err ? err.error : null);
+                        errorHandling.logJsonRpcError(err);
                         deferred.reject();
                     }
                 );

@@ -14,6 +14,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>remote-log-capture</servlet-name>
+        <servlet-class>org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>jawr-servlet-css</servlet-name>
         <servlet-class>net.jawr.web.servlet.JawrServlet</servlet-class>
         <init-param>
@@ -62,6 +68,11 @@
     <servlet-mapping>
         <servlet-name>error-servlet</servlet-name>
         <url-pattern>/error</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>remote-log-capture</servlet-name>
+        <url-pattern>/__log/capture</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
