@@ -43,43 +43,30 @@ angular.module('haikudepotserver').factory('jobs',
                     throw Error('the file must be supplied to provide data for the upload.');
                 }
 
-                var deferred = $q.defer();
-
-                $http({
+                return $http({
                     cache: false,
                     method: 'POST',
                     url: '/secured/jobdata',
                     headers: _.extend({ 'Content-Type' : 'application/octet-stream' },headers),
                     data: file
-                })
-                    .success(function(data,status,header,config) {
-                        var code = header('X-HaikuDepotServer-DataGuid');
+                }).then(
+                    function successFunction(response) {
+                        var code = response.headers('X-HaikuDepotServer-DataGuid');
 
                         if(!code || !code.length) {
                             throw Error('the data guid should have been supplied back from supplying data');
                         }
 
-                        deferred.resolve(code);
-                    })
-                    .error(function(data,status) {
-                        switch(status) {
-                            case 200:
-                                deferred.resolve();
-                                break;
-
-                            case 400: // bad request
-                                deferred.reject(errorCodes.BADREQUEST);
-                                break;
-
-                            default:
-                                deferred.reject(errorCodes.UNKNOWN);
-                                break;
-
+                        return code;
+                    },
+                    function failureFunction(response) {
+                        switch(response.status) {
+                            case 200: return $q.when();
+                            case 400: return $q.reject(errorCodes.BADREQUEST);
+                            default: return $q.reject(errorCodes.UNKNOWN);
                         }
-                    });
-
-                return deferred.promise;
-
+                    }
+                );
             }
 
             return {

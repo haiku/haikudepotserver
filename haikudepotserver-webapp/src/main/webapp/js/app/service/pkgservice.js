@@ -54,9 +54,7 @@ angular.module('haikudepotserver').factory('pkg',
                     throw Error('architecture code must be supplied');
                 }
 
-                var deferred = $q.defer();
-
-                jsonRpc.call(
+                return jsonRpc.call(
                     constants.ENDPOINT_API_V1_PKG,
                     'getPkg',
                     [{
@@ -75,15 +73,13 @@ angular.module('haikudepotserver').factory('pkg',
                 ).then(
                     function(result) {
                         $log.info('fetched '+result.name+' pkg');
-                        deferred.resolve(result);
+                        return result;
                     },
                     function(err) {
                         errorHandling.logJsonRpcError(err);
-                        deferred.reject();
+                        return $q.reject();
                     }
                 );
-
-                return deferred.promise;
             }
 
             /**

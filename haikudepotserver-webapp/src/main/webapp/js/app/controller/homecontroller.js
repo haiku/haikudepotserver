@@ -481,7 +481,7 @@ angular.module('haikudepotserver').controller(
 
                 // it is not possible to fetch packages if there is no architecture selected.  This should be OK to
                 // stop via a conditional because when the architecture is selected (fetched itself) then it will
-                // automatically attempt this refetch again.
+                // automatically attempt this re-fetch again.
 
                 if($scope.selectedArchitecture && $scope.selectedRepositories && $scope.selectedRepositories.length) {
 

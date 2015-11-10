@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -108,9 +108,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
                         };
                     }
 
-                    var deferred = $q.defer();
-
-                    $http({
+                    return $http({
                         cache: false,
                         method: 'POST',
                         url: endpoint,
@@ -123,31 +121,26 @@ angular.module('haikudepotserver').factory('jsonRpc',
                             params : params,
                             id : id
                         }
-                    })
-                    .success(function(data,status) {
-                        if(200!=status) {
-                            deferred.reject(mkTransportErr(status));
-                        }
-                        else {
-                            if(!data.result) {
-
-                                if(!data.error) {
-                                    deferred.reject(mkErr(status,JsonRpcService.errorCodes.INVALIDRESPONSE,'invalid-response'));
-                                }
-                                else {
-                                    deferred.reject(data.error);
-                                }
+                    }).then(
+                        function successCallback(response) {
+                            if(200 != response.status) {
+                                return $q.reject(mkTransportErr(response.status));
                             }
-                            else {
-                                deferred.resolve(data.result);
-                            }
-                        }
-                    })
-                    .error(function(data,status) {
-                        deferred.reject(mkTransportErr(status));
-                    });
 
-                    return deferred.promise;
+                            if(!response.data.result) {
+                                if (!response.data.error) {
+                                    return $q.reject(mkErr(response.status, JsonRpcService.errorCodes.INVALIDRESPONSE, 'invalid-response'));
+                                }
+
+                                return $q.reject(response.data.error);
+                            }
+
+                            return response.data.result;
+                        },
+                        function errorCallback(response) {
+                            return $q.reject(mkTransportErr(response.status));
+                        }
+                    );
                 }
 
             };

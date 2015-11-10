@@ -1,31 +1,28 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 /**
  * <p>This service maintains a list of reference data objects that can be re-used in the system.  This prevents the
- * need to keep going back to the server to ge this material; it can be cached locally.</p>
+ * need to keep going back to the server to get this material; it can be cached locally in-browser.</p>
  */
 
-angular.module('haikudepotserver').factory('referenceData',
+angular.module('haikudepotserver')
+    .factory('referenceDataCache',[
+        '$cacheFactory',
+        function($cacheFactory) {
+            return $cacheFactory('referenceData',{ capacity:25 });
+        }
+    ])
+    .factory('referenceData',
     [
-        '$log','$q','jsonRpc','constants','errorHandling',
-        function($log, $q, jsonRpc,constants,errorHandling) {
-
-            /**
-             * <p>This variable holds a cache of the reference data by method name.</p>
-             */
-
-            var repository = {};
-
-            var queues = {};
+        '$log','$q','jsonRpc','constants','errorHandling','referenceDataCache',
+        function($log, $q, jsonRpc,constants,errorHandling,referenceDataCache) {
 
             /**
              * <p>This method will get the data requested by deriving a method name on the misc api.  The 'what' value
-             * has a "getAll..." prefixed and this forms the correct method name to use.  A system using a queue of
-             * promises is used to avoid two concurrent requests being made for the same data.  A list of data found in
-             * the response object can be found by using the 'what' value for a key.</p>
+             * has a "getAll..." prefixed and this forms the correct method name to use.</p>
              */
 
             function getData(what) {
@@ -34,52 +31,28 @@ angular.module('haikudepotserver').factory('referenceData',
                     throw Error('the method name is expected in order to get reference data');
                 }
 
-                var deferred = $q.defer();
+                var result = referenceDataCache.get(what);
 
-                if(repository[what]) {
-                    deferred.resolve(repository[what]);
-                }
-                else {
-
-                    var queue = queues[what];
-
-                    if(!queue) {
-                        queue = [];
-                        queues[what] = queue;
-                    }
-
-                    queue.push(deferred);
-
-                    jsonRpc
+                if(!result) {
+                    result = jsonRpc
                         .call(
                         constants.ENDPOINT_API_V1_MISCELLANEOUS,
                         'getAll' + what.charAt(0).toUpperCase() + what.substring(1),
                         [{}]
                     ).then(
-                        function(data) {
-
-                            var list = data[what];
-
-                            repository[what] = list;
-
-                            _.each(
-                                queues[what],
-                                function(queueItem) {
-                                    queueItem.resolve(list);
-                                }
-                            );
-
-                            delete queues[what];
+                        function successCallback(data) {
+                          return data[what];
                         },
-                        function(err) {
-                            errorHandling.logJsonRpcError(err,'issue obtaining data for the misc method; '+what);
-                            deferred.reject(err);
+                        function errorCallback(err) {
+                            errorHandling.logJsonRpcError(err,'issue obtaining data for the misc method; ' + what);
+                            return $q.reject();
                         }
                     );
 
+                    referenceDataCache.put(what, result);
                 }
 
-                return deferred.promise;
+                return result;
             }
 
             return {
@@ -91,8 +64,7 @@ angular.module('haikudepotserver').factory('referenceData',
                  */
 
                 feedSupplierTypes : function() {
-                    var deferred = $q.defer();
-                    deferred.resolve(_.map(
+                    return $q.when(_.map(
                         [ 'CREATEDPKGVERSION', 'CREATEDUSERRATING' ],
                         function(item) {
                             return {
@@ -100,7 +72,6 @@ angular.module('haikudepotserver').factory('referenceData',
                             };
                         }
                     ));
-                    return deferred.promise;
                 },
 
                 naturalLanguages : function() {
@@ -124,27 +95,11 @@ angular.module('haikudepotserver').factory('referenceData',
                 },
 
                 architecture : function(code) {
-                    var deferred = $q.defer();
-
-                    getData('architectures').then(
-                        function(allArchitectures) {
-                            var theArchitecture = _.find(allArchitectures, function(anArchitecture) {
-                                return anArchitecture.code == code;
-                            });
-
-                            if(theArchitecture) {
-                                deferred.resolve(theArchitecture);
-                            }
-                            else {
-                                deferred.reject();
-                            }
-                        },
-                        function() {
-                            deferred.reject();
+                    return getData('architectures').then(
+                        function successCallback(allArchitectures) {
+                            return _.findWhere(allArchitectures, { code : code });
                         }
                     );
-
-                    return deferred.promise;
                 }
 
             };

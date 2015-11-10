@@ -439,27 +439,25 @@ angular.module('haikudepotserver').factory('userState',
                     }
                 }
 
-                var deferred = $q.defer();
-
                 // try handle this from the cached data.
 
                 var resultFromCache = tryDeriveFromCache(targetAndPermissions);
 
                 if(resultFromCache) {
-                    deferred.resolve(resultFromCache);
+                    return $q.when(resultFromCache);
                 }
-                else {
 
-                    // push this request to the queue.
+                var deferred = $q.defer();
 
-                    userStateData.checkQueue.push( {
-                        deferred : deferred,
-                        targetAndPermissions : targetAndPermissions
-                    });
+                // push this request to the queue.
 
-                    if(1==userStateData.checkQueue.length) {
-                        handleNextInCheckQueue();
-                    }
+                userStateData.checkQueue.push( {
+                    deferred : deferred,
+                    targetAndPermissions : targetAndPermissions
+                });
+
+                if(1==userStateData.checkQueue.length) {
+                    handleNextInCheckQueue();
                 }
 
                 return deferred.promise;
@@ -575,22 +573,12 @@ angular.module('haikudepotserver').factory('userState',
                 areAuthorized : function(targetAndPermissions) {
                     validateTargetAndPermissions(targetAndPermissions);
 
-                    var deferred = $q.defer();
-
-                    check(targetAndPermissions).then(
+                    return check(targetAndPermissions).then(
                         function(data) {
                             // now filter through and make sure everything is true.
-                            deferred.resolve(!_.find(data, function(item) {
-                                return !item.authorized;
-                            }));
-                        },
-                        function() {
-                            // error handling should already have been dealt with.
-                            deferred.reject();
+                            return !_.find(data, function(item) { return !item.authorized; });
                         }
                     );
-
-                    return deferred.promise;
                 }
 
 

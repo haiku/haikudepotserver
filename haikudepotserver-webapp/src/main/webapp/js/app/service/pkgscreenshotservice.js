@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -62,9 +62,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                         throw Error('to add a screenshot for '+pkg.name+' the image file must be provided');
                     }
 
-                    var deferred = $q.defer();
-
-                    $http({
+                    return $http({
                         cache: false,
                         method: 'POST',
                         url: '/pkgscreenshot/'+pkg.name+'/add?format=png',
@@ -72,42 +70,26 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                             { 'Content-Type' : 'image/png' },
                             PkgScreenshot.headers),
                         data: screenshotFile
-                    })
-                        .success(function(data,status,header,config) {
-                            var code = header('X-HaikuDepotServer-ScreenshotCode');
+                    }).then(
+                        function successFunction(response) {
+                            var code = response.headers('X-HaikuDepotServer-ScreenshotCode');
 
                             if(!code || !code.length) {
                                 throw Error('the screenshot code should have been supplied back from creating a new screenshot');
                             }
 
-                            deferred.resolve(code);
-                        })
-                        .error(function(data,status) {
-                            switch(status) {
-                                case 200:
-                                    deferred.resolve();
-                                    break;
-
-                                case 415: // unsupported media type
-                                    deferred.reject(PkgScreenshot.errorCodes.BADFORMATORSIZEERROR);
-                                    break;
-
-                                case 400: // bad request
-                                    deferred.reject(PkgScreenshot.errorCodes.BADREQUEST);
-                                    break;
-
-                                case 404: // not found
-                                    deferred.reject(PkgScreenshot.errorCodes.NOTFOUND);
-                                    break;
-
-                                default:
-                                    deferred.reject(PkgScreenshot.errorCodes.UNKNOWN);
-                                    break;
-
+                            return code;
+                        },
+                        function failureFunction(response) {
+                            switch(response.status) {
+                                case 200: return $q.when();
+                                case 415: return $q.reject(PkgScreenshot.errorCodes.BADFORMATORSIZEERROR); // unsupported media type
+                                case 400: return $q.reject(PkgScreenshot.errorCodes.BADREQUEST);
+                                case 404: return $q.reject(PkgScreenshot.errorCodes.NOTFOUND);
+                                default: return $q.reject(PkgScreenshot.errorCodes.UNKNOWN);
                             }
-                        });
-
-                    return deferred.promise;
+                        }
+                    );
                 },
 
                 /**

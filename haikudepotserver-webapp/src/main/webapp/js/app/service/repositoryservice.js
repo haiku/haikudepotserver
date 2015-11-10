@@ -15,40 +15,30 @@ angular.module('haikudepotserver').factory('repositoryService',
             $log,$q,jsonRpc,userState,errorHandling,
             constants) {
 
-            var repositories = undefined;
+            var repositoriesPromise = undefined;
 
             /**
              * <p>This function will fetch the package from the standard package version request params.</p>
              */
 
             function getRepositories() {
-
-                var deferred = $q.defer();
-
-                if(repositories) {
-                    deferred.resolve(repositories);
-                }
-                else {
-
-                    jsonRpc.call(
+                if(!repositoriesPromise) {
+                    repositoriesPromise = jsonRpc.call(
                         constants.ENDPOINT_API_V1_REPOSITORY,
                         'getRepositories',
                         [{}]
                     ).then(
-                        function (result) {
-                            $log.info('fetched ' + result.repositories.length + ' repositories');
-                            repositories = result.repositories;
-                            deferred.resolve(result.repositories);
+                        function successCallback(data) {
+                            return data.repositories;
                         },
-                        function (err) {
+                        function errorCallback(err) {
                             errorHandling.logJsonRpcError(err);
-                            deferred.reject();
+                            return $q.reject();
                         }
-                    );
-
+                    )
                 }
 
-                return deferred.promise;
+                return repositoriesPromise;
             }
 
             function preferentialSearchRepositories(repositories) {

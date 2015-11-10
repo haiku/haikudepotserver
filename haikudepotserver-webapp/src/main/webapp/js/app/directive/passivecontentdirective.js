@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,7 +32,6 @@ angular.module('haikudepotserver')
                             throw Error('the path must be supplied to obtain the passive content and must end with ".html"');
                         }
 
-                        var deferred = $q.defer();
                         var isFallback = !naturalLanguageCode || !naturalLanguageCode.length || 'en' == naturalLanguageCode;
                         var pDash = p;
 
@@ -40,52 +39,40 @@ angular.module('haikudepotserver')
                             pDash = p.substring(0, p.length-5) + '_' + naturalLanguageCode + '.html';
                         }
 
-                        var cachedResult = passiveContentCache.get(pDash);
+                        // grab the cached value or fetch it.
 
-                        if(cachedResult) {
-                            deferred.resolve(cachedResult);
-                        }
-                        else {
-                            $http.get('/js/app/passivecontent/' + pDash)
-                                .success(function (data, status) {
+                        var result = passiveContentCache.get(pDash);
 
-                                    if(200==status) {
-                                        passiveContentCache.put(pDash,data);
-                                        deferred.resolve(data);
-                                    }
-                                    else {
-                                        $log.error('http status ' + status + ' error has arisen obtaining the passive content; ' + p);
-                                        deferred.reject();
+                        if(!result) {
+                            result = $http.get('/js/app/passivecontent/' + pDash).then(
+                                function successFunction(response) {
+                                    if(200 == response.status) {
+                                        return response.data;
                                     }
 
-                                })
-                                .error(function(data,status) {
+                                    $log.error('http status ' + status + ' error has arisen obtaining the passive content; ' + p);
+                                    return $q.reject();
+                                },
+                                function failureFunction(response) {
 
-                                    if (404 == status) {
+                                    if(404 == response.status) {
                                         if (!isFallback) {
-                                            getTemplate(p).then(
-                                                function (fallbackData) {
-                                                    deferred.resolve(fallbackData);
-                                                },
-                                                function () {
-                                                    deferred.reject();
-                                                }
-                                            );
+                                            return getTemplate(p); // without a specific language
                                         }
-                                        else {
-                                            $log.error('unable to obtain the passive content; ' + p + ' - not found');
-                                            deferred.reject();
-                                        }
-                                    }
-                                    else {
-                                        $log.error('unable to obtain the passive content; ' + p + '(status:' + status + ')');
-                                        deferred.reject();
+
+                                        $log.error('unable to obtain the passive content; ' + p + ' - not found');
+                                        return $q.reject();
                                     }
 
-                                });
+                                    $log.error('unable to obtain the passive content; ' + p + '(status:' + status + ')');
+                                    return $q.reject();
+                                }
+                            );
+
+                            passiveContentCache.put(pDash, result);
                         }
 
-                        return deferred.promise;
+                        return result;
                     }
 
                     function update() {

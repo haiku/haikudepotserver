@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,26 +7,17 @@
  * <p>This service obtains and stores localized messages from the application.</p>
  */
 
-angular.module('haikudepotserver').factory('messageSource',
+angular.module('haikudepotserver')
+    .factory('naturalLanguageMessagesCache',[
+        '$cacheFactory',
+        function($cacheFactory) {
+            return $cacheFactory('naturalLanguageMessages',{ capacity:10 });
+        }
+    ])
+    .factory('messageSource',
     [
-        '$log','$q','constants','jsonRpc','errorHandling',
-        function($log,$q,constants,jsonRpc,errorHandling) {
-
-            /**
-             * <p>This ends up being a mapping between the natural language code and a mapping of codes to
-             * the messages.</p>
-             */
-
-            var naturalLanguagesMessages = {};
-
-            /**
-             * <p>When multiple requests come in for the same natural language, they may come in concurrently.  If this
-             * is the case then it would be inefficient to go and haul back the same data multiple times.  To avoid
-             * this problem, a queue is maintained that keeps track of clients that have asked for the messages and
-             * will then service those promises in the queue when the actual data comes in.</p>
-             */
-
-            var naturalLanguagesMessagesQueue = {};
+        '$log','$q','constants','jsonRpc','errorHandling','naturalLanguageMessagesCache',
+        function($log,$q,constants,jsonRpc,errorHandling,naturalLanguageMessagesCache) {
 
             /**
              * <p>This method will go off to the server and pull back the messages for the identified natural language
@@ -38,51 +29,29 @@ angular.module('haikudepotserver').factory('messageSource',
                     throw Error('the natural language code should be supplied to get messages');
                 }
 
-                var deferred = $q.defer();
+                var result = naturalLanguageMessagesCache.get(naturalLanguageCode);
 
-                if(naturalLanguagesMessages[naturalLanguageCode]) {
-                    deferred.resolve(naturalLanguagesMessages[naturalLanguageCode]);
-                }
-                else {
+                if(!result) {
+                    result = jsonRpc.call(
+                        constants.ENDPOINT_API_V1_MISCELLANEOUS,
+                        'getAllMessages',
+                        [
+                            {naturalLanguageCode: naturalLanguageCode}
+                        ]
+                    ).then(
+                        function successCallback(data) {
+                            return data.messages;
+                        },
+                        function errorCallback(err) {
+                            errorHandling.logJsonRpcError(err, 'unable to get the messages from the server for natural language; ' + naturalLanguageCode);
+                            return $q.reject();
+                        }
+                    );
 
-                    var queue = naturalLanguagesMessagesQueue[naturalLanguageCode];
-
-                    if(!queue) {
-                        queue = [];
-                        naturalLanguagesMessagesQueue[naturalLanguageCode] = queue;
-                    }
-
-                    queue.push(deferred);
-
-                    if(1==queue.length) {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                            'getAllMessages',
-                            [
-                                { naturalLanguageCode: naturalLanguageCode }
-                            ]
-                        ).then(
-                            function (data) {
-                                naturalLanguagesMessages[naturalLanguageCode] = data.messages;
-
-                                _.each(
-                                    queue,
-                                    function(d) {
-                                        d.resolve(naturalLanguagesMessages[naturalLanguageCode]);
-                                    }
-                                );
-
-                                delete naturalLanguagesMessagesQueue[naturalLanguageCode];
-                            },
-                            function(err) {
-                                errorHandling.logJsonRpcError(err, 'unable to get the messages from the server for natural language; ' + naturalLanguageCode);
-                                deferred.reject(null);
-                            }
-                        );
-                    }
+                    naturalLanguageMessagesCache.put(naturalLanguageCode, result);
                 }
 
-                return deferred.promise;
+                return result;
             }
 
             /**
@@ -99,35 +68,15 @@ angular.module('haikudepotserver').factory('messageSource',
                     throw Error('a key must be supplied to get a message');
                 }
 
-                var deferred = $q.defer();
-
-                getMessages(naturalLanguageCode).then(
-                    function(messages) {
-
-                        // if it cannot be found in the requested language then it may be possible to fall back to
-                        // looking up the key in english.
-
+                return getMessages(naturalLanguageCode).then(
+                    function successCallback(messages) {
                         if(!messages[key] && naturalLanguageCode != constants.NATURALLANGUAGECODE_ENGLISH) {
-                            getMessage(constants.NATURALLANGUAGECODE_ENGLISH, key)
-                                .then(
-                                    function(value) {
-                                        deferred.resolve(value);
-                                    },
-                                    function() {
-                                        deferred.reject();
-                                    }
-                                );
+                            return getMessage(constants.NATURALLANGUAGECODE_ENGLISH, key);
                         }
-                        else {
-                            deferred.resolve(messages[key] ? messages[key] : key);
-                        }
-                    },
-                    function() {
-                        deferred.reject(null);
+
+                        return messages[key] ? messages[key] : key;
                     }
                 );
-
-                return deferred.promise;
             }
 
             return {
