@@ -23,15 +23,16 @@ MAXSHUTDOWNDELAYSECONDS=20
 
 JAVA_HOME=/usr/lib/jvm/jre
 JAVA_OPTS="-Dfile.encoding=UTF-8 \
+-Dcommand.identifier=${HDS_PSIDENTIFIER} \
 -Dlogback.configurationFile=${HDS_CONFIGBASE}/logback.xml \
 -Duser.timezone=GMT0 \
 -Xms512m -Xmx640m \
 -Djava.awt.headless=true \
 -Dconfig.properties=file://${HDS_CONFIGBASE}/config.properties \
--jar ${HDS_HOME}/haikudepotserver-webapp-exec-war.jar \
--resetExtract \
--httpPort ${rpm.http.port} \
--extractDirectory /var/cache/haikudepotserver${rpm.variant}/extract"
+-jar ${HDS_HOME}/jetty-runner.jar \
+--jar ${HDS_HOME}/postgresql.jar \
+--port ${rpm.http.port} \
+${HDS_HOME}/haikudepotserver-webapp.war"
 
 haikudepotserver_pid() {
   echo `ps aux | grep "${HDS_PSIDENTIFIER}" | grep -v grep | awk '{ print $2 }'`
@@ -43,7 +44,7 @@ start() {
     echo "haikudepotserver${rpm.variant}; is already running (pid: $pid)"
   else
     echo "haikudepotserver${rpm.variant}; starting..."
-    /bin/su -s /bin/bash haikudepotserver${rpm.variant} -c "${JAVA_HOME}/bin/java ${JAVA_OPTS} -Dcommand.identifier=${HDS_PSIDENTIFIER} 2>&1 | tee -a ${HDS_LOGFILE} > /dev/null &"
+    /bin/su -s /bin/bash haikudepotserver${rpm.variant} -c "${JAVA_HOME}/bin/java ${JAVA_OPTS} 2>&1 | tee -a ${HDS_LOGFILE} > /dev/null &"
   fi
   return 0
 }

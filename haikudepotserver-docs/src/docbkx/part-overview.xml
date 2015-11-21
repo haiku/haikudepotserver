@@ -58,20 +58,35 @@ Distributed under the terms of the MIT License.
 
     <section xml:id="overview-prerequisites">
         <title>Prerequisites</title>
+
         <para>
             <itemizedlist>
                 <listitem><ulink url="https://community.java.net/open-jdk">Java</ulink> (&gt;= 7)</listitem>
                 <listitem><ulink url="http://maven.apache.org">Maven</ulink> (&gt;= 3.0.3)</listitem>
                 <listitem><ulink url="https://www.postgres.org">Postgres</ulink> (&gt;= 9.3)</listitem>
+                <listitem><ulink url="https://jdbc.postgresql.org/">Postgres JDBC Driver</ulink> (&gt;= 9.3) (deployment)</listitem>
+                <listitem><ulink url="http://www.eclipse.org/jetty/documentation/current/runner.html">Jetty Runner</ulink> (&gt;= 9.3) (deployment)</listitem>
             </itemizedlist>
         </para>
 
-        <para>On a debian host, these prerequisites can be installed with;</para>
+        <para>On a debian host, some of these prerequisites can be installed with;</para>
 
         <para>
             <programlisting>apt-get install default-jdk
 apt-get install maven
 apt-get install postgresql postgresql-client</programlisting>
+        </para>
+
+        <para>
+            You can
+            <ulink url="http://mvnrepository.com/artifact/org.eclipse.jetty/jetty-runner">download</ulink>
+            the Jetty Runner jar file from the Maven Repository.
+        </para>
+
+        <para>
+            You can
+            <ulink url="http://mvnrepository.com/artifact/org.postgresql/postgresql">download</ulink>
+            the Jetty Runner jar file from the Maven Repository.
         </para>
 
         <section xml:id="overview-prerequisites-buildingonlinux">

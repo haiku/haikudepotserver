@@ -12,11 +12,11 @@ Distributed under the terms of the MIT License.
 
     <para>
         This section outlines the approximate steps to deploy the web application-server.  The application-server
-        build process produces a &quot;stand-alone&quot; java program.  This build artifact is a packaged
-        &quot;jar&quot; file that contains the
-        <ulink url="http://tomcat.apache.org">Tomcat</ulink>
-        servlet container as well as the web application.  Upon launching, it will unbundle necessary parts and
-        start-up listening on a socket for inbound HTTP requests.
+        build process produces a standard JEE "war" packaged web application.  In the typical haikudepotserver
+        deployment, this will be launched with the <ulink url="http://www.eclipse.org/jetty">Jetty</ulink> application
+        server.  A special build of the Jetty application server called &quot;jetty-runner&quot; is used which
+        contains the essential Jetty server elements packaged as a single java jar file.  This avoids the need to
+        install the full Jetty distribution.
     </para>
 
     <warning>
@@ -41,7 +41,7 @@ Distributed under the terms of the MIT License.
         <link linkend="prerequisites">prerequisites</link> required for running this software and
         <link linkend="buildandrelease">information</link> about obtaining a build product and possibly also
         creating a release version.  The build product that you will require for deployment can be found at
-        &quot;haikudepotserver-webapp/target/haikudepotserver-webapp-1.2.3-war-exec.jar&quot;.
+        &quot;haikudepotserver-webapp/target/haikudepotserver-webapp-1.2.3.war&quot;.
         The leaf-name will vary depending on the release that is being build.  You should also refer to
         <link linkend="config">the configuration section</link>
         for details of the format and keys for the configuration file.  You will need to create a configuration
@@ -59,26 +59,16 @@ Distributed under the terms of the MIT License.
 -Duser.timezone=GMT0 \
 -Djava.awt.headless=true \
 -Dconfig.properties=file:///etc/haikudepotserver/config.properties \
--jar haikudepotserver-webapp-1.2.3-war-exec.jar \
--resetExtract \
--extractDirectory /var/cache/haikudepotserver</programlisting>
+-jar /opt/haikudepotserver/jetty-runner.jar \
+--jar /opt/haikudepotserver/postgresql.jar \
+--port 8801 \
+/opt/haikudepotserver/haikudepotserver-webapp.war</programlisting>
     </para>
 
     <para>
         By default the logging will be streamed to stdout/stderr.  It is possible to configure this using
         <ulink url="http://logback.qos.ch/">logback</ulink>
         logging configuration file.
-    </para>
-
-    <para>
-        There are a handful of other easily-accessed command line options which can be used to fine-tune
-        the deployment.  These can be viewed by executing the binary as follows;
-    </para>
-
-    <para>
-        <programlisting>java \
--jar haikudepotserver-webapp-1.2.3-war-exec.jar \
--h</programlisting>
     </para>
 
     <section xml:id="deployment-settinguprepositories">
@@ -131,8 +121,8 @@ Distributed under the terms of the MIT License.
             database server will need to be installed before the application server can be successfully
             started --- see
             <link linkend="prerequisites">prerequisites</link>
-            \ref{prerequisites}.
-            Two RPMs are built;
+            \ref{prerequisites}.  The RPM will install Jetty Runner and the Postgres JDBC driver itself so
+            you do not need to concern yourself with those.  Two RPMs are built;
         </para>
 
         <informaltable>
@@ -214,10 +204,6 @@ Distributed under the terms of the MIT License.
                         <row>
                             <entry>/opt/haikudepotserver-test</entry>
                             <entry>Application server binary resources</entry>
-                        </row>
-                        <row>
-                            <entry>/var/cache/haikudepotserver-test</entry>
-                            <entry>Operational files for the application server</entry>
                         </row>
                         <row>
                             <entry>/etc/haikudepotserver-test</entry>

@@ -87,6 +87,7 @@
         <property name="properties">
             <props>
                 <prop key="jawr.debug.on">${jawr.debug.on:false}</prop>
+                <prop key="jawr.factory.use.orphans.mapper">false</prop>
             </props>
         </property>
     </bean>

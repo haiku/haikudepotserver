@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2015, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,7 +9,9 @@ import org.haiku.haikudepotserver.multipage.model.Pagination;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.jsp.JspException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +48,8 @@ public class PaginationLinksTag extends RequestContextAwareTag {
     }
 
     private String deriveHref(int targetPage) {
-        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequest();
+        String path = (String) pageContext.getRequest().getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+        UriComponentsBuilder builder = ServletUriComponentsBuilder.newInstance().path(path);
         builder.replaceQueryParam("o", Integer.toString(targetPage * getPagination().getMax()));
         return builder.build().toString();
     }

@@ -29,7 +29,7 @@
             <artifactId>haikudepotserver-docs</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -51,7 +51,7 @@
             <artifactId>opencsv</artifactId>
         </dependency>
 
-        
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -69,7 +69,7 @@
             <artifactId>log4j-over-slf4j</artifactId>
         </dependency>
 
-        
+
         <dependency>
             <groupId>jstl</groupId>
             <artifactId>jstl</artifactId>
@@ -90,14 +90,19 @@
         </dependency>
         <dependency>
             <groupId>net.jawr</groupId>
-            <artifactId>jawr</artifactId>
+            <artifactId>jawr-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator-core</artifactId>
+            <version>0.27</version>
         </dependency>
         <dependency>
             <groupId>rome</groupId>
             <artifactId>rome</artifactId>
         </dependency>
 
-        
+
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
@@ -118,19 +123,19 @@
             <version>2.0</version>
         </dependency>
 
-        
+
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
         </dependency>
 
-        
+
         <dependency>
             <groupId>org.imgscalr</groupId>
             <artifactId>imgscalr-lib</artifactId>
         </dependency>
 
-        
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
@@ -144,7 +149,7 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
@@ -208,7 +213,7 @@
 
         <plugins>
 
-            
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -254,7 +259,7 @@
                     <jsTestSrcDir>${project.basedir}/src/test/javascript</jsTestSrcDir>
 
                     <!--<sourceExcludes>-->
-                        <!--<exclude>haikudepotserver.js</exclude>-->
+                    <!--<exclude>haikudepotserver.js</exclude>-->
                     <!--</sourceExcludes>-->
 
                     <webDriverClassName>org.openqa.selenium.firefox.FirefoxDriver</webDriverClassName>
@@ -274,38 +279,25 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.1</version>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
                 <configuration>
-                    <path>/</path>
+                    <contextXml>src/etc/jetty/context.xml</contextXml>
                 </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.postgresql</groupId>
                         <artifactId>postgresql</artifactId>
                         <version>${postgresql.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>org.slf4j</groupId>
+                                <artifactId>slf4j-simple</artifactId>
+                            </exclusion>
+                        </exclusions>
                     </dependency>
                 </dependencies>
-                <executions>
-                    <execution>
-                        <id>tomcat-run</id>
-                        <goals>
-                            <goal>exec-war-only</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <path>/</path>
-                            <extraDependencies>
-                                <dependency>
-                                    <groupId>org.postgresql</groupId>
-                                    <artifactId>postgresql</artifactId>
-                                    <version>${postgresql.version}</version>
-                                </dependency>
-                            </extraDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>

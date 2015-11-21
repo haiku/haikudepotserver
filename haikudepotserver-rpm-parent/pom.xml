@@ -136,6 +136,8 @@
                             <groupname>haikudepotserver${rpm.variant}</groupname>
                         </mapping>
 
+                        <!-- the servlet container that will run the application-server -->
+
                         <mapping>
                             <directory>/opt/haikudepotserver${rpm.variant}</directory>
                             <directoryIncluded>false</directoryIncluded>
@@ -145,16 +147,11 @@
                             <dependency>
                                 <includes>
                                     <include>org.haiku:haikudepotserver-webapp</include>
+                                    <include>org.eclipse.jetty:jetty-runner</include>
+                                    <include>org.postgresql:postgresql</include>
                                 </includes>
                                 <stripVersion>true</stripVersion>
                             </dependency>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/var/cache/haikudepotserver${rpm.variant}</directory>
-                            <filemode>770</filemode>
-                            <username>haikudepotserver${rpm.variant}</username>
-                            <groupname>haikudepotserver${rpm.variant}</groupname>
                         </mapping>
 
                         <mapping>
@@ -174,10 +171,22 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-runner</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>haikudepotserver-webapp</artifactId>
             <version>${project.version}</version>
-            <classifier>exec-war</classifier>
+            <type>war</type>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -185,8 +194,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        
 
         <dependency>
             <groupId>${project.groupId}</groupId>

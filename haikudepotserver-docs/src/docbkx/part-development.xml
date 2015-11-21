@@ -30,7 +30,7 @@ Distributed under the terms of the MIT License.
 -Dfile.encoding=UTF-8 \
 -Duser.timezone=GMT0 \
 -Djava.awt.headless=true \
-org.apache.tomcat.maven:tomcat7-maven-plugin:2.1:run</programlisting>
+jetty:run</programlisting>
     </para>
 
     <para>

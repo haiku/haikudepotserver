@@ -13,7 +13,9 @@ import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +66,8 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
 
             if(currentNaturalLanguage != naturalLanguage) {
 
-                ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequest();
+                String path = (String) pageContext.getRequest().getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+                UriComponentsBuilder builder = ServletUriComponentsBuilder.newInstance().path(path);
                 builder.replaceQueryParam(WebConstants.KEY_NATURALLANGUAGECODE, naturalLanguage.getCode());
 
                 tagWriter.startTag("a");
