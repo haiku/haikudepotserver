@@ -13,6 +13,7 @@ import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.io.*;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +30,18 @@ public abstract class AbstractExternalToolService<T> {
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractExternalToolService.class);
 
     protected static long TIMEOUT = 30 * 1000;
+
+    protected File temporaryDirectory = null;
+
+    private synchronized File getTemporaryDirectory() {
+        if(null==temporaryDirectory) {
+            temporaryDirectory = Files.createTempDir();
+            temporaryDirectory.deleteOnExit();
+            LOGGER.info("did create the temporary directory; {}", temporaryDirectory);
+        }
+
+        return temporaryDirectory;
+    }
 
     private void quietlyDeleteTemporaryFile(File f) {
         if(f.exists()) {
@@ -72,7 +85,7 @@ public abstract class AbstractExternalToolService<T> {
         long startMs = System.currentTimeMillis();
 
         File temporaryInputFile = File.createTempFile("image-input",".png");
-        File temporaryOutputFile = new File(Files.createTempDir(), UUID.randomUUID().toString());
+        File temporaryOutputFile = new File(getTemporaryDirectory(), UUID.randomUUID().toString());
 
         try {
             inputSource.copyTo(Files.asByteSink(temporaryInputFile));
