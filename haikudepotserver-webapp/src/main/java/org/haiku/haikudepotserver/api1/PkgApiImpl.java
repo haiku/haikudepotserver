@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
-import com.googlecode.jsonrpc4j.Base64;
 import freemarker.template.utility.StringUtil;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -619,7 +618,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
 
                 try {
-                    byte[] data = Base64.decode(pkgIconApi.dataBase64);
+                    byte[] data = Base64.getDecoder().decode(pkgIconApi.dataBase64);
 
                     ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data);
 

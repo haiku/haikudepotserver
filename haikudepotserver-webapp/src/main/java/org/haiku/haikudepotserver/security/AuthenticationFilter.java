@@ -9,7 +9,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
-import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -72,7 +72,7 @@ public class AuthenticationFilter implements Filter {
                 switch(authorizationMatcher.group(1)) {
 
                     case "Basic":
-                        byte[] usernamePasswordBytes = Base64.decode(authorizationMatcher.group(2));
+                        byte[] usernamePasswordBytes = Base64.getDecoder().decode(authorizationMatcher.group(2));
 
                         if (null != usernamePasswordBytes && usernamePasswordBytes.length >= 3) {
                             List<String> parts = new ArrayList<>();

@@ -123,7 +123,7 @@
             <dependency>
                 <groupId>com.github.briandilley.jsonrpc4j</groupId>
                 <artifactId>jsonrpc4j</artifactId>
-                <version>1.1</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet.jsp</groupId>

@@ -42,10 +42,18 @@
 
 <!--
 The presence of this will get the JSON-RPC APIs activated without needing
-to do it manually.
+to do it manually.  The invocation listener will handle logging of errors.
 -->
 
     <bean class="com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceExporter">
+        <!-- prevents spring from also logging the exception -->
+        <property name="registerTraceInterceptor" value="false"></property>
+        <!-- prevents jsonrpc4j from also logging the exception -->
+        <property name="exceptionLogLevel" value="FINEST"/>
+        <!-- allows hds control over how the exception is logged -->
+        <property name="invocationListener">
+            <bean class="org.haiku.haikudepotserver.support.JsonRpcInvocationListener"/>
+        </property>
         <property name="errorResolver">
             <bean class="org.haiku.haikudepotserver.api1.support.ErrorResolverImpl"/>
         </property>
