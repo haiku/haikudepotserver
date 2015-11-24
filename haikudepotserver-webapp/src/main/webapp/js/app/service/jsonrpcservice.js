@@ -40,7 +40,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
                 headers : {},
 
                 /**
-                 * <p>This method will set the HTTP hder that is sent on each JSON-RPC request.  This is handy,
+                 * <p>This method will set the HTTP header that is sent on each JSON-RPC request.  This is handy,
                  * for example for authentication.</p>
                  */
 

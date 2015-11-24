@@ -108,7 +108,7 @@ public class FallbackController {
         }
     }
 
-    private void streamFavicon(HttpServletResponse response) throws IOException {
+    private void streamFavicon(RequestMethod method, HttpServletResponse response) throws IOException {
         Preconditions.checkState(null!=servletContext, "the servlet context must be supplied");
         response.setContentType(com.google.common.net.MediaType.ICO.toString());
 
@@ -117,7 +117,9 @@ public class FallbackController {
                 throw new IllegalStateException("unable to find the favicon resource");
             }
 
-            ByteStreams.copy(inputStream, response.getOutputStream());
+            if(method != RequestMethod.HEAD) {
+                ByteStreams.copy(inputStream, response.getOutputStream());
+            }
         }
     }
 
@@ -153,8 +155,9 @@ public class FallbackController {
     }
 
 
-    @RequestMapping(value = "/{"+KEY_TERM+"}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{"+KEY_TERM+"}", method = { RequestMethod.GET, RequestMethod.HEAD } )
     public void fallback(
+            RequestMethod method,
             HttpServletResponse response,
             @PathVariable(value = KEY_TERM) String term)
             throws IOException {
@@ -167,7 +170,7 @@ public class FallbackController {
                 break;
 
             case FAVICON:
-                streamFavicon(response);
+                streamFavicon(method, response);
                 break;
 
             case PKG:
