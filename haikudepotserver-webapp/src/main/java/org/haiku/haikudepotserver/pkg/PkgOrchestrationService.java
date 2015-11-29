@@ -233,7 +233,7 @@ public class PkgOrchestrationService {
             Optional<PkgVersion> pkgVersionOptional = pkgVersions
                     .stream()
                     .filter(PkgVersion::getActive)
-                    .sorted((pv1, pv2) -> comparator.compare(pv1.toVersionCoordinates(), pv2.toVersionCoordinates()))
+                    .sorted((pv1, pv2) -> comparator.compare(pv2.toVersionCoordinates(), pv1.toVersionCoordinates()))
                     .findFirst();
 
             if(pkgVersionOptional.isPresent()) {
