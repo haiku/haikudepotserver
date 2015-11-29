@@ -33,6 +33,7 @@ public enum Permission {
     PKG_EDITLOCALIZATION(TargetType.PKG),
     PKG_EDITPROMINENCE(TargetType.PKG),
     PKG_EDITCHANGELOG(TargetType.PKG),
+    PKG_EDITVERSION(TargetType.PKG), // means edit the meta-data about a version + enabled / disabled
 
     BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET(null),
     BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET(null),

@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.api1;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
-import com.googlecode.jsonrpc4j.Base64;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.api1.model.pkg.*;
@@ -22,6 +21,7 @@ import org.haiku.haikudepotserver.api1.support.LimitExceededException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -293,15 +293,15 @@ public class PkgApiIT extends AbstractIntegrationTest {
                 new ConfigurePkgIconRequest.PkgIcon(
                         MediaType.PNG.toString(),
                         16,
-                        Base64.encodeBytes(sampleHvif)),
+                        Base64.getEncoder().encodeToString(sampleHvif)),
                 new ConfigurePkgIconRequest.PkgIcon(
                         MediaType.PNG.toString(),
                         32,
-                        Base64.encodeBytes(sampleHvif)),
+                        Base64.getEncoder().encodeToString(sampleHvif)),
                 new ConfigurePkgIconRequest.PkgIcon(
                         MediaType.PNG.toString(),
                         64,
-                        Base64.encodeBytes(sampleHvif)));
+                        Base64.getEncoder().encodeToString(sampleHvif)));
 
         try {
 
@@ -342,15 +342,15 @@ public class PkgApiIT extends AbstractIntegrationTest {
                 new ConfigurePkgIconRequest.PkgIcon(
                         MediaType.PNG.toString(),
                         16,
-                        Base64.encodeBytes(sample16)),
+                        Base64.getEncoder().encodeToString(sample16)),
                 new ConfigurePkgIconRequest.PkgIcon(
                         MediaType.PNG.toString(),
                         32,
-                        Base64.encodeBytes(sample32)),
+                        Base64.getEncoder().encodeToString(sample32)),
                 new ConfigurePkgIconRequest.PkgIcon(
                         MediaType.PNG.toString(),
                         64,
-                        Base64.encodeBytes(sample64)));
+                        Base64.getEncoder().encodeToString(sample64)));
 
         // ------------------------------------
         pkgApi.configurePkgIcon(request);
@@ -398,7 +398,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
                 new ConfigurePkgIconRequest.PkgIcon(
                         org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE,
                         null,
-                        Base64.encodeBytes(sampleHvif)));
+                        Base64.getEncoder().encodeToString(sampleHvif)));
 
         // ------------------------------------
         pkgApi.configurePkgIcon(request);
@@ -827,6 +827,36 @@ public class PkgApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(pkgAfter.getPkgChangelog().isPresent()).isFalse();
         }
 
+    }
+
+    @Test
+    public void updatePkgVersion_deactivate() throws ObjectNotFoundException {
+        integrationTestSupportService.createStandardTestData();
+        setAuthenticatedUserToRoot();
+
+        UpdatePkgVersionRequest request = new UpdatePkgVersionRequest();
+        request.pkgName = "pkg1";
+        request.repositoryCode = "testrepo";
+        request.architectureCode = "x86";
+        request.major = "1";
+        request.micro = "2";
+        request.revision = 3;
+
+        request.filter = Collections.singletonList(UpdatePkgVersionRequest.Filter.ACTIVE);
+        request.active = false;
+
+        // ------------------------------------
+        pkgApi.updatePkgVersion(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+            Repository repository = Repository.getByCode(context, "testrepo").get();
+            Architecture architecture = Architecture.getByCode(context, "x86").get();
+            PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
+            Assertions.assertThat(pkgVersion.getActive()).isFalse();
+        }
     }
 
 }

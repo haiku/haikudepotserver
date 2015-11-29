@@ -116,9 +116,9 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
         Preconditions.checkArgument(null != context);
         Preconditions.checkArgument(null != pkg);
-        Preconditions.checkArgument(null!=architecture);
-        Preconditions.checkArgument(null!=versionCoordinates && null!=versionCoordinates.getMajor(), "missing or malformed version coordinates");
-        Preconditions.checkArgument(null!=repository, "the repository is required to lookup a package version");
+        Preconditions.checkArgument(null != architecture);
+        Preconditions.checkArgument(null != versionCoordinates && null!=versionCoordinates.getMajor(), "missing or malformed version coordinates");
+        Preconditions.checkArgument(null != repository, "the repository is required to lookup a package version");
 
         List<Expression> expressions = new ArrayList<>();
 

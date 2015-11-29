@@ -219,4 +219,11 @@ public interface PkgApi {
 
     UpdatePkgChangelogResult updatePkgChangelog(UpdatePkgChangelogRequest request) throws ObjectNotFoundException;
 
+    /**
+     * <p>This method will allow a package version to be updated.</p>
+     * @throws ObjectNotFoundException if the package version is not able to be found.
+     */
+
+    UpdatePkgVersionResult updatePkgVersion(UpdatePkgVersionRequest request) throws ObjectNotFoundException;
+
 }

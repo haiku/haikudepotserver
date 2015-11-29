@@ -63,6 +63,8 @@
     <div id="pkg-metadata-container">
 
         <dl>
+            <dt ng-show="!pkg.versions[0].active"><message key="viewPkg.active.title"></message></dt>
+            <dd ng-show="!pkg.versions[0].active"><boolean-indicator state="pkg.versions[0].active"></boolean-indicator></dd>
             <dt><message key="viewPkg.name.title"></message></dt>
             <dd>{{pkg.name}}</dd>
             <dt ng-show="pkg.versions[0].repository"><message key="viewPkg.repository.title"></message></dt>
@@ -291,6 +293,13 @@
                     breadcrumb-link="viewPkgChangelog"
                     breadcrumb-link-parameters="[pkg]">
                     <message key="viewPkg.viewPkgChangelogAction.title"></message>
+                </a>
+            </li>
+            <li
+                    pkg="pkg"
+                    show-if-pkg-permission="'PKG_EDITVERSION'">
+                <a href="" ng-click="goDeactivate()">
+                    <message key="viewPkg.deactivateAction.title"></message>
                 </a>
             </li>
         </ul>

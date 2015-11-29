@@ -428,6 +428,38 @@ angular.module('haikudepotserver').controller(
 
             };
 
+            $scope.goDeactivate = function() {
+                var pv = $scope.pkg.versions[0];
+
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_PKG,
+                    "updatePkgVersion",
+                    [{
+                        filter : [ 'ACTIVE' ],
+                        active : false,
+                        repositoryCode : pv.repository.code,
+                        pkgName : $routeParams.name,
+                        architectureCode : pv.architectureCode,
+                        major : pv.major,
+                        minor : pv.minor,
+                        micro : pv.micro,
+                        preRelease : pv.preRelease,
+                        revision : pv.revision
+                    }]
+                ).then(
+                    function() {
+                        $log.info('deactivated '+$routeParams.name+' pkg version');
+                        refetchPkgIconMetaData();
+                        $scope.pkg.modifyTimestamp = new Date().getTime();
+                        $scope.pkg.versions[0].active = false;
+                    },
+                    function(err) {
+                        $log.error('unable to deactivate '+$routeParams.name);
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
+            };
+
             /**
              * <p>This function will produce a spreadsheet of the user ratings for this
              * package.</p>

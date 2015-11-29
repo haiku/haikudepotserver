@@ -204,6 +204,59 @@ public class PkgOrchestrationService {
     }
 
     /**
+     * <p>For the given architecture and package, re-establish what is the latest package and correct it.
+     * This may be necessary after, for example, adjusting the active flag on a pkg version.</p>
+     * @return the updated latest package version or an empty option if there is none.
+     */
+
+    public Optional<PkgVersion> adjustLatest(
+            ObjectContext context,
+            Pkg pkg,
+            Architecture architecture) {
+
+        Preconditions.checkArgument(null != context, "a context is required");
+        Preconditions.checkArgument(null != pkg, "the package must be supplied");
+        Preconditions.checkArgument(null != architecture, "the architecture must be supplied");
+
+        List<PkgVersion> pkgVersions = (List<PkgVersion>) context.performQuery(new SelectQuery(
+                PkgVersion.class,
+                ExpressionHelper.andAll(ImmutableList.of(
+                        ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg),
+                        ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture)
+                ))
+        ));
+
+        if(!pkgVersions.isEmpty()) {
+
+            final VersionCoordinatesComparator comparator = new VersionCoordinatesComparator();
+
+            Optional<PkgVersion> pkgVersionOptional = pkgVersions
+                    .stream()
+                    .filter(PkgVersion::getActive)
+                    .sorted((pv1, pv2) -> comparator.compare(pv1.toVersionCoordinates(), pv2.toVersionCoordinates()))
+                    .findFirst();
+
+            if(pkgVersionOptional.isPresent()) {
+                pkgVersionOptional.get().setIsLatest(true);
+            }
+
+            for (PkgVersion pkgVersion : pkgVersions) {
+                if (pkgVersion.getIsLatest() &&
+                        (!pkgVersionOptional.isPresent() ||
+                                !pkgVersion.equals(pkgVersionOptional.get())
+                        )
+                        ) {
+                    pkgVersion.setIsLatest(false);
+                }
+            }
+
+            return pkgVersionOptional;
+        }
+
+        return Optional.empty();
+    }
+
+    /**
      * <p>Given a {@link PkgVersion}, see if there is a corresponding source package.</p>
      */
 
@@ -211,7 +264,7 @@ public class PkgOrchestrationService {
             ObjectContext context,
             PkgVersion pkgVersion) {
 
-        Preconditions.checkArgument(null!=context, "a context is required");
+        Preconditions.checkArgument(null != context, "a context is required");
         Preconditions.checkArgument(null != pkgVersion, "a pkg version is required");
 
         Optional<Pkg> pkgSourceOptional = Pkg.getByName(context, pkgVersion.getPkg().getName() + "_source");

@@ -206,6 +206,7 @@ public class AuthorizationService {
             case PKG_EDITLOCALIZATION:
             case PKG_EDITCHANGELOG:
             case PKG_EDITPROMINENCE:
+            case PKG_EDITVERSION:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case USERRATING_EDIT:

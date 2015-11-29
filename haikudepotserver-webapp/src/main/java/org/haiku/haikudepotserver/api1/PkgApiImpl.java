@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
-import freemarker.template.utility.StringUtil;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.AbstractQueueJobResult;
@@ -1327,5 +1326,64 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         return new UpdatePkgChangelogResult();
     }
+
+    @Override
+    public UpdatePkgVersionResult updatePkgVersion(UpdatePkgVersionRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request, "the request object must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "the package name must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.architectureCode), "the architecture code must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.major), "the version major must be supplied");
+
+        ObjectContext context = serverRuntime.getContext();
+        User authUser = obtainAuthenticatedUser(context);
+        Pkg pkg = getPkg(context, request.pkgName);
+
+        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITVERSION)) {
+            throw new AuthorizationFailureException();
+        }
+
+        Optional<Repository> repositoryOptional = Repository.getByCode(context, request.repositoryCode);
+
+        if(!repositoryOptional.isPresent()) {
+            throw new ObjectNotFoundException(Repository.class.getSimpleName(), request.repositoryCode);
+        }
+
+        Optional<Architecture> architectureOptional = Architecture.getByCode(context, request.architectureCode);
+
+        if(!architectureOptional.isPresent()) {
+            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), request.architectureCode);
+        }
+
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
+                context, pkg, repositoryOptional.get(), architectureOptional.get(),
+                new VersionCoordinates(request.major, request.minor, request.micro, request.preRelease, request.revision)
+        );
+
+        if(!pkgVersionOptional.isPresent()) {
+            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), null);
+        }
+
+        PkgVersion pkgVersion = pkgVersionOptional.get();
+
+        for(UpdatePkgVersionRequest.Filter filter : request.filter) {
+
+            switch(filter) {
+
+                case ACTIVE:
+                    LOGGER.info("will update the package version active flag to {} for {}", request.active, pkgVersion.toString());
+                    pkgVersion.setActive(request.active);
+                    pkgOrchestrationService.adjustLatest(context, pkgVersion.getPkg(), pkgVersion.getArchitecture());
+                    break;
+
+            }
+
+        }
+
+        context.commitChanges();
+
+        return new UpdatePkgVersionResult();
+    }
+
 
 }
