@@ -5,11 +5,13 @@
 
 package org.haiku.haikudepotserver.api1;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.AbstractQueueJobResult;
@@ -28,6 +30,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.controller.PkgDownloadController;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -39,10 +42,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -269,6 +274,19 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return result;
     }
 
+    private String createHpkgDownloadUrl(PkgVersion pkgVersion) {
+        URL packagesBaseUrl = pkgVersion.getRepositorySource().getPackagesBaseURL();
+
+        if(ImmutableSet.of("http","https").contains(packagesBaseUrl.getProtocol())) {
+            return pkgVersion.getHpkgURL().toString();
+        }
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(PkgDownloadController.SEGMENT_PKGDOWNLOAD);
+        pkgVersion.appendPathSegments(builder);
+        builder.path("package.hpkg");
+        return builder.build().toUriString();
+    }
+
     /**
      * <p>Given the persistence model object, this method will construct the DTO to be sent back over the wire.</p>
      */
@@ -296,6 +314,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.copyrights = pkgVersion.getPkgVersionCopyrights().stream().map(PkgVersionCopyright::getBody).collect(Collectors.toList());
         version.licenses = pkgVersion.getPkgVersionLicenses().stream().map(PkgVersionLicense::getBody).collect(Collectors.toList());
         version.viewCounter = pkgVersion.getViewCounter();
+        version.hpkgDownloadURL = createHpkgDownloadUrl(pkgVersion);
 
         ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
                 pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);

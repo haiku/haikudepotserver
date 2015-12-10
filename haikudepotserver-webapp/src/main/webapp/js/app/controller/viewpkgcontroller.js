@@ -358,6 +358,11 @@ angular.module('haikudepotserver').controller(
             // ---------------------
             // ACTIONS FOR PACKAGE
 
+            $scope.goDownloadHpkg = function() {
+                var iframeEl = document.getElementById("download-iframe");
+                iframeEl.src = $scope.pkg.versions[0].hpkgDownloadURL;
+            };
+
             $scope.goPkgFeedBuilder = function() {
                 var item = breadcrumbFactory.createPkgFeedBuilder();
                 breadcrumbFactory.applySearch(item, { pkgNames : $scope.pkg.name });

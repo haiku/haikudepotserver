@@ -65,7 +65,7 @@ angular.module('haikudepotserver').controller(
                 }
                 var iframeEl = document.getElementById("download-iframe");
                 iframeEl.src = '/secured/authorization/authorizationpkgrule/download.csv?hdsbtok=' + userState.user().token;
-            }
+            };
 
             function refetchRules() {
 

@@ -91,6 +91,14 @@ public class GetPkgResult {
 
         public Boolean hasSource;
 
+        /**
+         * <p>This value may be a path or may be a full URL.  If it is path then it is assumed
+         * that the base URL (scheme and path) are the same as the one on which you have
+         * accessed this API on.</p>
+         * @since 2015-12-10
+         */
+
+        public String hpkgDownloadURL;
     }
 
 }
