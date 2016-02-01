@@ -359,8 +359,20 @@ angular.module('haikudepotserver').controller(
             // ACTIONS FOR PACKAGE
 
             $scope.goDownloadHpkg = function() {
-                var iframeEl = document.getElementById("download-iframe");
-                iframeEl.src = $scope.pkg.versions[0].hpkgDownloadURL;
+                var url = $scope.pkg.versions[0].hpkgDownloadURL;
+
+                if(url.charAt(0) === '/') {
+                    var iframeEl = document.getElementById("download-iframe");
+
+                    if(!iframeEl) {
+                        throw Error('unable to find the download iframe');
+                    }
+
+                    iframeEl.src = url;
+                }
+                else {
+                    window.open(url);
+                }
             };
 
             $scope.goPkgFeedBuilder = function() {

@@ -27,7 +27,7 @@
         <spring.version>4.2.0.RELEASE</spring.version>
         <postgresql.version>9.4-1200-jdbc41</postgresql.version>
 
-        <web-angularjs.versionbase>1.4.3-1</web-angularjs.versionbase>
+        <web-angularjs.versionbase>1.4.9</web-angularjs.versionbase>
         <web-angularjs.versionextension />
 
         <web-underscorejs.versionbase>1.8.3</web-underscorejs.versionbase>
