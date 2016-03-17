@@ -13,7 +13,6 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
@@ -94,8 +93,13 @@ public class AuthenticationService {
             LOGGER.warn("a shared key is not supplied so a random one has been created");
         }
 
-        jsonWebTokenSigner = new MACSigner(jsonWebTokenSharedKey.getBytes(Charsets.UTF_8));
-        jsonWebTokenVerifier = new MACVerifier(jsonWebTokenSharedKey.getBytes(Charsets.UTF_8));
+        try {
+            jsonWebTokenSigner = new MACSigner(jsonWebTokenSharedKey.getBytes(Charsets.UTF_8));
+            jsonWebTokenVerifier = new MACVerifier(jsonWebTokenSharedKey.getBytes(Charsets.UTF_8));
+        }
+        catch(JOSEException je) {
+            throw new RuntimeException("unable to create the signer / verifier for JWT tokens", je);
+        }
     }
 
     public ServerRuntime getServerRuntime() {
@@ -223,7 +227,7 @@ public class AuthenticationService {
 
     public Optional<ObjectId> authenticate(SignedJWT signedJwt) {
         Preconditions.checkNotNull(signedJwt);
-        ReadOnlyJWTClaimsSet claimsSet;
+        JWTClaimsSet claimsSet;
         long nowMillis = System.currentTimeMillis();
 
         try {
@@ -314,11 +318,13 @@ public class AuthenticationService {
         Preconditions.checkNotNull(user);
         DateTime now = new DateTime();
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet();
-        claimsSet.setSubject(user.getNickname() + SUFFIX_JSONWEBTOKEN_SUBJECT);
-        claimsSet.setIssueTime(now.toDate());
-        claimsSet.setExpirationTime(now.plusSeconds(jsonWebTokenExpirySeconds).toDate());
-        claimsSet.setIssuer(jsonWebTokenIssuer);
+        JWTClaimsSet claimsSet = new JWTClaimsSet
+                .Builder()
+                .subject(user.getNickname() + SUFFIX_JSONWEBTOKEN_SUBJECT)
+                .issueTime(now.toDate())
+                .expirationTime(now.plusSeconds(jsonWebTokenExpirySeconds).toDate())
+                .issuer(jsonWebTokenIssuer)
+                .build();
 
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
 

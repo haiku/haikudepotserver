@@ -5,7 +5,7 @@
 
 package org.haiku.haikudepotserver.feed.model;
 
-import com.sun.syndication.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndEntry;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface SyndEntrySupplier {
 
-    public final static String URI_PREFIX = "urn:hdsfeedentry:";
+    String URI_PREFIX = "urn:hdsfeedentry:";
 
     List<SyndEntry> generate(FeedSpecification specification);
 

@@ -373,6 +373,8 @@ angular.module('haikudepotserver').controller(
                 else {
                     window.open(url);
                 }
+
+                return false;
             };
 
             $scope.goPkgFeedBuilder = function() {
