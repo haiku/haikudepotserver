@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.support;
+package org.haiku.haikudepotserver.support.jsonrpc4j;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
@@ -13,6 +13,7 @@ import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.CaptchaBadResponseException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
+import org.haiku.haikudepotserver.support.ImageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ import java.util.List;
  * <p>This plugins into the JSON-RPC server system in order to handle logging errors.</p>
  */
 
-public class JsonRpcInvocationListener implements InvocationListener {
+public class ErrorLoggingInvocationListener implements InvocationListener {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 

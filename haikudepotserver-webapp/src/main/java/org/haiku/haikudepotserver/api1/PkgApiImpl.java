@@ -12,6 +12,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.AbstractQueueJobResult;
@@ -57,6 +58,7 @@ import java.util.stream.Collectors;
  */
 
 @Component
+@AutoJsonRpcServiceImpl
 public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     public final static int PKGPKGCATEGORIES_MAX = 3;

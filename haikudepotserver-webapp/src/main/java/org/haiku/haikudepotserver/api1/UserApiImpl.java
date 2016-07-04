@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.api1;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -38,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
+@AutoJsonRpcServiceImpl
 public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);

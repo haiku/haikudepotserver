@@ -14,6 +14,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>metric-admin</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.AdminServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>remote-log-capture</servlet-name>
         <servlet-class>org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
@@ -73,6 +78,11 @@
     <servlet-mapping>
         <servlet-name>remote-log-capture</servlet-name>
         <url-pattern>/__log/capture</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>metric-admin</servlet-name>
+        <url-pattern>/_metric/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

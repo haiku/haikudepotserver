@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.api1;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.job.*;
@@ -30,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+@AutoJsonRpcServiceImpl
 public class JobApiImpl extends AbstractApiImpl implements JobApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobApiImpl.class);

@@ -11,6 +11,7 @@ import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -29,6 +30,9 @@ public class LocalJobDataStorageServiceImpl implements JobDataStorageService {
 
     private File tmpDir;
 
+    @Value("${deployment.isproduction:false}")
+    private Boolean isProduction;
+
     @PostConstruct
     public void init() {
         String platformTmpDirPath = System.getProperty("java.io.tmpdir");
@@ -37,7 +41,9 @@ public class LocalJobDataStorageServiceImpl implements JobDataStorageService {
             throw new IllegalStateException("unable to ascertain the java temporary directory");
         }
 
-        tmpDir = new File(platformTmpDirPath, PATH_APPTMPDIR);
+        tmpDir = new File(
+                platformTmpDirPath,
+                PATH_APPTMPDIR + (null==isProduction||!isProduction ? "-test" : ""));
 
         if(!tmpDir.exists()) {
             if(tmpDir.mkdirs()) {
