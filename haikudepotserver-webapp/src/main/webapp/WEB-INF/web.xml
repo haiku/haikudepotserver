@@ -14,8 +14,13 @@
     </servlet>
 
     <servlet>
-        <servlet-name>metric-admin</servlet-name>
-        <servlet-class>com.codahale.metrics.servlets.AdminServlet</servlet-class>
+        <servlet-name>metric-admin-metrics</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.MetricsServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>metric-admin-ping</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.PingServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -81,8 +86,13 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>metric-admin</servlet-name>
-        <url-pattern>/_metric/*</url-pattern>
+        <servlet-name>metric-admin-metrics</servlet-name>
+        <url-pattern>/_metric/metrics</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>metric-admin-ping</servlet-name>
+        <url-pattern>/_metric/ping</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
