@@ -116,4 +116,23 @@
         <property name="metrics" ref="singlePageTemplateFrequencyMetrics"></property>
     </bean>
 
+    <!-- METRICS -->
+
+    <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
+    <bean id="healthCheckRegistry" class="com.codahale.metrics.health.HealthCheckRegistry"/>
+
+    <bean
+            class="org.springframework.web.context.support.ServletContextAttributeExporter">
+        <property name="attributes">
+            <map>
+                <entry key="com.codahale.metrics.servlets.MetricsServlet.registry">
+                    <ref bean="metricRegistry" />
+                </entry>
+                <entry key="com.codahale.metrics.servlets.HealthCheckServlet.registry">
+                    <ref bean="healthCheckRegistry" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
 </beans>

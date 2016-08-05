@@ -242,6 +242,10 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode));
         Preconditions.checkNotNull(null != request.pkgVersionType);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
+        Preconditions.checkArgument(null == request.rating || request.rating >= UserRating.MIN_USER_RATING,
+                "the user rating " + request.rating + " is less than the minimum allowed of " + UserRating.MIN_USER_RATING);
+        Preconditions.checkArgument(null == request.rating || request.rating <= UserRating.MAX_USER_RATING,
+                "the user rating " + request.rating + " is greater than the maximum allowed of " + UserRating.MIN_USER_RATING);
 
         if(null!=request.comment) {
             request.comment = Strings.emptyToNull(request.comment.trim());

@@ -5,11 +5,71 @@
 
 package org.haiku.haikudepotserver.support;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
+import com.google.common.net.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class FileHelper {
+
+    /**
+     * <p>This method will stream the data from the supplied URL into the file.  If it is a suitable
+     * URL (http / https) then it is possible to provide a timeout and that will be observed when
+     * connecting and retreiving data.</p>
+     */
+
+    public static void streamUrlDataToFile(URL url, File file, long timeoutMillis) throws IOException {
+        switch(url.getProtocol()) {
+
+            case "http":
+            case "https":
+                HttpURLConnection connection = null;
+
+                try {
+                    connection = (HttpURLConnection) url.openConnection();
+
+                    connection.setConnectTimeout((int) timeoutMillis);
+                    connection.setReadTimeout((int) timeoutMillis);
+                    connection.setRequestMethod(HttpMethod.GET.name());
+                    connection.connect();
+
+                    int responseCode = connection.getResponseCode();
+
+                    if (responseCode == HttpStatus.OK.value()) {
+                        try (
+                                InputStream inputStream = connection.getInputStream();
+                                OutputStream outputStream = new FileOutputStream(file)) {
+                            ByteStreams.copy(inputStream, outputStream);
+                        }
+                    }
+                    else {
+                        throw new IOException("url request returned " + responseCode);
+                    }
+
+                }
+                finally {
+                    if (null != connection) {
+                        connection.disconnect();
+                    }
+                }
+                break;
+
+
+            case "file":
+                Files.copy(new File(url.getFile()), file);
+                break;
+
+            default:
+                throw new IllegalStateException("the url scheme of " + url.getProtocol() + " is unsupported.");
+
+        }
+
+    }
 
     /**
      * <p>This method will delete the file specified recursively.</p>

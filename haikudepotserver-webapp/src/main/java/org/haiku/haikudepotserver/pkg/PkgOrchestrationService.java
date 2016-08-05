@@ -33,6 +33,7 @@ import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -807,7 +808,7 @@ public class PkgOrchestrationService {
 
                     connection.setConnectTimeout(PAYLOAD_LENGTH_CONNECT_TIMEOUT);
                     connection.setReadTimeout(PAYLOAD_LENGTH_READ_TIMEOUT);
-                    connection.setRequestMethod("HEAD");
+                    connection.setRequestMethod(HttpMethod.HEAD.name());
                     connection.connect();
 
                     String contentLengthHeader = connection.getHeaderField(HttpHeaders.CONTENT_LENGTH);

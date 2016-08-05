@@ -20,6 +20,9 @@ import java.util.*;
 
 public class UserRating extends _UserRating implements CreateAndModifyTimestamped {
 
+    public final static int MIN_USER_RATING = 0;
+    public final static int MAX_USER_RATING = 5;
+
     public static Optional<UserRating> getByCode(ObjectContext context, String code) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
@@ -93,11 +96,11 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
         super.validateForSave(validationResult);
 
         if(null!=getRating()) {
-            if(getRating() < 0) {
+            if(getRating() < MIN_USER_RATING) {
                 validationResult.addFailure(new BeanValidationFailure(this,RATING_PROPERTY,"min"));
             }
 
-            if(getRating() > 5) {
+            if(getRating() > MAX_USER_RATING) {
                 validationResult.addFailure(new BeanValidationFailure(this,RATING_PROPERTY,"max"));
             }
         }

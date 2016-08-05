@@ -7,19 +7,18 @@ package org.haiku.haikudepotserver.repository;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.repository.model.RepositoryImportException;
-import org.haiku.pkg.HpkrFileExtractor;
-import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.repository.model.RepositoryImportException;
+import org.haiku.haikudepotserver.support.FileHelper;
+import org.haiku.pkg.HpkrFileExtractor;
 import org.haiku.pkg.PkgIterator;
 import org.haiku.pkg.model.Pkg;
 import org.slf4j.Logger;
@@ -32,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>This object is responsible for migrating a HPKR file from a remote repository into the Haiku Depot Server
@@ -45,6 +45,8 @@ import java.util.Set;
 public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositoryImportJobSpecification> {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgRepositoryImportJobRunner.class);
+
+    private final static long TIMEOUT_REPOSITORY_SOURCE_FETCH = TimeUnit.SECONDS.convert(30, TimeUnit.MILLISECONDS);
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -130,9 +132,14 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
 
         try {
             temporaryFile = File.createTempFile(repositorySource.getCode() + "__import", ".hpkr");
-            Resources.asByteSource(url).copyTo(Files.asByteSink(temporaryFile));
 
-            LOGGER.debug("did copy data for repository source {} ({}) to temporary file", repositorySource, url.toString());
+            LOGGER.info("will copy data for repository source [{}] ({}) to temporary file",
+                    repositorySource, url.toString());
+
+            FileHelper.streamUrlDataToFile(url, temporaryFile, TIMEOUT_REPOSITORY_SOURCE_FETCH);
+
+            LOGGER.info("did copy {} bytes for repository source [{}] ({}) to temporary file",
+                    temporaryFile.length(), repositorySource, url.toString());
 
             HpkrFileExtractor fileExtractor = new HpkrFileExtractor(temporaryFile);
 
