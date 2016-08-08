@@ -158,7 +158,8 @@ public class PkgDownloadController {
             }
             catch(IOException ioe) {
                 // logged without a stack trace because it happens fairly often that a robot will initiate the download and then drop it.
-                LOGGER.error("unable to relay data to output stream from '{}'; {}", url.toString(), ioe.getMessage());
+                LOGGER.error("unable to relay data to output stream from '{}'; {} -- {}",
+                        url.toString(), ioe.getClass().getSimpleName(), ioe.getMessage());
             }
         }
     }

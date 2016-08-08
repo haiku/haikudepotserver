@@ -46,14 +46,13 @@ angular.module('haikudepotserver').factory('jsonRpc',
 
                 setHeader : function(name, value) {
 
-                    if(!name || 0==''+name.length) {
+                    if (!name || 0==''+name.length) {
                         throw Error('the name of the http header is required');
                     }
 
-                    if(!value || 0==''+value.length) {
+                    if (!value || 0==''+value.length) {
                         delete JsonRpcService.headers[name];
-                    }
-                    else {
+                    } else {
                         JsonRpcService.headers[name] = value;
                     }
 
@@ -75,36 +74,32 @@ angular.module('haikudepotserver').factory('jsonRpc',
 
                 call : function(endpoint, method, params, id) {
 
-                    if(!endpoint) {
+                    if (!endpoint) {
                         throw Error('the endpoint is required to invoke a json-rpc method');
                     }
 
-                    if(!method) {
+                    if (!method) {
                         throw Error('the method is required to invoke a json-rpc method');
                     }
 
-                    if(!params) {
+                    if (!params) {
                         params = [];
                     }
 
-                    if(!id) {
+                    if (!id) {
                         id = JsonRpcService.counter;
                         JsonRpcService.counter += 1;
                     }
 
                     function mkTransportErr(httpStatus) {
-                       return mkErr(httpStatus,JsonRpcService.errorCodes.TRANSPORTFAILURE,'transport-failure');
+                       return mkErr(httpStatus, JsonRpcService.errorCodes.TRANSPORTFAILURE, 'transport-failure');
                     }
 
-                    function mkErr(httpStatus,code,message) {
+                    function mkErr(httpStatus, code, message) {
                         return {
-                            jsonrpc: "2.0",
-                            id : id,
-                            error : {
-                                code : code,
-                                message : message,
-                                data : httpStatus
-                            }
+                            code : code,
+                            message : message,
+                            data : httpStatus
                         };
                     }
 
@@ -123,11 +118,11 @@ angular.module('haikudepotserver').factory('jsonRpc',
                         }
                     }).then(
                         function successCallback(response) {
-                            if(200 != response.status) {
+                            if (200 != response.status) {
                                 return $q.reject(mkTransportErr(response.status));
                             }
 
-                            if(!response.data.result) {
+                            if (!response.data.result) {
                                 if (!response.data.error) {
                                     return $q.reject(mkErr(response.status, JsonRpcService.errorCodes.INVALIDRESPONSE, 'invalid-response'));
                                 }

@@ -72,7 +72,7 @@ angular.module('haikudepotserver').factory('pkg',
                     }]
                 ).then(
                     function(result) {
-                        $log.info('fetched '+result.name+' pkg');
+                        $log.info('fetched ' + result.name + ' pkg');
                         return result;
                     },
                     function(err) {

@@ -95,6 +95,7 @@ angular.module('haikudepotserver').factory('errorHandling',
                 else {
 
                     if (jsonRpcErrorEnvelope.error && !jsonRpcErrorEnvelope.code) {
+                        // TODO - remove at some point in the future.
                         logAndSendErrorMessageToServer('illegal state; provided bad envelope; should be the \'error\' component of the response rather than the entire response -- will try to correct for now');
                         jsonRpcErrorEnvelope = jsonRpcErrorEnvelope.error;
                     }
