@@ -1,11 +1,10 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.dataobjects;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
@@ -17,6 +16,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -83,6 +83,12 @@ public class RepositorySource extends _RepositorySource {
             }
         }
 
+        if(null != getUrl()) {
+            if(getUrl().endsWith("/")) {
+                validationResult.addFailure(new BeanValidationFailure(this,URL_PROPERTY,"trailingslash"));
+            }
+        }
+
     }
 
     /**
@@ -90,19 +96,33 @@ public class RepositorySource extends _RepositorySource {
      */
 
     public URL getPackagesBaseURL() {
-        URL base = getBaseURL();
-
         try {
-            return new URL(
-                    base.getProtocol(),
-                    base.getHost(),
-                    base.getPort(),
-                    base.getPath() + "/packages");
+            return UriComponentsBuilder.fromUriString(getBaseURL().toString())
+                    .pathSegment("packages")
+                    .build()
+                    .toUri()
+                    .toURL();
         }
         catch(MalformedURLException mue) {
-            throw new IllegalStateException("unable to reform a url",mue);
+            throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
         }
+    }
 
+    /**
+     * <p>This URL can be used to access the HPKR data for the repository source.</p>
+     */
+
+    public URL getHpkrURL() {
+        try {
+            return UriComponentsBuilder.fromUriString(getBaseURL().toString())
+                    .pathSegment("repo")
+                    .build()
+                    .toUri()
+                    .toURL();
+        }
+        catch(MalformedURLException mue) {
+            throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
+        }
     }
 
     /**
@@ -111,44 +131,11 @@ public class RepositorySource extends _RepositorySource {
      */
 
     private URL getBaseURL() {
-        URL url;
-
         try {
-            url = new URL(getUrl());
+            return new URL(getUrl());
         }
         catch(MalformedURLException mue) {
             throw new IllegalStateException("malformed url should not be stored in a repository");
-        }
-
-        String path = url.getPath();
-
-        if(Strings.isNullOrEmpty(path)) {
-            throw new IllegalStateException("malformed url; no path component to the hpkr data");
-        }
-
-        int lastSlash = path.lastIndexOf('/');
-
-        if(lastSlash == path.length()-1) {
-            throw new IllegalStateException("malformed url; no path component to the hpkr data");
-        }
-        else {
-            if(-1==lastSlash) {
-                path = "";
-            }
-            else {
-                path = path.substring(0,lastSlash);
-            }
-        }
-
-        try {
-            return new URL(
-                    url.getProtocol(),
-                    url.getHost(),
-                    url.getPort(),
-                    path);
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("unable to reform a url",mue);
         }
     }
 

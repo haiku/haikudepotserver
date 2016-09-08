@@ -170,18 +170,24 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         specification.setLimit(request.limit);
         specification.setOffset(request.offset);
         specification.setIncludeInactive(null!=request.includeInactive && request.includeInactive);
+        specification.setRepositorySourceSearchUrls(request.repositorySourceSearchUrls);
 
         SearchRepositoriesResult result = new SearchRepositoriesResult();
-        List<Repository> searchedRepositories = repositoryService.search(context,specification);
 
         result.total = repositoryService.total(context,specification);
-        result.items = searchedRepositories.stream().map(sr -> {
-            SearchRepositoriesResult.Repository resultRepository = new SearchRepositoriesResult.Repository();
-            resultRepository.active = sr.getActive();
-            resultRepository.name = sr.getName();
-            resultRepository.code = sr.getCode();
-            return resultRepository;
-        }).collect(Collectors.toList());
+        result.items = Collections.emptyList();
+
+        if(result.total > 0) {
+            List<Repository> searchedRepositories = repositoryService.search(context,specification);
+
+            result.items = searchedRepositories.stream().map(sr -> {
+                SearchRepositoriesResult.Repository resultRepository = new SearchRepositoriesResult.Repository();
+                resultRepository.active = sr.getActive();
+                resultRepository.name = sr.getName();
+                resultRepository.code = sr.getCode();
+                return resultRepository;
+            }).collect(Collectors.toList());
+        }
 
         return result;
     }

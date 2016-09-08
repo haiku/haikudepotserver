@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2016, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -38,7 +38,13 @@ Distributed under the terms of the MIT License.
         <para>
             Repositories are sources of packages.  A repository has a number of repository sources which are URLs
             that Haiku Depot Server can extract HPKR data from in order to get a catalog of what packages are
-            available for that repository.  Package versions are &quot;siloed&quot; between repositories however
+            available for that repository.  The URL is a base URL and resources are expected to be found at this
+            base that provide information about the data in the repository.  You can find out more about the URLs and
+            expected resources in the <link linkend="repositories">repository</link> section.
+        </para>
+
+        <para>
+            Package versions are &quot;siloed&quot; between repositories however
             some data such as localization, iconography and screenshots are shared.
         </para>
     </section>

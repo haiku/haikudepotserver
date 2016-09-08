@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -62,10 +62,12 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
     @Test
     public void testImportThenCheck() throws Exception {
 
+        File temporaryDir = null;
         File temporaryFile = null;
 
         try {
-            temporaryFile = File.createTempFile("haikudepotserver-test-",".hpkr");
+            temporaryDir = Files.createTempDir();
+            temporaryFile = new File(temporaryDir, "repo");
 
             // get the test hpkr data and copy it into a temporary file that can be used as a source
             // for a repository.
@@ -83,7 +85,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
                 repositorySource.setCode("testsrc_xyz");
-                repositorySource.setUrl("file://" + temporaryFile.getAbsolutePath());
+                repositorySource.setUrl("file://" + temporaryDir.getAbsolutePath());
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
 
                 context.commitChanges();
@@ -100,7 +102,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
                 repositorySource.setCode("testsrc2_xyz");
-                repositorySource.setUrl("file://noop.hpkr");
+                repositorySource.setUrl("file:///noop.hpkr");
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
 
                 context.commitChanges();

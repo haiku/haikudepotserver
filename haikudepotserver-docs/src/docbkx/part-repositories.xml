@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2016, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="repositories">
+
+    <title>Repositories</title>
+
+    <section xml:id="datamodel-uniqueidentifiers">
+        <title>On-Net / On-Disk Repositories</title>
+
+        <para>
+            The term &quot;On-Net&quot; or &quot;On-Disk&quot; are used here interchangeably to represent an
+            operating-system level repository that consists of a number of files that might be accessed by some
+            physical storage mechanism such as a USB stick or might be accessed over a network interface using
+            the HTTP protocol for example.
+        </para>
+
+        <para>
+            Repositories are a collection of packages together with some meta-data or index about the packages.  A
+            Haiku-OS concept of a repository is a set of URL-accessible resources.  A base URL might be something like;
+        </para>
+
+        <para>
+            <programlisting>http://packages.haiku-os.org/haikuports/master/repo/x86_gcc2/current</programlisting>
+        </para>
+
+        <para>
+            At this location, a number of resources should exist that have well-known names so that they can be easily
+            found.  The resources in a repository are generally targetting a specific architecture such as
+            &quot;x86_gcc2&quot;, but there may also be resources for &quot;any&quot; architecture as well.
+        </para>
+
+        <section>
+            <title>repo</title>
+
+            <para>
+                This file contains the binary HPKR data that catalogs the various packages in the repository.
+                Haiku Depot Server will feed-in this data in order to inform itself about the current state of the
+                packages available in the repository.
+            </para>
+        </section>
+
+        <section>
+            <title>repo.info</title>
+
+            <para>
+                This file contains some brief information about the repository itself rather than the packages in the
+                repository.  This file is plain text.  Here is an example of the files' contents;
+            </para>
+
+            <warning>
+                <para>
+                    The 'url' field of this example data has been abridged for formatting reasons.
+                </para>
+            </warning>
+
+            <para>
+                <programlisting>name HaikuPorts
+vendor "Haiku Project"
+summary "The HaikuPorts repository (for Haiku hrev50480)"
+priority 1
+url http://packages.haiku-os.org/haikuports/master/repo/x86_gcc2/d03690...921
+architecture x86_gcc2
+                </programlisting>
+            </para>
+
+        </section>
+
+        <section>
+            <title>packages</title>
+
+            <para>
+                This directory contains the packages themselves.  The packages are in HPKR binary format.  The package
+                files have standard names.  Some examples;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>zlib-1.2.8-4-x86_gcc2.hpkg</listitem>
+                    <listitem>gnupg-1.4.16-1-x86_64.hpkg</listitem>
+                    <listitem>beam-1.2-2-x86_gcc2.hpkg</listitem>
+                </itemizedlist>
+            </para>
+
+        </section>
+
+    </section>
+
+    <section>
+        <title>Haiku Depot Server Repositories</title>
+
+        <para>
+            Haiku Depot Server's (HDS) concept of a Repository is, in nomenclature, slightly mis-aligned with the On-Net
+            concept.  An HDS Repository represents the collection of On-Net Repositories that are conceptually serving
+            the same or similar packages for different architectures.  A Repository Source points to the different
+            architectures.  The following diagram tries to illustrate the relationship between the Haiku Depot Server
+            Repositories and the On-Net repositories of the operating system.
+        </para>
+
+        <figure id="architecture-elements-diagram">
+            <title>HDS Repositories and how they relate to On-Net Repositories.
+            </title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/img-repositories.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            In this artificial example, an HDS Repository &quot;Peanut&quot; has two HDS Repository Sources for the two
+            architectures supported by this repository; x86_gcc and x86_64.  In this case, two On-Net repositories
+            exist and are related inside HDS by URL reference.
+        </para>
+
+
+    </section>
+
+</chapter>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 @JsonRpcService("/api/v1/pkg")
 public interface PkgApi {
 
-    public final static Integer GETBULKPKG_LIMIT = 50;
+    Integer GETBULKPKG_LIMIT = 50;
 
     /**
      * <p>This method will ensure that the categories configured on the nominated package are as per the list of
@@ -134,6 +134,10 @@ public interface PkgApi {
      *
      * <p>Various elements of the response can be filtered in or out by using the filter attribute on the request
      * object.</p>
+     *
+     * <p>The client should supply, in the request, a list of repositories of interest.  These can either be
+     * supplied with a list of repository codes or it is also possible to supply a list of repository source
+     * URLs that can then be mapped back to repository sources and from there to the repositories.</p>
      */
 
     GetBulkPkgResult getBulkPkg(GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException;

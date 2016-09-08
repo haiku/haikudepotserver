@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Optional;
@@ -135,7 +136,7 @@ public class IntegrationTestSupportService {
         result.repositorySource = context.newObject(RepositorySource.class);
         result.repositorySource.setCode("testreposrc_xyz");
         result.repositorySource.setRepository(result.repository);
-        result.repositorySource.setUrl("file://" + platformTmpDirPath + "/repository");
+        result.repositorySource.setUrl("file://" + new File(platformTmpDirPath, "repository").getAbsolutePath());
 
         result.pkg1 = context.newObject(Pkg.class);
         result.pkg1.setActive(true);

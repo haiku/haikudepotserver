@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -446,15 +447,20 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         specification.setIncludeInactive(null!= searchUsersRequest.includeInactive && searchUsersRequest.includeInactive);
 
         SearchUsersResult result = new SearchUsersResult();
-        List<User> searchedUsers = userOrchestrationService.search(context,specification);
 
         result.total = userOrchestrationService.total(context,specification);
-        result.items = searchedUsers.stream().map(u -> {
-            SearchUsersResult.User resultUser = new SearchUsersResult.User();
-            resultUser.active = u.getActive();
-            resultUser.nickname = u.getNickname();
-            return resultUser;
-        }).collect(Collectors.toList());
+        result.items = Collections.emptyList();
+
+        if(0 != result.total) {
+            List<User> searchedUsers = userOrchestrationService.search(context,specification);
+
+            result.items = searchedUsers.stream().map(u -> {
+                SearchUsersResult.User resultUser = new SearchUsersResult.User();
+                resultUser.active = u.getActive();
+                resultUser.nickname = u.getNickname();
+                return resultUser;
+            }).collect(Collectors.toList());
+        }
 
         return result;
 

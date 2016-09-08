@@ -1,11 +1,10 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
@@ -28,16 +27,17 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.controller.PkgDownloadController;
 import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,49 +227,54 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         SearchPkgsResult result = new SearchPkgsResult();
 
-        List<PkgVersion> searchedPkgVersions = pkgService.search(context, specification);
-
         // if there are more than we asked for then there must be more available.
 
         result.total = pkgService.total(context, specification);
-        result.items = searchedPkgVersions
-                .stream()
-                .map(spv -> {
-                    Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional =
-                            PkgUserRatingAggregate.getByPkgAndRepository(
-                                    context,
-                                    spv.getPkg(),
-                                    spv.getRepositorySource().getRepository());
+        result.items = Collections.emptyList();
 
-                    SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
-                    resultPkg.name = spv.getPkg().getName();
-                    resultPkg.modifyTimestamp = spv.getPkg().getModifyTimestamp().getTime();
-                    resultPkg.derivedRating = pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating() : null;
-                    resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
+        if(result.total > 0) {
 
-                    ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
-                            context, spv, specification.getExpressionAsPattern(), naturalLanguage);
+            List<PkgVersion> searchedPkgVersions = pkgService.search(context, specification);
 
-                    SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
-                    resultVersion.major = spv.getMajor();
-                    resultVersion.minor = spv.getMinor();
-                    resultVersion.micro = spv.getMicro();
-                    resultVersion.preRelease = spv.getPreRelease();
-                    resultVersion.revision = spv.getRevision();
-                    resultVersion.createTimestamp = spv.getCreateTimestamp().getTime();
-                    resultVersion.viewCounter = spv.getViewCounter();
-                    resultVersion.architectureCode = spv.getArchitecture().getCode();
-                    resultVersion.payloadLength = spv.getPayloadLength();
-                    resultVersion.title = resolvedPkgVersionLocalization.getTitle();
-                    resultVersion.summary = resolvedPkgVersionLocalization.getSummary();
-                    resultVersion.repositorySourceCode = spv.getRepositorySource().getCode();
-                    resultVersion.repositoryCode = spv.getRepositorySource().getRepository().getCode();
+            result.items = searchedPkgVersions
+                    .stream()
+                    .map(spv -> {
+                        Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional =
+                                PkgUserRatingAggregate.getByPkgAndRepository(
+                                        context,
+                                        spv.getPkg(),
+                                        spv.getRepositorySource().getRepository());
 
-                    resultPkg.versions = Collections.singletonList(resultVersion);
+                        SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
+                        resultPkg.name = spv.getPkg().getName();
+                        resultPkg.modifyTimestamp = spv.getPkg().getModifyTimestamp().getTime();
+                        resultPkg.derivedRating = pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating() : null;
+                        resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
 
-                    return resultPkg;
-                })
-                .collect(Collectors.toList());
+                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
+                                context, spv, specification.getExpressionAsPattern(), naturalLanguage);
+
+                        SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
+                        resultVersion.major = spv.getMajor();
+                        resultVersion.minor = spv.getMinor();
+                        resultVersion.micro = spv.getMicro();
+                        resultVersion.preRelease = spv.getPreRelease();
+                        resultVersion.revision = spv.getRevision();
+                        resultVersion.createTimestamp = spv.getCreateTimestamp().getTime();
+                        resultVersion.viewCounter = spv.getViewCounter();
+                        resultVersion.architectureCode = spv.getArchitecture().getCode();
+                        resultVersion.payloadLength = spv.getPayloadLength();
+                        resultVersion.title = resolvedPkgVersionLocalization.getTitle();
+                        resultVersion.summary = resolvedPkgVersionLocalization.getSummary();
+                        resultVersion.repositorySourceCode = spv.getRepositorySource().getCode();
+                        resultVersion.repositoryCode = spv.getRepositorySource().getRepository().getCode();
+
+                        resultPkg.versions = Collections.singletonList(resultVersion);
+
+                        return resultPkg;
+                    })
+                    .collect(Collectors.toList());
+        }
 
         LOGGER.info("search for pkgs found {} results", result.items.size());
 
@@ -1063,24 +1068,29 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public GetBulkPkgResult getBulkPkg(final GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException {
         Preconditions.checkNotNull(getBulkPkgRequest);
         Preconditions.checkState(null != getBulkPkgRequest.architectureCodes, "architecture codes must be non-null");
-        Preconditions.checkArgument(null != getBulkPkgRequest.repositoryCodes && !getBulkPkgRequest.repositoryCodes.isEmpty(), "the repositories should be supplied");
+        Preconditions.checkArgument(null == getBulkPkgRequest.repositoryCodes || !getBulkPkgRequest.repositoryCodes.isEmpty(),
+                "the repositories' codes must not be empty");
         Preconditions.checkNotNull(getBulkPkgRequest.pkgNames);
 
         if(getBulkPkgRequest.pkgNames.size() > GETBULKPKG_LIMIT) {
             throw new LimitExceededException();
         }
 
+        final ObjectContext context = serverRuntime.getContext();
         final GetBulkPkgResult result = new GetBulkPkgResult();
 
-        if(
-                getBulkPkgRequest.pkgNames.isEmpty()
-                        || (null!=getBulkPkgRequest.repositoryCodes && getBulkPkgRequest.repositoryCodes.isEmpty())
-                        || getBulkPkgRequest.architectureCodes.isEmpty()) {
-            result.pkgs = Collections.emptyList();
-        }
-        else {
+        result.pkgs = Collections.emptyList();
 
-            final ObjectContext context = serverRuntime.getContext();
+        Set<Repository> repositories = new HashSet<>();
+
+        if(null != getBulkPkgRequest.repositoryCodes) {
+            repositories.addAll(transformCodesToRepositories(context,getBulkPkgRequest.repositoryCodes));
+        }
+
+        if(!getBulkPkgRequest.pkgNames.isEmpty() &&
+                !getBulkPkgRequest.architectureCodes.isEmpty() &&
+                !repositories.isEmpty()) {
+
             final NaturalLanguage naturalLanguage = getNaturalLanguage(context, getBulkPkgRequest.naturalLanguageCode);
 
             if(null==getBulkPkgRequest.filter) {
@@ -1092,7 +1102,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             searchSpecification.setArchitectures(transformCodesToArchitectures(context, getBulkPkgRequest.architectureCodes));
             searchSpecification.setPkgNames(getBulkPkgRequest.pkgNames);
             searchSpecification.setNaturalLanguage(getNaturalLanguage(context, getBulkPkgRequest.naturalLanguageCode));
-            searchSpecification.setRepositories(transformCodesToRepositories(context,getBulkPkgRequest.repositoryCodes));
+            searchSpecification.setRepositories(repositories);
 
             searchSpecification.setLimit(0);
             searchSpecification.setLimit(Integer.MAX_VALUE);

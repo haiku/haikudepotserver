@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,8 @@ import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -50,8 +52,8 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
         return repositories;
     }
 
-    public void setRepositories(List<Repository> repositories) {
-        this.repositories = repositories;
+    public void setRepositories(Collection<Repository> repositories) {
+        this.repositories = new ArrayList(repositories);
     }
 
     public NaturalLanguage getNaturalLanguage() {

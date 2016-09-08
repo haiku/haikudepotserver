@@ -98,7 +98,12 @@
 
     <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">
         <property name="group" value="#{T(org.haiku.haikudepotserver.dataobjects.HaikuDepot.CacheGroup).REPOSITORY.name()}"/>
-        <property name="entityClass" value="org.haiku.haikudepotserver.dataobjects.Repository"/>
+        <property name="entityClasses">
+            <list>
+                <value>org.haiku.haikudepotserver.dataobjects.Repository</value>
+                <value>org.haiku.haikudepotserver.dataobjects.RepositorySource</value>
+            </list>
+        </property>
     </bean>
 
     <bean class="org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener">

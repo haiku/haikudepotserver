@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
@@ -116,16 +115,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
             ObjectContext mainContext,
             RepositorySource repositorySource)
             throws RepositoryImportException {
-        URL url;
-
-        try {
-            url = new URL(repositorySource.getUrl());
-        } catch (MalformedURLException mue) {
-            throw new IllegalStateException(
-                    "the repository source " + repositorySource + " for repository " +
-                            repositorySource.getRepository().getCode() + " has a malformed url; " + repositorySource.getUrl(),
-                    mue);
-        }
+        URL url = repositorySource.getHpkrURL();
 
         // now shift the URL's data into a temporary file and then process it.
         File temporaryFile = null;

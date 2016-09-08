@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2016, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -24,6 +24,7 @@ Distributed under the terms of the MIT License.
     <xi:include href="part-datamodel.xml"/>
     <xi:include href="part-architecture.xml"/>
     <xi:include href="part-userrating.xml"/>
+    <xi:include href="part-repositories.xml"/>
     <xi:include href="part-applicationlocalization.xml"/>
     <xi:include href="part-datalocalization.xml"/>
     <xi:include href="part-security.xml"/>

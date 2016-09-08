@@ -73,6 +73,13 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
     }
 
+    private void assertFoundRepository(SearchRepositoriesResult result) {
+        Assertions.assertThat(result.total).isEqualTo(1);
+        Assertions.assertThat(result.items.size()).isEqualTo(1);
+        Assertions.assertThat(result.items.get(0).code).isEqualTo("testrepo");
+        Assertions.assertThat(result.items.get(0).name).isEqualTo("Test Repository");
+    }
+
     @Test
     public void searchRepositoriesTest() {
         integrationTestSupportService.createStandardTestData();
@@ -87,10 +94,54 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         SearchRepositoriesResult result = repositoryApi.searchRepositories(request);
         // ------------------------------------
 
-        Assertions.assertThat(result.total).isEqualTo(1);
-        Assertions.assertThat(result.items.size()).isEqualTo(1);
-        Assertions.assertThat(result.items.get(0).code).isEqualTo("testrepo");
-        Assertions.assertThat(result.items.get(0).name).isEqualTo("Test Repository");
+        assertFoundRepository(result);
+    }
+
+    public void setupSourceBasedUrlTest() {
+        ObjectContext context = serverRuntime.getContext();
+
+        integrationTestSupportService.createStandardTestData();
+
+        RepositorySource repositorySource = context.newObject(RepositorySource.class);
+        repositorySource.setCode("zigzag_x86_64");
+        repositorySource.setUrl("http://example.com/zigzag");
+        repositorySource.setRepository(Repository.getByCode(context, "testrepo").get());
+        context.commitChanges();
+    }
+
+    @Test
+    public void searchRepositoriesTest_sourceBaseUrlHit() {
+        setupSourceBasedUrlTest();
+
+        SearchRepositoriesRequest request = new SearchRepositoriesRequest();
+        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
+        request.repositorySourceSearchUrls = Collections.singletonList("https://example.com/zigzag");
+        request.limit = 2;
+        request.offset = 0;
+
+        // ------------------------------------
+        SearchRepositoriesResult result = repositoryApi.searchRepositories(request);
+        // ------------------------------------
+
+        assertFoundRepository(result);
+    }
+
+    @Test
+    public void searchRepositoriesTest_sourceBaseUrlMiss() {
+        setupSourceBasedUrlTest();
+
+
+        SearchRepositoriesRequest request = new SearchRepositoriesRequest();
+        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
+        request.repositorySourceSearchUrls = Collections.singletonList("http://www.nowhere.org/notfound");
+        request.limit = 2;
+        request.offset = 0;
+
+        // ------------------------------------
+        SearchRepositoriesResult result = repositoryApi.searchRepositories(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.items.size()).isEqualTo(0);
     }
 
     @Test
