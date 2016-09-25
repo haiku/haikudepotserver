@@ -87,12 +87,12 @@
 
     <servlet-mapping>
         <servlet-name>metric-admin-metrics</servlet-name>
-        <url-pattern>/_metric/metrics</url-pattern>
+        <url-pattern>/__metric/metrics</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>metric-admin-ping</servlet-name>
-        <url-pattern>/_metric/ping</url-pattern>
+        <url-pattern>/__metric/ping</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -158,6 +158,12 @@
         <url-pattern>/js/app/*</url-pattern>
     </filter-mapping>
 
+    <filter-mapping>
+        <filter-name>desktopApplicationMinimumVersionFilter</filter-name>
+        <url-pattern>/__api/*</url-pattern>
+    </filter-mapping>
+
+    <!-- TODO; remove legacy path -->
     <filter-mapping>
         <filter-name>desktopApplicationMinimumVersionFilter</filter-name>
         <url-pattern>/api/*</url-pattern>

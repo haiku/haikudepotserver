@@ -1,5 +1,5 @@
 /*
-* Copyright 2014-2015, Andrew Lindesay
+* Copyright 2014-2016, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -35,7 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-@AutoJsonRpcServiceImpl
+@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/userrating") // TODO; legacy path - remove
 public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);

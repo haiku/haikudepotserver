@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 @Component
-@AutoJsonRpcServiceImpl
+@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/captcha") // TODO; legacy path - remove
 public class CaptchaApiImpl implements CaptchaApi {
 
     @Resource

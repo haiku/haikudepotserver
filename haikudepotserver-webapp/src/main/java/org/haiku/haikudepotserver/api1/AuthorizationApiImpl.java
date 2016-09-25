@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-@AutoJsonRpcServiceImpl
+@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/authorization") // TODO; legacy path - remove
 public class AuthorizationApiImpl extends AbstractApiImpl implements AuthorizationApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationApiImpl.class);

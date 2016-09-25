@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -130,7 +130,6 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     public void searchRepositoriesTest_sourceBaseUrlMiss() {
         setupSourceBasedUrlTest();
 
-
         SearchRepositoriesRequest request = new SearchRepositoriesRequest();
         request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
         request.repositorySourceSearchUrls = Collections.singletonList("http://www.nowhere.org/notfound");
@@ -142,6 +141,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.items.size()).isEqualTo(0);
+        Assertions.assertThat(result.total).isEqualTo(0);
     }
 
     @Test

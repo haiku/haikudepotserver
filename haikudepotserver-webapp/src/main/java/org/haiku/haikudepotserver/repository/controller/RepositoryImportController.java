@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,7 +32,10 @@ import java.util.Optional;
  */
 
 @Controller
-@RequestMapping(path = { "/repository", "/__repository" })
+@RequestMapping(path = {
+        "repository", // TODO - remove
+        "__repository"
+})
 public class RepositoryImportController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryImportController.class);

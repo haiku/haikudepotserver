@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,7 +9,7 @@ import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haiku.haikudepotserver.api1.model.repository.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 
-@JsonRpcService("/api/v1/repository")
+@JsonRpcService("/__api/v1/repository")
 public interface RepositoryApi {
 
     /**

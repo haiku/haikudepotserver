@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,7 +15,7 @@ import org.haiku.haikudepotserver.api1.support.ValidationException;
  * <p>This interface defines operations that can be undertaken around users.</p>
  */
 
-@JsonRpcService("/api/v1/user")
+@JsonRpcService("/__api/v1/user")
 public interface UserApi {
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,10 +29,10 @@ import java.io.IOException;
  * or similar request driven by cron.</p>
  */
 
-// TODO; remove "/maintenance".
-
 @Controller
-@RequestMapping(path = { "/maintenance", "/__maintenance" })
+@RequestMapping(path = {
+        "/maintenance", // TODO; remove
+        "/__maintenance" })
 public class MaintenanceController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(MaintenanceController.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -50,7 +50,7 @@ public class AuthenticationFilter implements Filter {
     private static String PARAM_BEARER_TOKEN = "hdsbtok";
 
     @Resource
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

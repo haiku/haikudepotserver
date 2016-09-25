@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,8 +39,10 @@ public class PkgIconController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconController.class);
 
-    public final static String SEGMENT_PKGICON = "pkgicon";
-    public final static String SEGMENT_GENERICPKGICON = "genericpkgicon.png";
+    public final static String SEGMENT_PKGICON = "__pkgicon";
+    public final static String SEGMENT_PKGICON_LEGACY = "pkgicon";
+    public final static String SEGMENT_GENERICPKGICON = "__genericpkgicon.png";
+    public final static String SEGMENT_GENERICPKGICON_LEGACY = "genericpkgicon.png";
 
     public final static String KEY_PKGNAME = "pkgname";
     public final static String KEY_FORMAT = "format";
@@ -187,7 +189,10 @@ public class PkgIconController extends AbstractController {
 
     }
 
-    @RequestMapping(value = "/" + SEGMENT_GENERICPKGICON, method = RequestMethod.HEAD)
+    @RequestMapping(value = {
+            "/" + SEGMENT_GENERICPKGICON,
+            "/" + SEGMENT_GENERICPKGICON_LEGACY // TODO; remove
+    }, method = RequestMethod.HEAD)
     public void handleGenericHead(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size)
@@ -199,7 +204,10 @@ public class PkgIconController extends AbstractController {
                 false);
     }
 
-    @RequestMapping(value = "/" + SEGMENT_GENERICPKGICON, method = RequestMethod.GET)
+    @RequestMapping(value = {
+            "/" + SEGMENT_GENERICPKGICON,
+            "/" + SEGMENT_GENERICPKGICON_LEGACY // TODO; remove
+    }, method = RequestMethod.GET)
     public void handleGenericGet(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size)
@@ -211,7 +219,10 @@ public class PkgIconController extends AbstractController {
                 false);
     }
 
-    @RequestMapping(value = "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.HEAD)
+    @RequestMapping(value = {
+            "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}",
+            "/" + SEGMENT_PKGICON_LEGACY + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", // TODO; remove
+    }, method = RequestMethod.HEAD)
     public void handleHead(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size,
@@ -228,7 +239,10 @@ public class PkgIconController extends AbstractController {
                 fallback);
     }
 
-    @RequestMapping(value = "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
+    @RequestMapping(value = {
+            "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}",
+            "/" + SEGMENT_PKGICON_LEGACY + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}" // TODO; remove
+    }, method = RequestMethod.GET)
     public void handleGet(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size,

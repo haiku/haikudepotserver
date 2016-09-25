@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
  * <p>API related to authorization.</p>
  */
 
-@JsonRpcService("/api/v1/authorization")
+@JsonRpcService("/__api/v1/authorization")
 public interface AuthorizationApi {
 
     /**

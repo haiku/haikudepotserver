@@ -1,18 +1,18 @@
+/*
+ * Copyright 2016, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.support.jsonrpc4j;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.googlecode.jsonrpc4j.InvocationListener;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,19 +27,13 @@ public class MetricsInvocationListener implements InvocationListener {
 
     private MetricRegistry metricRegistry;
 
-    LoadingCache<Class, String> apiClassToCounterName = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .expireAfterWrite(60, TimeUnit.MINUTES)
-            .build(
-                    new CacheLoader<Class, String>() {
-                        public String load(Class declaringClass) {
-                            Matcher matcher = PATTERN_API_PACKAGE.matcher(declaringClass.getPackage().getName());
-                            return "api" + (matcher.matches() ? matcher.group(1) : "") + "." + declaringClass.getSimpleName();
-                        }
-                    });
-
     public void setMetricRegistry(MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
+    }
+
+    private String formulateMetricName(Class klass) {
+        Matcher matcher = PATTERN_API_PACKAGE.matcher(klass.getPackage().getName());
+        return "jrpc-api" + (matcher.matches() ? matcher.group(1) : "") + "." + klass.getSimpleName();
     }
 
     @PostConstruct
@@ -59,7 +53,8 @@ public class MetricsInvocationListener implements InvocationListener {
             Throwable t,
             long duration) {
         Preconditions.checkState(null!=metricRegistry, "the metrics registry must be configured");
-        String name = apiClassToCounterName.getUnchecked(method.getDeclaringClass()) + "#" + method.getName();
-        metricRegistry.counter(name).inc();
+        String name = formulateMetricName(method.getDeclaringClass()) + "#" + method.getName();
+        metricRegistry.counter("counter-" + name).inc();
+        metricRegistry.timer("timer-" + name).update(duration, TimeUnit.MILLISECONDS);
     }
 }

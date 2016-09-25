@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
  */
 
 @Component
-@AutoJsonRpcServiceImpl
+@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/pkg") // TODO - remove old endpoint
 public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     public final static int PKGPKGCATEGORIES_MAX = 3;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,14 +20,14 @@ angular.module('haikudepotserver')
         ARCHITECTURE_CODE_DEFAULT : 'x86_gcc2', // TODO; from API somehow
         REPOSITORY_CODE_DEFAULT : 'haikuports', // TODO; from API somehow
 
-        ENDPOINT_API_V1_REPOSITORY : '/api/v1/repository',
-        ENDPOINT_API_V1_PKG : '/api/v1/pkg',
-        ENDPOINT_API_V1_CAPTCHA : '/api/v1/captcha',
-        ENDPOINT_API_V1_MISCELLANEOUS : '/api/v1/miscellaneous',
-        ENDPOINT_API_V1_USER : '/api/v1/user',
-        ENDPOINT_API_V1_JOB : '/api/v1/job',
-        ENDPOINT_API_V1_USERRATING : '/api/v1/userrating',
-        ENDPOINT_API_V1_AUTHORIZATION : '/api/v1/authorization',
+        ENDPOINT_API_V1_REPOSITORY : '/__api/v1/repository',
+        ENDPOINT_API_V1_PKG : '/__api/v1/pkg',
+        ENDPOINT_API_V1_CAPTCHA : '/__api/v1/captcha',
+        ENDPOINT_API_V1_MISCELLANEOUS : '/__api/v1/miscellaneous',
+        ENDPOINT_API_V1_USER : '/__api/v1/user',
+        ENDPOINT_API_V1_JOB : '/__api/v1/job',
+        ENDPOINT_API_V1_USERRATING : '/__api/v1/userrating',
+        ENDPOINT_API_V1_AUTHORIZATION : '/__api/v1/authorization',
 
         MEDIATYPE_PNG : 'image/png',
         MEDIATYPE_HAIKUVECTORICONFILE : 'application/x-vnd.haiku-icon',

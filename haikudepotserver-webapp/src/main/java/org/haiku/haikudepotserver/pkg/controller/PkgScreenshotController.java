@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,6 +23,7 @@ import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
+import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -36,10 +37,16 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/pkgscreenshot")
+@RequestMapping(value = {
+        PkgScreenshotController.SEGMENT_SCREENSHOT,
+        PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY // TODO; remove
+})
 public class PkgScreenshotController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotController.class);
+
+    public final static String SEGMENT_SCREENSHOT = "__pkgscreenshot";
+    public final static String SEGMENT_SCREENSHOT_LEGACY = "pkgscreenshot";
 
     public final static String HEADER_SCREENSHOTCODE = "X-HaikuDepotServer-ScreenshotCode";
 

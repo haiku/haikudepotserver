@@ -28,6 +28,32 @@
     <mvc:resources mapping="/docs/**" location="/docs/" />
     <mvc:resources mapping="favicon.ico" location="/img/favicon.ico" />
 
+    <mvc:interceptors>
+        <mvc:interceptor>
+
+            <mvc:mapping path="/__**"/>
+            <mvc:mapping path="/__**/*"/>
+            <mvc:mapping path="/pkg**"/> <!-- TODO; remove - legacy -->
+            <mvc:mapping path="/pkg**/*"/> <!-- TODO; remove - legacy -->
+
+            <bean class="org.haiku.haikudepotserver.support.web.MetricsInterceptor">
+                <property name="pathPrefixesForMetricsCapture">
+                    <list>
+                        <value>__maintenance</value>
+                        <value>__pkgdownload</value>
+                        <value>__pkgsearch</value>
+                        <value>__pkgicon</value>
+                        <value>pkgicon</value> <!-- TODO; remove - legacy -->
+                        <value>__genericpkgicon</value>
+                        <value>__pkgscreenshot</value>
+                        <value>pkgscreenshot</value> <!-- TODO; remove - legacy -->
+                        <value>__repository</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
     <bean
             class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,8 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
     [
         '$log','$q','$http',
         function($log,$q,$http) {
+
+            var SEGMENT_SCREENSHOT = "__pkgscreenshot";
 
             var PkgScreenshot = {
 
@@ -65,7 +67,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                     return $http({
                         cache: false,
                         method: 'POST',
-                        url: '/pkgscreenshot/'+pkg.name+'/add?format=png',
+                        url: '/' + SEGMENT_SCREENSHOT + '/'+pkg.name+'/add?format=png',
                         headers: _.extend(
                             { 'Content-Type' : 'image/png' },
                             PkgScreenshot.headers),
@@ -105,7 +107,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                         throw Error('the code must be supplied to derive a url for the screenshot image');
                     }
 
-                    return '/pkgscreenshot/' + code + '/raw';
+                    return '/' + SEGMENT_SCREENSHOT + '/' + code + '/raw';
                 },
 
                 /**
@@ -123,7 +125,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                         throw Error('the code must be supplied to derive a url for the screenshot image');
                     }
 
-                    var u = '/pkgscreenshot/' + code + '.png';
+                    var u = '/' + SEGMENT_SCREENSHOT + '/' + code + '.png';
                     var q = [];
 
                     if(pkg.modifyTimestamp) {

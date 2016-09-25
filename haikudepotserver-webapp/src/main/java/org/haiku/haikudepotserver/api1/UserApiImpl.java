@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Andrew Lindesay
+ * Copyright 2013-2016 Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
-@AutoJsonRpcServiceImpl
+@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/user") // TODO; legacy path - remove
 public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);

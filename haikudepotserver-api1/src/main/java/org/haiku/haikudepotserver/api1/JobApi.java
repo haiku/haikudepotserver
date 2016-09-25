@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
  * jobs etc...</P>
  */
 
-@JsonRpcService("/api/v1/job")
+@JsonRpcService("/__api/v1/job")
 public interface JobApi {
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,7 +21,7 @@ angular.module('haikudepotserver').factory('pkgIcon',
                  */
 
                 genericUrl : function(size) {
-                    return '/genericpkgicon.png?s=' + size;
+                    return '/__genericpkgicon.png?s=' + size;
                 },
 
                 /**
@@ -35,7 +35,7 @@ angular.module('haikudepotserver').factory('pkgIcon',
                         throw Error('the pkg must be supplied to get the package icon url');
                     }
 
-                    var u = '/pkgicon/' + pkg.name;
+                    var u = '/__pkgicon/' + pkg.name;
 
                     if(!mediaTypeCode) {
                         throw Error('the media type code is required to get the package icon url');

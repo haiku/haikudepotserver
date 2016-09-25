@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@AutoJsonRpcServiceImpl
+@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/repository") // TODO; legacy path - remove
 public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryApiImpl.class);

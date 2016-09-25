@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -95,7 +95,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 $scope.pkgHpkgUrl = [
-                    '__pkgdownload',
+                    '/__pkgdownload',
                     $scope.pkg.name,
                     $scope.pkg.versions[0].repositoryCode,
                     nullToHyphen($scope.pkg.versions[0].major),

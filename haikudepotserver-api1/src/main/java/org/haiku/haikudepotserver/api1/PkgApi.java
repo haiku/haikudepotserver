@@ -16,7 +16,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
  * <p>This API is for access to packages and package versions.</p>
  */
 
-@JsonRpcService("/api/v1/pkg")
+@JsonRpcService("/__api/v1/pkg")
 public interface PkgApi {
 
     Integer GETBULKPKG_LIMIT = 50;

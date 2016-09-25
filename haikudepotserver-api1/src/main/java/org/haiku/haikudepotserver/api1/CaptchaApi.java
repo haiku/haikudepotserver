@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,7 @@ import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
  * certain length of time.</p>
  */
 
-@JsonRpcService("/api/v1/captcha")
+@JsonRpcService("/__api/v1/captcha")
 public interface CaptchaApi {
 
     /**

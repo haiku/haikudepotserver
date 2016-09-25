@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
+import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,9 @@ public class PkgDownloadController {
     public final static String KEY_REVISION = "revision";
     public final static String KEY_ARCHITECTURECODE = "architectureCode";
 
+    public final static String PATH = "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
+            KEY_MICRO + "}/{" + KEY_PRERELEASE + "}/{" + KEY_REVISION + "}/{" + KEY_ARCHITECTURECODE + "}/package.hpkg";
+
     @Resource
     private ServerRuntime serverRuntime;
 
@@ -66,9 +70,7 @@ public class PkgDownloadController {
     }
 
     @RequestMapping(
-            value = "/" + SEGMENT_PKGDOWNLOAD +
-                    "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
-                    KEY_MICRO + "}/{" + KEY_PRERELEASE + "}/{" + KEY_REVISION + "}/{" + KEY_ARCHITECTURECODE + "}/package.hpkg",
+            value = { "/" + SEGMENT_PKGDOWNLOAD + PATH },
             method = RequestMethod.GET)
     public void download(
             HttpServletResponse response,

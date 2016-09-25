@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.OpenSearchDescription;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
+import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -42,10 +43,16 @@ import java.util.Optional;
  */
 
 @Controller
-@RequestMapping("/pkgsearch")
+@RequestMapping(value = {
+        PkgSearchController.SEGMENT_SEARCH,
+        PkgSearchController.SEGMENT_SEARCH_LEGACY // TODO; remove
+})
 public class PkgSearchController {
 
     private final static String KEY_QUERY = "srchexpr";
+
+    public final static String SEGMENT_SEARCH = "__pkgsearch";
+    public final static String SEGMENT_SEARCH_LEGACY = "pkgsearch";
 
     @Resource(name = "opensearchFreemarkerConfiguration")
     private Configuration freemarkerConfiguration;
@@ -115,7 +122,7 @@ public class PkgSearchController {
      * that package.  If it does not find it then it will redirect to a search page querying that expression.</p>
      */
 
-    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    @RequestMapping(value = "search", method = RequestMethod.GET)
     public void handleSearch(
             HttpServletResponse response,
             @RequestParam(value = KEY_QUERY, required = false) String query) throws IOException {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2016, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -312,7 +312,7 @@ Distributed under the terms of the MIT License.
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/pkgicon/&lt;pkgname&gt;.&lt;mediatype-extension&gt;</listitem>
+                        <listitem>/__pkgicon/&lt;pkgname&gt;.&lt;mediatype-extension&gt;</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Response Content-Type</term>
@@ -361,12 +361,12 @@ Distributed under the terms of the MIT License.
 
             <para>
                 An example URL for obtaining a bitmap image would be
-                &quot;http://localhost:8080/pkgicon/apr.png?size=32&amp;f=true&quot;.
+                &quot;http://localhost:8080/__pkgicon/apr.png?size=32&amp;f=true&quot;.
             </para>
 
             <para>
                 An example URL for obtaining a Haiku vector image file image would be
-                &quot;http://localhost:8080/pkgicon/apr.hvif&quot;
+                &quot;http://localhost:8080/__pkgicon/apr.hvif&quot;
             </para>
 
         </section>
@@ -393,7 +393,7 @@ Distributed under the terms of the MIT License.
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/pkgscreenshot/&lt;screenshotcode&gt;.png</listitem>
+                        <listitem>/__pkgscreenshot/&lt;screenshotcode&gt;.png</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Response Content-Type</term>
@@ -469,7 +469,7 @@ Distributed under the terms of the MIT License.
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/pkgscreenshot/&lt;screenshotcode&gt;/raw</listitem>
+                        <listitem>/__pkgscreenshot/&lt;screenshotcode&gt;/raw</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Response Content-Type</term>
@@ -494,7 +494,7 @@ Distributed under the terms of the MIT License.
             </para>
 
             <para>
-                An example URL is &quot;http://localhost:8080/pkgscreenshot/a78hw20fh2p20fh122jd92/raw&quot;.
+                An example URL is &quot;http://localhost:8080/__pkgscreenshot/a78hw20fh2p20fh122jd92/raw&quot;.
             </para>
 
         </section>
@@ -516,7 +516,7 @@ Distributed under the terms of the MIT License.
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/pkgscreenshot/&lt;pkgname&gt;/add</listitem>
+                        <listitem>/__pkgscreenshot/&lt;pkgname&gt;/add</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Query Parameters</term>
@@ -572,7 +572,7 @@ Distributed under the terms of the MIT License.
             </para>
 
             <para>
-                An example URL is &quot;http://localhost:8080/pkgscreenshot/apr/add?format=png&quot;.
+                An example URL is &quot;http://localhost:8080/__pkgscreenshot/apr/add?format=png&quot;.
             </para>
 
         </section>
