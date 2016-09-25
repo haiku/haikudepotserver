@@ -38,7 +38,7 @@
         </init-param>
         <init-param>
             <param-name>mapping</param-name>
-            <param-value>/jawr/css/</param-value>
+            <param-value>/__jawr/css/</param-value>
         </init-param>
         <init-param>
             <param-name>type</param-name>
@@ -56,7 +56,7 @@
         </init-param>
         <init-param>
             <param-name>mapping</param-name>
-            <param-value>/jawr/js/</param-value>
+            <param-value>/__jawr/js/</param-value>
         </init-param>
         <init-param>
             <param-name>type</param-name>
@@ -97,12 +97,12 @@
 
     <servlet-mapping>
         <servlet-name>jawr-servlet-css</servlet-name>
-        <url-pattern>/jawr/css/*</url-pattern>
+        <url-pattern>/__jawr/css/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>jawr-servlet-js</servlet-name>
-        <url-pattern>/jawr/js/*</url-pattern>
+        <url-pattern>/__jawr/js/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

@@ -20,7 +20,7 @@ environment is working.
             and
             <a href="https://www.google.com/chrome/browser/">Google Chrome</a>
             are known to function.  A simple user interface is also
-            <a href="/multipage">available</a>.
+            <a href="/__multipage">available</a>.
         </div>
 
         <div class="unsupported-message-container">
@@ -32,7 +32,7 @@ environment is working.
             <a href="https://www.mozilla.org/firefox">Firefox</a>
             und <a href="https://www.google.com/chrome/browser/">Google Chrome</a>
             funktionieren auf alle F&#xE4;lle.  Eine
-            <a href="/multipage">einfache Darstellung</a>
+            <a href="/__multipage">einfache Darstellung</a>
             steht auch zur Verfügung.
         </div>
 

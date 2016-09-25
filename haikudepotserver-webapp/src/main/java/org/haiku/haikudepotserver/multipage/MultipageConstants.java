@@ -7,6 +7,6 @@ package org.haiku.haikudepotserver.multipage;
 
 public class MultipageConstants {
 
-    public final static String PATH_MULTIPAGE = "/multipage";
+    public final static String PATH_MULTIPAGE = "/__multipage";
 
 }
