@@ -15,7 +15,7 @@
           init-method="startAsyncAndAwaitRunning"
           destroy-method="stopAsyncAndAwaitTerminated">
         <property name="jobDataStorageService">
-            <bean class="org.haiku.haikudepotserver.job.LocalJobDataStorageServiceImpl"></bean>
+            <bean class="org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl"></bean>
         </property>
     </bean>
 

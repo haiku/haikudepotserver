@@ -3,10 +3,11 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.job;
+package org.haiku.haikudepotserver.storage;
 
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
+import org.haiku.haikudepotserver.job.JobOrchestrationService;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -17,19 +18,18 @@ import java.util.Optional;
  * {@link JobOrchestrationService}.</p>
  */
 
-interface JobDataStorageService {
+public interface DataStorageService {
 
-    ByteSink put(String guid) throws IOException;
+    ByteSink put(String key) throws IOException;
 
     /**
-     * @param guid the identifier for the job data to obtain
+     * @param key the identifier for the job data to obtain
      * @return an {@link java.io.OutputStream} that will supply the data or null if the job data was not able to be found.
-     * @throws IOException
      */
 
-    Optional<? extends ByteSource> get(String guid) throws IOException;
+    Optional<? extends ByteSource> get(String key) throws IOException;
 
-    boolean remove(String guid);
+    boolean remove(String key);
 
     void clear();
 

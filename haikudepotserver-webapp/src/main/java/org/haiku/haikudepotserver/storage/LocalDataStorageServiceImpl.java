@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.job;
+package org.haiku.haikudepotserver.storage;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -18,15 +18,15 @@ import java.io.*;
 import java.util.Optional;
 
 /**
- * <p>An implementation of the {@link JobDataStorageService}
+ * <p>An implementation of the {@link DataStorageService}
  * which stores job data to a local temporary directory.</p>
  */
 
-public class LocalJobDataStorageServiceImpl implements JobDataStorageService {
+public class LocalDataStorageServiceImpl implements DataStorageService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(LocalJobDataStorageServiceImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(LocalDataStorageServiceImpl.class);
 
-    public final static String PATH_APPTMPDIR = "haikudepotserver-jobdata";
+    private final static String PATH_APPTMPDIR = "haikudepotserver-data";
 
     private File tmpDir;
 
@@ -62,19 +62,19 @@ public class LocalJobDataStorageServiceImpl implements JobDataStorageService {
 
     }
 
-    private File fileForGuid(String guid) {
-       return new File(tmpDir, guid + ".dat");
+    private File fileForKey(String key) {
+       return new File(tmpDir, key + ".dat");
     }
 
     @Override
-    public ByteSink put(final String guid) throws IOException {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
+    public ByteSink put(final String key) throws IOException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
 
         return new ByteSink() {
 
             @Override
             public OutputStream openStream() throws IOException {
-                return new FileOutputStream(fileForGuid(guid));
+                return new FileOutputStream(fileForKey(key));
             }
 
         };
@@ -82,13 +82,13 @@ public class LocalJobDataStorageServiceImpl implements JobDataStorageService {
     }
 
     @Override
-    public Optional<? extends ByteSource> get(final String guid) throws IOException {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
+    public Optional<? extends ByteSource> get(final String key) throws IOException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
 
         return Optional.of(new ByteSource() {
             @Override
             public InputStream openStream() throws IOException {
-                File f = fileForGuid(guid);
+                File f = fileForKey(key);
 
                 if(!f.exists()) {
                     return null;
@@ -101,9 +101,9 @@ public class LocalJobDataStorageServiceImpl implements JobDataStorageService {
     }
 
     @Override
-    public boolean remove(String guid) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
-        File f = fileForGuid(guid);
+    public boolean remove(String key) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
+        File f = fileForKey(key);
 
         if(f.exists()) {
             return f.delete();
