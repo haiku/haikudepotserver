@@ -18,7 +18,6 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +27,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.security.MessageDigest;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -196,7 +197,7 @@ public class AuthenticationService {
         }
 
         // get a count of upper case letters - should be at least one.
-        if(countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 65 && c <= 90; } }) < 1) {
+        if (countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 65 && c <= 90; } }) < 1) {
             return false;
         }
 
@@ -225,7 +226,7 @@ public class AuthenticationService {
      * an ObjectId that refers to the </p>
      */
 
-    public Optional<ObjectId> authenticate(SignedJWT signedJwt) {
+    private Optional<ObjectId> authenticate(SignedJWT signedJwt) {
         Preconditions.checkNotNull(signedJwt);
         JWTClaimsSet claimsSet;
         long nowMillis = System.currentTimeMillis();
@@ -284,7 +285,7 @@ public class AuthenticationService {
      * an absent.</p>
      */
 
-    public Optional<SignedJWT> verifyToken(String payload) {
+    private Optional<SignedJWT> verifyToken(String payload) {
         if(null!=payload && 0!=payload.length()) {
             try {
                 SignedJWT signedJWT = SignedJWT.parse(payload);
@@ -316,13 +317,13 @@ public class AuthenticationService {
 
     public String generateToken(User user) {
         Preconditions.checkNotNull(user);
-        DateTime now = new DateTime();
+        Instant instant = Instant.now();
 
         JWTClaimsSet claimsSet = new JWTClaimsSet
                 .Builder()
                 .subject(user.getNickname() + SUFFIX_JSONWEBTOKEN_SUBJECT)
-                .issueTime(now.toDate())
-                .expirationTime(now.plusSeconds(jsonWebTokenExpirySeconds).toDate())
+                .issueTime(new java.util.Date(instant.toEpochMilli()))
+                .expirationTime(new java.util.Date(instant.plus(jsonWebTokenExpirySeconds, ChronoUnit.SECONDS).toEpochMilli()))
                 .issuer(jsonWebTokenIssuer)
                 .build();
 

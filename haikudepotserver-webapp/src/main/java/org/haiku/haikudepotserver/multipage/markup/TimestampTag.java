@@ -6,11 +6,12 @@
 package org.haiku.haikudepotserver.multipage.markup;
 
 import com.google.common.html.HtmlEscapers;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -20,21 +21,7 @@ import java.util.Date;
 public class TimestampTag extends RequestContextAwareTag {
 
     // might be an idea to put this somewhere else if we need it again?
-    private final static DateTimeFormatter FORMATTER =
-            new DateTimeFormatterBuilder()
-            .appendYear(4,4)
-            .appendLiteral('-')
-            .appendMonthOfYear(2)
-            .appendLiteral('-')
-            .appendDayOfMonth(2)
-            .appendLiteral(' ')
-            .appendHourOfDay(2)
-            .appendLiteral(':')
-            .appendMinuteOfHour(2)
-            .appendLiteral(':')
-            .appendSecondOfMinute(2)
-            .toFormatter()
-            .withZoneUTC();
+    private final static DateTimeFormatter FORMATTER = DateTimeHelper.createStandardDateTimeFormat();
 
     private java.util.Date value;
 
@@ -53,7 +40,8 @@ public class TimestampTag extends RequestContextAwareTag {
 
         if(null!=getValue()) {
             tagWriter.startTag("span");
-            tagWriter.appendValue(HtmlEscapers.htmlEscaper().escape(FORMATTER.print(getValue().getTime())));
+            tagWriter.appendValue(HtmlEscapers.htmlEscaper().escape(FORMATTER.format(
+                    Instant.ofEpochMilli(getValue().getTime()))));
             tagWriter.endTag();
         }
 

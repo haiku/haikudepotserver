@@ -20,8 +20,7 @@ import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -279,7 +280,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(outputStream);
 
-        DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.basicDateTimeNoMillis();
+        DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
 
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
         CSVWriter csvWriter = new CSVWriter(outputStreamWriter);
@@ -304,7 +305,7 @@ public class AuthorizationPkgRuleOrchestrationService {
 
             for(PermissionUserPkg rule : rules) {
                 csvWriter.writeNext(new String[] {
-                        dateTimeFormatter.print(rule.getCreateTimestamp().getTime()),
+                        dateTimeFormatter.format(Instant.ofEpochMilli(rule.getCreateTimestamp().getTime())),
                         rule.getUser().getNickname(),
                         Boolean.toString(rule.getUser().getActive()),
                         rule.getPermission().getCode(),

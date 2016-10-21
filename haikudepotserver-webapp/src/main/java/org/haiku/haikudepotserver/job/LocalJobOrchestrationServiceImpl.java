@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -702,7 +703,7 @@ public class LocalJobOrchestrationServiceImpl
         return String.format(
                 "hds_%s_%s_%s.%s",
                 descriptor,
-                DateTimeHelper.create14DigitDateTimeFormat().print(System.currentTimeMillis()),
+                DateTimeHelper.create14DigitDateTimeFormat().format(Instant.now()),
                 jobDataGuid.substring(0,4),
                 extension);
     }

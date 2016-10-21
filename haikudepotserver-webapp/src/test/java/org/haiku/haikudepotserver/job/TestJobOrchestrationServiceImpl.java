@@ -9,12 +9,15 @@ import com.google.common.io.ByteSource;
 import org.haiku.haikudepotserver.api1.JobApi;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
-import org.joda.time.DateTime;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>This implementation of {@link JobOrchestrationService} has some
@@ -24,12 +27,12 @@ import java.util.stream.Collectors;
 
 public class TestJobOrchestrationServiceImpl implements JobOrchestrationService {
 
-    public final static DateTime DT_1976_JAN = new DateTime(1976,1,1,0,0);
-    public final static DateTime DT_1976_FEB = new DateTime(1976,2,1,0,0);
-    public final static DateTime DT_1976_MAR = new DateTime(1976,3,1,0,0);
-    public final static DateTime DT_1976_APR = new DateTime(1976,4,1,0,0);
-    public final static DateTime DT_1976_JUN = new DateTime(1976,6,1,0,0);
-    public final static DateTime DT_1976_JUL = new DateTime(1976,6,1,0,0);
+    public final static Instant DT_1976_JAN = LocalDateTime.of(1976,1,1,0,0).toInstant(ZoneOffset.UTC);
+    public final static Instant DT_1976_FEB = LocalDateTime.of(1976,2,1,0,0).toInstant(ZoneOffset.UTC);
+    public final static Instant DT_1976_MAR = LocalDateTime.of(1976,3,1,0,0).toInstant(ZoneOffset.UTC);
+    public final static Instant DT_1976_APR = LocalDateTime.of(1976,4,1,0,0).toInstant(ZoneOffset.UTC);
+    public final static Instant DT_1976_JUN = LocalDateTime.of(1976,6,1,0,0).toInstant(ZoneOffset.UTC);
+    public final static Instant DT_1976_JUL = LocalDateTime.of(1976,6,1,0,0).toInstant(ZoneOffset.UTC);
 
     private Job queuedJob;
     private Job startedJob;
@@ -44,22 +47,22 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
 
         {
             queuedJob = new Job();
-            queuedJob.setQueuedTimestamp(DT_1976_JAN.toDate());
+            queuedJob.setQueuedTimestamp(new Date(DT_1976_JAN.toEpochMilli()));
             queuedJob.setJobSpecification(new TestJobSpecificationImpl(null,"queued"));
         }
 
         {
             startedJob = new Job();
-            startedJob.setQueuedTimestamp(DT_1976_FEB.toDate());
-            startedJob.setStartTimestamp(DT_1976_MAR.toDate());
+            startedJob.setQueuedTimestamp(new Date(DT_1976_FEB.toEpochMilli()));
+            startedJob.setStartTimestamp(new Date(DT_1976_MAR.toEpochMilli()));
             startedJob.setJobSpecification(new TestJobSpecificationImpl(null,"started"));
         }
 
         {
             finishedJob = new Job();
-            finishedJob.setQueuedTimestamp(DT_1976_APR.toDate());
-            finishedJob.setStartTimestamp(DT_1976_JUN.toDate());
-            finishedJob.setFinishTimestamp(DT_1976_JUL.toDate());
+            finishedJob.setQueuedTimestamp(new Date(DT_1976_APR.toEpochMilli()));
+            finishedJob.setStartTimestamp(new Date(DT_1976_JUN.toEpochMilli()));
+            finishedJob.setFinishTimestamp(new Date(DT_1976_JUL.toEpochMilli()));
             finishedJob.setJobSpecification(new TestJobSpecificationImpl("testuser", "finished"));
         }
 
@@ -124,8 +127,7 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     }
 
     private List<Job> filteredJobs(final User user, final Set<JobSnapshot.Status> statuses) {
-        return Arrays.asList(queuedJob,startedJob,finishedJob)
-                .stream()
+        return Stream.of(queuedJob, startedJob, finishedJob)
                 .filter(j -> matches(j, user, statuses))
                 .collect(Collectors.toList());
     }

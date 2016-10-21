@@ -15,13 +15,14 @@ import org.haiku.haikudepotserver.support.Callback;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -115,7 +116,7 @@ public class UserRatingOrchestrationService {
 
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-        DateTime now = new DateTime();
+        Instant instant = Instant.now();
 
         List<String> whereExpressions = new ArrayList<>();
 
@@ -135,7 +136,7 @@ public class UserRatingOrchestrationService {
         }
 
         if (null != search.getDaysSinceCreated()) {
-            parameterAccumulator.add(new java.sql.Timestamp(now.minusDays(search.getDaysSinceCreated()).getMillis()));
+            parameterAccumulator.add(new java.sql.Timestamp(instant.minus(search.getDaysSinceCreated(), ChronoUnit.DAYS).toEpochMilli()));
             whereExpressions.add("ur." + UserRating.CREATE_TIMESTAMP_PROPERTY + " > ?" + parameterAccumulator.size());
         }
 
@@ -275,7 +276,7 @@ public class UserRatingOrchestrationService {
      * <p>This method will go through all of the relevant packages and will derive their user ratings.</p>
      */
 
-    public void updateUserRatingDerivationsForAllPkgs() {
+    void updateUserRatingDerivationsForAllPkgs() {
         ObjectContext context = serverRuntime.getContext();
 
         StringBuilder builder = new StringBuilder();
@@ -301,7 +302,7 @@ public class UserRatingOrchestrationService {
      * repositories.</p>
      */
 
-    public void updateUserRatingDerivation(String pkgName) {
+    void updateUserRatingDerivation(String pkgName) {
          Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the name of the package is required");
 
         ObjectContext context = serverRuntime.getContext();
@@ -330,7 +331,7 @@ public class UserRatingOrchestrationService {
      * specified repository.</p>
      */
 
-    public void updateUserRatingDerivation(String pkgName, String repositoryCode) {
+    private void updateUserRatingDerivation(String pkgName, String repositoryCode) {
         Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));
         Preconditions.checkState(!Strings.isNullOrEmpty(repositoryCode));
 
@@ -392,7 +393,7 @@ public class UserRatingOrchestrationService {
      * user rating; in which case, an absent {@link Optional} is returned.</p>
      */
 
-    public Optional<DerivedUserRating> userRatingDerivation(ObjectContext context, Pkg pkg, Repository repository) {
+    Optional<DerivedUserRating> userRatingDerivation(ObjectContext context, Pkg pkg, Repository repository) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
 
@@ -494,7 +495,7 @@ public class UserRatingOrchestrationService {
      * <P>This is used as a model class / return value for the derivation of the user rating.</P>
      */
 
-    public static class DerivedUserRating {
+    static class DerivedUserRating {
 
         private float rating;
         private int sampleSize;

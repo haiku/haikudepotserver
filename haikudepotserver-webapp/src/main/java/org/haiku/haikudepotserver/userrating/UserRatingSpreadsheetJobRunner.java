@@ -14,6 +14,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
@@ -21,8 +22,6 @@ import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.support.Callback;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,6 +30,8 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 /**
@@ -123,7 +124,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             long startMs = System.currentTimeMillis();
             LOGGER.info("will user rating spreadsheet report");
 
-            final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.basicDateTimeNoMillis();
+            final DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
 
             UserRatingSearchSpecification spec = new UserRatingSearchSpecification();
             spec.setPkg(paramPkgOptional.orElse(null));
@@ -142,8 +143,8 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
                                     userRating.getPkgVersion().getArchitecture().getCode(),
                                     userRating.getPkgVersion().toVersionCoordinates().toString(),
                                     userRating.getUser().getNickname(),
-                                    dateTimeFormatter.print(userRating.getCreateTimestamp().getTime()),
-                                    dateTimeFormatter.print(userRating.getModifyTimestamp().getTime()),
+                                    dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getCreateTimestamp().getTime())),
+                                    dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getModifyTimestamp().getTime())),
                                     null != userRating.getRating() ? userRating.getRating().toString() : "",
                                     null != userRating.getUserRatingStability() ? userRating.getUserRatingStability().getCode() : "",
                                     userRating.getNaturalLanguage().getCode(),

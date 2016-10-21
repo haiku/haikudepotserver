@@ -11,6 +11,7 @@ import org.haiku.haikudepotserver.security.AbstractUserAuthenticationAware;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
 
 public class AbstractController extends AbstractUserAuthenticationAware {
 
@@ -24,7 +25,7 @@ public class AbstractController extends AbstractUserAuthenticationAware {
         String filename = String.format(
                 "hds_%s_%s.csv",
                 filenameIdentifier,
-                DateTimeHelper.create14DigitDateTimeFormat().print(System.currentTimeMillis()));
+                DateTimeHelper.create14DigitDateTimeFormat().format(Instant.now()));
 
         response.setContentType(MediaType.CSV_UTF_8.toString());
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+filename);

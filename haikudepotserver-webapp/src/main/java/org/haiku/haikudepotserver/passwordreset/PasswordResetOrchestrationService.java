@@ -17,10 +17,9 @@ import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.security.AuthenticationService;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMail;
-import org.joda.time.DateTime;
+import org.haiku.haikudepotserver.security.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +31,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -173,7 +174,7 @@ public class PasswordResetOrchestrationService {
      */
 
     public void complete(String tokenCode, String passwordClear) {
-        DateTime now = new DateTime();
+        Instant now = Instant.now();
 
         try {
             if (!Strings.isNullOrEmpty(tokenCode)) {
@@ -186,7 +187,7 @@ public class PasswordResetOrchestrationService {
                     try {
                         UserPasswordResetToken token = tokenOptional.get();
 
-                        if(token.getCreateTimestamp().getTime() > now.minusHours(timeToLiveHours).getMillis()) {
+                        if(token.getCreateTimestamp().getTime() > now.minus(timeToLiveHours, ChronoUnit.HOURS).toEpochMilli()) {
 
                             User user = token.getUser();
 
@@ -244,15 +245,15 @@ public class PasswordResetOrchestrationService {
      * <p>This method will delete any tokens that have expired.</p>
      */
 
-    public void deleteExpiredPasswordResetTokens() {
+    void deleteExpiredPasswordResetTokens() {
         ObjectContext context = serverRuntime.getContext();
-        DateTime now = new DateTime();
+        Instant now = Instant.now();
 
         SelectQuery query = new SelectQuery(
                 UserPasswordResetToken.class,
                 ExpressionFactory.lessExp(
                         UserPasswordResetToken.CREATE_TIMESTAMP_PROPERTY,
-                        now.minusHours(timeToLiveHours).toDate()));
+                        new java.util.Date(now.minus(timeToLiveHours, ChronoUnit.HOURS).toEpochMilli())));
 
         List<UserPasswordResetToken> tokens = (List<UserPasswordResetToken>) context.performQuery(query);
 
