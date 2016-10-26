@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ import java.util.Optional;
  * package model object.</p>
  */
 
-public class PkgFactory {
+class PkgFactory {
 
     private String getOptionalStringAttributeValue(
             AttributeContext attributeContext,
@@ -90,7 +90,7 @@ public class PkgFactory {
         return PkgArchitecture.values()[value];
     }
 
-    public Pkg createPackage(
+    Pkg createPackage(
             AttributeContext attributeContext,
             Attribute attribute) throws PkgException {
 

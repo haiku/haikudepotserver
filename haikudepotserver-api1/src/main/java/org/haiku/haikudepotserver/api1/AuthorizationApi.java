@@ -40,5 +40,9 @@ public interface AuthorizationApi {
 
     SearchAuthorizationPkgRulesResult searchAuthorizationPkgRules(SearchAuthorizationPkgRulesRequest request) throws ObjectNotFoundException;
 
+    /**
+     * @since 2016-10-24
+     */
+    QueueAuthorizationRulesSpreadsheetResult queueAuthorizationRulesSpreadsheet(QueueAuthorizationRulesSpreadsheetRequest request);
 
 }

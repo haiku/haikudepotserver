@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class Permission extends _Permission {
 
     public static List<Permission> getAll(ObjectContext context) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(null != context, "the context must be provided");
         SelectQuery query = new SelectQuery(Permission.class);
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
@@ -29,7 +29,7 @@ public class Permission extends _Permission {
     }
 
     public static Optional<Permission> getByCode(ObjectContext context, final String code) {
-        Preconditions.checkArgument(null!=context, "the context must be provided");
+        Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the permission code must be provided");
         return getAll(context).stream().filter(p -> p.getCode().equals(code)).collect(SingleCollector.optional());
     }

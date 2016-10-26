@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -56,25 +56,25 @@ public class PkgOrchestrationService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgOrchestrationService.class);
 
-    protected static int PAYLOAD_LENGTH_CONNECT_TIMEOUT = 10 * 1000;
-    protected static int PAYLOAD_LENGTH_READ_TIMEOUT = 10 * 1000;
+    private static int PAYLOAD_LENGTH_CONNECT_TIMEOUT = 10 * 1000;
+    private static int PAYLOAD_LENGTH_READ_TIMEOUT = 10 * 1000;
 
-    protected static int SCREENSHOT_SIDE_LIMIT = 1500;
+    private static int SCREENSHOT_SIDE_LIMIT = 1500;
 
     // these seem like reasonable limits for the size of image data to have to
     // handle in-memory.
 
-    protected static int SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
-    protected static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
+    private static int SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
+    private static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
     /**
      * <p>This appears at the end of the package name to signify that it is a development package
      * for another package.</p>
      */
 
-    protected static String SUFFIX_PKG_DEVELOPMENT = "_devel";
+    static String SUFFIX_PKG_DEVELOPMENT = "_devel";
 
-    protected static String SUFFIX_SUMMARY_DEVELOPMENT = " (development files)";
+    static String SUFFIX_SUMMARY_DEVELOPMENT = " (development files)";
 
     @Resource
     private RenderedPkgIconRepository renderedPkgIconRepository;
@@ -96,8 +96,8 @@ public class PkgOrchestrationService {
      */
 
     private static byte[] toByteArray(InputStream inputStream, int sizeLimit) throws IOException {
-        Preconditions.checkNotNull(inputStream);
-        Preconditions.checkState(sizeLimit > 0);
+        Preconditions.checkArgument(null != inputStream, "an input stream must be provided");
+        Preconditions.checkArgument(sizeLimit > 0, "a size limit must be provided which is greater than zero");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[8*1024];
@@ -119,28 +119,6 @@ public class PkgOrchestrationService {
     // QUERY
 
     /**
-     * <p>This method will try to find the latest package version for the supplied package
-     * name.</p>
-     */
-
-    public Optional<PkgVersion> getLatestPkgVersionForPkgName(
-            ObjectContext context,
-            String pkgName,
-            Repository repository) {
-
-        Preconditions.checkArgument(null!=context, "the context must be supplied to lookup the package");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the package name must be supplied");
-
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
-
-        if(pkgOptional.isPresent()) {
-            return getLatestPkgVersionForPkg(context, pkgOptional.get(), repository);
-        }
-
-        return Optional.empty();
-    }
-
-    /**
      * <p>This method will return the latest version for a package in any architecture.</p>
      */
 
@@ -149,8 +127,8 @@ public class PkgOrchestrationService {
             Pkg pkg,
             Repository repository) {
 
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != context, "a context must be provided");
+        Preconditions.checkArgument(null != pkg, "a package must be provided");
 
         Optional<PkgVersion> pkgVersionOptional = getLatestPkgVersionForPkg(
                 context,
@@ -185,11 +163,10 @@ public class PkgOrchestrationService {
             Repository repository,
             final List<Architecture> architectures) {
 
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(architectures);
-        Preconditions.checkState(!architectures.isEmpty());
-        Preconditions.checkArgument(null!=repository);
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != pkg, "the pkg must must be provided");
+        Preconditions.checkArgument(null != architectures && !architectures.isEmpty(), "the architectures must be provided and must not be empty");
+        Preconditions.checkArgument(null != repository, "the repository must be provided");
 
         List<Expression> expressions = new ArrayList<>();
         expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg));
@@ -328,8 +305,8 @@ public class PkgOrchestrationService {
 
         SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver().getQuery("SearchPkgVersions");
         SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
-                "search",search,
-                "isTotal",true,
+                "search", search,
+                "isTotal", true,
                 "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
         ));
         query.setFetchingDataRows(true);
@@ -365,7 +342,7 @@ public class PkgOrchestrationService {
      * <p>This method will provide a total of the packages.</p>
      */
 
-    public long totalPkg(
+    long totalPkg(
             ObjectContext context,
             boolean allowSourceOnly) {
         Preconditions.checkArgument(null!=context, "the object context must be provided");
@@ -405,10 +382,10 @@ public class PkgOrchestrationService {
      * @return the quantity of packages processed.
      */
 
-    public long eachPkg(
+    long eachPkg(
             ObjectContext context,
             boolean allowSourceOnly,
-            Callback<Pkg> c) {
+            StoppableConsumer<Pkg> c) {
         Preconditions.checkArgument(null!=c, "the callback should be provided to run for each package");
         Preconditions.checkArgument(null!=context, "the object context must be provided");
 
@@ -450,7 +427,7 @@ public class PkgOrchestrationService {
 
                     offset++;
 
-                    if(!c.process(pkg)) {
+                    if(!c.accept(pkg)) {
                         return offset;
                     }
                 }
@@ -519,10 +496,10 @@ public class PkgOrchestrationService {
             ObjectContext context,
             Pkg pkg) throws IOException, BadPkgIconException {
 
-        Preconditions.checkNotNull(input);
-        Preconditions.checkNotNull(mediaType);
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != context, "the context is not supplied");
+        Preconditions.checkArgument(null != input, "the input must be provided");
+        Preconditions.checkArgument(null != mediaType, "the mediaType must be provided");
+        Preconditions.checkArgument(null != pkg, "the pkg must be provided");
 
         byte[] imageData = toByteArray(input, ICON_SIZE_LIMIT);
 
@@ -648,8 +625,10 @@ public class PkgOrchestrationService {
      * will be unique.</p>
      */
 
-    public List<PkgIconConfiguration> getInUsePkgIconConfigurations(ObjectContext objectContext) {
-        Preconditions.checkState(null!=objectContext,"the object context must be supplied");
+    List<PkgIconConfiguration> getInUsePkgIconConfigurations(ObjectContext objectContext) {
+
+        Preconditions.checkArgument(null!=objectContext,"the object context must be supplied");
+
         List<PkgIconConfiguration> result = new ArrayList<>();
 
         for(MediaType mediaType : getInUsePkgIconMediaTypes(objectContext)) {
@@ -685,11 +664,11 @@ public class PkgOrchestrationService {
             int targetWidth,
             int targetHeight) throws IOException {
 
-        Preconditions.checkNotNull(output);
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(screenshot);
-        Preconditions.checkState(targetHeight > 0);
-        Preconditions.checkState(targetWidth > 0);
+        Preconditions.checkArgument(null != output, "the output stream must be provided");
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != screenshot, "the screenshot must be provided");
+        Preconditions.checkArgument(targetHeight > 0, "the target height is <= 0");
+        Preconditions.checkArgument(targetWidth > 0, "the target width is <= 0");
 
         Optional<PkgScreenshotImage> pkgScreenshotImageOptional = screenshot.getPkgScreenshotImage();
 
@@ -727,9 +706,9 @@ public class PkgOrchestrationService {
             ObjectContext context,
             Pkg pkg) throws IOException, BadPkgScreenshotException {
 
-        Preconditions.checkNotNull(input);
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != input, "the input must be provided");
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != pkg, "the package must be provided");
 
         byte[] pngData = toByteArray(input, SCREENSHOT_SIZE_LIMIT);
         ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
@@ -787,7 +766,7 @@ public class PkgOrchestrationService {
      */
 
     public long payloadLength(PkgVersion pkgVersion) throws IOException {
-        Preconditions.checkArgument(null != pkgVersion);
+        Preconditions.checkArgument(null != pkgVersion, "the package version must be provided");
 
         long result = -1;
         URL pkgVersionHpkgURL = pkgVersion.getHpkgURL();
@@ -874,9 +853,9 @@ public class PkgOrchestrationService {
             Pkg pkg,
             final RepositorySource repositorySource) {
 
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(repositorySource);
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != pkg, "the pkg must be provided");
+        Preconditions.checkArgument(null != repositorySource, "the repository source must be provided");
 
         int count = 0;
 
@@ -901,8 +880,8 @@ public class PkgOrchestrationService {
             ObjectContext context,
             RepositorySource repositorySource) {
 
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(repositorySource);
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != repositorySource, "the repository soures must be provided");
 
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append("SELECT p.name FROM ");
@@ -958,9 +937,9 @@ public class PkgOrchestrationService {
             Pkg pkg,
             Repository repository,
             Prominence prominence) {
-        Preconditions.checkArgument(null!=prominence);
-        Preconditions.checkArgument(null!=repository);
-        Preconditions.checkArgument(null!=pkg);
+        Preconditions.checkArgument(null != prominence, "the prominence must be provided");
+        Preconditions.checkArgument(null != repository, "the repository must be provided");
+        Preconditions.checkArgument(null != pkg, "the pkg must be provided");
         Optional<PkgProminence> pkgProminenceOptional = pkg.getPkgProminence(repository);
 
         if(!pkgProminenceOptional.isPresent()) {
@@ -983,8 +962,8 @@ public class PkgOrchestrationService {
             ObjectContext objectContext,
             Pkg pkg) {
 
-        Preconditions.checkArgument(null!=objectContext);
-        Preconditions.checkArgument(null!=pkg);
+        Preconditions.checkArgument(null != objectContext, "the object context must be provided");
+        Preconditions.checkArgument(null != pkg, "the pkg must be provided");
 
         if(!pkg.getName().endsWith(SUFFIX_PKG_DEVELOPMENT)) {
             Optional<Pkg> develPkgOptional = Pkg.getByName(objectContext, pkg.getName() + SUFFIX_PKG_DEVELOPMENT);
@@ -1001,14 +980,14 @@ public class PkgOrchestrationService {
      * data out to the subordinate package as necessary.</p>
      */
 
-    public void propagateDataFromPkgToDevelPkg(
+    private void propagateDataFromPkgToDevelPkg(
             ObjectContext objectContext,
             Pkg pkg,
             Pkg develPkg) {
 
-        Preconditions.checkArgument(null!=objectContext);
-        Preconditions.checkArgument(null!=pkg);
-        Preconditions.checkArgument(null!=develPkg);
+        Preconditions.checkArgument(null != objectContext, "the object context must be provided");
+        Preconditions.checkArgument(null != pkg, "the pkg must be provided");
+        Preconditions.checkArgument(null != develPkg, "the development package must be provided");
 
         for(PkgLocalization pkgLocalization : pkg.getPkgLocalizations()) {
             updatePkgLocalization(
@@ -1053,8 +1032,8 @@ public class PkgOrchestrationService {
             org.haiku.pkg.model.Pkg pkg,
             boolean populatePayloadLength) {
 
-        Preconditions.checkNotNull(pkg);
-        Preconditions.checkNotNull(repositorySourceObjectId);
+        Preconditions.checkArgument(null != pkg, "the package must be provided");
+        Preconditions.checkArgument(null != repositorySourceObjectId, "the repository source is must be provided");
 
         RepositorySource repositorySource = RepositorySource.get(objectContext, repositorySourceObjectId);
 
@@ -1342,10 +1321,6 @@ public class PkgOrchestrationService {
             Pattern searchPattern,
             NaturalLanguage naturalLanguage) {
 
-        Preconditions.checkArgument(null!=result);
-        Preconditions.checkArgument(null!=context);
-        Preconditions.checkArgument(null!=pkgVersion);
-
         if(!result.hasAll()) {
             Optional<PkgVersionLocalization> pvlNl = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
                     context, pkgVersion, naturalLanguage.getCode());
@@ -1422,8 +1397,8 @@ public class PkgOrchestrationService {
             String summary,
             String description) {
 
-        Preconditions.checkArgument(null!=pkg);
-        Preconditions.checkNotNull(naturalLanguage);
+        Preconditions.checkArgument(null != pkg, "the package must be provided");
+        Preconditions.checkArgument(null != naturalLanguage, "the naturallanguage must be provided");
 
         if(null!=title) {
             title = title.trim();
@@ -1485,7 +1460,7 @@ public class PkgOrchestrationService {
             String summary,
             String description) {
 
-        Preconditions.checkNotNull(naturalLanguage);
+        Preconditions.checkArgument(null != naturalLanguage, "the natural language must be provided");
 
         if(null!=title) {
             title = title.trim();
@@ -1563,9 +1538,10 @@ public class PkgOrchestrationService {
      */
 
     public boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories) {
-        Preconditions.checkArgument(null!=context);
-        Preconditions.checkArgument(null!=pkg);
-        Preconditions.checkArgument(null!=pkgCategories);
+
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != pkg, "the pkg must be provided");
+        Preconditions.checkArgument(null != pkgCategories, "the pkg categories must be provided");
 
         pkgCategories = new ArrayList<>(pkgCategories);
         boolean didChange = false;
@@ -1609,6 +1585,10 @@ public class PkgOrchestrationService {
      */
 
     public void incrementViewCounter(ServerRuntime serverRuntime, ObjectId pkgVersionOid) {
+
+        Preconditions.checkArgument(null != serverRuntime, "the server runtime must be provided");
+        Preconditions.checkArgument(null != pkgVersionOid, "the pkg version oid must be provided");
+        Preconditions.checkArgument(pkgVersionOid.getEntityName().equals(PkgVersion.class.getSimpleName()), "the oid must reference PkgVersion");
 
         int attempts = 3;
 

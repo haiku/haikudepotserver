@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,6 @@ import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 public class PkgCategory extends _PkgCategory implements Coded {
 
     public static List<PkgCategory> getAll(ObjectContext context) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(null != context, "the context must be provided");
         SelectQuery query = new SelectQuery(PkgCategory.class);
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
@@ -33,8 +32,8 @@ public class PkgCategory extends _PkgCategory implements Coded {
     }
 
     public static Optional<PkgCategory> getByCode(ObjectContext context, final String code) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(code));
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return getAll(context).stream().filter(pc -> pc.getCode().equals(code)).collect(SingleCollector.optional());
     }
 
@@ -44,13 +43,8 @@ public class PkgCategory extends _PkgCategory implements Coded {
      */
 
     public static List<PkgCategory> getByCodes(ObjectContext context, final Collection<String> codes) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(codes);
-
-        if(codes.isEmpty()) {
-            return Collections.emptyList();
-        }
-
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != codes, "the codes must be provided");
         return getAll(context).stream().filter(pc -> codes.contains(pc.getCode())).collect(Collectors.toList());
     }
 

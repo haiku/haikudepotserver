@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class MultipageObjectNotFoundException extends Exception {
 
-    public String entityName;
-    public Object identifier;
+    private String entityName;
+    private Object identifier;
 
     public MultipageObjectNotFoundException(String entityName, Object identifier) {
         super();

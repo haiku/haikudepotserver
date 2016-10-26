@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,9 +28,9 @@ public abstract class AbstractExternalToolService<T> {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractExternalToolService.class);
 
-    protected static long TIMEOUT = 30 * 1000;
+    private static long TIMEOUT = 30 * 1000;
 
-    protected File temporaryDirectory = null;
+    private File temporaryDirectory = null;
 
     private synchronized File getTemporaryDirectory() {
         if(null==temporaryDirectory) {
@@ -55,7 +55,7 @@ public abstract class AbstractExternalToolService<T> {
 
     public abstract List<String> createArguments(T context, File temporaryInputFile, File temporaryOutputFile);
 
-    public byte[] execute(T context, byte[] input) throws IOException {
+    protected byte[] execute(T context, byte[] input) throws IOException {
         Preconditions.checkArgument(null != input && 0 != input.length, "the input is not specified");
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -73,7 +73,7 @@ public abstract class AbstractExternalToolService<T> {
         return baos.toByteArray();
     }
 
-    public void execute(
+    private void execute(
             T context,
             ByteSource inputSource,
             ByteSink outputSink) throws IOException {

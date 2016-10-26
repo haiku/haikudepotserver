@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
 import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
-import org.haiku.haikudepotserver.support.Callback;
+import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.slf4j.Logger;
@@ -135,46 +135,43 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
             long count = pkgOrchestrationService.eachPkg(
                     context,
                     false, // allow source only.
-                    new Callback<Pkg>() {
-                        @Override
-                        public boolean process(Pkg pkg) {
+                    pkg -> {
 
-                            for(Repository repository : repositoryOrchestrationService.getRepositoriesForPkg(context, pkg)) {
+                        for(Repository repository : repositoryOrchestrationService.getRepositoriesForPkg(context, pkg)) {
 
-                                for (Architecture architecture : architectures) {
+                            for (Architecture architecture : architectures) {
 
-                                    Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
-                                            context,
-                                            pkg,
-                                            repository,
-                                            Collections.singletonList(architecture));
+                                Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                                        context,
+                                        pkg,
+                                        repository,
+                                        Collections.singletonList(architecture));
 
-                                    if (pkgVersionOptional.isPresent()) {
-                                        int c = 0;
+                                if (pkgVersionOptional.isPresent()) {
+                                    int c = 0;
 
-                                        cells[c++] = pkg.getName();
-                                        cells[c++] = pkgVersionOptional.get().getRepositorySource().getRepository().getCode();
-                                        cells[c++] = architecture.getCode();
-                                        cells[c++] = pkgVersionOptional.get().toVersionCoordinates().toString();
+                                    cells[c++] = pkg.getName();
+                                    cells[c++] = pkgVersionOptional.get().getRepositorySource().getRepository().getCode();
+                                    cells[c++] = architecture.getCode();
+                                    cells[c++] = pkgVersionOptional.get().toVersionCoordinates().toString();
 
-                                        for (NaturalLanguage naturalLanguage : naturalLanguages) {
-                                            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguage);
-                                            cells[c++] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
-                                        }
-
-                                        writer.writeNext(cells);
-
+                                    for (NaturalLanguage naturalLanguage : naturalLanguages) {
+                                        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguage);
+                                        cells[c++] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
                                     }
-                                }
 
+                                    writer.writeNext(cells);
+
+                                }
                             }
 
-                            jobOrchestrationService.setJobProgressPercent(
-                                    specification.getGuid(),
-                                    (int) ((100 * counter.incrementAndGet()) / expectedTotal));
-
-                            return true; // keep going!
                         }
+
+                        jobOrchestrationService.setJobProgressPercent(
+                                specification.getGuid(),
+                                (int) ((100 * counter.incrementAndGet()) / expectedTotal));
+
+                        return true; // keep going!
                     }
             );
 

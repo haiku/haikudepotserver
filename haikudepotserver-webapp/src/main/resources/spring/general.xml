@@ -10,7 +10,6 @@
 
     <context:component-scan base-package="org.haiku.haikudepotserver">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-        <context:exclude-filter type="regex" expression="org\.haiku\.haikudepotserver\.api.*"/>
     </context:component-scan>
 
     <import resource="properties.xml"/>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,8 +22,7 @@ public class SpringProvidedConfigPropertiesSource implements ConfigPropertiesSou
 
     public Properties getConfigProperties() {
         WebApplicationContext ctx = ContextLoader.getCurrentWebApplicationContext();
-        Properties properties = (Properties) ctx.getBean(KEY_PROPERTIESBEAN);
-        return properties;
+        return (Properties) ctx.getBean(KEY_PROPERTIESBEAN);
     }
 
     public boolean configChanged() {

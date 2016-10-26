@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -58,14 +58,14 @@ public class HomeController {
     }
 
     // these should correspond to the single-page keys for the home page.
-    public final static String KEY_OFFSET = "o";
-    public final static String KEY_REPOSITORIESCODES = "repos";
-    public final static String KEY_ARCHITECTURECODE = "arch";
-    public final static String KEY_PKGCATEGORYCODE = "pkgcat";
-    public final static String KEY_SEARCHEXPRESSION = "srchexpr";
-    public final static String KEY_VIEWCRITERIATYPECODE = "viewcrttyp";
+    private final static String KEY_OFFSET = "o";
+    private final static String KEY_REPOSITORIESCODES = "repos";
+    private final static String KEY_ARCHITECTURECODE = "arch";
+    private final static String KEY_PKGCATEGORYCODE = "pkgcat";
+    private final static String KEY_SEARCHEXPRESSION = "srchexpr";
+    private final static String KEY_VIEWCRITERIATYPECODE = "viewcrttyp";
 
-    public final static int PAGESIZE = 15;
+    private final static int PAGESIZE = 15;
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -237,7 +237,7 @@ public class HomeController {
      * <p>This is the data model for the page to be rendered from.</p>
      */
 
-    public static class HomeData {
+    private static class HomeData {
 
         private NaturalLanguage naturalLanguage;
 

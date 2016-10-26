@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -99,17 +99,11 @@ public class ViewPkgController {
             throw new MultipageObjectNotFoundException(Pkg.class.getSimpleName(), pkgName); // 404
         }
 
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context, architectureCode);
+        Architecture architecture = Architecture.getByCode(context, architectureCode).orElseThrow(() ->
+                new MultipageObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode));
 
-        if(!architectureOptional.isPresent()) {
-            throw new MultipageObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode);
-        }
-
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
-
-        if(!repositoryOptional.isPresent()) {
-            throw new MultipageObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode);
-        }
+        Repository repository = Repository.getByCode(context, repositoryCode).orElseThrow(() ->
+                new MultipageObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode));
 
         VersionCoordinates coordinates = new VersionCoordinates(
                 Strings.emptyToNull(major),
@@ -119,11 +113,7 @@ public class ViewPkgController {
                 revision);
 
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
-                context,
-                pkgOptional.get(),
-                repositoryOptional.get(),
-                architectureOptional.get(),
-                coordinates);
+                context, pkgOptional.get(), repository, architecture, coordinates);
 
         if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
             throw new MultipageObjectNotFoundException(PkgVersion.class.getSimpleName(), pkgName + "...");

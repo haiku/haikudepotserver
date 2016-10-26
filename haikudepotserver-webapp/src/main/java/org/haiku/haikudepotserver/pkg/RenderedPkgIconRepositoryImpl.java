@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -106,8 +106,8 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
             Pkg pkg) {
 
         Preconditions.checkArgument(size <= SIZE_MAX && size >= SIZE_MIN, "bad size");
-        Preconditions.checkArgument(null!=context, "an object context is required");
-        Preconditions.checkArgument(null!=pkg, "a package is required");
+        Preconditions.checkArgument(null != context, "an object context is required");
+        Preconditions.checkArgument(null != pkg, "a package is required");
 
         Cache<Integer, Optional<byte[]>> pkgCache = getOrCreatePkgCache(pkg.getName());
 

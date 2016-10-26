@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ angular.module('haikudepotserver').factory('jobs',
                 return $http({
                     cache: false,
                     method: 'POST',
-                    url: '/secured/jobdata',
+                    url: '/__secured/jobdata',
                     headers: _.extend({ 'Content-Type' : 'application/octet-stream' },headers),
                     data: file
                 }).then(

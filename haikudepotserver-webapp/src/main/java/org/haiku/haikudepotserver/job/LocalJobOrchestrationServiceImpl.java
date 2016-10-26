@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,15 @@ package org.haiku.haikudepotserver.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
+import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractService;
-import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.storage.DataStorageService;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -41,9 +44,9 @@ public class LocalJobOrchestrationServiceImpl
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobOrchestrationService.class);
 
-    public final static int SIZE_QUEUE = 10;
+    private final static int SIZE_QUEUE = 10;
 
-    public final static long TTL_DEFAULT = 2 * 60 * 60 * 1000; // 2h
+    private final static long TTL_DEFAULT = 2 * 60 * 60 * 1000; // 2h
 
     private DataStorageService dataStorageService;
 
@@ -72,7 +75,6 @@ public class LocalJobOrchestrationServiceImpl
 
     private synchronized Collection<Job> findJobsWithStatuses(final EnumSet<JobSnapshot.Status> statuses) {
         Preconditions.checkArgument(null!=statuses, "the status must be supplied to filter the job run states");
-        assert statuses != null;
 
         if(statuses.isEmpty()) {
             return Collections.emptySet();
@@ -152,12 +154,8 @@ public class LocalJobOrchestrationServiceImpl
         Preconditions.checkState(null!=executor, "the executor has not been configured; was this service started correctly?");
         Preconditions.checkArgument(null!=specification);
 
-        assert specification != null;
-        Optional<JobRunner> jobRunnerOptional = getJobRunner(specification.getJobTypeCode());
-
-        if(!jobRunnerOptional.isPresent()) {
-            throw new IllegalStateException("unable to run a job runner for the job type code; " + specification.getJobTypeCode());
-        }
+        getJobRunner(specification.getJobTypeCode()).orElseThrow(() ->
+                new IllegalStateException("unable to run a job runner for the job type code; " + specification.getJobTypeCode()));
 
         for(String guid : specification.getSuppliedDataGuids()) {
             if(!tryGetData(guid).isPresent()) {
@@ -198,9 +196,7 @@ public class LocalJobOrchestrationServiceImpl
     }
 
     private void runInternal(JobSpecification specification) {
-        Preconditions.checkArgument(null!=specification, "the job specification must be supplied to run the job");
-
-        assert specification != null;
+        Preconditions.checkArgument(null != specification, "the job specification must be supplied to run the job");
         Optional<JobRunner> jobRunnerOptional = getJobRunner(specification.getJobTypeCode());
 
         if(!jobRunnerOptional.isPresent()) {
@@ -238,8 +234,7 @@ public class LocalJobOrchestrationServiceImpl
     }
 
     private synchronized Optional<Job> tryFindJob(final JobData data) {
-        Preconditions.checkArgument(null!=data);
-        assert null!=data;
+        Preconditions.checkArgument(null != data, "the data must be provided");
         return jobs
                 .values()
                 .stream()
@@ -275,7 +270,6 @@ public class LocalJobOrchestrationServiceImpl
 
     private synchronized void removeJob(Job job) {
         Preconditions.checkArgument(null!=job, "the job must be supplied to remove a job");
-        assert null!=job;
 
         for(String guid : job.getDataGuids()) {
             Optional<JobData> jobDataOptional = tryGetData(guid);
@@ -372,8 +366,8 @@ public class LocalJobOrchestrationServiceImpl
             int offset,
             int limit) {
 
-        Preconditions.checkState(offset >= 0, "illegal offset value");
-        Preconditions.checkState(limit >= 1, "illegal limit value");
+        Preconditions.checkArgument(offset >= 0, "illegal offset value");
+        Preconditions.checkArgument(limit >= 1, "illegal limit value");
 
         if(null!=statuses && statuses.isEmpty()) {
             return Collections.emptyList();
@@ -409,7 +403,6 @@ public class LocalJobOrchestrationServiceImpl
         Preconditions.checkArgument(null!=other, "need to provide the other job specification");
 
         for(JobSnapshot job : ImmutableList.copyOf(jobs)) {
-            assert other != null;
             if(other.isEquivalent(job.getJobSpecification())) {
                 return Optional.of(job);
             }
@@ -740,7 +733,6 @@ public class LocalJobOrchestrationServiceImpl
     @Override
     public JobData storeSuppliedData(String useCode, String mediaTypeCode, ByteSource byteSource) throws IOException {
         Preconditions.checkArgument(null!=byteSource, "the byte source must be supplied to provide data");
-        assert null!=byteSource;
         String guid = UUID.randomUUID().toString();
         JobData data;
         long len;

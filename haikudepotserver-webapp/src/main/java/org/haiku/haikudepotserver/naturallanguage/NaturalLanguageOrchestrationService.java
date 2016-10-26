@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -100,9 +100,9 @@ public class NaturalLanguageOrchestrationService {
         return naturalLanguageCodesWithLocalizationMessages;
     }
 
-    private Map<String,Boolean> assembleNaturalLanguageCodeUseMap(Query codeQuery) {
+    private Map<String, Boolean> assembleNaturalLanguageCodeUseMap(Query codeQuery) {
         ObjectContext context = serverRuntime.getContext();
-        Map<String,Boolean> result = Maps.newConcurrentMap();
+        Map<String, Boolean> result = Maps.newConcurrentMap();
         List<String> usedCodes = context.performQuery(codeQuery);
 
         for (String naturalLanguageCode : NaturalLanguage.getAllCodes(context)) {
@@ -120,7 +120,7 @@ public class NaturalLanguageOrchestrationService {
      * a list of all codes that have the 'true' codes set to true.</p>
      */
 
-    private Map<String,Boolean> assembleNaturalLanguageCodeUseMap(String ejbqlCodeQuery) {
+    private Map<String, Boolean> assembleNaturalLanguageCodeUseMap(String ejbqlCodeQuery) {
         EJBQLQuery query = new EJBQLQuery(ejbqlCodeQuery);
         query.setCacheGroups(HaikuDepot.CacheGroup.NATURAL_LANGUAGE.name());
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
@@ -153,7 +153,7 @@ public class NaturalLanguageOrchestrationService {
      */
 
     public boolean hasData(String naturalLanguageCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
+        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");
 
         Boolean userRatingB = getNaturalLanguageCodeHasUserRating().get(naturalLanguageCode);
 

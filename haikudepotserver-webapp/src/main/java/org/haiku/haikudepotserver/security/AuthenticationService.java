@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -185,14 +185,14 @@ public class AuthenticationService {
      */
 
     public boolean validatePassword(String passwordClear) {
-        Preconditions.checkNotNull(passwordClear);
+        Preconditions.checkArgument(null != passwordClear, "the password clear must be supplied");
 
-        if(passwordClear.length() < 8) {
+        if (passwordClear.length() < 8) {
             return false;
         }
 
         // get a count of digits - should be at least two.
-        if(countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 48 && c <= 57; } }) < 2) {
+        if (countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 48 && c <= 57; } }) < 2) {
             return false;
         }
 
@@ -214,7 +214,7 @@ public class AuthenticationService {
     public Optional<ObjectId> authenticateByToken(String payload) {
         Optional<SignedJWT> signedJwtOptional = verifyToken(payload);
 
-        if(signedJwtOptional.isPresent()) {
+        if (signedJwtOptional.isPresent()) {
             return authenticate(signedJwtOptional.get());
         }
 
@@ -227,27 +227,29 @@ public class AuthenticationService {
      */
 
     private Optional<ObjectId> authenticate(SignedJWT signedJwt) {
-        Preconditions.checkNotNull(signedJwt);
+
+        Preconditions.checkArgument(null != signedJwt, "the JWT must be provided");
+
         JWTClaimsSet claimsSet;
         long nowMillis = System.currentTimeMillis();
 
         try {
             claimsSet = signedJwt.getJWTClaimsSet();
         }
-        catch(ParseException pe) {
+        catch (ParseException pe) {
             throw new IllegalStateException("unable to parse the jwt",pe);
         }
 
         String issuer = claimsSet.getIssuer();
 
-        if(null==issuer||!issuer.equals(jsonWebTokenIssuer)) {
+        if (null==issuer||!issuer.equals(jsonWebTokenIssuer)) {
             LOGGER.info("rejected jwt authentication; the issuer '{}' on the jwt does not match the expected '{}'", issuer, jsonWebTokenIssuer);
         }
         else {
             java.util.Date issueTime = claimsSet.getIssueTime();
             java.util.Date expirationTime = claimsSet.getExpirationTime();
 
-            if(
+            if (
                     null==issueTime
                             || null==expirationTime
                             || nowMillis < issueTime.getTime()
@@ -257,7 +259,7 @@ public class AuthenticationService {
             else {
                 String subject = claimsSet.getSubject();
 
-                if(
+                if (
                         null==subject
                                 || !subject.endsWith(SUFFIX_JSONWEBTOKEN_SUBJECT)
                                 || subject.length() <= SUFFIX_JSONWEBTOKEN_SUBJECT.length()) {
@@ -269,7 +271,7 @@ public class AuthenticationService {
                     ObjectContext context = serverRuntime.getContext();
                     Optional<User> userOptional = User.getByNickname(context, nickname);
 
-                    if(userOptional.isPresent()) {
+                    if (userOptional.isPresent()) {
                         return Optional.of(userOptional.get().getObjectId());
                     }
                 }
@@ -286,23 +288,23 @@ public class AuthenticationService {
      */
 
     private Optional<SignedJWT> verifyToken(String payload) {
-        if(null!=payload && 0!=payload.length()) {
+        if (null!=payload && 0!=payload.length()) {
             try {
                 SignedJWT signedJWT = SignedJWT.parse(payload);
 
                 try {
-                    if(signedJWT.verify(jsonWebTokenVerifier)) {
+                    if (signedJWT.verify(jsonWebTokenVerifier)) {
                         return Optional.of(signedJWT);
                     }
                     else {
                         LOGGER.error("attempt to use jwt that was unable to be verified");
                     }
                 }
-                catch(JOSEException je) {
+                catch (JOSEException je) {
                     throw new IllegalStateException("unable to verify the jwt", je);
                 }
             }
-            catch(ParseException pe) {
+            catch (ParseException pe) {
                 LOGGER.error("rejected malformed jwt that was unable to be parsed", pe);
             }
         }
@@ -316,7 +318,9 @@ public class AuthenticationService {
      */
 
     public String generateToken(User user) {
-        Preconditions.checkNotNull(user);
+
+        Preconditions.checkArgument(null != user, "the user must be provided");
+
         Instant instant = Instant.now();
 
         JWTClaimsSet claimsSet = new JWTClaimsSet

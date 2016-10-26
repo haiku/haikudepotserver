@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -92,7 +92,6 @@ public interface JobOrchestrationService {
     /**
      * <P>This method will provide a means of storing data against the GUID.  This would be called by
      * the job runner.</P>
-     * @throws IOException
      */
 
     JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode) throws IOException;

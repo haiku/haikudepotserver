@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.security;
 
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.ObjectId;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.dataobjects.User;
 
@@ -27,13 +26,7 @@ public abstract class AbstractUserAuthenticationAware {
      */
 
     protected User obtainAuthenticatedUser(ObjectContext objectContext) throws AuthorizationFailureException {
-        Optional<User> userOptional = tryObtainAuthenticatedUser(objectContext);
-
-        if(!userOptional.isPresent()) {
-            throw new AuthorizationFailureException();
-        }
-
-        return userOptional.get();
+        return tryObtainAuthenticatedUser(objectContext).orElseThrow(AuthorizationFailureException::new);
     }
 
     /**
@@ -42,15 +35,10 @@ public abstract class AbstractUserAuthenticationAware {
      */
 
     protected Optional<User> tryObtainAuthenticatedUser(ObjectContext objectContext) {
-        Preconditions.checkNotNull(objectContext);
+        Preconditions.checkArgument(null != objectContext, "the object context must be provided");
 
-        Optional<ObjectId> authenticatedUserObjectId = AuthenticationHelper.getAuthenticatedUserObjectId();
-
-        if(authenticatedUserObjectId.isPresent()) {
-            return Optional.of(User.getByObjectId(objectContext, authenticatedUserObjectId.get()));
-        }
-
-        return Optional.empty();
+        return AuthenticationHelper.getAuthenticatedUserObjectId()
+                .map((oid) -> User.getByObjectId(objectContext, oid));
     }
 
 }

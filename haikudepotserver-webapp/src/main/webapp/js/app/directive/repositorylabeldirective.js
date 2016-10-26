@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,16 +9,13 @@
 
 angular.module('haikudepotserver').directive('repositoryLabel',[
     '$location',
-    'standardDirectiveMixins','userState','breadcrumbs','breadcrumbFactory',
+    'standardDirectiveFunctions','userState','breadcrumbs','breadcrumbFactory',
     function(
         $location,
-        standardDirectiveMixins,userState,breadcrumbs,breadcrumbFactory) {
+        standardDirectiveFunctions,userState,breadcrumbs,breadcrumbFactory) {
         return {
             restrict: 'E',
             link: function ($scope, element, attributes) {
-
-                // apply a mixin for standard directive mixins.
-                angular.extend(this, standardDirectiveMixins);
 
                 var containerEl = angular.element('<span></span>');
                 var breadcrumbItem = undefined;
@@ -60,7 +57,9 @@ angular.module('haikudepotserver').directive('repositoryLabel',[
 
                     // we may want an anchor or we may want simple text.
 
-                    if ((undefined == shouldLink || 'true' == shouldLink) && repository && !isChildOfForm(containerEl)) {
+                    if ((undefined == shouldLink || 'true' == shouldLink) &&
+                        repository &&
+                        !standardDirectiveFunctions.isChildOfForm(containerEl)) {
 
                         userState.areAuthorized([{
                             targetType:'REPOSITORY',

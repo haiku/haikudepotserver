@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,7 +10,6 @@ import com.google.common.html.HtmlEscapers;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
 import java.util.Arrays;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -37,8 +36,7 @@ public class PlainTextContentTag extends RequestContextAwareTag {
             pageContext.getOut().print(
                     String.join(
                             "<br/>\n",
-                            Arrays.asList(value.split("[\n\r]"))
-                                    .stream()
+                            Arrays.stream(value.split("[\n\r]"))
                                     .map(s -> HtmlEscapers.htmlEscaper().escape(s))
                                     .collect(Collectors.toList())
                     )

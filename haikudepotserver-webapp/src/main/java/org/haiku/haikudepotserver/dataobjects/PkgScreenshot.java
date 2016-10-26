@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,8 +22,8 @@ import java.util.Optional;
 public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScreenshot>, CreateAndModifyTimestamped {
 
     public static Optional<PkgScreenshot> getByCode(ObjectContext context, String code) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(code));
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         List<PkgScreenshot> pkgScreenshots = (List<PkgScreenshot>) context.performQuery(new SelectQuery(
                 PkgScreenshot.class,
                 ExpressionFactory.matchExp(PkgScreenshot.CODE_PROPERTY, code)));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -52,9 +52,9 @@ public class FallbackController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgOrchestrationService.class);
 
-    public final static String KEY_TERM = "term";
+    private final static String KEY_TERM = "term";
 
-    public final static String VALUE_FAVICON = "favicon";
+    private final static String VALUE_FAVICON = "favicon";
 
     @Resource
     private ServerRuntime serverRuntime;

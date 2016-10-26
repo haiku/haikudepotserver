@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,9 +15,9 @@ import java.util.Date;
 
 public interface CreateAndModifyTimestamped {
 
-    public void setCreateTimestamp(Date createTimestamp);
-    public Date getCreateTimestamp();
-    public void setModifyTimestamp(Date modifyTimestamp);
-    public Date getModifyTimestamp();
+    void setCreateTimestamp(Date createTimestamp);
+    Date getCreateTimestamp();
+    void setModifyTimestamp(Date modifyTimestamp);
+    Date getModifyTimestamp();
 
 }

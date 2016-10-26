@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
@@ -27,13 +28,13 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.controller.PkgDownloadController;
 import org.haiku.haikudepotserver.pkg.model.*;
-import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -61,7 +62,7 @@ import java.util.stream.Collectors;
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/pkg") // TODO - remove old endpoint
 public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
-    public final static int PKGPKGCATEGORIES_MAX = 3;
+    private final static int PKGPKGCATEGORIES_MAX = 3;
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
@@ -459,18 +460,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
                 final VersionCoordinatesComparator vcc = new VersionCoordinatesComparator();
 
-                Collections.sort(allVersions, new Comparator<PkgVersion>() {
-                    @Override
-                    public int compare(PkgVersion o1, PkgVersion o2) {
-                        int result = o1.getArchitecture().getCode().compareTo(o2.getArchitecture().getCode());
-
-                        if(0==result) {
-                            result = vcc.compare(o1.toVersionCoordinates(),o2.toVersionCoordinates());
-                        }
-
-                        return result;
-                    }
-                });
+                Collections.sort(allVersions, (pv1, pv2) ->
+                        ComparisonChain.start()
+                                .compare(pv1.getArchitecture().getCode(), pv2.getArchitecture().getCode())
+                                .compare(pv1.toVersionCoordinates(), pv2.toVersionCoordinates(), vcc)
+                                .result()
+                );
 
                 result.versions = allVersions
                         .stream()
@@ -488,24 +483,19 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         request.major, request.minor, request.micro,
                         request.preRelease, request.revision);
 
-                Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
-                        context, pkg, repository,
-                        architectureOptional.get(),
-                        coordinates);
-
-                if (!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
-                    throw new ObjectNotFoundException(
-                            PkgVersion.class.getSimpleName(),
-                            "");
-                }
+                PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repository, architectureOptional.get(), coordinates)
+                        .filter(_PkgVersion::getActive)
+                        .orElseThrow(() ->
+                            new ObjectNotFoundException(PkgVersion.class.getSimpleName(), "")
+                        );
 
                 if (null != request.incrementViewCounter && request.incrementViewCounter) {
-                    incrementCounter(pkgVersionOptional.get());
+                    incrementCounter(pkgVersion);
                 }
 
                 result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
                         context,
-                        pkgVersionOptional.get(),
+                        pkgVersion,
                         naturalLanguage));
             }
             break;
@@ -515,28 +505,20 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
                 }
 
-                Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
                         context, pkg, repository,
                         ImmutableList.of(
                                 architectureOptional.get(),
                                 Architecture.getByCode(context, Architecture.CODE_ANY).get(),
                                 Architecture.getByCode(context, Architecture.CODE_SOURCE).get())
-                );
-
-                if (!pkgVersionOptional.isPresent()) {
-                    throw new ObjectNotFoundException(
-                            PkgVersion.class.getSimpleName(),
-                            request.name);
-                }
+                ).orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), request.name));
 
                 if (null != request.incrementViewCounter && request.incrementViewCounter) {
-                    incrementCounter(pkgVersionOptional.get());
+                    incrementCounter(pkgVersion);
                 }
 
                 result.versions = Collections.singletonList(createGetPkgResultPkgVersion(
-                        context,
-                        pkgVersionOptional.get(),
-                        naturalLanguage));
+                        context, pkgVersion, naturalLanguage));
             }
             break;
 
@@ -628,11 +610,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             for(ConfigurePkgIconRequest.PkgIcon pkgIconApi : request.pkgIcons) {
 
-                Optional<MediaType> mediaTypeOptional = MediaType.getByCode(context, pkgIconApi.mediaTypeCode);
-
-                if(!mediaTypeOptional.isPresent()) {
-                    throw new IllegalStateException("unknown media type; "+pkgIconApi.mediaTypeCode);
-                }
+                MediaType mediaType = MediaType.getByCode(context, pkgIconApi.mediaTypeCode).orElseThrow(
+                        () -> new IllegalStateException("unknown media type; "+pkgIconApi.mediaTypeCode)
+                );
 
                 if(Strings.isNullOrEmpty(pkgIconApi.dataBase64)) {
                     throw new IllegalStateException("the base64 data must be supplied with the request to configure a pkg icon");
@@ -648,13 +628,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data);
 
                     createdOrUpdatedPkgIcons.add(
-                            pkgService.storePkgIconImage(
-                                    dataInputStream,
-                                    mediaTypeOptional.get(),
-                                    pkgIconApi.size,
-                                    context,
-                                    pkg
-                            )
+                            pkgService.storePkgIconImage(dataInputStream, mediaType, pkgIconApi.size, context, pkg)
                     );
 
                     updated++;
@@ -1202,16 +1176,13 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         // now check that the data is present.
 
-        Optional<JobData> dataOptional = jobOrchestrationService.tryGetData(request.inputDataGuid);
-
-        if(!dataOptional.isPresent()) {
-            throw new ObjectNotFoundException(JobData.class.getSimpleName(), request.inputDataGuid);
-        }
+        jobOrchestrationService.tryGetData(request.inputDataGuid)
+                .orElseThrow(() -> new ObjectNotFoundException(JobData.class.getSimpleName(), request.inputDataGuid));
 
         // setup and go
 
         PkgCategoryCoverageImportSpreadsheetJobSpecification spec = new PkgCategoryCoverageImportSpreadsheetJobSpecification();
-        spec.setOwnerUserNickname(user.get().getNickname());
+        spec.setOwnerUserNickname(user.map((u) -> u.getNickname()).orElse(null));
         spec.setInputDataGuid(request.inputDataGuid);
 
         return new QueuePkgCategoryCoverageImportSpreadsheetJobResult(
@@ -1320,8 +1291,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(null!=request, "a request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
 
-
-
         ObjectContext context = serverRuntime.getContext();
         Optional<PkgChangelog> pkgChangelogOptional = getPkg(context, request.pkgName).getPkgChangelog();
         GetPkgChangelogResult result = new GetPkgChangelogResult();
@@ -1374,28 +1343,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new AuthorizationFailureException();
         }
 
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, request.repositoryCode);
-
-        if(!repositoryOptional.isPresent()) {
-            throw new ObjectNotFoundException(Repository.class.getSimpleName(), request.repositoryCode);
-        }
-
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context, request.architectureCode);
-
-        if(!architectureOptional.isPresent()) {
-            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), request.architectureCode);
-        }
-
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
-                context, pkg, repositoryOptional.get(), architectureOptional.get(),
+        PkgVersion pkgVersion = PkgVersion.getForPkg(
+                context, pkg, getRepository(context, request.repositoryCode),
+                getArchitecture(context, request.architectureCode),
                 new VersionCoordinates(request.major, request.minor, request.micro, request.preRelease, request.revision)
-        );
-
-        if(!pkgVersionOptional.isPresent()) {
-            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), null);
-        }
-
-        PkgVersion pkgVersion = pkgVersionOptional.get();
+        ).orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), null));
 
         for(UpdatePkgVersionRequest.Filter filter : request.filter) {
 

@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
 public class RepositoryApiIT extends AbstractIntegrationTest {

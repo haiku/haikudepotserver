@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,6 +27,7 @@ public class Architecture extends _Architecture {
     public final static String CODE_X86 = "x86";
 
     public static List<Architecture> getAll(ObjectContext context) {
+        Preconditions.checkArgument(null != context, "the context must be provided");
         SelectQuery query = new SelectQuery(Architecture.class);
         query.addOrdering(Architecture.CODE_PROPERTY, SortOrder.ASCENDING);
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
@@ -34,7 +35,7 @@ public class Architecture extends _Architecture {
     }
 
     public static Optional<Architecture> getByCode(ObjectContext context, final String code) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(context, "the context must be provided");
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
         return getAll(context).stream().filter(a -> a.getCode().equals(code)).collect(SingleCollector.optional());
     }
@@ -45,14 +46,12 @@ public class Architecture extends _Architecture {
      */
 
     public static List<Architecture> getAllExceptByCode(ObjectContext context, final Collection<String> codes) {
-        Preconditions.checkArgument(null != context);
-        assert null!=context;
-        Preconditions.checkArgument(null != codes);
-        assert null!=codes;
+        Preconditions.checkArgument(null != context, "the contact must be provided");
+        Preconditions.checkArgument(null != codes, "the codes must be provided");
         return getAll(context).stream().filter(a -> !codes.contains(a.getCode())).collect(Collectors.toList());
     }
 
-    public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+    UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
         return builder.pathSegment(getCode());
     }
 

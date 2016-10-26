@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,7 +15,7 @@ import java.io.InputStream;
  * implementation for when there is no "hvif2png" tool available.</p>
  */
 
-public class FallbackHvifRenderingServiceImpl implements HvifRenderingService {
+class FallbackHvifRenderingServiceImpl implements HvifRenderingService {
 
     private byte[] generic(int size) throws IOException {
         String resourcePath = String.format("/img/generic%derror.png",size);

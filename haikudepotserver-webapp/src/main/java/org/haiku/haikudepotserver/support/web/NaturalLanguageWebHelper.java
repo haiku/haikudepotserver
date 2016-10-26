@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -31,9 +31,6 @@ public class NaturalLanguageWebHelper {
      * <p>This will look at parameters on the supplied request and will return a natural language.  It will
      * resort to English language if no other language is able to be derived.</p>
      */
-
-    // [apl 10.oct.2014]
-    // This will presently only select from the list of popular languages.
 
     public static NaturalLanguage deriveNaturalLanguage(ObjectContext context, HttpServletRequest request) {
         Preconditions.checkNotNull(context);

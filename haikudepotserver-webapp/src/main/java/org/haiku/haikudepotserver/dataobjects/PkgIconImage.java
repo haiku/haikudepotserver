@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,8 +17,8 @@ import java.util.List;
 public class PkgIconImage extends _PkgIconImage {
 
     public static List<PkgIconImage> findForPkg(ObjectContext context, Pkg pkg) {
-        Preconditions.checkArgument(null!=context, "the context must be provided");
-        Preconditions.checkArgument(null!=pkg, "the package must be provided");
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != pkg, "the package must be provided");
 
         SelectQuery query = new SelectQuery(
                 PkgIconImage.class,

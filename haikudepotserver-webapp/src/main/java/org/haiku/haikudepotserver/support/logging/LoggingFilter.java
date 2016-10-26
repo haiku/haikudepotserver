@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,11 +27,11 @@ import java.util.Optional;
 
 public class LoggingFilter implements Filter {
 
-    public final static String KEY_AUTHENTICATEDUSERNICKNAME = "authUserNickname";
-    public final static String KEY_USERAGENT = "userAgent";
-    public final static String KEY_USERAGENTCODE = "userAgentCode";
+    private final static String KEY_AUTHENTICATEDUSERNICKNAME = "authUserNickname";
+    private final static String KEY_USERAGENT = "userAgent";
+    private final static String KEY_USERAGENTCODE = "userAgentCode";
 
-    public final static String VALUE_ABSENT = "-";
+    private final static String VALUE_ABSENT = "-";
 
     public final static String USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT = "X-HDS-Client";
 

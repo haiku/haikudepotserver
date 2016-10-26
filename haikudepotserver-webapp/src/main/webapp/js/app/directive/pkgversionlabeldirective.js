@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,14 +19,11 @@
 
 angular.module('haikudepotserver').directive(
     'pkgVersionLabel',
-    ['breadcrumbs','breadcrumbFactory','$location','standardDirectiveMixins',
-        function(breadcrumbs,breadcrumbFactory,$location,standardDirectiveMixins) {
+    ['breadcrumbs','breadcrumbFactory','standardDirectiveFunctions',
+        function(breadcrumbs,breadcrumbFactory,standardDirectiveFunctions) {
             return {
                 restrict: 'E',
                 link : function($scope,element,attributes) {
-
-                    // apply a mixin for standard directive mixins.
-                    angular.extend(this,standardDirectiveMixins);
 
                     var pkgVersionExpression = attributes['pkgVersion'];
                     var shouldLink = attributes['shouldLink'];
@@ -40,7 +37,9 @@ angular.module('haikudepotserver').directive(
                     var textTargetEl = containerEl;
                     element.replaceWith(containerEl);
 
-                    if((undefined == shouldLink || 'true' == shouldLink) && !isChildOfForm(containerEl)) {
+                    if((undefined == shouldLink || 'true' == shouldLink) &&
+                        !standardDirectiveFunctions.isChildOfForm(containerEl)) {
+
                         var hyperlinkEl = angular.element('<a href=""></a>');
                         containerEl.append(hyperlinkEl);
                         textTargetEl = hyperlinkEl;
@@ -69,7 +68,7 @@ angular.module('haikudepotserver').directive(
                             var parts = [
                                 pkgVersion.pkg.name,
                                 ' - ',
-                                pkgVersionElementsToString(pkgVersion),
+                                standardDirectiveFunctions.pkgVersionElementsToString(pkgVersion),
                                 ' - ',
                                 pkgVersion.architectureCode
                             ];

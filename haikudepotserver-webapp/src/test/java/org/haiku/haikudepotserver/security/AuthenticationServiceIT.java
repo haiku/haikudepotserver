@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,13 +14,12 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
 public class AuthenticationServiceIT extends AbstractIntegrationTest {
 
     @Resource
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
 
     @Test
     public void testHashPassword() {

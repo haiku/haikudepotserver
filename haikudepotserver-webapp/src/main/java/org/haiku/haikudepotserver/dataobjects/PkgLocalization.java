@@ -1,3 +1,8 @@
+/*
+ * Copyright 2016, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
@@ -18,8 +23,8 @@ import java.util.Optional;
 public class PkgLocalization extends _PkgLocalization implements CreateAndModifyTimestamped {
 
     public static List<PkgLocalization> findForPkg(ObjectContext context, Pkg pkg) {
-        Preconditions.checkArgument(null!=context, "the context must be supplied");
-        Preconditions.checkArgument(null!=pkg, "the pkg must be supplied");
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
 
         SelectQuery query = new SelectQuery(
                 PkgLocalization.class,
@@ -32,7 +37,7 @@ public class PkgLocalization extends _PkgLocalization implements CreateAndModify
     }
 
     public static Optional<PkgLocalization> getForPkgAndNaturalLanguageCode(ObjectContext context, Pkg pkg, final String naturalLanguageCode) {
-        Preconditions.checkArgument(null!=context, "the context must be supplied");
+        Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");
         return findForPkg(context, pkg).stream().filter(l -> l.getNaturalLanguage().getCode().equals(naturalLanguageCode)).collect(SingleCollector.optional());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,14 +13,11 @@
 angular.module('haikudepotserver').directive(
     'versionLabel',
     [
-        'standardDirectiveMixins',
-        function(standardDirectiveMixins) {
+        'standardDirectiveFunctions',
+        function(standardDirectiveFunctions) {
             return {
                 restrict: 'E',
                 link : function($scope,element,attributes) {
-
-                    // apply a mixin for standard directive mixins.
-                    angular.extend(this,standardDirectiveMixins);
 
                     var versionExpression = attributes['version'];
 
@@ -32,7 +29,7 @@ angular.module('haikudepotserver').directive(
                     element.replaceWith(containerEl);
 
                     function refresh(version) {
-                        containerEl.text(version ? pkgVersionElementsToString(version) : '');
+                        containerEl.text(version ? standardDirectiveFunctions.pkgVersionElementsToString(version) : '');
                     }
 
                     $scope.$watch(versionExpression, function(newValue) {

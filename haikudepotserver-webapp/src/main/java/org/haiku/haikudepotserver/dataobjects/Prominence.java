@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,15 +22,15 @@ public class Prominence extends _Prominence {
     public final static Integer ORDERING_LAST = 1000;
 
     public static Optional<Prominence> getByOrdering(ObjectContext context, Integer ordering) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(null != ordering && ordering >= 0);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkState(null != ordering && ordering >= 0, "bad ordering");
         return ((List<Prominence>) context.performQuery(new SelectQuery(
                         Prominence.class,
                         ExpressionFactory.matchExp(Prominence.ORDERING_PROPERTY, ordering)))).stream().collect(SingleCollector.optional());
     }
 
     public static List<Prominence> getAll(ObjectContext context) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
         SelectQuery query = new SelectQuery(Prominence.class);
         query.addOrdering(new Ordering(ORDERING_PROPERTY, SortOrder.ASCENDING));
         return (List<Prominence>) context.performQuery(query);

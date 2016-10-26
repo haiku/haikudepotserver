@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class PkgUrlType extends _PkgUrlType implements Coded {
 
     public static Optional<PkgUrlType> getByCode(ObjectContext context, String code) {
-        Preconditions.checkArgument(null!=context);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "a code is required to get the url type");
         List<PkgUrlType> pkgUrlTypes = (List<PkgUrlType>) context.performQuery(new SelectQuery(
                 PkgUrlType.class,

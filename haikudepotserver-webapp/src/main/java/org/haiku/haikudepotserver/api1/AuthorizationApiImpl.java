@@ -17,9 +17,12 @@ import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.security.AuthorizationPkgRuleOrchestrationService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleSearchSpecification;
+import org.haiku.haikudepotserver.security.model.AuthorizationRulesSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.security.model.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,42 +47,29 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     private AuthorizationService authorizationService;
 
     @Resource
+    private JobOrchestrationService jobOrchestrationService;
+
+    @Resource
     private AuthorizationPkgRuleOrchestrationService authorizationRulesOrchestrationService;
 
     // -------------------------------
     // HELPERS
 
     private org.haiku.haikudepotserver.dataobjects.Permission ensurePermission(ObjectContext context, String code) throws ObjectNotFoundException {
-
-        Optional<org.haiku.haikudepotserver.dataobjects.Permission> permissionOptional = org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, code);
-
-        if(!permissionOptional.isPresent()) {
-            throw new ObjectNotFoundException(
-                    org.haiku.haikudepotserver.dataobjects.Permission.class.getSimpleName(),
-                    code);
-        }
-
-        return permissionOptional.get();
+        return org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, code)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        org.haiku.haikudepotserver.dataobjects.Permission.class.getSimpleName(),
+                        code));
     }
 
     private Pkg ensurePkg(ObjectContext context, String name) throws ObjectNotFoundException {
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, name);
-
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), name);
-        }
-
-        return pkgOptional.get();
+        return Pkg.getByName(context, name)
+                .orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), name));
     }
 
     private User ensureUser(ObjectContext context, String nickname) throws ObjectNotFoundException {
-        Optional<User> userOptional = User.getByNickname(context, nickname);
-
-        if(!userOptional.isPresent()) {
-            throw new ObjectNotFoundException(User.class.getSimpleName(), nickname);
-        }
-
-        return userOptional.get();
+        return User.getByNickname(context, nickname)
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), nickname));
     }
 
     /**
@@ -255,5 +245,23 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         return result;
     }
 
+    @Override
+    public QueueAuthorizationRulesSpreadsheetResult queueAuthorizationRulesSpreadsheet(QueueAuthorizationRulesSpreadsheetRequest request) {
+        Preconditions.checkArgument(null!=request, "a request objects is required");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        User user = obtainAuthenticatedUser(context);
+
+        if (!authorizationService.check(context, user, null, Permission.AUTHORIZATION_CONFIGURE)) {
+            LOGGER.warn("attempt to queue authorization spreadsheet without sufficient authorization");
+            throw new AuthorizationFailureException();
+        }
+
+        QueueAuthorizationRulesSpreadsheetResult result = new QueueAuthorizationRulesSpreadsheetResult();
+        result.guid = jobOrchestrationService.submit(new AuthorizationRulesSpreadsheetJobSpecification(),
+                JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
+        return result;
+    }
 
 }

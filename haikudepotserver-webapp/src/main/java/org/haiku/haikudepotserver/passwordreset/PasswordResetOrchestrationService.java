@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,6 +18,7 @@ import org.apache.cayenne.query.SelectQuery;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haiku.haikudepotserver.passwordreset.controller.PasswordResetController;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMail;
 import org.haiku.haikudepotserver.security.AuthenticationService;
 import org.slf4j.Logger;
@@ -95,8 +96,8 @@ public class PasswordResetOrchestrationService {
      */
 
     private void createTokenAndInvite(User user) throws PasswordResetException {
-        Preconditions.checkNotNull(user);
-        Preconditions.checkState(!Strings.isNullOrEmpty(user.getEmail()));
+        Preconditions.checkArgument(null != user, "the user must be provided");
+        Preconditions.checkState(!Strings.isNullOrEmpty(user.getEmail()), "the user must have an email configured");
 
         ObjectContext contextLocal = serverRuntime.getContext();
         User userLocal = User.getByObjectId(contextLocal, user.getObjectId());
@@ -107,7 +108,7 @@ public class PasswordResetOrchestrationService {
         userPasswordResetToken.setCreateTimestamp(new Date());
 
         PasswordResetMail mailModel = new PasswordResetMail();
-        mailModel.setPasswordResetBaseUrl(baseUrl + "/passwordreset/");
+        mailModel.setPasswordResetBaseUrl(baseUrl + "/" + PasswordResetController.SEGMENT_PASSWORDRESET + "/");
         mailModel.setUserNickname(user.getNickname());
         mailModel.setUserPasswordResetTokenCode(userPasswordResetToken.getCode());
 
@@ -134,8 +135,8 @@ public class PasswordResetOrchestrationService {
      */
 
     public void initiate(String email) throws PasswordResetException {
-        Preconditions.checkNotNull(email);
-        Preconditions.checkState(-1 != email.indexOf('@')); // very basic sanity check
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "the email must be provided");
+        Preconditions.checkArgument(-1 != email.indexOf('@'), "the email is malformed"); // very basic sanity check
 
         ObjectContext context = serverRuntime.getContext();
 
@@ -174,6 +175,9 @@ public class PasswordResetOrchestrationService {
      */
 
     public void complete(String tokenCode, String passwordClear) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(tokenCode), "the token code must be provided");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(passwordClear), "the pssword clear must be provided");
+
         Instant now = Instant.now();
 
         try {

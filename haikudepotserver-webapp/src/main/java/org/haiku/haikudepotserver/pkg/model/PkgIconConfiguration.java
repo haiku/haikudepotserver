@@ -1,11 +1,13 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 
 /**
@@ -42,24 +44,9 @@ public class PkgIconConfiguration implements Comparable<PkgIconConfiguration> {
 
     @Override
     public int compareTo(PkgIconConfiguration o) {
-        int result = o.getMediaType().getCode().compareTo(getMediaType().getCode());
-
-        if(0==result) {
-            if((null==o.getSize()) != (null==getSize())) {
-                if(null==getSize()) {
-                    result = 1;
-                }
-                else {
-                    result = -1;
-                }
-            }
-            else {
-                if(null!=getSize()) {
-                    result = o.getSize().compareTo(getSize());
-                }
-            }
-        }
-
-        return result;
+        return ComparisonChain.start()
+                .compare(o.getMediaType().getCode(), getMediaType().getCode())
+                .compare(o.getSize(), getSize(), Ordering.natural().nullsFirst())
+                .result();
     }
 }

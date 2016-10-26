@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2016, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -95,7 +95,7 @@ Distributed under the terms of the MIT License.
 
                 <para>
                     Certain HTTP requests may be authenticated using a URL query parameter.  This approach only
-                    applies when the URL path has a prefix &quot;/secured/&quot; and when the URL is employed with
+                    applies when the URL path has a prefix &quot;/__secured/&quot; and when the URL is employed with
                     the HTTP &quot;GET&quot; method.  The query parameter key is &quot;hdsbtok&quot; and the value
                     is a &quot;json web token&quot; as described above.
                 </para>

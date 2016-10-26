@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,9 +24,10 @@ public class PermissionUserPkg extends _PermissionUserPkg implements Authorizati
             Permission permission,
             User user,
             Pkg pkg) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(permission);
-        Preconditions.checkNotNull(user);
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != permission, "the context must be provided");
+        Preconditions.checkArgument(null != user, "the user must be provided");
+
         return ((List<PermissionUserPkg>) context.performQuery(new SelectQuery(
                 PermissionUserPkg.class,
                 ExpressionFactory.matchExp(PermissionUserPkg.PERMISSION_PROPERTY, permission).andExp(

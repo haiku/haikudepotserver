@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,16 +28,16 @@ public class UserPasswordResetToken extends _UserPasswordResetToken {
     private final static Pattern CODE_PATTERN = Pattern.compile("^[A-Za-z0-9-]{36,36}+$");
 
     public static List<UserPasswordResetToken> findByUser(ObjectContext context, User user) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(user);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != user, "the user must be supplied");
         return context.performQuery(new SelectQuery(
                 UserPasswordResetToken.class,
                 ExpressionFactory.matchExp(UserPasswordResetToken.USER_PROPERTY, user)));
     }
 
     public static Optional<UserPasswordResetToken> getByCode(ObjectContext context, String code) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(code));
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
         return ((List<UserPasswordResetToken>) context.performQuery(new SelectQuery(
                         UserPasswordResetToken.class,
                         ExpressionFactory.matchExp(UserPasswordResetToken.CODE_PROPERTY, code))))

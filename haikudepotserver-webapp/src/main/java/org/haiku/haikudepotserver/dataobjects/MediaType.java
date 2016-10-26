@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ public class MediaType extends _MediaType {
     public final static String EXTENSION_PNG = "png";
 
     public static List<MediaType> getAll(ObjectContext context) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(null != context, "the context must be provided");
         SelectQuery query = new SelectQuery(MediaType.class);
         query.addOrdering(new Ordering(CODE_PROPERTY, SortOrder.ASCENDING));
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
@@ -40,8 +40,8 @@ public class MediaType extends _MediaType {
      */
 
     public static Optional<MediaType> getByExtension(ObjectContext context, String extension) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(extension));
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(extension), "the extension must be provided");
 
         if(extension.equals(EXTENSION_HAIKUVECTORICONFILE)) {
             return getByCode(context, MEDIATYPE_HAIKUVECTORICONFILE);
@@ -55,8 +55,8 @@ public class MediaType extends _MediaType {
     }
 
     public static Optional<MediaType> getByCode(ObjectContext context, final String code) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(code));
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
         return getAll(context).stream().filter(mt -> mt.getCode().equals(code)).collect(SingleCollector.optional());
     }
 

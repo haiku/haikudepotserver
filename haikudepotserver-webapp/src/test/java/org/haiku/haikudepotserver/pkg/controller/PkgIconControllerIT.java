@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -21,13 +22,14 @@ import java.io.IOException;
         "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
+@WebAppConfiguration
 public class PkgIconControllerIT extends AbstractIntegrationTest {
 
     @Resource
-    PkgIconController pkgIconController;
+    private PkgIconController pkgIconController;
 
     @Resource
-    IntegrationTestSupportService integrationTestSupportService;
+    private IntegrationTestSupportService integrationTestSupportService;
 
     private byte[] getIconData() throws IOException {
         return getResourceData("/sample-32x32.png");

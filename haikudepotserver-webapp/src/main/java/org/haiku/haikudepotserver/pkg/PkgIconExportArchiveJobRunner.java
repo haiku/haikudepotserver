@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,13 +9,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
-import org.haiku.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -48,7 +46,6 @@ public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExpo
             PkgIconExportArchiveJobSpecification specification) throws IOException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
 
         long count = 0;
@@ -70,39 +67,34 @@ public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExpo
             count += pkgOrchestrationService.eachPkg(
                     context,
                     false,
-                    new Callback<Pkg>() {
+                    pkg -> {
 
-                        @Override
-                        public boolean process(Pkg pkg) {
+                        List<PkgIcon> pkgIcons = pkg.getPkgIcons();
 
-                            List<PkgIcon> pkgIcons = pkg.getPkgIcons();
+                        if(!pkgIcons.isEmpty()) {
 
-                            if(!pkgIcons.isEmpty()) {
+                            try {
+                                for (PkgIcon pkgIcon : pkgIcons) {
 
-                                try {
-                                    for (PkgIcon pkgIcon : pkgIcons) {
+                                    StringBuilder filename = new StringBuilder();
+                                    filename.append("hds_");
+                                    filename.append(getJobTypeCode());
+                                    filename.append('/');
+                                    filename.append(pkg.getName());
+                                    filename.append('/');
+                                    filename.append(pkgIcon.deriveFilename());
 
-                                        StringBuilder filename = new StringBuilder();
-                                        filename.append("hds_");
-                                        filename.append(getJobTypeCode());
-                                        filename.append('/');
-                                        filename.append(pkg.getName());
-                                        filename.append('/');
-                                        filename.append(pkgIcon.deriveFilename());
-
-                                        zipOutputStream.putNextEntry(new ZipEntry(filename.toString()));
-                                        zipOutputStream.write(pkgIcon.getPkgIconImage().get().getData());
-                                        zipOutputStream.closeEntry();
-                                    }
-                                }
-                                catch(IOException ioe) {
-                                    throw new RuntimeException("unable to write the package " + pkg.getName() + "'s icons to a zip archive");
+                                    zipOutputStream.putNextEntry(new ZipEntry(filename.toString()));
+                                    zipOutputStream.write(pkgIcon.getPkgIconImage().get().getData());
+                                    zipOutputStream.closeEntry();
                                 }
                             }
-
-                            return true;
+                            catch(IOException ioe) {
+                                throw new RuntimeException("unable to write the package " + pkg.getName() + "'s icons to a zip archive");
+                            }
                         }
 
+                        return true;
                     });
 
         }

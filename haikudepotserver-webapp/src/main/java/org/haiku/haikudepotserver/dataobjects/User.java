@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -38,8 +38,8 @@ public class User extends _User implements CreateAndModifyTimestamped {
     public final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{10,32}$");
 
     public static List<User> findByEmail(ObjectContext context, String email) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(email));
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "the email must be supplied");
         return context.performQuery(new SelectQuery(
                 User.class,
                 ExpressionFactory.matchExp(User.EMAIL_PROPERTY, email)
@@ -47,9 +47,9 @@ public class User extends _User implements CreateAndModifyTimestamped {
     }
 
     public static User getByObjectId(ObjectContext context, ObjectId objectId) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(objectId);
-        Preconditions.checkState(objectId.getEntityName().equals(User.class.getSimpleName()));
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != objectId, "the objectId must be supplied");
+        Preconditions.checkArgument(objectId.getEntityName().equals(User.class.getSimpleName()), "the objectId must be targetting the User entity");
 
         ObjectIdQuery objectIdQuery = new ObjectIdQuery(
                 objectId,
@@ -196,10 +196,6 @@ public class User extends _User implements CreateAndModifyTimestamped {
     public void setPasswordSalt() {
         String randomHash = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString();
         setPasswordSalt(randomHash.substring(0,16)); // LDAP server doesn't seem to like very long salts
-    }
-
-    public Boolean getDerivedCanManageUsers() {
-        return getCanManageUsers() || getIsRoot();
     }
 
     @Override

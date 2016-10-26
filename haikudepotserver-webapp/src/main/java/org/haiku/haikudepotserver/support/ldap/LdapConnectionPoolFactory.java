@@ -17,6 +17,8 @@ import org.springframework.beans.factory.FactoryBean;
  * depending on the configuration of the LDAP server.</p>
  */
 
+// WARNING; NOT IN ACTIVE USE
+
 public class LdapConnectionPoolFactory implements FactoryBean<LdapConnectionPoolHolder> {
 
     private String host;

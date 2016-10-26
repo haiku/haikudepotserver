@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,13 +27,13 @@ public abstract class AbstractDataObject extends CayenneDataObject {
         // If we implement the Coded interface then we can validate the code on this
         // object to check it is valid.
 
-        if(Coded.class.isAssignableFrom(this.getClass())) {
+        if (Coded.class.isAssignableFrom(this.getClass())) {
 
             Coded coded = (Coded) this;
 
-            if(null != coded.getCode()) {
+            if (null != coded.getCode()) {
                 if(!CODE_PATTERN.matcher(coded.getCode()).matches()) {
-                    validationResult.addFailure(new BeanValidationFailure(this,"code","malformed"));
+                    validationResult.addFailure(new BeanValidationFailure(this, "code", "malformed"));
                 }
             }
         }

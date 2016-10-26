@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,7 @@ public class RemoteLogCaptureServlet extends HttpServlet {
     private static final int MAX_LEN = 2048;
     private static final String NAME_LOGGER = "org.haiku.haikudepotserver.js";
 
-    protected static Logger LOGGER_CAPTURE = LoggerFactory.getLogger(NAME_LOGGER);
+    private static Logger LOGGER_CAPTURE = LoggerFactory.getLogger(NAME_LOGGER);
 
     /**
      * <p>Reads only the specified limit of characters from the reader and discards the rest.</p>

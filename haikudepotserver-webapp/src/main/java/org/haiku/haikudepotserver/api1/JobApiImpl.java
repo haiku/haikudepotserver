@@ -48,7 +48,6 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
     @Override
     public SearchJobsResult searchJobs(SearchJobsRequest request) throws ObjectNotFoundException {
         Preconditions.checkArgument(null!=request);
-        assert null!=request;
         final SearchJobsResult result = new SearchJobsResult();
 
         final ObjectContext context = serverRuntime.getContext();
@@ -121,7 +120,6 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
     @Override
     public GetJobResult getJob(GetJobRequest request) throws ObjectNotFoundException {
         Preconditions.checkArgument(null!=request);
-        assert null!=request;
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.guid));
 
         final ObjectContext context = serverRuntime.getContext();

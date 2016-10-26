@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -60,7 +60,7 @@ public class ManagedDatabase {
         migrate();
     }
 
-    public void migrate() {
+    private void migrate() {
         if(null==migrate || migrate) {
             Preconditions.checkNotNull(getDataSource());
             Preconditions.checkState(!Strings.isNullOrEmpty(getSchema()));

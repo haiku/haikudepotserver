@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
 public class UserApiIT extends AbstractIntegrationTest {

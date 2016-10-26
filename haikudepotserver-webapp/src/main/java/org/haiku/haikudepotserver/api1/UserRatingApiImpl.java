@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.api1.model.userrating.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -117,11 +118,8 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new AuthorizationFailureException();
         }
 
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.pkgName);
-
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
-        }
+        Pkg.getByName(context, request.pkgName).
+                orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
 
         jobOrchestrationService.submit(
                 new UserRatingDerivationJobSpecification(request.pkgName),
@@ -162,14 +160,12 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         final ObjectContext context = serverRuntime.getContext();
 
-        Optional<UserRating> userRatingOptional = UserRating.getByCode(context, request.code);
-
-        if(!userRatingOptional.isPresent()) {
-            throw new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code);
-        }
+        UserRating userRating = UserRating.getByCode(context, request.code).orElseThrow(
+                () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code)
+        );
 
         GetUserRatingResult result = new GetUserRatingResult();
-        fillAbstractGetUserRatingResult(userRatingOptional.get(), result);
+        fillAbstractGetUserRatingResult(userRating, result);
 
         return result;
     }
@@ -187,17 +183,10 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         final ObjectContext context = serverRuntime.getContext();
 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
-        Optional<User> userOptional = User.getByNickname(context, request.userNickname);
-
-        if(!userOptional.isPresent()) {
-            throw new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname);
-        }
-
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.pkgName);
-
-        if(!pkgOptional.isPresent()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
-        }
+        User user = User.getByNickname(context, request.userNickname).orElseThrow(
+            () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
+        Pkg pkg = Pkg.getByName(context, request.pkgName).orElseThrow(
+                () -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
 
         Repository repository = getRepository(context, request.repositoryCode);
 
@@ -209,11 +198,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 request.pkgVersionRevision);
 
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
-                context,
-                pkgOptional.get(),
-                repository,
-                architecture,
-                versionCoordinates);
+                context, pkg, repository, architecture, versionCoordinates);
 
         if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
             throw new ObjectNotFoundException(
@@ -221,7 +206,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                     request.pkgName + "@" + versionCoordinates.toString());
         }
 
-        Optional<UserRating> userRatingOptional = UserRating.getByUserAndPkgVersion(context, userOptional.get(), pkgVersionOptional.get());
+        Optional<UserRating> userRatingOptional = UserRating.getByUserAndPkgVersion(context, user, pkgVersionOptional.get());
 
         if(!userRatingOptional.isPresent()) {
             throw new ObjectNotFoundException(UserRating.class.getSimpleName(), "");
@@ -272,12 +257,8 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
         Repository repository = getRepository(context, request.repositoryCode);
-
-        Optional<User> userOptional = User.getByNickname(context, request.userNickname);
-
-        if(!userOptional.isPresent()) {
-            throw new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname);
-        }
+        User user = User.getByNickname(context, request.userNickname).orElseThrow(
+                () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
 
         Optional<UserRatingStability> userRatingStabilityOptional = Optional.empty();
 
@@ -300,7 +281,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new AuthorizationFailureException();
         }
 
-        if(!authenticatedUserOptional.get().getNickname().equals(userOptional.get().getNickname())) {
+        if(!authenticatedUserOptional.get().getNickname().equals(user.getNickname())) {
             LOGGER.warn("it is not allowed to add a user rating for another user");
             throw new AuthorizationFailureException();
         }
@@ -338,11 +319,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new IllegalStateException("it is not possible to add a user rating to a version other than the latest version.");
         }
 
-        List<UserRating> legacyUserRatings = UserRating.findByUserAndPkg(context, userOptional.get(), pkgOptional.get());
+        List<UserRating> legacyUserRatings = UserRating.findByUserAndPkg(context, user, pkgOptional.get());
 
         for(UserRating legacyUserRating : legacyUserRatings) {
             if(legacyUserRating.getPkgVersion().equals(pkgVersionOptional.get())) {
-                throw new IllegalStateException("an exisiting user rating '"+legacyUserRating.getCode()+"' already exists for this package version; it is not possible to add another one");
+                throw new IllegalStateException("an existing user rating '"+legacyUserRating.getCode()+"' already exists for this package version; it is not possible to add another one");
             }
         }
 
@@ -351,7 +332,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setCode(UUID.randomUUID().toString());
         userRating.setUserRatingStability(userRatingStabilityOptional.orElse(null));
-        userRating.setUser(userOptional.get());
+        userRating.setUser(user);
         userRating.setComment(Strings.emptyToNull(Strings.nullToEmpty(request.comment).trim()));
         userRating.setPkgVersion(pkgVersionOptional.get());
         userRating.setNaturalLanguage(naturalLanguage);
@@ -361,7 +342,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         LOGGER.info(
                 "did create user rating for user {} on package {}",
-                userOptional.get().toString(),
+                user.toString(),
                 pkgOptional.get().toString());
 
         return new CreateUserRatingResult(userRating.getCode());
@@ -376,19 +357,12 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         final ObjectContext context = serverRuntime.getContext();
 
-        Optional<UserRating> userRatingOptional = UserRating.getByCode(context, request.code);
-
-        if(!userRatingOptional.isPresent()) {
-            throw new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code);
-        }
+        UserRating userRating = UserRating.getByCode(context, request.code).orElseThrow(
+                () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
 
         User authenticatedUser = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(
-                context,
-                authenticatedUser,
-                userRatingOptional.get(),
-                Permission.USERRATING_EDIT)) {
+        if(!authorizationService.check(context, authenticatedUser, userRating, Permission.USERRATING_EDIT)) {
             LOGGER.error("unable to edit the userrating as {}", authenticatedUser.toString());
             throw new AuthorizationFailureException();
         }
@@ -402,43 +376,39 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                         throw new IllegalStateException("the active flag must be supplied to configure this field");
                     }
 
-                    userRatingOptional.get().setActive(request.active);
+                    userRating.setActive(request.active);
                     break;
 
                 case COMMENT:
                     if(null!=request.comment) {
-                        userRatingOptional.get().setComment(Strings.emptyToNull(request.comment.trim()));
+                        userRating.setComment(Strings.emptyToNull(request.comment.trim()));
                     }
                     else {
-                        userRatingOptional.get().setComment(null);
+                        userRating.setComment(null);
                     }
                     break;
 
                 case NATURALLANGUAGE:
                     NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
-                    userRatingOptional.get().setNaturalLanguage(naturalLanguage);
+                    userRating.setNaturalLanguage(naturalLanguage);
                     break;
 
                 case RATING:
-                    userRatingOptional.get().setRating(request.rating);
+                    userRating.setRating(request.rating);
                     break;
 
                 case USERRATINGSTABILITY:
                     if(null==request.userRatingStabilityCode) {
-                        userRatingOptional.get().setUserRatingStability(null);
+                        userRating.setUserRatingStability(null);
                     }
                     else {
-                        Optional<UserRatingStability> userRatingStabilityOptional = UserRatingStability.getByCode(
+                        userRating.setUserRatingStability(UserRatingStability.getByCode(
                                 context,
-                                request.userRatingStabilityCode);
-
-                        if (!userRatingStabilityOptional.isPresent()) {
-                            throw new ObjectNotFoundException(
-                                    UserRatingStability.class.getSimpleName(),
-                                    request.userRatingStabilityCode);
-                        }
-
-                        userRatingOptional.get().setUserRatingStability(userRatingStabilityOptional.get());
+                                request.userRatingStabilityCode).orElseThrow(
+                                () -> new ObjectNotFoundException(
+                                        UserRatingStability.class.getSimpleName(),
+                                        request.userRatingStabilityCode)
+                        ));
                     }
                     break;
 
@@ -451,8 +421,8 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         LOGGER.info(
                 "did update user rating for user {} on package {}",
-                userRatingOptional.get().getUser().toString(),
-                userRatingOptional.get().getPkgVersion().getPkg().toString());
+                userRating.getUser().toString(),
+                userRating.getPkgVersion().getPkg().toString());
 
         context.commitChanges();
 
@@ -515,7 +485,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 throw new IllegalStateException("the architecture is required when a pkg version is specified");
             }
 
-            Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
+            PkgVersion pkgVersion = PkgVersion.getForPkg(
                     context,
                     pkgOptional.get(),
                     repositoryOptional.get(),
@@ -525,13 +495,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                             request.pkgVersionMinor,
                             request.pkgVersionMicro,
                             request.pkgVersionPreRelease,
-                            request.pkgVersionRevision));
+                            request.pkgVersionRevision))
+                    .filter(_PkgVersion::getActive)
+                    .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(),""));
 
-            if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
-                throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(),"");
-            }
-
-            searchSpecification.setPkgVersion(pkgVersionOptional.get());
+            searchSpecification.setPkgVersion(pkgVersion);
         }
         else {
             searchSpecification.setArchitecture(architecture);

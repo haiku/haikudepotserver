@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -95,6 +95,21 @@ angular.module('haikudepotserver').controller(
 
             $scope.goPkgIconExportArchive = function() {
                 goBasicPkgReport('queuePkgIconExportArchiveJob');
+            };
+
+            $scope.goAuthorizationRulesSpreadsheet= function() {
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_AUTHORIZATION,
+                    'queueAuthorizationRulesSpreadsheet',
+                    [{}]
+                ).then(
+                    function(data) {
+                        navigateToViewJobOrNotifyRejection(data.guid);
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             };
 
             $scope.goUserRatingSpreadsheetReportAll = function() {

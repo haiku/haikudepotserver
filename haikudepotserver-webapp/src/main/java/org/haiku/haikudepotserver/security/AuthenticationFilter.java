@@ -35,19 +35,19 @@ import java.util.regex.Pattern;
  * basic authentication method; it will simply fail the authentication and there will be no authenticated user
  * in the current request-response cycle.</p>
  *
- * <p>For some URLs (those starting with "/secured/"), it is also possible for the filter to look for a
+ * <p>For some URLs (those starting with "/__secured/"), it is also possible for the filter to look for a
  * bearer token on the parameters.  This only works on a GET request.</p>
  */
 
 public class AuthenticationFilter implements Filter {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
 
-    private static Pattern PATTERN_AUTHORIZATION_HEADER = Pattern.compile("^([A-Za-z0-9]+)\\s+(.+)$");
+    private static final Pattern PATTERN_AUTHORIZATION_HEADER = Pattern.compile("^([A-Za-z0-9]+)\\s+(.+)$");
 
-    private static String PREFIX_PATH_SECURED = "/secured/";
+    public static final String PREFIX_PATH_SECURED = "/__secured/";
 
-    private static String PARAM_BEARER_TOKEN = "hdsbtok";
+    private static final String PARAM_BEARER_TOKEN = "hdsbtok";
 
     @Resource
     private AuthenticationService authenticationService;

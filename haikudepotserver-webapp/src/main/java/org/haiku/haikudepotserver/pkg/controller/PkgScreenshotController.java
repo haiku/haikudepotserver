@@ -45,18 +45,18 @@ public class PkgScreenshotController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotController.class);
 
-    public final static String SEGMENT_SCREENSHOT = "__pkgscreenshot";
-    public final static String SEGMENT_SCREENSHOT_LEGACY = "pkgscreenshot";
+    final static String SEGMENT_SCREENSHOT = "__pkgscreenshot";
+    final static String SEGMENT_SCREENSHOT_LEGACY = "pkgscreenshot";
 
-    public final static String HEADER_SCREENSHOTCODE = "X-HaikuDepotServer-ScreenshotCode";
+    final static String HEADER_SCREENSHOTCODE = "X-HaikuDepotServer-ScreenshotCode";
 
-    public final static String KEY_PKGNAME = "pkgname";
-    public final static String KEY_SCREENSHOTCODE = "code";
-    public final static String KEY_FORMAT = "format";
-    public final static String KEY_TARGETWIDTH = "tw";
-    public final static String KEY_TARGETHEIGHT = "th";
+    private final static String KEY_PKGNAME = "pkgname";
+    private final static String KEY_SCREENSHOTCODE = "code";
+    private final static String KEY_FORMAT = "format";
+    private final static String KEY_TARGETWIDTH = "tw";
+    private final static String KEY_TARGETHEIGHT = "th";
 
-    protected static int SCREENSHOT_SIDE_LIMIT = 1500;
+    private static int SCREENSHOT_SIDE_LIMIT = 1500;
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -96,41 +96,25 @@ public class PkgScreenshotController extends AbstractController {
         }
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.getByCode(context, screenshotCode);
-
-        if(!screenshotOptional.isPresent()) {
-            throw new ScreenshotNotFound();
-        }
+        PkgScreenshot screenshot = PkgScreenshot.getByCode(context, screenshotCode).orElseThrow(ScreenshotNotFound::new);
 
         response.setContentType(MediaType.PNG.toString());
         response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
 
         response.setDateHeader(
                 HttpHeaders.LAST_MODIFIED,
-                screenshotOptional.get().getPkg().getModifyTimestampSecondAccuracy().getTime());
+                screenshot.getPkg().getModifyTimestampSecondAccuracy().getTime());
 
         switch(requestMethod) {
             case HEAD:
                 ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
-
-                pkgService.writePkgScreenshotImage(
-                        byteCounter,
-                        context,
-                        screenshotOptional.get(),
-                        targetWidth,
-                        targetHeight);
-
+                pkgService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
                 response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
 
                 break;
 
             case GET:
-                pkgService.writePkgScreenshotImage(
-                        response.getOutputStream(),
-                        context,
-                        screenshotOptional.get(),
-                        targetWidth,
-                        targetHeight);
+                pkgService.writePkgScreenshotImage(response.getOutputStream(), context, screenshot, targetWidth, targetHeight);
                 break;
 
             default:
@@ -192,14 +176,9 @@ public class PkgScreenshotController extends AbstractController {
         }
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.getByCode(context, screenshotCode);
-
-        if(!screenshotOptional.isPresent()) {
-            throw new ScreenshotNotFound();
-        }
-
-        byte[] data = screenshotOptional.get().getPkgScreenshotImage().get().getData();
-        org.haiku.haikudepotserver.dataobjects.MediaType mediaType = screenshotOptional.get().getPkgScreenshotImage().get().getMediaType();
+        PkgScreenshot screenshot = PkgScreenshot.getByCode(context, screenshotCode).orElseThrow(ScreenshotNotFound::new);
+        byte[] data = screenshot.getPkgScreenshotImage().get().getData();
+        org.haiku.haikudepotserver.dataobjects.MediaType mediaType = screenshot.getPkgScreenshotImage().get().getMediaType();
 
         // TODO - find a better way to do this.
         String extension = null;
@@ -218,8 +197,8 @@ public class PkgScreenshotController extends AbstractController {
                 HttpHeaders.CONTENT_DISPOSITION,
                 String.format(
                         "attachment; filename=\"%s__%s.%s\"",
-                        screenshotOptional.get().getPkg().getName(),
-                        screenshotOptional.get().getCode(),
+                        screenshot.getPkg().getName(),
+                        screenshot.getCode(),
                         extension));
 
         response.getOutputStream().write(data);
@@ -245,18 +224,13 @@ public class PkgScreenshotController extends AbstractController {
         }
 
         ObjectContext context = serverRuntime.getContext();
-
-        Optional<Pkg> pkg = Pkg.getByName(context, pkgName);
-
-        if(!pkg.isPresent()) {
-            throw new PkgNotFound();
-        }
+        Pkg pkg = Pkg.getByName(context, pkgName).orElseThrow(PkgNotFound::new);
 
         // check the authorization
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user.orElse(null), pkg.get(), Permission.PKG_EDITSCREENSHOT)) {
+        if(!authorizationService.check(context, user.orElse(null), pkg, Permission.PKG_EDITSCREENSHOT)) {
             LOGGER.warn("attempt to add a pkg screenshot, but there is no user present or that user is not able to edit the pkg");
             throw new PkgAuthorizationFailure();
         }
@@ -264,10 +238,7 @@ public class PkgScreenshotController extends AbstractController {
         String screenshotCode;
 
         try {
-            screenshotCode = pkgService.storePkgScreenshotImage(
-                    request.getInputStream(),
-                    context,
-                    pkg.get()).getCode();
+            screenshotCode = pkgService.storePkgScreenshotImage(request.getInputStream(), context, pkg).getCode();
         }
         catch(SizeLimitReachedException sizeLimit) {
             LOGGER.warn("attempt to load in a screenshot larger than the size limit");

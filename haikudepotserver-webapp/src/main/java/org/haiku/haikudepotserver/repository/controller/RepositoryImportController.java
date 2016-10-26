@@ -40,8 +40,8 @@ public class RepositoryImportController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryImportController.class);
 
-    public final static String KEY_REPOSITORYCODE = "repositoryCode";
-    public final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
+    private final static String KEY_REPOSITORYCODE = "repositoryCode";
+    private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
 
     @Resource
     private JobOrchestrationService jobOrchestrationService;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -22,11 +21,12 @@ import java.io.IOException;
 @Controller
 public class PasswordResetController {
 
-    public final static String KEY_TOKEN = "token";
+    private final static String KEY_TOKEN = "token";
 
-    @RequestMapping(value = "/passwordreset/{"+KEY_TOKEN+"}", method = RequestMethod.GET)
+    public final static String SEGMENT_PASSWORDRESET = "__passwordreset";
+
+    @RequestMapping(value = "/" + SEGMENT_PASSWORDRESET + "/{"+KEY_TOKEN+"}", method = RequestMethod.GET)
     public ModelAndView handleGet(
-            HttpServletResponse response,
             @PathVariable(value = KEY_TOKEN) String token)
             throws IOException {
         return new ModelAndView("redirect:/#/completepasswordreset/"+token);

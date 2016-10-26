@@ -1,11 +1,12 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
-import com.google.common.base.Strings;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 
 import java.util.Comparator;
 
@@ -29,53 +30,17 @@ public class VersionCoordinatesComparator implements Comparator<VersionCoordinat
 
     @Override
     public int compare(VersionCoordinates o1, VersionCoordinates o2) {
+        ComparisonChain chain = ComparisonChain.start()
+                .compare(o1.getMajor(), o2.getMajor(), naturalStringComparator)
+                .compare(o1.getMinor(), o2.getMinor(), naturalStringComparator)
+                .compare(o1.getMicro(), o2.getMicro(), naturalStringComparator);
 
-        int result;
-
-        result = naturalStringComparator.compare(o1.getMajor(), o2.getMajor());
-
-        if(0!=result) {
-            return result;
+        if (!ignorePrereleaseAndRevision) {
+            chain = chain
+                    .compare(o1.getPreRelease(), o2.getPreRelease(), Ordering.from(naturalStringComparator).nullsLast())
+                    .compare(o1.getRevision(), o2.getRevision(), Ordering.natural().nullsLast());
         }
 
-        result = naturalStringComparator.compare(o1.getMinor(), o2.getMinor());
-
-        if(0!=result) {
-            return result;
-        }
-
-        result = naturalStringComparator.compare(o1.getMicro(), o2.getMicro());
-
-        if(0!=result) {
-            return result;
-        }
-
-        if(!ignorePrereleaseAndRevision) {
-            // an empty string means that this is _not_ a prerelease and so the NULL case is
-            // sorted as greater than the not NULL case.
-
-            if (Strings.isNullOrEmpty(o1.getPreRelease())) {
-                if (!Strings.isNullOrEmpty(o2.getPreRelease())) {
-                    return 1;
-                }
-            } else {
-                if (Strings.isNullOrEmpty(o2.getPreRelease())) {
-                    return -1;
-                } else {
-                    result = naturalStringComparator.compare(o1.getPreRelease(), o2.getPreRelease());
-
-                    if (0 != result) {
-                        return result;
-                    }
-                }
-            }
-
-            int r1 = null != o1.getRevision() ? o1.getRevision() : 0;
-            int r2 = null != o2.getRevision() ? o2.getRevision() : 0;
-
-            return r1-r2;
-        }
-
-        return 0;
+        return chain.result();
     }
 }

@@ -14,8 +14,9 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.user.*;
 import org.haiku.haikudepotserver.api1.support.*;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.captcha.CaptchaService;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.security.AuthenticationService;
@@ -24,10 +25,8 @@ import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.user.UserOrchestrationService;
 import org.haiku.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
 import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
-import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
-import org.haiku.haikudepotserver.captcha.CaptchaService;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
+import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -101,13 +100,10 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         User authUser = obtainAuthenticatedUser(context);
         boolean activeDidChange = false;
 
-        Optional<User> user = User.getByNickname(context, updateUserRequest.nickname);
+        User user = User.getByNickname(context, updateUserRequest.nickname)
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY));
 
-        if (!user.isPresent()) {
-            throw new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY);
-        }
-
-        if (!authorizationService.check(context, authUser, user.get(), Permission.USER_EDIT)) {
+        if (!authorizationService.check(context, authUser, user, Permission.USER_EDIT)) {
             throw new AuthorizationFailureException();
         }
 
@@ -121,22 +117,14 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                         throw new IllegalStateException("the natural language code is required to update the natural language on a user");
                     }
 
-                    Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(
-                            context,
-                            updateUserRequest.naturalLanguageCode);
+                    user.setNaturalLanguage(getNaturalLanguage(context, updateUserRequest.naturalLanguageCode));
 
-                    if(!naturalLanguageOptional.isPresent()) {
-                        throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), updateUserRequest.naturalLanguageCode);
-                    }
-
-                    user.get().setNaturalLanguage(naturalLanguageOptional.get());
-
-                    LOGGER.info("will update the natural language on the user {} to {}", user.get().toString(), naturalLanguageOptional.get().toString());
+                    LOGGER.info("will update the natural language on the user {} to {}", user.toString(), updateUserRequest.naturalLanguageCode);
 
                     break;
 
                 case EMAIL:
-                    user.get().setEmail(updateUserRequest.email);
+                    user.setEmail(updateUserRequest.email);
                     break;
 
                 case ACTIVE:
@@ -144,8 +132,8 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                         throw new IllegalStateException("the 'active' attribute is required to configure active on the user.");
                     }
 
-                    activeDidChange = user.get().getActive() != updateUserRequest.active;
-                    user.get().setActive(updateUserRequest.active);
+                    activeDidChange = user.getActive() != updateUserRequest.active;
+                    user.setActive(updateUserRequest.active);
 
                     break;
 
@@ -158,18 +146,18 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         if(context.hasChanges()) {
             context.commitChanges();
-            LOGGER.info("did update the user {}", user.get().toString());
+            LOGGER.info("did update the user {}", user.toString());
 
             // if a user is made active or inactive will have some impact on the user-ratings.
 
             if(activeDidChange) {
                 List<String> pkgNames = userRatingOrchestrationService.pkgNamesEffectedByUserActiveStateChange(
-                        context, user.get());
+                        context, user);
 
                 LOGGER.info(
                         "will update user rating derivation for {} packages owing to active state change on user {}",
                         pkgNames.size(),
-                        user.get().toString());
+                        user.toString());
 
                 for(String pkgName : pkgNames) {
                     jobOrchestrationService.submit(
@@ -180,7 +168,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         }
         else {
-            LOGGER.info("no changes in updating the user {}", user.get().toString());
+            LOGGER.info("no changes in updating the user {}", user.toString());
         }
 
         return new UpdateUserResult();
@@ -227,18 +215,8 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             );
         }
 
-        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(
-                context,
-                createUserRequest.naturalLanguageCode);
-
-        if(!naturalLanguageOptional.isPresent()) {
-            throw new ObjectNotFoundException(
-                    NaturalLanguage.class.getSimpleName(),
-                    createUserRequest.naturalLanguageCode);
-        }
-
         User user = context.newObject(User.class);
-        user.setNaturalLanguage(naturalLanguageOptional.get());
+        user.setNaturalLanguage(getNaturalLanguage(context, createUserRequest.naturalLanguageCode));
         user.setNickname(createUserRequest.nickname);
         user.setPasswordSalt(); // random
         user.setEmail(createUserRequest.email);
@@ -258,24 +236,21 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         final ObjectContext context = serverRuntime.getContext();
         User authUser = obtainAuthenticatedUser(context);
 
-        Optional<User> user = User.getByNickname(context, getUserRequest.nickname);
+        User user = User.getByNickname(context, getUserRequest.nickname)
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY));
 
-        if(!user.isPresent()) {
-            throw new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY);
-        }
-
-        if(!authorizationService.check(context, authUser, user.get(), Permission.USER_VIEW)) {
+        if(!authorizationService.check(context, authUser, user, Permission.USER_VIEW)) {
             throw new AuthorizationFailureException();
         }
 
         GetUserResult result = new GetUserResult();
-        result.nickname = user.get().getNickname();
-        result.email = user.get().getEmail();
-        result.isRoot = user.get().getIsRoot();
-        result.active = user.get().getActive();
-        result.naturalLanguageCode = user.get().getNaturalLanguage().getCode();
-        result.createTimestamp = user.get().getCreateTimestamp().getTime();
-        result.modifyTimestamp = user.get().getModifyTimestamp().getTime();
+        result.nickname = user.getNickname();
+        result.email = user.getEmail();
+        result.isRoot = user.getIsRoot();
+        result.active = user.getActive();
+        result.naturalLanguageCode = user.getNaturalLanguage().getCode();
+        result.createTimestamp = user.getCreateTimestamp().getTime();
+        result.modifyTimestamp = user.getModifyTimestamp().getTime();
         return result;
     }
 
@@ -353,15 +328,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        Optional<User> targetUserOptional = User.getByNickname(context, changePasswordRequest.nickname);
+        User targetUser = User.getByNickname(context, changePasswordRequest.nickname).orElseThrow(
+                () -> new ObjectNotFoundException(User.class.getSimpleName(), changePasswordRequest.nickname)
+        );
 
-        if(!targetUserOptional.isPresent()) {
-            throw new ObjectNotFoundException(User.class.getSimpleName(), changePasswordRequest.nickname);
-        }
-
-        User targetUser = targetUserOptional.get();
-
-        if(!authorizationService.check(context, authUser, targetUserOptional.get(), Permission.USER_CHANGEPASSWORD)) {
+        if(!authorizationService.check(context, authUser, targetUser, Permission.USER_CHANGEPASSWORD)) {
             LOGGER.info("the logged in user {} is not allowed to change the password of another user {}", authUser.getNickname(), changePasswordRequest.nickname);
             throw new AuthorizationFailureException();
         }

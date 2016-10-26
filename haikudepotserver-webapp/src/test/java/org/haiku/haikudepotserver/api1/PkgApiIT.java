@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -31,7 +31,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
 public class PkgApiIT extends AbstractIntegrationTest {

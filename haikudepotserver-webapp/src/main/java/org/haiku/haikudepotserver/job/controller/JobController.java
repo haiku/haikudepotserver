@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.security.AuthenticationFilter;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.web.AbstractController;
@@ -31,7 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 
 /**
  * <p>The job controller allows for upload and download of binary data related to jobs; for example, there are
@@ -40,18 +40,18 @@ import java.util.Optional;
  */
 
 @Controller
-@RequestMapping("/secured")
+@RequestMapping(AuthenticationFilter.PREFIX_PATH_SECURED)
 public class JobController extends AbstractController {
 
     private final static long MAX_SUPPLY_DATA_LENGTH = 1 * 1024 * 1024; // 1MB
 
-    public final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
+    private final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
 
-    public final static String KEY_GUID = "guid";
+    private final static String KEY_GUID = "guid";
 
-    public final static String KEY_USECODE = "usecode";
+    private final static String KEY_USECODE = "usecode";
 
     @Resource
     private JobOrchestrationService jobOrchestrationService;
@@ -64,7 +64,8 @@ public class JobController extends AbstractController {
 
     /**
      * <p>This URL can be used to supply data that can be used with a job to be run as an input to the
-     * job.</p>
+     * job.  A GUID is returned in the header {@link #HEADER_DATAGUID} that can be later used to refer
+     * to this uploaded data.</p>
      */
 
     @RequestMapping(value = "/jobdata", method = RequestMethod.POST)
@@ -76,8 +77,7 @@ public class JobController extends AbstractController {
             @RequestParam(value = KEY_USECODE, required = false) String useCode)
     throws IOException {
 
-        Preconditions.checkArgument(null!=request);
-        assert null!=request;
+        Preconditions.checkArgument(null!=request, "the request must be provided");
 
         int length = request.getContentLength();
 
@@ -87,12 +87,10 @@ public class JobController extends AbstractController {
 
         ObjectContext context = serverRuntime.getContext();
 
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if(!user.isPresent()) {
+        tryObtainAuthenticatedUser(context).orElseThrow(() -> {
             LOGGER.warn("attempt to supply job data with no authenticated user");
-            throw new JobDataAuthorizationFailure();
-        }
+            return new JobDataAuthorizationFailure();
+        });
 
         JobData data = jobOrchestrationService.storeSuppliedData(
                 useCode,
@@ -117,60 +115,50 @@ public class JobController extends AbstractController {
     public void downloadGeneratedData(
             HttpServletResponse response,
             @PathVariable(value = KEY_GUID) String guid)
-    throws IOException{
+    throws IOException {
 
         ObjectContext context = serverRuntime.getContext();
 
         // lots and lots of checking that the user who is authenticated can actually view
         // the data.
 
-        Optional<User> user = tryObtainAuthenticatedUser(context);
+        User user = tryObtainAuthenticatedUser(context).orElseThrow(() -> {
+                    LOGGER.warn("attempt to obtain job data {} with no authenticated user", guid);
+                    return new JobDataAuthorizationFailure();
+                });
 
-        if(!user.isPresent()) {
-            LOGGER.warn("attempt to obtain job data {} with no authenticated user", guid);
-            throw new JobDataAuthorizationFailure();
-        }
-
-        Optional<? extends JobSnapshot> jobOptional = jobOrchestrationService.tryGetJobForData(guid);
-
-        if(!jobOptional.isPresent()) {
+        JobSnapshot job = jobOrchestrationService.tryGetJobForData(guid).orElseThrow(() -> {
             LOGGER.warn("attempt to access job data {} for which no job exists", guid);
-            throw new JobDataAuthorizationFailure();
-        }
-
-        JobSnapshot job = jobOptional.get();
+            return new JobDataAuthorizationFailure();
+        });
 
         if(Strings.isNullOrEmpty(job.getOwnerUserNickname())) {
-            if (!authorizationService.check(context, user.get(), null, Permission.JOBS_VIEW)) {
+            if (!authorizationService.check(context, user, null, Permission.JOBS_VIEW)) {
                 LOGGER.warn("attempt to access job data {} but was not authorized", guid);
                 throw new JobDataAuthorizationFailure();
             }
         }
         else {
-            Optional<User> ownerUserOptional = User.getByNickname(context, job.getOwnerUserNickname());
-
-            if(!ownerUserOptional.isPresent()) {
+            User ownerUser= User.getByNickname(context, job.getOwnerUserNickname()).orElseThrow(() -> {
                 LOGGER.warn("owner of job does not seem to exist; {}", job.getOwnerUserNickname());
-                throw new JobDataAuthorizationFailure();
-            }
+                return new JobDataAuthorizationFailure();
+            });
 
-            if (!authorizationService.check(context, user.get(), ownerUserOptional.get(), Permission.USER_VIEWJOBS)) {
+            if (!authorizationService.check(context, user, ownerUser, Permission.USER_VIEWJOBS)) {
                 LOGGER.warn("attempt to access jobs view for; {}", job.toString());
                 throw new JobDataAuthorizationFailure();
             }
         }
 
-        Optional<JobDataWithByteSource> jobDataWithByteSinkOptional = jobOrchestrationService.tryObtainData(guid);
-
-        if(!jobDataWithByteSinkOptional.isPresent()) {
+        JobDataWithByteSource jobDataWithByteSink = jobOrchestrationService.tryObtainData(guid).orElseThrow(() -> {
             LOGGER.warn("requested job data {} not found", guid);
-            throw new JobDataAuthorizationFailure();
-        }
+            return new JobDataAuthorizationFailure();
+        });
 
         // finally access has been checked and the logic can move onto actual
         // delivery of the material.
 
-        JobData jobData = jobDataWithByteSinkOptional.get().getJobData();
+        JobData jobData = jobDataWithByteSink.getJobData();
 
         if(!Strings.isNullOrEmpty(jobData.getMediaTypeCode())) {
             response.setContentType(jobData.getMediaTypeCode());
@@ -184,13 +172,13 @@ public class JobController extends AbstractController {
         response.setDateHeader(HttpHeaders.EXPIRES, 0);
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
 
-        jobDataWithByteSinkOptional.get().getByteSource().copyTo(response.getOutputStream());
+        jobDataWithByteSink.getByteSource().copyTo(response.getOutputStream());
 
         LOGGER.info("did stream job data; {}", guid);
 
     }
 
     @ResponseStatus(value= HttpStatus.UNAUTHORIZED, reason="access to job data denied")
-    public class JobDataAuthorizationFailure extends RuntimeException {}
+    private class JobDataAuthorizationFailure extends RuntimeException {}
 
 }

@@ -5,6 +5,8 @@
 
 package org.haiku.haikudepotserver.dataobjects;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
@@ -27,25 +29,26 @@ import java.util.stream.Collectors;
 
 public class RepositorySource extends _RepositorySource {
 
-    public final static Pattern CODE_PATTERN = Pattern.compile("^[a-z0-9]{2,16}_[a-z0-9_]+$");
+    private final static Pattern CODE_PATTERN = Pattern.compile("^[a-z0-9]{2,16}_[a-z0-9_]+$");
 
     public static RepositorySource get(ObjectContext context, ObjectId objectId) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != objectId, "the objectId must be supplied");
+        Preconditions.checkArgument(objectId.getEntityName().equals(RepositorySource.class.getSimpleName()), "the objectId must be targetting RepositorySource");
         return ((List<RepositorySource>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
     }
 
     public static Optional<RepositorySource> getByCode(ObjectContext context, String code) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return ((List<RepositorySource>) context.performQuery(new SelectQuery(
                 RepositorySource.class,
                 ExpressionFactory.matchExp(RepositorySource.CODE_PROPERTY, code)))).stream().collect(SingleCollector.optional());
     }
 
-    public static List<RepositorySource> findByRepository(ObjectContext context, Repository repository) {
-        return ((List<RepositorySource>) context.performQuery(new SelectQuery(
-                RepositorySource.class,
-                ExpressionFactory.matchExp(RepositorySource.REPOSITORY_PROPERTY, repository)))).stream().collect(Collectors.toList());
-    }
-
     public static List<RepositorySource> findActiveByRepository(ObjectContext context, Repository repository) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != repository, "the repository must be supplied");
         return ((List<RepositorySource>) context.performQuery(new SelectQuery(
                 RepositorySource.class,
                 ExpressionHelper.andAll(ImmutableList.of(

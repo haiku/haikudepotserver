@@ -1,13 +1,13 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import com.google.common.net.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
@@ -76,6 +76,7 @@ public class FileHelper {
      */
 
     public static void delete(File f) throws IOException {
+        Preconditions.checkArgument(null != f, "the file must be provided");
         if (f.isDirectory()) {
             for (File c : f.listFiles())
                 delete(c);

@@ -37,8 +37,8 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
-    public final static String RESOURCE_MESSAGES = "/messages%s.properties";
-    public final static String RESOURCE_MESSAGES_NATURALLANGUAGE = "/naturallanguagemessages.properties";
+    private final static String RESOURCE_MESSAGES = "/messages%s.properties";
+    private final static String RESOURCE_MESSAGES_NATURALLANGUAGE = "/naturallanguagemessages.properties";
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -65,7 +65,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllPkgCategoriesRequest.naturalLanguageCode)
-                ? Optional.<NaturalLanguage>empty()
+                ? Optional.empty()
                         : NaturalLanguage.getByCode(context, getAllPkgCategoriesRequest.naturalLanguageCode);
 
         return new GetAllPkgCategoriesResult(
@@ -94,7 +94,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllNaturalLanguagesRequest.naturalLanguageCode)
-                        ? Optional.<NaturalLanguage>empty()
+                        ? Optional.empty()
                         : NaturalLanguage.getByCode(context, getAllNaturalLanguagesRequest.naturalLanguageCode);
 
         return new GetAllNaturalLanguagesResult(
@@ -235,7 +235,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllUserRatingStabilitiesRequest.naturalLanguageCode)
-                        ? Optional.<NaturalLanguage>empty()
+                        ? Optional.empty()
                         : NaturalLanguage.getByCode(context, getAllUserRatingStabilitiesRequest.naturalLanguageCode);
 
         return new GetAllUserRatingStabilitiesResult(

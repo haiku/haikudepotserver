@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,6 @@ import javax.annotation.Resource;
 import java.util.EnumSet;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-jobapi-context.xml"
 })
 public class JobApiIT extends AbstractIntegrationTest {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,7 +34,7 @@ public class NaturalLanguage extends _NaturalLanguage {
     public final static String CODE_RUSSIAN = "ru";
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(null != context, "the context must be provided");
         SelectQuery query = new SelectQuery(NaturalLanguage.class);
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
@@ -42,18 +42,13 @@ public class NaturalLanguage extends _NaturalLanguage {
     }
 
     public static List<NaturalLanguage> getAllPopular(ObjectContext context) {
-        Preconditions.checkNotNull(context);
-        return getAll(context).stream().filter(nl -> nl.getIsPopular()).collect(Collectors.toList());
-    }
-
-    public static List<NaturalLanguage> getAllExceptEnglish(ObjectContext context) {
-        Preconditions.checkNotNull(context);
-        return getAll(context).stream().filter(nl -> !nl.getCode().equals(NaturalLanguage.CODE_ENGLISH)).collect(Collectors.toList());
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        return getAll(context).stream().filter(_NaturalLanguage::getIsPopular).collect(Collectors.toList());
     }
 
     public static Optional<NaturalLanguage> getByCode(ObjectContext context, final String code) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(code));
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
         return getAll(context).stream().filter(nl -> nl.getCode().equals(code)).collect(SingleCollector.optional());
     }
 
@@ -66,7 +61,7 @@ public class NaturalLanguage extends _NaturalLanguage {
      */
 
     public static List<String> getAllCodes(ObjectContext context) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(null != context, "the context must be provided");
         return getAll(context).stream().map(NaturalLanguage::getCode).collect(Collectors.toList());
     }
 

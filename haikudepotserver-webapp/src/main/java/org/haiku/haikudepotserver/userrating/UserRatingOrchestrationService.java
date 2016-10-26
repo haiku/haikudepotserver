@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,7 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.support.Callback;
+import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
@@ -58,7 +58,7 @@ public class UserRatingOrchestrationService {
     public int each(
             ObjectContext context,
             UserRatingSearchSpecification search,
-            Callback<UserRating> c) {
+            StoppableConsumer<UserRating> c) {
 
         Preconditions.checkNotNull(c);
         Preconditions.checkNotNull(context);
@@ -96,7 +96,7 @@ public class UserRatingOrchestrationService {
             }
 
             for(UserRating userRating : userRatings) {
-                if(!c.process(userRating)) {
+                if(!c.accept(userRating)) {
                     return count;
                 }
             }

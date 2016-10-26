@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,15 +19,11 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
  * <p>This tag renders a list of languages allowing the user to choose one of those languages.</p>
  */
-
-// [apl 10.oct.2014]
-// Presently to keep things simple, it will only show the popular languages.
 
 public class NaturalLanguageChooserTag extends RequestContextAwareTag {
 
@@ -45,12 +41,7 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
                 context,
                 (HttpServletRequest) pageContext.getRequest());
 
-        Collections.sort(naturalLanguages, new Comparator<NaturalLanguage>() {
-                    @Override
-                    public int compare(NaturalLanguage o1, NaturalLanguage o2) {
-                        return o1.getCode().compareTo(o2.getCode());
-                    }
-                }
+        Collections.sort(naturalLanguages, (o1, o2) -> o1.getCode().compareTo(o2.getCode())
         );
 
         tagWriter.startTag("span");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,7 +11,7 @@ import java.io.IOException;
  * <p>Does nothing to the PNG to optimize it.</p>
  */
 
-public class NoOpPngOptimizationServiceImpl implements PngOptimizationService {
+class NoOpPngOptimizationServiceImpl implements PngOptimizationService {
 
     public boolean identityOptimization() {
         return true;

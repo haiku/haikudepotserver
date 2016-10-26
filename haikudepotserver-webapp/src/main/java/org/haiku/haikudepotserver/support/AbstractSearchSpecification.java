@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -104,6 +104,7 @@ public abstract class AbstractSearchSpecification {
      * <p>This converts the expression into a form that can be used with a SQL like.</p>
      */
 
+    @SuppressWarnings("unused") // used in Cayenne SQL template.
     public String getExpressionAsSqlLike() {
         if(null==getExpression()) {
             return null;

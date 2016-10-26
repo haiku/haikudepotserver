@@ -99,7 +99,7 @@ angular.module('haikudepotserver')
     // this constant is an object of mix-ins that can be used to extend a directive so that it
     // has access to a cache of handy functions that can be re-used.
 
-    .constant('standardDirectiveMixins', {
+    .constant('standardDirectiveFunctions', {
 
         /**
          * <p>This function is able to adjust the visibility of the element by adding or removing a class.  It

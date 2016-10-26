@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
 public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {

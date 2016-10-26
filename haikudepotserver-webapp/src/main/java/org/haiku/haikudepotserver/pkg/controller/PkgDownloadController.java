@@ -17,7 +17,6 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.Optional;
 
 /**
  * <p>This controller allows the user to download a package.</p>
@@ -46,16 +44,16 @@ public class PkgDownloadController {
 
     public final static String SEGMENT_PKGDOWNLOAD = "__pkgdownload";
 
-    public final static String KEY_PKGNAME = "pkgName";
-    public final static String KEY_REPOSITORYCODE = "repositoryCode";
-    public final static String KEY_MAJOR = "major";
-    public final static String KEY_MINOR = "minor";
-    public final static String KEY_MICRO = "micro";
-    public final static String KEY_PRERELEASE = "preRelease";
-    public final static String KEY_REVISION = "revision";
-    public final static String KEY_ARCHITECTURECODE = "architectureCode";
+    private final static String KEY_PKGNAME = "pkgName";
+    private final static String KEY_REPOSITORYCODE = "repositoryCode";
+    private final static String KEY_MAJOR = "major";
+    private final static String KEY_MINOR = "minor";
+    private final static String KEY_MICRO = "micro";
+    private final static String KEY_PRERELEASE = "preRelease";
+    private final static String KEY_REVISION = "revision";
+    private final static String KEY_ARCHITECTURECODE = "architectureCode";
 
-    public final static String PATH = "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
+    private final static String PATH = "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
             KEY_MICRO + "}/{" + KEY_PRERELEASE + "}/{" + KEY_REVISION + "}/{" + KEY_ARCHITECTURECODE + "}/package.hpkg";
 
     @Resource
@@ -89,26 +87,20 @@ public class PkgDownloadController {
 
         ObjectContext context = serverRuntime.getContext();
 
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
-
-        if(!pkgOptional.isPresent()) {
+        Pkg pkg = Pkg.getByName(context, pkgName).orElseThrow(() -> {
             LOGGER.info("unable to find the package; {}", pkgName);
-            throw new RequestObjectNotFound();
-        }
+            return new RequestObjectNotFound();
+        });
 
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
-
-        if(!repositoryOptional.isPresent()) {
+        Repository repository = Repository.getByCode(context, repositoryCode).orElseThrow(() -> {
             LOGGER.info("unable to find the repository; {}", repositoryCode);
-            throw new RequestObjectNotFound();
-        }
+            return new RequestObjectNotFound();
+        });
 
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context, architectureCode);
-
-        if(!architectureOptional.isPresent()) {
+        Architecture architecture = Architecture.getByCode(context, architectureCode).orElseThrow(() -> {
             LOGGER.info("unable to find the architecture; {}", architectureCode);
-            throw new RequestObjectNotFound();
-        }
+            return new RequestObjectNotFound();
+        });
 
         revisionStr = hyphenToNull(revisionStr);
 
@@ -119,19 +111,13 @@ public class PkgDownloadController {
                 hyphenToNull(prerelease),
                 null==revisionStr ? null : Integer.parseInt(revisionStr));
 
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
-                context,
-                pkgOptional.get(),
-                repositoryOptional.get(),
-                architectureOptional.get(),
-                versionCoordinates);
+        PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repository, architecture, versionCoordinates)
+                .orElseThrow(() -> {
+                    LOGGER.info("unable to find the pkg version; {}, {}", pkgName, versionCoordinates);
+                    return new RequestObjectNotFound();
+                });
 
-        if(!pkgVersionOptional.isPresent()) {
-            LOGGER.info("unable to find the pkg version; {}, {}", pkgName, versionCoordinates);
-            throw new RequestObjectNotFound();
-        }
-
-        URL url = pkgVersionOptional.get().getHpkgURL();
+        URL url = pkgVersion.getHpkgURL();
 
         // if it is an HTTP URL then it should be possible to redirect the browser to that URL
         // instead of piping it through the application server.
@@ -151,11 +137,11 @@ public class PkgDownloadController {
                     HttpHeaders.CONTENT_DISPOSITION,
                     String.format(
                             "attachment; filename=\"%s\"",
-                            pkgVersionOptional.get().getHpkgFilename())
+                            pkgVersion.getHpkgFilename())
             );
 
             try (InputStream inputStream = url.openStream()) {
-                LOGGER.info("downloaded package version; {} - {}", pkgOptional.get().getName(), pkgVersionOptional.get());
+                LOGGER.info("downloaded package version; {} - {}", pkg.getName(), pkgVersion);
                 ByteStreams.copy(inputStream, response.getOutputStream());
             }
             catch(IOException ioe) {

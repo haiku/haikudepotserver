@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,8 +63,9 @@ public class AuthorizationService {
             TargetType targetType,
             String targetIdentifier,
             Permission permission) {
-        Preconditions.checkNotNull(permission);
-        Preconditions.checkNotNull(objectContext);
+
+        Preconditions.checkArgument(null != permission, "the permission must be provided");
+        Preconditions.checkArgument(null != objectContext, "the object context must be provided");
 
         DataObject target = null;
 
@@ -125,9 +126,9 @@ public class AuthorizationService {
             DataObject target,
             final Permission permission) {
 
-        Preconditions.checkNotNull(permission);
-        Preconditions.checkNotNull(objectContext);
-        Preconditions.checkState(
+        Preconditions.checkArgument(null != permission, "the permission must be provided");
+        Preconditions.checkArgument(null != objectContext, "the object context must be provided");
+        Preconditions.checkArgument(
                 deriveTargetType(target) == permission.getRequiredTargetType(),
                 "during checking authorization, the target object type " + deriveTargetType(target) + " does not match the expected type "  + permission.getRequiredTargetType() + " for permission " + permission);
 

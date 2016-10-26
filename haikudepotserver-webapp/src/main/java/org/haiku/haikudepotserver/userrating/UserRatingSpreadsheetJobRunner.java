@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,7 +21,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.JobOrchestrationService;
-import org.haiku.haikudepotserver.support.Callback;
+import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -132,9 +132,9 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             spec.setRepository(paramRepositoryOptional.orElse(null));
 
             // TODO; provide a prefetch tree into the user, pkgversion.
-            int count = userRatingOrchestrationService.each(context, spec, new Callback<UserRating>() {
+            int count = userRatingOrchestrationService.each(context, spec, new StoppableConsumer<UserRating>() {
                 @Override
-                public boolean process(UserRating userRating) {
+                public boolean accept(UserRating userRating) {
 
                     writer.writeNext(
                             new String[]{

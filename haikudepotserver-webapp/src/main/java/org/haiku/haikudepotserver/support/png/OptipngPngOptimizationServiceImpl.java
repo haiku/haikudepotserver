@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,7 @@ import java.util.List;
  * <p>This class provides a service to optimize PNG images.</p>
  */
 
-public class OptipngPngOptimizationServiceImpl
+class OptipngPngOptimizationServiceImpl
         extends AbstractExternalToolService<OptipngPngOptimizationServiceImpl.Context>
         implements PngOptimizationService {
 
@@ -28,7 +28,7 @@ public class OptipngPngOptimizationServiceImpl
 
     private String optiPngPath;
 
-    public OptipngPngOptimizationServiceImpl(String optiPngPath) {
+    OptipngPngOptimizationServiceImpl(String optiPngPath) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(optiPngPath), "the path should be supplied");
         this.optiPngPath = optiPngPath;
     }
@@ -57,11 +57,11 @@ public class OptipngPngOptimizationServiceImpl
         return out;
     }
 
-    public static class Context {
+    static class Context {
 
-        public int optimizationLevel = 5;
+        int optimizationLevel = 5;
 
-        public int getOptimizationLevel() {
+        int getOptimizationLevel() {
             return optimizationLevel;
         }
     }

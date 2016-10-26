@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,8 +27,8 @@ import java.util.Optional;
 public class PkgVersionLocalization extends _PkgVersionLocalization implements CreateAndModifyTimestamped {
 
     public static List<PkgVersionLocalization> getForPkgVersion(ObjectContext context, PkgVersion pkgVersion) {
-        Preconditions.checkArgument(null!=context, "the context must be supplied");
-        Preconditions.checkArgument(null!=pkgVersion, "the pkg version must be supplied");
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkgVersion, "the pkg version must be supplied");
 
         SelectQuery query = new SelectQuery(
                 PkgVersionLocalization.class,
@@ -45,7 +45,7 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements C
             PkgVersion pkgVersion,
             final String naturalLanguageCode) {
 
-        Preconditions.checkArgument(null!=context, "the context must be supplied");
+        Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkgVersion, "the pkg version must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code is required");
         return getForPkgVersion(context, pkgVersion)

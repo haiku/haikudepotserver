@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,12 +32,15 @@ import java.util.stream.Collectors;
 
 public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestamped {
 
-    public final static Pattern MAJOR_PATTERN = Pattern.compile("^[\\w_]+$");
-    public final static Pattern MINOR_PATTERN = Pattern.compile("^[\\w_]+$");
-    public final static Pattern MICRO_PATTERN = Pattern.compile("^[\\w_.]+$");
-    public final static Pattern PRE_RELEASE_PATTERN = Pattern.compile("^[\\w_.]+$");
+    private final static Pattern MAJOR_PATTERN = Pattern.compile("^[\\w_]+$");
+    private final static Pattern MINOR_PATTERN = Pattern.compile("^[\\w_]+$");
+    private final static Pattern MICRO_PATTERN = Pattern.compile("^[\\w_.]+$");
+    private final static Pattern PRE_RELEASE_PATTERN = Pattern.compile("^[\\w_.]+$");
 
     public static PkgVersion get(ObjectContext context, ObjectId objectId) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != objectId, "the objectId must be supplied");
+        Preconditions.checkArgument(objectId.getEntityName().equals(PkgVersion.class.getSimpleName()), "the objectId must be targetting PkgVersion");
         return ((List<PkgVersion>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
     }
 
@@ -45,8 +48,8 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             ObjectContext context,
             Pkg pkg,
             boolean includeInactive) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
         return getForPkg(context, pkg, null, null, includeInactive);
     }
 
@@ -55,8 +58,8 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             Pkg pkg,
             Repository repository,
             boolean includeInactive) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
         Preconditions.checkArgument(null != repository, "a repository must be supplied to give context to obtaining a pkg version for a pkg");
         return getForPkg(context, pkg, null, repository, includeInactive);
     }
@@ -66,8 +69,8 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             Pkg pkg,
             RepositorySource repositorySource,
             boolean includeInactive) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
         Preconditions.checkArgument(null != repositorySource, "a repository source must be supplied to give context to obtaining a pkg version for a pkg");
         return getForPkg(context, pkg, repositorySource, null, includeInactive);
     }
@@ -78,8 +81,8 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             RepositorySource repositorySource,
             Repository repository,
             boolean includeInactive) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
 
         List<Expression> expressions = new ArrayList<>();
 
@@ -114,9 +117,9 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
             Architecture architecture,
             VersionCoordinates versionCoordinates) {
 
-        Preconditions.checkArgument(null != context);
-        Preconditions.checkArgument(null != pkg);
-        Preconditions.checkArgument(null != architecture);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
+        Preconditions.checkArgument(null != architecture, "the architecture must be supplied");
         Preconditions.checkArgument(null != versionCoordinates && null!=versionCoordinates.getMajor(), "missing or malformed version coordinates");
         Preconditions.checkArgument(null != repository, "the repository is required to lookup a package version");
 

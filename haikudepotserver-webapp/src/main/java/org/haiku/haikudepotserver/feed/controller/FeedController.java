@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -53,13 +52,13 @@ public class FeedController {
     public final static String KEY_LIMIT = "limit";
     public final static String KEY_TYPES = "types";
 
-    public final static String FEEDTYPE = "atom_1.0";
-    public final static String FEEDTITLE = "Haiku Depot Server Feed";
+    private final static String FEEDTYPE = "atom_1.0";
+    private final static String FEEDTITLE = "Haiku Depot Server Feed";
 
-    public final static int DEFAULT_LIMIT = 50;
-    public final static int MAX_LIMIT = 100;
+    private final static int DEFAULT_LIMIT = 50;
+    private final static int MAX_LIMIT = 100;
 
-    public final static long EXPIRY_CACHE_SECONDS = 60;
+    private final static long EXPIRY_CACHE_SECONDS = 60;
 
     public final static String PATH_ROOT = "/feed";
     public final static String PATH_PKG_LEAF = "/pkg.atom";
@@ -97,12 +96,7 @@ public class FeedController {
 
                     // sort the entries and then take the first number of them up to the limit.
 
-                    Collections.sort(entries, new Comparator<SyndEntry>() {
-                        @Override
-                        public int compare(SyndEntry o1, SyndEntry o2) {
-                            return -1 * o1.getPublishedDate().compareTo(o2.getPublishedDate());
-                        }
-                    });
+                    Collections.sort(entries, (o1, o2) -> -1 * o1.getPublishedDate().compareTo(o2.getPublishedDate()));
 
                     if(entries.size() > key.getLimit()) {
                         entries = entries.subList(0,key.getLimit());

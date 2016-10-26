@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,6 +21,8 @@ import javax.annotation.Resource;
  * <p>This will attempt to listen to changes to a user and then after those changes have been
  * persisted, to look them up and to relay those into an LDAP server.</p>
  */
+
+// WARNING; NOT IN ACTIVE USE
 
 public class LdapUserUpdateListener implements LifecycleListener {
 

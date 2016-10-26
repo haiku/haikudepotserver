@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,14 +9,11 @@
  */
 
 angular.module('haikudepotserver').directive('showIfPkgPermission',[
-    'userState', 'standardDirectiveMixins',
-    function(userState,standardDirectiveMixins) {
+    'userState', 'standardDirectiveFunctions',
+    function(userState,standardDirectiveFunctions) {
         return {
             restrict: 'A',
             link : function($scope,element,attributes) {
-
-                // apply a mixin for standard directive mixins.
-                angular.extend(this,standardDirectiveMixins);
 
                 var pkgExpression = attributes['pkg'];
                 var permissionCodeExpression = attributes['showIfPkgPermission'];
@@ -39,7 +36,7 @@ angular.module('haikudepotserver').directive('showIfPkgPermission',[
                 });
 
                 function check() {
-                    showOrHideElementAfterCheckPermission(
+                    standardDirectiveFunctions.showOrHideElementAfterCheckPermission(
                         userState,
                         element,
                         permissionCode,

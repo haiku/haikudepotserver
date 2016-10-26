@@ -1,3 +1,8 @@
+/*
+ * Copyright 2016, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.pkg;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -45,7 +50,6 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
             throws IOException, JobRunnerException {
 
         Preconditions.checkArgument(null != jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
         Preconditions.checkArgument(null!=specification.getInputDataGuid(), "missing imput data guid on specification");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,14 +8,11 @@
  */
 
 angular.module('haikudepotserver').directive('userLabel',[
-    'standardDirectiveMixins','breadcrumbs','userState','breadcrumbFactory',
-    function(standardDirectiveMixins,breadcrumbs,userState,breadcrumbFactory) {
+    'standardDirectiveFunctions','breadcrumbs','userState','breadcrumbFactory',
+    function(standardDirectiveFunctions,breadcrumbs,userState,breadcrumbFactory) {
         return {
             restrict: 'E',
             link : function($scope,element,attributes) {
-
-                // apply a mixin for standard directive mixins.
-                angular.extend(this,standardDirectiveMixins);
 
                 var userExpression = attributes['user'];
                 var shouldLink = undefined == attributes['shouldLink'] || 'true' == shouldLink;
@@ -40,7 +37,7 @@ angular.module('haikudepotserver').directive('userLabel',[
                             containerEl.text(user.nickname);
                         }
 
-                        if(shouldLink && !isChildOfForm(containerEl)) {
+                        if(shouldLink && !standardDirectiveFunctions.isChildOfForm(containerEl)) {
 
                             userState.areAuthorized([{
                                 targetType:'USER',

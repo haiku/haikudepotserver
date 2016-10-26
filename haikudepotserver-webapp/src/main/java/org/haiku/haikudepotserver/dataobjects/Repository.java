@@ -1,10 +1,11 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.dataobjects;
 
+import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -36,6 +37,9 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
     public final static String CODE_DEFAULT = "haikuports";
 
     public static Repository get(ObjectContext context, ObjectId objectId) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != objectId, "the objectId must be supplied");
+        Preconditions.checkArgument(objectId.getEntityName().equals(Repository.class.getSimpleName()), "the objectId must be targetting Repository");
         return ((List<Repository>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
     }
 
@@ -43,6 +47,8 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
     // quite a large number of repositories, but this eventuality is unlikely.
 
     public static Optional<Repository> getByCode(ObjectContext context, String code) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != code, "the code must be supplied");
         return getAll(context)
                 .stream()
                 .filter(r -> r.getCode().equals(code))
@@ -50,6 +56,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
     }
 
     public static List<Repository> getAllActive(ObjectContext context) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
         return getAll(context).stream().filter(r -> r.getActive()).collect(Collectors.toList());
     }
 
@@ -58,6 +65,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
          */
 
     public static List<Repository> getAll(ObjectContext context) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
         SelectQuery query = new SelectQuery(Repository.class);
 
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
@@ -96,7 +104,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
 
     }
 
-    public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+    UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
         return builder.pathSegment(getCode());
     }
 

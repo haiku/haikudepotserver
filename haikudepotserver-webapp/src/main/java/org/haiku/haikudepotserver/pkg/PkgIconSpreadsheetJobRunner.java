@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,13 +11,12 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.PrefetchTreeNode;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
+import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
 import org.haiku.haikudepotserver.pkg.model.PkgIconSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -52,7 +51,6 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
             PkgIconSpreadsheetJobSpecification specification) throws IOException {
 
         Preconditions.checkArgument(null!=jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
@@ -105,29 +103,26 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
             long count = pkgOrchestrationService.eachPkg(
                     context,
                     false,
-                    new Callback<Pkg>() {
-                        @Override
-                        public boolean process(Pkg pkg) {
+                    pkg -> {
 
-                            List<String> cells = new ArrayList<>();
-                            cells.add(pkg.getName());
+                        List<String> cells = new ArrayList<>();
+                        cells.add(pkg.getName());
 
-                            cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");
+                        cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");
 
-                            for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
-                                cells.add(
-                                        pkg.getPkgIcon(
-                                                pkgIconConfiguration.getMediaType(),
-                                                pkgIconConfiguration.getSize()
-                                        ).isPresent()
-                                                ? MARKER
-                                                : "");
-                            }
-
-                            writer.writeNext(cells.toArray(new String[cells.size()]));
-
-                            return true;
+                        for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
+                            cells.add(
+                                    pkg.getPkgIcon(
+                                            pkgIconConfiguration.getMediaType(),
+                                            pkgIconConfiguration.getSize()
+                                    ).isPresent()
+                                            ? MARKER
+                                            : "");
                         }
+
+                        writer.writeNext(cells.toArray(new String[cells.size()]));
+
+                        return true;
                     });
 
             LOGGER.info(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ import java.util.Comparator;
  * lexicographical comparison is not a logical choice.</p>
  */
 
-public class NaturalStringComparator implements Comparator<String> {
+class NaturalStringComparator implements Comparator<String> {
 
     private NaturalChunkFormat naturalChunkFormat = new NaturalChunkFormat();
 
@@ -97,7 +97,7 @@ public class NaturalStringComparator implements Comparator<String> {
      * <p>This method will pull out chunks of the text in order that they can be compared in the comparator.</p>
      */
 
-    public static class NaturalChunkFormat extends Format {
+    private static class NaturalChunkFormat extends Format {
 
         @Override
         public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
@@ -175,20 +175,20 @@ public class NaturalStringComparator implements Comparator<String> {
 
     }
 
-    public static class NaturalChunk {
+    private static class NaturalChunk {
 
-        public enum Type {
+        enum Type {
             NUMBER,
             ASCII, // the use of ascii here is not clear, but follows the convention of the C++ implementation
             END
-        };
+        }
 
         private Type type;
         private String source;
         private int offset;
         private int length;
 
-        public NaturalChunk(Type type, String source, int offset, int length) {
+        NaturalChunk(Type type, String source, int offset, int length) {
             Preconditions.checkNotNull(type);
             Preconditions.checkNotNull(source);
             Preconditions.checkNotNull(offset);
@@ -215,7 +215,7 @@ public class NaturalStringComparator implements Comparator<String> {
             return length;
         }
 
-        public String getExtract() {
+        String getExtract() {
             return getSource().substring(getOffset(), getOffset() + getLength());
         }
 

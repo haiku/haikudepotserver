@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,11 +15,9 @@ import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.support.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -86,48 +84,45 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
             long count = pkgOrchestrationService.eachPkg(
                     context,
                     false,
-                    new Callback<Pkg>() {
-                        @Override
-                        public boolean process(Pkg pkg) {
+                    pkg -> {
 
-                            List<PkgProminence> pkgProminences = PkgProminence.findByPkg(context, pkg);
-                            List<PkgUserRatingAggregate> pkgUserRatingAggregates = PkgUserRatingAggregate.findByPkg(context, pkg);
-                            List<Repository> repositories = Stream.concat(
-                                    pkgProminences.stream().map(PkgProminence::getRepository),
-                                    pkgUserRatingAggregates.stream().map(PkgUserRatingAggregate::getRepository)
-                            ).distinct().sorted().collect(Collectors.toList());
+                        List<PkgProminence> pkgProminences = PkgProminence.findByPkg(context, pkg);
+                        List<PkgUserRatingAggregate> pkgUserRatingAggregates = PkgUserRatingAggregate.findByPkg(context, pkg);
+                        List<Repository> repositories = Stream.concat(
+                                pkgProminences.stream().map(PkgProminence::getRepository),
+                                pkgUserRatingAggregates.stream().map(PkgUserRatingAggregate::getRepository)
+                        ).distinct().sorted().collect(Collectors.toList());
 
-                            if(repositories.isEmpty()) {
-                                writer.writeNext(new String[]{ pkg.getName(),"","","","","" });
-                            }
-                            else {
-                                for(Repository repository : repositories) {
-
-                                    Optional<PkgProminence> pkgProminenceOptional = pkgProminences
-                                            .stream()
-                                            .filter(pp -> pp.getRepository().equals(repository))
-                                            .collect(SingleCollector.optional());
-
-                                    Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional = pkgUserRatingAggregates
-                                            .stream()
-                                            .filter(pura -> pura.getRepository().equals(repository))
-                                            .collect(SingleCollector.optional());
-
-                                    writer.writeNext(
-                                            new String[]{
-                                                    pkg.getName(),
-                                                    repository.getCode(),
-                                                    pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getName() : "",
-                                                    pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getOrdering().toString() : "",
-                                                    pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating().toString() : "",
-                                                    pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRatingSampleSize().toString() : ""
-                                            }
-                                    );
-                                }
-                            }
-
-                            return true;
+                        if(repositories.isEmpty()) {
+                            writer.writeNext(new String[]{ pkg.getName(),"","","","","" });
                         }
+                        else {
+                            for(Repository repository : repositories) {
+
+                                Optional<PkgProminence> pkgProminenceOptional = pkgProminences
+                                        .stream()
+                                        .filter(pp -> pp.getRepository().equals(repository))
+                                        .collect(SingleCollector.optional());
+
+                                Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional = pkgUserRatingAggregates
+                                        .stream()
+                                        .filter(pura -> pura.getRepository().equals(repository))
+                                        .collect(SingleCollector.optional());
+
+                                writer.writeNext(
+                                        new String[]{
+                                                pkg.getName(),
+                                                repository.getCode(),
+                                                pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getName() : "",
+                                                pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getOrdering().toString() : "",
+                                                pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating().toString() : "",
+                                                pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRatingSampleSize().toString() : ""
+                                        }
+                                );
+                            }
+                        }
+
+                        return true;
                     });
 
             LOGGER.info(

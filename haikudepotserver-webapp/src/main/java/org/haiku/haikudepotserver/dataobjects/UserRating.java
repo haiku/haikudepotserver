@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,8 +24,8 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
     public final static int MAX_USER_RATING = 5;
 
     public static Optional<UserRating> getByCode(ObjectContext context, String code) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(code));
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return ((List<UserRating>) context.performQuery(new SelectQuery(
                         UserRating.class,
                         ExpressionFactory.matchExp(UserRating.CODE_PROPERTY, code))))
@@ -34,9 +34,9 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
     }
 
     public static List<UserRating> findByUserAndPkg(ObjectContext context, User user, Pkg pkg) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(user);
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != user, "the user must be supplied");
+        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
 
         return context.performQuery(new SelectQuery(
                 UserRating.class,
@@ -49,9 +49,9 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
             ObjectContext context,
             User user,
             Collection<PkgVersion> pkgVersions) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(user);
-        Preconditions.checkNotNull(pkgVersions);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != user, "the user must be supplied");
+        Preconditions.checkArgument(null != pkgVersions, "the pkgVersions must be supplied");
 
         if(pkgVersions.isEmpty()) {
             return Collections.emptyList();
@@ -65,9 +65,9 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
     }
 
     public static Optional<UserRating> getByUserAndPkgVersion(ObjectContext context, User user, PkgVersion pkgVersion) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(user);
-        Preconditions.checkNotNull(pkgVersion);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != user, "the user must be supplied");
+        Preconditions.checkArgument(null != pkgVersion, "the pkgVersion must be supplied");
 
         return ((List<UserRating>) context.performQuery(new SelectQuery(
                         UserRating.class,

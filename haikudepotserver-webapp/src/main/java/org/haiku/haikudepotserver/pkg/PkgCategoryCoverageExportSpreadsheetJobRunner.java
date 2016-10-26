@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,11 +11,9 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.support.Callback;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,6 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
             throws IOException, JobRunnerException {
 
         Preconditions.checkArgument(null!=jobOrchestrationService);
-        assert null!=jobOrchestrationService;
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
@@ -84,28 +81,25 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
             long count = pkgOrchestrationService.eachPkg(
                     context,
                     false,
-                    new Callback<Pkg>() {
-                        @Override
-                        public boolean process(Pkg pkg) {
-                            List<String> cols = new ArrayList<>();
-                            Optional<PkgVersionLocalization> locOptional = Optional.empty();
+                    pkg -> {
+                        List<String> cols = new ArrayList<>();
+                        Optional<PkgVersionLocalization> locOptional = Optional.empty();
 
-                            if(null!=pkg) {
-                                locOptional = PkgVersionLocalization.getAnyPkgVersionLocalizationForPkg(context, pkg);
-                            }
-
-                            cols.add(pkg.getName());
-                            cols.add(locOptional.isPresent() ? locOptional.get().getSummary().orElse("") : "");
-                            cols.add(pkg.getPkgPkgCategories().isEmpty() ? AbstractJobRunner.MARKER : "");
-
-                            for (String pkgCategoryCode : pkgCategoryCodes) {
-                                cols.add(pkg.getPkgPkgCategory(pkgCategoryCode).isPresent() ? AbstractJobRunner.MARKER : "");
-                            }
-
-                            cols.add(""); // no action
-                            writer.writeNext(cols.toArray(new String[cols.size()]));
-                            return true; // keep going!
+                        if(null!=pkg) {
+                            locOptional = PkgVersionLocalization.getAnyPkgVersionLocalizationForPkg(context, pkg);
                         }
+
+                        cols.add(pkg.getName());
+                        cols.add(locOptional.isPresent() ? locOptional.get().getSummary().orElse("") : "");
+                        cols.add(pkg.getPkgPkgCategories().isEmpty() ? AbstractJobRunner.MARKER : "");
+
+                        for (String pkgCategoryCode : pkgCategoryCodes) {
+                            cols.add(pkg.getPkgPkgCategory(pkgCategoryCode).isPresent() ? AbstractJobRunner.MARKER : "");
+                        }
+
+                        cols.add(""); // no action
+                        writer.writeNext(cols.toArray(new String[cols.size()]));
+                        return true; // keep going!
                     }
             );
 

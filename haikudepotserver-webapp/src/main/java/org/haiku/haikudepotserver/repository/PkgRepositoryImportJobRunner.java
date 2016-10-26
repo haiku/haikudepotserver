@@ -168,9 +168,9 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
             // repository and then if the package simply doesn't exist in that repository any more, mark all of
             // those versions are inactive.
 
-            for (String persistedPkgName : pkgService.fetchPkgNamesWithAnyPkgVersionAssociatedWithRepositorySource(
+            pkgService.fetchPkgNamesWithAnyPkgVersionAssociatedWithRepositorySource(
                     mainContext,
-                    repositorySource)) {
+                    repositorySource).forEach((persistedPkgName) -> {
                 if (!repositoryImportPkgNames.contains(persistedPkgName)) {
 
                     ObjectContext removalContext = serverRuntime.getContext();
@@ -187,7 +187,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
                     }
 
                 }
-            }
+            });
 
             LOGGER.info("did process data for repository source {} in {}ms", repositorySource, System.currentTimeMillis() - startTimeMs);
 

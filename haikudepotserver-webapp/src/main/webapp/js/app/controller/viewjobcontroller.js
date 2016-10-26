@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -102,7 +102,7 @@ angular.module('haikudepotserver').controller(
                     throw Error('am not able to find the \'download-iframe\'');
                 }
 
-                iframeEl.src = '/secured/jobdata/'+jobData.guid+'/download?hdsbtok=' +
+                iframeEl.src = '/__secured/jobdata/'+jobData.guid+'/download?hdsbtok=' +
                 userState.token() +
                 '&rnd=' +
                 _.random(0,1000);

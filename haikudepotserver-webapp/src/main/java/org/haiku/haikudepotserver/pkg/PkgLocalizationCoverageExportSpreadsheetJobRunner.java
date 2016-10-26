@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -53,7 +53,7 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
      * some localizations.</P>
      */
 
-    public List<NaturalLanguage> getNaturalLanguages(ObjectContext context) {
+    private List<NaturalLanguage> getNaturalLanguages(ObjectContext context) {
         SelectQuery query = new SelectQuery(NaturalLanguage.class);
         query.addOrdering(new Ordering(NaturalLanguage.CODE_PROPERTY, SortOrder.ASCENDING));
         return ((List<NaturalLanguage>) context.performQuery(query))

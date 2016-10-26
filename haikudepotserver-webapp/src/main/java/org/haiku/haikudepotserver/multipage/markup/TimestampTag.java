@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,6 @@ import java.util.Date;
 
 public class TimestampTag extends RequestContextAwareTag {
 
-    // might be an idea to put this somewhere else if we need it again?
     private final static DateTimeFormatter FORMATTER = DateTimeHelper.createStandardDateTimeFormat();
 
     private java.util.Date value;

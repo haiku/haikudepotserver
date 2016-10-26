@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,8 +17,6 @@ import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
-
 
 /**
  * <p>This abstract superclass of the API implementations allows access to the presently authenticated user.  See the
@@ -33,27 +31,15 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
     protected Architecture getArchitecture(ObjectContext context, String architectureCode) throws ObjectNotFoundException {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(architectureCode), "an architecture code is required to get the architecture");
-
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context,architectureCode);
-
-        if(!architectureOptional.isPresent()) {
-            throw new ObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode);
-        }
-
-        return architectureOptional.get();
+        return Architecture.getByCode(context,architectureCode)
+                .orElseThrow(() -> new ObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode));
     }
 
     protected NaturalLanguage getNaturalLanguage(ObjectContext context, String naturalLanguageCode) throws ObjectNotFoundException  {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-
-        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, naturalLanguageCode);
-
-        if(!naturalLanguageOptional.isPresent()) {
-            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), naturalLanguageCode);
-        }
-
-        return naturalLanguageOptional.get();
+        return NaturalLanguage.getByCode(context, naturalLanguageCode)
+                .orElseThrow(() -> new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), naturalLanguageCode));
     }
 
     /**
@@ -64,41 +50,15 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
     protected Repository getRepository(ObjectContext context, String repositoryCode) throws ObjectNotFoundException {
         Preconditions.checkNotNull(context);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(repositoryCode), "a repository code is required to search for the repository");
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
-
-        if(!repositoryOptional.isPresent()) {
-            throw new ObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode);
-        }
-
-        return repositoryOptional.get();
-    }
-
-    /**
-     * <p>If the code is null or empty, this will return an empty optional.  If it is present then it will try to look
-     * it up.  If it then fails to find a repository for this code, it will throw an exception.</p>
-     */
-
-    protected Optional<Repository> maybeGetRepository(ObjectContext context, String repositoryCode) throws ObjectNotFoundException {
-        Preconditions.checkArgument(null != context, "the object context must be supplied");
-
-        if(!Strings.isNullOrEmpty(repositoryCode)) {
-            Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
-
-            if(!repositoryOptional.isPresent()) {
-                throw new ObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode);
-            }
-
-            return repositoryOptional;
-        }
-
-        return Optional.empty();
+        return Repository.getByCode(context, repositoryCode)
+                .orElseThrow(() -> new ObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode));
     }
 
     /**
      * <p>This method will try to obtain some sort of identifier for the current client; such as their IP address.</p>
      */
 
-    protected String getRemoteIdentifier() {
+    String getRemoteIdentifier() {
         String result = null;
 
         if(null!=request) {

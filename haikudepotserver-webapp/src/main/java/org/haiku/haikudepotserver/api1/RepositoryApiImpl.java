@@ -102,17 +102,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             repositorySources = new HashSet<>();
 
              for(String repositorySourceCode : triggerImportRepositoryRequest.repositorySourceCodes) {
-                 Optional<RepositorySource> repositorySourceOptional = repositoryOptional.get()
-                         .getRepositorySources()
-                         .stream()
-                         .filter(rs -> rs.getCode().equals(repositorySourceCode))
-                         .collect(SingleCollector.optional());
-
-                 if(!repositorySourceOptional.isPresent()) {
-                     throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), repositorySourceCode);
-                 }
-
-                 repositorySources.add(repositorySourceOptional.get());
+                 repositorySources.add(
+                         repositoryOptional.get()
+                                 .getRepositorySources()
+                                 .stream()
+                                 .filter(rs -> rs.getCode().equals(repositorySourceCode))
+                                 .collect(SingleCollector.optional())
+                         .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), repositorySourceCode))
+                 );
              }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,8 +28,8 @@ public class UserRatingStability extends _UserRatingStability implements Coded {
     public final static String CODE_STABLE="stable";
 
     public static Optional<UserRatingStability> getByCode(ObjectContext context, String code) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(code));
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return ((List<UserRatingStability>) context.performQuery(new SelectQuery(
                         UserRatingStability.class,
                         ExpressionFactory.matchExp(UserRatingStability.CODE_PROPERTY, code))))
@@ -38,7 +38,7 @@ public class UserRatingStability extends _UserRatingStability implements Coded {
     }
 
     public static List<UserRatingStability> getAll(ObjectContext context) {
-        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(null != context, "the context must be supplied");
         SelectQuery query = new SelectQuery(UserRatingStability.class);
         query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
         return (List<UserRatingStability>) context.performQuery(query);

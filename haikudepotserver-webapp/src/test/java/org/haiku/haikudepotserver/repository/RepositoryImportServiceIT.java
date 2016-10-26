@@ -38,12 +38,11 @@ import java.util.concurrent.TimeUnit;
  */
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
 public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
-    public final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
+    private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
 
     @Resource
     private JobOrchestrationService jobOrchestrationService;

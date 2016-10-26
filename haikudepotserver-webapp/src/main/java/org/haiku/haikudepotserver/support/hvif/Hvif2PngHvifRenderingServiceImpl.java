@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,7 +21,7 @@ import java.util.List;
  * build process.  See the accompanying documentation for help with this.</p>
  */
 
-public class Hvif2PngHvifRenderingServiceImpl
+class Hvif2PngHvifRenderingServiceImpl
         extends AbstractExternalToolService<Hvif2PngHvifRenderingServiceImpl.Context>
         implements HvifRenderingService {
 
@@ -29,7 +29,7 @@ public class Hvif2PngHvifRenderingServiceImpl
 
     private String hvif2pngPath;
 
-    public Hvif2PngHvifRenderingServiceImpl(String hvif2pngPath) {
+    Hvif2PngHvifRenderingServiceImpl(String hvif2pngPath) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(hvif2pngPath), "the path is required");
         this.hvif2pngPath = hvif2pngPath;
     }
@@ -52,11 +52,11 @@ public class Hvif2PngHvifRenderingServiceImpl
         return execute(new Context(size), input);
     }
 
-    public static class Context {
+    static class Context {
 
         private int size;
 
-        public Context(int size) {
+        Context(int size) {
             this.size = size;
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -25,13 +26,14 @@ import java.util.Optional;
         "classpath:/spring/servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
+@WebAppConfiguration
 public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
 
     @Resource
-    PkgScreenshotController pkgScreenshotController;
+    private PkgScreenshotController pkgScreenshotController;
 
     @Resource
-    IntegrationTestSupportService integrationTestSupportService;
+    private IntegrationTestSupportService integrationTestSupportService;
 
     /**
      * <p>This will return an image that can be used as a sample screenshot.</p>
