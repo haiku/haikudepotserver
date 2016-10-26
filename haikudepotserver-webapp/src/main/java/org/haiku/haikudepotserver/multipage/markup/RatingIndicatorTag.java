@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -50,17 +50,17 @@ public class RatingIndicatorTag extends RequestContextAwareTag {
                 switch(value) {
 
                     case 1:
-                        tagWriter.writeAttribute("src","/img/starhalf.png");
-                        tagWriter.writeAttribute("alt","o");
+                        tagWriter.writeAttribute("src", "/__img/starhalf.png");
+                        tagWriter.writeAttribute("alt", "o");
                         break;
 
                     case 0:
-                        tagWriter.writeAttribute("src","/img/staroff.png");
-                        tagWriter.writeAttribute("alt",".");
+                        tagWriter.writeAttribute("src", "/__img/staroff.png");
+                        tagWriter.writeAttribute("alt", ".");
                         break;
 
                     default:
-                        tagWriter.writeAttribute("src","/img/staron.png");
+                        tagWriter.writeAttribute("src","/__img/staron.png");
                         tagWriter.writeAttribute("alt","*");
                         break;
 

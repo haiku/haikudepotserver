@@ -7,7 +7,7 @@ Overrides a setting on #banner-title
 */
 
 .multipage-banner-title {
-    background: url('/img/haikudepot32.png') no-repeat 32px 4px transparent;
+    background: url('/__img/haikudepot32.png') no-repeat 32px 4px transparent;
 }
 
 #banner-title > div > span {

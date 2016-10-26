@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -216,8 +216,8 @@ angular.module('haikudepotserver').directive('paginationControl',[
                 // so we need this many elements to use as page numbers.
 
                 var topLevelE = angular.element('<ul class="pagination-control-container"></ul>');
-                var leftArrowImgE = angular.element('<img src="/img/paginationleft.svg">');
-                var rightArrowImgE = angular.element('<img src="/img/paginationright.svg">');
+                var leftArrowImgE = angular.element('<img src="/__img/paginationleft.svg">');
+                var rightArrowImgE = angular.element('<img src="/__img/paginationright.svg">');
                 var leftArrowAnchorE = angular.element('<a href="" class="pagination-control-left"></a>');
                 var rightArrowAnchorE = angular.element('<a href="" class="pagination-control-right"></a>');
 
@@ -225,8 +225,8 @@ angular.module('haikudepotserver').directive('paginationControl',[
                 rightArrowAnchorE.append(rightArrowImgE);
 
                 if(!Modernizr.svg) {
-                    leftArrowImgE.attr('src','/img/paginationleft.png');
-                    rightArrowImgE.attr('src','/img/paginationright.png');
+                    leftArrowImgE.attr('src','/__img/paginationleft.png');
+                    rightArrowImgE.attr('src','/__img/paginationright.png');
                 }
 
                 element.replaceWith(topLevelE);

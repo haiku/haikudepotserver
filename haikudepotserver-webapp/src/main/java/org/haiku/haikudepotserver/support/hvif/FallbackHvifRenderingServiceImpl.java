@@ -18,7 +18,7 @@ import java.io.InputStream;
 class FallbackHvifRenderingServiceImpl implements HvifRenderingService {
 
     private byte[] generic(int size) throws IOException {
-        String resourcePath = String.format("/img/generic%derror.png",size);
+        String resourcePath = String.format("/__img/generic%derror.png",size);
         try (InputStream inputStream = FallbackHvifRenderingServiceImpl.class.getResourceAsStream(resourcePath)) {
             if(null==inputStream) {
                 throw new IllegalStateException("unable to find the fallback resource; " + resourcePath);

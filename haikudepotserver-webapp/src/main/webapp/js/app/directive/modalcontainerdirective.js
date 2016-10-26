@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,7 @@ angular.module('haikudepotserver').directive('modalContainer',[
         function($timeout) {
             return {
                 restrict: 'E',
-                templateUrl:'/js/app/directive/modalcontainer.html',
+                templateUrl:'/__js/app/directive/modalcontainer.html',
                 replace: true,
                 transclude: true,
                 scope: {

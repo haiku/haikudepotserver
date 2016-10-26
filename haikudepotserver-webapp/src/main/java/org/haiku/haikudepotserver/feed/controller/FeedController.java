@@ -85,7 +85,7 @@ public class FeedController {
                     feed.setPublishedDate(new java.util.Date());
 
                     SyndImage image = new SyndImageImpl();
-                    image.setUrl(baseUrl + "/img/haikudepot32.png");
+                    image.setUrl(baseUrl + "/__img/haikudepot32.png");
                     feed.setImage(image);
 
                     List<SyndEntry> entries = new ArrayList<>();

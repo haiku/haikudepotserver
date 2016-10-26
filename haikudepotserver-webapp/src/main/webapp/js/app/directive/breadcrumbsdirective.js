@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,7 +10,7 @@
 angular.module('haikudepotserver').directive('breadcrumbs',function() {
     return {
         restrict: 'E',
-        templateUrl:'/js/app/directive/breadcrumbs.html',
+        templateUrl:'/__js/app/directive/breadcrumbs.html',
         replace: true,
         scope: {
         },

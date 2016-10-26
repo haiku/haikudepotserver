@@ -27,7 +27,7 @@ A [mailing list](http://www.freelists.org/list/haiku-depot-web) exists to discus
 ## Documentation and Development
 
 Assuming the application server is deployed, you should be able to see relatively recent documentation
-[here](http://depot.haiku-os.org/docs/index.html).
+[here](http://depot.haiku-os.org/__docs/index.html).
 
 ## Other Helpful Resources
 

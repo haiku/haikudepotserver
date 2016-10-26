@@ -237,7 +237,8 @@ public class HomeController {
      * <p>This is the data model for the page to be rendered from.</p>
      */
 
-    private static class HomeData {
+    @SuppressWarnings("WeakerAccess") // required for JSP rendering.
+    public static class HomeData {
 
         private NaturalLanguage naturalLanguage;
 

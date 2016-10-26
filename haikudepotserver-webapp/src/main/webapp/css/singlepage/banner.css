@@ -23,17 +23,17 @@ as well as the status of the authenticated user.
     background-repeat: no-repeat;
     background-position: 32px 4px;
     background-color: transparent;
-    background-image: url('/img/haikudepot.svg');
+    background-image: url('/__img/haikudepot.svg');
     background-size: 32px 32px;
 }
 
 #banner-title:hover {
-    background-image: url('/img/haikudepot-lightoverlay.svg') , url('/img/haikudepot.svg');
+    background-image: url('/__img/haikudepot-lightoverlay.svg') , url('/__img/haikudepot.svg');
     cursor: pointer;
 }
 
 html.nosvg #banner-title {
-    background-image: url('/img/haikudepot32.png');
+    background-image: url('/__img/haikudepot32.png');
     background-size: auto;
 }
 

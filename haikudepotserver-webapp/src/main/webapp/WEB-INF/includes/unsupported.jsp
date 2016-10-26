@@ -8,7 +8,7 @@ environment is working.
 
 <div id="unsupported">
     <div id="unsupported-container">
-        <div class="unsupported-image"><img src="/img/haikudepot-error.png" alt="Haiku Depot Server"></div>
+        <div class="unsupported-image"><img src="/__img/haikudepot-error.png" alt="Haiku Depot Server"></div>
         <h1>Haiku Depot Server</h1>
 
         <div class="unsupported-message-container">

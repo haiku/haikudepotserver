@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,7 +30,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.requiresOldPassword = function() {
                 return (!$scope.user || !userState.user() || $scope.user.nickname == userState.user().nickname);
-            }
+            };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
                 return $scope.changePasswordForm[name].$invalid ? ['form-control-group-error'] : [];

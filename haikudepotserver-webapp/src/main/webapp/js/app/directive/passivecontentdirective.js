@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -44,7 +44,7 @@ angular.module('haikudepotserver')
                         var result = passiveContentCache.get(pDash);
 
                         if(!result) {
-                            result = $http.get('/js/app/passivecontent/' + pDash).then(
+                            result = $http.get('/__js/app/passivecontent/' + pDash).then(
                                 function successFunction(response) {
                                     if(200 == response.status) {
                                         return response.data;

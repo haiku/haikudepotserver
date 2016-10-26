@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,7 @@ angular.module('haikudepotserver').directive(
     function() {
         return {
             restrict: 'E',
-            templateUrl: '/js/app/directive/repositorieschooser.html',
+            templateUrl: '/__js/app/directive/repositorieschooser.html',
             replace: true,
             scope: {
                 repositories: '=',

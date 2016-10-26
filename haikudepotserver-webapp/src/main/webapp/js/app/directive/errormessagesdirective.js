@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,7 @@
 angular.module('haikudepotserver').directive('errorMessages',function() {
         return {
             restrict: 'E',
-            templateUrl:'/js/app/directive/errormessages.html',
+            templateUrl:'/__js/app/directive/errormessages.html',
             replace: true,
             scope: {
                 error:'=',

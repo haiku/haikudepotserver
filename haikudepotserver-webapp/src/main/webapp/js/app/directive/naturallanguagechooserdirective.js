@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,7 @@ angular.module('haikudepotserver').directive(
         function() {
             return {
                 restrict: 'E',
-                templateUrl: '/js/app/directive/naturallanguagechooser.html',
+                templateUrl: '/__js/app/directive/naturallanguagechooser.html',
                 replace: true,
                 scope: {
                     naturalLanguageCode: '=',

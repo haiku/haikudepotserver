@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -66,7 +66,7 @@ public class PaginationLinksTag extends RequestContextAwareTag {
         tagWriter.writeAttribute("href",href);
         tagWriter.writeAttribute("alt",alt);
         tagWriter.startTag("img");
-        tagWriter.writeAttribute("src", "/img/" + imageFilename);
+        tagWriter.writeAttribute("src", "/__img/" + imageFilename);
         tagWriter.endTag(); // img
         tagWriter.endTag(); // a
         tagWriter.endTag(); // li

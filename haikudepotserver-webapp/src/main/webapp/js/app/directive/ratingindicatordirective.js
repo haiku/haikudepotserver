@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,7 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
                     element.replaceWith(topLevelE);
 
                     for(var i=0;i<5;i++) {
-                        var starE = angular.element('<img width="16" height="16" src="/img/staroff.'+extension+'"/>');
+                        var starE = angular.element('<img width="16" height="16" src="/__img/staroff.'+extension+'"/>');
                         starEs.push(starE);
                         topLevelE.append(starE);
                     }
@@ -59,14 +59,14 @@ angular.module('haikudepotserver').directive('ratingIndicator',[
                                 var starE = starEs[(i / 2) - 1];
 
                                 if (rating >= i) {
-                                    starE.attr('src', '/img/staron.'+extension);
+                                    starE.attr('src', '/__img/staron.'+extension);
                                 }
                                 else {
                                     if (rating >= i - 1) {
-                                        starE.attr('src', '/img/starhalf.'+extension);
+                                        starE.attr('src', '/__img/starhalf.'+extension);
                                     }
                                     else {
-                                        starE.attr('src', '/img/staroff.'+extension);
+                                        starE.attr('src', '/__img/staroff.'+extension);
                                     }
                                 }
                             }

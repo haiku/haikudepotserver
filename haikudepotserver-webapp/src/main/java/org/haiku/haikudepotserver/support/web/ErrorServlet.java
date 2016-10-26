@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -98,9 +98,9 @@ public class ErrorServlet extends HttpServlet {
 
         out.append("<html>\n");
         out.append("<head>\n");
-        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/img/haikudepot16.png\" sizes=\"16x16\">\n");
-        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/img/haikudepot32.png\" sizes=\"32x32\">\n");
-        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/img/haikudepot64.png\" sizes=\"64x64\">\n");
+        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/__img/haikudepot16.png\" sizes=\"16x16\">\n");
+        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/__img/haikudepot32.png\" sizes=\"32x32\">\n");
+        out.append("<link rel=\"icon\" type=\"image/png\" href=\"/__img/haikudepot64.png\" sizes=\"64x64\">\n");
         out.append("<title>HaikuDepotServer - Error</title>\n");
         out.append("<style>\n");
         out.append("body { background-color: #336698; position: relative; font-family: sans-serif; }\n");
@@ -114,7 +114,7 @@ public class ErrorServlet extends HttpServlet {
         out.append("</head>\n");
         out.append("<body>\n");
         out.append("<div id=\"error-container\">\n");
-        out.append("<div id=\"error-image\"><img src=\"/img/haikudepot-error.svg\"></div>\n");
+        out.append("<div id=\"error-image\"><img src=\"/__img/haikudepot-error.svg\"></div>\n");
         out.append("<h1>Haiku Depot Server</h1>\n");
 
         for(String naturalLanguageCode : new String[] {

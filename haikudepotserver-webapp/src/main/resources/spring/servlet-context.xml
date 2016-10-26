@@ -21,11 +21,11 @@
 
     <import resource="properties.xml"/>
 
-    <mvc:resources mapping="/js/**" location="/js/" cache-period="0"/>
-    <mvc:resources mapping="/webjars/**" location="/webjars/" />
-    <mvc:resources mapping="/css/**" location="/css/" />
-    <mvc:resources mapping="/img/**" location="/img/" />
-    <mvc:resources mapping="/docs/**" location="/docs/" />
+    <mvc:resources mapping="/__js/**" location="/js/" cache-period="0"/>
+    <mvc:resources mapping="/__webjars/**" location="/webjars/" />
+    <mvc:resources mapping="/__css/**" location="/css/" />
+    <mvc:resources mapping="/__img/**" location="/img/" />
+    <mvc:resources mapping="/__docs/**" location="/docs/" />
     <mvc:resources mapping="favicon.ico" location="/img/favicon.ico" />
 
     <mvc:interceptors>

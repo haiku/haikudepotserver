@@ -125,7 +125,7 @@ angular.module('haikudepotserver').factory('errorHandling',
                 if (!haveNavigatedToError) {
                     breadcrumbs.reset();
                     var query = code ? '?jrpcerrorcd=' + code : '';
-                    window.location.href = '/error' + query;
+                    window.location.href = '/__error' + query;
                     haveNavigatedToError = true;
                 }
             }
@@ -139,7 +139,7 @@ angular.module('haikudepotserver').factory('errorHandling',
                 handleException: function(exception, cause) {
                     logAndSendErrorMessageToServer('unhandled error; ' + exception);
                     breadcrumbs.reset();
-                    window.location.href = '/error';
+                    window.location.href = '/__error';
                 },
 
                 logJsonRpcError : function(jsonRpcErrorEnvelope, message) {
