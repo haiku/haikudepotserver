@@ -197,10 +197,16 @@ angular.module('haikudepotserver').controller(
 
                 $scope.pkgIconHvifUrl = undefined;
 
+                var pkgName = $routeParams.name;
+
+                if (!pkgName || !pkgName.length) {
+                    throw new Error('illegal state -- the package name should be available; ' + $location.path());
+                }
+
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_PKG,
                     "getPkgIcons",
-                    [{ pkgName: $routeParams.name }]
+                    [{ pkgName: pkgName }]
                 ).then(
                     function(result) {
 
