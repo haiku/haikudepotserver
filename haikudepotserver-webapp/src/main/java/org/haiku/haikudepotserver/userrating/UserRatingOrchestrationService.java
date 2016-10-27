@@ -276,7 +276,7 @@ public class UserRatingOrchestrationService {
      * <p>This method will go through all of the relevant packages and will derive their user ratings.</p>
      */
 
-    void updateUserRatingDerivationsForAllPkgs() {
+    public void updateUserRatingDerivationsForAllPkgs() {
         ObjectContext context = serverRuntime.getContext();
 
         StringBuilder builder = new StringBuilder();
@@ -302,7 +302,7 @@ public class UserRatingOrchestrationService {
      * repositories.</p>
      */
 
-    void updateUserRatingDerivation(String pkgName) {
+    public void updateUserRatingDerivation(String pkgName) {
          Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the name of the package is required");
 
         ObjectContext context = serverRuntime.getContext();

@@ -60,7 +60,7 @@ angular.module('haikudepotserver').controller(
 
             function goBasicPkgReport(methodName) {
                 jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
+                    constants.ENDPOINT_API_V1_PKG_JOB,
                     methodName,
                     [{}]
                 ).then(
@@ -99,7 +99,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goAuthorizationRulesSpreadsheet= function() {
                 jsonRpc.call(
-                    constants.ENDPOINT_API_V1_AUTHORIZATION,
+                    constants.ENDPOINT_API_V1_AUTHORIZATION_JOB,
                     'queueAuthorizationRulesSpreadsheet',
                     [{}]
                 ).then(
@@ -114,7 +114,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goUserRatingSpreadsheetReportAll = function() {
                 jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
+                    constants.ENDPOINT_API_V1_USERRATING_JOB,
                     'queueUserRatingSpreadsheetJob',
                     [{}] // no spec; get everything!
                 ).then(

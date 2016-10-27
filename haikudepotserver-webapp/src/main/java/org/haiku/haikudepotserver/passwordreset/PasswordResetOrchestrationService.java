@@ -249,7 +249,7 @@ public class PasswordResetOrchestrationService {
      * <p>This method will delete any tokens that have expired.</p>
      */
 
-    void deleteExpiredPasswordResetTokens() {
+    public void deleteExpiredPasswordResetTokens() {
         ObjectContext context = serverRuntime.getContext();
         Instant now = Instant.now();
 

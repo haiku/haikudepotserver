@@ -52,8 +52,8 @@
 
     <!-- JOBS -->
 
-    <bean class="org.haiku.haikudepotserver.repository.PkgRepositoryImportJobRunner"/>
-    <bean class="org.haiku.haikudepotserver.passwordreset.PasswordResetMaintenanceJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.repository.job.PkgRepositoryImportJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.passwordreset.job.PasswordResetMaintenanceJobRunner"/>
 
     <!-- OPEN SEARCH -->
 

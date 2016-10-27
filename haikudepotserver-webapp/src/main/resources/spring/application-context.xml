@@ -22,7 +22,7 @@
     package entity.
     -->
 
-    <bean class="org.haiku.haikudepotserver.userrating.UserRatingDerivationJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.userrating.job.UserRatingDerivationJobRunner"/>
 
     <!--
     Picks up on Cayenne ORM events around user ratings and triggers the background update
@@ -37,7 +37,7 @@
     Processes requests to synchronize the HDS database into LDAP
     -->
 
-    <bean class="org.haiku.haikudepotserver.user.LdapSynchronizeUsersJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.user.job.LdapSynchronizeUsersJobRunner"/>
 
     <!--
     Picks up on Cayenne ORM events around user changes so that LDAP can (optionally) be

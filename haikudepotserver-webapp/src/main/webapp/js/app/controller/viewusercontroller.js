@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -116,7 +116,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goDownloadUserRatings = function() {
                 jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
+                    constants.ENDPOINT_API_V1_USERRATING_JOB,
                     'queueUserRatingSpreadsheetJob',
                     [{ userNickname: $routeParams.nickname }]
                 ).then(

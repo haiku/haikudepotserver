@@ -492,7 +492,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goDownloadUserRatings = function() {
                 jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
+                    constants.ENDPOINT_API_V1_USERRATING_JOB,
                     'queueUserRatingSpreadsheetJob',
                     [{
                         pkgName: $routeParams.name,

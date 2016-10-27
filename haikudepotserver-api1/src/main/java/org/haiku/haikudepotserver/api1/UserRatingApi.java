@@ -66,12 +66,4 @@ public interface UserRatingApi {
 
     SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequest request) throws ObjectNotFoundException;
 
-    /**
-     * <p>Enqueues a request to run a report about user ratings such that they are output as a spreadsheet.  The
-     * result contains a GUID that is a handle to the job.  The job is able to be managed by the
-     * {@link JobApi}.
-     */
-
-    QueueUserRatingSpreadsheetJobResult queueUserRatingSpreadsheetJob(QueueUserRatingSpreadsheetJobRequest request) throws ObjectNotFoundException;
-
 }

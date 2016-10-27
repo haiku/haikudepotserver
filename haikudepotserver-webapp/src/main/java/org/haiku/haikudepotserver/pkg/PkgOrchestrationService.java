@@ -342,7 +342,7 @@ public class PkgOrchestrationService {
      * <p>This method will provide a total of the packages.</p>
      */
 
-    long totalPkg(
+    public long totalPkg(
             ObjectContext context,
             boolean allowSourceOnly) {
         Preconditions.checkArgument(null!=context, "the object context must be provided");
@@ -382,7 +382,7 @@ public class PkgOrchestrationService {
      * @return the quantity of packages processed.
      */
 
-    long eachPkg(
+    public long eachPkg(
             ObjectContext context,
             boolean allowSourceOnly,
             StoppableConsumer<Pkg> c) {
@@ -625,7 +625,7 @@ public class PkgOrchestrationService {
      * will be unique.</p>
      */
 
-    List<PkgIconConfiguration> getInUsePkgIconConfigurations(ObjectContext objectContext) {
+    public List<PkgIconConfiguration> getInUsePkgIconConfigurations(ObjectContext objectContext) {
 
         Preconditions.checkArgument(null!=objectContext,"the object context must be supplied");
 

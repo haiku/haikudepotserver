@@ -150,62 +150,6 @@ public interface PkgApi {
     UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) throws ObjectNotFoundException;
 
     /**
-     * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing the coverage of categories
-     * for the packages.  See the {@link JobApi} for details on how to control the
-     * job.</p>
-     */
-
-    QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request);
-
-    /**
-     * <P>Enqueues a request on behalf od the current user to import package data from a spreadsheet that is uploaded
-     * to the server.  It does this and also produces an outbound spreadsheet of the result.</P>
-     * @throws ObjectNotFoundException in the case that the data identified by GUID does not exist.
-     */
-
-    QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException;
-
-    /**
-     * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have icons
-     * associated with them.  See the {@link JobApi} for details on how to control the
-     * job.</p>
-     */
-
-    QueuePkgIconSpreadsheetJobResult queuePkgIconSpreadsheetJob(QueuePkgIconSpreadsheetJobRequest request);
-
-    /**
-     * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have what
-     * prominence.  See the {@link JobApi} for details on how to control the
-     * job.</p>
-     */
-
-    QueuePkgProminenceAndUserRatingSpreadsheetJobResult queuePkgProminenceAndUserRatingSpreadsheetJob(QueuePkgProminenceAndUserRatingSpreadsheetJobRequest request);
-
-    /**
-     * <p>Enqueues a request to produce an archive of all of the icons of the packages.</p>
-     */
-
-    QueuePkgIconExportArchiveJobResult queuePkgIconExportArchiveJob(QueuePkgIconExportArchiveJobRequest request);
-
-    /**
-     * <p>Enqueues a job to cause all PkgVersion objects with no payload length to get those populated if possible.</p>
-     */
-
-    QueuePkgVersionPayloadLengthPopulationJobResult queuePkgVersionPayloadLengthPopulationJob(QueuePkgVersionPayloadLengthPopulationJobRequest request);
-
-    /**
-     * <p>Enqueues a job to produce a spreadsheet of the coverage of package version localizations.</p>
-     */
-
-    QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult queuePkgVersionLocalizationCoverageExportSpreadsheetJob(QueuePkgVersionLocalizationCoverageExportSpreadsheetJobRequest request);
-
-    /**
-     * <p>Enqueues a job to produce a spreadsheet of the coverage of package localizations.</p>
-     */
-
-    QueuePkgLocalizationCoverageExportSpreadsheetJobResult queuePkgLocalizationCoverageExportSpreadsheetJob(QueuePkgLocalizationCoverageExportSpreadsheetJobRequest request);
-
-    /**
      * <p>The package might have a change log associated with it.  This is just a long string with notes
      * about what versions were released and what changed in those releases.  If there is no change log
      * stored for this package, a NULL value may be returned in {@link GetPkgChangelogResult#content}.

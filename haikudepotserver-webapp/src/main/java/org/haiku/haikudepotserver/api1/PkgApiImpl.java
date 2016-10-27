@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableSet;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.api1.model.AbstractQueueJobResult;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.api1.model.pkg.*;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgIcon;
@@ -29,12 +28,10 @@ import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
-import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
-import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.controller.PkgDownloadController;
-import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
+import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -77,9 +74,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     @Resource
     private PkgOrchestrationService pkgService;
-
-    @Resource
-    private JobOrchestrationService jobOrchestrationService;
 
     @Value("${pkgversion.viewcounter.protectrecurringincrementfromsameclient:true}")
     private Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient;
@@ -1146,145 +1140,6 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return new UpdatePkgProminenceResult();
     }
 
-    @Override
-    public QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request) {
-        Preconditions.checkArgument(null != request);
-        return queueSimplePkgJob(
-                QueuePkgCategoryCoverageExportSpreadsheetJobResult.class,
-                PkgCategoryCoverageExportSpreadsheetJobSpecification.class,
-                Permission.BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET);
-    }
-
-    @Override
-    public QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(
-            QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException {
-        Preconditions.checkArgument(null != request, "the request must be supplied");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
-
-        final ObjectContext context = serverRuntime.getContext();
-
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(
-                context,
-                user.orElse(null),
-                null,
-                Permission.BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET)) {
-            LOGGER.warn("attempt to import package categories, but was not authorized");
-            throw new AuthorizationFailureException();
-        }
-
-        // now check that the data is present.
-
-        jobOrchestrationService.tryGetData(request.inputDataGuid)
-                .orElseThrow(() -> new ObjectNotFoundException(JobData.class.getSimpleName(), request.inputDataGuid));
-
-        // setup and go
-
-        PkgCategoryCoverageImportSpreadsheetJobSpecification spec = new PkgCategoryCoverageImportSpreadsheetJobSpecification();
-        spec.setOwnerUserNickname(user.map((u) -> u.getNickname()).orElse(null));
-        spec.setInputDataGuid(request.inputDataGuid);
-
-        return new QueuePkgCategoryCoverageImportSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE).orElse(null));
-    }
-
-    @Override
-    public QueuePkgIconSpreadsheetJobResult queuePkgIconSpreadsheetJob(QueuePkgIconSpreadsheetJobRequest request) {
-        Preconditions.checkArgument(null != request);
-        return queueSimplePkgJob(
-                QueuePkgIconSpreadsheetJobResult.class,
-                PkgIconSpreadsheetJobSpecification.class,
-                Permission.BULK_PKGICONSPREADSHEETREPORT);
-    }
-
-    @Override
-    public QueuePkgProminenceAndUserRatingSpreadsheetJobResult queuePkgProminenceAndUserRatingSpreadsheetJob(QueuePkgProminenceAndUserRatingSpreadsheetJobRequest request) {
-        Preconditions.checkArgument(null!=request);
-        return queueSimplePkgJob(
-                QueuePkgProminenceAndUserRatingSpreadsheetJobResult.class,
-                PkgProminenceAndUserRatingSpreadsheetJobSpecification.class,
-                Permission.BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT);
-    }
-
-    @Override
-    public QueuePkgIconExportArchiveJobResult queuePkgIconExportArchiveJob(QueuePkgIconExportArchiveJobRequest request) {
-        Preconditions.checkArgument(null!=request);
-        return queueSimplePkgJob(
-                QueuePkgIconExportArchiveJobResult.class,
-                PkgIconExportArchiveJobSpecification.class,
-                Permission.BULK_PKGICONEXPORTARCHIVE);
-    }
-
-    @Override
-    public QueuePkgVersionPayloadLengthPopulationJobResult queuePkgVersionPayloadLengthPopulationJob(QueuePkgVersionPayloadLengthPopulationJobRequest request) {
-        Preconditions.checkArgument(null!=request, "a request objects is required");
-        return queueSimplePkgJob(
-                QueuePkgVersionPayloadLengthPopulationJobResult.class,
-                PkgVersionPayloadLengthPopulationJobSpecification.class,
-                Permission.BULK_PKGVERSIONPAYLOADLENGTHPOPULATION);
-    }
-
-    @Override
-    public QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult queuePkgVersionLocalizationCoverageExportSpreadsheetJob(QueuePkgVersionLocalizationCoverageExportSpreadsheetJobRequest request) {
-        Preconditions.checkArgument(null!=request, "a request objects is required");
-        return queueSimplePkgJob(
-                QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult.class,
-                PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification.class,
-                Permission.BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET);
-    }
-
-    @Override
-    public QueuePkgLocalizationCoverageExportSpreadsheetJobResult queuePkgLocalizationCoverageExportSpreadsheetJob(QueuePkgLocalizationCoverageExportSpreadsheetJobRequest request) {
-        Preconditions.checkArgument(null!=request, "a request objects is required");
-        return queueSimplePkgJob(
-                QueuePkgLocalizationCoverageExportSpreadsheetJobResult.class,
-                PkgLocalizationCoverageExportSpreadsheetJobSpecification.class,
-                Permission.BULK_PKGLOCALIZATIONCOVERAGEEXPORTSPREADSHEET);
-    }
-
-    private <R extends AbstractQueueJobResult> R queueSimplePkgJob(
-            Class<R> resultClass,
-            Class<? extends AbstractJobSpecification> jobSpecificationClass,
-            Permission permission) {
-
-        final ObjectContext context = serverRuntime.getContext();
-
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
-        if (!user.isPresent()) {
-            LOGGER.warn("attempt to queue {} without a user", jobSpecificationClass.getSimpleName());
-            throw new AuthorizationFailureException();
-        }
-
-        if (!authorizationService.check(context, user.get(), null, permission)) {
-            LOGGER.warn("attempt to queue {} without sufficient authorization", jobSpecificationClass.getSimpleName());
-            throw new AuthorizationFailureException();
-        }
-
-        AbstractJobSpecification spec;
-
-        try {
-            spec = jobSpecificationClass.newInstance();
-        }
-        catch(InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("unable to create the job specification for class; " + jobSpecificationClass.getSimpleName(), e);
-        }
-
-        spec.setOwnerUserNickname(user.get().getNickname());
-
-        R result;
-
-        try {
-            result = resultClass.newInstance();
-        }
-        catch(InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("unable to create the result; " + resultClass.getSimpleName(), e);
-        }
-
-        result.guid = jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
-        return result;
-    }
 
     @Override
     public GetPkgChangelogResult getPkgChangelog(GetPkgChangelogRequest request) throws ObjectNotFoundException {

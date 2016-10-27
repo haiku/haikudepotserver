@@ -22,12 +22,15 @@ angular.module('haikudepotserver')
 
         ENDPOINT_API_V1_REPOSITORY : '/__api/v1/repository',
         ENDPOINT_API_V1_PKG : '/__api/v1/pkg',
+        ENDPOINT_API_V1_PKG_JOB: '/__api/v1/pkg/job',
         ENDPOINT_API_V1_CAPTCHA : '/__api/v1/captcha',
         ENDPOINT_API_V1_MISCELLANEOUS : '/__api/v1/miscellaneous',
         ENDPOINT_API_V1_USER : '/__api/v1/user',
         ENDPOINT_API_V1_JOB : '/__api/v1/job',
         ENDPOINT_API_V1_USERRATING : '/__api/v1/userrating',
+        ENDPOINT_API_V1_USERRATING_JOB : '/__api/v1/userrating/job',
         ENDPOINT_API_V1_AUTHORIZATION : '/__api/v1/authorization',
+        ENDPOINT_API_V1_AUTHORIZATION_JOB : '/__api/v1/authorization/job',
 
         MEDIATYPE_PNG : 'image/png',
         MEDIATYPE_HAIKUVECTORICONFILE : 'application/x-vnd.haiku-icon',

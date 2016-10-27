@@ -11,6 +11,8 @@ import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.authorization.*;
+import org.haiku.haikudepotserver.api1.model.authorization.job.QueueAuthorizationRulesSpreadsheetRequest;
+import org.haiku.haikudepotserver.api1.model.authorization.job.QueueAuthorizationRulesSpreadsheetResult;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
@@ -31,7 +33,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -45,9 +46,6 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
 
     @Resource
     private AuthorizationService authorizationService;
-
-    @Resource
-    private JobOrchestrationService jobOrchestrationService;
 
     @Resource
     private AuthorizationPkgRuleOrchestrationService authorizationRulesOrchestrationService;
@@ -242,25 +240,6 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
                 )
                 .collect(Collectors.toList());
 
-        return result;
-    }
-
-    @Override
-    public QueueAuthorizationRulesSpreadsheetResult queueAuthorizationRulesSpreadsheet(QueueAuthorizationRulesSpreadsheetRequest request) {
-        Preconditions.checkArgument(null!=request, "a request objects is required");
-
-        final ObjectContext context = serverRuntime.getContext();
-
-        User user = obtainAuthenticatedUser(context);
-
-        if (!authorizationService.check(context, user, null, Permission.AUTHORIZATION_CONFIGURE)) {
-            LOGGER.warn("attempt to queue authorization spreadsheet without sufficient authorization");
-            throw new AuthorizationFailureException();
-        }
-
-        QueueAuthorizationRulesSpreadsheetResult result = new QueueAuthorizationRulesSpreadsheetResult();
-        result.guid = jobOrchestrationService.submit(new AuthorizationRulesSpreadsheetJobSpecification(),
-                JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
         return result;
     }
 

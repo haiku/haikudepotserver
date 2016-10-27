@@ -90,6 +90,11 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
         if(!includeInactive) {
             expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
+            expressions.add(ExpressionFactory.matchExp(
+                    PkgVersion.REPOSITORY_SOURCE_PROPERTY
+                            + "." + RepositorySource.REPOSITORY_PROPERTY
+                            + "." + Repository.ACTIVE_PROPERTY,
+                    Boolean.TRUE));
         }
 
         if (null != repositorySource) {
