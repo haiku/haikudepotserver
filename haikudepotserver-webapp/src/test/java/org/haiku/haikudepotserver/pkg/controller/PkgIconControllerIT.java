@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
+        "classpath:/spring/test-servlet-context.xml",
         "classpath:/spring/test-context.xml"
 })
 @WebAppConfiguration

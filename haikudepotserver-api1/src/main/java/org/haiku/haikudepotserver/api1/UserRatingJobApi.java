@@ -5,10 +5,12 @@
 
 package org.haiku.haikudepotserver.api1;
 
+import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haiku.haikudepotserver.api1.model.userrating.job.QueueUserRatingSpreadsheetJobRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.job.QueueUserRatingSpreadsheetJobResult;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 
+@JsonRpcService("/__api/v1/userrating/job")
 public interface UserRatingJobApi {
 
     /**

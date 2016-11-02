@@ -1,0 +1,22 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <import resource="test-properties.xml"/>
+    <import resource="test-general.xml"/>
+    <import resource="basic.xml"/>
+
+
+    <bean class="org.haiku.haikudepotserver.IntegrationTestSupportService"/>
+
+    <bean class="org.haiku.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
+          init-method="startAsyncAndAwaitRunning"
+          destroy-method="stopAsyncAndAwaitTerminated">
+        <property name="jobDataStorageService">
+            <bean class="org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl"></bean>
+        </property>
+    </bean>
+
+</beans>

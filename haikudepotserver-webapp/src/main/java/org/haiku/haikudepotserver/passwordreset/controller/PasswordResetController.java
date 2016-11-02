@@ -5,6 +5,7 @@
 
 package org.haiku.haikudepotserver.passwordreset.controller;
 
+import org.haiku.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,8 @@ public class PasswordResetController {
 
     private final static String KEY_TOKEN = "token";
 
-    public final static String SEGMENT_PASSWORDRESET = "__passwordreset";
+    // TODO; separate so that it is not configured from the orchestration service.
+    private final static String SEGMENT_PASSWORDRESET = PasswordResetOrchestrationService.URL_SEGMENT_PASSWORDRESET;
 
     @RequestMapping(value = "/" + SEGMENT_PASSWORDRESET + "/{"+KEY_TOKEN+"}", method = RequestMethod.GET)
     public ModelAndView handleGet(

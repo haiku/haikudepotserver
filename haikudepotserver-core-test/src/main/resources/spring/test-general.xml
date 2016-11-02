@@ -1,0 +1,21 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean class="org.haiku.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
+    <bean class="org.haiku.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
+    <bean id="mailSender" class="org.haiku.haikudepotserver.CapturingMailSender"/>
+    <bean class="org.haiku.haikudepotserver.support.NoopClientIdentifierSupplier"/>
+
+    <!-- LOCALIZATION -->
+
+    <util:list id="messageSourceBaseNames">
+        <value>classpath:messages</value>
+        <value>classpath:naturallanguagemessages</value>
+    </util:list>
+
+</beans>

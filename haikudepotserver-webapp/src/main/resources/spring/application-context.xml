@@ -1,9 +1,15 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <import resource="general.xml"/>
+    <import resource="properties.xml"/>
+    <import resource="basic.xml"/>
+
+    <bean class="org.haiku.haikudepotserver.support.HttpRequestClientIdentifierSupplier"/>
 
     <!-- JOB-MANAGEMENT -->
 
@@ -62,5 +68,64 @@
         </property>
     </bean>
 
+    <!-- JAWR; WEB RESOURCE COMPRESSION ETC... -->
+
+    <bean id="jawrConfigProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="location" value="classpath:/jawr.properties"/>
+        <property name="properties">
+            <props>
+                <prop key="jawr.debug.on">${jawr.debug.on:false}</prop>
+                <prop key="jawr.factory.use.orphans.mapper">false</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- SECURITY -->
+
+    <bean id="authenticationFilter" class="org.haiku.haikudepotserver.security.AuthenticationFilter"/>
+
+    <!-- LOGGING -->
+
+    <bean id="loggingFilter" class="org.haiku.haikudepotserver.support.logging.LoggingFilter"/>
+
+    <!-- SUNDRY -->
+
+    <bean
+            id="desktopApplicationMinimumVersionFilter"
+            class="org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter"/>
+
+    <!-- SINGLE PAGE TEMPLATE STATS -->
+
+    <bean
+            id="singlePageTemplateFrequencyMetrics"
+            class="org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics"/>
+
+    <bean
+            id="singlePageTemplateFrequencyMetricsFilter"
+            class="org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetricsFilter">
+        <property name="metrics" ref="singlePageTemplateFrequencyMetrics"></property>
+    </bean>
+
+    <bean
+            class="org.springframework.web.context.support.ServletContextAttributeExporter">
+        <property name="attributes">
+            <map>
+                <entry key="com.codahale.metrics.servlets.MetricsServlet.registry">
+                    <ref bean="metricRegistry" />
+                </entry>
+                <entry key="com.codahale.metrics.servlets.HealthCheckServlet.registry">
+                    <ref bean="healthCheckRegistry" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <!-- LOCALIZATION -->
+
+    <util:list id="messageSourceBaseNames">
+        <value>classpath:messages</value>
+        <value>classpath:webmessages</value>
+        <value>classpath:naturallanguagemessages</value>
+    </util:list>
 
 </beans>

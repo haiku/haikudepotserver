@@ -9,7 +9,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.support.ImageHelper;
+import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.junit.Test;
@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 @ContextConfiguration({
-        "classpath:/spring/servlet-context.xml",
-        "classpath:/spring/test-context.xml"
+        "classpath:/spring/test-context.xml",
+        "classpath:/spring/test-servlet-context.xml"
 })
 @WebAppConfiguration
 public class PkgScreenshotControllerIT extends AbstractIntegrationTest {

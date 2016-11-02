@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.CaptchaBadResponseException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
-import org.haiku.haikudepotserver.support.ImageHelper;
+import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

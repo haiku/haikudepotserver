@@ -17,6 +17,7 @@ import com.rometools.rome.feed.synd.*;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.feed.FeedOrchestrationService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.slf4j.Logger;
@@ -42,15 +43,10 @@ import java.util.stream.Collectors;
  */
 
 @Controller
-@RequestMapping(FeedController.PATH_ROOT)
+@RequestMapping(FeedOrchestrationService.PATH_ROOT)
 public class FeedController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(FeedController.class);
-
-    public final static String KEY_NATURALLANGUAGECODE = "natlangcode";
-    public final static String KEY_PKGNAMES = "pkgnames";
-    public final static String KEY_LIMIT = "limit";
-    public final static String KEY_TYPES = "types";
 
     private final static String FEEDTYPE = "atom_1.0";
     private final static String FEEDTITLE = "Haiku Depot Server Feed";
@@ -59,9 +55,6 @@ public class FeedController {
     private final static int MAX_LIMIT = 100;
 
     private final static long EXPIRY_CACHE_SECONDS = 60;
-
-    public final static String PATH_ROOT = "/feed";
-    public final static String PATH_PKG_LEAF = "/pkg.atom";
 
     @Resource
     private List<SyndEntrySupplier> syndEntrySuppliers;
@@ -108,13 +101,13 @@ public class FeedController {
                 }
             });
 
-    @RequestMapping(value = PATH_PKG_LEAF, method = RequestMethod.GET)
+    @RequestMapping(value = FeedOrchestrationService.PATH_PKG_LEAF, method = RequestMethod.GET)
     public void generate(
             HttpServletResponse response,
-            @RequestParam(value = KEY_NATURALLANGUAGECODE, required = false) String naturalLanguageCode,
-            @RequestParam(value = KEY_PKGNAMES, required = false) String pkgNames,
-            @RequestParam(value = KEY_LIMIT, required = false) Integer limit,
-            @RequestParam(value = KEY_TYPES, required = false) String types) throws IOException, FeedException {
+            @RequestParam(value = FeedOrchestrationService.KEY_NATURALLANGUAGECODE, required = false) String naturalLanguageCode,
+            @RequestParam(value = FeedOrchestrationService.KEY_PKGNAMES, required = false) String pkgNames,
+            @RequestParam(value = FeedOrchestrationService.KEY_LIMIT, required = false) Integer limit,
+            @RequestParam(value = FeedOrchestrationService.KEY_TYPES, required = false) String types) throws IOException, FeedException {
 
         Preconditions.checkNotNull(response);
 

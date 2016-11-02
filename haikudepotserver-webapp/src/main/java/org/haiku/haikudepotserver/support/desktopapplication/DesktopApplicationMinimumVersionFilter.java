@@ -9,6 +9,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
+import org.haiku.haikudepotserver.support.IntArrayVersionComparator;
 import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
