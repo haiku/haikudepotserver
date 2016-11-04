@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
+import com.google.common.io.Resources;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.DataNode;
@@ -93,18 +94,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected ByteSource getResourceByteSource(final String path) {
-        return new ByteSource() {
-            @Override
-            public InputStream openStream() throws IOException {
-                InputStream result = this.getClass().getResourceAsStream(path);
-
-                if (null == result) {
-                    throw new IllegalStateException("unable to find the test resource; " + path);
-                }
-
-                return result;
-            }
-        };
+        return Resources.asByteSource(Resources.getResource(path));
     }
 
     protected byte[] getResourceData(String path) throws IOException {

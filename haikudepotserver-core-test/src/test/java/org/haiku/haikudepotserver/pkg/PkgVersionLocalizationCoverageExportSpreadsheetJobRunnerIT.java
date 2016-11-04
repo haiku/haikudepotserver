@@ -53,7 +53,7 @@ public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends 
                 .stream()
                 .collect(SingleCollector.single());
         JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
-        ByteSource expectedByteSource = getResourceByteSource("/sample-pkgversionlocalizationcoverageexportspreadsheet-generated.csv");
+        ByteSource expectedByteSource = getResourceByteSource("sample-pkgversionlocalizationcoverageexportspreadsheet-generated.csv");
 
         try(
                 BufferedReader jobReader = jobSource.getByteSource().asCharSource(Charsets.UTF_8).openBufferedStream();

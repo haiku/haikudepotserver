@@ -40,7 +40,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
      */
 
     private byte[] getScreenshotData() throws IOException {
-        return getResourceData("/sample-320x240.png");
+        return getResourceData("sample-320x240.png");
     }
 
     @Test

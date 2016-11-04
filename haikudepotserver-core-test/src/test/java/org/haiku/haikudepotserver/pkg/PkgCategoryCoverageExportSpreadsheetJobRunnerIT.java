@@ -61,7 +61,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunnerIT extends AbstractInt
                 .collect(SingleCollector.single());
 
         JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
-        ByteSource expectedByteSource = getResourceByteSource("/sample-pkgcategorycoverageexportspreadsheet-generated.csv");
+        ByteSource expectedByteSource = getResourceByteSource("sample-pkgcategorycoverageexportspreadsheet-generated.csv");
 
         try(
                 BufferedReader jobReader = jobSource.getByteSource().asCharSource(Charsets.UTF_8).openBufferedStream();

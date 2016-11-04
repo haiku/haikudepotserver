@@ -51,7 +51,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "input",
                 MediaType.CSV_UTF_8.toString(),
-                getResourceByteSource("/sample-pkgcategorycoverageimportspreadsheet-supplied.csv")
+                getResourceByteSource("sample-pkgcategorycoverageimportspreadsheet-supplied.csv")
         ).getGuid());
 
         // ------------------------------------
@@ -69,7 +69,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
                 .collect(SingleCollector.single());
 
         JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
-        ByteSource expectedByteSource = getResourceByteSource("/sample-pkgcategorycoverageimportspreadsheet-generated.csv");
+        ByteSource expectedByteSource = getResourceByteSource("sample-pkgcategorycoverageimportspreadsheet-generated.csv");
 
         try(
                 BufferedReader jobReader = jobSource.getByteSource().asCharSource(Charsets.UTF_8).openBufferedStream();

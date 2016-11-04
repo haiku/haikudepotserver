@@ -90,7 +90,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
                 if(zipEntry.getName().contains("/pkg1/")) {
                     if (zipEntry.getName().endsWith("/pkg1/icon.hvif")) {
-                        getResourceByteSource("/src/main/resources/sample.hvif").contentEquals(zipNoCloseInputStreamByteSource);
+                        getResourceByteSource("sample.hvif").contentEquals(zipNoCloseInputStreamByteSource);
                         foundPkg1Filenames.add("icon.hvif");
                     }
                     else {
@@ -98,7 +98,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
                         Matcher matcher = pngPattern.matcher(zipEntry.getName());
 
                         if (matcher.matches()) {
-                            String expectedPath = "/sample-" + matcher.group(1) + "x" + matcher.group(1) + ".png";
+                            String expectedPath = "sample-" + matcher.group(1) + "x" + matcher.group(1) + ".png";
                             getResourceByteSource(expectedPath).contentEquals(zipNoCloseInputStreamByteSource);
                             foundPkg1Filenames.add(matcher.group(1) + ".png");
                         }

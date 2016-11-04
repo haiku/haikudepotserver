@@ -32,7 +32,7 @@ public class PkgIconControllerIT extends AbstractIntegrationTest {
     private IntegrationTestSupportService integrationTestSupportService;
 
     private byte[] getIconData() throws IOException {
-        return getResourceData("/sample-32x32.png");
+        return getResourceData("sample-32x32.png");
     }
 
     /**

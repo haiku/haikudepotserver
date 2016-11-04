@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
@@ -73,7 +74,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                     org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkg1").get();
             MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
 
-            try(InputStream inputStream = PkgOrchestrationServiceIT.class.getResourceAsStream("/src/main/resources/sample-32x32.png")) {
+            try(InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
 
                 // ---------------------------------
                 pkgOrchestrationService.storePkgIconImage(
@@ -204,7 +205,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                         "description_kingston_black");
                 setupObjectContext.commitChanges();
 
-                try (InputStream inputStream = PkgOrchestrationServiceIT.class.getResourceAsStream("/src/main/resources/sample-32x32.png")) {
+                try (InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
                     pkgOrchestrationService.storePkgIconImage(
                             inputStream,
                             MediaType.getByCode(setupObjectContext, com.google.common.net.MediaType.PNG.toString()).get(),

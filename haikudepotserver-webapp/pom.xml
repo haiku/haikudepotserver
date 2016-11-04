@@ -145,6 +145,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <!--
             This plugin handles jasmine java-script tests that can be
             executed as part of the 'test' lifecycle.

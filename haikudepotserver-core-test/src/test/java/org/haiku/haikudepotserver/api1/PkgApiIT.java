@@ -283,7 +283,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
         integrationTestSupportService.createStandardTestData();
 
-        byte[] sampleHvif = getResourceData("/src/main/resources/sample.hvif");
+        byte[] sampleHvif = getResourceData("sample.hvif");
 
         ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
 
@@ -330,9 +330,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
         integrationTestSupportService.createStandardTestData();
 
-        byte[] sample16 = getResourceData("/src/main/resources/sample-16x16.png");
-        byte[] sample32 = getResourceData("/src/main/resources/sample-32x32.png");
-        byte[] sample64 = getResourceData("/src/main/resources/sample-64x64.png");
+        byte[] sample16 = getResourceData("sample-16x16.png");
+        byte[] sample32 = getResourceData("sample-32x32.png");
+        byte[] sample64 = getResourceData("sample-64x64.png");
 
         ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
 
@@ -388,7 +388,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
         integrationTestSupportService.createStandardTestData();
 
-        byte[] sampleHvif = getResourceData("/src/main/resources/sample.hvif");
+        byte[] sampleHvif = getResourceData("sample.hvif");
 
         ConfigurePkgIconRequest request = new ConfigurePkgIconRequest();
 

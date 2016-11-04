@@ -71,7 +71,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
             // get the test hpkr data and copy it into a temporary file that can be used as a source
             // for a repository.
 
-            Files.write(getResourceData("/sample-repo.hpkr"), temporaryFile);
+            Files.write(getResourceData("sample-repo.hpkr"), temporaryFile);
 
             // first setup a fake repository to import that points at the local test HPKR file.
 
