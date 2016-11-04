@@ -11,7 +11,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
@@ -38,17 +38,17 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
 
     @Override
     public void run(
-            JobOrchestrationService jobOrchestrationService,
+            JobService jobService,
             PkgCategoryCoverageExportSpreadsheetJobSpecification specification)
             throws IOException, JobRunnerException {
 
-        Preconditions.checkArgument(null!=jobOrchestrationService);
+        Preconditions.checkArgument(null!= jobService);
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
 
         // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(
+        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
                 MediaType.CSV_UTF_8.toString());

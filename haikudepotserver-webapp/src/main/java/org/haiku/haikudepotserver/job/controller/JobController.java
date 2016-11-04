@@ -13,7 +13,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -54,7 +54,7 @@ public class JobController extends AbstractController {
     private final static String KEY_USECODE = "usecode";
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -92,7 +92,7 @@ public class JobController extends AbstractController {
             return new JobDataAuthorizationFailure();
         });
 
-        JobData data = jobOrchestrationService.storeSuppliedData(
+        JobData data = jobService.storeSuppliedData(
                 useCode,
                 !Strings.isNullOrEmpty(contentType) ? contentType : MediaType.OCTET_STREAM.toString(),
                 new ByteSource() {
@@ -127,7 +127,7 @@ public class JobController extends AbstractController {
                     return new JobDataAuthorizationFailure();
                 });
 
-        JobSnapshot job = jobOrchestrationService.tryGetJobForData(guid).orElseThrow(() -> {
+        JobSnapshot job = jobService.tryGetJobForData(guid).orElseThrow(() -> {
             LOGGER.warn("attempt to access job data {} for which no job exists", guid);
             return new JobDataAuthorizationFailure();
         });
@@ -150,7 +150,7 @@ public class JobController extends AbstractController {
             }
         }
 
-        JobDataWithByteSource jobDataWithByteSink = jobOrchestrationService.tryObtainData(guid).orElseThrow(() -> {
+        JobDataWithByteSource jobDataWithByteSink = jobService.tryObtainData(guid).orElseThrow(() -> {
             LOGGER.warn("requested job data {} not found", guid);
             return new JobDataAuthorizationFailure();
         });
@@ -168,7 +168,7 @@ public class JobController extends AbstractController {
         }
 
         response.setContentType(MediaType.CSV_UTF_8.toString());
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+jobOrchestrationService.deriveDataFilename(guid));
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+ jobService.deriveDataFilename(guid));
         response.setDateHeader(HttpHeaders.EXPIRES, 0);
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
 

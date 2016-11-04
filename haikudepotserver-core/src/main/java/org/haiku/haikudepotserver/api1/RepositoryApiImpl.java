@@ -20,14 +20,13 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
 import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -48,7 +47,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     private RepositoryOrchestrationService repositoryService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Override
     public GetRepositoriesResult getRepositories(final GetRepositoriesRequest getRepositoriesRequest) {
@@ -112,7 +111,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
              }
         }
 
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new PkgRepositoryImportJobSpecification(
                         repositoryOptional.get().getCode(),
                         null==repositorySources ? null : repositorySources
@@ -120,7 +119,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                                 .map(RepositorySource::getCode)
                                 .collect(Collectors.toSet())
                 ),
-                JobOrchestrationService.CoalesceMode.QUEUED);
+                JobService.CoalesceMode.QUEUED);
 
         return new TriggerImportRepositoryResult();
     }

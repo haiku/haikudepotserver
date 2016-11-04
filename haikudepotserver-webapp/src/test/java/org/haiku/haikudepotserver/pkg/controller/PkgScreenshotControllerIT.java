@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 @ContextConfiguration({
-        "classpath:/spring/test-context.xml",
-        "classpath:/spring/test-servlet-context.xml"
+        "classpath:/spring/test-servlet-context.xml",
+        "classpath:/spring/test-application-context.xml"
 })
 @WebAppConfiguration
 public class PkgScreenshotControllerIT extends AbstractIntegrationTest {

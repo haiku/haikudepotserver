@@ -9,7 +9,7 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.job.*;
-import org.haiku.haikudepotserver.job.TestJobOrchestrationServiceImpl;
+import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -50,8 +50,8 @@ public class JobApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.size()).isEqualTo(1);
         SearchJobsResult.Job job = result.items.get(0);
         Assertions.assertThat(job.guid).isEqualTo("started");
-        Assertions.assertThat(job.queuedTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_FEB.toEpochMilli());
-        Assertions.assertThat(job.startTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_MAR.toEpochMilli());
+        Assertions.assertThat(job.queuedTimestamp.longValue()).isEqualTo(TestJobServiceImpl.DT_1976_FEB.toEpochMilli());
+        Assertions.assertThat(job.startTimestamp.longValue()).isEqualTo(TestJobServiceImpl.DT_1976_MAR.toEpochMilli());
         Assertions.assertThat(job.finishTimestamp).isNull();
         Assertions.assertThat(job.ownerUserNickname).isNull();
         Assertions.assertThat(job.jobStatus).isEqualTo(JobStatus.STARTED);
@@ -77,9 +77,9 @@ public class JobApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.size()).isEqualTo(1);
         SearchJobsResult.Job job = result.items.get(0);
         Assertions.assertThat(job.guid).isEqualTo("finished");
-        Assertions.assertThat(job.queuedTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_APR.toEpochMilli());
-        Assertions.assertThat(job.startTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_JUN.toEpochMilli());
-        Assertions.assertThat(job.finishTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_JUL.toEpochMilli());
+        Assertions.assertThat(job.queuedTimestamp.longValue()).isEqualTo(TestJobServiceImpl.DT_1976_APR.toEpochMilli());
+        Assertions.assertThat(job.startTimestamp.longValue()).isEqualTo(TestJobServiceImpl.DT_1976_JUN.toEpochMilli());
+        Assertions.assertThat(job.finishTimestamp.longValue()).isEqualTo(TestJobServiceImpl.DT_1976_JUL.toEpochMilli());
         Assertions.assertThat(job.ownerUserNickname).isEqualTo("testuser");
         Assertions.assertThat(job.jobStatus).isEqualTo(JobStatus.FINISHED);
 
@@ -97,8 +97,8 @@ public class JobApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.guid).isEqualTo("started");
-        Assertions.assertThat(result.queuedTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_FEB.toEpochMilli());
-        Assertions.assertThat(result.startTimestamp.longValue()).isEqualTo(TestJobOrchestrationServiceImpl.DT_1976_MAR.toEpochMilli());
+        Assertions.assertThat(result.queuedTimestamp.longValue()).isEqualTo(TestJobServiceImpl.DT_1976_FEB.toEpochMilli());
+        Assertions.assertThat(result.startTimestamp.longValue()).isEqualTo(TestJobServiceImpl.DT_1976_MAR.toEpochMilli());
         Assertions.assertThat(result.finishTimestamp).isNull();
         Assertions.assertThat(result.ownerUserNickname).isNull();
         Assertions.assertThat(result.jobStatus).isEqualTo(JobStatus.STARTED);

@@ -15,18 +15,16 @@ import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Collections;
@@ -47,7 +45,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     private AuthorizationService authorizationService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Resource
     private UserRatingOrchestrationService userRatingOrchestrationService;
@@ -120,9 +118,9 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Pkg.getByName(context, request.pkgName).
                 orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
 
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new UserRatingDerivationJobSpecification(request.pkgName),
-                JobOrchestrationService.CoalesceMode.QUEUED);
+                JobService.CoalesceMode.QUEUED);
 
         return new DeriveAndStoreUserRatingForPkgResult();
     }
@@ -141,9 +139,9 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new AuthorizationFailureException();
         }
 
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new UserRatingDerivationJobSpecification(),
-                JobOrchestrationService.CoalesceMode.QUEUED);
+                JobService.CoalesceMode.QUEUED);
 
         LOGGER.info("did enqueue request to derive and store user ratings for all packages");
 

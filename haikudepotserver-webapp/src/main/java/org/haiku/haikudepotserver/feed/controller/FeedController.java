@@ -17,7 +17,8 @@ import com.rometools.rome.feed.synd.*;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.feed.FeedOrchestrationService;
+import org.haiku.haikudepotserver.feed.FeedServiceImpl;
+import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
  */
 
 @Controller
-@RequestMapping(FeedOrchestrationService.PATH_ROOT)
+@RequestMapping(FeedService.PATH_ROOT)
 public class FeedController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(FeedController.class);
@@ -101,13 +102,13 @@ public class FeedController {
                 }
             });
 
-    @RequestMapping(value = FeedOrchestrationService.PATH_PKG_LEAF, method = RequestMethod.GET)
+    @RequestMapping(value = FeedServiceImpl.PATH_PKG_LEAF, method = RequestMethod.GET)
     public void generate(
             HttpServletResponse response,
-            @RequestParam(value = FeedOrchestrationService.KEY_NATURALLANGUAGECODE, required = false) String naturalLanguageCode,
-            @RequestParam(value = FeedOrchestrationService.KEY_PKGNAMES, required = false) String pkgNames,
-            @RequestParam(value = FeedOrchestrationService.KEY_LIMIT, required = false) Integer limit,
-            @RequestParam(value = FeedOrchestrationService.KEY_TYPES, required = false) String types) throws IOException, FeedException {
+            @RequestParam(value = FeedServiceImpl.KEY_NATURALLANGUAGECODE, required = false) String naturalLanguageCode,
+            @RequestParam(value = FeedServiceImpl.KEY_PKGNAMES, required = false) String pkgNames,
+            @RequestParam(value = FeedServiceImpl.KEY_LIMIT, required = false) Integer limit,
+            @RequestParam(value = FeedServiceImpl.KEY_TYPES, required = false) String types) throws IOException, FeedException {
 
         Preconditions.checkNotNull(response);
 

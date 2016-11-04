@@ -12,7 +12,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends 
     private IntegrationTestSupportService integrationTestSupportService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Test
     public void testRun() throws IOException {
@@ -42,17 +42,17 @@ public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends 
         PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification spec = new PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification();
 
         // ------------------------------------
-        Optional<String> guidOptional = jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE);
+        Optional<String> guidOptional = jobService.submit(spec, JobService.CoalesceMode.NONE);
         // ------------------------------------
 
-        jobOrchestrationService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
+        jobService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
+        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guidOptional.get());
         Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         String dataGuid = snapshotOptional.get().getGeneratedDataGuids()
                 .stream()
                 .collect(SingleCollector.single());
-        JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();
+        JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
         ByteSource expectedByteSource = getResourceByteSource("/sample-pkgversionlocalizationcoverageexportspreadsheet-generated.csv");
 
         try(

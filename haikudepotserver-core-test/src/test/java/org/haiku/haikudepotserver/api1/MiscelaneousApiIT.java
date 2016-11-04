@@ -16,7 +16,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
-import org.haiku.haikudepotserver.feed.FeedOrchestrationService;
+import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -241,10 +241,10 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
 
         // this is a bit rough, but will do for assertion...
         Map<String,String> queryParams = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(url.getQuery());
-        Assertions.assertThat(queryParams.get(FeedOrchestrationService.KEY_LIMIT)).isEqualTo("55");
-        Assertions.assertThat(queryParams.get(FeedOrchestrationService.KEY_NATURALLANGUAGECODE)).isEqualTo(NaturalLanguage.CODE_GERMAN);
-        Assertions.assertThat(queryParams.get(FeedOrchestrationService.KEY_PKGNAMES)).isEqualTo(String.join("-",data.pkg1.getName(), data.pkg2.getName()));
-        Assertions.assertThat(queryParams.get(FeedOrchestrationService.KEY_TYPES)).isEqualTo(GenerateFeedUrlRequest.SupplierType.CREATEDPKGVERSION.name());
+        Assertions.assertThat(queryParams.get(FeedService.KEY_LIMIT)).isEqualTo("55");
+        Assertions.assertThat(queryParams.get(FeedService.KEY_NATURALLANGUAGECODE)).isEqualTo(NaturalLanguage.CODE_GERMAN);
+        Assertions.assertThat(queryParams.get(FeedService.KEY_PKGNAMES)).isEqualTo(String.join("-",data.pkg1.getName(), data.pkg2.getName()));
+        Assertions.assertThat(queryParams.get(FeedService.KEY_TYPES)).isEqualTo(GenerateFeedUrlRequest.SupplierType.CREATEDPKGVERSION.name());
 
     }
 

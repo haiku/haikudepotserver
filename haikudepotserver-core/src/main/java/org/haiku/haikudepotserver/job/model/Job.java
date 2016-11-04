@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.job.model;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
 import java.util.Set;
@@ -241,15 +242,11 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
 
     @Override
     public String toString() {
-        @SuppressWarnings("StringBufferReplaceableByString")
-        StringBuilder result = new StringBuilder();
-        result.append("job ");
-        result.append(getGuid());
-        result.append(" ");
-        result.append(getJobTypeCode());
-        result.append(" @ ");
-        result.append(getStatus().name());
-        return result.toString();
+        return new ToStringBuilder(this)
+                .append("guid", getGuid())
+                .append("jobTypeCode", getJobTypeCode())
+                .append("status", getStatus())
+                .build();
     }
 
 }

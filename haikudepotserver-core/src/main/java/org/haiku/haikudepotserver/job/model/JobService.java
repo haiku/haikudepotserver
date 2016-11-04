@@ -1,9 +1,9 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.job;
+package org.haiku.haikudepotserver.job.model;
 
 import com.google.common.io.ByteSource;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -19,7 +19,7 @@ import java.util.Set;
  * a runner and will run the specification.  It coordinates the running of jobs.</p>
  */
 
-public interface JobOrchestrationService {
+public interface JobService {
 
     enum CoalesceMode {
         NONE,

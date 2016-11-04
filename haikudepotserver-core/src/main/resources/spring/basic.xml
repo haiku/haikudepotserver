@@ -24,7 +24,7 @@
         <property name="expirySeconds" value="${captcha.expiryseconds:120}"/>
     </bean>
 
-    <bean class="org.haiku.haikudepotserver.captcha.CaptchaService">
+    <bean class="org.haiku.haikudepotserver.captcha.CaptchaServiceImpl">
         <property name="captchaAlgorithm">
             <bean class="org.haiku.haikudepotserver.captcha.SimpleMathProblemCaptchaAlgorithm"/>
         </property>

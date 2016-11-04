@@ -12,7 +12,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class MaintenanceController {
     protected static Logger LOGGER = LoggerFactory.getLogger(MaintenanceController.class);
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -58,9 +58,9 @@ public class MaintenanceController {
             ObjectContext context = serverRuntime.getContext();
 
             for(Repository repository : Repository.getAllActive(context)) {
-                jobOrchestrationService.submit(
+                jobService.submit(
                         new PkgRepositoryImportJobSpecification(repository.getCode()),
-                        JobOrchestrationService.CoalesceMode.QUEUED);
+                        JobService.CoalesceMode.QUEUED);
             }
         }
 
@@ -84,15 +84,15 @@ public class MaintenanceController {
 
         // remove any jobs which are too old and are no longer required.
 
-        jobOrchestrationService.clearExpiredJobs();
+        jobService.clearExpiredJobs();
 
         // remove any expired password reset tokens.
 
         {
             if (UserPasswordResetToken.hasAny(serverRuntime.getContext())) {
-                jobOrchestrationService.submit(
+                jobService.submit(
                         new PasswordResetMaintenanceJobSpecification(),
-                        JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED);
+                        JobService.CoalesceMode.QUEUEDANDSTARTED);
             }
             else {
                 LOGGER.debug("did not submit task for password reset maintenance as there are no tokens stored");

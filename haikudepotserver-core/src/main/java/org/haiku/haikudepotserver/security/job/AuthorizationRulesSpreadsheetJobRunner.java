@@ -16,7 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.Permission;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.security.model.AuthorizationRulesSpreadsheetJobSpecification;
@@ -42,7 +42,7 @@ public class AuthorizationRulesSpreadsheetJobRunner
 
     @Override
     public void run(
-            JobOrchestrationService jobOrchestrationService,
+            JobService jobService,
             AuthorizationRulesSpreadsheetJobSpecification specification)
             throws IOException, JobRunnerException {
 
@@ -51,7 +51,7 @@ public class AuthorizationRulesSpreadsheetJobRunner
         DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
 
         // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(
+        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
                 MediaType.CSV_UTF_8.toString());

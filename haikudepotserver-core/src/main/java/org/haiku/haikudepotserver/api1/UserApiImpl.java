@@ -14,10 +14,10 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.user.*;
 import org.haiku.haikudepotserver.api1.support.*;
-import org.haiku.haikudepotserver.captcha.CaptchaService;
+import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
-import org.haiku.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.security.AuthenticationService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
@@ -29,7 +29,6 @@ import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Collections;
@@ -62,10 +61,10 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     private UserRatingOrchestrationService userRatingOrchestrationService;
 
     @Resource
-    private PasswordResetOrchestrationService passwordResetOrchestrationService;
+    private PasswordResetService passwordResetService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Override
     public SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest) {
@@ -81,9 +80,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             throw new AuthorizationFailureException();
         }
 
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new LdapSynchronizeUsersJobSpecification(),
-                JobOrchestrationService.CoalesceMode.QUEUED);
+                JobService.CoalesceMode.QUEUED);
 
         return new SynchronizeUsersResult();
     }
@@ -159,9 +158,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                         user.toString());
 
                 for(String pkgName : pkgNames) {
-                    jobOrchestrationService.submit(
+                    jobService.submit(
                             new UserRatingDerivationJobSpecification(pkgName),
-                            JobOrchestrationService.CoalesceMode.QUEUED);
+                            JobService.CoalesceMode.QUEUED);
                 }
             }
 
@@ -445,7 +444,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         }
 
         try {
-            passwordResetOrchestrationService.initiate(initiatePasswordResetRequest.email);
+            passwordResetService.initiate(initiatePasswordResetRequest.email);
         }
         catch(Throwable th) {
             LOGGER.error("unable to initiate password reset", th);
@@ -466,7 +465,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         }
 
         try {
-            passwordResetOrchestrationService.complete(
+            passwordResetService.complete(
                     completePasswordResetRequest.token,
                     completePasswordResetRequest.passwordClear);
         }

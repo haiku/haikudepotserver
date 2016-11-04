@@ -13,7 +13,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
@@ -48,16 +48,16 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
 
     @Override
     public void run(
-            JobOrchestrationService jobOrchestrationService,
+            JobService jobService,
             PkgIconSpreadsheetJobSpecification specification) throws IOException {
 
-        Preconditions.checkArgument(null!=jobOrchestrationService);
+        Preconditions.checkArgument(null!= jobService);
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
 
         // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(
+        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
                 MediaType.CSV_UTF_8.toString());

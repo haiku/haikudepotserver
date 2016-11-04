@@ -13,7 +13,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryImportException;
@@ -57,7 +57,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
     private boolean shouldPopulatePayloadLength;
 
     @Override
-    public void run(JobOrchestrationService jobOrchestrationService, PkgRepositoryImportJobSpecification specification) {
+    public void run(JobService jobService, PkgRepositoryImportJobSpecification specification) {
 
         Preconditions.checkNotNull(specification);
 

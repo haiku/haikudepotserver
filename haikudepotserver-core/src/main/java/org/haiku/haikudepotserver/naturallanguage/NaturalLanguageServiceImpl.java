@@ -18,6 +18,7 @@ import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Query;
 import org.apache.cayenne.query.QueryCacheStrategy;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,9 +36,9 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class NaturalLanguageOrchestrationService {
+public class NaturalLanguageServiceImpl implements NaturalLanguageService {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageOrchestrationService.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageServiceImpl.class);
 
     private static final String PREFIX_BASE_NAME_CLASSPATH = "classpath:";
 
@@ -188,6 +189,7 @@ public class NaturalLanguageOrchestrationService {
      * <p>Returns true if the natural language provided has stored messages.</p>
      */
 
+    @Override
     public boolean hasLocalizationMessages(String naturalLanguageCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode));
         return getNaturalLanguageCodesWithLocalizationMessages().contains(naturalLanguageCode);
@@ -197,6 +199,7 @@ public class NaturalLanguageOrchestrationService {
      * <p>Returns true if there is user data stored in the database for this language.</p>
      */
 
+    @Override
     public boolean hasData(String naturalLanguageCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");
 
@@ -221,6 +224,7 @@ public class NaturalLanguageOrchestrationService {
         return false;
     }
 
+    @Override
     public Properties getAllLocalizationMessages(String naturalLanguageCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");
         return allLocalizationMessages.getUnchecked(naturalLanguageCode);

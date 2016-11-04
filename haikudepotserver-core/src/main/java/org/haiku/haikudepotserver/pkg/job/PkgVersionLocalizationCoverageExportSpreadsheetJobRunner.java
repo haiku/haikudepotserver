@@ -17,11 +17,11 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -57,7 +57,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
     private RepositoryOrchestrationService repositoryOrchestrationService;
 
     @Resource
-    private NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
+    private NaturalLanguageService naturalLanguageService;
 
     /**
      * <P>Returns a list of all of the natural languages sorted on the code rather than
@@ -70,17 +70,17 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
         query.addOrdering(new Ordering(NaturalLanguage.CODE_PROPERTY, SortOrder.ASCENDING));
         return ((List<NaturalLanguage>) context.performQuery(query))
                 .stream()
-                .filter(nl -> naturalLanguageOrchestrationService.hasData(nl.getCode()))
+                .filter(nl -> naturalLanguageService.hasData(nl.getCode()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public void run(
-            final JobOrchestrationService jobOrchestrationService,
+            final JobService jobService,
             final PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification specification)
             throws IOException, JobRunnerException {
 
-        Preconditions.checkArgument(null != jobOrchestrationService);
+        Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
@@ -93,7 +93,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
         }
 
         // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(
+        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
                 MediaType.CSV_UTF_8.toString());
@@ -167,7 +167,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
                         }
 
-                        jobOrchestrationService.setJobProgressPercent(
+                        jobService.setJobProgressPercent(
                                 specification.getGuid(),
                                 (int) ((100 * counter.incrementAndGet()) / expectedTotal));
 

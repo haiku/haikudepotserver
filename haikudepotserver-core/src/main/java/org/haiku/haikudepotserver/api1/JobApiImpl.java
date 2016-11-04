@@ -16,12 +16,11 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
     private AuthorizationService authorizationService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -88,8 +87,8 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
                 statuses = request.statuses.stream().map(s -> JobSnapshot.Status.valueOf(s.name())).collect(Collectors.toSet());
             }
 
-            result.total = (long) jobOrchestrationService.totalJobs(ownerUserOptional.orElse(null), statuses);
-            result.items = jobOrchestrationService.findJobs(
+            result.total = (long) jobService.totalJobs(ownerUserOptional.orElse(null), statuses);
+            result.items = jobService.findJobs(
                             ownerUserOptional.orElse(null),
                             statuses,
                             null == request.offset ? 0 : request.offset,
@@ -124,7 +123,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
         final ObjectContext context = serverRuntime.getContext();
         User authUser = obtainAuthenticatedUser(context);
 
-        Optional<? extends JobSnapshot> jobOptional = jobOrchestrationService.tryGetJob(request.guid);
+        Optional<? extends JobSnapshot> jobOptional = jobService.tryGetJob(request.guid);
 
         if(!jobOptional.isPresent()) {
             throw new ObjectNotFoundException(JobSnapshot.class.getSimpleName(), request.guid);
@@ -173,7 +172,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
 
         for(String guid : job.getGeneratedDataGuids()) {
 
-            Optional<JobData> jobData = jobOrchestrationService.tryGetData(guid);
+            Optional<JobData> jobData = jobService.tryGetData(guid);
 
             if(!jobData.isPresent()) {
                 throw new ObjectNotFoundException(JobData.class.getSimpleName(), guid);
@@ -183,7 +182,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
             resultJobData.useCode = jobData.get().getUseCode();
             resultJobData.guid = jobData.get().getGuid();
             resultJobData.mediaTypeCode = jobData.get().getMediaTypeCode();
-            resultJobData.filename = jobOrchestrationService.deriveDataFilename(guid);
+            resultJobData.filename = jobService.deriveDataFilename(guid);
 
             result.generatedDatas.add(resultJobData);
 

@@ -10,7 +10,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -44,7 +44,7 @@ public class RepositoryImportController {
     private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -60,9 +60,9 @@ public class RepositoryImportController {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
         }
 
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new PkgRepositoryImportJobSpecification(repositoryCode),
-                JobOrchestrationService.CoalesceMode.QUEUED);
+                JobService.CoalesceMode.QUEUED);
 
         return ResponseEntity.ok("repository import submitted");
 
@@ -88,9 +88,9 @@ public class RepositoryImportController {
             return new ResponseEntity<>("repository source not found", HttpStatus.NOT_FOUND);
         }
 
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new PkgRepositoryImportJobSpecification(repositoryCode, Collections.singleton(repositorySourceCode)),
-                JobOrchestrationService.CoalesceMode.QUEUED);
+                JobService.CoalesceMode.QUEUED);
 
         return ResponseEntity.ok("repository source import submitted");
     }

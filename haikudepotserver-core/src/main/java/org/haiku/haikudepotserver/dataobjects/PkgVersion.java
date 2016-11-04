@@ -15,6 +15,7 @@ import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -377,7 +378,9 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
     @Override
     public String toString() {
-        return toVersionCoordinates().toString();
+        return new ToStringBuilder(this)
+                .append("versionCoordinates", toVersionCoordinates().toString())
+                .build();
     }
 
 }

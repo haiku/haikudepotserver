@@ -21,9 +21,8 @@ import org.haiku.haikudepotserver.support.ByteCounterOutputStream;
 import org.haiku.haikudepotserver.support.NoOpOutputStream;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
-import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -65,7 +64,7 @@ public class PkgScreenshotController extends AbstractController {
     private PkgOrchestrationService pkgService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Resource
     private AuthorizationService authorizationService;
@@ -252,9 +251,9 @@ public class PkgScreenshotController extends AbstractController {
 
         // trigger optimization of the screenshot image.
 
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new PkgScreenshotOptimizationJobSpecification(screenshotCode),
-                JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED);
+                JobService.CoalesceMode.QUEUEDANDSTARTED);
 
         response.setHeader(HEADER_SCREENSHOTCODE, screenshotCode);
         response.setStatus(HttpServletResponse.SC_OK);

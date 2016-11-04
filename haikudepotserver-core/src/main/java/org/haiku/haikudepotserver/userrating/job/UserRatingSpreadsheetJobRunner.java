@@ -21,7 +21,7 @@ import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpeci
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,15 +58,15 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
     private UserRatingOrchestrationService userRatingOrchestrationService;
 
     @Override
-    public void run(JobOrchestrationService jobOrchestrationService, UserRatingSpreadsheetJobSpecification specification) throws IOException {
+    public void run(JobService jobService, UserRatingSpreadsheetJobSpecification specification) throws IOException {
 
-        Preconditions.checkArgument(null != jobOrchestrationService);
+        Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.getContext();
 
         // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(
+        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
                 MediaType.CSV_UTF_8.toString());

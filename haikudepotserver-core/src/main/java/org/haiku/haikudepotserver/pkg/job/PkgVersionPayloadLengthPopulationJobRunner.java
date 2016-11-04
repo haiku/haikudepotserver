@@ -16,7 +16,7 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionPayloadLengthPopulationJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +45,9 @@ public class PkgVersionPayloadLengthPopulationJobRunner
     private PkgOrchestrationService pkgOrchestrationService;
 
     @Override
-    public void run(JobOrchestrationService jobOrchestrationService, PkgVersionPayloadLengthPopulationJobSpecification specification) throws IOException {
+    public void run(JobService jobService, PkgVersionPayloadLengthPopulationJobSpecification specification) throws IOException {
 
-        Preconditions.checkArgument(null != jobOrchestrationService);
+        Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
         ObjectContext context = serverRuntime.getContext();
@@ -91,7 +91,7 @@ public class PkgVersionPayloadLengthPopulationJobRunner
                 context.commitChanges();
             }
 
-            jobOrchestrationService.setJobProgressPercent(
+            jobService.setJobProgressPercent(
                     specification.getGuid(),
                     i*100 / pkgVersions.size()
             );

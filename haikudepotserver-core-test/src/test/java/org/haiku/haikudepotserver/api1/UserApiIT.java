@@ -14,11 +14,11 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetException;
 import org.haiku.haikudepotserver.api1.support.AbstractSearchRequest;
-import org.haiku.haikudepotserver.captcha.CaptchaService;
+import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.captcha.model.Captcha;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
-import org.haiku.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
+import org.haiku.haikudepotserver.passwordreset.PasswordResetServiceImpl;
 import org.junit.Test;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
@@ -34,13 +34,13 @@ import java.util.Optional;
 public class UserApiIT extends AbstractIntegrationTest {
 
     @Resource
-    UserApi userApi;
+    private UserApi userApi;
 
     @Resource
-    CaptchaService captchaService;
+    private CaptchaService captchaService;
 
     @Resource
-    PasswordResetOrchestrationService passwordResetOrchestrationService;
+    private PasswordResetServiceImpl passwordResetService;
 
     @Test
     public void testUpdateUser() throws Exception {
@@ -313,7 +313,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(getOnlyPasswordResetTokenCodeForTestUser()).isNull();
 
         try {
-            passwordResetOrchestrationService.initiate("integration-test-recipient@haiku-os.org");
+            passwordResetService.initiate("integration-test-recipient@haiku-os.org");
         } catch (PasswordResetException pre) {
             throw new IllegalStateException("unable to initiate the password reset when testing complete", pre);
         }

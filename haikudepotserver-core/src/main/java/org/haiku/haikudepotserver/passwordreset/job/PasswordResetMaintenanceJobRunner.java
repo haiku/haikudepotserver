@@ -7,9 +7,9 @@ package org.haiku.haikudepotserver.passwordreset.job;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.passwordreset.PasswordResetOrchestrationService;
+import org.haiku.haikudepotserver.passwordreset.PasswordResetServiceImpl;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ public class PasswordResetMaintenanceJobRunner extends AbstractJobRunner<Passwor
     ServerRuntime serverRuntime;
 
     @Resource
-    PasswordResetOrchestrationService passwordResetOrchestrationService;
+    PasswordResetServiceImpl passwordResetService;
 
     /**
      * <p>This method has been overridden in order to ensure that during start-up at least one
@@ -31,8 +31,8 @@ public class PasswordResetMaintenanceJobRunner extends AbstractJobRunner<Passwor
      */
 
     @Override
-    public void run(JobOrchestrationService jobOrchestrationService, PasswordResetMaintenanceJobSpecification specification) {
-        passwordResetOrchestrationService.deleteExpiredPasswordResetTokens();
+    public void run(JobService jobService, PasswordResetMaintenanceJobSpecification specification) {
+        passwordResetService.deleteExpiredPasswordResetTokens();
     }
 
 }

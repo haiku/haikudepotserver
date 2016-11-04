@@ -8,7 +8,7 @@ package org.haiku.haikudepotserver.user.job;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.user.LdapException;
 import org.haiku.haikudepotserver.user.UserOrchestrationService;
 import org.haiku.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
@@ -34,7 +34,7 @@ public class LdapSynchronizeUsersJobRunner
     UserOrchestrationService userOrchestrationService;
 
     @Override
-    public void run(JobOrchestrationService jobOrchestrationService, LdapSynchronizeUsersJobSpecification job) {
+    public void run(JobService jobService, LdapSynchronizeUsersJobSpecification job) {
         Preconditions.checkNotNull(job);
 
         try {

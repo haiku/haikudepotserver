@@ -5,7 +5,9 @@
 
 package org.haiku.haikudepotserver.job;
 
+import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
 
 import java.io.IOException;
@@ -40,7 +42,7 @@ public abstract class AbstractJobRunner<T extends JobSpecification> implements J
     }
 
     @Override
-    public abstract void run(JobOrchestrationService jobOrchestrationService, T specification)
+    public abstract void run(JobService jobService, T specification)
             throws IOException, JobRunnerException;
 
 }

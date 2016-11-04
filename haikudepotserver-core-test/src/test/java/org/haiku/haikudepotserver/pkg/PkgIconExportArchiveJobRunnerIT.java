@@ -12,7 +12,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.WrapWithNoCloseInputStream;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.junit.Assert;
@@ -42,7 +42,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
     private IntegrationTestSupportService integrationTestSupportService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
 
     /**
@@ -56,19 +56,19 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData(); // pkg1 has some icons
 
         // ------------------------------------
-        Optional<String> guidOptional = jobOrchestrationService.submit(
+        Optional<String> guidOptional = jobService.submit(
                 new PkgIconExportArchiveJobSpecification(),
-                JobOrchestrationService.CoalesceMode.NONE);
+                JobService.CoalesceMode.NONE);
         // ------------------------------------
 
-        jobOrchestrationService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
+        jobService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
+        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guidOptional.get());
         Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
 
         // pull in the ZIP file now and extract the icons.
 
         String dataGuid = snapshotOptional.get().getGeneratedDataGuids().iterator().next();
-        JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();
+        JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
 
         try (
                 InputStream inputStream = jobSource.getByteSource().openBufferedStream();

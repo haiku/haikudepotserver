@@ -8,12 +8,13 @@
 
     <import resource="properties.xml"/>
     <import resource="basic.xml"/>
+    <import resource="basic-application.xml"/>
 
     <bean class="org.haiku.haikudepotserver.support.HttpRequestClientIdentifierSupplier"/>
 
     <!-- JOB-MANAGEMENT -->
 
-    <bean class="org.haiku.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
+    <bean class="org.haiku.haikudepotserver.job.LocalJobServiceImpl"
           init-method="startAsyncAndAwaitRunning"
           destroy-method="stopAsyncAndAwaitTerminated">
         <property name="jobDataStorageService">
@@ -95,10 +96,6 @@
             class="org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter"/>
 
     <!-- SINGLE PAGE TEMPLATE STATS -->
-
-    <bean
-            id="singlePageTemplateFrequencyMetrics"
-            class="org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics"/>
 
     <bean
             id="singlePageTemplateFrequencyMetricsFilter"

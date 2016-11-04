@@ -11,7 +11,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -27,7 +27,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
     private ServerRuntime serverRuntime;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @PostConstruct
     public void init() {
@@ -39,9 +39,9 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
         Preconditions.checkNotNull(entity);
         UserRating userRating = (UserRating) entity;
         String pkgName = userRating.getPkgVersion().getPkg().getName();
-        jobOrchestrationService.submit(
+        jobService.submit(
                 new UserRatingDerivationJobSpecification(pkgName),
-                JobOrchestrationService.CoalesceMode.QUEUED);
+                JobService.CoalesceMode.QUEUED);
     }
 
     @Override

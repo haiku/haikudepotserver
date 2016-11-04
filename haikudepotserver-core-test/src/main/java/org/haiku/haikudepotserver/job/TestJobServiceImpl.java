@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>This implementation of {@link JobOrchestrationService} has some
+ * <p>This implementation of {@link JobService} has some
  * jobs in "suspended" state so that tests of the {@link JobApi} are able to
  * query that known state.</p>
  */
 
-public class TestJobOrchestrationServiceImpl implements JobOrchestrationService {
+public class TestJobServiceImpl implements JobService {
 
     public final static Instant DT_1976_JAN = LocalDateTime.of(1976,1,1,0,0).toInstant(ZoneOffset.UTC);
     public final static Instant DT_1976_FEB = LocalDateTime.of(1976,2,1,0,0).toInstant(ZoneOffset.UTC);
@@ -38,7 +38,7 @@ public class TestJobOrchestrationServiceImpl implements JobOrchestrationService 
     private Job startedJob;
     private Job finishedJob;
 
-    public TestJobOrchestrationServiceImpl() {
+    public TestJobServiceImpl() {
         super();
     }
 

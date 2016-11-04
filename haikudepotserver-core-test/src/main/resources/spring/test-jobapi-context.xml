@@ -14,6 +14,6 @@
     Artificial job orchestration service that has some known fake jobs in known states.
     -->
 
-    <bean class="org.haiku.haikudepotserver.job.TestJobOrchestrationServiceImpl"/>
+    <bean class="org.haiku.haikudepotserver.job.TestJobServiceImpl"/>
 
 </beans>

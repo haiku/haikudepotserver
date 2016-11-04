@@ -10,7 +10,7 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.userrating.UserRatingDerivationService;
 import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class UserRatingDerivationJobRunner
     @Resource
     UserRatingOrchestrationService userRatingOrchestrationService;
 
-    public void run(JobOrchestrationService jobOrchestrationService, UserRatingDerivationJobSpecification job) {
+    public void run(JobService jobService, UserRatingDerivationJobSpecification job) {
         Preconditions.checkNotNull(job);
 
         if(job.appliesToAllPkgs()) {

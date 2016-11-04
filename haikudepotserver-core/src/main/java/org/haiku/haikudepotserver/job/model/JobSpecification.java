@@ -5,9 +5,6 @@
 
 package org.haiku.haikudepotserver.job.model;
 
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
-import org.haiku.haikudepotserver.job.JobRunner;
-
 import java.util.Collection;
 
 /**
@@ -32,7 +29,7 @@ public interface JobSpecification {
     /**
      * <p>This code is able to identify the type of the job.  The same code associated with an instance of
      * {@link JobRunner} allows an instance of
-     * {@link JobOrchestrationService} to find a runner which is
+     * {@link JobService} to find a runner which is
      * able to run a given specification.</p>
      */
 
@@ -40,7 +37,7 @@ public interface JobSpecification {
 
     /**
      * <p>Once a job has completed, this value (in milliseconds) defines how long it should remain available
-     * in the {@link JobOrchestrationService}.</p>
+     * in the {@link JobService}.</p>
      */
 
     Long getTimeToLive();
@@ -49,7 +46,7 @@ public interface JobSpecification {
 
     /**
      * <p>When two job specifications are submitted to the
-     * {@link JobOrchestrationService}, it is possible to coalesce
+     * {@link JobService}, it is possible to coalesce
      * them in order to avoid two of the same job running at the same time.  This method is called in order
      * to know if two jobs are equivalent before knowing if it should enqueue the submitted one.</p>
      *

@@ -15,6 +15,7 @@ import org.apache.cayenne.query.ObjectIdQuery;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
@@ -144,7 +145,9 @@ public class RepositorySource extends _RepositorySource {
 
     @Override
     public String toString() {
-        return "reposrc;" + getCode();
+        return new ToStringBuilder(this)
+                .append("code", getCode())
+                .build();
     }
 
 }

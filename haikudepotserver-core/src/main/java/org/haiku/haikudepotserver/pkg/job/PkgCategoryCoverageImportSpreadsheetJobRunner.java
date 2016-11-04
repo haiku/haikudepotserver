@@ -17,7 +17,7 @@ import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,16 +45,16 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
 
     @Override
     public void run(
-            JobOrchestrationService jobOrchestrationService,
+            JobService jobService,
             PkgCategoryCoverageImportSpreadsheetJobSpecification specification)
             throws IOException, JobRunnerException {
 
-        Preconditions.checkArgument(null != jobOrchestrationService);
+        Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
         Preconditions.checkArgument(null!=specification.getInputDataGuid(), "missing imput data guid on specification");
 
         // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(
+        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
                 MediaType.CSV_UTF_8.toString());
@@ -62,7 +62,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
         // if there is input data then feed it in and process it to manipulate the packages'
         // categories.
 
-        Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobOrchestrationService.tryObtainData(specification.getInputDataGuid());
+        Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 
         if(!jobDataWithByteSourceOptional.isPresent()) {
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());

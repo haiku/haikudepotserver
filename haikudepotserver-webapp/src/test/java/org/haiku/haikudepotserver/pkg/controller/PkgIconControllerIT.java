@@ -20,7 +20,7 @@ import java.io.IOException;
 
 @ContextConfiguration({
         "classpath:/spring/test-servlet-context.xml",
-        "classpath:/spring/test-context.xml"
+        "classpath:/spring/test-application-context.xml"
 })
 @WebAppConfiguration
 public class PkgIconControllerIT extends AbstractIntegrationTest {

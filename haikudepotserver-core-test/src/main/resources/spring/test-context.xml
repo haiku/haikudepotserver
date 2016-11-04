@@ -11,7 +11,7 @@
 
     <bean class="org.haiku.haikudepotserver.IntegrationTestSupportService"/>
 
-    <bean class="org.haiku.haikudepotserver.job.LocalJobOrchestrationServiceImpl"
+    <bean class="org.haiku.haikudepotserver.job.LocalJobServiceImpl"
           init-method="startAsyncAndAwaitRunning"
           destroy-method="stopAsyncAndAwaitTerminated">
         <property name="jobDataStorageService">

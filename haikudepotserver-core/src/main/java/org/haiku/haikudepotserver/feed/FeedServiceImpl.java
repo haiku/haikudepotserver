@@ -1,11 +1,12 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.feed;
 
 import com.google.common.base.Preconditions;
+import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.stream.Collectors;
 
 @Service
-public class FeedOrchestrationService {
-
-    public final static String KEY_NATURALLANGUAGECODE = "natlangcode";
-    public final static String KEY_PKGNAMES = "pkgnames";
-    public final static String KEY_LIMIT = "limit";
-    public final static String KEY_TYPES = "types";
-
-    public final static String PATH_ROOT = "/feed";
-    public final static String PATH_PKG_LEAF = "/pkg.atom";
+public class FeedServiceImpl implements FeedService {
 
     @Value("${baseurl}")
     private String baseUrl;
@@ -32,6 +25,7 @@ public class FeedOrchestrationService {
      * to get that feed.</p>
      */
 
+    @Override
     public String generateUrl(FeedSpecification specification) {
         Preconditions.checkNotNull(specification);
 

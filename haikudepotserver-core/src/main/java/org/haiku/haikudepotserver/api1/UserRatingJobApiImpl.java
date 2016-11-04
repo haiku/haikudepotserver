@@ -16,13 +16,12 @@ import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Optional;
@@ -39,7 +38,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
     private AuthorizationService authorizationService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Override
     public QueueUserRatingSpreadsheetJobResult queueUserRatingSpreadsheetJob(QueueUserRatingSpreadsheetJobRequest request) throws ObjectNotFoundException {
@@ -110,7 +109,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
         spec.setOwnerUserNickname(user.get().getNickname());
 
         return new QueueUserRatingSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null));
+                jobService.submit(spec, JobService.CoalesceMode.QUEUEDANDSTARTED).orElse(null));
 
     }
 

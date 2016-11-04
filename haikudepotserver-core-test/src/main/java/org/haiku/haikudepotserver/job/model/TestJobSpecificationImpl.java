@@ -5,13 +5,13 @@
 
 package org.haiku.haikudepotserver.job.model;
 
-import org.haiku.haikudepotserver.job.TestJobOrchestrationServiceImpl;
+import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 
 import java.util.Collection;
 import java.util.Collections;
 
 /**
- * <P>This class is used with the {@link TestJobOrchestrationServiceImpl}.</P>
+ * <P>This class is used with the {@link TestJobServiceImpl}.</P>
  */
 
 public class TestJobSpecificationImpl implements JobSpecification {

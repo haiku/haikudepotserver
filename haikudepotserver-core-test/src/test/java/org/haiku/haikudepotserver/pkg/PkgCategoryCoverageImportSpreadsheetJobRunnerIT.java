@@ -20,7 +20,7 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,7 +40,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
     private IntegrationTestSupportService integrationTestSupportService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Test
     public void testRun() throws IOException {
@@ -48,18 +48,18 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
         integrationTestSupportService.createStandardTestData();
 
         PkgCategoryCoverageImportSpreadsheetJobSpecification spec = new PkgCategoryCoverageImportSpreadsheetJobSpecification();
-        spec.setInputDataGuid(jobOrchestrationService.storeSuppliedData(
+        spec.setInputDataGuid(jobService.storeSuppliedData(
                 "input",
                 MediaType.CSV_UTF_8.toString(),
                 getResourceByteSource("/sample-pkgcategorycoverageimportspreadsheet-supplied.csv")
         ).getGuid());
 
         // ------------------------------------
-        Optional<String> guidOptional = jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE);
+        Optional<String> guidOptional = jobService.submit(spec, JobService.CoalesceMode.NONE);
         // ------------------------------------
 
-        jobOrchestrationService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
+        jobService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
+        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guidOptional.get());
         Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
 
         String dataGuid = snapshotOptional
@@ -68,7 +68,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
                 .stream()
                 .collect(SingleCollector.single());
 
-        JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();
+        JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
         ByteSource expectedByteSource = getResourceByteSource("/sample-pkgcategorycoverageimportspreadsheet-generated.csv");
 
         try(

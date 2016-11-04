@@ -11,7 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
@@ -43,10 +43,10 @@ public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExpo
 
     @Override
     public void run(
-            JobOrchestrationService jobOrchestrationService,
+            JobService jobService,
             PkgIconExportArchiveJobSpecification specification) throws IOException {
 
-        Preconditions.checkArgument(null != jobOrchestrationService);
+        Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
         long count = 0;
@@ -55,7 +55,7 @@ public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExpo
         final ObjectContext context = serverRuntime.getContext();
 
         // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobOrchestrationService.storeGeneratedData(
+        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
                 MediaType.ZIP.toString());

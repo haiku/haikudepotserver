@@ -23,7 +23,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgUrlType;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionUrl;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -45,7 +45,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
     private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
@@ -186,9 +186,9 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
             // do the import.
 
-            String guid = jobOrchestrationService.submit(
+            String guid = jobService.submit(
                     new PkgRepositoryImportJobSpecification("test"),
-                    JobOrchestrationService.CoalesceMode.NONE).get();
+                    JobService.CoalesceMode.NONE).get();
 
             // wait for it to finish.
 
@@ -196,12 +196,12 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 long startMs = System.currentTimeMillis();
 
                 while(
-                        Jobs.isQueuedOrStarted(jobOrchestrationService.tryGetJob(guid).get())
+                        Jobs.isQueuedOrStarted(jobService.tryGetJob(guid).get())
                                 && (System.currentTimeMillis() - startMs) < DELAY_PROCESSSUBMITTEDTESTJOB) {
                     Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                 }
 
-                if(Jobs.isQueuedOrStarted(jobOrchestrationService.tryGetJob(guid).get())) {
+                if(Jobs.isQueuedOrStarted(jobService.tryGetJob(guid).get())) {
                     throw new IllegalStateException("test processing of the sample repo has taken > "+DELAY_PROCESSSUBMITTEDTESTJOB+"ms");
                 }
             }

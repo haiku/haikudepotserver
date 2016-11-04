@@ -15,7 +15,7 @@ import org.haiku.haikudepotserver.api1.model.pkg.job.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.pkg.model.*;
@@ -23,7 +23,6 @@ import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Optional;
@@ -40,7 +39,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
     private AuthorizationService authorizationService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Override
     public QueuePkgCategoryCoverageExportSpreadsheetJobResult queuePkgCategoryCoverageExportSpreadsheetJob(QueuePkgCategoryCoverageExportSpreadsheetJobRequest request) {
@@ -72,7 +71,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         // now check that the data is present.
 
-        jobOrchestrationService.tryGetData(request.inputDataGuid)
+        jobService.tryGetData(request.inputDataGuid)
                 .orElseThrow(() -> new ObjectNotFoundException(JobData.class.getSimpleName(), request.inputDataGuid));
 
         // setup and go
@@ -82,7 +81,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
         spec.setInputDataGuid(request.inputDataGuid);
 
         return new QueuePkgCategoryCoverageImportSpreadsheetJobResult(
-                jobOrchestrationService.submit(spec, JobOrchestrationService.CoalesceMode.NONE).orElse(null));
+                jobService.submit(spec, JobService.CoalesceMode.NONE).orElse(null));
     }
 
     @Override
@@ -178,7 +177,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
             throw new RuntimeException("unable to create the result; " + resultClass.getSimpleName(), e);
         }
 
-        result.guid = jobOrchestrationService.submit(spec,JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
+        result.guid = jobService.submit(spec, JobService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
         return result;
     }
 

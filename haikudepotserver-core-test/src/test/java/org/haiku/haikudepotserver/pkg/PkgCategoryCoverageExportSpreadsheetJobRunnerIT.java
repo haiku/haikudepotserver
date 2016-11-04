@@ -9,7 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.ByteSource;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
@@ -32,7 +32,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunnerIT extends AbstractInt
     private IntegrationTestSupportService integrationTestSupportService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     /**
      * <p>Uses the sample data and checks that the output from the report matches a captured, sensible-looking
@@ -45,13 +45,13 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunnerIT extends AbstractInt
         integrationTestSupportService.createStandardTestData();
 
         // ------------------------------------
-        Optional<String> guidOptional = jobOrchestrationService.submit(
+        Optional<String> guidOptional = jobService.submit(
                 new PkgCategoryCoverageExportSpreadsheetJobSpecification(),
-                JobOrchestrationService.CoalesceMode.NONE);
+                JobService.CoalesceMode.NONE);
         // ------------------------------------
 
-        jobOrchestrationService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobOrchestrationService.tryGetJob(guidOptional.get());
+        jobService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
+        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guidOptional.get());
         Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
 
         String dataGuid = snapshotOptional
@@ -60,7 +60,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunnerIT extends AbstractInt
                 .stream()
                 .collect(SingleCollector.single());
 
-        JobDataWithByteSource jobSource = jobOrchestrationService.tryObtainData(dataGuid).get();
+        JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
         ByteSource expectedByteSource = getResourceByteSource("/sample-pkgcategorycoverageexportspreadsheet-generated.csv");
 
         try(

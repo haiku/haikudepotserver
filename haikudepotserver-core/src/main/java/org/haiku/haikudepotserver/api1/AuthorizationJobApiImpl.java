@@ -13,13 +13,12 @@ import org.haiku.haikudepotserver.api1.model.authorization.job.QueueAuthorizatio
 import org.haiku.haikudepotserver.api1.model.authorization.job.QueueAuthorizationRulesSpreadsheetResult;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.AuthorizationRulesSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
@@ -35,7 +34,7 @@ public class AuthorizationJobApiImpl extends AbstractApiImpl implements Authoriz
     private AuthorizationService authorizationService;
 
     @Resource
-    private JobOrchestrationService jobOrchestrationService;
+    private JobService jobService;
 
     @Override
     public QueueAuthorizationRulesSpreadsheetResult queueAuthorizationRulesSpreadsheet(QueueAuthorizationRulesSpreadsheetRequest request) {
@@ -51,8 +50,8 @@ public class AuthorizationJobApiImpl extends AbstractApiImpl implements Authoriz
         }
 
         QueueAuthorizationRulesSpreadsheetResult result = new QueueAuthorizationRulesSpreadsheetResult();
-        result.guid = jobOrchestrationService.submit(new AuthorizationRulesSpreadsheetJobSpecification(),
-                JobOrchestrationService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
+        result.guid = jobService.submit(new AuthorizationRulesSpreadsheetJobSpecification(),
+                JobService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
         return result;
     }
 

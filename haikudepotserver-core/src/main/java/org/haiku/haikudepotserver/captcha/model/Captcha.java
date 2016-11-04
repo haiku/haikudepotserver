@@ -5,6 +5,8 @@
 
 package org.haiku.haikudepotserver.captcha.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * <p>This object models a captcha; which is an image that contains instructions for a human to convert into text to
  * confirm that they are more likely to be a human.</p>
@@ -58,14 +60,10 @@ public class Captcha {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append(null!=token ? token.toString() : "???");
-        result.append(" --> ");
-        result.append(getResponse());
-        result.append(" (");
-        result.append(Integer.toString(pngImageData.length));
-        result.append("b)");
-        return result.toString();
+        return new ToStringBuilder(this)
+                .append("token", token)
+                .append("pngImageData.length", pngImageData.length)
+                .build();
     }
 
 }

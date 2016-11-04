@@ -13,9 +13,9 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.miscellaneous.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.feed.FeedOrchestrationService;
+import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
-import org.haiku.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,13 +41,13 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     private RuntimeInformationService runtimeInformationService;
 
     @Resource
-    private FeedOrchestrationService feedOrchestrationService;
+    private FeedService feedService;
 
     @Resource
     private MessageSource messageSource;
 
     @Resource
-    private NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
+    private NaturalLanguageService naturalLanguageService;
 
     @Value("${deployment.isproduction:false}")
     private Boolean isProduction;
@@ -101,16 +101,16 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                                                 null, // params
                                                 naturalLanguageOptional.get().toLocale()),
                                         nl.getIsPopular(),
-                                        naturalLanguageOrchestrationService.hasData(nl.getCode()),
-                                        naturalLanguageOrchestrationService.hasLocalizationMessages(nl.getCode()));
+                                        naturalLanguageService.hasData(nl.getCode()),
+                                        naturalLanguageService.hasLocalizationMessages(nl.getCode()));
                             }
                             else {
                                 return new GetAllNaturalLanguagesResult.NaturalLanguage(
                                         nl.getCode(),
                                         nl.getName(),
                                         nl.getIsPopular(),
-                                        naturalLanguageOrchestrationService.hasData(nl.getCode()),
-                                        naturalLanguageOrchestrationService.hasLocalizationMessages(nl.getCode()));
+                                        naturalLanguageService.hasData(nl.getCode()),
+                                        naturalLanguageService.hasLocalizationMessages(nl.getCode()));
                             }
                         }
                 ).collect(Collectors.toList())
@@ -179,7 +179,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), getAllMessagesRequest.naturalLanguageCode);
         }
 
-        Properties allLocalizationMessages = naturalLanguageOrchestrationService.getAllLocalizationMessages(
+        Properties allLocalizationMessages = naturalLanguageService.getAllLocalizationMessages(
                 naturalLanguageOptional.get().getCode());
 
         GetAllMessagesResult getAllMessagesResult = new GetAllMessagesResult();
@@ -274,7 +274,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         }
 
         GenerateFeedUrlResult result = new GenerateFeedUrlResult();
-        result.url = feedOrchestrationService.generateUrl(specification);
+        result.url = feedService.generateUrl(specification);
         return result;
     }
 

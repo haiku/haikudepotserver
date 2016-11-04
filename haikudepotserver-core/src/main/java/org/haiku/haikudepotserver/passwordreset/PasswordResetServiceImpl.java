@@ -19,6 +19,7 @@ import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMail;
+import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.security.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +40,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class PasswordResetOrchestrationService {
+public class PasswordResetServiceImpl implements PasswordResetService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PasswordResetOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(PasswordResetServiceImpl.class);
 
     private final static String MAIL_SUBJECT = "passwordreset-subject";
     private final static String MAIL_PLAINTEXT = "passwordreset-plaintext";
-
-    // TODO; should be injected at some point as this should not know about the controller config.
-    public final static String URL_SEGMENT_PASSWORDRESET = "__passwordreset";
 
     @Resource
     private MailSender mailSender;
@@ -82,11 +80,9 @@ public class PasswordResetOrchestrationService {
             Template template = freemarkerConfiguration.getTemplate(templateLeafName + "_" + naturalLanguage.getCode());
             template.process(wrapper.wrap(mailModel), writer);
             return writer.toString();
-        }
-        catch(TemplateException te) {
+        } catch (TemplateException te) {
             throw new PasswordResetException("unable to process the freemarker template for sending out mail for the password reset token", te);
-        }
-        catch(IOException ioe) {
+        } catch (IOException ioe) {
             throw new PasswordResetException("unable to obtain the freemarker templates for sending out mail for the password reset token",ioe);
         }
     }
@@ -124,18 +120,12 @@ public class PasswordResetOrchestrationService {
 
         try {
             this.mailSender.send(message);
-        }
-        catch(MailException me) {
+        } catch (MailException me) {
             throw new PasswordResetException("the password reset email to "+user.toString()+" was not able to be sent",me);
         }
     }
 
-    /**
-     * <p>This method will create the necessary tokens to reset a password and will dispatch those tokens
-     * out to the users using their email address.  It is assumed that the email address is validated
-     * by this point.</p>
-     */
-
+    @Override
     public void initiate(String email) throws PasswordResetException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "the email must be provided");
         Preconditions.checkArgument(-1 != email.indexOf('@'), "the email is malformed"); // very basic sanity check
@@ -155,8 +145,7 @@ public class PasswordResetOrchestrationService {
             for(User user : users) {
                 if(!user.getActive()) {
                     LOGGER.warn("it is not possible to send a password reset to an inactive user; {}", user.toString());
-                }
-                else {
+                } else {
                     if (user.getIsRoot()) {
                         LOGGER.warn("it is not possible to send a password reset to a root user; {}", user.toString());
                     } else {
@@ -170,12 +159,7 @@ public class PasswordResetOrchestrationService {
         }
     }
 
-    /**
-     * <p>This method will action the password reset token that the user would have supplied in a URL together with
-     * a clear-text password.  This method will either perform the action or will not perform the action.  It will
-     * not return if it has done anything or not, but it will log what it has done.</p>
-     */
-
+    @Override
     public void complete(String tokenCode, String passwordClear) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(tokenCode), "the token code must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(passwordClear), "the pssword clear must be provided");
@@ -214,8 +198,7 @@ public class PasswordResetOrchestrationService {
                                 LOGGER.warn("the user having their password reset is inactive; will ignore");
                             }
 
-                        }
-                        else {
+                        } else {
                             LOGGER.warn("the token used to reset the password is expired; will ignore");
                         }
                     } finally {
@@ -247,10 +230,7 @@ public class PasswordResetOrchestrationService {
         }
     }
 
-    /**
-     * <p>This method will delete any tokens that have expired.</p>
-     */
-
+    @Override
     public void deleteExpiredPasswordResetTokens() {
         ObjectContext context = serverRuntime.getContext();
         Instant now = Instant.now();
@@ -265,8 +245,7 @@ public class PasswordResetOrchestrationService {
 
         if(tokens.isEmpty()) {
             LOGGER.debug("no expired tokens to delete");
-        }
-        else {
+        } else {
             context.deleteObjects(tokens.toArray(new UserPasswordResetToken[tokens.size()]));
             context.commitChanges();
             LOGGER.info("did delete {} expired tokens", tokens.size());

@@ -33,16 +33,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * <p>This concrete implementation of the {@link JobOrchestrationService}
+ * <p>This concrete implementation of the {@link JobService}
  * is able to run jobs locally in the virtual machine; it does not distribute or coordinate the run-state of the
  * jobs across virtual machines etc...</p>
  */
 
-public class LocalJobOrchestrationServiceImpl
+public class LocalJobServiceImpl
         extends AbstractService
-        implements JobOrchestrationService {
+        implements JobService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(JobOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
     private final static int SIZE_QUEUE = 10;
 

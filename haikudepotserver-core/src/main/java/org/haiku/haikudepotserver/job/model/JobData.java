@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.job.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
 
 import java.util.Date;
 
@@ -15,7 +14,7 @@ import java.util.Date;
  * <p>This class models reference to a piece of binary data that is associated with a job.  For example, a
  * "spreadsheet" job may be used to generate a report.  The output of the report would be an instance of
  * {@link JobData}.  The actual payload can be obtained from the
- * instance of {@link JobOrchestrationService} and this is vended to
+ * instance of {@link JobService} and this is vended to
  * users over the internet from &quot;JobController&quot;.</p>
  */
 

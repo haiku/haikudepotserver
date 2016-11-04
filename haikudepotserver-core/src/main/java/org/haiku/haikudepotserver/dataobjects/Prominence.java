@@ -11,6 +11,7 @@ import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.haiku.haikudepotserver.dataobjects.auto._Prominence;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
@@ -38,7 +39,9 @@ public class Prominence extends _Prominence {
 
     @Override
     public String toString() {
-        return "prominence;"+getOrdering();
+        return new ToStringBuilder(this)
+                .append("ordering", getOrdering())
+                .build();
     }
 
 }

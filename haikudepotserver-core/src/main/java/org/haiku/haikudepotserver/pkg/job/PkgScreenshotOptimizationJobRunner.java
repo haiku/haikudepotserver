@@ -14,7 +14,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
-import org.haiku.haikudepotserver.job.JobOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +44,11 @@ public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScr
 
     @Override
     public void run(
-            JobOrchestrationService jobOrchestrationService,
+            JobService jobService,
             PkgScreenshotOptimizationJobSpecification specification)
             throws IOException, JobRunnerException {
 
-        Preconditions.checkArgument(null!=jobOrchestrationService);
+        Preconditions.checkArgument(null!= jobService);
         Preconditions.checkArgument(null!=specification);
 
         long startMs = System.currentTimeMillis();

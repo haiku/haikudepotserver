@@ -11,6 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.dataobjects.auto._Architecture;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -57,7 +58,9 @@ public class Architecture extends _Architecture {
 
     @Override
     public String toString() {
-        return "arch;"+getCode();
+        return new ToStringBuilder(this)
+                .append("code", getCode())
+                .build();
     }
 
 }

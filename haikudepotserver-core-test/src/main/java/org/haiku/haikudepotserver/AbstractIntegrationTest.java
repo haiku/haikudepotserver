@@ -15,7 +15,7 @@ import org.apache.cayenne.map.DataMap;
 import org.apache.cayenne.map.DbEntity;
 import org.apache.cayenne.map.ObjEntity;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.naturallanguage.NaturalLanguageOrchestrationService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.security.AuthenticationHelper;
 import org.haiku.haikudepotserver.security.AuthenticationService;
 import org.junit.After;
@@ -72,7 +72,7 @@ public abstract class AbstractIntegrationTest {
     protected CapturingMailSender mailSender;
 
     @Resource
-    protected NaturalLanguageOrchestrationService naturalLanguageOrchestrationService;
+    protected NaturalLanguageService naturalLanguageService;
 
     protected void assertEqualsLineByLine(BufferedReader expected, BufferedReader actual) throws IOException {
             String expectedLine;
