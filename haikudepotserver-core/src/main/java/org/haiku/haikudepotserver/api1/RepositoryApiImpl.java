@@ -13,18 +13,18 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.repository.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
-import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
-import org.haiku.haikudepotserver.security.AuthorizationService;
+import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.Permission;
+import org.haiku.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     private AuthorizationService authorizationService;
 
     @Resource
-    private RepositoryOrchestrationService repositoryService;
+    private RepositoryService repositoryService;
 
     @Resource
     private JobService jobService;

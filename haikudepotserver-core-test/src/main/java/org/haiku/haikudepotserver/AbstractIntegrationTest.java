@@ -17,7 +17,7 @@ import org.apache.cayenne.map.ObjEntity;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.security.AuthenticationHelper;
-import org.haiku.haikudepotserver.security.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

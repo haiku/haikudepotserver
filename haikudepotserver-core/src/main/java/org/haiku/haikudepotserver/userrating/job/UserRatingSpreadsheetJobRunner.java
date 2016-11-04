@@ -15,8 +15,9 @@ import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
-import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
+import org.haiku.haikudepotserver.userrating.UserRatingServiceImpl;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
+import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -55,7 +56,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
     private ServerRuntime serverRuntime;
 
     @Resource
-    private UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingService userRatingService;
 
     @Override
     public void run(JobService jobService, UserRatingSpreadsheetJobSpecification specification) throws IOException {
@@ -133,29 +134,26 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             spec.setRepository(paramRepositoryOptional.orElse(null));
 
             // TODO; provide a prefetch tree into the user, pkgversion.
-            int count = userRatingOrchestrationService.each(context, spec, new StoppableConsumer<UserRating>() {
-                @Override
-                public boolean accept(UserRating userRating) {
+            int count = userRatingService.each(context, spec, userRating -> {
 
-                    writer.writeNext(
-                            new String[]{
-                                    userRating.getPkgVersion().getPkg().getName(),
-                                    userRating.getPkgVersion().getRepositorySource().getRepository().getCode(),
-                                    userRating.getPkgVersion().getArchitecture().getCode(),
-                                    userRating.getPkgVersion().toVersionCoordinates().toString(),
-                                    userRating.getUser().getNickname(),
-                                    dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getCreateTimestamp().getTime())),
-                                    dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getModifyTimestamp().getTime())),
-                                    null != userRating.getRating() ? userRating.getRating().toString() : "",
-                                    null != userRating.getUserRatingStability() ? userRating.getUserRatingStability().getCode() : "",
-                                    userRating.getNaturalLanguage().getCode(),
-                                    userRating.getComment(),
-                                    userRating.getCode()
-                            }
-                    );
+                writer.writeNext(
+                        new String[]{
+                                userRating.getPkgVersion().getPkg().getName(),
+                                userRating.getPkgVersion().getRepositorySource().getRepository().getCode(),
+                                userRating.getPkgVersion().getArchitecture().getCode(),
+                                userRating.getPkgVersion().toVersionCoordinates().toString(),
+                                userRating.getUser().getNickname(),
+                                dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getCreateTimestamp().getTime())),
+                                dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getModifyTimestamp().getTime())),
+                                null != userRating.getRating() ? userRating.getRating().toString() : "",
+                                null != userRating.getUserRatingStability() ? userRating.getUserRatingStability().getCode() : "",
+                                userRating.getNaturalLanguage().getCode(),
+                                userRating.getComment(),
+                                userRating.getCode()
+                        }
+                );
 
-                    return true;
-                }
+                return true;
             });
 
             LOGGER.info(

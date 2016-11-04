@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,21 +9,17 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.*;
-import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.ModifyRequest;
 import org.apache.directory.api.ldap.model.message.ModifyRequestImpl;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
-import org.haiku.haikudepotserver.user.model.LdapPerson;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.support.LikeHelper;
 import org.haiku.haikudepotserver.support.ldap.LdapConnectionPoolHolder;
-import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
+import org.haiku.haikudepotserver.user.model.LdapPerson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,13 +32,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * <p>This service undertakes non-trivial operations on users.</p>
+ * <p>This service is focused on the migration of user-data to and from LDAP.</p>
  */
 
 @Service
-public class UserOrchestrationService {
+public class LdapSynchronizationService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(LdapSynchronizationService.class);
 
     /**
      * <p>Users are processed in batches to avoid excessive memory or IO consumption at once.  This constant
@@ -87,7 +83,7 @@ public class UserOrchestrationService {
         return null!=ldapConnectionPoolHolder.get();
     }
 
-    private LdapPerson createPerson(Entry entry) throws LdapException {
+    private LdapPerson createPerson(Entry entry) throws org.apache.directory.api.ldap.model.exception.LdapException {
 
         Attribute mailA = entry.get(LDAP_ATTRIBUTE_KEY_MAIL);
         Attribute uidA = entry.get(LDAP_ATTRIBUTE_KEY_UID);
@@ -125,7 +121,7 @@ public class UserOrchestrationService {
                 throw new IllegalStateException("found two matches for the user; " + nickname);
             }
         }
-        catch(LdapException le) {
+        catch(org.apache.directory.api.ldap.model.exception.LdapException le) {
             throw new org.haiku.haikudepotserver.user.LdapException("an error arose finding the user in the ldap system; " + nickname, le);
         }
         catch(CursorException ce) {
@@ -371,120 +367,5 @@ public class UserOrchestrationService {
         }
 
     }
-
-    // ------------------------------
-    // DATABASE SEARCH
-
-    private String prepareWhereClause(
-            List<Object> parameterAccumulator,
-            ObjectContext context,
-            UserSearchSpecification search) {
-
-        Preconditions.checkNotNull(parameterAccumulator);
-        Preconditions.checkNotNull(search);
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(search.getOffset() >= 0);
-        Preconditions.checkState(search.getLimit() > 0);
-
-        List<String> parts = new ArrayList<>();
-
-        if(!Strings.isNullOrEmpty(search.getExpression())) {
-            switch(search.getExpressionType()) {
-
-                case CONTAINS:
-                    parts.add("LOWER(u.nickname) LIKE ?" + (parameterAccumulator.size() + 1));
-                    parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                    break;
-
-                default:
-                    throw new IllegalStateException("unknown expression type " + search.getExpressionType().name());
-
-            }
-        }
-
-        if(!search.getIncludeInactive()) {
-            parts.add("u.active = ?" + (parameterAccumulator.size() + 1));
-            parameterAccumulator.add(Boolean.TRUE);
-        }
-
-        return String.join(" AND ", parts);
-    }
-
-    /**
-     * <p>Undertakes a search for users.</p>
-     */
-
-    @SuppressWarnings("unchecked")
-    public List<User> search(
-            ObjectContext context,
-            UserSearchSpecification searchSpecification) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(searchSpecification);
-
-        StringBuilder queryBuilder = new StringBuilder("SELECT u FROM User AS u");
-        List<Object> parameters = new ArrayList<>();
-        String where = prepareWhereClause(parameters, context, searchSpecification);
-
-        if(!Strings.isNullOrEmpty(where)) {
-            queryBuilder.append(" WHERE ");
-            queryBuilder.append(where);
-        }
-
-        queryBuilder.append(" ORDER BY u.nickname ASC");
-
-        EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-
-        for (int i = 0; i < parameters.size(); i++) {
-            query.setParameter(i+1, parameters.get(i));
-        }
-
-        query.setFetchOffset(searchSpecification.getOffset());
-        query.setFetchLimit(searchSpecification.getLimit());
-
-        //noinspection unchecked
-        return (List<User>) context.performQuery(query);
-    }
-
-    /**
-     * <p>Find out the total number of results that would be yielded from
-     * a search if the search were not constrained.</p>
-     */
-
-    public long total(
-            ObjectContext context,
-            UserSearchSpecification searchSpecification) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(searchSpecification);
-
-        StringBuilder queryBuilder = new StringBuilder("SELECT COUNT(u) FROM User u");
-        List<Object> parameters = new ArrayList<>();
-        String where = prepareWhereClause(parameters, context, searchSpecification);
-
-        if(!Strings.isNullOrEmpty(where)) {
-            queryBuilder.append(" WHERE ");
-            queryBuilder.append(where);
-        }
-
-        EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-
-        for (int i = 0; i < parameters.size(); i++) {
-            query.setParameter(i+1, parameters.get(i));
-        }
-
-        @SuppressWarnings("unchecked") List<Long> result = (List<Long>) context.performQuery(query);
-
-        switch(result.size()) {
-
-            case 1:
-                return result.get(0);
-
-            default:
-                throw new IllegalStateException("the result should have contained a single long result");
-
-        }
-    }
-
-    // ------------------------------
-
 
 }

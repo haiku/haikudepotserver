@@ -1,9 +1,9 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.storage;
+package org.haiku.haikudepotserver.storage.model;
 
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;

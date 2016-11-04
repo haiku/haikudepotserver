@@ -17,9 +17,9 @@ import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.security.AuthorizationPkgRuleOrchestrationService;
-import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleSearchSpecification;
+import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleService;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     private AuthorizationService authorizationService;
 
     @Resource
-    private AuthorizationPkgRuleOrchestrationService authorizationRulesOrchestrationService;
+    private AuthorizationPkgRuleService authorizationPkgRulesService;
 
     // -------------------------------
     // HELPERS
@@ -137,11 +137,11 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         // now we need to check to make sure that the newly added rule does not conflict with an existing
         // rule.  If this is the case then exception.
 
-        if(authorizationRulesOrchestrationService.wouldConflict(context,user,permission,pkg)) {
+        if(authorizationPkgRulesService.wouldConflict(context,user,permission,pkg)) {
             throw new AuthorizationRuleConflictException();
         }
 
-        authorizationRulesOrchestrationService.create(
+        authorizationPkgRulesService.create(
                 context, user,
                 permission,
                 pkg);
@@ -173,7 +173,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
             pkg = ensurePkg(context, request.pkgName);
         }
 
-        authorizationRulesOrchestrationService.remove(
+        authorizationPkgRulesService.remove(
                 context,
                 user,
                 permission,
@@ -220,8 +220,8 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         }
 
         SearchAuthorizationPkgRulesResult result = new SearchAuthorizationPkgRulesResult();
-        result.total = authorizationRulesOrchestrationService.total(context, specification);
-        result.items = authorizationRulesOrchestrationService.search(context, specification)
+        result.total = authorizationPkgRulesService.total(context, specification);
+        result.items = authorizationPkgRulesService.search(context, specification)
                 .stream()
                 .map(r -> {
                             SearchAuthorizationPkgRulesResult.Rule rule = new SearchAuthorizationPkgRulesResult.Rule();

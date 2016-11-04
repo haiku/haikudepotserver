@@ -8,8 +8,8 @@ package org.haiku.haikudepotserver.userrating;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,8 +23,12 @@ import java.util.concurrent.TimeUnit;
 })
 public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
+    /**
+     * <p>Note that this test will actually check the implementation and not the interface to the implementation.</p>
+     */
+
     @Resource
-    private UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingServiceImpl userRatingServiceImpl;
 
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
@@ -119,7 +123,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         context.commitChanges();
 
         // ----------------------------
-        Optional<UserRatingOrchestrationService.DerivedUserRating> result = userRatingOrchestrationService.userRatingDerivation(
+        Optional<UserRatingServiceImpl.DerivedUserRating> result = userRatingServiceImpl.userRatingDerivation(
                 context,
                 userRatingData.pkg,
                 Repository.getByCode(context, "testrepo").get());

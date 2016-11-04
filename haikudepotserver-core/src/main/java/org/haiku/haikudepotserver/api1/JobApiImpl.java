@@ -14,19 +14,19 @@ import org.haiku.haikudepotserver.api1.model.job.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.security.AuthorizationService;
-import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobData;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/job") // TODO; legacy path - remove

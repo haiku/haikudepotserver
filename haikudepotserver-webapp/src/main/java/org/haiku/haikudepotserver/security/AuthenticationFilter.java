@@ -10,6 +10,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectId;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

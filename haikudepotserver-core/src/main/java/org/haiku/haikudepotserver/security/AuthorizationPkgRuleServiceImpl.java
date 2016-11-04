@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleSearchSpecification;
+import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,9 +32,9 @@ import java.util.Optional;
  */
 
 @Service
-public class AuthorizationPkgRuleOrchestrationService {
+public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleOrchestrationService.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleServiceImpl.class);
 
     @SuppressWarnings("UnusedParameters")
     private String prepareWhereClause(
@@ -84,6 +85,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         return String.join(" AND ", clauses);
     }
 
+    @Override
     public List<AuthorizationPkgRule> search(
             ObjectContext context,
             AuthorizationPkgRuleSearchSpecification specification) {
@@ -127,6 +129,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         return (List<AuthorizationPkgRule>) context.performQuery(query);
     }
 
+    @Override
     public long total(
             ObjectContext context,
             AuthorizationPkgRuleSearchSpecification specification) {
@@ -168,11 +171,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         }
     }
 
-    /**
-     * <p>This method returns true if the proposed new rule would conflict with existing rules
-     * that are already present in the system.</p>
-     */
-
+    @Override
     public boolean wouldConflict(
             ObjectContext context,
             User user,
@@ -209,11 +208,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         return false;
     }
 
-    /**
-     * <p>This method will create a new rule object.  It will decide what sort of object to create
-     * based on the inputs supplied.</p>
-     */
-
+    @Override
     public AuthorizationPkgRule create(
             ObjectContext context,
             User user,
@@ -237,6 +232,7 @@ public class AuthorizationPkgRuleOrchestrationService {
         return rule;
     }
 
+    @Override
     public void remove(
             ObjectContext context,
             User user,

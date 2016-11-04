@@ -19,14 +19,14 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.security.AuthenticationService;
-import org.haiku.haikudepotserver.security.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.user.UserOrchestrationService;
 import org.haiku.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
 import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
-import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
+import org.haiku.haikudepotserver.user.model.UserService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
+import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,10 +55,10 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     private AuthenticationService authenticationService;
 
     @Resource
-    private UserOrchestrationService userOrchestrationService;
+    private UserService userService;
 
     @Resource
-    private UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingService userRatingService;
 
     @Resource
     private PasswordResetService passwordResetService;
@@ -149,7 +149,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             // if a user is made active or inactive will have some impact on the user-ratings.
 
             if(activeDidChange) {
-                List<String> pkgNames = userRatingOrchestrationService.pkgNamesEffectedByUserActiveStateChange(
+                List<String> pkgNames = userRatingService.pkgNamesEffectedByUserActiveStateChange(
                         context, user);
 
                 LOGGER.info(
@@ -417,11 +417,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         SearchUsersResult result = new SearchUsersResult();
 
-        result.total = userOrchestrationService.total(context,specification);
+        result.total = userService.total(context,specification);
         result.items = Collections.emptyList();
 
         if(0 != result.total) {
-            List<User> searchedUsers = userOrchestrationService.search(context,specification);
+            List<User> searchedUsers = userService.search(context,specification);
 
             result.items = searchedUsers.stream().map(u -> {
                 SearchUsersResult.User resultUser = new SearchUsersResult.User();

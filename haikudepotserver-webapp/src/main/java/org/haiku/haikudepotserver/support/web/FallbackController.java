@@ -11,11 +11,11 @@ import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
+import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class FallbackController {
     private PkgOrchestrationService pkgOrchestrationService;
 
     @Resource
-    private RepositoryOrchestrationService repositoryOrchestrationService;
+    private RepositoryService repositoryService;
 
     @Value("${baseurl}")
     private String baseUrl;
@@ -140,7 +140,7 @@ public class FallbackController {
             Optional<Pkg> pkgOptional = Pkg.getByName(context, term);
 
             if(pkgOptional.isPresent()) {
-                List<Repository> repositories = repositoryOrchestrationService.getRepositoriesForPkg(context, pkgOptional.get());
+                List<Repository> repositories = repositoryService.getRepositoriesForPkg(context, pkgOptional.get());
 
                 if(!repositories.isEmpty()) {
                     return pkgOrchestrationService.getLatestPkgVersionForPkg(

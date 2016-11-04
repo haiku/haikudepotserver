@@ -17,7 +17,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.security.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
 import org.slf4j.Logger;

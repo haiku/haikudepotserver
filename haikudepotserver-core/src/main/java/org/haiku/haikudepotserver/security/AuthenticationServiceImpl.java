@@ -18,6 +18,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,17 +34,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-/**
- * <p>This service is able to provide the ability to authenticate a user given their nickname and their clear-text
- * password.  It will maintain a cache of nickname to {@link ObjectId}s so that it is able to lookup users very quickly
- * if they are known to this instance.  This may be useful in a small-scale deployment.  This class is accessed by
- * the {@link AuthenticationFilter}.</p>
- */
 
 @Service
-public class AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     private final static String SUFFIX_JSONWEBTOKEN_SUBJECT = "@hds";
 
@@ -111,6 +106,7 @@ public class AuthenticationService {
         this.serverRuntime = serverRuntime;
     }
 
+    @Override
     public Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear) {
 
         Optional<ObjectId> result = Optional.empty();
@@ -147,6 +143,7 @@ public class AuthenticationService {
      * <p>This method will hash the password in a consistent manner across the whole system.</p>
      */
 
+    @Override
     public String hashPassword(User user, String passwordClear) {
         byte[] saltBytes = BaseEncoding.base16().decode(user.getPasswordSalt().toUpperCase());
 
@@ -184,6 +181,7 @@ public class AuthenticationService {
      * <p>This method will check the password for suitability.</p>
      */
 
+    @Override
     public boolean validatePassword(String passwordClear) {
         Preconditions.checkArgument(null != passwordClear, "the password clear must be supplied");
 
@@ -211,6 +209,7 @@ public class AuthenticationService {
     // ---------------------------
     // JSON WEB TOKEN
 
+    @Override
     public Optional<ObjectId> authenticateByToken(String payload) {
         Optional<SignedJWT> signedJwtOptional = verifyToken(payload);
 
@@ -317,6 +316,7 @@ public class AuthenticationService {
      * that token and for it to be used as a form of authentication for some period of time.</p>
      */
 
+    @Override
     public String generateToken(User user) {
 
         Preconditions.checkArgument(null != user, "the user must be provided");

@@ -13,6 +13,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -32,7 +33,7 @@ public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {
     IntegrationTestSupportService integrationTestSupportService;
 
     @Resource
-    RepositoryOrchestrationService repositoryOrchestrationService;
+    RepositoryService repositoryService;
 
     public void setup(ObjectContext context) {
         integrationTestSupportService.createStandardTestData();
@@ -52,7 +53,7 @@ public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {
         specification.setRepositorySourceSearchUrls(Collections.singletonList("https://example.com/zigzag/"));
 
         // ---------------------------------
-        List<Repository> repos = repositoryOrchestrationService.search(context, specification);
+        List<Repository> repos = repositoryService.search(context, specification);
         // ---------------------------------
 
         Assertions.assertThat(repos.size()).isEqualTo(1);
@@ -70,7 +71,7 @@ public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {
         specification.setLimit(2);
 
         // ---------------------------------
-        List<Repository> repos = repositoryOrchestrationService.search(context, specification);
+        List<Repository> repos = repositoryService.search(context, specification);
         // ---------------------------------
 
         Assertions.assertThat(repos.size()).isEqualTo(0);

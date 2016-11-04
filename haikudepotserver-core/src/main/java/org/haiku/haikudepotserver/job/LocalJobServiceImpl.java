@@ -16,7 +16,7 @@ import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractService;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
-import org.haiku.haikudepotserver.storage.DataStorageService;
+import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;

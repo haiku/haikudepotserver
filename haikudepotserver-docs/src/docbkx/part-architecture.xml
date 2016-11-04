@@ -96,7 +96,7 @@ Distributed under the terms of the MIT License.
                 application server has no formal DAO layer; queries are simply made from the ORM context.  Static
                 methods on concrete entity objects provide easy access to common queries and
                 &quot;...OrchestrationServices&quot; beans such as PkgOrchestrationService,
-                UserRatingOrchestrationService and UserOrchestrationService provide more sophisticated functionality
+                UserRatingOrchestrationService and UserService provide more sophisticated functionality
                 in specific domain areas.
             </para>
 

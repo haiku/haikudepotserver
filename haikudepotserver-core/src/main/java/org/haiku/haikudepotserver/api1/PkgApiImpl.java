@@ -30,7 +30,7 @@ import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
-import org.haiku.haikudepotserver.security.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -39,7 +39,6 @@ import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;

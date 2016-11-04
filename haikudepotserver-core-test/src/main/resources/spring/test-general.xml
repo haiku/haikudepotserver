@@ -6,7 +6,6 @@
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean class="org.haiku.haikudepotserver.userrating.NoopUserRatingDerviationService"/>
     <bean class="org.haiku.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
     <bean id="mailSender" class="org.haiku.haikudepotserver.CapturingMailSender"/>
     <bean class="org.haiku.haikudepotserver.support.NoopClientIdentifierSupplier"/>

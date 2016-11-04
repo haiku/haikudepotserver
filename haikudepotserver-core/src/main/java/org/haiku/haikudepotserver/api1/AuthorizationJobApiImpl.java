@@ -14,8 +14,8 @@ import org.haiku.haikudepotserver.api1.model.authorization.job.QueueAuthorizatio
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.security.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.AuthorizationRulesSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

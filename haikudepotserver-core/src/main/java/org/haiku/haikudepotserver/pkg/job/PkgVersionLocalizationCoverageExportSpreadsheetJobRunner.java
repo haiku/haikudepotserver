@@ -21,7 +21,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.repository.RepositoryOrchestrationService;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -54,7 +54,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
     private PkgOrchestrationService pkgOrchestrationService;
 
     @Resource
-    private RepositoryOrchestrationService repositoryOrchestrationService;
+    private RepositoryService repositoryService;
 
     @Resource
     private NaturalLanguageService naturalLanguageService;
@@ -137,7 +137,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
                     false, // allow source only.
                     pkg -> {
 
-                        for(Repository repository : repositoryOrchestrationService.getRepositoriesForPkg(context, pkg)) {
+                        for(Repository repository : repositoryService.getRepositoriesForPkg(context, pkg)) {
 
                             for (Architecture architecture : architectures) {
 

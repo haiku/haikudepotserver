@@ -10,8 +10,9 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.user.LdapException;
-import org.haiku.haikudepotserver.user.UserOrchestrationService;
+import org.haiku.haikudepotserver.user.LdapSynchronizationService;
 import org.haiku.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
+import org.haiku.haikudepotserver.user.model.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,18 +29,21 @@ public class LdapSynchronizeUsersJobRunner
     protected static Logger LOGGER = LoggerFactory.getLogger(LdapSynchronizeUsersJobRunner.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    UserOrchestrationService userOrchestrationService;
+    private UserService userService;
+
+    @Resource
+    private LdapSynchronizationService ldapSynchronizationService;
 
     @Override
     public void run(JobService jobService, LdapSynchronizeUsersJobSpecification job) {
         Preconditions.checkNotNull(job);
 
         try {
-            userOrchestrationService.ldapSynchronizeAllUsers(serverRuntime.getContext());
-            userOrchestrationService.ldapRemoveNonExistentUsers(serverRuntime.getContext());
+            ldapSynchronizationService.ldapSynchronizeAllUsers(serverRuntime.getContext());
+            ldapSynchronizationService.ldapRemoveNonExistentUsers(serverRuntime.getContext());
         }
         catch(LdapException le) {
             LOGGER.error("unable to ldap synchronize users", le);

@@ -10,7 +10,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haiku.haikudepotserver.security.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

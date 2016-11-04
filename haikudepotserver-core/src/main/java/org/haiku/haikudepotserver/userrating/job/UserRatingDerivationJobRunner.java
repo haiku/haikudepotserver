@@ -7,19 +7,13 @@ package org.haiku.haikudepotserver.userrating.job;
 
 import com.google.common.base.Preconditions;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.userrating.UserRatingDerivationService;
-import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
-import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
+import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
-
-/**
- * <p>This implementation of the {@link UserRatingDerivationService}
- * operates in the same runtime as the application and has no persistence or distributed behaviour.</p>
- */
 
 public class UserRatingDerivationJobRunner
         extends AbstractJobRunner<UserRatingDerivationJobSpecification> {
@@ -27,16 +21,16 @@ public class UserRatingDerivationJobRunner
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingDerivationJobRunner.class);
 
     @Resource
-    UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingService userRatingService;
 
     public void run(JobService jobService, UserRatingDerivationJobSpecification job) {
         Preconditions.checkNotNull(job);
 
         if(job.appliesToAllPkgs()) {
-            userRatingOrchestrationService.updateUserRatingDerivationsForAllPkgs();
+            userRatingService.updateUserRatingDerivationsForAllPkgs();
         }
         else {
-            userRatingOrchestrationService.updateUserRatingDerivation(job.getPkgName());
+            userRatingService.updateUserRatingDerivation(job.getPkgName());
         }
     }
 

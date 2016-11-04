@@ -20,7 +20,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMail;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
-import org.haiku.haikudepotserver.security.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -12,6 +12,7 @@ import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.security.model.TargetType;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -22,13 +23,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * <P>This class will provide functions around authorization.  Some of the model for this is provided
- * by the API objects.</p>
- */
-
 @Service
-public class AuthorizationService {
+public class AuthorizationServiceImpl implements AuthorizationService {
 
     private TargetType deriveTargetType(DataObject dataObject) {
         if(null==dataObject)

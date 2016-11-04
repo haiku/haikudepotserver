@@ -17,12 +17,12 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haiku.haikudepotserver.security.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.userrating.UserRatingOrchestrationService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
+import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     private JobService jobService;
 
     @Resource
-    private UserRatingOrchestrationService userRatingOrchestrationService;
+    private UserRatingService userRatingService;
 
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
@@ -519,10 +519,10 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         searchSpecification.setLimit(request.limit);
         searchSpecification.setOffset(request.offset);
 
-        List<UserRating> foundUserRatings = userRatingOrchestrationService.search(context, searchSpecification);
+        List<UserRating> foundUserRatings = userRatingService.search(context, searchSpecification);
 
         final SearchUserRatingsResult result = new SearchUserRatingsResult();
-        result.total = userRatingOrchestrationService.total(context, searchSpecification);
+        result.total = userRatingService.total(context, searchSpecification);
         result.items = foundUserRatings
                 .stream()
                 .map(ur -> {

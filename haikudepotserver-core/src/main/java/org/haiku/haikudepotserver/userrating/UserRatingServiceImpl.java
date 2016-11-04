@@ -15,6 +15,7 @@ import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
+import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,14 +27,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * <p>This service is able to provide support for non-trivial operations around user ratings.</p>
- */
-
 @Service
-public class UserRatingOrchestrationService {
+public class UserRatingServiceImpl implements UserRatingService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingServiceImpl.class);
 
     @Value("${userrating.aggregation.pkg.versionsback:2}")
     private int userRatingDerivationVersionsBack;
@@ -55,6 +52,7 @@ public class UserRatingOrchestrationService {
 
     // TODO; somehow prefetch the user?  prefetch tree?
 
+    @Override
     public int each(
             ObjectContext context,
             UserRatingSearchSpecification search,
@@ -164,6 +162,7 @@ public class UserRatingOrchestrationService {
 
     }
 
+    @Override
     public List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
@@ -181,6 +180,7 @@ public class UserRatingOrchestrationService {
         return context.performQuery(query);
     }
 
+    @Override
     public long total(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
@@ -214,6 +214,7 @@ public class UserRatingOrchestrationService {
      * in a user's active flag.</p>
      */
 
+    @Override
     public List<String> pkgNamesEffectedByUserActiveStateChange(ObjectContext context, User user) {
         Preconditions.checkNotNull(user);
         EJBQLQuery query = new EJBQLQuery("SELECT DISTINCT ur.pkgVersion.pkg.name FROM UserRating ur WHERE ur.user=?1");
@@ -276,6 +277,7 @@ public class UserRatingOrchestrationService {
      * <p>This method will go through all of the relevant packages and will derive their user ratings.</p>
      */
 
+    @Override
     public void updateUserRatingDerivationsForAllPkgs() {
         ObjectContext context = serverRuntime.getContext();
 
@@ -302,6 +304,7 @@ public class UserRatingOrchestrationService {
      * repositories.</p>
      */
 
+    @Override
     public void updateUserRatingDerivation(String pkgName) {
          Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the name of the package is required");
 
@@ -500,7 +503,7 @@ public class UserRatingOrchestrationService {
         private float rating;
         private int sampleSize;
 
-        public DerivedUserRating(float rating, int sampleSize) {
+        DerivedUserRating(float rating, int sampleSize) {
             this.rating = rating;
             this.sampleSize = sampleSize;
         }
@@ -509,7 +512,7 @@ public class UserRatingOrchestrationService {
             return rating;
         }
 
-        public int getSampleSize() {
+        int getSampleSize() {
             return sampleSize;
         }
     }

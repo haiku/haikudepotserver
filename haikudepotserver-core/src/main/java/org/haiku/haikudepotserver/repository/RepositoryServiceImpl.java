@@ -16,6 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.support.LikeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +32,14 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class RepositoryOrchestrationService {
+public class RepositoryServiceImpl implements RepositoryService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryServiceImpl.class);
 
     // ------------------------------
     // HELPERS
 
-    /**
-     * <p>Returns all of the repositories that contain this package.</p>
-     */
-
+    @Override
     public List<Repository> getRepositoriesForPkg(
             ObjectContext context,
             Pkg pkg) {
@@ -144,6 +142,7 @@ public class RepositoryOrchestrationService {
         return String.join(" AND ", whereExpressions);
     }
 
+    @Override
     public List<Repository> search(ObjectContext context, RepositorySearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
@@ -185,6 +184,7 @@ public class RepositoryOrchestrationService {
         return (List<Repository>) context.performQuery(ejbqlQuery);
     }
 
+    @Override
     public long total(ObjectContext context, RepositorySearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);

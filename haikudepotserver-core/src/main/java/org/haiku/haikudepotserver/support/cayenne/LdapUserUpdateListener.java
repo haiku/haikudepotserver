@@ -10,9 +10,10 @@ import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
-import org.haiku.haikudepotserver.user.UserOrchestrationService;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.user.LdapException;
+import org.haiku.haikudepotserver.user.LdapSynchronizationService;
+import org.haiku.haikudepotserver.user.model.UserService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -30,7 +31,10 @@ public class LdapUserUpdateListener implements LifecycleListener {
     private ServerRuntime serverRuntime;
 
     @Resource
-    private UserOrchestrationService userOrchestrationService;
+    private UserService userService;
+
+    @Resource
+    private LdapSynchronizationService ldapSynchronizationService;
 
     @PostConstruct
     public void init() {
@@ -44,7 +48,7 @@ public class LdapUserUpdateListener implements LifecycleListener {
         User user = User.getByObjectId(context, ((User) entity).getObjectId());
 
         try {
-            userOrchestrationService.ldapUpdateUser(context, user);
+            ldapSynchronizationService.ldapUpdateUser(context, user);
         }
         catch(LdapException le) {
             throw new RuntimeException("unable to ldap update user; " + user.toString(), le);
