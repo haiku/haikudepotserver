@@ -1,11 +1,9 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.captcha.model;
-
-import org.haiku.haikudepotserver.captcha.model.Captcha;
 
 /**
  * <p>This service is able to provide interfacing to the captcha system including verification and generation of

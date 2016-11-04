@@ -1,11 +1,10 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.support.desktopapplication;
+package org.haiku.haikudepotserver.support;
 
-import org.haiku.haikudepotserver.support.IntArrayVersionComparator;
 import org.junit.Test;
 import static org.fest.assertions.Assertions.assertThat;
 

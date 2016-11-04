@@ -5,9 +5,6 @@
 
 package org.haiku.haikudepotserver.naturallanguage.model;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-
 import java.util.Properties;
 
 /**

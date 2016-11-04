@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.job.model;
 
 import com.google.common.io.ByteSource;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.model.*;
 
 import java.io.IOException;
 import java.util.List;

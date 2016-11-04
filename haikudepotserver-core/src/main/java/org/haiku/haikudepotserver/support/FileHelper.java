@@ -17,8 +17,6 @@ import java.net.URL;
 
 public class FileHelper {
 
-    private static final String METHOD_GET = "GET";
-
     /**
      * <p>This method will stream the data from the supplied URL into the file.  If it is a suitable
      * URL (http / https) then it is possible to provide a timeout and that will be observed when
