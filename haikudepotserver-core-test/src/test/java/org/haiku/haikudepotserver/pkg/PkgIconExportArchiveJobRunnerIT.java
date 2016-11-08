@@ -13,6 +13,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.pkg.job.PkgIconExportArchiveJobRunner;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.WrapWithNoCloseInputStream;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -31,6 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -46,7 +48,6 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
     @Resource
     private JobService jobService;
-
 
     /**
      * <p>Uses the sample data and checks that the output from the report matches a captured, sensible-looking
@@ -74,12 +75,13 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
         JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
 
         try (
-                InputStream inputStream = jobSource.getByteSource().openBufferedStream();
-                final TarArchiveInputStream tarInputStream = new TarArchiveInputStream(inputStream);
+                final InputStream inputStream = jobSource.getByteSource().openBufferedStream();
+                final GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+                final TarArchiveInputStream tarInputStream = new TarArchiveInputStream(gzipInputStream);
         ) {
 
             ArchiveEntry tarEntry;
-            Pattern pngPattern = Pattern.compile("hdsiconexport/pkg1/([0-9]+).png");
+            Pattern pngPattern = Pattern.compile("^" + PkgIconExportArchiveJobRunner.PATH_COMPONENT_TOP + "/pkg1/([0-9]+).png$");
             ByteSource zipNoCloseInputStreamByteSource = new ByteSource() {
                 @Override
                 public InputStream openStream() throws IOException {

@@ -92,9 +92,7 @@
         <property name="errorResolver">
             <bean class="org.haiku.haikudepotserver.api1.support.ErrorResolverImpl"/>
         </property>
-        <property name="objectMapper">
-            <bean class="org.haiku.haikudepotserver.api1.support.ObjectMapperFactory"/>
-        </property>
+        <property name="objectMapper" ref="objectMapper"/>
         <property name="httpStatusCodeProvider">
             <bean class="org.haiku.haikudepotserver.support.jsonrpc4j.HttpStatusCodeProvider"/>
         </property>
