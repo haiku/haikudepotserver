@@ -185,6 +185,11 @@
                 <version>1.7.0</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.0</version>
+            </dependency>
             
             <dependency>
                 <groupId>org.flywaydb</groupId>

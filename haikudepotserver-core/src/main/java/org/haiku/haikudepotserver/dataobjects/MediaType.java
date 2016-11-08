@@ -21,6 +21,7 @@ import java.util.Optional;
 public class MediaType extends _MediaType {
 
     public final static String MEDIATYPE_HAIKUVECTORICONFILE = "application/x-vnd.haiku-icon";
+    public final static String MEDIATYPE_PNG = "image/png";
 
     public final static String EXTENSION_HAIKUVECTORICONFILE = "hvif";
 

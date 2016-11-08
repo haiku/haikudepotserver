@@ -14,8 +14,8 @@ import java.util.Optional;
 
 public class PkgIcon extends _PkgIcon {
 
-    public final static String VALIDATION_REQUIREDFORBITMAP = "requiredforbitmap";
-    public final static String VALIDATION_NOTALLOWEDFORVECTOR = "notallowedforvector";
+    private final static String VALIDATION_REQUIREDFORBITMAP = "requiredforbitmap";
+    private final static String VALIDATION_NOTALLOWEDFORVECTOR = "notallowedforvector";
 
     /**
      * <p>As there should be only one of these, if there are two then this method will throw an
@@ -50,17 +50,17 @@ public class PkgIcon extends _PkgIcon {
      * <p>This method will return a string which represents a leafname for the icon.</p>
      */
 
-    public String deriveFilename() {
+    public static String deriveFilename(String mediaTypeCode, Integer size) {
+        switch(mediaTypeCode) {
+            case MediaType.MEDIATYPE_HAIKUVECTORICONFILE:
+                return "icon.hvif";
 
-        if(com.google.common.net.MediaType.PNG.toString().equals(getMediaType().getCode())) {
-            return Integer.toString(getSize()) + ".png";
+            case MediaType.MEDIATYPE_PNG:
+                return Integer.toString(size) + ".png";
+
+            default:
+                throw new IllegalStateException("unsupported media type; " + mediaTypeCode);
         }
-
-        if(MediaType.MEDIATYPE_HAIKUVECTORICONFILE.equals(getMediaType().getCode())) {
-            return "icon.hvif";
-        }
-
-        throw new IllegalStateException("unsupported media type; " + getMediaType().getCode());
     }
 
 }

@@ -690,6 +690,10 @@ public class LocalJobServiceImpl
                 if(jobData.getMediaTypeCode().equals(MediaType.ZIP.withoutParameters().toString())) {
                     extension = "zip";
                 }
+
+                if(jobData.getMediaTypeCode().equals(MediaType.TAR.withoutParameters().toString())) {
+                    extension = "tar";
+                }
             }
         }
 

@@ -7,6 +7,9 @@ package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
@@ -72,30 +75,30 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         try (
                 InputStream inputStream = jobSource.getByteSource().openBufferedStream();
-                final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+                final TarArchiveInputStream tarInputStream = new TarArchiveInputStream(inputStream);
         ) {
 
-            ZipEntry zipEntry;
-            Pattern pngPattern = Pattern.compile("hds_pkgiconexportarchive/pkg1/([0-9]+).png");
+            ArchiveEntry tarEntry;
+            Pattern pngPattern = Pattern.compile("hdsiconexport/pkg1/([0-9]+).png");
             ByteSource zipNoCloseInputStreamByteSource = new ByteSource() {
                 @Override
                 public InputStream openStream() throws IOException {
-                    return new WrapWithNoCloseInputStream(zipInputStream);
+                    return new WrapWithNoCloseInputStream(tarInputStream);
                 }
             };
 
             Set<String> foundPkg1Filenames = Sets.newHashSet();
 
-            while(null != (zipEntry = zipInputStream.getNextEntry())) {
+            while(null != (tarEntry = tarInputStream.getNextEntry())) {
 
-                if(zipEntry.getName().contains("/pkg1/")) {
-                    if (zipEntry.getName().endsWith("/pkg1/icon.hvif")) {
+                if(tarEntry.getName().contains("/pkg1/")) {
+                    if (tarEntry.getName().endsWith("/pkg1/icon.hvif")) {
                         getResourceByteSource("sample.hvif").contentEquals(zipNoCloseInputStreamByteSource);
                         foundPkg1Filenames.add("icon.hvif");
                     }
                     else {
 
-                        Matcher matcher = pngPattern.matcher(zipEntry.getName());
+                        Matcher matcher = pngPattern.matcher(tarEntry.getName());
 
                         if (matcher.matches()) {
                             String expectedPath = "sample-" + matcher.group(1) + "x" + matcher.group(1) + ".png";
@@ -103,12 +106,12 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
                             foundPkg1Filenames.add(matcher.group(1) + ".png");
                         }
                         else {
-                            Assert.fail("the zip entry has an unknown file; " + zipEntry.getName());
+                            Assert.fail("the zip entry has an unknown file; " + tarEntry.getName());
                         }
                     }
                 }
                 else {
-                    LOGGER.info("ignoring; {}", zipEntry.getName());
+                    LOGGER.info("ignoring; {}", tarEntry.getName());
                 }
             }
 
