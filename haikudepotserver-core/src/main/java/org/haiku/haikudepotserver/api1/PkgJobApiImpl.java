@@ -15,9 +15,8 @@ import org.haiku.haikudepotserver.api1.model.pkg.job.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
-import org.haiku.haikudepotserver.job.model.JobData;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.dataobjects.auto._User;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -77,11 +76,11 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
         // setup and go
 
         PkgCategoryCoverageImportSpreadsheetJobSpecification spec = new PkgCategoryCoverageImportSpreadsheetJobSpecification();
-        spec.setOwnerUserNickname(user.map((u) -> u.getNickname()).orElse(null));
+        spec.setOwnerUserNickname(user.map(_User::getNickname).orElse(null));
         spec.setInputDataGuid(request.inputDataGuid);
 
         return new QueuePkgCategoryCoverageImportSpreadsheetJobResult(
-                jobService.submit(spec, JobService.CoalesceMode.NONE).orElse(null));
+                jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_NONE));
     }
 
     @Override
@@ -177,7 +176,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
             throw new RuntimeException("unable to create the result; " + resultClass.getSimpleName(), e);
         }
 
-        result.guid = jobService.submit(spec, JobService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
+        result.guid = jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
         return result;
     }
 

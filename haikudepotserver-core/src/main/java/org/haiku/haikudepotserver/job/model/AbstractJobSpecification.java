@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.job.model;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * <p>This is an abstract superclass which provides some implementation for a
@@ -53,8 +54,8 @@ public abstract class AbstractJobSpecification implements JobSpecification {
     }
 
     @Override
-    public Long getTimeToLive() {
-        return null;
+    public Optional<Long> tryGetTimeToLiveMillis() {
+        return Optional.empty();
     }
 
     @Override
@@ -63,7 +64,9 @@ public abstract class AbstractJobSpecification implements JobSpecification {
     }
 
     @Override
-    abstract public boolean isEquivalent(JobSpecification other);
+    public boolean isEquivalent(JobSpecification other) {
+        return this.getClass().isAssignableFrom(other.getClass());
+    }
 
     @Override
     public String toString() {

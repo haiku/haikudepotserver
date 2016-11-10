@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,8 @@ import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 /**
  * <P>This class is used with the {@link TestJobServiceImpl}.</P>
@@ -50,8 +52,8 @@ public class TestJobSpecificationImpl implements JobSpecification {
     }
 
     @Override
-    public Long getTimeToLive() {
-        return null;
+    public Optional<Long> tryGetTimeToLiveMillis() {
+        return Optional.empty();
     }
 
     @Override

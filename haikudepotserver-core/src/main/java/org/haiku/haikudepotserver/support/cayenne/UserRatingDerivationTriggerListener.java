@@ -10,6 +10,7 @@ import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
 
@@ -41,7 +42,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
         String pkgName = userRating.getPkgVersion().getPkg().getName();
         jobService.submit(
                 new UserRatingDerivationJobSpecification(pkgName),
-                JobService.CoalesceMode.QUEUED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
     }
 
     @Override

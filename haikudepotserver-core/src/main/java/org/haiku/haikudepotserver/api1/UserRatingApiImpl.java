@@ -16,6 +16,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -120,7 +121,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         jobService.submit(
                 new UserRatingDerivationJobSpecification(request.pkgName),
-                JobService.CoalesceMode.QUEUED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return new DeriveAndStoreUserRatingForPkgResult();
     }
@@ -141,7 +142,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         jobService.submit(
                 new UserRatingDerivationJobSpecification(),
-                JobService.CoalesceMode.QUEUED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         LOGGER.info("did enqueue request to derive and store user ratings for all packages");
 

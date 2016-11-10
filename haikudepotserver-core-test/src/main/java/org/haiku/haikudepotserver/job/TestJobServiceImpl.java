@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -69,9 +69,14 @@ public class TestJobServiceImpl implements JobService {
     }
 
     @Override
-    public Optional<String> submit(
+    public String submit(
             JobSpecification specification,
-            CoalesceMode coalesceMode) {
+            Set<JobSnapshot.Status> coalesceForStatuses) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String immediate(JobSpecification specification, boolean coalesceFinished) {
         throw new UnsupportedOperationException();
     }
 
@@ -185,7 +190,7 @@ public class TestJobServiceImpl implements JobService {
     }
 
     @Override
-    public void awaitJobConcludedUninterruptibly(String guid, long timeout) {
+    public void awaitJobFinishedUninterruptibly(String guid, long timeout) {
         // ignore
     }
 

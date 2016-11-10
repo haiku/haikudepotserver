@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.api1.model.authorization.job.QueueAuthorizatio
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.security.model.AuthorizationRulesSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -51,7 +52,7 @@ public class AuthorizationJobApiImpl extends AbstractApiImpl implements Authoriz
 
         QueueAuthorizationRulesSpreadsheetResult result = new QueueAuthorizationRulesSpreadsheetResult();
         result.guid = jobService.submit(new AuthorizationRulesSpreadsheetJobSpecification(),
-                JobService.CoalesceMode.QUEUEDANDSTARTED).orElse(null);
+                JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
         return result;
     }
 

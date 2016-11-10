@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,15 +9,16 @@ import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 public class PkgIconExportArchiveJobSpecification extends AbstractJobSpecification {
 
-    @Override
-    public boolean isEquivalent(JobSpecification other) {
-        if(PkgIconExportArchiveJobSpecification.class.isAssignableFrom(other.getClass())) {
-            return ObjectUtils.nullSafeEquals(other.getOwnerUserNickname(), getOwnerUserNickname());
-        }
+    private final static long TTL_MINUTES = 10;
 
-        return false;
+    @Override
+    public Optional<Long> tryGetTimeToLiveMillis() {
+        return Optional.of(TimeUnit.MINUTES.toMillis(TTL_MINUTES));
     }
 
 }

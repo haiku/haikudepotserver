@@ -14,11 +14,8 @@ public class AuthorizationRulesSpreadsheetJobSpecification extends AbstractJobSp
 
     @Override
     public boolean isEquivalent(JobSpecification other) {
-        if(PkgProminenceAndUserRatingSpreadsheetJobSpecification.class.isAssignableFrom(other.getClass())) {
-            return ObjectUtils.nullSafeEquals(other.getOwnerUserNickname(), getOwnerUserNickname());
-        }
-
-        return false;
+        return super.isEquivalent(other)
+                && ObjectUtils.nullSafeEquals(other.getOwnerUserNickname(), getOwnerUserNickname());
     }
 
 }

@@ -44,7 +44,7 @@ public class UserRatingSpreadsheetJobSpecification extends AbstractJobSpecificat
 
     @Override
     public boolean isEquivalent(JobSpecification other) {
-        if(UserRatingSpreadsheetJobSpecification.class.isAssignableFrom(other.getClass())) {
+        if(super.isEquivalent(other)) {
             UserRatingSpreadsheetJobSpecification otherSpec = (UserRatingSpreadsheetJobSpecification) other;
 
             return

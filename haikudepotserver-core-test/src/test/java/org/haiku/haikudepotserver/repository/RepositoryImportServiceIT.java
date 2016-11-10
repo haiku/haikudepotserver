@@ -16,6 +16,7 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.Jobs;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
@@ -188,7 +189,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
 
             String guid = jobService.submit(
                     new PkgRepositoryImportJobSpecification("test"),
-                    JobService.CoalesceMode.NONE).get();
+                    JobSnapshot.COALESCE_STATUSES_NONE);
 
             // wait for it to finish.
 

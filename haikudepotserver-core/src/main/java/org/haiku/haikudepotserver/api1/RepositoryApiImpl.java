@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.api1.support.ValidationFailure;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
@@ -119,7 +120,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                                 .map(RepositorySource::getCode)
                                 .collect(Collectors.toSet())
                 ),
-                JobService.CoalesceMode.QUEUED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return new TriggerImportRepositoryResult();
     }

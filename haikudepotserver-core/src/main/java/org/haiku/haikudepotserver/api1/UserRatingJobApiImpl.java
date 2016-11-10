@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
@@ -109,7 +110,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
         spec.setOwnerUserNickname(user.get().getNickname());
 
         return new QueueUserRatingSpreadsheetJobResult(
-                jobService.submit(spec, JobService.CoalesceMode.QUEUEDANDSTARTED).orElse(null));
+                jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED));
 
     }
 

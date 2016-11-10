@@ -1,12 +1,11 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.job.model;
 
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>This interface describes an object that represents the state of a job at a particular point in time.</p>
@@ -14,11 +13,16 @@ import java.util.Set;
 
 public interface JobSnapshot {
 
-    public enum Status {
-        INDETERMINATE,
+    Set<Status> COALESCE_STATUSES_NONE = Collections.emptySet();
+    Set<Status> COALESCE_STATUSES_QUEUED = EnumSet.of(Status.QUEUED);
+    Set<Status> COALESCE_STATUSES_QUEUED_STARTED = EnumSet.of(Status.QUEUED, Status.STARTED);
+    Set<Status> COALESCE_STATUSES_QUEUED_STARTED_FINISHED = EnumSet.of(Status.QUEUED, Status.STARTED, Status.FINISHED);
+
+    enum Status {
         QUEUED,
         STARTED,
         FINISHED,
+        INDETERMINATE,
         FAILED,
         CANCELLED
     }
@@ -49,6 +53,6 @@ public interface JobSnapshot {
 
     String getGuid();
 
-    Long getTimeToLive();
+    Optional<Long> tryGetTimeToLiveMillis();
 
 }

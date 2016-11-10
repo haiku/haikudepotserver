@@ -1,0 +1,138 @@
+/*
+ * Copyright 2016, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
+package org.haiku.haikudepotserver.job;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import org.fest.assertions.Assertions;
+import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.job.model.*;
+import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
+
+import javax.annotation.Resource;
+import java.io.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+@ContextConfiguration({
+        "classpath:/spring/test-context.xml"
+})
+public class LocalJobServiceIT extends AbstractIntegrationTest {
+
+    @Resource
+    private JobService jobService;
+
+    /**
+     * <p>This will be a bit of an unstable test (non-repeatable) because it is
+     * going to drive jobs into the job service and see them all run correctly.
+     * It introduces some random delays.</p>
+     */
+
+    @Test
+    public void testHappyDays() throws IOException {
+
+        // -------------------------
+        List<String> guids = IntStream.of(1,2,3,4)
+                .mapToObj((i) -> new TestNumberedLinesJobSpecification(3, 500L))
+                .map((spec) -> jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_NONE))
+                .collect(Collectors.toList());
+        String immediateGuid = jobService.immediate(new TestNumberedLinesJobSpecification(3, 500L), false);
+        // -------------------------
+
+        Stream.concat(guids.stream(), Stream.of(immediateGuid))
+                .forEach((guid) -> {
+
+                    jobService.awaitJobFinishedUninterruptibly(guid, TimeUnit.SECONDS.toMillis(15));
+
+                    try {
+                        Optional<? extends JobSnapshot> jobSnapshotOptional = jobService.tryGetJob(guid);
+                        Assertions.assertThat(jobSnapshotOptional.isPresent()).isTrue();
+                        Assertions.assertThat(jobSnapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
+
+                        Set<String> dataGuids = jobSnapshotOptional.get().getGeneratedDataGuids();
+                        Assertions.assertThat(dataGuids.size()).isEqualTo(1);
+                        String dataGuid = dataGuids.iterator().next();
+
+                        Optional<JobDataWithByteSource> jobDataOptional = jobService.tryObtainData(dataGuid);
+                        Assertions.assertThat(jobDataOptional.isPresent()).isTrue();
+
+                        try (
+                                InputStream inputStream = jobDataOptional.get().getByteSource().openStream();
+                                Reader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                        ) {
+                            Assertions.assertThat(CharStreams.toString(reader)).isEqualTo("0\n1\n2\n");
+                        }
+                    } catch (IOException ioe) {
+                        new UncheckedIOException(ioe);
+                    }
+                });
+
+    }
+
+    /**
+     * This test will allow two jobs to go through.  Then it will load another and lock it and put another
+     * into the queue.  We can then check the statuses of the jobs and also check that if another is
+     * submitted with coalescing, that the correct code is returned.
+     */
+
+    @Test
+    public void testCoalescePicksTheMostRecentFinished() {
+
+        // -------------------------
+        // setup the initial situation
+        String job1FinishedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
+        jobService.awaitJobFinishedUninterruptibly(job1FinishedGuid, TimeUnit.SECONDS.toMillis(10));
+        String job2FinishedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
+        jobService.awaitJobFinishedUninterruptibly(job2FinishedGuid, TimeUnit.SECONDS.toMillis(10));
+        Lock job3Lock = new ReentrantLock();
+        job3Lock.lock();
+        String job3StartedGuid = jobService.submit(new TestLockableJobSpecification(job3Lock), JobSnapshot.COALESCE_STATUSES_NONE);
+        String job4QueuedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
+        // -------------------------
+
+        assertStatus(job1FinishedGuid, JobSnapshot.Status.FINISHED);
+        assertStatus(job2FinishedGuid, JobSnapshot.Status.FINISHED);
+        assertStatus(job3StartedGuid, JobSnapshot.Status.STARTED);
+        assertStatus(job4QueuedGuid, JobSnapshot.Status.QUEUED);
+
+        // check some coalescing works.
+        Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED))
+                .isEqualTo(job4QueuedGuid);
+
+        Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED))
+                .isEqualTo(job3StartedGuid);
+
+        Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED_FINISHED))
+                .isEqualTo(job1FinishedGuid);
+
+        // -------------------------
+        // release the last two jobs and watch they come through OK.
+        job3Lock.unlock();
+        jobService.awaitJobFinishedUninterruptibly(job3StartedGuid, TimeUnit.SECONDS.toMillis(10));
+        jobService.awaitJobFinishedUninterruptibly(job4QueuedGuid, TimeUnit.SECONDS.toMillis(10));
+        // -------------------------
+
+        assertStatus(job3StartedGuid, JobSnapshot.Status.FINISHED);
+        assertStatus(job3StartedGuid, JobSnapshot.Status.FINISHED);
+
+    }
+
+    private void assertStatus(String guid, JobSnapshot.Status status) {
+        Optional<? extends JobSnapshot> afterJob = jobService.tryGetJob(guid);
+        Assertions.assertThat(afterJob.isPresent()).isTrue();
+        Assertions.assertThat(afterJob.get().getStatus()).isEqualTo(status);
+    }
+
+
+}

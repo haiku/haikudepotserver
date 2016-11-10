@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -36,12 +37,12 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
     private Set<String> generatedDataGuids = Sets.newHashSet();
 
     public Job() {
+        super();
     }
 
     public Job(JobSnapshot other) {
         this();
         Preconditions.checkArgument(null != other, "the other job run state must be supplied");
-        assert other != null;
         this.startTimestamp = other.getStartTimestamp();
         this.finishTimestamp = other.getFinishTimestamp();
         this.queuedTimestamp = other.getQueuedTimestamp();
@@ -50,6 +51,11 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
         this.progressPercent = other.getProgressPercent();
         this.jobSpecification = other.getJobSpecification();
         this.generatedDataGuids = Sets.newHashSet(other.getGeneratedDataGuids());
+    }
+
+    public Job(JobSpecification jobSpecification) {
+        this();
+        this.jobSpecification = jobSpecification;
     }
 
     @Override
@@ -216,12 +222,12 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
     }
 
     @Override
-    public Long getTimeToLive() {
+    public Optional<Long> tryGetTimeToLiveMillis() {
         if (null != jobSpecification) {
-            return jobSpecification.getTimeToLive();
+            return jobSpecification.tryGetTimeToLiveMillis();
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Override

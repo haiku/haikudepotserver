@@ -11,6 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
@@ -60,7 +61,7 @@ public class MaintenanceController {
             for(Repository repository : Repository.getAllActive(context)) {
                 jobService.submit(
                         new PkgRepositoryImportJobSpecification(repository.getCode()),
-                        JobService.CoalesceMode.QUEUED);
+                        JobSnapshot.COALESCE_STATUSES_QUEUED);
             }
         }
 
@@ -92,7 +93,7 @@ public class MaintenanceController {
             if (UserPasswordResetToken.hasAny(serverRuntime.getContext())) {
                 jobService.submit(
                         new PasswordResetMaintenanceJobSpecification(),
-                        JobService.CoalesceMode.QUEUEDANDSTARTED);
+                        JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
             }
             else {
                 LOGGER.debug("did not submit task for password reset maintenance as there are no tokens stored");

@@ -64,7 +64,7 @@ public class PkgRepositoryImportJobSpecification extends AbstractJobSpecificatio
     public boolean isEquivalent(JobSpecification other) {
         Preconditions.checkState(!Strings.isNullOrEmpty(repositoryCode), "this specification should have a repository code defined.");
 
-        if(PkgRepositoryImportJobSpecification.class.isAssignableFrom(other.getClass())) {
+        if(super.isEquivalent(other)) {
             PkgRepositoryImportJobSpecification other2 = (PkgRepositoryImportJobSpecification) other;
 
             return

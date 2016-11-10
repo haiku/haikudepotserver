@@ -40,7 +40,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobSpecification extends Abstra
     @Override
     public boolean isEquivalent(JobSpecification other) {
         return
-                PkgCategoryCoverageImportSpreadsheetJobSpecification.class.isAssignableFrom(other.getClass())
+                super.isEquivalent(other)
                         && getSuppliedDataGuids().equals(other.getSuppliedDataGuids())
                         && ObjectUtils.nullSafeEquals(other.getOwnerUserNickname(), getOwnerUserNickname());
     }

@@ -37,7 +37,7 @@ public class PkgScreenshotOptimizationJobSpecification extends AbstractJobSpecif
 
     @Override
     public boolean isEquivalent(JobSpecification other) {
-        if(PkgScreenshotOptimizationJobSpecification.class.isAssignableFrom(other.getClass())) {
+        if (super.isEquivalent(other)) {
             PkgScreenshotOptimizationJobSpecification spec = (PkgScreenshotOptimizationJobSpecification) other;
             return
                     Objects.equals(spec.getOwnerUserNickname(), getOwnerUserNickname()) &&

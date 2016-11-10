@@ -20,21 +20,31 @@ import java.util.Set;
 
 public interface JobService {
 
-    enum CoalesceMode {
-        NONE,
-        QUEUED,
-        QUEUEDANDSTARTED
-    }
-
     /**
-     * <p>This method will block until the job is no longer queued or started.</p>
+     * <p>This method will block until the job is no longer queued or started.  It may be finished, but
+     * actually it could have also failed or have been cancelled.</p>
      */
 
-    void awaitJobConcludedUninterruptibly(String guid, long timeout);
+    void awaitJobFinishedUninterruptibly(String guid, long timeout);
 
-    Optional<String> submit(
+    /**
+     * <p>This method will run the specification asynchronously.  If there is an existing job which is
+     * in the system and that is in one of the states supplied, then that will be returned instead.
+     * This is to avoid double-running the job.  See {@link JobSpecification} for some handy constants.
+     * </p>
+     */
+
+    String submit(
             JobSpecification specification,
-            CoalesceMode coalesceMode);
+            Set<JobSnapshot.Status> coalesceForStatuses);
+
+    /**
+     * <p>This method will run the specification immediate in the current thread.  Do not use this unless
+     * there is a need to feed the data directly or quasi-directly to a client.  See
+     * {@link #submit(JobSpecification, Set)} for information on the coalescing over statuses.</p>
+     */
+
+    String immediate(JobSpecification specification, boolean coalesceFinished);
 
     void setJobFailTimestamp(String guid);
 

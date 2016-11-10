@@ -10,14 +10,4 @@ import org.haiku.haikudepotserver.job.model.JobSpecification;
 import org.springframework.util.ObjectUtils;
 
 public class PkgLocalizationCoverageExportSpreadsheetJobSpecification extends AbstractJobSpecification {
-
-    @Override
-    public boolean isEquivalent(JobSpecification other) {
-        if(PkgLocalizationCoverageExportSpreadsheetJobSpecification.class.isAssignableFrom(other.getClass())) {
-            return ObjectUtils.nullSafeEquals(other.getOwnerUserNickname(), getOwnerUserNickname());
-        }
-
-        return false;
-    }
-
 }

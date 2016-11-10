@@ -31,6 +31,10 @@ public interface DataStorageService {
 
     boolean remove(String key);
 
+    /**
+     * <p>Removes all of the items from storage.</p>
+     */
+
     void clear();
 
 }

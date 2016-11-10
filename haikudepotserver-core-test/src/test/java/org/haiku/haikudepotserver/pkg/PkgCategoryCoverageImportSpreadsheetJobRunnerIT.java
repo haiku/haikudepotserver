@@ -55,11 +55,13 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
         ).getGuid());
 
         // ------------------------------------
-        Optional<String> guidOptional = jobService.submit(spec, JobService.CoalesceMode.NONE);
+        String guid = jobService.submit(
+                spec,
+                JobSnapshot.COALESCE_STATUSES_NONE);
         // ------------------------------------
 
-        jobService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guidOptional.get());
+        jobService.awaitJobFinishedUninterruptibly(guid, 10000);
+        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
         Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
 
         String dataGuid = snapshotOptional

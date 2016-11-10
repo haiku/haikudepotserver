@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.job.model;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * <p>Concrete implementations of this interface are able to be used as specifications for a job to be run.  It does
@@ -40,7 +41,7 @@ public interface JobSpecification {
      * in the {@link JobService}.</p>
      */
 
-    Long getTimeToLive();
+    Optional<Long> tryGetTimeToLiveMillis();
 
     Collection<String> getSuppliedDataGuids();
 

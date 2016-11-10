@@ -1,12 +1,16 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.userrating.model;
 
+import org.flywaydb.core.internal.util.ObjectUtils;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
+
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>An instance of this job can be submitted in order to get the
@@ -34,8 +38,8 @@ public class UserRatingDerivationJobSpecification extends AbstractJobSpecificati
         this.pkgName = value;
     }
 
-    public Long getTimeToLive() {
-        return 120 * 1000L; // only stay around for a short while
+    public Optional<Long> tryGetTimeToLiveMillis() {
+        return Optional.of(TimeUnit.MILLISECONDS.convert(120, TimeUnit.SECONDS)); // only stay around for a short while
     }
 
     public boolean appliesToAllPkgs() {
@@ -44,15 +48,9 @@ public class UserRatingDerivationJobSpecification extends AbstractJobSpecificati
 
     @Override
     public boolean isEquivalent(JobSpecification other) {
-        if(UserRatingDerivationJobSpecification.class.isAssignableFrom(other.getClass())) {
+        if(super.isEquivalent(other)) {
             UserRatingDerivationJobSpecification other2 = (UserRatingDerivationJobSpecification) other;
-
-            if(null==other2.getPkgName()) {
-                return null==getPkgName();
-            }
-            else {
-                return null!=getPkgName() && other2.getPkgName().equals(getPkgName());
-            }
+            return ObjectUtils.nullSafeEquals(other2.getPkgName(), getPkgName());
         }
 
         return false;

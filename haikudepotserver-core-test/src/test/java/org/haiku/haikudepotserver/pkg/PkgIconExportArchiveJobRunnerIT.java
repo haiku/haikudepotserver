@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.pkg;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
@@ -33,8 +32,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @ContextConfiguration({
         "classpath:/spring/test-context.xml"
@@ -60,13 +57,13 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData(); // pkg1 has some icons
 
         // ------------------------------------
-        Optional<String> guidOptional = jobService.submit(
+        String guid = jobService.submit(
                 new PkgIconExportArchiveJobSpecification(),
-                JobService.CoalesceMode.NONE);
+                JobSnapshot.COALESCE_STATUSES_NONE);
         // ------------------------------------
 
-        jobService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guidOptional.get());
+        jobService.awaitJobFinishedUninterruptibly(guid, 10000);
+        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
         Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
 
         // pull in the ZIP file now and extract the icons.

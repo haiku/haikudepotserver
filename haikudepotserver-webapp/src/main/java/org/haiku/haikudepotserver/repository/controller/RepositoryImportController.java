@@ -9,6 +9,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ public class RepositoryImportController {
 
         jobService.submit(
                 new PkgRepositoryImportJobSpecification(repositoryCode),
-                JobService.CoalesceMode.QUEUED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return ResponseEntity.ok("repository import submitted");
 
@@ -90,7 +91,7 @@ public class RepositoryImportController {
 
         jobService.submit(
                 new PkgRepositoryImportJobSpecification(repositoryCode, Collections.singleton(repositorySourceCode)),
-                JobService.CoalesceMode.QUEUED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return ResponseEntity.ok("repository source import submitted");
     }

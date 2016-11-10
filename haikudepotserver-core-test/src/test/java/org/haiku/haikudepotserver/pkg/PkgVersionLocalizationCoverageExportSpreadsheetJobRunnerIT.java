@@ -42,11 +42,13 @@ public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends 
         PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification spec = new PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification();
 
         // ------------------------------------
-        Optional<String> guidOptional = jobService.submit(spec, JobService.CoalesceMode.NONE);
+        String guid = jobService.submit(
+                spec,
+                JobSnapshot.COALESCE_STATUSES_NONE);
         // ------------------------------------
 
-        jobService.awaitJobConcludedUninterruptibly(guidOptional.get(), 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guidOptional.get());
+        jobService.awaitJobFinishedUninterruptibly(guid, 10000);
+        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
         Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         String dataGuid = snapshotOptional.get().getGeneratedDataGuids()

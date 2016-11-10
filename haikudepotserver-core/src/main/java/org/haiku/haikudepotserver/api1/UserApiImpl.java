@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.api1.support.*;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
@@ -82,7 +83,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         jobService.submit(
                 new LdapSynchronizeUsersJobSpecification(),
-                JobService.CoalesceMode.QUEUED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return new SynchronizeUsersResult();
     }
@@ -160,7 +161,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                 for(String pkgName : pkgNames) {
                     jobService.submit(
                             new UserRatingDerivationJobSpecification(pkgName),
-                            JobService.CoalesceMode.QUEUED);
+                            JobSnapshot.COALESCE_STATUSES_QUEUED);
                 }
             }
 

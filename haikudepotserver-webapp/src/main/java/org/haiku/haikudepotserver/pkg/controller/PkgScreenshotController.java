@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecification;
@@ -253,7 +254,7 @@ public class PkgScreenshotController extends AbstractController {
 
         jobService.submit(
                 new PkgScreenshotOptimizationJobSpecification(screenshotCode),
-                JobService.CoalesceMode.QUEUEDANDSTARTED);
+                JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
 
         response.setHeader(HEADER_SCREENSHOTCODE, screenshotCode);
         response.setStatus(HttpServletResponse.SC_OK);

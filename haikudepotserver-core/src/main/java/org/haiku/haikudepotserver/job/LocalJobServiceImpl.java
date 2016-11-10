@@ -6,14 +6,14 @@
 package org.haiku.haikudepotserver.job;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractService;
+import com.google.common.util.concurrent.Uninterruptibles;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -30,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +48,7 @@ public class LocalJobServiceImpl
 
     private final static int SIZE_QUEUE = 10;
 
-    private final static long TTL_DEFAULT = 2 * 60 * 60 * 1000; // 2h
+    private final static long TTL_DEFAULT = TimeUnit.HOURS.toMillis(2);
 
     private DataStorageService dataStorageService;
 
@@ -69,61 +71,28 @@ public class LocalJobServiceImpl
 
     private Set<JobData> datas = Sets.newHashSet();
 
-    public void setJobDataStorageService(DataStorageService dataStorageService) {
-        this.dataStorageService = dataStorageService;
+    @PreDestroy
+    public void tearDown() {
+        stopAsyncAndAwaitTerminated();
     }
 
-    private synchronized Collection<Job> findJobsWithStatuses(final EnumSet<JobSnapshot.Status> statuses) {
-        Preconditions.checkArgument(null!=statuses, "the status must be supplied to filter the job run states");
-
-        if(statuses.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        return jobs
-                .values()
-                .stream()
-                .filter(j -> statuses.contains(j.getStatus()))
-                .collect(Collectors.toList());
+    public void setJobDataStorageService(DataStorageService dataStorageService) {
+        this.dataStorageService = dataStorageService;
     }
 
     // ------------------------------
     // RUN JOBS
 
-    private boolean existsAndIsQueuedOrStarted(String guid) {
-        Optional<? extends JobSnapshot> jobSnapshotOptional = tryGetJob(guid);
-
-        if(!jobSnapshotOptional.isPresent()) {
-            return false;
-        }
-
-        switch(jobSnapshotOptional.get().getStatus()) {
-            case QUEUED:
-            case STARTED:
-                return true;
-
-            default:
-                return false;
-        }
-
-    }
-
     @Override
-    public void awaitJobConcludedUninterruptibly(String guid, long timeout) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
+    public void awaitJobFinishedUninterruptibly(String guid, long timeout) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(guid), "a guid must be supplied");
         Preconditions.checkArgument(timeout > 0);
-        long ms = System.currentTimeMillis();
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        EnumSet<JobSnapshot.Status> earlyStatuses = EnumSet.of(JobSnapshot.Status.QUEUED, JobSnapshot.Status.STARTED);
 
-        while(System.currentTimeMillis() - ms < timeout
-                && existsAndIsQueuedOrStarted(guid)) {
-            synchronized(this) {
-                try {
-                    wait(timeout);
-                }
-                catch(InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+        while(stopwatch.elapsed(TimeUnit.MILLISECONDS) < timeout
+                && tryGetJob(guid).filter((j) -> earlyStatuses.contains(j.getStatus())).isPresent()) {
+            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
         }
     }
 
@@ -133,69 +102,128 @@ public class LocalJobServiceImpl
         return jobRunners.stream().filter(j -> j.getJobTypeCode().equals(jobTypeCode)).collect(SingleCollector.optional());
     }
 
-    private Job submit(JobSpecification specification) {
-        Job job = new Job();
-        job.setJobSpecification(specification);
+    @Override
+    public String submit(
+            JobSpecification specification,
+            Set<JobSnapshot.Status> coalesceForStatuses) {
+        return validateAndcoalesceOrCreateJob(specification,
+                coalesceForStatuses, this::createInternalJobBySubmittingToExecutor);
+    }
+
+    @Override
+    public String immediate(
+            JobSpecification specification, boolean coalesceFinished) {
+        return validateAndcoalesceOrCreateJob(specification,
+                EnumSet.of(JobSnapshot.Status.FINISHED),
+                this::createInternalJobByRunningInCurrentThread);
+    }
+
+    private String validateAndcoalesceOrCreateJob(
+            JobSpecification specification,
+            Set<JobSnapshot.Status> coalesceForStatuses,
+            Function<JobSpecification, Job> createJobFunction) {
+
+        Preconditions.checkState(null != executor,
+                "the executor has not been configured; was this service started correctly?");
+        Preconditions.checkArgument(null != specification);
+        Preconditions.checkArgument(null != coalesceForStatuses,
+                "the statuses over which coalescing should occur must be supplied");
+
+        getJobRunner(specification.getJobTypeCode()).orElseThrow(() ->
+                new IllegalStateException("unable to run a job runner for the job type code; "
+                        + specification.getJobTypeCode()));
+
+        for (String guid : specification.getSuppliedDataGuids()) {
+            if (!tryGetData(guid).isPresent()) {
+                throw new IllegalStateException(
+                        "unable to run a job specification because the specified data "
+                                + guid + " was not able to be found");
+            }
+        }
+
+        if (null==specification.getGuid()) {
+            specification.setGuid(UUID.randomUUID().toString());
+        } else {
+            synchronized (this) {
+               if (tryGetJob(specification.getGuid()).isPresent()) {
+                   throw new IllegalStateException(
+                           "a specification has been submitted for which there is already a job running; "
+                                   + specification.getGuid());
+               }
+            }
+        }
+
+        // if there is an existing report that can be used then use it; otherwise make a new one.
+        // The use of sorting below is to get the best job to re-use (the most recent) from all
+        // of the possible ones.
+
+        Optional<String> firstMatchingJobGuidOptional;
+
+        synchronized (this) {
+            firstMatchingJobGuidOptional = ImmutableList.copyOf(jobs.values())
+                    .stream()
+                    .filter((j) -> coalesceForStatuses.contains(j.getStatus()))
+                    .filter((j) -> specification.isEquivalent(j.getJobSpecification()))
+                    .sorted((j1, j2) -> ComparisonChain.start()
+                            .compare(j1.getStatus(), j2.getStatus(),
+                                    Ordering.explicit(
+                                            JobSnapshot.Status.FINISHED,
+                                            JobSnapshot.Status.STARTED,
+                                            JobSnapshot.Status.QUEUED
+                                    )
+                            )
+                            .compare(j1.getFinishTimestamp(), j2.getFinishTimestamp(), Ordering.natural().nullsLast())
+                            .compare(j1.getStartTimestamp(), j2.getStartTimestamp(), Ordering.natural().nullsLast())
+                            .compare(j1.getQueuedTimestamp(), j2.getQueuedTimestamp(), Ordering.natural().nullsLast())
+                            .compare(j1.getFailTimestamp(), j2.getFailTimestamp(), Ordering.natural().nullsLast())
+                            .compare(j1.getCancelTimestamp(), j2.getCancelTimestamp(), Ordering.natural().nullsLast())
+                            .result()
+                    )
+                    .map(Job::getGuid)
+                    .findFirst();
+        }
+
+        return firstMatchingJobGuidOptional.orElse(createJobFunction.apply(specification).getGuid());
+    }
+
+    private Job createInternalJobBySubmittingToExecutor(final JobSpecification specification) {
+        Job job = new Job(specification);
 
         LOGGER.debug("{}; will submit job", specification.toString());
         jobs.put(job.getGuid(), job);
-        setJobRunQueuedTimestamp(specification.getGuid());
-        executor.submit(new JobRunnable(job.getJobSpecification()));
-        LOGGER.debug("{}; did submit job", specification.toString());
+        setInternalJobRunQueuedTimestamp(specification.getGuid());
+        executor.submit(() -> {
+            String threadNamePrior = Thread.currentThread().getName();
+
+            try {
+                Thread.currentThread().setName("job-run-" + StringUtils.abbreviate(specification.getGuid(), 4));
+                runSpecificationInCurrentThread(specification);
+            }
+            finally {
+                Thread.currentThread().setName(threadNamePrior);
+            }
+        });
 
         return job;
     }
 
-    @Override
-    public synchronized Optional<String> submit(
-            JobSpecification specification,
-            CoalesceMode coalesceMode) {
+    private Job createInternalJobByRunningInCurrentThread(JobSpecification specification) {
+        Job job = new Job(specification);
 
-        Preconditions.checkState(null!=executor, "the executor has not been configured; was this service started correctly?");
-        Preconditions.checkArgument(null!=specification);
+        LOGGER.debug("{}; will run job immediately", specification.toString());
+        jobs.put(job.getGuid(), job);
+        setInternalJobRunQueuedTimestamp(specification.getGuid());
+        runSpecificationInCurrentThread(specification);
+        LOGGER.debug("{}; did run job immediately", specification.toString());
 
-        getJobRunner(specification.getJobTypeCode()).orElseThrow(() ->
-                new IllegalStateException("unable to run a job runner for the job type code; " + specification.getJobTypeCode()));
-
-        for(String guid : specification.getSuppliedDataGuids()) {
-            if(!tryGetData(guid).isPresent()) {
-                throw new IllegalStateException("unable to run a job specification because the specified data " + guid + " was not able to be found");
-            }
-        }
-
-        if(null==specification.getGuid()) {
-            specification.setGuid(UUID.randomUUID().toString());
-        }
-
-        switch(coalesceMode) {
-
-            case NONE:
-                return Optional.of(submit(specification).getGuid());
-
-            case QUEUED:
-                if(!tryGetJobWithEquivalentSpecification(
-                        specification,
-                        findJobsWithStatuses(EnumSet.of(JobSnapshot.Status.QUEUED))).isPresent()) {
-                    return Optional.of(submit(specification).getGuid());
-                }
-                break;
-
-            case QUEUEDANDSTARTED:
-                if(!tryGetJobWithEquivalentSpecification(
-                        specification,
-                        findJobsWithStatuses(
-                                EnumSet.of(JobSnapshot.Status.QUEUED, JobSnapshot.Status.STARTED))
-                ).isPresent()) {
-                    return Optional.of(submit(specification).getGuid());
-                }
-                break;
-
-        }
-
-        return Optional.empty();
+        return job;
     }
 
-    private void runInternal(JobSpecification specification) {
+    /**
+     * <p>This will actually run the job.  This does not need to be locked.</p>
+     */
+
+    private void runSpecificationInCurrentThread(JobSpecification specification) {
         Preconditions.checkArgument(null != specification, "the job specification must be supplied to run the job");
         Optional<JobRunner> jobRunnerOptional = getJobRunner(specification.getJobTypeCode());
 
@@ -209,10 +237,10 @@ public class LocalJobServiceImpl
         }
 
         try {
-            setJobStartTimestamp(specification.getGuid());
+            setInternalJobStartTimestamp(specification.getGuid());
             //noinspection unchecked
             jobRunnerOptional.get().run(this, specification);
-            setJobFinishTimestamp(specification.getGuid());
+            setInternalJobFinishTimestamp(specification.getGuid());
         }
         catch(Throwable th) {
             LOGGER.error(specification.getGuid() + "; failure to run the job", th);
@@ -223,17 +251,7 @@ public class LocalJobServiceImpl
     // ------------------------------
     // PURGE
 
-    private long deriveTimeToLive(JobSnapshot job) {
-        Long timeToLive = job.getTimeToLive();
-
-        if(null==timeToLive) {
-            return TTL_DEFAULT;
-        }
-
-        return timeToLive;
-    }
-
-    private synchronized Optional<Job> tryFindJob(final JobData data) {
+    private synchronized Optional<Job> tryFindInternalJobOwningJobData(final JobData data) {
         Preconditions.checkArgument(null != data, "the data must be provided");
         return jobs
                 .values()
@@ -249,26 +267,26 @@ public class LocalJobServiceImpl
      */
 
     private synchronized void clearExpiredDatas() {
-        for(JobData data : ImmutableList.copyOf(datas)) {
-            if(System.currentTimeMillis() - data.getCreateTimestamp().getTime() > TTL_DEFAULT) {
-                if(!tryFindJob(data).isPresent()) {
-                    if(dataStorageService.remove(data.getGuid())) {
-                        LOGGER.info("did delete the expired unassociated job data; {}", data);
-                        datas.remove(data);
+        ImmutableList.copyOf(datas)
+                .stream()
+                .filter((d) -> System.currentTimeMillis() - d.getCreateTimestamp().getTime() > TTL_DEFAULT)
+                .filter((d) -> !tryFindInternalJobOwningJobData(d).isPresent())
+                .forEach((d) -> {
+                    if(dataStorageService.remove(d.getGuid())) {
+                        LOGGER.info("did delete the expired unassociated job data; [{}]", d);
+                        datas.remove(d);
                     }
                     else {
-                        LOGGER.error("was not able to delete the expired unassociated job data; {} - data will remain in situ", data);
+                        LOGGER.error("was not able to delete the expired unassociated job data; [{}] - data will remain in situ", d);
                     }
-                }
-            }
-        }
+                });
     }
 
     /**
      * <p>Removes the job and any data associated with the job.</p>
      */
 
-    private synchronized void removeJob(Job job) {
+    private synchronized void removeInternalJob(Job job) {
         Preconditions.checkArgument(null!=job, "the job must be supplied to remove a job");
 
         for(String guid : job.getDataGuids()) {
@@ -291,14 +309,18 @@ public class LocalJobServiceImpl
     }
 
     @Override
-    public synchronized void clearExpiredJobs() {
+    public void clearExpiredJobs() {
+        clearExpiredInternalJobs();
+    }
+
+    private synchronized void clearExpiredInternalJobs() {
         long nowMillis = System.currentTimeMillis();
 
         synchronized (this) {
 
             for (Job job : ImmutableList.copyOf(jobs.values())) {
 
-                Long ttl = deriveTimeToLive(job);
+                Long ttl = job.tryGetTimeToLiveMillis().orElse(TTL_DEFAULT);
                 Date quiesenceTimestamp = null;
 
                 switch (job.getStatus()) {
@@ -320,7 +342,7 @@ public class LocalJobServiceImpl
                 if (null != quiesenceTimestamp) {
                     if (nowMillis - quiesenceTimestamp.getTime() > ttl) {
 
-                        removeJob(job);
+                        removeInternalJob(job);
 
                         LOGGER.info(
                                 "{} purged expired job for ttl; {}ms",
@@ -336,9 +358,9 @@ public class LocalJobServiceImpl
     }
 
     // ------------------------------
-    // RUN STATE MANIPULATION
+    // GET JOBS / LIST / SEARCH
 
-    private synchronized List<Job> filteredJobs(
+    private synchronized List<Job> filteredInternalJobs(
             final User user,
             final Set<JobSnapshot.Status> statuses) {
 
@@ -351,10 +373,8 @@ public class LocalJobServiceImpl
         return jobs
                 .values()
                 .stream()
-                .filter(v ->
-                                (null == user || user.getNickname().equals(v.getOwnerUserNickname()))
-                                        && (null == statuses || statuses.contains(v.getStatus()))
-                )
+                .filter(v -> null == user || user.getNickname().equals(v.getOwnerUserNickname()))
+                .filter(v -> null == statuses || statuses.contains(v.getStatus()))
                 .collect(Collectors.toList());
 
     }
@@ -373,7 +393,7 @@ public class LocalJobServiceImpl
             return Collections.emptyList();
         }
 
-        List<Job> result = filteredJobs(user, statuses);
+        List<Job> result = filteredInternalJobs(user, statuses);
 
         if(offset >= result.size()) {
             return Collections.emptyList();
@@ -390,26 +410,13 @@ public class LocalJobServiceImpl
 
     @Override
     public int totalJobs(User user, Set<JobSnapshot.Status> statuses) {
-        return filteredJobs(user, statuses).size();
+        return filteredInternalJobs(user, statuses).size();
     }
 
     /**
-     * <p>Parameters from this are concurrency-safe from caller.</p>
+     * <p>Note that this method will return a <em>copy</em> of the job and not the internal
+     * representation of the job itself.</p>
      */
-
-    private static Optional<JobSnapshot> tryGetJobWithEquivalentSpecification(
-            JobSpecification other,
-            Collection<Job> jobs) {
-        Preconditions.checkArgument(null!=other, "need to provide the other job specification");
-
-        for(JobSnapshot job : ImmutableList.copyOf(jobs)) {
-            if(other.isEquivalent(job.getJobSpecification())) {
-                return Optional.of(job);
-            }
-        }
-
-        return Optional.empty();
-    }
 
     @Override
     public synchronized Optional<? extends JobSnapshot> tryGetJob(String guid) {
@@ -429,7 +436,7 @@ public class LocalJobServiceImpl
      * the working copy.</p>
      */
 
-    private Job getJob(String guid) {
+    private Job getInternalJob(String guid) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
         Job job = jobs.get(guid);
 
@@ -440,8 +447,26 @@ public class LocalJobServiceImpl
         return job;
     }
 
-    public synchronized void setJobStartTimestamp(String guid) {
-        Job job = getJob(guid);
+    // ------------------------------
+    // SET STATUS
+
+    @Override
+    public synchronized void setJobProgressPercent(String guid, Integer progressPercent) {
+        setInternalJobProgressPercent(guid, progressPercent);
+    }
+
+    @Override
+    public synchronized void setJobFailTimestamp(String guid) {
+        setInternalJobFailTimestamp(guid);
+    }
+
+    @Override
+    public synchronized void setJobCancelTimestamp(String guid) {
+        setInternalJobCancelTimestamp(guid);
+    }
+
+    private synchronized void setInternalJobStartTimestamp(String guid) {
+        Job job = getInternalJob(guid);
 
         if(job.getStatus() != JobSnapshot.Status.QUEUED) {
             throw new IllegalStateException("it is not possible to start a job from status; " + job.getStatus());
@@ -453,8 +478,8 @@ public class LocalJobServiceImpl
         notifyAll();
     }
 
-    public synchronized void setJobFinishTimestamp(String guid) {
-        Job job = getJob(guid);
+    private synchronized void setInternalJobFinishTimestamp(String guid) {
+        Job job = getInternalJob(guid);
 
         if(job.getStatus() != JobSnapshot.Status.STARTED) {
             throw new IllegalStateException("it is not possible to finish a job from status; " + job.getStatus());
@@ -466,8 +491,8 @@ public class LocalJobServiceImpl
         notifyAll();
     }
 
-    public synchronized void setJobRunQueuedTimestamp(String guid) {
-        Job job = getJob(guid);
+    private synchronized void setInternalJobRunQueuedTimestamp(String guid) {
+        Job job = getInternalJob(guid);
 
         if(job.getStatus() != JobSnapshot.Status.INDETERMINATE) {
             throw new IllegalStateException("it is not possible to queue a job from status; " + job.getStatus());
@@ -479,9 +504,8 @@ public class LocalJobServiceImpl
         notifyAll();
     }
 
-    @Override
-    public synchronized void setJobFailTimestamp(String guid) {
-        Job job = getJob(guid);
+    private synchronized void setInternalJobFailTimestamp(String guid) {
+        Job job = getInternalJob(guid);
 
         if(job.getStatus() != JobSnapshot.Status.STARTED) {
             throw new IllegalStateException("it is not possible to fail a job from status; " + job.getStatus());
@@ -493,9 +517,8 @@ public class LocalJobServiceImpl
         notifyAll();
     }
 
-    @Override
-    public synchronized void setJobCancelTimestamp(String guid) {
-        Job job = getJob(guid);
+    private synchronized void setInternalJobCancelTimestamp(String guid) {
+        Job job = getInternalJob(guid);
 
         switch (job.getStatus()) {
             case QUEUED:
@@ -510,10 +533,9 @@ public class LocalJobServiceImpl
         }
     }
 
-    @Override
-    public synchronized void setJobProgressPercent(String guid, Integer progressPercent) {
+    private synchronized void setInternalJobProgressPercent(String guid, Integer progressPercent) {
         Preconditions.checkArgument(null==progressPercent || (progressPercent >= 0 && progressPercent <= 100), "bad progress percent value");
-        Job job = getJob(guid);
+        Job job = getInternalJob(guid);
 
         if(job.getStatus() != JobSnapshot.Status.STARTED) {
             throw new IllegalStateException("it is not possible to set the progress percent for a job from status; " + job.getStatus());
@@ -547,7 +569,7 @@ public class LocalJobServiceImpl
             executor = new ThreadPoolExecutor(
                     0, // core pool size
                     1, // max pool size
-                    1l, // time to shutdown threads
+                    1L, // time to shutdown threads
                     TimeUnit.MINUTES,
                     runnables,
                     new ThreadPoolExecutor.AbortPolicy());
@@ -583,15 +605,6 @@ public class LocalJobServiceImpl
         }
     }
 
-    private void tryClearDataStorageService() {
-        try {
-            dataStorageService.clear();
-        }
-        catch(Throwable th) {
-            LOGGER.error("unable to clear the data storage service", th);
-        }
-    }
-
     public void startAsyncAndAwaitRunning() {
         tryClearDataStorageService();
         startAsync();
@@ -604,52 +617,8 @@ public class LocalJobServiceImpl
         awaitTerminated();
     }
 
-    /**
-     * <p>Returns true if the service is actively working on a job or it has a job submitted which has not yet
-     * been dequeued and run.</p>
-     */
-
-    public boolean isProcessingSubmittedJobs() {
-        return
-                null!=executor
-                        && (executor.getActiveCount() > 0 || !executor.getQueue().isEmpty());
-    }
-
-    /**
-     * <p>This wrapper takes one of the queued jobs and runs it.</p>
-     */
-
-    public class JobRunnable implements Runnable {
-
-        private JobSpecification specification;
-
-        public JobRunnable(JobSpecification specification) {
-            this.specification = specification;
-        }
-
-        @Override
-        public void run() {
-
-            String threadNamePrior = Thread.currentThread().getName();
-
-            try {
-                String g = specification.getGuid();
-
-                if(g.length() > 4) {
-                    g = g.substring(0,4) + "..";
-                }
-
-                Thread.currentThread().setName("job-run-"+g);
-
-                runInternal(specification);
-            }
-            finally {
-                Thread.currentThread().setName(threadNamePrior);
-            }
-
-        }
-
-    }
+    // ------------------------------
+    // DATA INPUT AND OUTPUT
 
     @Override
     public Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid) {
@@ -657,7 +626,7 @@ public class LocalJobServiceImpl
         Optional<JobData> jobDataOptional = tryGetData(jobDataGuid);
 
         if(jobDataOptional.isPresent()) {
-            return tryFindJob(jobDataOptional.get());
+            return tryFindInternalJobOwningJobData(jobDataOptional.get());
         }
 
         return Optional.empty();
@@ -694,6 +663,10 @@ public class LocalJobServiceImpl
                 if(jobData.getMediaTypeCode().equals(MediaType.TAR.withoutParameters().toString())) {
                     extension = "tgz";
                 }
+
+                if(jobData.getMediaTypeCode().equals(MediaType.PLAIN_TEXT_UTF_8.withoutParameters().toString())) {
+                    extension = "txt";
+                }
             }
         }
 
@@ -719,7 +692,7 @@ public class LocalJobServiceImpl
 
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobGuid));
 
-        Job job = getJob(jobGuid);
+        Job job = getInternalJob(jobGuid);
         String guid = UUID.randomUUID().toString();
 
         JobData data = new JobData(guid, JobDataType.GENERATED,useCode,mediaTypeCode);
@@ -773,6 +746,15 @@ public class LocalJobServiceImpl
         }
 
         return Optional.empty();
+    }
+
+    private void tryClearDataStorageService() {
+        try {
+            dataStorageService.clear();
+        }
+        catch(Throwable th) {
+            LOGGER.error("unable to clear the data storage service", th);
+        }
     }
 
 }

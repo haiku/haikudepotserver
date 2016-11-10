@@ -10,6 +10,10 @@
     <bean id="mailSender" class="org.haiku.haikudepotserver.CapturingMailSender"/>
     <bean class="org.haiku.haikudepotserver.support.NoopClientIdentifierSupplier"/>
 
+    <!-- JOBS -->
+    <bean class="org.haiku.haikudepotserver.job.TestNumberedLinesJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.job.TestLockableJobRunner"/>
+
     <!-- LOCALIZATION -->
 
     <util:list id="messageSourceBaseNames">
