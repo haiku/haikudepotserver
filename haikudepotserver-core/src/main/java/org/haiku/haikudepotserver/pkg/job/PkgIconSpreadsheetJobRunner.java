@@ -12,12 +12,14 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
 import org.haiku.haikudepotserver.pkg.model.PkgIconSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>This report produces a list of icon configuration by package.</p>
@@ -42,6 +45,9 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
 
     @Resource
     private ServerRuntime serverRuntime;
+
+    @Resource
+    private RepositoryService repositoryService;
 
     @Resource
     private PkgOrchestrationService pkgOrchestrationService;
@@ -73,6 +79,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                 List<String> headings = new ArrayList<>();
 
                 headings.add("pkg-name");
+                headings.add("repository-codes");
                 headings.add("no-icons");
 
                 for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
@@ -108,7 +115,10 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
 
                         List<String> cells = new ArrayList<>();
                         cells.add(pkg.getName());
-
+                        cells.add(repositoryService.getRepositoriesForPkg(context, pkg)
+                                .stream()
+                                .map(Repository::getCode)
+                                .collect(Collectors.joining(";")));
                         cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");
 
                         for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
