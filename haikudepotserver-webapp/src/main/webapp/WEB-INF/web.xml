@@ -45,6 +45,7 @@
             <param-value>css</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
@@ -63,6 +64,7 @@
             <param-value>js</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
@@ -73,6 +75,7 @@
             <param-value>classpath:/spring/servlet-context.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet-mapping>
@@ -126,21 +129,25 @@
     <filter>
         <filter-name>authenticationFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
     </filter>
 
     <filter>
         <filter-name>loggingFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
     </filter>
 
     <filter>
         <filter-name>singlePageTemplateFrequencyMetricsFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
     </filter>
 
     <filter>
         <filter-name>desktopApplicationMinimumVersionFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
     </filter>
 
     <filter-mapping>
@@ -158,12 +165,6 @@
         <url-pattern>/__js/app/*</url-pattern>
     </filter-mapping>
 
-    <filter-mapping>
-        <filter-name>desktopApplicationMinimumVersionFilter</filter-name>
-        <url-pattern>/__api/*</url-pattern>
-    </filter-mapping>
-
-    <!-- TODO; remove legacy path -->
     <filter-mapping>
         <filter-name>desktopApplicationMinimumVersionFilter</filter-name>
         <url-pattern>/__api/*</url-pattern>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
+import com.google.common.io.Files;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,47 +71,21 @@ public class LocalDataStorageServiceImpl implements DataStorageService {
     @Override
     public ByteSink put(final String key) throws IOException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
-
-        return new ByteSink() {
-
-            @Override
-            public OutputStream openStream() throws IOException {
-                return new FileOutputStream(fileForKey(key));
-            }
-
-        };
-
+        return Files.asByteSink(fileForKey(key));
     }
 
     @Override
     public Optional<? extends ByteSource> get(final String key) throws IOException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
-
-        return Optional.of(new ByteSource() {
-            @Override
-            public InputStream openStream() throws IOException {
-                File f = fileForKey(key);
-
-                if(!f.exists()) {
-                    return null;
-                }
-
-                return new FileInputStream(f);
-            }
-        });
-
+        File file = fileForKey(key);
+        return file.exists() ? Optional.of(Files.asByteSource(file)) : Optional.empty();
     }
 
     @Override
     public boolean remove(String key) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         File f = fileForKey(key);
-
-        if(f.exists()) {
-            return f.delete();
-        }
-
-        return true;
+        return !f.exists() || f.delete();
     }
 
     @Override

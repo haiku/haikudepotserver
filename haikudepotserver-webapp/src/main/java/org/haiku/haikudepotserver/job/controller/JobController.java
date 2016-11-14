@@ -21,6 +21,7 @@ import org.haiku.haikudepotserver.security.AuthenticationFilter;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.web.AbstractController;
+import org.haiku.haikudepotserver.support.web.JobDataWriteListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,10 +29,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>The job controller allows for upload and download of binary data related to jobs; for example, there are
@@ -43,11 +47,13 @@ import java.io.InputStream;
 @RequestMapping(AuthenticationFilter.PREFIX_PATH_SECURED)
 public class JobController extends AbstractController {
 
+    protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
+
     private final static long MAX_SUPPLY_DATA_LENGTH = 1 * 1024 * 1024; // 1MB
 
-    private final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
+    private final static long TIMEOUT_DOWNLOAD_MILLIS = TimeUnit.MINUTES.toMillis(2);
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
+    private final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
 
     private final static String KEY_GUID = "guid";
 
@@ -113,6 +119,7 @@ public class JobController extends AbstractController {
 
     @RequestMapping(value = "/jobdata/{" + KEY_GUID + "}/download", method = RequestMethod.GET)
     public void downloadGeneratedData(
+            HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable(value = KEY_GUID) String guid)
     throws IOException {
@@ -172,9 +179,15 @@ public class JobController extends AbstractController {
         response.setDateHeader(HttpHeaders.EXPIRES, 0);
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
 
-        jobDataWithByteSink.getByteSource().copyTo(response.getOutputStream());
+        // now switch to async for the delivery of the data.
 
-        LOGGER.info("did stream job data; {}", guid);
+        AsyncContext async = request.startAsync();
+        async.setTimeout(TIMEOUT_DOWNLOAD_MILLIS);
+        ServletOutputStream outputStream = response.getOutputStream();
+        outputStream.setWriteListener(new JobDataWriteListener(
+                guid, jobService, async, outputStream));
+
+        LOGGER.info("did start async stream job data; {}", guid);
 
     }
 

@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Strings;
+import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -22,7 +23,6 @@ import org.haiku.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ByteCounterOutputStream;
-import org.haiku.haikudepotserver.support.NoOpOutputStream;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +107,7 @@ public class PkgScreenshotController extends AbstractController {
 
         switch(requestMethod) {
             case HEAD:
-                ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(new NoOpOutputStream());
+                ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(ByteStreams.nullOutputStream());
                 pkgService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
                 response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
 
