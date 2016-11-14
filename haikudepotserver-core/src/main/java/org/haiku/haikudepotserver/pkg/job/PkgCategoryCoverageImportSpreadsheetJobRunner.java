@@ -116,29 +116,29 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                         } else {
                             String pkgName = row[0];
                             // 1; display
-                            boolean isNone = AbstractJobRunner.MARKER.equals(row[2]);
+                            boolean isNone = AbstractJobRunner.MARKER.equals(row[COLUMN_NONE]);
 
                             Optional<Pkg> pkgOptional = Pkg.getByName(rowContext, pkgName);
-                            List<String> selectedPkgCateogryCodes = new ArrayList<>();
+                            List<String> selectedPkgCategoryCodes = new ArrayList<>();
 
                             if (pkgOptional.isPresent()) {
 
                                 for (int i = 0; i < pkgCategoryCodes.size(); i++) {
-                                    if (AbstractJobRunner.MARKER.equals(row[3 + i].trim())) {
+                                    if (AbstractJobRunner.MARKER.equals(row[COLUMN_NONE + 1 + i].trim())) {
 
                                         if(isNone) {
                                             action = Action.INVALID;
                                             LOGGER.warn("line for package {} has 'none' marked as well as an actual category", row[0]);
                                         }
 
-                                        selectedPkgCateogryCodes.add(pkgCategoryCodes.get(i));
+                                        selectedPkgCategoryCodes.add(pkgCategoryCodes.get(i));
                                     }
                                 }
 
                                 if(action == Action.NOACTION) {
-                                    List<PkgCategory> selectedPkgCategories = PkgCategory.getByCodes(rowContext, selectedPkgCateogryCodes);
+                                    List<PkgCategory> selectedPkgCategories = PkgCategory.getByCodes(rowContext, selectedPkgCategoryCodes);
 
-                                    if (selectedPkgCategories.size() != selectedPkgCateogryCodes.size()) {
+                                    if (selectedPkgCategories.size() != selectedPkgCategoryCodes.size()) {
                                         throw new IllegalStateException("one or more of the package category codes was not able to be found");
                                     }
 

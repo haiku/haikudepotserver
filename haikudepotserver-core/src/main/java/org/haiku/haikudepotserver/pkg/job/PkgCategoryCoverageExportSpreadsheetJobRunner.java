@@ -9,16 +9,20 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -26,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>This report is a spreadsheet that covers basic details of each package.</p>
@@ -35,6 +40,9 @@ import java.util.Optional;
 public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCategorySpreadsheetJobRunner<PkgCategoryCoverageExportSpreadsheetJobSpecification> {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgCategoryCoverageExportSpreadsheetJobRunner.class);
+
+    @Resource
+    private RepositoryService repositoryService;
 
     @Override
     public void run(
@@ -62,17 +70,11 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
             // headers
 
             final List<String> pkgCategoryCodes = getPkgCategoryCodes();
-
-            List<String> headings = new ArrayList<>();
-            headings.add("pkg-name");
-            headings.add("any-summary");
-            headings.add("none");
-            Collections.addAll(headings, pkgCategoryCodes.toArray(new String[pkgCategoryCodes.size()]));
-            headings.add("action");
+            String[] headings = getHeadingRow(pkgCategoryCodes);
 
             long startMs = System.currentTimeMillis();
 
-            writer.writeNext(headings.toArray(new String[headings.size()]));
+            writer.writeNext(headings);
 
             // stream out the packages.
 
@@ -90,6 +92,10 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                         }
 
                         cols.add(pkg.getName());
+                        cols.add(repositoryService.getRepositoriesForPkg(context, pkg)
+                                .stream()
+                                .map(Repository::getCode)
+                                .collect(Collectors.joining(";")));
                         cols.add(locOptional.isPresent() ? locOptional.get().getSummary().orElse("") : "");
                         cols.add(pkg.getPkgPkgCategories().isEmpty() ? AbstractJobRunner.MARKER : "");
 

@@ -17,8 +17,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecification>
+abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecification>
         extends AbstractJobRunner<T> {
+
+    static final int COLUMN_NONE = 3;
 
     @Resource
     protected ServerRuntime serverRuntime;
@@ -26,18 +28,19 @@ public abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpeci
     @Resource
     protected PkgOrchestrationService pkgOrchestrationService;
 
-    protected List<String> getPkgCategoryCodes() {
+    List<String> getPkgCategoryCodes() {
         return PkgCategory.getAll(serverRuntime.getContext())
                 .stream()
                 .map(PkgCategory::getCode)
                 .collect(Collectors.toList());
     }
 
-    protected String[] getHeadingRow(List<String> pkgCategoryCodes) {
+    String[] getHeadingRow(List<String> pkgCategoryCodes) {
         List<String> headings = new ArrayList<>();
-        headings.add("pkg-name");
-        headings.add("any-summary");
-        headings.add("none");
+        headings.add("pkg-name"); // 0
+        headings.add("repository-codes"); // 1
+        headings.add("any-summary"); // 2
+        headings.add("none"); // 3
         Collections.addAll(headings, pkgCategoryCodes.toArray(new String[pkgCategoryCodes.size()]));
         headings.add("action");
         return headings.toArray(new String[headings.size()]);
