@@ -5,6 +5,12 @@
 
 <div class="content-container">
 
+    <div
+            ng-show="showHelp"
+            class="form-info-container"
+            passive-content="pkgiconarchiveimporthelp.html">
+    </div>
+
     <form name="specificationForm" novalidate="novalidate">
 
         <label for="import-data-file"><message key="pkgIconArchiveImport.importDataFile.title"></message></label>
@@ -24,6 +30,14 @@
         </div>
 
     </form>
+
+    <ul>
+        <li ng-show="!showHelp">
+            <a href="" ng-click="goShowHelp()">
+                <message key="gen.help.title"></message>
+            </a>
+        </li>
+    </ul>
 
 </div>
 

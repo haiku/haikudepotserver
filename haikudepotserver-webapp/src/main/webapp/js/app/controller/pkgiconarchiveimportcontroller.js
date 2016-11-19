@@ -20,6 +20,7 @@ angular.module('haikudepotserver').controller(
                 importDataFile : undefined
             };
 
+            $scope.showHelp = false;
             $scope.amQueueing = false;
 
             $scope.shouldSpin = function() {
@@ -55,6 +56,9 @@ angular.module('haikudepotserver').controller(
                 importDataFileDidChange();
             });
 
+            $scope.goShowHelp = function() {
+                $scope.showHelp = !$scope.showHelp;
+            };
 
             // This function will take the data from the form and load in the new pkg icons
 
