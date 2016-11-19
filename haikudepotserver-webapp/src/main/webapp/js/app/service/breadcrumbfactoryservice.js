@@ -544,6 +544,13 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                         titleKey : 'breadcrumb.pkgCategoryCoverageImportSpreadsheet.title',
                         path : '/pkgcategorycoverageimportspreadsheet'
                     });
+                },
+
+                createPkgIconArchiveImport : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.pkgIconArchiveImport.title',
+                        path : '/pkgiconarchiveimport'
+                    });
                 }
 
             };

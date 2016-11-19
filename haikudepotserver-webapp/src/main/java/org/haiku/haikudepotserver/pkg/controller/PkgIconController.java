@@ -118,7 +118,7 @@ public class PkgIconController extends AbstractController {
             throw new MissingOrBadFormat();
         }
 
-        if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
+        if(Strings.isNullOrEmpty(pkgName) || !Pkg.PATTERN_NAME.matcher(pkgName).matches()) {
             throw new MissingPkgName();
         }
 

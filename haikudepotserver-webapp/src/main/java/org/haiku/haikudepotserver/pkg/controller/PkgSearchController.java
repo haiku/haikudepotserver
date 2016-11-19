@@ -19,7 +19,6 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.OpenSearchDescription;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
-import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -134,7 +133,7 @@ public class PkgSearchController {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl);
         Optional<PkgVersion> pkgVersionOptional = Optional.empty();
 
-        if(!Strings.isNullOrEmpty(query) && Pkg.NAME_PATTERN.matcher(query).matches()) {
+        if(!Strings.isNullOrEmpty(query) && Pkg.PATTERN_NAME.matcher(query).matches()) {
             ObjectContext context = serverRuntime.getContext();
             Optional<Pkg> pkgOptional = Pkg.getByName(context, query);
 

@@ -1,10 +1,10 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 angular.module('haikudepotserver').controller(
-    'PkgCategoryCoverageImportSpreadsheetController',
+    'PkgIconArchiveImportController',
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
@@ -14,7 +14,7 @@ angular.module('haikudepotserver').controller(
             jsonRpc,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,pkg,jobs) {
 
-            var IMPORT_SIZE_LIMIT = 256 * 1024; // 100k
+            var IMPORT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
 
             $scope.specification = {
                 importDataFile : undefined
@@ -34,7 +34,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbFactory.createHome(),
                     breadcrumbFactory.createRootOperations(),
-                    breadcrumbFactory.createPkgCategoryCoverageImportSpreadsheet()
+                    breadcrumbFactory.createPkgIconArchiveImport()
                 ]);
             }
 
@@ -44,7 +44,7 @@ angular.module('haikudepotserver').controller(
             // input for this importation process.
 
             function validateImportDataFile(file, model) {
-                model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < IMPORT_SIZE_LIMIT));
+                model.$setValidity('badsize',undefined==file || (file.size > 8 && file.size < IMPORT_SIZE_LIMIT));
             }
 
             function importDataFileDidChange() {
@@ -61,7 +61,7 @@ angular.module('haikudepotserver').controller(
             $scope.goQueue = function() {
 
                 if($scope.specificationForm.$invalid) {
-                    throw Error('expected the import of package categories only to be possible if the form is valid');
+                    throw Error('expected the import of pkg icon archive only to be possible if the form is valid');
                 }
 
                 $scope.amQueueing = true;
@@ -70,15 +70,15 @@ angular.module('haikudepotserver').controller(
 
                 jobs.supplyData($scope.specification.importDataFile).then(
                     function(guid) {
-                      $log.info('did upload import data to the server; ' + guid);
+                        $log.info('did upload import data to the server; ' + guid);
 
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_PKG_JOB,
-                            "queuePkgCategoryCoverageImportSpreadsheetJob",
+                            "queuePkgIconArchiveImportJob",
                             [{ inputDataGuid: guid }]
                         ).then(
                             function(result) {
-                                $log.info('did queue pkg category coverage import spreadsheet job; ' + result.guid);
+                                $log.info('did queue pkg icon archive import spreadsheet job; ' + result.guid);
                                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:result.guid }));
                                 $scope.amQueueing = false;
                             },

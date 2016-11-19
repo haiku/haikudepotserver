@@ -50,8 +50,8 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
             throws IOException, JobRunnerException {
 
         Preconditions.checkArgument(null != jobService);
-        Preconditions.checkArgument(null!=specification);
-        Preconditions.checkArgument(null!=specification.getInputDataGuid(), "missing imput data guid on specification");
+        Preconditions.checkArgument(null != specification);
+        Preconditions.checkArgument(null != specification.getInputDataGuid(), "missing imput data guid on specification");
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(

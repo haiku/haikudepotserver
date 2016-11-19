@@ -99,7 +99,7 @@ public class IntegrationTestSupportService {
 //        addHvifPkgIcon(objectContext, pkg);
     }
 
-    public void addDummyLocalization(ObjectContext context, PkgVersion pkgVersion) {
+    private void addDummyLocalization(ObjectContext context, PkgVersion pkgVersion) {
         pkgOrchestrationService.updatePkgVersionLocalization(
                 context,
                 pkgVersion,

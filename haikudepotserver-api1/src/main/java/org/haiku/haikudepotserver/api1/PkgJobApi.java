@@ -29,6 +29,13 @@ public interface PkgJobApi {
     QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException;
 
     /**
+     * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have spreadsheets
+     * associated with them.  See the {@link JobApi} for details on how to control the job.</p>
+     */
+
+    QueuePkgScreenshotSpreadsheetJobResult queuePkgScreenshotSpreadsheetJob(QueuePkgScreenshotSpreadsheetJobRequest request);
+
+    /**
      * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have icons
      * associated with them.  See the {@link JobApi} for details on how to control the
      * job.</p>
@@ -49,6 +56,13 @@ public interface PkgJobApi {
      */
 
     QueuePkgIconExportArchiveJobResult queuePkgIconExportArchiveJob(QueuePkgIconExportArchiveJobRequest request);
+
+    /**
+     * <p>Enqueues a request (linked to some data) that will import a tar-ball of data
+     * containing package icons.</p>
+     */
+
+    QueuePkgIconArchiveImportJobResult queuePkgIconArchiveImportJob(QueuePkgIconArchiveImportJobRequest request) throws ObjectNotFoundException;
 
     /**
      * <p>Enqueues a job to cause all PkgVersion objects with no payload length to get those populated if possible.</p>

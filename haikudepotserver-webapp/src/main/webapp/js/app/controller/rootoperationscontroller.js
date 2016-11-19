@@ -99,6 +99,10 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createPkgCategoryCoverageImportSpreadsheet());
             };
 
+            $scope.goPkgIconArchiveImport = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createPkgIconArchiveImport());
+            };
+
             // -------------------
             // TEST ERROR HANDLING TESTING
 

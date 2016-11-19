@@ -25,7 +25,9 @@ import java.util.stream.Collectors;
 
 public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
-    public static Pattern NAME_PATTERN = Pattern.compile("^[^\\s/=!<>-]+$");
+    public static final String PATTERN_STRING_NAME_CHAR = "[^\\s/=!<>-]";
+
+    public static final Pattern PATTERN_NAME = Pattern.compile("^" + PATTERN_STRING_NAME_CHAR + "+$");
 
     public static Optional<Pkg> getByName(ObjectContext context, String name) {
         Preconditions.checkArgument(null!=context, "a context must be provided to lookup a package");
@@ -56,7 +58,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         super.validateForSave(validationResult);
 
         if(null != getName()) {
-            if(!NAME_PATTERN.matcher(getName()).matches()) {
+            if(!PATTERN_NAME.matcher(getName()).matches()) {
                 validationResult.addFailure(new BeanValidationFailure(this,NAME_PROPERTY,"malformed"));
             }
         }

@@ -216,15 +216,16 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             case BULK_PKGLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT:
+            case BULK_PKGSCREENSHOTSPREADSHEETREPORT:
             case BULK_PKGICONSPREADSHEETREPORT:
             case BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGICONEXPORTARCHIVE:
                 return null!=authenticatedUser;
 
+            case BULK_PKGICONIMPORTARCHIVE:
             case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
-
             case BULK_USERRATINGSPREADSHEETREPORT_ALL:
+            case BULK_PKGVERSIONPAYLOADLENGTHPOPULATION:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case BULK_USERRATINGSPREADSHEETREPORT_PKG:
@@ -234,9 +235,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                 return null!=authenticatedUser &&
                         (authenticatedUser.getIsRoot() ||
                                 authenticatedUser.getNickname().equals(((User) target).getNickname()));
-
-            case BULK_PKGVERSIONPAYLOADLENGTHPOPULATION:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
 
             case JOBS_VIEW:
                 return null!=authenticatedUser && authenticatedUser.getIsRoot();

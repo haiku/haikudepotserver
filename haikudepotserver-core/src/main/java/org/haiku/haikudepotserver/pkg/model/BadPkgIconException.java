@@ -10,4 +10,12 @@ package org.haiku.haikudepotserver.pkg.model;
  */
 
 public class BadPkgIconException extends Exception {
+
+    public BadPkgIconException() {
+    }
+
+    public BadPkgIconException(String message) {
+        super(message);
+    }
+
 }

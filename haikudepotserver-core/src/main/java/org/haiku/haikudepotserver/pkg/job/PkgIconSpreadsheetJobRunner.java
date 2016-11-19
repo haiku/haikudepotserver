@@ -105,9 +105,6 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
             long startMs = System.currentTimeMillis();
             LOGGER.info("will produce icon spreadsheet report");
 
-            PrefetchTreeNode prefetchTreeNode = new PrefetchTreeNode();
-            prefetchTreeNode.addPath(Pkg.PKG_ICONS_PROPERTY);
-
             long count = pkgOrchestrationService.eachPkg(
                     context,
                     false,

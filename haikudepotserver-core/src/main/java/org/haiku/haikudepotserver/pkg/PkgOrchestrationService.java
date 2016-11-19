@@ -511,46 +511,48 @@ public class PkgOrchestrationService {
         Optional<PkgIcon> pkgIconOptional;
         Integer size = null;
 
-        if(com.google.common.net.MediaType.PNG.toString().equals(mediaType.getCode())) {
+        switch(mediaType.getCode()) {
 
-            ImageHelper.Size pngSize =  imageHelper.derivePngSize(imageData);
+            case MediaType.MEDIATYPE_PNG:
+                ImageHelper.Size pngSize =  imageHelper.derivePngSize(imageData);
 
-            if(null==pngSize) {
-                LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it is not a valid png image", pkg.getName());
-                throw new BadPkgIconException();
-            }
+                if(null==pngSize) {
+                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it is not a valid png image", pkg.getName());
+                    throw new BadPkgIconException("invalid png");
+                }
 
-            if(!pngSize.areSides(16) && !pngSize.areSides(32) && !pngSize.areSides(64)) {
-                LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it must be either 32x32 or 16x16 px, but was {}", pkg.getName(), pngSize.toString());
-                throw new BadPkgIconException();
-            }
+                if(!pngSize.areSides(16) && !pngSize.areSides(32) && !pngSize.areSides(64)) {
+                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it must be either 32x32 or 16x16 px, but was {}", pkg.getName(), pngSize.toString());
+                    throw new BadPkgIconException("non-square sizing or unexpected sizing");
+                }
 
-            if(null!=expectedSize && !pngSize.areSides(expectedSize)) {
-                LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not match the expected size", pkg.getName());
-                throw new BadPkgIconException();
-            }
+                if(null!=expectedSize && !pngSize.areSides(expectedSize)) {
+                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not match the expected size", pkg.getName());
+                    throw new BadPkgIconException("size of image was not as expected");
+                }
 
-            try {
-                imageData = pngOptimizationService.optimize(imageData);
-            }
-            catch(IOException ioe) {
-                throw new RuntimeException("the png optimization process has failed; ", ioe);
-            }
+                try {
+                    imageData = pngOptimizationService.optimize(imageData);
+                }
+                catch(IOException ioe) {
+                    throw new RuntimeException("the png optimization process has failed; ", ioe);
+                }
 
-            size = pngSize.width;
-            pkgIconOptional = pkg.getPkgIcon(mediaType, pngSize.width);
-        }
-        else {
-            if(MediaType.MEDIATYPE_HAIKUVECTORICONFILE.equals(mediaType.getCode())) {
+                size = pngSize.width;
+                pkgIconOptional = pkg.getPkgIcon(mediaType, pngSize.width);
+                break;
+
+            case MediaType.MEDIATYPE_HAIKUVECTORICONFILE:
                 if(!imageHelper.looksLikeHaikuVectorIconFormat(imageData)) {
                     LOGGER.warn("attempt to set the vector (hvif) package icon for package {}, but the data does not look like hvif", pkg.getName());
                     throw new BadPkgIconException();
                 }
                 pkgIconOptional = pkg.getPkgIcon(mediaType, null);
-            }
-            else {
+                break;
+
+            default:
                 throw new IllegalStateException("unhandled media type; "+mediaType.getCode());
-            }
+
         }
 
         PkgIconImage pkgIconImage;

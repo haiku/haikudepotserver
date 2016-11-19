@@ -215,7 +215,7 @@ public class PkgScreenshotController extends AbstractController {
             @RequestParam(value = KEY_FORMAT, required = true) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName) throws IOException {
 
-        if(Strings.isNullOrEmpty(pkgName) || !Pkg.NAME_PATTERN.matcher(pkgName).matches()) {
+        if(Strings.isNullOrEmpty(pkgName) || !Pkg.PATTERN_NAME.matcher(pkgName).matches()) {
             throw new MissingPkgName();
         }
 

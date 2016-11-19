@@ -93,6 +93,10 @@ angular.module('haikudepotserver').controller(
                 goBasicPkgReport('queuePkgIconSpreadsheetJob');
             };
 
+            $scope.goPkgIconSpreadsheetReport = function() {
+                goBasicPkgReport('queuePkgScreenshotSpreadsheetJob');
+            };
+
             $scope.goPkgIconExportArchive = function() {
                 goBasicPkgReport('queuePkgIconExportArchiveJob');
             };

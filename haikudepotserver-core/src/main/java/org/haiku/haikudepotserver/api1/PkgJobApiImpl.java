@@ -84,6 +84,15 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
     }
 
     @Override
+    public QueuePkgScreenshotSpreadsheetJobResult queuePkgScreenshotSpreadsheetJob(QueuePkgScreenshotSpreadsheetJobRequest request) {
+        Preconditions.checkArgument(null != request);
+        return queueSimplePkgJob(
+                QueuePkgScreenshotSpreadsheetJobResult.class,
+                PkgScreenshotSpreadsheetJobSpecification.class,
+                Permission.BULK_PKGICONSPREADSHEETREPORT);
+    }
+
+    @Override
     public QueuePkgIconSpreadsheetJobResult queuePkgIconSpreadsheetJob(QueuePkgIconSpreadsheetJobRequest request) {
         Preconditions.checkArgument(null != request);
         return queueSimplePkgJob(
@@ -108,6 +117,41 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
                 QueuePkgIconExportArchiveJobResult.class,
                 PkgIconExportArchiveJobSpecification.class,
                 Permission.BULK_PKGICONEXPORTARCHIVE);
+    }
+
+    @Override
+    public QueuePkgIconArchiveImportJobResult queuePkgIconArchiveImportJob(QueuePkgIconArchiveImportJobRequest request)
+        throws ObjectNotFoundException {
+
+        Preconditions.checkArgument(null != request, "the request must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orElse(null),
+                null,
+                Permission.BULK_PKGICONIMPORTARCHIVE)) {
+            LOGGER.warn("attempt to import package categories, but was not authorized");
+            throw new AuthorizationFailureException();
+        }
+
+        // now check that the data is present.
+
+        jobService.tryGetData(request.inputDataGuid)
+                .orElseThrow(() -> new ObjectNotFoundException(JobData.class.getSimpleName(), request.inputDataGuid));
+
+        // setup and go
+
+        PkgIconImportArchiveJobSpecification spec = new PkgIconImportArchiveJobSpecification();
+        spec.setOwnerUserNickname(user.map(_User::getNickname).orElse(null));
+        spec.setInputDataGuid(request.inputDataGuid);
+
+        return new QueuePkgIconArchiveImportJobResult(
+                jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_NONE));
     }
 
     @Override
