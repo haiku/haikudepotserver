@@ -6,4 +6,8 @@ public class JobRunnerException extends Exception {
         super(message);
     }
 
+    public JobRunnerException(String message, Throwable th) {
+        super(message, th);
+    }
+
 }

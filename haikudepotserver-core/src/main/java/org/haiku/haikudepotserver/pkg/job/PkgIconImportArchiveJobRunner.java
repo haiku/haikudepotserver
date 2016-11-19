@@ -8,7 +8,9 @@ package org.haiku.haikudepotserver.pkg.job;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
+import org.apache.cayenne.CayenneException;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -32,7 +34,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -51,16 +56,25 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             PkgIconExportArchiveJobRunner.PATH_COMPONENT_TOP +
             "/(" + Pkg.PATTERN_STRING_NAME_CHAR + "+)/[A-Za-z0-9_-]+\\.([A-Za-z0-9]+)$");
 
+    private static final Pattern PATTERN_PKG_PATH = Pattern.compile("^/?" +
+            PkgIconExportArchiveJobRunner.PATH_COMPONENT_TOP +
+            "/(" + Pkg.PATTERN_STRING_NAME_CHAR + "+)(/.+)?$");
+
     // references to the groups in the regex above
     private static final int GROUP_PKGNAME = 1;
     private static final int GROUP_LEAFEXTENSION = 2;
+
+    private static final int CSV_COLUMN_PKGNAME = 0;
+    private static final int CSV_COLUMN_ACTION = 1;
+    private static final int CSV_COLUMN_MESSAGE = 2;
 
     private static final long MAX_ICON_PAYLOAD = 128 * 1024; // 128k
 
     private enum Action {
         INVALID,
         UPDATED,
-        NOTFOUND
+        NOTFOUND,
+        REMOVED
     }
 
     @Resource
@@ -91,20 +105,91 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
-        try(
+        // start a cayenne long-running txn
+        Transaction transaction = serverRuntime.getDataDomain().createTransaction();
+        Transaction.bindThreadTransaction(transaction);
+
+        try (
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',');
-                InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
-                GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-                TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream);
-        ) {
+                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')) {
 
-            String[] headings = new String[] { "path", "action", "message" };
+            String[] headings = new String[]{"path", "action", "message"};
             writer.writeNext(headings);
-            processEntriesFromArchive(tarArchiveInputStream, writer);
+
+            // make a first sweep to delete all existing icons for packages in the spreadsheet.
+
+            try (
+                    InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
+                    GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+                    TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
+            ) {
+                clearPackagesIconsAppearingInArchive(tarArchiveInputStream, writer);
+            }
+
+            // now load the icons in.
+
+            try (
+                    InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
+                    GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+                    TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
+            ) {
+                processEntriesFromArchive(tarArchiveInputStream, writer);
+            }
+
+            transaction.commit();
+        } catch (SQLException | CayenneException e) {
+            throw new JobRunnerException("unable to complete job; ", e);
+        } finally {
+            Transaction.bindThreadTransaction(null);
+
+            if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
+                try {
+                    transaction.rollback();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+
         }
 
+    }
+
+    /**
+     * <p>All packages appearing in the archive should first have their icons removed.</p>
+     */
+
+    private void clearPackagesIconsAppearingInArchive(ArchiveInputStream archiveInputStream, CSVWriter writer) throws IOException {
+        String[] row = new String[3];
+        Set<String> pkgNamesProcessed = new HashSet<>();
+        ArchiveEntry archiveEntry;
+        row[CSV_COLUMN_MESSAGE] = "";
+
+        while(null != (archiveEntry = archiveInputStream.getNextEntry())) {
+            Matcher matcher = PATTERN_PKG_PATH.matcher(archiveEntry.getName());
+
+            if (matcher.matches()) {
+                String pkgName = matcher.group(GROUP_PKGNAME);
+
+                if(!pkgNamesProcessed.contains(pkgName)) {
+                    row[CSV_COLUMN_PKGNAME] = archiveEntry.getName();
+                    ObjectContext context = serverRuntime.getContext();
+                    Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+
+                    if (pkgOptional.isPresent()) {
+                        pkgOrchestrationService.removePkgIcon(context, pkgOptional.get());
+                        LOGGER.info("removed icons for pkg; {}", pkgName);
+                        row[CSV_COLUMN_ACTION] = Action.REMOVED.name();
+                    } else {
+                        LOGGER.info("not able to find pkg; {}", pkgName);
+                        row[CSV_COLUMN_ACTION] = Action.NOTFOUND.name();
+                    }
+
+                    pkgNamesProcessed.add(pkgName);
+                    writer.writeNext(row);
+                }
+            }
+        }
     }
 
     private void processEntriesFromArchive(ArchiveInputStream archiveInputStream, CSVWriter writer) throws IOException {
@@ -116,13 +201,13 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             if (!archiveEntry.isDirectory()) {
                 Matcher nameMatcher = PATTERN_PATH.matcher(archiveEntry.getName());
                 ArchiveEntryResult result;
-                row[0] = archiveEntry.getName();
+                row[CSV_COLUMN_PKGNAME] = archiveEntry.getName();
 
                 if(nameMatcher.matches()) {
 
                     if(archiveEntry.getSize() <= MAX_ICON_PAYLOAD) {
                         result = processMatchingFileEntryFromArchive(
-                                archiveInputStream, archiveEntry,
+                                archiveInputStream,
                                 nameMatcher.group(GROUP_PKGNAME),
                                 nameMatcher.group(GROUP_LEAFEXTENSION).toLowerCase());
                     } else {
@@ -138,8 +223,8 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                     );
                 }
 
-                row[1] = result.action.name();
-                row[2] = StringUtils.trimToEmpty(result.message);
+                row[CSV_COLUMN_ACTION] = result.action.name();
+                row[CSV_COLUMN_MESSAGE] = StringUtils.trimToEmpty(result.message);
                 writer.writeNext(row);
 
             } else {
@@ -151,9 +236,8 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
     private ArchiveEntryResult processMatchingFileEntryFromArchive(
             ArchiveInputStream archiveInputStream,
-            ArchiveEntry archiveEntry,
             String pkgName, String leafnameExtension)
-    throws IOException {
+            throws IOException {
 
         ObjectContext context = serverRuntime.getContext();
         Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
@@ -198,6 +282,10 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         return new ArchiveEntryResult(Action.UPDATED, null);
     }
 
+    /**
+     * <p>This object models the result of having processed an icon-loading.</p>
+     */
+
     private static class ArchiveEntryResult {
 
         Action action;
@@ -209,6 +297,5 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         }
 
     }
-
 
 }

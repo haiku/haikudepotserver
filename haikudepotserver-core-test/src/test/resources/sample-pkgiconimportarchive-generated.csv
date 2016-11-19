@@ -1,4 +1,5 @@
 "path","action","message"
+"hicn/pkg2/rectangle.png","REMOVED",""
 "hicn/pkg2/rectangle.png","INVALID","non-square sizing or unexpected sizing"
 "hicn/pkg2/rubbish.txt","INVALID","unknown file-extension"
 "hicn/pkg2/tasse.hvif","UPDATED",""

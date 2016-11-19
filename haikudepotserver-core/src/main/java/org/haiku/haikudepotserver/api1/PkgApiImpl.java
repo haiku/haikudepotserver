@@ -665,13 +665,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new AuthorizationFailureException();
         }
 
-        for(org.haiku.haikudepotserver.dataobjects.PkgIcon pkgIcon : ImmutableList.copyOf(pkg.getPkgIcons())) {
-            context.deleteObjects(
-                    pkgIcon.getPkgIconImage().get(),
-                    pkgIcon);
-        }
-
-        pkg.setModifyTimestamp();
+        pkgOrchestrationService.removePkgIcon(context, pkg);
 
         context.commitChanges();
 

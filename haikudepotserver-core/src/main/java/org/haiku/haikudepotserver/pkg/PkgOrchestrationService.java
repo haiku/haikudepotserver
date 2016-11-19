@@ -486,6 +486,23 @@ public class PkgOrchestrationService {
     // ICONS
 
     /**
+     * <p>Removes all icons that are stored on this package.</p>
+     */
+
+    public void removePkgIcon(ObjectContext context, Pkg pkg) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        Preconditions.checkArgument(null != pkg, "the package must be supplied");
+
+        for(org.haiku.haikudepotserver.dataobjects.PkgIcon pkgIcon : ImmutableList.copyOf(pkg.getPkgIcons())) {
+            context.deleteObjects(
+                    pkgIcon.getPkgIconImage().get(),
+                    pkgIcon);
+        }
+
+        pkg.setModifyTimestamp();
+    }
+
+    /**
      * <p>This method will write the icon data supplied in the input to the package as its icon.  Note that the icon
      * must comply with necessary characteristics; for example it must be either 16 or 32 pixels along both its sides
      * if it is a PNG.  If it is non-compliant then an instance of

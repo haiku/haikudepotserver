@@ -94,18 +94,18 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
                 } catch (Throwable th) {
                     transaction.setRollbackOnly();
                     LOGGER.error("a problem has arisen processing a repository file for repository " + repository.getCode(), th);
-                } finally {
-                    Transaction.bindThreadTransaction(null);
+                    } finally {
+                        Transaction.bindThreadTransaction(null);
 
-                    if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
-                        try {
-                            transaction.rollback();
-                        } catch (Exception e) {
-                            // ignore
+                        if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
+                            try {
+                                transaction.rollback();
+                            } catch (Exception e) {
+                                // ignore
+                            }
                         }
-                    }
 
-                }
+                    }
             }
         }
 
