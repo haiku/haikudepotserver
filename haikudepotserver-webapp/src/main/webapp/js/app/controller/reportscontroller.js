@@ -93,12 +93,16 @@ angular.module('haikudepotserver').controller(
                 goBasicPkgReport('queuePkgIconSpreadsheetJob');
             };
 
-            $scope.goPkgIconSpreadsheetReport = function() {
+            $scope.goPkgScreenshotSpreadsheetReport = function() {
                 goBasicPkgReport('queuePkgScreenshotSpreadsheetJob');
             };
 
             $scope.goPkgIconExportArchive = function() {
                 goBasicPkgReport('queuePkgIconExportArchiveJob');
+            };
+
+            $scope.goPkgScreenshotExportArchive = function() {
+                goBasicPkgReport('queuePkgScreenshotExportArchiveJob');
             };
 
             $scope.goAuthorizationRulesSpreadsheet= function() {

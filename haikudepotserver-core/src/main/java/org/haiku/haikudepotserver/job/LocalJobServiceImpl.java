@@ -84,7 +84,21 @@ public class LocalJobServiceImpl
     // RUN JOBS
 
     @Override
-    public void awaitJobFinishedUninterruptibly(String guid, long timeout) {
+    public boolean awaitAllJobsFinishedUninterruptibly(long timeout) {
+        Preconditions.checkArgument(timeout > 0);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        EnumSet<JobSnapshot.Status> earlyStatuses = EnumSet.of(JobSnapshot.Status.QUEUED, JobSnapshot.Status.STARTED);
+
+        while (stopwatch.elapsed(TimeUnit.MILLISECONDS) < timeout
+            && !filteredInternalJobs(null, earlyStatuses).isEmpty()) {
+            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+        }
+
+        return filteredInternalJobs(null, earlyStatuses).isEmpty();
+    }
+
+    @Override
+    public boolean awaitJobFinishedUninterruptibly(String guid, long timeout) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid), "a guid must be supplied");
         Preconditions.checkArgument(timeout > 0);
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -94,6 +108,8 @@ public class LocalJobServiceImpl
                 && tryGetJob(guid).filter((j) -> earlyStatuses.contains(j.getStatus())).isPresent()) {
             Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
         }
+
+        return tryGetJob(guid).filter((j) -> earlyStatuses.contains(j.getStatus())).isPresent();
     }
 
     private Optional<JobRunner> getJobRunner(final String jobTypeCode) {

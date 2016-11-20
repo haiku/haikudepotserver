@@ -5,33 +5,15 @@
 
 package org.haiku.haikudepotserver.pkg.job;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
-import com.google.common.net.MediaType;
-import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
-import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
-import org.haiku.haikudepotserver.support.DateTimeHelper;
-import org.haiku.haikudepotserver.support.RuntimeInformationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * <p>Produce a tar-ball file containing all of the icons of the packages.  This uses a direct query avoiding the
@@ -39,9 +21,7 @@ import java.util.zip.GZIPOutputStream;
  */
 
 @Component
-public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExportArchiveJobSpecification> {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunner.class);
+public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArchiveJobRunner<PkgIconExportArchiveJobSpecification> {
 
     private static int BATCH_SIZE = 25;
 
@@ -53,72 +33,17 @@ public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExpo
 
     public static String PATH_COMPONENT_TOP = "hicn";
 
-    @Resource
-    private ServerRuntime serverRuntime;
-
-    @Resource
-    private RuntimeInformationService runtimeInformationService;
-
-    @Resource
-    private ObjectMapper objectMapper;
-
-    private DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
+    int getBatchSize() {
+        return BATCH_SIZE;
+    }
 
     @Override
-    public void run(
-            JobService jobService,
-            PkgIconExportArchiveJobSpecification specification) throws IOException {
-
-        Preconditions.checkArgument(null != jobService);
-        Preconditions.checkArgument(null!=specification);
-
-        long startMs = System.currentTimeMillis();
-        final ObjectContext context = serverRuntime.getContext();
-        int offset = 0;
-
-        // this will register the outbound data against the job.
-        JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
-                specification.getGuid(),
-                "download",
-                MediaType.TAR.toString());
-
-        try(
-                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream); // tars assumed to be compressed
-                final TarArchiveOutputStream tarOutputStream = new TarArchiveOutputStream(gzipOutputStream)
-        ) {
-
-            State state = new State();
-            state.tarArchiveOutputStream = tarOutputStream;
-            EJBQLQuery query = new EJBQLQuery(createEjbqlRawRowsExpression());
-            query.setFetchLimit(BATCH_SIZE);
-            int countLastQuery;
-
-            do {
-                query.setFetchOffset(offset);
-                List<Object[]> queryResults = context.performQuery(query);
-                countLastQuery = queryResults.size();
-                appendFromRawRows(state, queryResults);
-                offset += countLastQuery;
-            } while(countLastQuery > 0);
-
-            appendArchiveInfo(state);
-        }
-
-        LOGGER.info(
-                "did produce icon report for {} icons in {}ms",
-                offset, System.currentTimeMillis() - startMs);
-
+    String getPathComponentTop() {
+        return PATH_COMPONENT_TOP;
     }
 
-    private void appendFromRawRows(State state, List<Object[]> rows)
-            throws IOException {
-        for(Object[] row : rows) {
-            appendFromRawRow(state, row);
-        }
-    }
-
-    private void appendFromRawRow(State state, Object[] row)
+    @Override
+    void appendFromRawRow(State state, Object[] row)
             throws IOException {
         append(
                 state,
@@ -154,73 +79,21 @@ public class PkgIconExportArchiveJobRunner extends AbstractJobRunner<PkgIconExpo
         }
     }
 
-    /**
-     * <p>Adds a little informational file into the tar-ball.</p>
-     */
-
-    private void appendArchiveInfo(State state) throws IOException {
-        byte[] payload = objectMapper.writeValueAsBytes(createArchiveInfo(state));
-        TarArchiveEntry tarEntry = new TarArchiveEntry(PATH_COMPONENT_TOP + "/info.json");
-        tarEntry.setSize(payload.length);
-        tarEntry.setModTime(roundTimeToSecondPlusOne(state.latestModifiedTimestamp));
-        state.tarArchiveOutputStream.putArchiveEntry(tarEntry);
-        state.tarArchiveOutputStream.write(payload);
-        state.tarArchiveOutputStream.closeArchiveEntry();
+    @Override
+    EJBQLQuery createEjbqlQuery(PkgIconExportArchiveJobSpecification specification) {
+        return new EJBQLQuery(createEjbqlRawRowsExpression(specification));
     }
 
-    private Date roundTimeToSecond(Date date) {
-        return new Date((date.getTime() / 1000) * 1000);
-    }
-
-    private Date roundTimeToSecondPlusOne(Date date) {
-        return new Date(roundTimeToSecond(date).getTime() + 1000);
-    }
-
-    private String createEjbqlRawRowsExpression() {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("SELECT pii.pkgIcon.pkg.name, pii.pkgIcon.size,\n");
-        builder.append("pii.pkgIcon.mediaType.code, pii.data, pii.pkgIcon.pkg.modifyTimestamp\n");
-        builder.append("FROM " + PkgIconImage.class.getSimpleName() + " pii\n");
-        builder.append("WHERE pii.pkgIcon.pkg.active = true\n");
-        builder.append("ORDER BY pii.pkgIcon.pkg.name ASC,\n");
-        builder.append("pii.pkgIcon.mediaType.code ASC,\n");
-        builder.append("pii.pkgIcon.size ASC\n");
-
-        return builder.toString();
-    }
-
-    private ArchiveInfo createArchiveInfo(State state) {
-        ArchiveInfo archiveInfo = new ArchiveInfo();
-        archiveInfo.agent = "hds";
-        archiveInfo.agentVersion = runtimeInformationService.getProjectVersion();
-        archiveInfo.createTimestamp = new Date();
-        archiveInfo.createTimestampIso = dateTimeFormatter.format(archiveInfo.createTimestamp.toInstant());
-        archiveInfo.modifiedTimestamp = roundTimeToSecondPlusOne(state.latestModifiedTimestamp);
-        archiveInfo.modifiedTimestampIso = dateTimeFormatter.format(archiveInfo.modifiedTimestamp.toInstant());
-        return archiveInfo;
-    }
-
-    /**
-     * <p>This data gets encoded into the file such that it knows the latest change to the data.</p>
-     */
-
-    private final static class ArchiveInfo {
-
-        public Date createTimestamp;
-        public String createTimestampIso;
-        public Date modifiedTimestamp;
-        public String modifiedTimestampIso;
-        public String agent;
-        public String agentVersion;
-
-    }
-
-    private final static class State {
-
-        TarArchiveOutputStream tarArchiveOutputStream;
-        Date latestModifiedTimestamp = new Date(0);
-
+    private String createEjbqlRawRowsExpression(PkgIconExportArchiveJobSpecification specification) {
+        return String.join("\n",
+                "SELECT pii.pkgIcon.pkg.name, pii.pkgIcon.size,",
+                "pii.pkgIcon.mediaType.code, pii.data, pii.pkgIcon.pkg.modifyTimestamp",
+                "FROM " + PkgIconImage.class.getSimpleName() + " pii",
+                "WHERE pii.pkgIcon.pkg.active = true",
+                "ORDER BY pii.pkgIcon.pkg.name ASC,",
+                "pii.pkgIcon.mediaType.code ASC,",
+                "pii.pkgIcon.size ASC"
+        );
     }
 
 }

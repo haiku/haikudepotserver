@@ -1,9 +1,9 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.pkg;
+package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteSource;

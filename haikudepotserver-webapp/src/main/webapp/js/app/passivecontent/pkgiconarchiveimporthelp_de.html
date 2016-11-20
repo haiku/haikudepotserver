@@ -1,0 +1,30 @@
+<p>
+    Dieser Prozess verarbeitet ein gzip-komprimiertes tar-Archiv. Normalerweise hat dieses
+    Archivformat die Dateiendung "<code>.tgz</code>", "<code>.tar.gz</code>" ist aber ebenso
+    gebräuchlich. Die Dateien des Archivs sind nach folgender Konvention benannt:
+    &quot;<code>hicn/beshare/icon.hvif</code>&quot;. In diesem Beispiel wird ein HVIF Vektoricon
+    für das "beshare" Paket bereitgestellt.
+</p>
+
+<p>
+    Manchmal steht das Icon nicht im Vektorformat zur Verfügung. In diesem Fall können PNG Bilder
+    in den Größen 16, 32 und 64 Pixel verwendet werden. Dann wird dieses Namensformat benutzt:
+    &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+	Vorhandene Icons in den von diesem Prozess bearbeiteten Paketen werden entfernt.
+</p>
+
+<p>
+    Der Import der tar-Datei ist &quot;atomic&quot;, d. h. entweder es wird das gesamte Archiv
+    komplett verarbeitet, oder die serverseitigen Daten werden überhaupt nicht verändert. Dies
+    bezieht sich auf Laufzeitfehler wie bespielsweise ungültige Daten, die die Ausführung des
+    Prozesses verhindern.
+</p>
+
+<p>
+    Die Rückmeldung von Problemen wie fehlende Pakete erfolgt ebenso wie das erfolgreiche Laden
+    von Icons über eine generiertes CSV Datei.
+</p>
+

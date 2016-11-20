@@ -1,9 +1,9 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2016, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.pkg;
+package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
@@ -12,7 +12,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.pkg.job.PkgIconExportArchiveJobRunner;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.WrapWithNoCloseInputStream;
 import org.haiku.haikudepotserver.job.model.JobService;

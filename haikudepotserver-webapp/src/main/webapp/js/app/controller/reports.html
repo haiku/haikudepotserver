@@ -39,6 +39,18 @@
 
         <!-- ===================================== -->
 
+        <tr show-if-permission="'BULK_USERRATINGSPREADSHEETREPORT_ALL'">
+            <td>
+                <a href="" ng-click="goUserRatingSpreadsheetReportAll()">
+                    <message key="reporting.userratingspreadsheetreportall.title"></message>
+                </a>
+            </td>
+            <td>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
         <tr show-if-permission="'BULK_PKGICONSPREADSHEETREPORT'">
             <td>
                 <a href="" ng-click="goPkgIconSpreadsheetReport()">
@@ -54,24 +66,12 @@
 
         <tr show-if-permission="'BULK_PKGSCREENSHOTSPREADSHEETREPORT'">
             <td>
-                <a href="" ng-click="goPkgIconSpreadsheetReport()">
+                <a href="" ng-click="goPkgScreenshotSpreadsheetReport()">
                     <message key="reporting.pkgscreenshotspreadsheetreport.title"></message>
                 </a>
             </td>
             <td>
                 <message key="reporting.pkgscreenshotspreadsheetreport.description"></message>
-            </td>
-        </tr>
-
-        <!-- ===================================== -->
-
-        <tr show-if-permission="'BULK_USERRATINGSPREADSHEETREPORT_ALL'">
-            <td>
-                <a href="" ng-click="goUserRatingSpreadsheetReportAll()">
-                    <message key="reporting.userratingspreadsheetreportall.title"></message>
-                </a>
-            </td>
-            <td>
             </td>
         </tr>
 
@@ -85,6 +85,19 @@
             </td>
             <td>
                 <message key="reporting.pkgiconexportarchive.description"></message>
+            </td>
+        </tr>
+
+        <!-- ===================================== -->
+
+        <tr show-if-permission="'BULK_PKGSCREENSHOTEXPORTARCHIVE'">
+            <td>
+                <a href="" ng-click="goPkgScreenshotExportArchive()">
+                    <message key="reporting.pkgscreenshotexportarchive.title"></message>
+                </a>
+            </td>
+            <td>
+                <message key="reporting.pkgscreenshotexportarchive.description"></message>
             </td>
         </tr>
 

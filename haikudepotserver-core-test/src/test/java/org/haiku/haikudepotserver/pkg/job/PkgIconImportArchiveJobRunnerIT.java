@@ -7,8 +7,6 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteSource;
-import com.google.common.io.CharSource;
-import com.google.common.io.CharStreams;
 import com.google.common.io.Resources;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -27,7 +25,6 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 
 @ContextConfiguration({
@@ -64,7 +61,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         // load in an icon for pkg2 in order to check that the removal phase does happen.
 
-        try (InputStream iconInputStream = Resources.asByteSource(Resources.getResource("16x16.png")).openStream()) {
+        try (InputStream iconInputStream = Resources.asByteSource(Resources.getResource("sample-16x16-2.png")).openStream()) {
             ObjectContext context = serverRuntime.getContext();
             pkgOrchestrationService.storePkgIconImage(
                     iconInputStream,

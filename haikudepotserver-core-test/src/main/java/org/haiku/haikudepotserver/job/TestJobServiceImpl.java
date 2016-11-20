@@ -190,8 +190,12 @@ public class TestJobServiceImpl implements JobService {
     }
 
     @Override
-    public void awaitJobFinishedUninterruptibly(String guid, long timeout) {
-        // ignore
+    public boolean awaitJobFinishedUninterruptibly(String guid, long timeout) {
+        return true;
     }
 
+    @Override
+    public boolean awaitAllJobsFinishedUninterruptibly(long timeout) {
+        return true;
+    }
 }

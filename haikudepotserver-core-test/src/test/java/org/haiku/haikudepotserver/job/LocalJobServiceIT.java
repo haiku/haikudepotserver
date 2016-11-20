@@ -10,6 +10,7 @@ import com.google.common.io.CharStreams;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.job.model.*;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -32,6 +33,15 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
 
     @Resource
     private JobService jobService;
+
+    @Before
+    public void setUp() {
+        if (!jobService.awaitAllJobsFinishedUninterruptibly(TimeUnit.SECONDS.toMillis(10))) {
+            throw new IllegalStateException("the job service is still busy, but needs to be clean for the tests to proceed.");
+        }
+
+        LOGGER.info("did clear out job service");
+    }
 
     /**
      * <p>This will be a bit of an unstable test (non-repeatable) because it is
@@ -96,29 +106,39 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
         String job2FinishedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
         jobService.awaitJobFinishedUninterruptibly(job2FinishedGuid, TimeUnit.SECONDS.toMillis(10));
         Lock job3Lock = new ReentrantLock();
+
+        String job3StartedGuid;
+        String job4QueuedGuid;
+
         job3Lock.lock();
-        String job3StartedGuid = jobService.submit(new TestLockableJobSpecification(job3Lock), JobSnapshot.COALESCE_STATUSES_NONE);
-        String job4QueuedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
-        // -------------------------
 
-        assertStatus(job1FinishedGuid, JobSnapshot.Status.FINISHED);
-        assertStatus(job2FinishedGuid, JobSnapshot.Status.FINISHED);
-        assertStatus(job3StartedGuid, JobSnapshot.Status.STARTED);
-        assertStatus(job4QueuedGuid, JobSnapshot.Status.QUEUED);
+        try {
+            job3StartedGuid = jobService.submit(new TestLockableJobSpecification(job3Lock), JobSnapshot.COALESCE_STATUSES_NONE);
+            job4QueuedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
+            // -------------------------
 
-        // check some coalescing works.
-        Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED))
-                .isEqualTo(job4QueuedGuid);
+            assertStatus(job1FinishedGuid, JobSnapshot.Status.FINISHED);
+            assertStatus(job2FinishedGuid, JobSnapshot.Status.FINISHED);
+            assertStatus(job3StartedGuid, JobSnapshot.Status.STARTED);
+            assertStatus(job4QueuedGuid, JobSnapshot.Status.QUEUED);
 
-        Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED))
-                .isEqualTo(job3StartedGuid);
+            // check some coalescing works.
+            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED))
+                    .isEqualTo(job4QueuedGuid);
 
-        Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED_FINISHED))
-                .isEqualTo(job1FinishedGuid);
+            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED))
+                    .isEqualTo(job3StartedGuid);
 
-        // -------------------------
-        // release the last two jobs and watch they come through OK.
-        job3Lock.unlock();
+            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED_FINISHED))
+                    .isEqualTo(job1FinishedGuid);
+
+            // -------------------------
+            // release the last two jobs and watch they come through OK.
+
+        } finally {
+            job3Lock.unlock();
+        }
+
         jobService.awaitJobFinishedUninterruptibly(job3StartedGuid, TimeUnit.SECONDS.toMillis(10));
         jobService.awaitJobFinishedUninterruptibly(job4QueuedGuid, TimeUnit.SECONDS.toMillis(10));
         // -------------------------

@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
 import org.haiku.haikudepotserver.job.model.*;
+import org.haiku.haikudepotserver.pkg.job.PkgScreenshotExportArchiveJobRunner;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -222,6 +223,31 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         result.guid = jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
         return result;
+    }
+
+    @Override
+    public QueuePkgScreenshotExportArchiveJobResult queuePkgScreenshotExportArchiveJob(QueuePkgScreenshotExportArchiveJobRequest request) {
+        Preconditions.checkArgument(null != request, "the request must be supplied");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orElse(null),
+                null,
+                Permission.BULK_PKGSCREENSHOTEXPORTARCHIVE)) {
+            LOGGER.warn("attempt to export pkg screenshots as an archive, but was not authorized");
+            throw new AuthorizationFailureException();
+        }
+
+        PkgScreenshotExportArchiveJobSpecification specification = new PkgScreenshotExportArchiveJobSpecification();
+        specification.setOwnerUserNickname(user.get().getNickname());
+        specification.setPkgName(request.pkgName);
+
+        return new QueuePkgScreenshotExportArchiveJobResult(
+                jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_NONE));
     }
 
 }

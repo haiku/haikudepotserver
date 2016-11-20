@@ -82,4 +82,10 @@ public interface PkgJobApi {
 
     QueuePkgLocalizationCoverageExportSpreadsheetJobResult queuePkgLocalizationCoverageExportSpreadsheetJob(QueuePkgLocalizationCoverageExportSpreadsheetJobRequest request);
 
+    /**
+     * <p>Enqueues a job to produce a spreadsheet of the coverage of package localizations.</p>
+     */
+
+    QueuePkgScreenshotExportArchiveJobResult queuePkgScreenshotExportArchiveJob(QueuePkgScreenshotExportArchiveJobRequest request);
+
 }
