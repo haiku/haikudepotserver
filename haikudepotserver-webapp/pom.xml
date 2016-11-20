@@ -117,7 +117,6 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>jawr.properties</include>
-                    <include>build.properties</include>
                 </includes>
             </resource>
             <resource>
@@ -125,7 +124,6 @@
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>jawr.properties</exclude>
-                    <exclude>build.properties</exclude>
                 </excludes>
             </resource>
         </resources>
