@@ -12,7 +12,11 @@ Distributed under the terms of the MIT License.
 
     <para>
         This section covers how to setup the system for development purposes.  First review
-        <link linkend="prerequisites">prerequisites</link>.  The project consists of a number of modules.
+        <link linkend="prerequisites">prerequisites</link>.
+    </para>
+
+    <para>
+        The project consists of a number of modules.
         &quot;haikudepotserver-webapp&quot; is the application server module.  You should configure a
         <emphasis>development</emphasis> configuration file at the following location relative to the
         top-level of the source; &quot;haikudepotserver-webapp/src/main/resources/local.properties&quot;.

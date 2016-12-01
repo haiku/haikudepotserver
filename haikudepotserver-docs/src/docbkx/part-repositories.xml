@@ -11,7 +11,7 @@ Distributed under the terms of the MIT License.
     <title>Repositories</title>
 
     <section xml:id="datamodel-uniqueidentifiers">
-        <title>On-Net / On-Disk Repositories</title>
+        <title>On-Net / On-Disk Haiku Package Repositories</title>
 
         <para>
             The term &quot;On-Net&quot; or &quot;On-Disk&quot; are used here interchangeably to represent an
