@@ -16,15 +16,10 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.Jobs;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgUrlType;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionUrl;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -49,7 +44,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
     private JobService jobService;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     private void verifyPackage(
             ObjectContext context,
@@ -114,8 +109,8 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.getContext();
                 Pkg pkg = context.newObject(Pkg.class);
-                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
-                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
                 pkg.setName("taranaki");
 
                 // this one should get deactivated
@@ -152,8 +147,8 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
                 ObjectContext context = serverRuntime.getContext();
 
                 Pkg pkg = context.newObject(Pkg.class);
-                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
-                pkgOrchestrationService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
                 pkg.setName("ffmpeg");
 
                 PkgVersion pkgVersion = context.newObject(PkgVersion.class);

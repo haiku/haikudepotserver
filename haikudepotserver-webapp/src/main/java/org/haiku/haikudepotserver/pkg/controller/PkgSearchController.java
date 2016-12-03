@@ -16,8 +16,9 @@ import freemarker.template.TemplateException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.OpenSearchDescription;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -72,7 +73,7 @@ public class PkgSearchController {
     private MessageSource messageSource;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     /**
      * <p>This method returns XML data that defines how a browser might search the site.  It uses an
@@ -138,7 +139,7 @@ public class PkgSearchController {
             Optional<Pkg> pkgOptional = Pkg.getByName(context, query);
 
             if(pkgOptional.isPresent()) {
-                pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
                         Repository.getByCode(context, Repository.CODE_DEFAULT).get(), // TODO - user interface for choosing?

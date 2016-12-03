@@ -10,7 +10,7 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -31,7 +31,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
     private UserRatingServiceImpl userRatingServiceImpl;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     // -------------------
     // SETUP
@@ -77,7 +77,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
         userRatingTestData.pkg = context.newObject(Pkg.class);
         userRatingTestData.pkg.setName("urtestpkg");
-        pkgOrchestrationService.ensurePkgProminence(context, userRatingTestData.pkg, repository, Prominence.ORDERING_LAST);
+        pkgService.ensurePkgProminence(context, userRatingTestData.pkg, repository, Prominence.ORDERING_LAST);
 
         userRatingTestData.user1 = integrationTestSupportService.createBasicUser(context,"urtestuser1","password");
         userRatingTestData.user2 = integrationTestSupportService.createBasicUser(context,"urtestuser2","password");

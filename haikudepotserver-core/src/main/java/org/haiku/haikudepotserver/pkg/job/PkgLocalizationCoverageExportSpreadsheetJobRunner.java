@@ -19,8 +19,8 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationCoverageExportSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     @Resource
     private NaturalLanguageService naturalLanguageService;
@@ -112,12 +112,12 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
 
             // stream out the packages.
 
-            final long expectedTotal = pkgOrchestrationService.totalPkg(context, false);
+            final long expectedTotal = pkgService.totalPkg(context, false);
             final AtomicLong counter = new AtomicLong(0);
 
             LOGGER.info("will produce package localization report for {} packages", expectedTotal);
 
-            long count = pkgOrchestrationService.eachPkg(
+            long count = pkgService.eachPkg(
                     context,
                     false, // allow source only.
                     pkg -> {

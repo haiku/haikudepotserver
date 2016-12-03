@@ -12,13 +12,13 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.PkgProminence;
 import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haiku.haikudepotserver.support.SingleCollector;
-import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -46,7 +46,7 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     @Override
     public void run(JobService jobService, PkgProminenceAndUserRatingSpreadsheetJobSpecification specification) throws IOException {
@@ -82,7 +82,7 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
             long startMs = System.currentTimeMillis();
             LOGGER.info("will produce prominence spreadsheet report");
 
-            long count = pkgOrchestrationService.eachPkg(
+            long count = pkgService.eachPkg(
                     context,
                     false,
                     pkg -> {

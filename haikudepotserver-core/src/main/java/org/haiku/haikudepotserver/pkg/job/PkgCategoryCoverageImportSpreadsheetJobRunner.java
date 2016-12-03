@@ -142,7 +142,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                                         throw new IllegalStateException("one or more of the package category codes was not able to be found");
                                     }
 
-                                    if (pkgOrchestrationService.updatePkgCategories(
+                                    if (pkgService.updatePkgCategories(
                                             rowContext,
                                             pkgOptional.get(),
                                             selectedPkgCategories)) {

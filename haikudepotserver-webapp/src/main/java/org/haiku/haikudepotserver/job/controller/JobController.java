@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * <p>The job controller allows for upload and download of binary data related to jobs; for example, there are
@@ -48,6 +49,8 @@ import java.util.concurrent.TimeUnit;
 public class JobController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
+
+    private final static Pattern PATTERN_GUID = Pattern.compile("^[A-Za-z0-9_-]+$");
 
     private final static long MAX_SUPPLY_DATA_LENGTH = 1 * 1024 * 1024; // 1MB
 
@@ -123,6 +126,8 @@ public class JobController extends AbstractController {
             HttpServletResponse response,
             @PathVariable(value = KEY_GUID) String guid)
     throws IOException {
+
+        Preconditions.checkArgument(PATTERN_GUID.matcher(guid).matches(), "the supplied guid does not match the required pattern");
 
         ObjectContext context = serverRuntime.getContext();
 

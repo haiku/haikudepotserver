@@ -10,15 +10,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.PrefetchTreeNode;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
+import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,10 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
     private RepositoryService repositoryService;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
+
+    @Resource
+    private PkgIconService pkgIconService;
 
     @Override
     public void run(
@@ -73,7 +75,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
                 CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
         ) {
-            final List<PkgIconConfiguration> pkgIconConfigurations = pkgOrchestrationService.getInUsePkgIconConfigurations(context);
+            final List<PkgIconConfiguration> pkgIconConfigurations = pkgIconService.getInUsePkgIconConfigurations(context);
 
             {
                 List<String> headings = new ArrayList<>();
@@ -105,7 +107,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
             long startMs = System.currentTimeMillis();
             LOGGER.info("will produce icon spreadsheet report");
 
-            long count = pkgOrchestrationService.eachPkg(
+            long count = pkgService.eachPkg(
                     context,
                     false,
                     pkg -> {

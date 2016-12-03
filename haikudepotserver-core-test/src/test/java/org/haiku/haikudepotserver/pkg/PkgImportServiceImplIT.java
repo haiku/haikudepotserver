@@ -13,6 +13,10 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.pkg.model.PkgImportService;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.pkg.model.Pkg;
@@ -25,15 +29,25 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 @ContextConfiguration({
         "classpath:/spring/test-context.xml"
 })
-public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
+public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgImportService pkgImportService;
+
+    @Resource
+    private PkgLocalizationService pkgLocalizationService;
+
+    @Resource
+    private PkgIconService pkgIconService;
+
+    @Resource
+    private PkgService pkgService;
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
@@ -48,116 +62,6 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
         return pkg;
     }
 
-    /**
-     * <p>When a "_devel" package exists and an update is made to the icon of the parent
-     * package then the icon should flow down to the "_devel" package too.</p>
-     */
-
-    @Test
-    public void testStorePkgIconImage_develPkgHandling() throws Exception {
-
-        // setup the two packages.
-
-        integrationTestSupportService.createStandardTestData();
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel = context.newObject(org.haiku.haikudepotserver.dataobjects.Pkg.class);
-            pkg1Devel.setActive(true);
-            pkg1Devel.setName("pkg1" + PkgOrchestrationService.SUFFIX_PKG_DEVELOPMENT);
-            context.commitChanges();
-        }
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkg1").get();
-            MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
-
-            try(InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
-
-                // ---------------------------------
-                pkgOrchestrationService.storePkgIconImage(
-                        inputStream,
-                        pngMediaType,
-                        32,
-                        context,
-                        pkg1);
-                // ---------------------------------
-
-            }
-
-            context.commitChanges();
-        }
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
-            org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(
-                            context,
-                            "pkg1" + PkgOrchestrationService.SUFFIX_PKG_DEVELOPMENT).get();
-
-            PkgIcon pkgIcon = pkg1Devel.getPkgIcon(pngMediaType, 32).get();
-
-            Assertions.assertThat(pkgIcon.getSize()).isEqualTo(32);
-        }
-    }
-
-    /**
-     * <p>When a "_devel" package exists and an update is made to the localization of the parent
-     * package then the localization should flow down to the "_devel" package too.</p>
-     */
-
-    @Test
-    public void testUpdatePkgLocalization_develPkgHandling() throws Exception {
-
-        // setup the two packages.
-
-        integrationTestSupportService.createStandardTestData();
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel = context.newObject(org.haiku.haikudepotserver.dataobjects.Pkg.class);
-            pkg1Devel.setActive(true);
-            pkg1Devel.setName("pkg1" + PkgOrchestrationService.SUFFIX_PKG_DEVELOPMENT);
-            context.commitChanges();
-        }
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkg1").get();
-            NaturalLanguage naturalLanguageGerman = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN).get();
-
-            // ---------------------------------
-            pkgOrchestrationService.updatePkgLocalization(
-                    context,
-                    pkg1,
-                    naturalLanguageGerman,
-                    "title_kokako",
-                    "summary_kokako",
-                    "description_kokako");
-            // ---------------------------------
-
-            context.commitChanges();
-        }
-
-        {
-            ObjectContext context = serverRuntime.getContext();
-            org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(
-                            context,
-                            "pkg1" + PkgOrchestrationService.SUFFIX_PKG_DEVELOPMENT).get();
-
-            PkgLocalization pkgLocalization = pkg1Devel.getPkgLocalization(NaturalLanguage.CODE_GERMAN).get();
-
-            Assertions.assertThat(pkgLocalization.getTitle()).isEqualTo("title_kokako");
-            Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kokako" + PkgOrchestrationService.SUFFIX_SUMMARY_DEVELOPMENT);
-            Assertions.assertThat(pkgLocalization.getDescription()).isEqualTo("description_kokako");
-        }
-
-    }
 
     /**
      * <p>When a "_devel" package is imported there is a special behaviour that the localization and the
@@ -184,7 +88,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext importObjectContext = serverRuntime.getContext();
-                pkgOrchestrationService.importFrom(importObjectContext, respositorySourceObjectId, importPkg, false);
+                pkgImportService.importFrom(importObjectContext, respositorySourceObjectId, importPkg, false);
                 importObjectContext.commitChanges();
             }
 
@@ -196,7 +100,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                         org.haiku.haikudepotserver.dataobjects.Pkg.getByName(setupObjectContext, importPkg.getName()).get();
                 setupObjectContext.commitChanges();
 
-                pkgOrchestrationService.updatePkgLocalization(
+                pkgLocalizationService.updatePkgLocalization(
                         setupObjectContext,
                         persistedPkg,
                         NaturalLanguage.getByCode(setupObjectContext, NaturalLanguage.CODE_GERMAN).get(),
@@ -205,8 +109,9 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                         "description_kingston_black");
                 setupObjectContext.commitChanges();
 
+
                 try (InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
-                    pkgOrchestrationService.storePkgIconImage(
+                    pkgIconService.storePkgIconImage(
                             inputStream,
                             MediaType.getByCode(setupObjectContext, com.google.common.net.MediaType.PNG.toString()).get(),
                             32,
@@ -220,12 +125,12 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
         // setup the devel package.
 
         Pkg importDevelPkg = createPkg("2");
-        importDevelPkg.setName(importDevelPkg.getName() + PkgOrchestrationService.SUFFIX_PKG_DEVELOPMENT);
+        importDevelPkg.setName(importDevelPkg.getName() + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
 
         // ---------------------------------
         {
             ObjectContext importObjectContext = serverRuntime.getContext();
-            pkgOrchestrationService.importFrom(importObjectContext, respositorySourceObjectId, importDevelPkg, false);
+            pkgImportService.importFrom(importObjectContext, respositorySourceObjectId, importDevelPkg, false);
             importObjectContext.commitChanges();
         }
         // ---------------------------------
@@ -293,7 +198,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
 
                 // ---------------------------------
 
-                pkgOrchestrationService.importFrom(
+                pkgImportService.importFrom(
                         context,
                         repositorySource.getObjectId(),
                         inputPackage,
@@ -309,7 +214,7 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.getContext();
                 org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "testpkg").get();
-                org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkg,
                         Repository.getByCode(context, "testrepo").get(),
@@ -325,6 +230,107 @@ public class PkgOrchestrationServiceIT extends AbstractIntegrationTest {
                 FileHelper.delete(repositoryDirectory);
             }
         }
+    }
+
+    /**
+     * <p>If there is a series of packages and suddenly there is an older version come in then the future versions
+     * should be deactivated.</p>
+     */
+
+    @Test
+    public void testImport_versionRegressionDeactivatesNewerVersions() {
+
+        integrationTestSupportService.createStandardTestData();
+
+        int highestMinor= 6;
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            org.haiku.haikudepotserver.dataobjects.Pkg pkg = context.newObject(
+                    org.haiku.haikudepotserver.dataobjects.Pkg.class);
+            pkg.setName("pkgx");
+
+            for(int i = 1; i <= 6; i++) {
+                org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = context.newObject(
+                        org.haiku.haikudepotserver.dataobjects.PkgVersion.class);
+                pkgVersion.setPkg(pkg);
+                pkgVersion.setIsLatest(i == highestMinor);
+                pkgVersion.setArchitecture(org.haiku.haikudepotserver.dataobjects.Architecture.getByCode(
+                        context, Architecture.CODE_X86).orElseThrow(IllegalStateException::new));
+                pkgVersion.setMajor("1");
+                pkgVersion.setMinor(Integer.toString(i));
+                pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testreposrc_xyz")
+                        .orElseThrow(IllegalStateException::new));
+            }
+
+            context.commitChanges();
+        }
+
+        // now there are a string of pkg versions in place, import an older one.
+
+        Pkg inputPackage = new Pkg();
+        inputPackage.setArchitecture(PkgArchitecture.X86);
+        inputPackage.setName("pkgx");
+        inputPackage.setVersion(new PkgVersion("1", "4", null, null, null)); // <-- version in middle of pkg versions
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            ObjectId repositorySourceObjectId = RepositorySource.getByCode(context, "testreposrc_xyz")
+                    .orElseThrow(IllegalStateException::new).getObjectId();
+
+            // ---------------------------------
+
+            pkgImportService.importFrom(
+                    context,
+                    repositorySourceObjectId,
+                    inputPackage,
+                    false);
+
+            // ---------------------------------
+
+            context.commitChanges();
+        }
+
+        // now check to see that the right outcomes have been achieved.
+
+        {
+            ObjectContext context = serverRuntime.getContext();
+            List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.getForPkg(
+                    context,
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkgx")
+                            .orElseThrow(IllegalStateException::new),
+                    true);
+
+            Assertions.assertThat(pkgVersions.size()).isEqualTo(6);
+
+            for(org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion : pkgVersions) {
+                switch(Integer.parseInt(pkgVersion.getMinor())) {
+
+                    case 1:
+                    case 2:
+                    case 3:
+                        Assertions.assertThat(pkgVersion.getActive()).isTrue();
+                        Assertions.assertThat(pkgVersion.getIsLatest()).isFalse();
+                        break;
+
+                    case 4:
+                        Assertions.assertThat(pkgVersion.getActive()).isTrue();
+                        Assertions.assertThat(pkgVersion.getIsLatest()).isTrue();
+                        break;
+
+                    case 5:
+                    case 6:
+                        Assertions.assertThat(pkgVersion.getActive()).isFalse();
+                        Assertions.assertThat(pkgVersion.getIsLatest()).isFalse();
+                        break;
+
+                    default:
+                        throw new IllegalStateException("unknown pkg version; " + pkgVersion.toVersionCoordinates().toString());
+                }
+            }
+
+        }
+
     }
 
 }

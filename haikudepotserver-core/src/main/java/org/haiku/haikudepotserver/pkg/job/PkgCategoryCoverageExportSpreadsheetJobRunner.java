@@ -9,7 +9,6 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -27,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,7 +78,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
 
             LOGGER.info("will produce category coverage spreadsheet report");
 
-            long count = pkgOrchestrationService.eachPkg(
+            long count = pkgService.eachPkg(
                     context,
                     false,
                     pkg -> {

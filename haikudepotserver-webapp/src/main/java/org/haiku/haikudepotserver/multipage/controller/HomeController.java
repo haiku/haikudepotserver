@@ -12,8 +12,9 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.multipage.model.Pagination;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
@@ -71,7 +72,7 @@ public class HomeController {
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     @Value("${architecture.default.code}")
     private String defaultArchitectureCode;
@@ -184,13 +185,13 @@ public class HomeController {
 
         }
 
-        Long totalPkgVersions = pkgOrchestrationService.total(context, searchSpecification);
+        Long totalPkgVersions = pkgService.total(context, searchSpecification);
 
         if(searchSpecification.getOffset() > totalPkgVersions) {
             searchSpecification.setOffset(totalPkgVersions.intValue());
         }
 
-        List<PkgVersion> pkgVersions = pkgOrchestrationService.search(context, searchSpecification);
+        List<PkgVersion> pkgVersions = pkgService.search(context, searchSpecification);
 
         // ------------------------------
         // GENERATE OUTPUT

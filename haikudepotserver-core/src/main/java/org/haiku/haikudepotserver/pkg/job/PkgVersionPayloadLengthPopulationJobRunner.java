@@ -11,13 +11,13 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.SelectQuery;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionPayloadLengthPopulationJobSpecification;
+import org.haiku.haikudepotserver.support.URLHelper;
+import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,9 +40,6 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
     @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
 
     @Override
     public void run(JobService jobService, PkgVersionPayloadLengthPopulationJobSpecification specification) throws IOException {
@@ -77,18 +74,18 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
         for(int i=0;i<pkgVersions.size();i++) {
             PkgVersion pkgVersion = pkgVersions.get(i);
-            long len = -1;
+            long len;
 
             try {
-                len = pkgOrchestrationService.payloadLength(pkgVersion);
+                len = URLHelper.payloadLength(pkgVersion.getHpkgURL());
+
+                if(len > 0) {
+                    pkgVersion.setPayloadLength(len);
+                    context.commitChanges();
+                }
             }
             catch(IOException ioe) {
                 LOGGER.error("unable to get the payload length for " + pkgVersion.toString(), ioe);
-            }
-
-            if(len > 0) {
-                pkgVersion.setPayloadLength(pkgOrchestrationService.payloadLength(pkgVersion));
-                context.commitChanges();
             }
 
             jobService.setJobProgressPercent(

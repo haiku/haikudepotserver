@@ -16,8 +16,8 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
     private JobService jobService;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgIconService pkgIconService;
 
     /**
      * <p>The package 'pkg2' has initially no icons associated with it, but one 16x16 icons is then added.  The
@@ -63,7 +63,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         try (InputStream iconInputStream = Resources.asByteSource(Resources.getResource("sample-16x16-2.png")).openStream()) {
             ObjectContext context = serverRuntime.getContext();
-            pkgOrchestrationService.storePkgIconImage(
+            pkgIconService.storePkgIconImage(
                     iconInputStream,
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG).get(),

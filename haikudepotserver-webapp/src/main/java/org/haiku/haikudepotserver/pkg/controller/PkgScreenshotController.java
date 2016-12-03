@@ -16,9 +16,9 @@ import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
 import org.haiku.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -62,7 +62,7 @@ public class PkgScreenshotController extends AbstractController {
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgService;
+    private PkgScreenshotService pkgScreenshotService;
 
     @Resource
     private JobService jobService;
@@ -108,13 +108,13 @@ public class PkgScreenshotController extends AbstractController {
         switch(requestMethod) {
             case HEAD:
                 ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(ByteStreams.nullOutputStream());
-                pkgService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
+                pkgScreenshotService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
                 response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
 
                 break;
 
             case GET:
-                pkgService.writePkgScreenshotImage(response.getOutputStream(), context, screenshot, targetWidth, targetHeight);
+                pkgScreenshotService.writePkgScreenshotImage(response.getOutputStream(), context, screenshot, targetWidth, targetHeight);
                 break;
 
             default:
@@ -238,7 +238,7 @@ public class PkgScreenshotController extends AbstractController {
         String screenshotCode;
 
         try {
-            screenshotCode = pkgService.storePkgScreenshotImage(request.getInputStream(), context, pkg).getCode();
+            screenshotCode = pkgScreenshotService.storePkgScreenshotImage(request.getInputStream(), context, pkg).getCode();
         }
         catch(SizeLimitReachedException sizeLimit) {
             LOGGER.warn("attempt to load in a screenshot larger than the size limit");

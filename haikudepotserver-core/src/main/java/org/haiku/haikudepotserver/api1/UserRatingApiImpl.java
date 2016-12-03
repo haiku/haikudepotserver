@@ -17,7 +17,8 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
@@ -52,7 +53,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     private UserRatingService userRatingService;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     private AbstractGetUserRatingResult.User createUser(User user) {
         Preconditions.checkNotNull(user);
@@ -298,7 +299,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         switch(request.pkgVersionType) {
             case LATEST:
-                pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
                         repository,

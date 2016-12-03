@@ -9,7 +9,10 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,20 +34,26 @@ public class IntegrationTestSupportService {
     protected static Logger LOGGER = LoggerFactory.getLogger(IntegrationTestSupportService.class);
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Resource
-    PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     @Resource
-    PkgOrchestrationService pkgService;
+    private PkgLocalizationService pkgLocalizationService;
 
     @Resource
-    protected AuthenticationService authenticationService;
+    private PkgIconService pkgIconService;
+
+    @Resource
+    private PkgScreenshotService pkgScreenshotService;
+
+    @Resource
+    private AuthenticationService authenticationService;
 
     private ObjectContext objectContext = null;
 
-    public ObjectContext getObjectContext() {
+    private ObjectContext getObjectContext() {
         if(null==objectContext) {
             objectContext = serverRuntime.getContext();
         }
@@ -54,7 +63,7 @@ public class IntegrationTestSupportService {
 
     private PkgScreenshot addPkgScreenshot(ObjectContext objectContext, Pkg pkg) {
         try (InputStream inputStream = IntegrationTestSupportService.class.getResourceAsStream("/sample-320x240.png")) {
-            return pkgService.storePkgScreenshotImage(inputStream, objectContext, pkg);
+            return pkgScreenshotService.storePkgScreenshotImage(inputStream, objectContext, pkg);
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading a sample screenshot into a test package",e);
@@ -64,7 +73,7 @@ public class IntegrationTestSupportService {
     private void addPngPkgIcon(ObjectContext objectContext, Pkg pkg, int size) {
 
         try (InputStream inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png", size, size))) {
-            pkgService.storePkgIconImage(
+            pkgIconService.storePkgIconImage(
                     inputStream,
                     MediaType.getByCode(objectContext, com.google.common.net.MediaType.PNG.toString()).get(),
                     size,
@@ -80,7 +89,7 @@ public class IntegrationTestSupportService {
 
         try (InputStream inputStream = this.getClass().getResourceAsStream("/sample.hvif")) {
 
-            pkgService.storePkgIconImage(
+            pkgIconService.storePkgIconImage(
                     inputStream,
                     MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get(),
                     null,
@@ -100,7 +109,7 @@ public class IntegrationTestSupportService {
     }
 
     private void addDummyLocalization(ObjectContext context, PkgVersion pkgVersion) {
-        pkgOrchestrationService.updatePkgVersionLocalization(
+        pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 pkgVersion,
                 NaturalLanguage.getEnglish(context),
@@ -141,8 +150,8 @@ public class IntegrationTestSupportService {
         result.pkg1 = context.newObject(Pkg.class);
         result.pkg1.setActive(true);
         result.pkg1.setName("pkg1");
-        pkgOrchestrationService.ensurePkgProminence(context, result.pkg1, result.repository, prominence.getOrdering());
-        pkgOrchestrationService.updatePkgChangelog(context, result.pkg1, "Stadt\r\nKarlsruhe\r\n");
+        pkgService.ensurePkgProminence(context, result.pkg1, result.repository, prominence.getOrdering());
+        pkgService.updatePkgChangelog(context, result.pkg1, "Stadt\r\nKarlsruhe\r\n");
 
         ensureUserRatingAggregate(context, result.pkg1, result.repository, 3.5f, 4);
 
@@ -199,7 +208,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86.setPkg(result.pkg1);
         result.pkg1Version2x86.setRepositorySource(result.repositorySource);
 
-        pkgOrchestrationService.updatePkgVersionLocalization(
+        pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86,
                 NaturalLanguage.getEnglish(context),
@@ -207,7 +216,7 @@ public class IntegrationTestSupportService {
                 "pkg1Version2SummaryEnglish_persimon",
                 "pkg1Version2DescriptionEnglish_rockmelon");
 
-        pkgOrchestrationService.updatePkgVersionLocalization(
+        pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86,
                 NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
@@ -227,7 +236,7 @@ public class IntegrationTestSupportService {
 
         // this is the same as the x86 version so that comparisons with English will happen.
 
-        pkgOrchestrationService.updatePkgVersionLocalization(
+        pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86_gcc2,
                 NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
@@ -238,7 +247,7 @@ public class IntegrationTestSupportService {
         result.pkg2 = context.newObject(Pkg.class);
         result.pkg2.setActive(true);
         result.pkg2.setName("pkg2");
-        pkgOrchestrationService.ensurePkgProminence(context, result.pkg2, result.repository, prominence);
+        pkgService.ensurePkgProminence(context, result.pkg2, result.repository, prominence);
 
         result.pkg2Version1 = context.newObject(PkgVersion.class);
         result.pkg2Version1.setActive(Boolean.TRUE);
@@ -255,7 +264,7 @@ public class IntegrationTestSupportService {
         result.pkg3 = context.newObject(Pkg.class);
         result.pkg3.setActive(true);
         result.pkg3.setName("pkg3");
-        pkgOrchestrationService.ensurePkgProminence(context, result.pkg3, result.repository, prominence);
+        pkgService.ensurePkgProminence(context, result.pkg3, result.repository, prominence);
 
         result.pkg3Version1 = context.newObject(PkgVersion.class);
         result.pkg3Version1.setActive(Boolean.TRUE);
@@ -272,7 +281,7 @@ public class IntegrationTestSupportService {
         result.pkgAny = context.newObject(Pkg.class);
         result.pkgAny.setActive(true);
         result.pkgAny.setName("pkgany");
-        pkgOrchestrationService.ensurePkgProminence(context, result.pkgAny, result.repository, prominence);
+        pkgService.ensurePkgProminence(context, result.pkgAny, result.repository, prominence);
 
         result.pkgAnyVersion1 = context.newObject(PkgVersion.class);
         result.pkgAnyVersion1.setActive(Boolean.TRUE);
@@ -292,7 +301,7 @@ public class IntegrationTestSupportService {
         return result;
     }
 
-    public void ensureUserRatingAggregate(ObjectContext context, Pkg pkg, Repository repository, Float rating, Integer sampleSize) {
+    private void ensureUserRatingAggregate(ObjectContext context, Pkg pkg, Repository repository, Float rating, Integer sampleSize) {
         Optional<PkgUserRatingAggregate> aggregateOptional = pkg.getPkgUserRatingAggregate(repository);
         PkgUserRatingAggregate aggregate;
 
@@ -330,7 +339,7 @@ public class IntegrationTestSupportService {
         ObjectContext context = serverRuntime.getContext();
         Pkg pkg = Pkg.getByName(context, "pkg3").get();
         Architecture x86 = Architecture.getByCode(context, "x86").get();
-        PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
+        PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                 context,
                 pkg,
                 Repository.getByCode(context, "testrepo").get(),

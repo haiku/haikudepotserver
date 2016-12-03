@@ -14,7 +14,8 @@ import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.model.PkgImportService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryImportException;
 import org.haiku.haikudepotserver.support.FileHelper;
@@ -51,7 +52,10 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgService;
+    private PkgService pkgService;
+
+    @Resource
+    private PkgImportService pkgImportService;
 
     @Value("${repository.import.populatepayloadlength:false}")
     private boolean shouldPopulatePayloadLength;
@@ -148,7 +152,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
                 Pkg pkg = pkgIterator.next();
                 repositoryImportPkgNames.add(pkg.getName());
 
-                pkgService.importFrom(
+                pkgImportService.importFrom(
                         pkgImportContext,
                         repositorySource.getObjectId(),
                         pkg,

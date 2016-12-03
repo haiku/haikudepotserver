@@ -14,7 +14,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class FallbackController {
         PKG
     }
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgOrchestrationService.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(FallbackController.class);
 
     private final static String KEY_TERM = "term";
 
@@ -60,7 +60,7 @@ public class FallbackController {
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     @Resource
     private RepositoryService repositoryService;
@@ -143,7 +143,7 @@ public class FallbackController {
                 List<Repository> repositories = repositoryService.getRepositoriesForPkg(context, pkgOptional.get());
 
                 if(!repositories.isEmpty()) {
-                    return pkgOrchestrationService.getLatestPkgVersionForPkg(
+                    return pkgService.getLatestPkgVersionForPkg(
                             context,
                             pkgOptional.get(),
                             repositories.get(0));

@@ -8,7 +8,7 @@ package org.haiku.haikudepotserver.pkg.model;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 
@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * <p>This model object specifies the parameters of a search into the system for packages.  See the
- * {@link PkgOrchestrationService} for further detail on this.</p>
+ * {@link PkgServiceImpl} for further detail on this.</p>
  */
 
 public class PkgSearchSpecification extends AbstractSearchSpecification {

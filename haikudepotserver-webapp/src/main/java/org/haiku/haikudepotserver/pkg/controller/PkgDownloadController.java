@@ -16,7 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class PkgDownloadController {
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgDownloadController.class);
 
     // TODO; should be injected into the orchestration service.
-    public final static String SEGMENT_PKGDOWNLOAD = PkgOrchestrationService.URL_SEGMENT_PKGDOWNLOAD;
+    public final static String SEGMENT_PKGDOWNLOAD = PkgServiceImpl.URL_SEGMENT_PKGDOWNLOAD;
 
     private final static String KEY_PKGNAME = "pkgName";
     private final static String KEY_REPOSITORYCODE = "repositoryCode";

@@ -15,7 +15,7 @@ import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.api1.model.userrating.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,7 +33,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     UserRatingApi userRatingApi;
 
     @Resource
-    PkgOrchestrationService pkgOrchestrationService;
+    PkgService pkgService;
 
     private String createTestUserAndSampleUserRating() {
         ObjectContext context = serverRuntime.getContext();
@@ -42,7 +42,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
         userRating.setComment("How now brown cow");
-        userRating.setPkgVersion(pkgOrchestrationService.getLatestPkgVersionForPkg(
+        userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,
                 Pkg.getByName(context, "pkg1").get(),
                 Repository.getByCode(context, "testrepo").get(),

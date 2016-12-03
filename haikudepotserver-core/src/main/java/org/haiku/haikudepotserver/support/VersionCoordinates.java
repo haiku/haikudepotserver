@@ -21,6 +21,15 @@ public class VersionCoordinates {
     private String preRelease;
     private Integer revision;
 
+    public VersionCoordinates(org.haiku.pkg.model.PkgVersion version) {
+        this(
+                version.getMajor(),
+                version.getMinor(),
+                version.getMicro(),
+                version.getPreRelease(),
+                version.getRevision());
+    }
+
     public VersionCoordinates(String major, String minor, String micro, String preRelease, Integer revision) {
         Preconditions.checkState(!Strings.isNullOrEmpty(major));
         this.major = major;

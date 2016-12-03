@@ -9,7 +9,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecificatio
     protected ServerRuntime serverRuntime;
 
     @Resource
-    protected PkgOrchestrationService pkgOrchestrationService;
+    protected PkgService pkgService;
 
     List<String> getPkgCategoryCodes() {
         return PkgCategory.getAll(serverRuntime.getContext())

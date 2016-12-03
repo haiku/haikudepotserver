@@ -19,7 +19,8 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     @Resource
     private RepositoryService repositoryService;
@@ -127,12 +128,12 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
             // stream out the packages.
 
-            final long expectedTotal = pkgOrchestrationService.totalPkg(context, false);
+            final long expectedTotal = pkgService.totalPkg(context, false);
             final AtomicLong counter = new AtomicLong(0);
 
             LOGGER.info("will produce package version localization report for {} packages", expectedTotal);
 
-            long count = pkgOrchestrationService.eachPkg(
+            long count = pkgService.eachPkg(
                     context,
                     false, // allow source only.
                     pkg -> {
@@ -141,7 +142,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
                             for (Architecture architecture : architectures) {
 
-                                Optional<PkgVersion> pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                                Optional<PkgVersion> pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                                         context,
                                         pkg,
                                         repository,

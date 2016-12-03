@@ -22,9 +22,9 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -81,7 +81,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
     private ServerRuntime serverRuntime;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgIconService pkgIconService;
 
     @Override
     public void run(
@@ -177,7 +177,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                     Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
 
                     if (pkgOptional.isPresent()) {
-                        pkgOrchestrationService.removePkgIcon(context, pkgOptional.get());
+                        pkgIconService.removePkgIcon(context, pkgOptional.get());
                         LOGGER.info("removed icons for pkg; {}", pkgName);
                         row[CSV_COLUMN_ACTION] = Action.REMOVED.name();
                     } else {
@@ -262,7 +262,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             }
 
             try {
-                pkgOrchestrationService.storePkgIconImage(
+                pkgIconService.storePkgIconImage(
                         archiveInputStream,
                         mediaType.get(),
                         null, // there is no expected icon size

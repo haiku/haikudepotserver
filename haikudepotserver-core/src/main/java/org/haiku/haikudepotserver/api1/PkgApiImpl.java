@@ -27,9 +27,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
-import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
@@ -65,10 +63,13 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     private AuthorizationService authorizationService;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgIconService pkgIconService;
 
     @Resource
-    private PkgOrchestrationService pkgService;
+    private PkgService pkgService;
+
+    @Resource
+    private PkgLocalizationService pkgLocalizationService;
 
     @Value("${pkgversion.viewcounter.protectrecurringincrementfromsameclient:true}")
     private Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient;
@@ -160,7 +161,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new ObjectNotFoundException(PkgCategory.class.getSimpleName(), null);
         }
 
-        pkgOrchestrationService.updatePkgCategories(context, pkg, pkgCategories);
+        pkgService.updatePkgCategories(context, pkg, pkgCategories);
 
         context.commitChanges();
 
@@ -244,7 +245,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultPkg.derivedRating = pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating() : null;
                         resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
 
-                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgOrchestrationService.resolvePkgVersionLocalization(
+                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgLocalizationService.resolvePkgVersionLocalization(
                                 context, spv, specification.getExpressionAsPattern(), naturalLanguage);
 
                         SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
@@ -292,7 +293,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.revision = pkgVersion.getRevision();
         version.preRelease = pkgVersion.getPreRelease();
 
-        version.hasSource = pkgOrchestrationService.getCorrespondingSourcePkgVersion(context, pkgVersion).isPresent();
+        version.hasSource = pkgService.getCorrespondingSourcePkgVersion(context, pkgVersion).isPresent();
         version.createTimestamp = pkgVersion.getCreateTimestamp().getTime();
         version.payloadLength = pkgVersion.getPayloadLength();
         version.repositorySourceCode = pkgVersion.getRepositorySource().getCode();
@@ -301,10 +302,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.copyrights = pkgVersion.getPkgVersionCopyrights().stream().map(PkgVersionCopyright::getBody).collect(Collectors.toList());
         version.licenses = pkgVersion.getPkgVersionLicenses().stream().map(PkgVersionLicense::getBody).collect(Collectors.toList());
         version.viewCounter = pkgVersion.getViewCounter();
-        version.hpkgDownloadURL = pkgOrchestrationService.createHpkgDownloadUrl(pkgVersion);
+        version.hpkgDownloadURL = pkgService.createHpkgDownloadUrl(pkgVersion);
 
         ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
-                pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
+                pkgLocalizationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
 
         version.title = resolvedPkgVersionLocalization.getTitle();
         version.description = resolvedPkgVersionLocalization.getDescription();
@@ -352,7 +353,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         if(shouldIncrement) {
-            pkgOrchestrationService.incrementViewCounter(serverRuntime, pkgVersion.getObjectId());
+            pkgService.incrementViewCounter(serverRuntime, pkgVersion.getObjectId());
         }
 
         if(null!=cacheKey) {
@@ -484,7 +485,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
                 }
 
-                PkgVersion pkgVersion = pkgOrchestrationService.getLatestPkgVersionForPkg(
+                PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context, pkg, repository,
                         ImmutableList.of(
                                 architectureOptional.get(),
@@ -607,7 +608,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data);
 
                     createdOrUpdatedPkgIcons.add(
-                            pkgService.storePkgIconImage(dataInputStream, mediaType, pkgIconApi.size, context, pkg)
+                            pkgIconService.storePkgIconImage(dataInputStream, mediaType, pkgIconApi.size, context, pkg)
                     );
 
                     updated++;
@@ -665,7 +666,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new AuthorizationFailureException();
         }
 
-        pkgOrchestrationService.removePkgIcon(context, pkg);
+        pkgIconService.removePkgIcon(context, pkg);
 
         context.commitChanges();
 
@@ -798,7 +799,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             NaturalLanguage naturalLanguage = getNaturalLanguage(context, requestPkgVersionLocalization.naturalLanguageCode);
 
-            pkgService.updatePkgLocalization(
+            pkgLocalizationService.updatePkgLocalization(
                     context,
                     pkg,
                     naturalLanguage,
@@ -860,7 +861,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Optional<PkgVersion> pkgVersionOptional;
 
         if(null==getPkgVersionLocalizationsRequest.major) {
-            pkgVersionOptional = pkgOrchestrationService.getLatestPkgVersionForPkg(
+            pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                     context, pkg, repository,
                     Collections.singletonList(architecture));
         }
@@ -919,7 +920,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.payloadLength = pkgVersion.getPayloadLength();
 
         ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
-                pkgOrchestrationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
+                pkgLocalizationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
 
         if(includeDescription) {
             version.description = resolvedPkgVersionLocalization.getDescription();
@@ -1106,7 +1107,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new ObjectNotFoundException(Prominence.class.getSimpleName(), request.prominenceOrdering);
         }
 
-        PkgProminence pkgProminence = pkgOrchestrationService.ensurePkgProminence(
+        PkgProminence pkgProminence = pkgService.ensurePkgProminence(
                 context,
                 pkg,
                 repository);
@@ -1155,7 +1156,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             newContent = Strings.emptyToNull(newContent.trim());
         }
 
-        pkgOrchestrationService.updatePkgChangelog(context, pkg, newContent);
+        pkgService.updatePkgChangelog(context, pkg, newContent);
         context.commitChanges();
 
         return new UpdatePkgChangelogResult();
@@ -1190,7 +1191,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 case ACTIVE:
                     LOGGER.info("will update the package version active flag to {} for {}", request.active, pkgVersion.toString());
                     pkgVersion.setActive(request.active);
-                    pkgOrchestrationService.adjustLatest(context, pkgVersion.getPkg(), pkgVersion.getArchitecture());
+                    pkgService.adjustLatest(context, pkgVersion.getPkg(), pkgVersion.getArchitecture());
                     break;
 
             }

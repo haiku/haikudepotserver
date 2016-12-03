@@ -15,8 +15,8 @@ import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.pkg.PkgOrchestrationService;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
     private RepositoryService repositoryService;
 
     @Resource
-    private PkgOrchestrationService pkgOrchestrationService;
+    private PkgService pkgService;
 
     @Override
     public void run(
@@ -80,7 +80,7 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
             long startMs = System.currentTimeMillis();
             LOGGER.info("will produce spreadsheet spreadsheet report");
 
-            long count = pkgOrchestrationService.eachPkg(
+            long count = pkgService.eachPkg(
                     context,
                     false,
                     pkg -> {
