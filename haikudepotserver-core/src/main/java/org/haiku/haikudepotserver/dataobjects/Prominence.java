@@ -12,6 +12,7 @@ import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._Prominence;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
@@ -39,7 +40,7 @@ public class Prominence extends _Prominence {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("ordering", getOrdering())
                 .build();
     }

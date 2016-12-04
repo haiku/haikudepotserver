@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.captcha.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * <p>This object models a captcha; which is an image that contains instructions for a human to convert into text to
@@ -60,7 +61,7 @@ public class Captcha {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("token", token)
                 .append("pngImageData.length", pngImageData.length)
                 .build();

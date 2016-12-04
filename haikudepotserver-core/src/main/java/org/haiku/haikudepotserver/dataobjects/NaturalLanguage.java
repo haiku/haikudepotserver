@@ -13,6 +13,7 @@ import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
@@ -84,7 +85,7 @@ public class NaturalLanguage extends _NaturalLanguage {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("code", getCode())
                 .build();
     }

@@ -12,6 +12,7 @@ import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.dataobjects.auto._Architecture;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -58,7 +59,7 @@ public class Architecture extends _Architecture {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("code", getCode())
                 .build();
     }

@@ -18,6 +18,7 @@ import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
@@ -201,7 +202,7 @@ public class User extends _User implements CreateAndModifyTimestamped {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("nickname", getNickname())
                 .build();
     }

@@ -86,7 +86,7 @@ public class URLHelper {
 
         }
 
-        LOGGER.info("did obtain length forurl; {} - {}", url, result);
+        LOGGER.info("did obtain length for url; {} - {}", url, result);
 
         return result;
     }

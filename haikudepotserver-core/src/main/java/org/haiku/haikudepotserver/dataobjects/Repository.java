@@ -14,6 +14,7 @@ import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
@@ -115,7 +116,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("code", getCode())
                 .build();
     }

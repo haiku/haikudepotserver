@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
 import java.util.Optional;
@@ -248,7 +249,7 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("guid", getGuid())
                 .append("jobTypeCode", getJobTypeCode())
                 .append("status", getStatus())
