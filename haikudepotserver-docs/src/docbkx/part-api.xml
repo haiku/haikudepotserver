@@ -390,7 +390,7 @@ Distributed under the terms of the MIT License.
             </para>
             <para>
                 The tar-ball contains a file &quot;info.json&quot; which has a field &quot;dataModifyTimestamp&quot;
-                that can be used to form the &quot;If-Modified-Since&quot&quot;.  Otherwise, the file contains each entry
+                that can be used to form the &quot;If-Modified-Since&quot;.  Otherwise, the file contains each entry
                 in the form &quot;hicn/&lt;package-name&gt;/&lt;icon-leaf&gt;.&lt;extension&gt;&quot;.  Possible
                 values for the extension are;
             </para>
