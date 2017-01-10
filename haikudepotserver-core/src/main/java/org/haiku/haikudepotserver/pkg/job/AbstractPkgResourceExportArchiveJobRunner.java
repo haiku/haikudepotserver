@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -85,7 +85,7 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
                 offset += countLastQuery;
 
                 if (0 == offset % 100) {
-                    LOGGER.info("processed {} screenshots", offset + 1);
+                    LOGGER.info("processed {} entries", offset + 1);
                 }
 
             } while(countLastQuery > 0);
@@ -132,8 +132,8 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
         archiveInfo.agentVersion = runtimeInformationService.getProjectVersion();
         archiveInfo.createTimestamp = new Date();
         archiveInfo.createTimestampIso = dateTimeFormatter.format(archiveInfo.createTimestamp.toInstant());
-        archiveInfo.modifiedTimestamp = roundTimeToSecondPlusOne(state.latestModifiedTimestamp);
-        archiveInfo.modifiedTimestampIso = dateTimeFormatter.format(archiveInfo.modifiedTimestamp.toInstant());
+        archiveInfo.dataModifiedTimestamp = roundTimeToSecondPlusOne(state.latestModifiedTimestamp);
+        archiveInfo.dataModifiedTimestampIso = dateTimeFormatter.format(archiveInfo.dataModifiedTimestamp.toInstant());
         return archiveInfo;
     }
 
@@ -153,8 +153,8 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
 
         public Date createTimestamp;
         public String createTimestampIso;
-        public Date modifiedTimestamp;
-        public String modifiedTimestampIso;
+        public Date dataModifiedTimestamp;
+        public String dataModifiedTimestampIso;
         public String agent;
         public String agentVersion;
 

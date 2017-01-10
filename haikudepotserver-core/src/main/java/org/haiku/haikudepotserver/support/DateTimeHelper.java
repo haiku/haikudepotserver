@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
+import java.util.Date;
 import java.util.Locale;
 
 import static java.time.temporal.ChronoField.*;
@@ -16,6 +17,10 @@ import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 
 public class DateTimeHelper {
+
+    public static Date secondAccuracyDate(Date date) {
+        return new Date((date.getTime() / 1000) * 1000);
+    }
 
     public static DateTimeFormatter createStandardDateTimeFormat() {
         return new DateTimeFormatterBuilder()

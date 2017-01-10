@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ public class AuthenticationFilter implements Filter {
 
     private static final Pattern PATTERN_AUTHORIZATION_HEADER = Pattern.compile("^([A-Za-z0-9]+)\\s+(.+)$");
 
-    public static final String PREFIX_PATH_SECURED = "/__secured/";
+    public static final String SEGMENT_SECURED = "__secured";
 
     private static final String PARAM_BEARER_TOKEN = "hdsbtok";
 
@@ -110,7 +110,7 @@ public class AuthenticationFilter implements Filter {
         if(!authenticatedUserObjectId.isPresent() && httpRequest.getMethod().equals("GET")) {
             String filterPathInfo = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
 
-            if(filterPathInfo.startsWith(PREFIX_PATH_SECURED)) {
+            if(filterPathInfo.startsWith("/" + SEGMENT_SECURED + "/")) {
                 String param = httpRequest.getParameter(PARAM_BEARER_TOKEN);
 
                 if (!Strings.isNullOrEmpty(param)) {

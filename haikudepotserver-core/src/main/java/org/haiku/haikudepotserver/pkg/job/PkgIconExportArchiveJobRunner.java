@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,15 +23,15 @@ import java.util.Date;
 @Component
 public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArchiveJobRunner<PkgIconExportArchiveJobSpecification> {
 
-    private static int BATCH_SIZE = 25;
+    private final static int BATCH_SIZE = 25;
 
-    private static int ROW_PKG_NAME = 0;
-    private static int ROW_SIZE = 1;
-    private static int ROW_MEDIA_TYPE_CODE = 2;
-    private static int ROW_PAYLOAD = 3;
-    private static int ROW_PKG_MODIFY_TIMESTAMP = 4;
+    private final static int ROW_PKG_NAME = 0;
+    private final static int ROW_SIZE = 1;
+    private final static int ROW_MEDIA_TYPE_CODE = 2;
+    private final static int ROW_PAYLOAD = 3;
+    private final static int ROW_PKG_MODIFY_TIMESTAMP = 4;
 
-    public static String PATH_COMPONENT_TOP = "hicn";
+    public final static String PATH_COMPONENT_TOP = "hicn";
 
     int getBatchSize() {
         return BATCH_SIZE;
@@ -81,13 +81,13 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
 
     @Override
     EJBQLQuery createEjbqlQuery(PkgIconExportArchiveJobSpecification specification) {
-        return new EJBQLQuery(createEjbqlRawRowsExpression(specification));
+        return new EJBQLQuery(createEjbqlRawRowsExpression());
     }
 
-    private String createEjbqlRawRowsExpression(PkgIconExportArchiveJobSpecification specification) {
+    private String createEjbqlRawRowsExpression() {
         return String.join("\n",
                 "SELECT pii.pkgIcon.pkg.name, pii.pkgIcon.size,",
-                "pii.pkgIcon.mediaType.code, pii.data, pii.pkgIcon.pkg.modifyTimestamp",
+                "pii.pkgIcon.mediaType.code, pii.data, pii.pkgIcon.pkg.iconModifyTimestamp",
                 "FROM " + PkgIconImage.class.getSimpleName() + " pii",
                 "WHERE pii.pkgIcon.pkg.active = true",
                 "ORDER BY pii.pkgIcon.pkg.name ASC,",

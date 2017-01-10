@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2016, Andrew Lindesay
+Copyright 2015-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -367,6 +367,76 @@ Distributed under the terms of the MIT License.
             <para>
                 An example URL for obtaining a Haiku vector image file image would be
                 &quot;http://localhost:8080/__pkgicon/apr.hvif&quot;
+            </para>
+
+        </section>
+
+        <section>
+
+            <title>Get All Packages' Icons as an Archive</title>
+
+            <para>
+                This API is able to generate a &quot;tar-ball&quot; containing all of the icon data together
+                with some meta-data about the icons.  Note that the data will be compressed using gzip
+                compression.  After making this call, the client may be redirected to a different URL to
+                actually access the data.  Clients should not make assumptions about the form of the redirected
+                URL.
+            </para>
+            <para>
+                In order to prevent clients from downloading and processing data they already have, the client
+                may add a &quot;If-Modified-Since&quot; header to the initial request.  The form of this header
+                is RFC-1123 compliant and looks like &quot;Sat, 3 Dec 2016 23:48:05 GMT&quot;.  If the icon data
+                has not been modified since this time, then the API will return a 304 (Not Modified) response.
+            </para>
+            <para>
+                The tar-ball contains a file &quot;info.json&quot; which has a field &quot;dataModifyTimestamp&quot;
+                that can be used to form the &quot;If-Modified-Since&quot&quot;.  Otherwise, the file contains each entry
+                in the form &quot;hicn/&lt;package-name&gt;/&lt;icon-leaf&gt;.&lt;extension&gt;&quot;.  Possible
+                values for the extension are;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>png</listitem>
+                    <listitem>hvif</listitem>
+                </itemizedlist>
+            </para>
+
+            <para>
+                The icon-leaf may be &quot;icon&quot; in the case of HVIF data or in the case of a bitmap icon,
+                the icon-leaf will be the size of the image; for example 16, 32 or 64.
+            </para>
+
+            <para>
+                Details of the API;
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/__pkgicon/all.tar.gz</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>302</term>
+                                    <listitem>Redirect to the actual payload data.</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>304</term>
+                                    <listitem>The data was not modified since the supplied timestamp.</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
             </para>
 
         </section>

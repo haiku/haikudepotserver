@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -48,7 +48,7 @@ public class PkgIconControllerIT extends AbstractIntegrationTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // ------------------------------------
-        pkgIconController.handleGet(
+        pkgIconController.handleGetPkgIcon(
                 response,
                 32,
                 "png",

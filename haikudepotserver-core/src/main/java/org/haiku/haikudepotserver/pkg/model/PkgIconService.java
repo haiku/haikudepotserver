@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,9 +12,16 @@ import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 public interface PkgIconService {
+
+    /**
+     * <p>This method will return the date at which the last icon modification was made.</p>
+     */
+
+    Date getLastPkgIconModifyTimestampSecondAccuracy(ObjectContext context);
 
     /**
      * <p>Removes all icons that are stored on this package.</p>

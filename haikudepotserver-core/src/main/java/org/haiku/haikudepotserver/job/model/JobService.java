@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,6 +39,7 @@ public interface JobService {
      * in the system and that is in one of the states supplied, then that will be returned instead.
      * This is to avoid double-running the job.  See {@link JobSpecification} for some handy constants.
      * </p>
+     * @return a GUID that can be later used to reference this job.
      */
 
     String submit(
@@ -49,6 +50,7 @@ public interface JobService {
      * <p>This method will run the specification immediate in the current thread.  Do not use this unless
      * there is a need to feed the data directly or quasi-directly to a client.  See
      * {@link #submit(JobSpecification, Set)} for information on the coalescing over statuses.</p>
+     * @return a GUID that can be later used to reference this job.
      */
 
     String immediate(JobSpecification specification, boolean coalesceFinished);

@@ -24,6 +24,7 @@ public abstract class _Pkg extends AbstractDataObject {
 
     public static final String ACTIVE_PROPERTY = "active";
     public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
+    public static final String ICON_MODIFY_TIMESTAMP_PROPERTY = "iconModifyTimestamp";
     public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
     public static final String NAME_PROPERTY = "name";
     public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
@@ -50,6 +51,13 @@ public abstract class _Pkg extends AbstractDataObject {
     }
     public Date getCreateTimestamp() {
         return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+    }
+
+    public void setIconModifyTimestamp(Date iconModifyTimestamp) {
+        writeProperty(ICON_MODIFY_TIMESTAMP_PROPERTY, iconModifyTimestamp);
+    }
+    public Date getIconModifyTimestamp() {
+        return (Date)readProperty(ICON_MODIFY_TIMESTAMP_PROPERTY);
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {

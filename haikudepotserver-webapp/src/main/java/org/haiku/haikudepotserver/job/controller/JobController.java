@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -45,12 +45,16 @@ import java.util.regex.Pattern;
  */
 
 @Controller
-@RequestMapping(AuthenticationFilter.PREFIX_PATH_SECURED)
+@RequestMapping("/" + AuthenticationFilter.SEGMENT_SECURED)
 public class JobController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
 
     private final static Pattern PATTERN_GUID = Pattern.compile("^[A-Za-z0-9_-]+$");
+
+    public final static String SEGMENT_JOBDATA = "jobdata";
+
+    public final static String SEGMENT_DOWNLOAD = "download";
 
     private final static long MAX_SUPPLY_DATA_LENGTH = 1 * 1024 * 1024; // 1MB
 
@@ -58,7 +62,7 @@ public class JobController extends AbstractController {
 
     private final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
 
-    private final static String KEY_GUID = "guid";
+    public final static String KEY_GUID = "guid";
 
     private final static String KEY_USECODE = "usecode";
 
@@ -77,7 +81,7 @@ public class JobController extends AbstractController {
      * to this uploaded data.</p>
      */
 
-    @RequestMapping(value = "/jobdata", method = RequestMethod.POST)
+    @RequestMapping(value = "/" + SEGMENT_JOBDATA, method = RequestMethod.POST)
     @ResponseBody
     public void supplyData(
             final HttpServletRequest request,
@@ -120,7 +124,7 @@ public class JobController extends AbstractController {
      * <p>This URL can be used to download job data that has resulted from a job being run.</p>
      */
 
-    @RequestMapping(value = "/jobdata/{" + KEY_GUID + "}/download", method = RequestMethod.GET)
+    @RequestMapping(value = "/" + SEGMENT_JOBDATA + "/{" + KEY_GUID + "}/" + SEGMENT_DOWNLOAD, method = RequestMethod.GET)
     public void downloadGeneratedData(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -131,26 +135,21 @@ public class JobController extends AbstractController {
 
         ObjectContext context = serverRuntime.getContext();
 
-        // lots and lots of checking that the user who is authenticated can actually view
-        // the data.
-
-        User user = tryObtainAuthenticatedUser(context).orElseThrow(() -> {
-                    LOGGER.warn("attempt to obtain job data {} with no authenticated user", guid);
-                    return new JobDataAuthorizationFailure();
-                });
-
         JobSnapshot job = jobService.tryGetJobForData(guid).orElseThrow(() -> {
             LOGGER.warn("attempt to access job data {} for which no job exists", guid);
             return new JobDataAuthorizationFailure();
         });
 
-        if(Strings.isNullOrEmpty(job.getOwnerUserNickname())) {
-            if (!authorizationService.check(context, user, null, Permission.JOBS_VIEW)) {
-                LOGGER.warn("attempt to access job data {} but was not authorized", guid);
-                throw new JobDataAuthorizationFailure();
-            }
-        }
-        else {
+        // If there is no user who is assigned to the job then the job is for nobody in particular and is thereby
+        // secured by the GUID of the job's data; if you know the GUID then you can have the data.
+
+        if(!Strings.isNullOrEmpty(job.getOwnerUserNickname())) {
+
+            User user = tryObtainAuthenticatedUser(context).orElseThrow(() -> {
+                LOGGER.warn("attempt to obtain job data {} with no authenticated user", guid);
+                return new JobDataAuthorizationFailure();
+            });
+
             User ownerUser= User.getByNickname(context, job.getOwnerUserNickname()).orElseThrow(() -> {
                 LOGGER.warn("owner of job does not seem to exist; {}", job.getOwnerUserNickname());
                 return new JobDataAuthorizationFailure();
@@ -160,6 +159,8 @@ public class JobController extends AbstractController {
                 LOGGER.warn("attempt to access jobs view for; {}", job.toString());
                 throw new JobDataAuthorizationFailure();
             }
+        } else {
+            LOGGER.debug("access to job [{}] allowed for unauthenticated access", job.toString());
         }
 
         JobDataWithByteSource jobDataWithByteSink = jobService.tryObtainData(guid).orElseThrow(() -> {

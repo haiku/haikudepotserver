@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,15 +12,13 @@ import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.commons.io.input.BoundedInputStream;
-import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -52,12 +50,33 @@ public class PkgIconServiceImpl implements PkgIconService {
     private ImageHelper imageHelper = new ImageHelper();
 
     @Override
+    public Date getLastPkgIconModifyTimestampSecondAccuracy(ObjectContext context) {
+        EJBQLQuery query = new EJBQLQuery(String.join(" ",
+                "SELECT",
+                "MAX(p." + Pkg.ICON_MODIFY_TIMESTAMP_PROPERTY + ")",
+                "FROM",
+                Pkg.class.getSimpleName(),
+                "p WHERE p.active = true"));
+
+        query.setCacheGroups(HaikuDepot.CacheGroup.PKG_ICON.name());
+
+        List<Object> result = context.performQuery(query);
+
+        switch(result.size()) {
+            case 0: return new Date(0);
+            case 1: return DateTimeHelper.secondAccuracyDate((Date) result.get(0));
+            default: throw new IllegalStateException("more than one row returned for a max aggregate.");
+        }
+    }
+
+    @Override
     public void removePkgIcon(ObjectContext context, Pkg pkg) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the package must be supplied");
 
         context.deleteObjects(deriveDataObjectsToDelete(pkg.getPkgIcons()));
         pkg.setModifyTimestamp();
+        pkg.setIconModifyTimestamp();
 
         pkgServiceImpl.tryGetDevelPkg(context, pkg.getName())
                 .ifPresent(develPkg -> removePkgIcon(context, develPkg));
@@ -142,7 +161,8 @@ public class PkgIconServiceImpl implements PkgIconService {
         }
 
         pkgIconImage.setData(imageData);
-        pkg.setModifyTimestamp(new java.util.Date());
+        pkg.setModifyTimestamp();
+        pkg.setIconModifyTimestamp();
         renderedPkgIconRepository.evict(context, pkg);
 
         if(null!=size) {

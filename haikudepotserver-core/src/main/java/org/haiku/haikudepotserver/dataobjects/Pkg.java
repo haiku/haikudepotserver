@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._Pkg;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -116,6 +117,10 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         setModifyTimestamp(new java.util.Date());
     }
 
+    public void setIconModifyTimestamp() {
+        setIconModifyTimestamp(new java.util.Date());
+    }
+
     /**
      * <p>The regular {$link #getModifyTimestamp} is at millisecond accuracy.  When dealing with second-accuracy
      * dates, this can cause anomalies.  For this reason, this method will provide the modify timestamp at
@@ -123,7 +128,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
      */
 
     public Date getModifyTimestampSecondAccuracy() {
-        return new java.util.Date((getModifyTimestamp().getTime() / 1000) * 1000);
+        return DateTimeHelper.secondAccuracyDate(getModifyTimestamp());
     }
 
     public List<PkgScreenshot> getSortedPkgScreenshots() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -122,19 +122,19 @@ public class LocalJobServiceImpl
     public String submit(
             JobSpecification specification,
             Set<JobSnapshot.Status> coalesceForStatuses) {
-        return validateAndcoalesceOrCreateJob(specification,
+        return validateAndCoalesceOrCreateJob(specification,
                 coalesceForStatuses, this::createInternalJobBySubmittingToExecutor);
     }
 
     @Override
     public String immediate(
             JobSpecification specification, boolean coalesceFinished) {
-        return validateAndcoalesceOrCreateJob(specification,
+        return validateAndCoalesceOrCreateJob(specification,
                 EnumSet.of(JobSnapshot.Status.FINISHED),
                 this::createInternalJobByRunningInCurrentThread);
     }
 
-    private String validateAndcoalesceOrCreateJob(
+    private String validateAndCoalesceOrCreateJob(
             JobSpecification specification,
             Set<JobSnapshot.Status> coalesceForStatuses,
             Function<JobSpecification, Job> createJobFunction) {
@@ -169,6 +169,10 @@ public class LocalJobServiceImpl
             }
         }
 
+        // first clear out any expired jobs
+
+        clearExpiredInternalJobs();
+
         // if there is an existing report that can be used then use it; otherwise make a new one.
         // The use of sorting below is to get the best job to re-use (the most recent) from all
         // of the possible ones.
@@ -199,7 +203,7 @@ public class LocalJobServiceImpl
                     .findFirst();
         }
 
-        return firstMatchingJobGuidOptional.orElse(createJobFunction.apply(specification).getGuid());
+        return firstMatchingJobGuidOptional.orElseGet(() -> createJobFunction.apply(specification).getGuid());
     }
 
     private Job createInternalJobBySubmittingToExecutor(final JobSpecification specification) {
@@ -380,7 +384,7 @@ public class LocalJobServiceImpl
             final User user,
             final Set<JobSnapshot.Status> statuses) {
 
-        clearExpiredJobs();
+        clearExpiredInternalJobs();
 
         if(null!=statuses && statuses.isEmpty()) {
             return Collections.emptyList();

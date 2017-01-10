@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -53,13 +53,17 @@ Distributed under the terms of the MIT License.
 
         <para>
             The mapping from the keys to text is done using java properties files.  These property files are located
-            in the source at &quot;haikudepotserver-webapp/src/main/resources/messages*.properties&quot;.
+            in the source at;
         </para>
+
+        <itemizedlist>
+            <listitem>haikudepotserver-webapp/src/main/resources/messages*.properties</listitem>
+            <listitem>haikudepotserver-core/src/main/resources/messages_en.properties</listitem>
+        </itemizedlist>
 
         <para>
             Variants of the properties file for various natural languages can be found at this location and each file
-            is suffixed by the code for the natural language.  The default, with no suffix, is the English natural
-            language.
+            is suffixed by the code for the natural language.
         </para>
 
         <para>
