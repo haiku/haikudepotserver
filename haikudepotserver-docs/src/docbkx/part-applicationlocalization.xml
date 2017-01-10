@@ -120,7 +120,7 @@ Distributed under the terms of the MIT License.
             An &quot;unsupported page&quot; is designed to appear when a browser does not support the technology
             required to drive the user interface of the application.  This unsupported page has localization messages
             directly in the JSP template because any detection of natural language or mechanisms to select a natural
-            language may not function.  The text for this page can be fund in the file &quot;unsupported.jsp&quot;.
+            language may not function.  The text for this page can be found in the file &quot;unsupported.jsp&quot;.
         </para>
     </section>
 
