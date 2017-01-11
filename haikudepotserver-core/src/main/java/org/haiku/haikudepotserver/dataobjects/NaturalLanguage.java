@@ -34,6 +34,7 @@ public class NaturalLanguage extends _NaturalLanguage {
     public final static String CODE_SPANISH = "es";
     public final static String CODE_FRENCH = "fr";
     public final static String CODE_RUSSIAN = "ru";
+    public final static String CODE_SLOVAK = "sk";
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
