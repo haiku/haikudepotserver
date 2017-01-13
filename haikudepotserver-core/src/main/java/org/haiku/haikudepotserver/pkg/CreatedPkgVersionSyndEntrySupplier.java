@@ -12,6 +12,8 @@ import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndContentImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
+import com.rometools.utils.Strings;
+import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.exp.ExpressionFactory;
@@ -24,6 +26,9 @@ import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -49,6 +54,9 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
     @Resource
     private MessageSource messageSource;
+
+    @Resource
+    private PkgLocalizationService pkgLocalizationService;
 
     @Override
     public List<SyndEntry> generate(final FeedSpecification specification) {
@@ -89,7 +97,13 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
             query.setFetchLimit(specification.getLimit());
 
-            List<PkgVersion> pkgVersions = serverRuntime.getContext().performQuery(query);
+            ObjectContext context = serverRuntime.getContext();
+            NaturalLanguage naturalLanguage = Strings.isBlank(specification.getNaturalLanguageCode())
+                ? NaturalLanguage.getEnglish(context)
+                    : NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode())
+                    .orElseThrow(() -> new IllegalStateException("unable to find natural language; "
+                            + specification.getNaturalLanguageCode()));
+            List<PkgVersion> pkgVersions = context.performQuery(query);
 
             return pkgVersions
                     .stream()
@@ -119,15 +133,12 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                         ));
 
                         {
-                            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pv.getPkgVersionLocalization(specification.getNaturalLanguageCode());
-
-                            if (!pkgVersionLocalizationOptional.isPresent()) {
-                                pkgVersionLocalizationOptional = pv.getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
-                            }
+                            ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgLocalizationService
+                                    .resolvePkgVersionLocalization(context, pv, null, naturalLanguage);
 
                             SyndContent content = new SyndContentImpl();
                             content.setType(MediaType.PLAIN_TEXT_UTF_8.type());
-                            content.setValue(pkgVersionLocalizationOptional.get().getSummary().orElse(null));
+                            content.setValue(resolvedPkgVersionLocalization.getSummary());
                             entry.setDescription(content);
                         }
 
