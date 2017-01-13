@@ -39,12 +39,12 @@ public class ErrorServlet extends HttpServlet {
 
     private final static Map<String,String> BODY_GENERAL = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Something has gone wrong with your use of this web application.",
-            NaturalLanguage.CODE_GERMAN, "Bei der Benutzung dieser Web-Anwendung ist was schief gegangen.",
+            NaturalLanguage.CODE_GERMAN, "Mit dieser Web-Anwendung ist was schief gegangen.",
             NaturalLanguage.CODE_RUSSIAN, "Что-то пошло не так во время использования вами данного веб-сайта.",
             NaturalLanguage.CODE_SLOVAK, "Niečo sa pokazilo počas vašej práce s touto webovou aplikáciou.");
 
     private final static Map<String,String> BODY_NOTFOUND = ImmutableMap.of(
-            NaturalLanguage.CODE_ENGLISH, "The requested resource was not able to be found.",
+            NaturalLanguage.CODE_ENGLISH, "The requested resource was not found.",
             NaturalLanguage.CODE_GERMAN, "Die angefragte Ressource wurde nicht gefunden.",
             NaturalLanguage.CODE_RUSSIAN, "Запрашиваемый ресурс не найден.",
             NaturalLanguage.CODE_SLOVAK, "Požadovaný zdroj nebol nájdený.");
@@ -57,7 +57,7 @@ public class ErrorServlet extends HttpServlet {
 
     private final static Map<String,String> ACTION = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Start again",
-            NaturalLanguage.CODE_GERMAN, "Neue anfangen",
+            NaturalLanguage.CODE_GERMAN, "Neu starten",
             NaturalLanguage.CODE_RUSSIAN, "Начать сначала",
             NaturalLanguage.CODE_SLOVAK, "Začať znova");
 
