@@ -31,7 +31,7 @@ public class FeedServiceImpl implements FeedService {
 
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(baseUrl)
-                .path(PATH_ROOT + PATH_PKG_LEAF);
+                .path(PATH_ROOT + "/pkg.atom");
 
         if(null!=specification.getNaturalLanguageCode()) {
             builder.queryParam(KEY_NATURALLANGUAGECODE, specification.getNaturalLanguageCode());

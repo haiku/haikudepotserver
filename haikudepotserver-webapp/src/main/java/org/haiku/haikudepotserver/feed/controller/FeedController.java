@@ -12,7 +12,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import com.google.common.net.MediaType;
 import com.rometools.rome.feed.synd.*;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
@@ -24,7 +23,9 @@ import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,8 +35,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -49,8 +51,8 @@ public class FeedController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(FeedController.class);
 
-    private final static String FEEDTYPE = "atom_1.0";
-    private final static String FEEDTITLE = "Haiku Depot Server Feed";
+    private final static String FEED_TITLE = "Haiku Depot Server Feed";
+    private final static String FEED_ICON_TITLE = "Haiku Depot Server Icon";
 
     private final static int DEFAULT_LIMIT = 50;
     private final static int MAX_LIMIT = 100;
@@ -59,6 +61,9 @@ public class FeedController {
 
     @Resource
     private List<SyndEntrySupplier> syndEntrySuppliers;
+
+    @Resource
+    private MessageSource messageSource;
 
     @Value("${baseurl}")
     private String baseUrl;
@@ -71,15 +76,22 @@ public class FeedController {
                 @Override
                 public SyndFeed load(FeedSpecification key) throws Exception {
                     Preconditions.checkNotNull(key);
+                    Locale locale = Locale.ENGLISH;
+
+                    if (!Strings.isNullOrEmpty(key.getNaturalLanguageCode())) {
+                        locale = new Locale(key.getNaturalLanguageCode());
+                    }
 
                     SyndFeed feed = new SyndFeedImpl();
-                    feed.setFeedType(FEEDTYPE);
-                    feed.setTitle(FEEDTITLE);
+                    feed.setFeedType(key.getFeedType().getFeedType());
+                    feed.setTitle(FEED_TITLE);
+                    feed.setDescription(messageSource.getMessage("feed.description", new Object[] {}, locale));
                     feed.setLink(baseUrl);
                     feed.setPublishedDate(new java.util.Date());
 
                     SyndImage image = new SyndImageImpl();
                     image.setUrl(baseUrl + "/__img/haikudepot32.png");
+                    image.setTitle(FEED_ICON_TITLE);
                     feed.setImage(image);
 
                     List<SyndEntry> entries = new ArrayList<>();
@@ -90,7 +102,7 @@ public class FeedController {
 
                     // sort the entries and then take the first number of them up to the limit.
 
-                    Collections.sort(entries, (o1, o2) -> -1 * o1.getPublishedDate().compareTo(o2.getPublishedDate()));
+                    entries.sort((o1, o2) -> -1 * o1.getPublishedDate().compareTo(o2.getPublishedDate()));
 
                     if(entries.size() > key.getLimit()) {
                         entries = entries.subList(0,key.getLimit());
@@ -102,9 +114,12 @@ public class FeedController {
                 }
             });
 
-    @RequestMapping(value = FeedServiceImpl.PATH_PKG_LEAF, method = RequestMethod.GET)
+    @RequestMapping(
+            value = "{pathBase:pkg\\.}{" + FeedServiceImpl.KEY_EXTENSION + ":atom|rss}",
+            method = RequestMethod.GET)
     public void generate(
             HttpServletResponse response,
+            @PathVariable(value = FeedServiceImpl.KEY_EXTENSION) String extension,
             @RequestParam(value = FeedServiceImpl.KEY_NATURALLANGUAGECODE, required = false) String naturalLanguageCode,
             @RequestParam(value = FeedServiceImpl.KEY_PKGNAMES, required = false) String pkgNames,
             @RequestParam(value = FeedServiceImpl.KEY_LIMIT, required = false) Integer limit,
@@ -116,7 +131,11 @@ public class FeedController {
             limit = DEFAULT_LIMIT;
         }
 
+        FeedSpecification.FeedType feedType = tryDeriveFeedTypeByExtension(extension)
+                .orElseThrow(() -> new IllegalStateException("unable to derive the feed type from [" + extension + "]"));
+
         FeedSpecification specification = new FeedSpecification();
+        specification.setFeedType(feedType);
         specification.setLimit(limit > MAX_LIMIT ? MAX_LIMIT : limit);
         specification.setNaturalLanguageCode(!Strings.isNullOrEmpty(naturalLanguageCode) ? naturalLanguageCode : NaturalLanguage.CODE_ENGLISH);
 
@@ -142,13 +161,25 @@ public class FeedController {
 
         SyndFeed feed = feedCache.getUnchecked(specification);
 
-        response.setContentType(MediaType.ATOM_UTF_8.toString());
+        response.setContentType(feedType.getContentType());
 
         Writer writer = response.getWriter();
         SyndFeedOutput syndFeedOutput = new SyndFeedOutput();
         syndFeedOutput.output(feed, writer);
 
         writer.close();
+    }
+
+    private Optional<FeedSpecification.FeedType> tryDeriveFeedTypeByExtension(String extension) {
+        if (!Strings.isNullOrEmpty(extension)) {
+            for (FeedSpecification.FeedType feedType : FeedSpecification.FeedType.values()) {
+                if (extension.equals(feedType.getExtension())) {
+                    return Optional.of(feedType);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
 

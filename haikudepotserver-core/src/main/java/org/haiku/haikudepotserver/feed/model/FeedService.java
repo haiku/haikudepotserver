@@ -11,9 +11,9 @@ public interface FeedService {
     String KEY_PKGNAMES = "pkgnames";
     String KEY_LIMIT = "limit";
     String KEY_TYPES = "types";
+    String KEY_EXTENSION = "extension";
 
     String PATH_ROOT = "/feed";
-    String PATH_PKG_LEAF = "/pkg.atom";
 
     /**
      * <p>Given a specification for a feed, this method will generate a URL that external users can query in order

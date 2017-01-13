@@ -5,6 +5,8 @@
 
 package org.haiku.haikudepotserver.feed.model;
 
+import com.google.common.net.MediaType;
+
 import java.util.List;
 
 /**
@@ -21,12 +23,49 @@ public class FeedSpecification {
     public enum SupplierType {
         CREATEDPKGVERSION,
         CREATEDUSERRATING
-    };
+    }
 
+    public enum FeedType {
+        ATOM("atom_1.0", "atom", MediaType.ATOM_UTF_8.toString()),
+        RSS("rss_2.0", "rss", "application/rss+xml");
+
+        private String feedType;
+        private String extension;
+        private String contentType;
+
+        FeedType(String feedType, String extension, String contentType) {
+            this.feedType = feedType;
+            this.extension = extension;
+            this.contentType = contentType;
+        }
+
+        public String getFeedType() {
+            return feedType;
+        }
+
+        public String getExtension() {
+            return extension;
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
+
+    }
+
+    private FeedType feedType;
     private String naturalLanguageCode;
     private List<String> pkgNames;
     private Integer limit;
     private List<SupplierType> supplierTypes;
+
+    public FeedType getFeedType() {
+        return feedType;
+    }
+
+    public void setFeedType(FeedType feedType) {
+        this.feedType = feedType;
+    }
 
     public String getNaturalLanguageCode() {
         return naturalLanguageCode;
@@ -67,6 +106,7 @@ public class FeedSpecification {
 
         FeedSpecification that = (FeedSpecification) o;
 
+        if (!feedType.equals(that.feedType)) return false;
         if (!limit.equals(that.limit)) return false;
         if (!naturalLanguageCode.equals(that.naturalLanguageCode)) return false;
         if (pkgNames != null ? !pkgNames.equals(that.pkgNames) : that.pkgNames != null) return false;
@@ -81,6 +121,7 @@ public class FeedSpecification {
         result = 31 * result + (pkgNames != null ? pkgNames.hashCode() : 0);
         result = 31 * result + limit.hashCode();
         result = 31 * result + supplierTypes.hashCode();
+        result = 31 * result + feedType.hashCode();
         return result;
     }
 }

@@ -242,6 +242,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         final ObjectContext context = serverRuntime.getContext();
         FeedSpecification specification = new FeedSpecification();
+        specification.setFeedType(FeedSpecification.FeedType.ATOM);
         specification.setLimit(request.limit);
 
         if(null!=request.supplierTypes) {
