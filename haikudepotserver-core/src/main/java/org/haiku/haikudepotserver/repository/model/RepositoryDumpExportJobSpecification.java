@@ -1,18 +1,16 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.pkg.model;
+package org.haiku.haikudepotserver.repository.model;
 
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
-import org.haiku.haikudepotserver.job.model.JobSpecification;
-import org.springframework.util.ObjectUtils;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class PkgIconExportArchiveJobSpecification extends AbstractJobSpecification {
+public class RepositoryDumpExportJobSpecification extends AbstractJobSpecification {
 
     private final static long TTL_MINUTES = 30;
 

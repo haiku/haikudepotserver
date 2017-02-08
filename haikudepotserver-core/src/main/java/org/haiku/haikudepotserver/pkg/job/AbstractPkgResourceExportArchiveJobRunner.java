@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
+import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
@@ -44,8 +45,6 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
 
     @Resource
     protected ObjectMapper objectMapper;
-
-    private DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
 
     @Override
     public void run(
@@ -117,7 +116,11 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
      */
 
     void appendArchiveInfo(State state) throws IOException {
-        byte[] payload = objectMapper.writeValueAsBytes(createArchiveInfo(state));
+        ArchiveInfo archiveInfo = new ArchiveInfo(
+                DateTimeHelper.secondAccuracyDatePlusOneSecond(state.latestModifiedTimestamp),
+                runtimeInformationService.getProjectVersion());
+
+        byte[] payload = objectMapper.writeValueAsBytes(archiveInfo);
         TarArchiveEntry tarEntry = new TarArchiveEntry(getPathComponentTop() + "/info.json");
         tarEntry.setSize(payload.length);
         tarEntry.setModTime(roundTimeToSecondPlusOne(state.latestModifiedTimestamp));
@@ -126,38 +129,12 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
         state.tarArchiveOutputStream.closeArchiveEntry();
     }
 
-    private ArchiveInfo createArchiveInfo(State state) {
-        ArchiveInfo archiveInfo = new ArchiveInfo();
-        archiveInfo.agent = "hds";
-        archiveInfo.agentVersion = runtimeInformationService.getProjectVersion();
-        archiveInfo.createTimestamp = new Date();
-        archiveInfo.createTimestampIso = dateTimeFormatter.format(archiveInfo.createTimestamp.toInstant());
-        archiveInfo.dataModifiedTimestamp = roundTimeToSecondPlusOne(state.latestModifiedTimestamp);
-        archiveInfo.dataModifiedTimestampIso = dateTimeFormatter.format(archiveInfo.dataModifiedTimestamp.toInstant());
-        return archiveInfo;
-    }
-
     Date roundTimeToSecond(Date date) {
         return new Date((date.getTime() / 1000) * 1000);
     }
 
     private Date roundTimeToSecondPlusOne(Date date) {
         return new Date(roundTimeToSecond(date).getTime() + 1000);
-    }
-
-    /**
-     * <p>This data gets encoded into the file such that it knows the latest change to the data.</p>
-     */
-
-    final static class ArchiveInfo {
-
-        public Date createTimestamp;
-        public String createTimestampIso;
-        public Date dataModifiedTimestamp;
-        public String dataModifiedTimestampIso;
-        public String agent;
-        public String agentVersion;
-
     }
 
     final static class State {

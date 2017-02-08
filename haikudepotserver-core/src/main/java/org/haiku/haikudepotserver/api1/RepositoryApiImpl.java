@@ -20,7 +20,7 @@ import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
@@ -113,7 +113,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         }
 
         jobService.submit(
-                new PkgRepositoryImportJobSpecification(
+                new RepositoryHpkrIngressJobSpecification(
                         repositoryOptional.get().getCode(),
                         null==repositorySources ? null : repositorySources
                                 .stream()

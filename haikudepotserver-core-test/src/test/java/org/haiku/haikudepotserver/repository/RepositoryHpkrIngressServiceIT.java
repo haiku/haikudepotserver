@@ -19,7 +19,7 @@ import org.haiku.haikudepotserver.job.Jobs;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @ContextConfiguration({
         "classpath:/spring/test-context.xml"
 })
-public class RepositoryImportServiceIT extends AbstractIntegrationTest {
+public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
     private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
 
@@ -183,7 +183,7 @@ public class RepositoryImportServiceIT extends AbstractIntegrationTest {
             // do the import.
 
             String guid = jobService.submit(
-                    new PkgRepositoryImportJobSpecification("test"),
+                    new RepositoryHpkrIngressJobSpecification("test"),
                     JobSnapshot.COALESCE_STATUSES_NONE);
 
             // wait for it to finish.

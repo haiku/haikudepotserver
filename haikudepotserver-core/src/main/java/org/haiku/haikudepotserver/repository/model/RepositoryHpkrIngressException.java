@@ -5,9 +5,9 @@
 
 package org.haiku.haikudepotserver.repository.model;
 
-public class RepositoryImportException extends Exception {
+public class RepositoryHpkrIngressException extends Exception {
 
-    public RepositoryImportException(String message, Throwable cause) {
+    public RepositoryHpkrIngressException(String message, Throwable cause) {
         super(message, cause);
     }
 

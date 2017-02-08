@@ -22,6 +22,10 @@ public class DateTimeHelper {
         return new Date((date.getTime() / 1000) * 1000);
     }
 
+    public static Date secondAccuracyDatePlusOneSecond(Date date) {
+        return new Date(secondAccuracyDate(date).getTime() + 1000);
+    }
+
     public static DateTimeFormatter createStandardDateTimeFormat() {
         return new DateTimeFormatterBuilder()
                 .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)

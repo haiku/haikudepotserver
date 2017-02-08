@@ -14,7 +14,7 @@ import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -60,7 +60,7 @@ public class MaintenanceController {
 
             for(Repository repository : Repository.getAllActive(context)) {
                 jobService.submit(
-                        new PkgRepositoryImportJobSpecification(repository.getCode()),
+                        new RepositoryHpkrIngressJobSpecification(repository.getCode()),
                         JobSnapshot.COALESCE_STATUSES_QUEUED);
             }
         }

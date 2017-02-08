@@ -43,7 +43,7 @@
 
     <!-- JOBS -->
 
-    <bean class="org.haiku.haikudepotserver.repository.job.PkgRepositoryImportJobRunner"/>
+    <bean class="org.haiku.haikudepotserver.repository.job.RepositoryHpkrIngressJobRunner"/>
     <bean class="org.haiku.haikudepotserver.passwordreset.job.PasswordResetMaintenanceJobRunner"/>
 
     <!-- OPEN SEARCH -->

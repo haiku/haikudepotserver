@@ -16,8 +16,8 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
-import org.haiku.haikudepotserver.repository.model.RepositoryImportException;
+import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressException;
 import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.pkg.HpkrFileExtractor;
 import org.haiku.pkg.PkgIterator;
@@ -42,9 +42,9 @@ import java.util.concurrent.TimeUnit;
  * will undertake the import process.</p>
  */
 
-public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositoryImportJobSpecification> {
+public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<RepositoryHpkrIngressJobSpecification> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgRepositoryImportJobRunner.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryHpkrIngressJobRunner.class);
 
     private final static long TIMEOUT_REPOSITORY_SOURCE_FETCH = TimeUnit.SECONDS.convert(30, TimeUnit.MILLISECONDS);
 
@@ -61,7 +61,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
     private boolean shouldPopulatePayloadLength;
 
     @Override
-    public void run(JobService jobService, PkgRepositoryImportJobSpecification specification) {
+    public void run(JobService jobService, RepositoryHpkrIngressJobSpecification specification) {
 
         Preconditions.checkNotNull(specification);
 
@@ -118,7 +118,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
     private void runForRepositorySource(
             ObjectContext mainContext,
             RepositorySource repositorySource)
-            throws RepositoryImportException {
+            throws RepositoryHpkrIngressException {
         URL url = repositorySource.getHpkrURL();
 
         // now shift the URL's data into a temporary file and then process it.
@@ -162,7 +162,7 @@ public class PkgRepositoryImportJobRunner extends AbstractJobRunner<PkgRepositor
                     pkgImportContext.commitChanges();
                 }
                 catch(Throwable th) {
-                    throw new RepositoryImportException("unable to store package [" + pkg.toString() + "]", th);
+                    throw new RepositoryHpkrIngressException("unable to store package [" + pkg.toString() + "]", th);
                 }
             }
 

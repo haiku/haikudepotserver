@@ -20,21 +20,21 @@ import java.util.Set;
  * </p>
  */
 
-public class PkgRepositoryImportJobSpecification extends AbstractJobSpecification {
+public class RepositoryHpkrIngressJobSpecification extends AbstractJobSpecification {
 
     private String repositoryCode;
 
     private Set<String> repositorySourceCodes;
 
-    public PkgRepositoryImportJobSpecification() {
+    public RepositoryHpkrIngressJobSpecification() {
         super();
     }
 
-    public PkgRepositoryImportJobSpecification(String repositoryCode) {
+    public RepositoryHpkrIngressJobSpecification(String repositoryCode) {
         this(repositoryCode, null);
     }
 
-    public PkgRepositoryImportJobSpecification(
+    public RepositoryHpkrIngressJobSpecification(
             String repositoryCode,
             Set<String> repositorySourceCodes) {
         this();
@@ -65,7 +65,7 @@ public class PkgRepositoryImportJobSpecification extends AbstractJobSpecificatio
         Preconditions.checkState(!Strings.isNullOrEmpty(repositoryCode), "this specification should have a repository code defined.");
 
         if(super.isEquivalent(other)) {
-            PkgRepositoryImportJobSpecification other2 = (PkgRepositoryImportJobSpecification) other;
+            RepositoryHpkrIngressJobSpecification other2 = (RepositoryHpkrIngressJobSpecification) other;
 
             return
                     Objects.equals(getRepositoryCode(), other2.getRepositoryCode()) &&

@@ -10,7 +10,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.repository.model.PkgRepositoryImportJobSpecification;
+import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +37,9 @@ import java.util.Optional;
         "repository", // TODO - remove
         "__repository"
 })
-public class RepositoryImportController {
+public class RepositoryHpkrIngressController {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryImportController.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryHpkrIngressController.class);
 
     private final static String KEY_REPOSITORYCODE = "repositoryCode";
     private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
@@ -62,7 +62,7 @@ public class RepositoryImportController {
         }
 
         jobService.submit(
-                new PkgRepositoryImportJobSpecification(repositoryCode),
+                new RepositoryHpkrIngressJobSpecification(repositoryCode),
                 JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return ResponseEntity.ok("repository import submitted");
@@ -90,7 +90,7 @@ public class RepositoryImportController {
         }
 
         jobService.submit(
-                new PkgRepositoryImportJobSpecification(repositoryCode, Collections.singleton(repositorySourceCode)),
+                new RepositoryHpkrIngressJobSpecification(repositoryCode, Collections.singleton(repositorySourceCode)),
                 JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return ResponseEntity.ok("repository source import submitted");
