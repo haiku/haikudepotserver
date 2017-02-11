@@ -12,11 +12,9 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.model.JobData;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.security.AuthenticationFilter;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -27,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
@@ -35,6 +34,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -74,6 +80,81 @@ public class JobController extends AbstractController {
 
     @Resource
     private AuthorizationService authorizationService;
+
+    /**
+     * <p>This is helper-code that can be used to check to see if the data is stale and
+     * will then enqueue the job, run it and then redirect the user to the data
+     * download.</p>
+     * @param response is the HTTP response to send the redirect to.
+     * @param ifModifiedSinceHeader is the inbound header from the client.
+     * @param lastModifyTimestamp is the actual last modified date for the data.
+     * @param jobSpecification is the job that would be run if the data is newer than in the
+     *                         inbound header.
+     */
+
+    public static void handleRedirectToJobData(
+            HttpServletResponse response,
+            JobService jobService,
+            String ifModifiedSinceHeader,
+            Date lastModifyTimestamp,
+            JobSpecification jobSpecification) throws IOException {
+
+        if (!Strings.isNullOrEmpty(ifModifiedSinceHeader)) {
+            try {
+                Date requestModifyTimestamp = new Date(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(ifModifiedSinceHeader)).toEpochMilli());
+
+                if (requestModifyTimestamp.getTime() >= lastModifyTimestamp.getTime()) {
+                    response.setStatus(HttpStatus.NOT_MODIFIED.value());
+                    return;
+                }
+            } catch (DateTimeParseException dtpe) {
+                LOGGER.warn("bad [{}] header on request; [{}] -- will ignore",
+                        HttpHeaders.IF_MODIFIED_SINCE,
+                        StringUtils.abbreviate(ifModifiedSinceHeader, 128));
+            }
+        }
+
+        // what happens here is that we get the report and if it is too old, delete it and try again.
+
+        JobSnapshot jobSnapshot = getJobSnapshotStartedAfter(jobService, lastModifyTimestamp, jobSpecification);
+        Set<String> jobDataGuids = jobSnapshot.getDataGuids();
+
+        if (1 != jobDataGuids.size()) {
+            throw new IllegalStateException("found [" + jobDataGuids.size() + "] job data guids related to the job ["
+                    + jobSnapshot.getGuid() + "] - was expecting 1");
+        }
+
+        String lastModifiedValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(
+                lastModifyTimestamp.toInstant(), ZoneOffset.UTC));
+        String destinationLocationUrl = UriComponentsBuilder.newInstance()
+                .pathSegment(AuthenticationFilter.SEGMENT_SECURED)
+                .pathSegment(JobController.SEGMENT_JOBDATA)
+                .pathSegment(jobDataGuids.iterator().next())
+                .pathSegment(JobController.SEGMENT_DOWNLOAD)
+                .toUriString();
+
+        response.addHeader(HttpHeaders.LAST_MODIFIED, lastModifiedValue);
+        response.sendRedirect(destinationLocationUrl);
+    }
+
+    private static JobSnapshot getJobSnapshotStartedAfter(
+            JobService jobService,
+            Date lastModifyTimestamp,
+            JobSpecification jobSpecification) {
+        for (int i = 0; i < 3; i++) {
+            String jobGuid = jobService.immediate(jobSpecification, true);
+            JobSnapshot jobSnapshot = jobService.tryGetJob(jobGuid)
+                    .orElseThrow(() -> new IllegalStateException("unable to obtain the job snapshot having run it immediate prior."));
+
+            if (jobSnapshot.getStartTimestamp().getTime() >= lastModifyTimestamp.getTime()) {
+                return jobSnapshot;
+            }
+
+            jobService.removeJob(jobGuid); // remove the stale one.
+        }
+
+        throw new IllegalStateException("unable to find a job snapshot started after [" + lastModifyTimestamp + "]");
+    }
 
     /**
      * <p>This URL can be used to supply data that can be used with a job to be run as an input to the

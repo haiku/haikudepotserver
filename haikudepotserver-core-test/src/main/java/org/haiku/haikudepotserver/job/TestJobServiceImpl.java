@@ -11,6 +11,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
 
 import javax.annotation.PostConstruct;
+import javax.naming.OperationNotSupportedException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -99,6 +100,11 @@ public class TestJobServiceImpl implements JobService {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public void removeJob(String guid) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

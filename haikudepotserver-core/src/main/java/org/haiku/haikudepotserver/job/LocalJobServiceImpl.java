@@ -443,11 +443,21 @@ public class LocalJobServiceImpl
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
         JobSnapshot job = jobs.get(guid);
 
-        if(null!=job) {
+        if (null != job) {
             return Optional.of(new Job(job));
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public synchronized void removeJob(String guid) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(guid));
+        Job job = jobs.get(guid);
+
+        if (null != job) {
+            removeInternalJob(job);
+        }
     }
 
     /**

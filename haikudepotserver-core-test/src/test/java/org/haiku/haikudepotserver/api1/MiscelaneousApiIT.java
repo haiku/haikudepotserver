@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -119,7 +119,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
                 result.pkgCategories.stream().filter(pks -> pks.code.equals("education")).findFirst();
 
         Assertions.assertThat(pkgCategoryOptional.isPresent()).isTrue();
-        Assertions.assertThat(pkgCategoryOptional.get().name).isEqualTo("Ausbildung");
+        Assertions.assertThat(pkgCategoryOptional.get().name).isEqualTo("Bildung");
     }
 
     @Test

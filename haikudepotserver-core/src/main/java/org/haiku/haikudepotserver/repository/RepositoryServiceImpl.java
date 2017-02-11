@@ -11,12 +11,10 @@ import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.LikeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +37,26 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     // ------------------------------
     // HELPERS
+
+    @Override
+    public Date getLastRepositoryModifyTimestampSecondAccuracy(ObjectContext context) {
+        EJBQLQuery query = new EJBQLQuery(String.join(" ",
+                "SELECT",
+                "MAX(r." + Repository.MODIFY_TIMESTAMP_PROPERTY + ")",
+                "FROM",
+                Repository.class.getSimpleName(),
+                "r WHERE r.active = true"));
+
+        query.setCacheGroups(HaikuDepot.CacheGroup.REPOSITORY.name());
+
+        List<Object> result = context.performQuery(query);
+
+        switch(result.size()) {
+            case 0: return new Date(0);
+            case 1: return DateTimeHelper.secondAccuracyDate((Date) result.get(0));
+            default: throw new IllegalStateException("more than one row returned for a max aggregate.");
+        }
+    }
 
     @Override
     public List<Repository> getRepositoriesForPkg(

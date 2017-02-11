@@ -9,6 +9,7 @@ import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,6 +18,7 @@ import java.util.List;
 
 public interface RepositoryService {
 
+    Date getLastRepositoryModifyTimestampSecondAccuracy(ObjectContext context);
 
     /**
      * <p>Returns all of the repositories that contain this package.</p>

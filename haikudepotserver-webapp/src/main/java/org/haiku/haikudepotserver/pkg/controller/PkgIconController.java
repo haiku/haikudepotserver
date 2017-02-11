@@ -11,34 +11,25 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.lang.StringUtils;
-import org.haiku.haikudepotserver.job.controller.JobController;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.RenderedPkgIconRepository;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.job.controller.JobController;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.pkg.RenderedPkgIconRepository;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
-import org.haiku.haikudepotserver.security.AuthenticationFilter;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.Date;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * <p>This controller vends the package icon.  This may be provided by data stored in the database, or it may be
@@ -95,45 +86,12 @@ public class PkgIconController extends AbstractController {
             HttpServletResponse response,
             @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSinceHeader)
         throws IOException {
-
-        ObjectContext context = serverRuntime.getContext();
-        Date modifyTimestamp = pkgIconService.getLastPkgIconModifyTimestampSecondAccuracy(context);
-
-        if (!Strings.isNullOrEmpty(ifModifiedSinceHeader)) {
-            try {
-                Date requestModifyTimestamp = new Date(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(ifModifiedSinceHeader)).toEpochMilli());
-
-                if (requestModifyTimestamp.getTime() >= modifyTimestamp.getTime()) {
-                    response.setStatus(HttpStatus.NOT_MODIFIED.value());
-                    return;
-                }
-            } catch (DateTimeParseException dtpe) {
-                LOGGER.warn("bad [{}] header on request; [{}] -- will ignore",
-                        HttpHeaders.IF_MODIFIED_SINCE,
-                        StringUtils.abbreviate(ifModifiedSinceHeader, 128));
-            }
-        }
-
-        PkgIconExportArchiveJobSpecification specification = new PkgIconExportArchiveJobSpecification();
-        String jobGuid = jobService.immediate(specification, true);
-        JobSnapshot jobSnapshot = jobService.tryGetJob(jobGuid)
-                .orElseThrow(() -> new IllegalStateException("unable to obtain the job snapshot having run it immediate prior."));
-        Set<String> jobDataGuids = jobSnapshot.getDataGuids();
-
-        if (1 != jobDataGuids.size()) {
-            throw new IllegalStateException("found [" + jobDataGuids.size() + "] job data guids related to the job [" + jobGuid + "] - was expecting 1");
-        }
-
-        String lastModifiedValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(
-                modifyTimestamp.toInstant(), ZoneOffset.UTC));
-
-        response.addHeader(HttpHeaders.LAST_MODIFIED, lastModifiedValue);
-        response.sendRedirect(UriComponentsBuilder.newInstance()
-                .pathSegment(AuthenticationFilter.SEGMENT_SECURED)
-                .pathSegment(JobController.SEGMENT_JOBDATA)
-                .pathSegment(jobDataGuids.iterator().next())
-                .pathSegment(JobController.SEGMENT_DOWNLOAD)
-                .toUriString());
+        JobController.handleRedirectToJobData(
+                response,
+                jobService,
+                ifModifiedSinceHeader,
+                pkgIconService.getLastPkgIconModifyTimestampSecondAccuracy(serverRuntime.getContext()),
+                new PkgIconExportArchiveJobSpecification());
     }
 
     @RequestMapping(value = {

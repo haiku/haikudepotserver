@@ -66,6 +66,8 @@ public interface JobService {
 
     Optional<? extends JobSnapshot> tryGetJob(String guid);
 
+    void removeJob(String guid);
+
     void setJobProgressPercent(String guid, Integer progressPercent);
 
     void clearExpiredJobs();

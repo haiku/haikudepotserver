@@ -65,7 +65,10 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                 ) {
 
             ObjectContext context = serverRuntime.getContext();
-            List<Repository> repositories = Repository.getAll(context);
+            List<Repository> repositories = Repository.getAll(context)
+                    .stream()
+                    .filter((r) -> r.getActive())
+                    .collect(Collectors.toList());
 
             jsonGenerator.writeStartObject();
             writeInfo(jsonGenerator, repositories);
@@ -94,6 +97,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
         dumpRepository.informationUrl = repository.getInformationUrl();
         dumpRepository.repositorySources = repository.getRepositorySources()
                 .stream()
+                .filter(_RepositorySource::getActive)
                 .sorted(Comparator.comparing(_RepositorySource::getCode))
                 .map((r) -> {
                     DumpRepositorySource dumpRepositorySource = new DumpRepositorySource();
