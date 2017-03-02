@@ -24,10 +24,10 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring.version>4.3.3.RELEASE</spring.version>
+        <spring.version>4.3.6.RELEASE</spring.version>
         <postgresql.version>9.4.1211</postgresql.version>
 
-        <web-angularjs.versionbase>1.5.8</web-angularjs.versionbase>
+        <web-angularjs.versionbase>1.6.2</web-angularjs.versionbase>
         <web-angularjs.versionextension />
 
         <web-underscorejs.versionbase>1.8.3</web-underscorejs.versionbase>
@@ -44,7 +44,7 @@
         <jasmine.plugin.version>2.2</jasmine.plugin.version>
 
         <selenium-java.version>2.53.1</selenium-java.version>
-        <jetty.version>9.3.13.v20161014</jetty.version>
+        <jetty.version>9.3.16.v20170120</jetty.version>
 
         <metrics.version>3.1.2</metrics.version>
     </properties>
@@ -109,7 +109,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>19.0</version>
+                <version>21.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -155,7 +155,7 @@
             <dependency>
                 <groupId>com.github.briandilley.jsonrpc4j</groupId>
                 <artifactId>jsonrpc4j</artifactId>
-                <version>1.4.6</version>
+                <version>1.5.0</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet.jsp</groupId>
@@ -194,7 +194,7 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>4.0.3</version>
+                <version>4.1.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cayenne</groupId>

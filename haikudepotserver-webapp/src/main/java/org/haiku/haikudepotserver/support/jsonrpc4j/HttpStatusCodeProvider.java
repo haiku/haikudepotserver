@@ -1,5 +1,7 @@
 package org.haiku.haikudepotserver.support.jsonrpc4j;
 
+import com.googlecode.jsonrpc4j.DefaultHttpStatusCodeProvider;
+
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -11,6 +13,11 @@ public class HttpStatusCodeProvider implements com.googlecode.jsonrpc4j.HttpStat
     @Override
     public int getHttpStatusCode(int resultCode) {
         return HttpServletResponse.SC_OK;
+    }
+
+    @Override
+    public Integer getJsonRpcCode(int httpStatusCode) {
+        return DefaultHttpStatusCodeProvider.INSTANCE.getJsonRpcCode(httpStatusCode);
     }
 
 }
