@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -171,7 +171,7 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                         reduceIterator,
                         window.location.pathname,
                         query
-                    ) + '#' + item.path,
+                    ) + '#!' + item.path,
                     item.search
                 );
 
