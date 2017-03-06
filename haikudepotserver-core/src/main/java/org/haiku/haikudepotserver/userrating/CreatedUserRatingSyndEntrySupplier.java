@@ -154,7 +154,7 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
                                                 ur.getPkgVersion().toVersionCoordinates().toString(),
                                                 ur.getUser().getNickname())).toString());
                         entry.setLink(String.format(
-                                "%s/#/userrating/%s",
+                                "%s/#!/userrating/%s",
                                 baseUrl,
                                 ur.getCode()));
 

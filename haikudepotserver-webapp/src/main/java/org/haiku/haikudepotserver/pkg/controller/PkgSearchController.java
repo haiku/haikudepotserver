@@ -151,12 +151,12 @@ public class PkgSearchController {
 
             PkgVersion pv = pkgVersionOptional.get();
 
-            builder.pathSegment("#", "pkg", pv.getPkg().getName());
+            builder.pathSegment("#!", "pkg", pv.getPkg().getName());
             pv.toVersionCoordinates().appendPathSegments(builder);
             builder.pathSegment(pv.getArchitecture().getCode());
         }
         else {
-            builder.path("#/");
+            builder.path("#!/");
             builder.queryParam(KEY_QUERY, query);
         }
 

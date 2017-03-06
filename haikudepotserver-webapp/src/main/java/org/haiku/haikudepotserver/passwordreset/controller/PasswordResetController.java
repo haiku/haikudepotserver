@@ -31,7 +31,7 @@ public class PasswordResetController {
     public ModelAndView handleGet(
             @PathVariable(value = KEY_TOKEN) String token)
             throws IOException {
-        return new ModelAndView("redirect:/#/completepasswordreset/"+token);
+        return new ModelAndView("redirect:/#!/completepasswordreset/"+token);
     }
 
 }
