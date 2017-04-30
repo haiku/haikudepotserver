@@ -64,6 +64,8 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                         throw Error('to add a screenshot for '+pkg.name+' the image file must be provided');
                     }
 
+                    $log.info('will upload screenshot for pkg [' + pkg.name + ']');
+                    
                     return $http({
                         cache: false,
                         method: 'POST',
@@ -74,6 +76,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                         data: screenshotFile
                     }).then(
                         function successFunction(response) {
+                            $log.info('did upload screenshot');
                             var code = response.headers('X-HaikuDepotServer-ScreenshotCode');
 
                             if(!code || !code.length) {
@@ -83,6 +86,7 @@ angular.module('haikudepotserver').factory('pkgScreenshot',
                             return code;
                         },
                         function failureFunction(response) {
+                            $log.info('failed to upload screenshot');
                             switch(response.status) {
                                 case 200: return $q.when();
                                 case 415: return $q.reject(PkgScreenshot.errorCodes.BADFORMATORSIZEERROR); // unsupported media type

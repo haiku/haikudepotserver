@@ -46,7 +46,7 @@ angular.module('haikudepotserver').directive('spinner',[
                                 innerContainerEl.append(svgEl);
                             }
                             else {
-                                innerContainerEl.append(angular.element('<img src="img/spinner.gif">'));
+                                innerContainerEl.append(angular.element('<img src="/__img/spinner.gif">'));
                             }
 
                             containerEl.removeClass('app-hide');
