@@ -85,7 +85,7 @@ public class FallbackController {
         Optional<PkgVersion> pkgVersionOptional = tryGetPkgVersion(context, term);
 
         if (pkgVersionOptional.isPresent()) {
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#!", "pkg");
             pkgVersionOptional.get().appendPathSegments(builder);
             UriComponents uriComponents = builder.build();
 
