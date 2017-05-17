@@ -118,7 +118,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                             // 1; display
                             boolean isNone = AbstractJobRunner.MARKER.equals(row[COLUMN_NONE]);
 
-                            Optional<Pkg> pkgOptional = Pkg.getByName(rowContext, pkgName);
+                            Optional<Pkg> pkgOptional = Pkg.tryGetByName(rowContext, pkgName);
                             List<String> selectedPkgCategoryCodes = new ArrayList<>();
 
                             if (pkgOptional.isPresent()) {

@@ -56,7 +56,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Assert.assertEquals(Pkg.getByName(context, "pkg2").get().getPkgIcons().size(), 0);
+            Assert.assertEquals(Pkg.tryGetByName(context, "pkg2").get().getPkgIcons().size(), 0);
         }
 
         // load in an icon for pkg2 in order to check that the removal phase does happen.
@@ -69,7 +69,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG).get(),
                     16, // expected size along both axiis
                     context,
-                    Pkg.getByName(context, "pkg2").get());
+                    Pkg.tryGetByName(context, "pkg2").get());
         }
 
         // now load in the data to the job's storage system.
@@ -94,9 +94,9 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkg2 = Pkg.getByName(context, "pkg2").get();
+            Pkg pkg2 = Pkg.tryGetByName(context, "pkg2").get();
 
-            Assert.assertEquals(Pkg.getByName(context, "pkg2").get().getPkgIcons().size(), 2);
+            Assert.assertEquals(Pkg.tryGetByName(context, "pkg2").get().getPkgIcons().size(), 2);
 
             Assert.assertTrue(pkg2.getPkgIcon(
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
@@ -141,6 +141,5 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
         }
 
     }
-
 
 }

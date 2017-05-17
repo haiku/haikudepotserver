@@ -66,6 +66,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     private PkgIconService pkgIconService;
 
     @Resource
+    private PkgScreenshotService pkgScreenshotService;
+
+    @Resource
     private PkgService pkgService;
 
     @Resource
@@ -92,7 +95,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));
 
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
         if(!pkgOptional.isPresent()) {
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), pkgName);
@@ -681,7 +684,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request.code);
 
         final ObjectContext context = serverRuntime.getContext();
-        Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.getByCode(context, request.code);
+        Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.tryGetByCode(context, request.code);
 
         if(!pkgScreenshotOptional.isPresent()) {
             throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), request.code);
@@ -728,7 +731,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(removePkgScreenshotRequest.code);
 
         final ObjectContext context = serverRuntime.getContext();
-        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.getByCode(context, removePkgScreenshotRequest.code);
+        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, removePkgScreenshotRequest.code);
 
         if(!screenshotOptional.isPresent()) {
             throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), removePkgScreenshotRequest.code);
@@ -741,15 +744,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new AuthorizationFailureException();
         }
 
-        pkg.removeToManyTarget(Pkg.PKG_SCREENSHOTS_PROPERTY, screenshotOptional.get(), true);
-
-        Optional<PkgScreenshotImage> image = screenshotOptional.get().getPkgScreenshotImage();
-
-        if(image.isPresent()) {
-            context.deleteObjects(image.get());
-        }
-
-        context.deleteObjects(screenshotOptional.get());
+        pkgScreenshotService.deleteScreenshot(context, screenshotOptional.get());
         context.commitChanges();
 
         LOGGER.info("did remove the screenshot {} on package {}", removePkgScreenshotRequest.code, pkg.getName());

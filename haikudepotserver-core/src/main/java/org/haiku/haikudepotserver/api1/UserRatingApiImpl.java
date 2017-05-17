@@ -17,7 +17,6 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -117,7 +116,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new AuthorizationFailureException();
         }
 
-        Pkg.getByName(context, request.pkgName).
+        Pkg.tryGetByName(context, request.pkgName).
                 orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
 
         jobService.submit(
@@ -184,7 +183,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         User user = User.getByNickname(context, request.userNickname).orElseThrow(
             () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
-        Pkg pkg = Pkg.getByName(context, request.pkgName).orElseThrow(
+        Pkg pkg = Pkg.tryGetByName(context, request.pkgName).orElseThrow(
                 () -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
 
         Repository repository = getRepository(context, request.repositoryCode);
@@ -247,7 +246,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         final ObjectContext context = serverRuntime.getContext();
 
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, request.pkgName);
+        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
         if(!pkgOptional.isPresent()) {
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
@@ -451,7 +450,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Optional<Pkg> pkgOptional = Optional.empty();
 
         if(null!=request.pkgName) {
-            pkgOptional = Pkg.getByName(context, request.pkgName);
+            pkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
             if(!pkgOptional.isPresent()) {
                 throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);

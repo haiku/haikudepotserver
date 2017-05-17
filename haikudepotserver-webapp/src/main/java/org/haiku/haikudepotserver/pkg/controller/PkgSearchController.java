@@ -16,7 +16,6 @@ import freemarker.template.TemplateException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.OpenSearchDescription;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
@@ -136,7 +135,7 @@ public class PkgSearchController {
 
         if(!Strings.isNullOrEmpty(query) && Pkg.PATTERN_NAME.matcher(query).matches()) {
             ObjectContext context = serverRuntime.getContext();
-            Optional<Pkg> pkgOptional = Pkg.getByName(context, query);
+            Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, query);
 
             if(pkgOptional.isPresent()) {
                 pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(

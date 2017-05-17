@@ -8,10 +8,12 @@ package org.haiku.haikudepotserver.pkg.model;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Optional;
 
 public interface PkgScreenshotService {
 
@@ -36,6 +38,9 @@ public interface PkgScreenshotService {
     PkgScreenshot storePkgScreenshotImage(
             InputStream input,
             ObjectContext context,
-            Pkg pkg) throws IOException, BadPkgScreenshotException;
+            Pkg pkg,
+            Integer ordering) throws IOException, BadPkgScreenshotException;
+
+    void deleteScreenshot(ObjectContext context, PkgScreenshot screenshot);
 
 }

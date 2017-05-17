@@ -53,7 +53,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkg1").get();
+                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkg1").get();
             MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
 
             try(InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
@@ -76,7 +76,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.getContext();
             MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(
+                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(
                             context,
                             "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT).get();
 

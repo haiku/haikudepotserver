@@ -182,7 +182,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
                     int changes = pkgService.deactivatePkgVersionsForPkgAssociatedWithRepositorySource(
                             removalContext,
-                            org.haiku.haikudepotserver.dataobjects.Pkg.getByName(removalContext, persistedPkgName).get(),
+                            org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(removalContext, persistedPkgName).get(),
                             removalRepositorySource);
 
                     if (changes > 0) {

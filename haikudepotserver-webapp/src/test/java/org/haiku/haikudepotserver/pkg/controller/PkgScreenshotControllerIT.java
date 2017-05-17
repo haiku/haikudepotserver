@@ -40,7 +40,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
      */
 
     private byte[] getScreenshotData() throws IOException {
-        return getResourceData("sample-320x240.png");
+        return getResourceData("sample-320x240-a.png");
     }
 
     @Test
@@ -64,10 +64,10 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         Assertions.assertThat(code).isNotEmpty();
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.getByCode(context, code);
+        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, code);
         Assertions.assertThat(screenshotOptional.isPresent()).isTrue();
         Assertions.assertThat(screenshotOptional.get().getPkg().getName()).isEqualTo("pkg1");
-        Assertions.assertThat(screenshotOptional.get().getPkgScreenshotImage().get().getData()).isEqualTo(imageData);
+        Assertions.assertThat(screenshotOptional.get().tryGetPkgScreenshotImage().get().getData()).isEqualTo(imageData);
 
     }
 

@@ -134,7 +134,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.getContext();
             User user1 = integrationTestSupportService.createBasicUser(context, "testuser1", "fakepassword");
-            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+            Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
 
             org.haiku.haikudepotserver.dataobjects.Permission permission =
                     org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITICON.name().toLowerCase()).get();
@@ -260,7 +260,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
                             context,
                             org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITSCREENSHOT.name().toLowerCase()).get(),
                             User.getByNickname(context, "testuser").get(),
-                            Pkg.getByName(context, "pkg1").get());
+                            Pkg.tryGetByName(context, "pkg1").get());
 
             Assertions.assertThat(permissionUserPkgOptional.isPresent()).isTrue();
         }
@@ -347,7 +347,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
             PermissionUserPkg permissionUserPkg = context.newObject(PermissionUserPkg.class);
             permissionUserPkg.setPermission(org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITICON.name().toLowerCase()).get());
             permissionUserPkg.setUser(user);
-            permissionUserPkg.setPkg(Pkg.getByName(context, "pkg1").get());
+            permissionUserPkg.setPkg(Pkg.tryGetByName(context, "pkg1").get());
             context.commitChanges();
         }
 
@@ -367,7 +367,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
                             context,
                             org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITICON.name().toLowerCase()).get(),
                             User.getByNickname(context, "testuser").get(),
-                            Pkg.getByName(context, "pkg1").get()).isPresent()).isFalse();
+                            Pkg.tryGetByName(context, "pkg1").get()).isPresent()).isFalse();
         }
 
     }
@@ -379,8 +379,8 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         User user2 = integrationTestSupportService.createBasicUser(context, "testuser2", "fakepassword");
         User user3 = integrationTestSupportService.createBasicUser(context, "testuser3", "fakepassword");
 
-        Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
-        Pkg pkg2 = Pkg.getByName(context, "pkg2").get();
+        Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
+        Pkg pkg2 = Pkg.tryGetByName(context, "pkg2").get();
 
         org.haiku.haikudepotserver.dataobjects.Permission permission =
                 org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITICON.name().toLowerCase()).get();

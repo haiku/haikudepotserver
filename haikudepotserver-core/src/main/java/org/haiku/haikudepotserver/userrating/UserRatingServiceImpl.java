@@ -339,7 +339,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkState(!Strings.isNullOrEmpty(repositoryCode));
 
         ObjectContext context = serverRuntime.getContext();
-        Pkg pkg = Pkg.getByName(context, pkgName)
+        Pkg pkg = Pkg.tryGetByName(context, pkgName)
                 .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no pkg was found; " + pkgName));
         Repository repository = Repository.getByCode(context, repositoryCode)
                 .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no repository was found; " + repositoryCode));

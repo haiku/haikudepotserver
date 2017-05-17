@@ -77,7 +77,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
         else {
 
             if (!Strings.isNullOrEmpty(request.pkgName)) {
-                Optional<Pkg> requestPkgOptional = Pkg.getByName(context, request.pkgName);
+                Optional<Pkg> requestPkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
                 if (!requestPkgOptional.isPresent()) {
                     LOGGER.warn("attempt to produce user rating report for pkg {}, but that pkg does not exist -- not allowed", request.pkgName);

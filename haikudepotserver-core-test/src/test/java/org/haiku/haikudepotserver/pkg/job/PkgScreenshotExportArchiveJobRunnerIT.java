@@ -86,7 +86,7 @@ public class PkgScreenshotExportArchiveJobRunnerIT extends AbstractIntegrationTe
                 }
             };
 
-            ByteSource expectedScreenshotByteSource = getResourceByteSource("sample-320x240.png");
+            ByteSource expectedScreenshotByteSource = getResourceByteSource("sample-320x240-a.png");
 
             Set<String> foundPkg1Filenames = Sets.newHashSet();
 

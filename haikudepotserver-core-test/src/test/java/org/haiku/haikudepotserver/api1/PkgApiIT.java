@@ -22,6 +22,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,7 +49,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkg = Pkg.getByName(context, data.pkg1.getName()).get();
+            Pkg pkg = Pkg.tryGetByName(context, data.pkg1.getName()).get();
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
@@ -78,7 +79,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkg = Pkg.getByName(context, data.pkg1.getName()).get();
+            Pkg pkg = Pkg.tryGetByName(context, data.pkg1.getName()).get();
 
             Assertions.assertThat(ImmutableSet.of("business", "development")).isEqualTo(
                     pkg.getPkgPkgCategories().stream().map(ppc -> ppc.getPkgCategory().getCode()).collect(Collectors.toSet())
@@ -357,7 +358,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.getContext();
-            Optional<Pkg> pkgOptionalafter = Pkg.getByName(objectContext, "pkg1");
+            Optional<Pkg> pkgOptionalafter = Pkg.tryGetByName(objectContext, "pkg1");
 
             org.haiku.haikudepotserver.dataobjects.MediaType mediaTypePng
                     = org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
@@ -405,7 +406,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.getContext();
-            Optional<Pkg> pkgOptionalafter = Pkg.getByName(objectContext, "pkg1");
+            Optional<Pkg> pkgOptionalafter = Pkg.tryGetByName(objectContext, "pkg1");
 
             org.haiku.haikudepotserver.dataobjects.MediaType mediaTypeHvif
                     = org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
@@ -432,7 +433,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.getContext();
-            Optional<Pkg> pkgOptionalBefore = Pkg.getByName(objectContext, "pkg1");
+            Optional<Pkg> pkgOptionalBefore = Pkg.tryGetByName(objectContext, "pkg1");
             Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(3); // 16 and 32 px sizes + hvif
         }
 
@@ -442,7 +443,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.getContext();
-            Optional<Pkg> pkgOptionalBefore = Pkg.getByName(objectContext, "pkg1");
+            Optional<Pkg> pkgOptionalBefore = Pkg.tryGetByName(objectContext, "pkg1");
             Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(0);
         }
     }
@@ -462,13 +463,24 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.size()).isEqualTo(data.pkg1.getPkgScreenshots().size());
         List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshots = data.pkg1.getSortedPkgScreenshots();
 
+        Assert.assertThat(sortedScreenshots.size(), CoreMatchers.is(3));
+
+        int widths[] = { 320, 240, 320 };
+        int heights[] = { 240, 320, 240 };
+        int lengths[] = { 41296, 28303, 33201 };
+
         for(int i=0;i<sortedScreenshots.size();i++) {
             org.haiku.haikudepotserver.dataobjects.PkgScreenshot pkgScreenshot = sortedScreenshots.get(i);
             PkgScreenshot apiPkgScreenshot = result.items.get(i);
+
             Assertions.assertThat(pkgScreenshot.getCode()).isEqualTo(apiPkgScreenshot.code);
-            Assertions.assertThat(pkgScreenshot.getWidth()).isEqualTo(320);
-            Assertions.assertThat(pkgScreenshot.getHeight()).isEqualTo(240);
-            Assertions.assertThat(pkgScreenshot.getLength()).isEqualTo(41296);
+            Assertions.assertThat(pkgScreenshot.getWidth()).isEqualTo(apiPkgScreenshot.width);
+            Assertions.assertThat(pkgScreenshot.getHeight()).isEqualTo(apiPkgScreenshot.height);
+            Assertions.assertThat(pkgScreenshot.getLength()).isEqualTo(apiPkgScreenshot.length);
+
+            Assert.assertThat(apiPkgScreenshot.width, CoreMatchers.is(widths[i]));
+            Assert.assertThat(apiPkgScreenshot.height, CoreMatchers.is(heights[i]));
+            Assert.assertThat(apiPkgScreenshot.length, CoreMatchers.is(lengths[i]));
         }
     }
 
@@ -513,7 +525,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
+        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, data.pkg1.getName());
         List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsAfter = pkgOptional.get().getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(sortedScreenshotsBefore.size()-1);
@@ -546,7 +558,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, data.pkg1.getName());
+        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, data.pkg1.getName());
         List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsAfter = pkgOptional.get().getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(3);
@@ -573,7 +585,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+            Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
             List<String[]> rules = ImmutableList.of(
                     new String[] { NaturalLanguage.CODE_ENGLISH, "flourescence" },
                     new String[] { NaturalLanguage.CODE_FRENCH, "treacle" },
@@ -757,7 +769,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+            Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
             Repository repository = Repository.getByCode(context, "testrepo").get();
             Assertions.assertThat(pkg1.getPkgProminence(repository).get().getProminence().getOrdering()).isEqualTo(200);
         }
@@ -797,7 +809,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkgAfter = Pkg.getByName(context, "pkg1").get();
+            Pkg pkgAfter = Pkg.tryGetByName(context, "pkg1").get();
             Assertions.assertThat(pkgAfter.getPkgChangelog().get().getContent()).isEqualTo("das Zimmer");
         }
 
@@ -822,7 +834,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkgAfter = Pkg.getByName(context, "pkg1").get();
+            Pkg pkgAfter = Pkg.tryGetByName(context, "pkg1").get();
             Assertions.assertThat(pkgAfter.getPkgChangelog().isPresent()).isFalse();
         }
 
@@ -850,7 +862,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Pkg pkg1 = Pkg.getByName(context, "pkg1").get();
+            Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
             Repository repository = Repository.getByCode(context, "testrepo").get();
             Architecture architecture = Architecture.getByCode(context, "x86").get();
             PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();

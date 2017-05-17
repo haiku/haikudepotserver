@@ -75,7 +75,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
             switch(targetType) {
                 case PKG:
-                    targetOptional = Pkg.getByName(objectContext, targetIdentifier);
+                    targetOptional = Pkg.tryGetByName(objectContext, targetIdentifier);
                     break;
 
                 case REPOSITORY:

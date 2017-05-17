@@ -49,7 +49,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
     private void verifyPackage(
             ObjectContext context,
             String name) {
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, name);
+        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, name);
         Assertions.assertThat(pkgOptional.isPresent()).isTrue();
         Assertions.assertThat(pkgOptional.get().getActive()).isTrue();
     }
@@ -217,7 +217,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                         PkgVersion.class,
                         ExpressionFactory.matchExp(
                                 PkgVersion.PKG_PROPERTY,
-                                Pkg.getByName(context, "taranaki").get()
+                                Pkg.tryGetByName(context, "taranaki").get()
                         )
                 );
 

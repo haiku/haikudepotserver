@@ -89,7 +89,7 @@ public class PkgDownloadController {
 
         ObjectContext context = serverRuntime.getContext();
 
-        Pkg pkg = Pkg.getByName(context, pkgName).orElseThrow(() -> {
+        Pkg pkg = Pkg.tryGetByName(context, pkgName).orElseThrow(() -> {
             LOGGER.info("unable to find the package; {}", pkgName);
             return new RequestObjectNotFound();
         });

@@ -45,7 +45,7 @@ public class ViewPkgController {
     }
 
     private boolean hasSource(ObjectContext context, PkgVersion pkgVersion) {
-        Optional<Pkg> sourcePkgOptional = Pkg.getByName(context, pkgVersion.getPkg().getName() + "_source");
+        Optional<Pkg> sourcePkgOptional = Pkg.tryGetByName(context, pkgVersion.getPkg().getName() + "_source");
         return sourcePkgOptional.isPresent() &&
                 PkgVersion.getForPkg(
                 context,
@@ -93,7 +93,7 @@ public class ViewPkgController {
         Integer revision = null==revisionStr ? null : Integer.parseInt(revisionStr);
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
         if(!pkgOptional.isPresent()) {
             throw new MultipageObjectNotFoundException(Pkg.class.getSimpleName(), pkgName); // 404

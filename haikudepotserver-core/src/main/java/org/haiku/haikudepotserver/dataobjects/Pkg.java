@@ -16,6 +16,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._Pkg;
+import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -31,7 +32,12 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     public static final Pattern PATTERN_NAME = Pattern.compile("^" + PATTERN_STRING_NAME_CHAR + "+$");
 
-    public static Optional<Pkg> getByName(ObjectContext context, String name) {
+    public static Pkg getByName(ObjectContext context, String name) {
+        return tryGetByName(context, name)
+                .orElseThrow(() -> new IllegalStateException("unable to find pkg for name [" + name + "]"));
+    }
+
+    public static Optional<Pkg> tryGetByName(ObjectContext context, String name) {
         Preconditions.checkArgument(null!=context, "a context must be provided to lookup a package");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name), "a name must be provided to get a package");
 
@@ -137,14 +143,11 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         return screenshots;
     }
 
-    public Optional<Integer> getHighestPkgScreenshotOrdering() {
-        List<PkgScreenshot> screenshots = getSortedPkgScreenshots();
-
-        if(screenshots.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(screenshots.get(screenshots.size()-1).getOrdering());
+    public OptionalInt getHighestPkgScreenshotOrdering() {
+        return getPkgScreenshots()
+                .stream()
+                .mapToInt(_PkgScreenshot::getOrdering)
+                .max();
     }
 
     /**

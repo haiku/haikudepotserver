@@ -262,7 +262,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             List<String> checkedPkgNames = new ArrayList<>();
 
             for (String pkgName : request.pkgNames) {
-                Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+                Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
                 if (!pkgOptional.isPresent()) {
                     throw new ObjectNotFoundException(Pkg.class.getSimpleName(), pkgName);

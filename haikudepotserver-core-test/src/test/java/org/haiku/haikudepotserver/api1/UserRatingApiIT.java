@@ -44,7 +44,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         userRating.setComment("How now brown cow");
         userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,
-                Pkg.getByName(context, "pkg1").get(),
+                Pkg.tryGetByName(context, "pkg1").get(),
                 Repository.getByCode(context, "testrepo").get(),
                 Collections.singletonList(Architecture.getByCode(context, "x86").get())).get());
         userRating.setRating((short) 3);

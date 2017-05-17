@@ -61,9 +61,9 @@ public class IntegrationTestSupportService {
         return objectContext;
     }
 
-    private PkgScreenshot addPkgScreenshot(ObjectContext objectContext, Pkg pkg) {
-        try (InputStream inputStream = IntegrationTestSupportService.class.getResourceAsStream("/sample-320x240.png")) {
-            return pkgScreenshotService.storePkgScreenshotImage(inputStream, objectContext, pkg);
+    private PkgScreenshot addPkgScreenshot(ObjectContext objectContext, Pkg pkg, String sourceLeafname) {
+        try (InputStream inputStream = IntegrationTestSupportService.class.getResourceAsStream(sourceLeafname)) {
+            return pkgScreenshotService.storePkgScreenshotImage(inputStream, objectContext, pkg, null);
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading a sample screenshot into a test package",e);
@@ -182,9 +182,9 @@ public class IntegrationTestSupportService {
             pkgLocalization.setPkg(result.pkg1);
         }
 
-        addPkgScreenshot(context,result.pkg1);
-        addPkgScreenshot(context,result.pkg1);
-        addPkgScreenshot(context,result.pkg1);
+        addPkgScreenshot(context,result.pkg1, "/sample-320x240-a.png");
+        addPkgScreenshot(context,result.pkg1, "/sample-240x320-b.png");
+        addPkgScreenshot(context,result.pkg1, "/sample-320x240-c.png");
         addPkgBitmapIcons(context, result.pkg1);
 
         result.pkg1Version1x86 = context.newObject(PkgVersion.class);
@@ -337,7 +337,7 @@ public class IntegrationTestSupportService {
     public void createUserRatings() {
 
         ObjectContext context = serverRuntime.getContext();
-        Pkg pkg = Pkg.getByName(context, "pkg3").get();
+        Pkg pkg = Pkg.tryGetByName(context, "pkg3").get();
         Architecture x86 = Architecture.getByCode(context, "x86").get();
         PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                 context,

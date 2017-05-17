@@ -186,7 +186,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != context, "a context is required");
         Preconditions.checkArgument(null != pkgVersion, "a pkg version is required");
 
-        Optional<Pkg> pkgSourceOptional = Pkg.getByName(context, pkgVersion.getPkg().getName() + "_source");
+        Optional<Pkg> pkgSourceOptional = Pkg.tryGetByName(context, pkgVersion.getPkg().getName() + "_source");
 
         if(pkgSourceOptional.isPresent()) {
 
@@ -542,7 +542,7 @@ public class PkgServiceImpl implements PkgService {
 
         if (develPkgName.endsWith(SUFFIX_PKG_DEVELOPMENT)) {
             String mainPkgName = develPkgName.substring(0, develPkgName.length() - PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT.length());
-            return Pkg.getByName(objectContext, mainPkgName);
+            return Pkg.tryGetByName(objectContext, mainPkgName);
         }
 
         return Optional.empty();
@@ -561,7 +561,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(mainPkgName), "the pkg must be provided");
 
         if(!mainPkgName.endsWith(SUFFIX_PKG_DEVELOPMENT)) {
-            return Pkg.getByName(objectContext, mainPkgName + SUFFIX_PKG_DEVELOPMENT);
+            return Pkg.tryGetByName(objectContext, mainPkgName + SUFFIX_PKG_DEVELOPMENT);
         }
 
         return Optional.empty();

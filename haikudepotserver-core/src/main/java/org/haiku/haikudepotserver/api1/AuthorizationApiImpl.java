@@ -54,7 +54,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     }
 
     private Pkg ensurePkg(ObjectContext context, String name) throws ObjectNotFoundException {
-        return Pkg.getByName(context, name)
+        return Pkg.tryGetByName(context, name)
                 .orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), name));
     }
 

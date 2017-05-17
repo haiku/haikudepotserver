@@ -84,7 +84,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
 
         {
             ObjectContext context = serverRuntime.getContext();
-            Optional<Pkg> pkgOptional = Pkg.getByName(context, "pkg1");
+            Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, "pkg1");
             Set<String> pkg1PkgCategoryCodes = pkgOptional.get().getPkgPkgCategories()
                     .stream()
                     .map(c -> c.getPkgCategory().getCode())

@@ -96,7 +96,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             }
 
             if (!Strings.isNullOrEmpty(specification.getPkgName())) {
-                paramPkgOptional = Pkg.getByName(context, specification.getPkgName());
+                paramPkgOptional = Pkg.tryGetByName(context, specification.getPkgName());
 
                 if (!paramPkgOptional.isPresent()) {
                     throw new IllegalStateException("unable to find the package; " + specification.getPkgName());

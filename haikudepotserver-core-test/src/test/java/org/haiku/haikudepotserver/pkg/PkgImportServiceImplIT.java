@@ -97,7 +97,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             {
                 ObjectContext setupObjectContext = serverRuntime.getContext();
                 org.haiku.haikudepotserver.dataobjects.Pkg persistedPkg =
-                        org.haiku.haikudepotserver.dataobjects.Pkg.getByName(setupObjectContext, importPkg.getName()).get();
+                        org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(setupObjectContext, importPkg.getName()).get();
                 setupObjectContext.commitChanges();
 
                 pkgLocalizationService.updatePkgLocalization(
@@ -141,7 +141,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.getContext();
 
             org.haiku.haikudepotserver.dataobjects.Pkg persistedDevelPkg =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, importDevelPkg.getName()).get();
+                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, importDevelPkg.getName()).get();
 
             Assertions.assertThat(persistedDevelPkg.getPkgIcons().size()).isEqualTo(1);
             Assertions.assertThat(persistedDevelPkg.getPkgIcons().get(0).getSize()).isEqualTo(32);
@@ -213,7 +213,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.getContext();
-                org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "testpkg").get();
+                org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "testpkg").get();
                 org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkg,
@@ -297,7 +297,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.getContext();
             List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.getForPkg(
                     context,
-                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkgx")
+                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkgx")
                             .orElseThrow(IllegalStateException::new),
                     true);
 

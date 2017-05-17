@@ -230,7 +230,7 @@ public class PkgIconController extends AbstractController {
         }
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkg = Pkg.getByName(context, pkgName); // cached
+        Optional<Pkg> pkg = Pkg.tryGetByName(context, pkgName); // cached
 
         if(!pkg.isPresent()) {
             LOGGER.debug("request for icon for package '{}', but no such package was able to be found", pkgName);

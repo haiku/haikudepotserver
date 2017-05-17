@@ -65,7 +65,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         Preconditions.checkArgument(targetHeight > 0, "the target height is <= 0");
         Preconditions.checkArgument(targetWidth > 0, "the target width is <= 0");
 
-        Optional<PkgScreenshotImage> pkgScreenshotImageOptional = screenshot.getPkgScreenshotImage();
+        Optional<PkgScreenshotImage> pkgScreenshotImageOptional = screenshot.tryGetPkgScreenshotImage();
 
         if(!pkgScreenshotImageOptional.isPresent()) {
             throw new IllegalStateException("the screenshot "+screenshot.getCode()+" is missing a screenshot image");
@@ -90,11 +90,16 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         }
     }
 
+    /**
+     * @param ordering can be NULL; in which case the screenshot will come at the end.
+     */
+
     @Override
     public PkgScreenshot storePkgScreenshotImage(
             InputStream input,
             ObjectContext context,
-            Pkg pkg) throws IOException, BadPkgScreenshotException {
+            Pkg pkg,
+            Integer ordering) throws IOException, BadPkgScreenshotException {
 
         Preconditions.checkArgument(null != input, "the input must be provided");
         Preconditions.checkArgument(null != context, "the context must be provided");
@@ -121,16 +126,11 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         // now we need to know the largest ordering so we can add this one at the end of the orderings
         // such that it is the next one in the list.
 
-        int ordering = 1;
-        Optional<Integer> highestExistingScreenshotOrdering = pkg.getHighestPkgScreenshotOrdering();
-
-        if(highestExistingScreenshotOrdering.isPresent()) {
-            ordering = highestExistingScreenshotOrdering.get() + 1;
-        }
+        int actualOrdering = null == ordering ? pkg.getHighestPkgScreenshotOrdering().orElse(0) + 1 : ordering;
 
         PkgScreenshot screenshot = context.newObject(PkgScreenshot.class);
         screenshot.setCode(UUID.randomUUID().toString());
-        screenshot.setOrdering(ordering);
+        screenshot.setOrdering(actualOrdering);
         screenshot.setHeight(size.height);
         screenshot.setWidth(size.width);
         screenshot.setLength(pngData.length);
@@ -143,9 +143,21 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
         pkg.setModifyTimestamp(new java.util.Date());
 
-        LOGGER.info("a screenshot #{} has been added to package {} ({})", ordering, pkg.getName(), screenshot.getCode());
+        LOGGER.info("a screenshot #{} has been added to package {} ({})",
+                actualOrdering, pkg.getName(), screenshot.getCode());
 
         return screenshot;
+    }
+
+    @Override
+    public void deleteScreenshot(
+            ObjectContext context,
+            PkgScreenshot screenshot) {
+
+        screenshot.setPkg(null);
+        Optional<PkgScreenshotImage> image = screenshot.tryGetPkgScreenshotImage();
+        image.ifPresent(context::deleteObjects);
+        context.deleteObjects(screenshot);
     }
 
 

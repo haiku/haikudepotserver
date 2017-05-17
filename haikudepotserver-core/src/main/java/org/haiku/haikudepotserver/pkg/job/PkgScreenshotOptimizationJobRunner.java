@@ -59,12 +59,12 @@ public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScr
             for (String pkgScreenshotCode : specification.getPkgScreenshotCodes()) {
 
                 ObjectContext context = serverRuntime.getContext();
-                Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.getByCode(context, pkgScreenshotCode);
+                Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.tryGetByCode(context, pkgScreenshotCode);
 
                 if (pkgScreenshotOptional.isPresent()) {
 
                     PkgScreenshot pkgScreenshot = pkgScreenshotOptional.get();
-                    PkgScreenshotImage pkgScreenshotImage = pkgScreenshotOptional.get().getPkgScreenshotImage().get();
+                    PkgScreenshotImage pkgScreenshotImage = pkgScreenshotOptional.get().tryGetPkgScreenshotImage().get();
 
                     if (pkgScreenshotImage.getMediaType().getCode().equals(MediaType.PNG.withoutParameters().toString())) {
 

@@ -21,7 +21,12 @@ import java.util.Optional;
 
 public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScreenshot>, CreateAndModifyTimestamped {
 
-    public static Optional<PkgScreenshot> getByCode(ObjectContext context, String code) {
+    public static PkgScreenshot getByCode(ObjectContext context, String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new IllegalStateException("unable to find the screenshot with code [" + code + "]"));
+    }
+
+    public static Optional<PkgScreenshot> tryGetByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         List<PkgScreenshot> pkgScreenshots = (List<PkgScreenshot>) context.performQuery(new SelectQuery(
@@ -30,12 +35,17 @@ public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScree
         return pkgScreenshots.stream().collect(SingleCollector.optional());
     }
 
+    public PkgScreenshotImage getPkgScreenshotImage() {
+        return tryGetPkgScreenshotImage()
+                .orElseThrow(() -> new IllegalStateException("unable to find the pkg screenshot's image"));
+    }
+
     /**
      * <p>As there should be only one of these, if there are two then this method will throw an
      * {@link IllegalStateException}.</p>
      */
 
-    public Optional<PkgScreenshotImage> getPkgScreenshotImage() {
+    public Optional<PkgScreenshotImage> tryGetPkgScreenshotImage() {
         List<PkgScreenshotImage> images = getPkgScreenshotImages();
 
         switch(images.size()) {

@@ -66,7 +66,7 @@ public class PkgImportServiceImpl implements PkgImportService {
 
         // first, check to see if the package is there or not.
 
-        Optional<Pkg> persistedPkgOptional = Pkg.getByName(objectContext, pkg.getName());
+        Optional<Pkg> persistedPkgOptional = Pkg.tryGetByName(objectContext, pkg.getName());
         Pkg persistedPkg;
         Optional<PkgVersion> persistedLatestExistingPkgVersion = Optional.empty();
         Architecture architecture = Architecture.getByCode(objectContext, pkg.getArchitecture().name().toLowerCase())

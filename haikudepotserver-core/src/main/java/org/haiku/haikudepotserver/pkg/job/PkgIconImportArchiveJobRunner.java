@@ -174,7 +174,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                 if(!pkgNamesProcessed.contains(pkgName)) {
                     row[CSV_COLUMN_PKGNAME] = archiveEntry.getName();
                     ObjectContext context = serverRuntime.getContext();
-                    Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+                    Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
                     if (pkgOptional.isPresent()) {
                         pkgIconService.removePkgIcon(context, pkgOptional.get());
@@ -240,7 +240,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             throws IOException {
 
         ObjectContext context = serverRuntime.getContext();
-        Optional<Pkg> pkgOptional = Pkg.getByName(context, pkgName);
+        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
         if(pkgOptional.isPresent()) {
 

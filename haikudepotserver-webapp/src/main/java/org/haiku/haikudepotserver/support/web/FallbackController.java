@@ -137,7 +137,7 @@ public class FallbackController {
 
     private Optional<PkgVersion> tryGetPkgVersion(ObjectContext context, String term) {
         if(!Strings.isNullOrEmpty(term)) {
-            Optional<Pkg> pkgOptional = Pkg.getByName(context, term);
+            Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, term);
 
             if(pkgOptional.isPresent()) {
                 List<Repository> repositories = repositoryService.getRepositoriesForPkg(context, pkgOptional.get());
