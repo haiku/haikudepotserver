@@ -16,6 +16,7 @@ angular.module('haikudepotserver').config(
                 .when('/jobs',{controller:'ListJobsController',templateUrl:controllerTemplatePathPrefix + '/listjobs.html'})
                 .when('/pkgcategorycoverageimportspreadsheet',{controller:'PkgCategoryCoverageImportSpreadsheetController',templateUrl:controllerTemplatePathPrefix + '/pkgcategorycoverageimportspreadsheet.html'})
                 .when('/pkgiconarchiveimport',{controller:'PkgIconArchiveImportController',templateUrl:controllerTemplatePathPrefix + '/pkgiconarchiveimport.html'})
+                .when('/pkgscreenshotarchiveimport',{controller:'PkgScreenshotArchiveImportController',templateUrl:controllerTemplatePathPrefix + '/pkgscreenshotarchiveimport.html'})
                 .when('/job/:guid',{controller:'ViewJobController',templateUrl:controllerTemplatePathPrefix + '/viewjob.html'})
                 .when('/reports',{controller:'ReportsController',templateUrl:controllerTemplatePathPrefix + '/reports.html'})
                 .when('/pkg/feed/builder',{controller:'PkgFeedBuilderController',templateUrl:controllerTemplatePathPrefix + '/pkgfeedbuilder.html'})

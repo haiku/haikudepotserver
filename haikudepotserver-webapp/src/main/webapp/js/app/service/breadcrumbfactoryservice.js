@@ -551,6 +551,13 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                         titleKey : 'breadcrumb.pkgIconArchiveImport.title',
                         path : '/pkgiconarchiveimport'
                     });
+                },
+
+                createPkgScreenshotArchiveImport : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.pkgScreenshotArchiveImport.title',
+                        path : '/pkgscreenshotarchiveimport'
+                    });
                 }
 
             };

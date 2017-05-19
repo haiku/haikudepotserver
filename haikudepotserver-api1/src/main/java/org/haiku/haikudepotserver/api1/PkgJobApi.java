@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -87,5 +87,12 @@ public interface PkgJobApi {
      */
 
     QueuePkgScreenshotExportArchiveJobResult queuePkgScreenshotExportArchiveJob(QueuePkgScreenshotExportArchiveJobRequest request);
+
+    /**
+     * <p>Enqueues a request (linked to some data) that will import a tar-ball of data
+     * containing package screenshots.</p>
+     */
+
+    QueuePkgScreenshotArchiveImportJobResult queuePkgScreenshotArchiveImportJob(QueuePkgScreenshotArchiveImportJobRequest request) throws ObjectNotFoundException;
 
 }

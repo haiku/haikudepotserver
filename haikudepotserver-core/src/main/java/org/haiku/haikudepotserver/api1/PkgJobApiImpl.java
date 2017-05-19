@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.AbstractQueueJobResult;
 import org.haiku.haikudepotserver.api1.model.pkg.job.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
@@ -17,7 +18,6 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
 import org.haiku.haikudepotserver.job.model.*;
-import org.haiku.haikudepotserver.pkg.job.PkgScreenshotExportArchiveJobRunner;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -136,7 +136,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
                 user.orElse(null),
                 null,
                 Permission.BULK_PKGICONIMPORTARCHIVE)) {
-            LOGGER.warn("attempt to import package categories, but was not authorized");
+            LOGGER.warn("attempt to import package icons, but was not authorized");
             throw new AuthorizationFailureException();
         }
 
@@ -248,6 +248,41 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         return new QueuePkgScreenshotExportArchiveJobResult(
                 jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_NONE));
+    }
+
+    @Override
+    public QueuePkgScreenshotArchiveImportJobResult queuePkgScreenshotArchiveImportJob(QueuePkgScreenshotArchiveImportJobRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null != request, "the request must be supplied");
+        Preconditions.checkArgument(StringUtils.isNotBlank(request.inputDataGuid), "the data guid must be supplied");
+        Preconditions.checkArgument(null != request.importStrategy, "the import strategy must be supplied");
+
+        final ObjectContext context = serverRuntime.getContext();
+
+        Optional<User> user = tryObtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(
+                context,
+                user.orElse(null),
+                null,
+                Permission.BULK_PKGSCREENSHOTIMPORTARCHIVE)) {
+            LOGGER.warn("attempt to import package screenshots, but was not authorized");
+            throw new AuthorizationFailureException();
+        }
+
+        // now check that the data is present.
+
+        jobService.tryGetData(request.inputDataGuid)
+                .orElseThrow(() -> new ObjectNotFoundException(JobData.class.getSimpleName(), request.inputDataGuid));
+
+        // setup and go
+
+        PkgScreenshotImportArchiveJobSpecification spec = new PkgScreenshotImportArchiveJobSpecification();
+        spec.setOwnerUserNickname(user.map(_User::getNickname).orElse(null));
+        spec.setInputDataGuid(request.inputDataGuid);
+        spec.setImportStrategy(PkgScreenshotImportArchiveJobSpecification.ImportStrategy.valueOf(request.importStrategy.name()));
+
+        return new QueuePkgScreenshotArchiveImportJobResult(
+                jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_NONE));
     }
 
 }

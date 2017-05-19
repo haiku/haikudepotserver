@@ -223,6 +223,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             case BULK_PKGSCREENSHOTEXPORTARCHIVE:
                 return null!=authenticatedUser;
 
+            case BULK_PKGSCREENSHOTIMPORTARCHIVE:
             case BULK_PKGICONIMPORTARCHIVE:
             case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:
             case BULK_USERRATINGSPREADSHEETREPORT_ALL:

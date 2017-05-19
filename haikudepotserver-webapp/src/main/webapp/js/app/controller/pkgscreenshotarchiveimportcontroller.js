@@ -1,27 +1,53 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 angular.module('haikudepotserver').controller(
-    'PkgIconArchiveImportController',
+    'PkgScreenshotArchiveImportController',
     [
         '$scope', '$log', '$location', '$routeParams',
-        'jsonRpc', 'constants', 'pkgIcon', 'errorHandling',
+        'jsonRpc', 'constants', 'errorHandling', 'messageSource', 'userState',
         'breadcrumbs', 'breadcrumbFactory', 'jobs',
         function(
             $scope, $log, $location, $routeParams,
-            jsonRpc, constants, pkgIcon, errorHandling,
+            jsonRpc, constants, errorHandling, messageSource, userState,
             breadcrumbs, breadcrumbFactory, jobs) {
 
-            var IMPORT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
+            var IMPORT_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
+
+            $scope.importStrategies = [
+                {
+                    code : 'AUGMENT',
+                    title : undefined
+                },
+                {
+                    code : 'REPLACE',
+                    title : undefined
+                }
+            ];
 
             $scope.specification = {
-                importDataFile : undefined
+                importDataFile : undefined,
+                importStrategy : _.find($scope.importStrategies, function(is) { return is.code == 'AUGMENT'; })
             };
 
             $scope.showHelp = false;
             $scope.amQueueing = false;
+
+            _.each($scope.importStrategies, function(is) {
+                is.title = is.code;
+                messageSource.get(
+                    userState.naturalLanguageCode(),
+                    'pkgScreenshotArchiveImport.importStrategy.' + is.code.toLowerCase() + '.title').then(
+                    function (localizedString) {
+                        is.title = localizedString;
+                    },
+                    function () {
+                        is.title = localizedString = '???';
+                    }
+                );
+            });
 
             $scope.shouldSpin = function() {
                 return $scope.amQueueing;
@@ -35,7 +61,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbFactory.createHome(),
                     breadcrumbFactory.createRootOperations(),
-                    breadcrumbFactory.createPkgIconArchiveImport()
+                    breadcrumbFactory.createPkgScreenshotArchiveImport()
                 ]);
             }
 
@@ -65,7 +91,7 @@ angular.module('haikudepotserver').controller(
             $scope.goQueue = function() {
 
                 if($scope.specificationForm.$invalid) {
-                    throw Error('expected the import of pkg icon archive only to be possible if the form is valid');
+                    throw Error('expected the import of pkg screenshot archive only to be possible if the form is valid');
                 }
 
                 $scope.amQueueing = true;
@@ -78,11 +104,11 @@ angular.module('haikudepotserver').controller(
 
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_PKG_JOB,
-                            "queuePkgIconArchiveImportJob",
-                            [{ inputDataGuid: guid }]
+                            "queuePkgScreenshotArchiveImportJob",
+                            [{ inputDataGuid: guid, importStrategy: $scope.specification.importStrategy.code }]
                         ).then(
                             function(result) {
-                                $log.info('did queue pkg icon archive import job; ' + result.guid);
+                                $log.info('did queue pkg screenshot archive import job; ' + result.guid);
                                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:result.guid }));
                                 $scope.amQueueing = false;
                             },
