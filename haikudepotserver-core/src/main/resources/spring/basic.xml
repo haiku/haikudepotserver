@@ -74,6 +74,9 @@
 
     <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
     <bean id="healthCheckRegistry" class="com.codahale.metrics.health.HealthCheckRegistry"/>
+    <bean
+            id="databasePingHealthCheckSetup"
+            class="org.haiku.haikudepotserver.support.metrics.DatabasePingHealthCheckSetup"/>
 
     <!-- API1 IMPLEMENTATIONS -->
 

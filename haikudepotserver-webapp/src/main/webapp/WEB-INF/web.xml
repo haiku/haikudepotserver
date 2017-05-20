@@ -14,6 +14,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>metric-admin-health-check</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>metric-admin-metrics</servlet-name>
         <servlet-class>com.codahale.metrics.servlets.MetricsServlet</servlet-class>
     </servlet>
@@ -91,6 +96,11 @@
     <servlet-mapping>
         <servlet-name>metric-admin-metrics</servlet-name>
         <url-pattern>/__metric/metrics</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>metric-admin-health-check</servlet-name>
+        <url-pattern>/__metric/healthcheck</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
