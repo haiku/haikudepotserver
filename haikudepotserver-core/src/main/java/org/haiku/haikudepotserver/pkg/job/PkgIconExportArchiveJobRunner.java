@@ -31,7 +31,7 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
     private final static int ROW_PAYLOAD = 3;
     private final static int ROW_PKG_MODIFY_TIMESTAMP = 4;
 
-    public final static String PATH_COMPONENT_TOP = "hicn";
+    final static String PATH_COMPONENT_TOP = "hicn";
 
     int getBatchSize() {
         return BATCH_SIZE;

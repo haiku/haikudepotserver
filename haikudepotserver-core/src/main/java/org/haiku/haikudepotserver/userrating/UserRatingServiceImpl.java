@@ -140,6 +140,7 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         if (null != search.getPkg() && null == search.getPkgVersion()) {
             parameterAccumulator.add(search.getPkg());
+            whereExpressions.add("ur." + UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.ACTIVE_PROPERTY + " = true");
             whereExpressions.add("ur." + UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY + " = ?" + parameterAccumulator.size());
         }
 
