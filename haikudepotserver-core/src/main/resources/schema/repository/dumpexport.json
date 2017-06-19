@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "id": "http://depot.haiku-os.org/schema/repository/dumpexport.json",
+  "title": "Repository",
+  "javaType": "org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepository",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "informationUrl": {
+      "type": "string"
+    },
+    "repositorySources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "javaType": "org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepositorySource",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

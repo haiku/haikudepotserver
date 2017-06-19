@@ -18,6 +18,8 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
+import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepository;
+import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepositorySource;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
@@ -67,7 +69,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
             ObjectContext context = serverRuntime.getContext();
             List<Repository> repositories = Repository.getAll(context)
                     .stream()
-                    .filter((r) -> r.getActive())
+                    .filter(_Repository::getActive)
                     .collect(Collectors.toList());
 
             jsonGenerator.writeStartObject();
@@ -89,23 +91,24 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
         jsonGenerator.writeEndArray();
     }
 
-    private DumpRepository createDumpRepository(Repository repository) {
-        DumpRepository dumpRepository = new DumpRepository();
-        dumpRepository.code = repository.getCode();
-        dumpRepository.name = repository.getName();
-        dumpRepository.description = repository.getDescription();
-        dumpRepository.informationUrl = repository.getInformationUrl();
-        dumpRepository.repositorySources = repository.getRepositorySources()
+    private DumpExportRepository createDumpRepository(Repository repository) {
+        DumpExportRepository dumpRepository = new DumpExportRepository();
+        dumpRepository.setCode(repository.getCode());
+        dumpRepository.setName(repository.getName());
+        dumpRepository.setDescription(repository.getDescription());
+        dumpRepository.setInformationUrl(repository.getInformationUrl());
+        dumpRepository.setRepositorySources(repository.getRepositorySources()
                 .stream()
                 .filter(_RepositorySource::getActive)
                 .sorted(Comparator.comparing(_RepositorySource::getCode))
                 .map((r) -> {
-                    DumpRepositorySource dumpRepositorySource = new DumpRepositorySource();
-                    dumpRepositorySource.code = r.getCode();
-                    dumpRepositorySource.url = r.getUrl();
+                    DumpExportRepositorySource dumpRepositorySource = new DumpExportRepositorySource();
+                    dumpRepositorySource.setCode(r.getCode());
+                    dumpRepositorySource.setUrl(r.getUrl());
                     return dumpRepositorySource;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+        );
         return dumpRepository;
     }
 
@@ -125,27 +128,6 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
         return new ArchiveInfo(
                 DateTimeHelper.secondAccuracyDatePlusOneSecond(modifyTimestamp),
                 runtimeInformationService.getProjectVersion());
-    }
-
-    /**
-     * <p>This is a DTO representing {@link org.haiku.haikudepotserver.dataobjects.Repository}.</p>
-     */
-
-    private static final class DumpRepository {
-        public String code;
-        public String name;
-        public String description;
-        public String informationUrl;
-        public List<DumpRepositorySource> repositorySources;
-    }
-
-    /**
-     * <p>This is a DTO representing {@link org.haiku.haikudepotserver.dataobjects.RepositorySource}</p>
-     */
-
-    private static final class DumpRepositorySource {
-        public String code;
-        public String url;
     }
 
 }
