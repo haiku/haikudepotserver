@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -120,9 +120,9 @@ Distributed under the terms of the MIT License.
             RPM-based linux system.  The RPMs do not have any dependencies and so both java and Postgres
             database server will need to be installed before the application server can be successfully
             started --- see
-            <link linkend="prerequisites">prerequisites</link>
-            \ref{prerequisites}.  The RPM will install Jetty Runner and the Postgres JDBC driver itself so
-            you do not need to concern yourself with those.  Two RPMs are built;
+            <link linkend="prerequisites">prerequisites</link>.  The RPM will
+            install Jetty Runner and the Postgres JDBC driver itself so
+            you do not need to concern yourself with the installation of those.  Two RPMs are built;
         </para>
 
         <informaltable>

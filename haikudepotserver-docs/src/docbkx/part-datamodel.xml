@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2016, Andrew Lindesay
+Copyright 2015-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -27,14 +27,19 @@ Distributed under the terms of the MIT License.
     <section xml:id="datamodel-uniqueidentifiers">
         <title>Unique Identifiers</title>
         <para>
-            In general, an artifical attribute used to identify instances has a name of &quot;code&quot;.  In some cases,
-            existing nomenclature is already in place and another attribute name has been chosen.  An example of this
-            is the &quot;Pkg&quot; entity which is uniquely identified by its attribute &quot;name&quot;.
+            In general, an artifical identifier used to identify instances.  This artificial identifier has a name of
+            &quot;code&quot;.  In some cases an existing natual key is already in place and so that attribute is used.  An
+            example of this is the &quot;Pkg&quot; entity which is uniquely identified by its attribute &quot;name&quot;.  Note that the
+            identifier is not the primary key.  In all cases, the database keys are artificial numerical
+            identifiers.
         </para>
     </section>
 
     <section>
         <title>Repositories</title>
+        <para>
+            A package is a cohesive piece of software or software sub-system for the Haiku operating system.
+        </para>
         <para>
             Repositories are sources of packages.  A repository has a number of repository sources which are URLs
             that Haiku Depot Server can extract HPKR data from in order to get a catalog of what packages are
@@ -44,8 +49,8 @@ Distributed under the terms of the MIT License.
         </para>
 
         <para>
-            Package versions are &quot;siloed&quot; between repositories however
-            some data such as localization, iconography and screenshots are shared.
+            Package versions' data is &quot;siloed&quot; between repositories, but some data such as localization, iconography and
+            screenshots are shared.
         </para>
     </section>
 

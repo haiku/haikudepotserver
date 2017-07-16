@@ -16,7 +16,7 @@ Distributed under the terms of the MIT License.
         &quot;natural languages&quot; in the application in order to differentiate from computer languages such
         as C++, Java or Ruby.  An instance of the application running in a browser has a chosen natural language
         that has either come about through the user explicitly choosing a language or through the user having
-        authenticated and the authenticated user's natural language being employed.
+        authenticated and the authenticated user's configured natural language being employed.
     </para>
 
     <section xml:id="applicationlocalization-datetimenumerics">

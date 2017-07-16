@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2016, Andrew Lindesay
+Copyright 2015-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -86,7 +86,7 @@ Distributed under the terms of the MIT License.
             <para>
                 The token bearer system of authentication has the advantage that although a user's password is
                 supplied by the user to the client software for the initial authentication, subsequent requests do
-                not need to convey the password.  In addition, the token expire and are unable to be employed after
+                not need to convey the password.  In addition, the tokens expire and are unable to be employed after
                 they have expired.
             </para>
 

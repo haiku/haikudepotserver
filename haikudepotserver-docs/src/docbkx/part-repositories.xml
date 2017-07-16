@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2016, Andrew Lindesay
+Copyright 2016-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -98,8 +98,12 @@ architecture x86_gcc2
             Haiku Depot Server's (HDS) concept of a Repository is, in nomenclature, slightly mis-aligned with the On-Net
             concept.  An HDS Repository represents the collection of On-Net Repositories that are conceptually serving
             the same or similar packages for different architectures.  A Repository Source points to the different
-            architectures.  The following diagram tries to illustrate the relationship between the Haiku Depot Server
-            Repositories and the On-Net repositories of the operating system.
+            architectures.
+        </para>
+        <para>
+            The following diagram illustrates the relationship between the Haiku Depot Server
+            Repositories and the On-Net repositories of the operating system.  The yellow elements are the HDS elements
+            and the blue elements are the on-net elements.
         </para>
 
         <figure id="architecture-elements-diagram">

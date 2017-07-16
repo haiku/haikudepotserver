@@ -82,11 +82,20 @@ Distributed under the terms of the MIT License.
 
         <section xml:id="api-ifmodifiedsince">
             <title>If-Modified-Since Header</title>
+
+            <para>
+                This header is only observed in some APIs where large quantities of data are being downloaded
+                or where the data is computationally expensive to assemble.  Examples of these situations
+                include the assembly of a tar-ball of pacakges' icons or the download of bulk package data.
+            </para>
+
             <para>
                 In order to prevent clients from downloading and processing data they already have, the client
                 may add a &quot;If-Modified-Since&quot; header to the initial request.  The form of this header
-                is RFC-1123 compliant and looks like &quot;Sat, 3 Dec 2016 23:48:05 GMT&quot;.  If the icon data
-                has not been modified since this time, then the API will return a 304 (Not Modified) response.
+                is RFC-1123 compliant and looks like &quot;Sat, 3 Dec 2016 23:48:05 GMT&quot;.  Taking the example of
+                downloading a tar-ball of icon data; if the icon data
+                has not been modified since the "If-Modified-Since" header time, then the API will return a
+                304 (Not Modified) response.
             </para>
         </section>
 
@@ -105,7 +114,7 @@ Distributed under the terms of the MIT License.
 
         <para>
             The documentation and list of available methods can be obtained by viewing the java interfaces and
-            model objects in that module.
+            corresponding model objects in that module.
         </para>
 
         <example>
@@ -151,7 +160,7 @@ Distributed under the terms of the MIT License.
                 The &quot;id&quot; value here can be anything.  It must be supplied and is used to correlate a
                 request with a response; the same &quot;id&quot; value that arrives in the request is relayed
                 back in the response.  If a client were using the API in an asynchronous manner then being able
-                to correlate the request and the response is very important.
+                to correlate the request and the response might be important.
             </para>
             
             <para>
@@ -205,8 +214,8 @@ Distributed under the terms of the MIT License.
 
         <para>
             REST API is generally required where data is inappropriate to encode as JSON-RPC.  This tends to be
-            situations where the data is binary in nature.  An example of this is where a package icon needs
-            to be uploaded.
+            situations where the data is binary in nature or where data is large in size.  An example of this is
+            where a package icon needs to be uploaded or where bulk packages' data should be returned.
         </para>
 
         <section>
@@ -245,6 +254,11 @@ Distributed under the terms of the MIT License.
                 appropriate protocol to employ in this situation.  This invocation will trigger the import process,
                 but the import process will execute in a background thread in the application server and will not
                 block the client.
+            </para>
+
+            <para>
+                In order to prevent the possibility of this API causing undue load on the aopplication server, it will
+                coalesce overlapping requests.
             </para>
 
             <para>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -22,12 +22,13 @@ Distributed under the terms of the MIT License.
             The application server is able to communicate with remote repositories to retrieve &quot;Haiku Package
             Repository&quot; (.hpkr) files.  .hpkr files contain meta-data of the packages that are stored at that
             repository.  The application server is able to consume the .hpkr data and populate its own internal database
-            with some of the meta-data that it contains.
+            with some of the meta-data that it contains.  THe .hpkr format is a binary data structure described
+            <ulink url="https://dev.haiku-os.org/wiki/PackageManagement/FileFormat">here</ulink>.
         </para>
 
         <para>
-            The application-server then provides an HTTP-vended API as well as a web user-interface to the data.  The
-            application server is also intended to interact with a desktop client also called &quot;Haiku Depot&quot;.
+            The application-server then provides an HTTP-vended API as well as a web user-interface to the data.
+            The application server is also intended to interact with a desktop client also called &quot;Haiku Depot&quot;.
             The system augments the information acquired from the .hpkr data with additional detail such as;
 
             <itemizedlist>
@@ -61,10 +62,9 @@ Distributed under the terms of the MIT License.
 
         <para>
             <itemizedlist>
-                <listitem><ulink url="https://community.java.net/open-jdk">Java</ulink> (&gt;= 7)</listitem>
-                <listitem><ulink url="http://maven.apache.org">Maven</ulink> (&gt;= 3.0.3)</listitem>
+                <listitem><ulink url="https://community.java.net/open-jdk">Java</ulink> (&gt;= 8)</listitem>
+                <listitem><ulink url="http://maven.apache.org">Maven</ulink> (&gt;= 3.3)</listitem>
                 <listitem><ulink url="https://www.postgres.org">Postgres</ulink> (&gt;= 9.3)</listitem>
-                <listitem><ulink url="https://jdbc.postgresql.org/">Postgres JDBC Driver</ulink> (&gt;= 9.3) (deployment)</listitem>
                 <listitem><ulink url="http://www.eclipse.org/jetty/documentation/current/runner.html">Jetty Runner</ulink> (&gt;= 9.3) (deployment)</listitem>
             </itemizedlist>
         </para>
@@ -80,12 +80,6 @@ apt-get install postgresql postgresql-client</programlisting>
         <para>
             You can
             <ulink url="http://mvnrepository.com/artifact/org.eclipse.jetty/jetty-runner">download</ulink>
-            the Jetty Runner jar file from the Maven Repository.
-        </para>
-
-        <para>
-            You can
-            <ulink url="http://mvnrepository.com/artifact/org.postgresql/postgresql">download</ulink>
             the Jetty Runner jar file from the Maven Repository.
         </para>
 
@@ -157,7 +151,8 @@ apt-get install postgresql postgresql-client</programlisting>
 
             <para>
                 The database schema objects will be automatically populated into the fresh database by the
-                application-server as it launches.
+                application-server as it launches.  This technique uses
+                <ulink url="https://flywaydb.org/">Flyway</ulink>.
             </para>
 
         </section>
@@ -212,7 +207,7 @@ apt-get install postgresql postgresql-client</programlisting>
                 Work through building Haiku operating system from source and then build the hvif2png tool using
                 &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  Note that you may need to install the
                 &quot;libpng&quot; libraries for this to build and yield the hvif2png tool as a
-                build artifact.
+                build artifact.  The build product in this case will be a binary for the build host.
             </para>
             <para>
                 To install this on a development or deployment host, you will either need to
@@ -239,7 +234,7 @@ apt-get install postgresql postgresql-client</programlisting>
             <para>
                 You can
                 <link linkend="config-general-hvif2png">configure</link>
-                Haiku Depot Server to use the deployed hvif2png tool.
+                Haiku Depot Server to then use the deployed hvif2png tool.
             </para>
 
         </section>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2017, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -25,22 +25,32 @@ Distributed under the terms of the MIT License.
         </figure>
 
         <para>
-            The application server is a self-contained java &quot;jar&quot; file that contains a packaged-up
-            Tomcat application server container.
+            The application server deploy product is a self-contained java &quot;war&quot; file.  It can be run within
+            a servlet container, but the target deployment container is
+            <ulink url="http://www.eclipse.org/jetty/">jetty</ulink>.
         </para>
 
         <para>
-            The application server communicates (see <link linkend="api">api</link>) with its clients using the HTTP protocol.  The
-            communications are <emphasis>typically</emphasis> framed as JSON-RPC envelopes, but also straight
-            GET, POST and other requests are employed where appropriate.  The web-front end contains a
+            The application server communicates (see <link linkend="api">api</link>) with its clients using the HTTP
+            protocol.  The communications are <emphasis>typically</emphasis> framed as JSON-RPC envelopes, but also
+            straight GET, POST and other requests are employed where appropriate.  The web-front end contains a
             JavaScript/HTML client that utilizes the same API as is employed by the &quot;Haiku Depot&quot;
             desktop application running on the Haiku operating system.
         </para>
 
+        <figure id="haikudepot-desktop-screenshot">
+            <title>Screenshot of the running HaikuDepot desktop application.</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/img-hd.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
         <para>
-            The application server will, when prompted, import Haiku package repository data from the Haiku package
-            repositories.  To obtain this data it uses HTTP GET requests to obtain the &quot;.hpkr&quot; files from
-            each repository.
+            The application server will, when prompted or on a poll, import Haiku package repository data from
+            configured Haiku package repositories.  To obtain this data it uses HTTP GET requests to obtain
+            the &quot;.hpkr&quot; files from each repository.
         </para>
 
         <para>
@@ -61,7 +71,7 @@ Distributed under the terms of the MIT License.
 
         <para>
             The application server uses a number of technologies to provide infrastructure for the application
-            server.  The application server is based on java/j2e technology.  It uses the
+            server.  The application server is based on java/j2e/jee technology.  It uses the
             <ulink url="http://projects.spring.io/spring-framework/">Spring Framework</ulink>
             to manage dependency injection and wiring-up and SpringMVC to manage vending material over HTTP and
             providing basic HTTP services.  It uses a library called
@@ -92,12 +102,11 @@ Distributed under the terms of the MIT License.
                 transaction per request&quot;.  The entities are described in a model file <footnote><para>
                 There is a desktop-application editor for this model file.</para></footnote>.
                 &quot;cayenne-haikudepotserver.xml&quot; and the java objects that represent those entities in the
-                running application are in the package &quot;org.haiku.haikudepotserver.dataobjects&quot;.  The
+                running application are in the java package &quot;org.haiku.haikudepotserver.dataobjects&quot;.  The
                 application server has no formal DAO layer; queries are simply made from the ORM context.  Static
                 methods on concrete entity objects provide easy access to common queries and
-                &quot;...OrchestrationServices&quot; beans such as PkgOrchestrationService,
-                UserRatingOrchestrationService and UserService provide more sophisticated functionality
-                in specific domain areas.
+                various services such as &quot;PkgIconService&quot; and &quot;PasswordResetService&quot; provide
+                higher level functionality in various logical areas of the application.
             </para>
 
             <para>
@@ -288,7 +297,8 @@ Distributed under the terms of the MIT License.
 
             <para>
                 Permissions related to packages can be configured in the database on the PermissionUserPkg entity.
-                Users can be assigned either a specific permission across all packages or for a specific package.
+                Users can be assigned either a specific permission across all packages or for a specific package.  This
+                way if a user is an owner of a package then they can be assigned special permissions on that package.
             </para>
                 </section>
 
@@ -330,6 +340,7 @@ Distributed under the terms of the MIT License.
                 <itemizedlist>
                     <listitem>Importing repository data</listitem>
                     <listitem>Generating a report of localization coverage</listitem>
+                    <listitem>Importing a tar archive of package icons</listitem>
                 </itemizedlist>
             </para>
 
@@ -351,7 +362,7 @@ Distributed under the terms of the MIT License.
             </para>
 
             <para>
-                In general, manipulating, enqueueing and querying jobs is done through the JobOrchestrationService.
+                In general, manipulating, enqueueing and querying jobs is done through the JobService.
                 The service will typically return results of type JobSnapshot to indicate the status of the running
                 job.  The JobSnapshot instance is immutable.
                 A job is identified by a GUID.  An example of a GUID would be
@@ -381,17 +392,18 @@ Distributed under the terms of the MIT License.
             <para>
                 Some jobs require data inputs and outputs.  An example might be a package category import job.
                 Such a job requires that a CSV file of changes is supplied and the job will export a new
-                CSV file with a list of the changes made.  This input and output files are managed by the
-                JobOrchestrationService and can be referred to by a GUID.
+                CSV file with a list of the changes made.  These input and output files are managed by the
+                JobService and can be referred to by a GUID.
             </para>
 
             <para>
-                The JobSpecification object will maintain a GUID for the suplied input data.  The supplied input
-                data can be populated into the JobOrchestrationService ahead of creating the JobSpecification.
+                The JobSpecification object will maintain a GUID for the supplied input data.  The supplied input
+                data can be populated into the JobService ahead of creating the JobSpecification.  Various methods are
+                exposed on the JobService to support the manipulation of job data.
             </para>
 
             <para>
-                The JobOrchestrationService keeps track of generated output data and its association with a given job.
+                The JobService keeps track of generated output data and its association with a given job.
             </para>
             </section>
 
@@ -407,7 +419,7 @@ Distributed under the terms of the MIT License.
             <para>
                 As the application server may be running a number of jobs over time, these would pile-up in the
                 memory of the application server and data related to these reports would pile-up in storage.  To
-                avoid this, jobs have a time-to-live which is specified by the JobSpecification.
+                avoid this, jobs have a time-to-live which is specified as an attribute of the JobSpecification.
             </para>
             </section>
 
@@ -429,10 +441,11 @@ Distributed under the terms of the MIT License.
             <title>Feeds</title>
 
             <para>
-                The application server is able to produce Atom feeds that can provide updates relating to packages.
-                The feeds are in the context of one or many packages.  These are produced by the FeedController
-                class which uses the
-                <ulink url="http://rometools.github.io/rome/">Rome</ulink> library to render the feed.
+                The application server is able to produce Atom or RSS feeds that can provide updates relating to
+                packages.  The feeds are in the context of one or many packages.  These are produced by the
+                FeedController class which uses the
+                <ulink url="http://rometools.github.io/rome/">Rome</ulink> library to render the feed to XML.  See
+                the FeedService for further details about this process.
             </para>
         </section>
 
