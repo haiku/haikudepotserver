@@ -214,7 +214,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
 
         GetRepositorySourceRequest request = new GetRepositorySourceRequest();
-        request.code = data.pkg1Version1x86.getRepositorySource().getCode();
+        request.code = data.pkg1Version1x86_64.getRepositorySource().getCode();
 
         // ------------------------------------
         GetRepositorySourceResult result = repositoryApi.getRepositorySource(request);

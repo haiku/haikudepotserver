@@ -46,7 +46,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
                 context,
                 Pkg.tryGetByName(context, "pkg1").get(),
                 Repository.getByCode(context, "testrepo").get(),
-                Collections.singletonList(Architecture.getByCode(context, "x86").get())).get());
+                Collections.singletonList(Architecture.getByCode(context, "x86_64").get())).get());
         userRating.setRating((short) 3);
         userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_VERYUNSTABLE).get());
         userRating.setUser(user);
@@ -66,7 +66,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.user.nickname).isEqualTo("testuser");
         Assertions.assertThat(result.userRatingStabilityCode).isEqualTo(UserRatingStability.CODE_VERYUNSTABLE);
         Assertions.assertThat(result.pkgVersion.pkg.name).isEqualTo("pkg1");
-        Assertions.assertThat(result.pkgVersion.architectureCode).isEqualTo("x86");
+        Assertions.assertThat(result.pkgVersion.architectureCode).isEqualTo("x86_64");
         Assertions.assertThat(result.pkgVersion.major).isEqualTo("1");
         Assertions.assertThat(result.pkgVersion.micro).isEqualTo("2");
         Assertions.assertThat(result.pkgVersion.minor).isNull();
@@ -127,7 +127,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         GetUserRatingByUserAndPkgVersionRequest request = new GetUserRatingByUserAndPkgVersionRequest();
         request.pkgName = "pkg1";
         request.userNickname = "testuser";
-        request.pkgVersionArchitectureCode = "x86";
+        request.pkgVersionArchitectureCode = "x86_64";
         request.pkgVersionMajor = "1";
         request.pkgVersionMicro = "2";
         request.repositoryCode = "testrepo";
@@ -163,7 +163,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         request.comment = "The supermarket has gone crazy";
         request.rating = (short) 5;
         request.pkgName = "pkg1";
-        request.pkgVersionArchitectureCode = "x86";
+        request.pkgVersionArchitectureCode = "x86_64";
         request.pkgVersionType = PkgVersionType.LATEST;
 
         // ------------------------------------
@@ -224,7 +224,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
             Assertions.assertThat(userRating.pkgVersion.pkg.name).isEqualTo("pkg3");
             Assertions.assertThat(userRating.pkgVersion.repositoryCode).isEqualTo("testrepo");
-            Assertions.assertThat(userRating.pkgVersion.architectureCode).isEqualTo("x86");
+            Assertions.assertThat(userRating.pkgVersion.architectureCode).isEqualTo("x86_64");
             Assertions.assertThat(userRating.pkgVersion.major).isEqualTo("1");
             Assertions.assertThat(userRating.pkgVersion.micro).isEqualTo("2");
             Assertions.assertThat(userRating.pkgVersion.revision).isEqualTo(3);

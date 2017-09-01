@@ -54,7 +54,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
     private Pkg createPkg(String minor) {
         Pkg pkg = new Pkg();
-        pkg.setArchitecture(PkgArchitecture.X86);
+        pkg.setArchitecture(PkgArchitecture.X86_64);
         pkg.setDescription("test-description-en");
         pkg.setSummary("test-summary-en");
         pkg.setName("testpkg");
@@ -184,7 +184,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 }
 
                 Random random = new Random(System.currentTimeMillis());
-                File fileF = new File(repositoryDirectory, "testpkg-1.3.3~4-5-x86.hpkg");
+                File fileF = new File(repositoryDirectory, "testpkg-1.3.3~4-5-x86_64.hpkg");
                 byte[] buffer = new byte[1000 + (Math.abs(random.nextInt()) % 10*1000)];
                 Files.write(buffer,fileF);
                 expectedPayloadLength = buffer.length;
@@ -219,7 +219,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                         pkg,
                         Repository.getByCode(context, "testrepo").get(),
                         Collections.singletonList(
-                                Architecture.getByCode(context, "x86").get()
+                                Architecture.getByCode(context, "x86_64").get()
                         )).get();
 
                 Assertions.assertThat(pkgVersion.getPayloadLength()).isEqualTo(expectedPayloadLength);
@@ -256,7 +256,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 pkgVersion.setPkg(pkg);
                 pkgVersion.setIsLatest(i == highestMinor);
                 pkgVersion.setArchitecture(org.haiku.haikudepotserver.dataobjects.Architecture.getByCode(
-                        context, Architecture.CODE_X86).orElseThrow(IllegalStateException::new));
+                        context, Architecture.CODE_X86_64).orElseThrow(IllegalStateException::new));
                 pkgVersion.setMajor("1");
                 pkgVersion.setMinor(Integer.toString(i));
                 pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testreposrc_xyz")
@@ -269,7 +269,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
         // now there are a string of pkg versions in place, import an older one.
 
         Pkg inputPackage = new Pkg();
-        inputPackage.setArchitecture(PkgArchitecture.X86);
+        inputPackage.setArchitecture(PkgArchitecture.X86_64);
         inputPackage.setName("pkgx");
         inputPackage.setVersion(new PkgVersion("1", "4", null, null, null)); // <-- version in middle of pkg versions
 

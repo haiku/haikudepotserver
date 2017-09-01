@@ -93,7 +93,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = ImmutableList.of("any","x86");
+        request.architectureCodes = ImmutableList.of("any","x86_64");
         request.naturalLanguageCode = NaturalLanguage.CODE_ENGLISH;
         request.repositoryCodes = Collections.singletonList("testrepo");
         request.expression = "pk";
@@ -123,7 +123,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = Collections.singletonList("x86");
+        request.architectureCodes = Collections.singletonList("x86_64");
         request.repositoryCodes = Collections.singletonList("testrepo");
         request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
         request.expression = "feij";
@@ -153,7 +153,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = Collections.singletonList("x86");
+        request.architectureCodes = Collections.singletonList("x86_64");
         request.naturalLanguageCode = NaturalLanguage.CODE_FRENCH;
         request.repositoryCodes = Collections.singletonList("testrepo");
         request.expression = "persimon";
@@ -176,7 +176,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();
-        request.architectureCode = "x86";
+        request.architectureCode = "x86_64";
         request.name = "pkg1";
         request.repositoryCode = "testrepo";
         request.versionType = PkgVersionType.SPECIFIC;
@@ -194,7 +194,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.name).isEqualTo("pkg1");
         Assertions.assertThat(result.versions.size()).isEqualTo(1);
         Assertions.assertThat(result.versions.get(0).title).isEqualTo("Package 1");
-        Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
+        Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86_64");
         Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");
         Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
@@ -212,7 +212,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();
-        request.architectureCode = "x86";
+        request.architectureCode = "x86_64";
         request.name = "pkg1";
         request.repositoryCode = "testrepo";
         request.versionType = PkgVersionType.LATEST;
@@ -224,7 +224,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(result.name).isEqualTo("pkg1");
         Assertions.assertThat(result.versions.size()).isEqualTo(1);
-        Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86");
+        Assertions.assertThat(result.versions.get(0).architectureCode).isEqualTo("x86_64");
         Assertions.assertThat(result.versions.get(0).major).isEqualTo("1");
         Assertions.assertThat(result.versions.get(0).micro).isEqualTo("2");
         Assertions.assertThat(result.versions.get(0).revision).isEqualTo(4);
@@ -237,7 +237,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();
-        request.architectureCode = "x86";
+        request.architectureCode = "x86_64";
         request.name = "pkg9";
         request.versionType = PkgVersionType.LATEST;
         request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
@@ -637,7 +637,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgVersionLocalizationsRequest request = new GetPkgVersionLocalizationsRequest();
-        request.architectureCode = "x86";
+        request.architectureCode = "x86_64";
         request.repositoryCode = "testrepo";
         request.naturalLanguageCodes = ImmutableList.of(NaturalLanguage.CODE_ENGLISH, NaturalLanguage.CODE_GERMAN);
         request.pkgName = "pkg1";
@@ -662,7 +662,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetBulkPkgRequest request = new GetBulkPkgRequest();
         request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
         request.versionType = PkgVersionType.LATEST;
-        request.architectureCodes = Collections.singletonList("x86");
+        request.architectureCodes = Collections.singletonList("x86_64");
         request.naturalLanguageCode = "en";
         request.pkgNames = new ArrayList<>();
         request.repositoryCodes = Collections.singletonList(Repository.CODE_DEFAULT);
@@ -690,7 +690,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
         request.versionType = PkgVersionType.LATEST;
         request.repositoryCodes = Collections.singletonList("testrepo");
-        request.architectureCodes = ImmutableList.of("any","x86");
+        request.architectureCodes = ImmutableList.of("any","x86_64");
         request.naturalLanguageCode = "en";
         request.pkgNames = ImmutableList.of("pkg1","pkg2","pkg3","pkg4","pkgany"); // pkg4 does not exist
 
@@ -848,7 +848,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         UpdatePkgVersionRequest request = new UpdatePkgVersionRequest();
         request.pkgName = "pkg1";
         request.repositoryCode = "testrepo";
-        request.architectureCode = "x86";
+        request.architectureCode = "x86_64";
         request.major = "1";
         request.micro = "2";
         request.revision = 3;
@@ -864,7 +864,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.getContext();
             Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
             Repository repository = Repository.getByCode(context, "testrepo").get();
-            Architecture architecture = Architecture.getByCode(context, "x86").get();
+            Architecture architecture = Architecture.getByCode(context, "x86_64").get();
             PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
             Assertions.assertThat(pkgVersion.getActive()).isFalse();
         }

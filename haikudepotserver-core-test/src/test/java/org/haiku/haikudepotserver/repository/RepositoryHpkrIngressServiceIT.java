@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 })
 public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
-    private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
+    private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 300 * 1000; // 60s
 
     @Resource
     private JobService jobService;
@@ -119,7 +119,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setPkg(pkg);
                     pkgVersion.setMajor("1");
                     pkgVersion.setMinor("2");
-                    pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
+                    pkgVersion.setArchitecture(Architecture.getByCode(context, "x86_64").get());
                     pkgVersion.setIsLatest(true);
                     pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
                 }
@@ -130,7 +130,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setPkg(pkg);
                     pkgVersion.setMajor("1");
                     pkgVersion.setMinor("3");
-                    pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
+                    pkgVersion.setArchitecture(Architecture.getByCode(context, "x86_64").get());
                     pkgVersion.setIsLatest(true);
                     pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc2_xyz").get());
                 }
@@ -153,11 +153,11 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
                 PkgVersion pkgVersion = context.newObject(PkgVersion.class);
                 pkgVersion.setPkg(pkg);
-                pkgVersion.setMajor("0");
-                pkgVersion.setMinor("10");
+                pkgVersion.setMajor("3");
+                pkgVersion.setMinor("3");
                 pkgVersion.setMicro("2");
-                pkgVersion.setRevision(4);
-                pkgVersion.setArchitecture(Architecture.getByCode(context, "x86").get());
+                pkgVersion.setRevision(1);
+                pkgVersion.setArchitecture(Architecture.getByCode(context, "x86_64").get());
                 pkgVersion.setIsLatest(true);
                 pkgVersion.setActive(false); // to be sure!
                 pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
@@ -209,7 +209,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 ObjectContext context = serverRuntime.getContext();
 
                 verifyPackage(context,"apr");
-                verifyPackage(context,"zlib_x86_gcc2_devel");
+                verifyPackage(context,"schroedinger");
 
                 // this one is not in the import and so should be inactive afterwards.
 
@@ -250,7 +250,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     // the former rubbish copyright is removed
                     List<String> copyrights = pkgVersion.getCopyrights();
                     Assertions.assertThat(copyrights.size()).isEqualTo(2);
-                    Assertions.assertThat(ImmutableSet.copyOf(copyrights)).containsOnly("2000-2003 Fabrice Bellard", "2003-2012 the FFmpeg developers");
+                    Assertions.assertThat(ImmutableSet.copyOf(copyrights)).containsOnly("2000-2003 Fabrice Bellard", "2003-2017 the FFmpeg developers");
 
                     // the former rubbish license is removed
                     List<String> licenses = pkgVersion.getLicenses();
@@ -262,14 +262,14 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                             org.haiku.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase()).get());
 
                     Assertions.assertThat(pkgVersionUrlOptional.isPresent()).isTrue();
-                    Assertions.assertThat(pkgVersionUrlOptional.get().getUrl()).isEqualTo("http://www.ffmpeg.org");
+                    Assertions.assertThat(pkgVersionUrlOptional.get().getUrl()).isEqualTo("https://ffmpeg.org/");
                 }
 
             }
         }
         finally {
-            if(null!=temporaryFile) {
-                if(!temporaryFile.delete()) {
+            if (null != temporaryFile) {
+                if (!temporaryFile.delete()) {
                     LOGGER.warn("unable to delete the temporary file");
                 }
             }

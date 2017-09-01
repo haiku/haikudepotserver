@@ -216,8 +216,10 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         // not sure what architectures there may be in the future, but
         // we will just check for a couple that we know to be there.
 
-        Assertions.assertThat(isPresent(result, "x86").isPresent()).isTrue();
+        Assertions.assertThat(isPresent(result, "x86_64").isPresent()).isTrue();
         Assertions.assertThat(isPresent(result, "x86_gcc2").isPresent()).isTrue();
+
+        Assertions.assertThat(isPresent(result, "x86").isPresent()).isFalse();
         Assertions.assertThat(isPresent(result, "mips").isPresent()).isFalse();
     }
 

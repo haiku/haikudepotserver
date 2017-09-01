@@ -133,7 +133,7 @@ public class IntegrationTestSupportService {
 
         Prominence prominence = Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get();
 
-        Architecture x86 = Architecture.getByCode(context, "x86").get();
+        Architecture x86_64 = Architecture.getByCode(context, "x86_64").get();
         Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2").get();
         Architecture any = Architecture.getByCode(context, "any").get();
 
@@ -187,30 +187,30 @@ public class IntegrationTestSupportService {
         addPkgScreenshot(context,result.pkg1, "/sample-320x240-c.png");
         addPkgBitmapIcons(context, result.pkg1);
 
-        result.pkg1Version1x86 = context.newObject(PkgVersion.class);
-        result.pkg1Version1x86.setActive(Boolean.FALSE);
-        result.pkg1Version1x86.setArchitecture(x86);
-        result.pkg1Version1x86.setMajor("1");
-        result.pkg1Version1x86.setMicro("2");
-        result.pkg1Version1x86.setRevision(3);
-        result.pkg1Version1x86.setIsLatest(false);
-        result.pkg1Version1x86.setPkg(result.pkg1);
-        result.pkg1Version1x86.setRepositorySource(result.repositorySource);
-        addDummyLocalization(context, result.pkg1Version1x86);
+        result.pkg1Version1x86_64 = context.newObject(PkgVersion.class);
+        result.pkg1Version1x86_64.setActive(Boolean.FALSE);
+        result.pkg1Version1x86_64.setArchitecture(x86_64);
+        result.pkg1Version1x86_64.setMajor("1");
+        result.pkg1Version1x86_64.setMicro("2");
+        result.pkg1Version1x86_64.setRevision(3);
+        result.pkg1Version1x86_64.setIsLatest(false);
+        result.pkg1Version1x86_64.setPkg(result.pkg1);
+        result.pkg1Version1x86_64.setRepositorySource(result.repositorySource);
+        addDummyLocalization(context, result.pkg1Version1x86_64);
 
-        result.pkg1Version2x86 = context.newObject(PkgVersion.class);
-        result.pkg1Version2x86.setActive(Boolean.TRUE);
-        result.pkg1Version2x86.setArchitecture(x86);
-        result.pkg1Version2x86.setMajor("1");
-        result.pkg1Version2x86.setMicro("2");
-        result.pkg1Version2x86.setRevision(4);
-        result.pkg1Version2x86.setIsLatest(true);
-        result.pkg1Version2x86.setPkg(result.pkg1);
-        result.pkg1Version2x86.setRepositorySource(result.repositorySource);
+        result.pkg1Version2x86_64 = context.newObject(PkgVersion.class);
+        result.pkg1Version2x86_64.setActive(Boolean.TRUE);
+        result.pkg1Version2x86_64.setArchitecture(x86_64);
+        result.pkg1Version2x86_64.setMajor("1");
+        result.pkg1Version2x86_64.setMicro("2");
+        result.pkg1Version2x86_64.setRevision(4);
+        result.pkg1Version2x86_64.setIsLatest(true);
+        result.pkg1Version2x86_64.setPkg(result.pkg1);
+        result.pkg1Version2x86_64.setRepositorySource(result.repositorySource);
 
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
-                result.pkg1Version2x86,
+                result.pkg1Version2x86_64,
                 NaturalLanguage.getEnglish(context),
                 null,
                 "pkg1Version2SummaryEnglish_persimon",
@@ -218,7 +218,7 @@ public class IntegrationTestSupportService {
 
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
-                result.pkg1Version2x86,
+                result.pkg1Version2x86_64,
                 NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
                 null,
                 "pkg1Version2SummarySpanish_feijoa",
@@ -251,7 +251,7 @@ public class IntegrationTestSupportService {
 
         result.pkg2Version1 = context.newObject(PkgVersion.class);
         result.pkg2Version1.setActive(Boolean.TRUE);
-        result.pkg2Version1.setArchitecture(x86);
+        result.pkg2Version1.setArchitecture(x86_64);
         result.pkg2Version1.setMajor("1");
         result.pkg2Version1.setMinor("1");
         result.pkg2Version1.setMicro("2");
@@ -268,7 +268,7 @@ public class IntegrationTestSupportService {
 
         result.pkg3Version1 = context.newObject(PkgVersion.class);
         result.pkg3Version1.setActive(Boolean.TRUE);
-        result.pkg3Version1.setArchitecture(x86);
+        result.pkg3Version1.setArchitecture(x86_64);
         result.pkg3Version1.setMajor("1");
         result.pkg3Version1.setMinor("1");
         result.pkg3Version1.setMicro("2");
@@ -338,12 +338,12 @@ public class IntegrationTestSupportService {
 
         ObjectContext context = serverRuntime.getContext();
         Pkg pkg = Pkg.tryGetByName(context, "pkg3").get();
-        Architecture x86 = Architecture.getByCode(context, "x86").get();
+        Architecture x86_64 = Architecture.getByCode(context, "x86_64").get();
         PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                 context,
                 pkg,
                 Repository.getByCode(context, "testrepo").get(),
-                Collections.singletonList(x86)).get();
+                Collections.singletonList(x86_64)).get();
 
         NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get();
 
@@ -404,8 +404,8 @@ public class IntegrationTestSupportService {
         public RepositorySource repositorySource;
 
         public Pkg pkg1;
-        public PkgVersion pkg1Version1x86;
-        public PkgVersion pkg1Version2x86;
+        public PkgVersion pkg1Version1x86_64;
+        public PkgVersion pkg1Version2x86_64;
         public PkgVersion pkg1Version2x86_gcc2;
 
         public Pkg pkg2;
