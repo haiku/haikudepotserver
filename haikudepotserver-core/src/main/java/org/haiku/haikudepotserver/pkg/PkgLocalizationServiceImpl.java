@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,8 +15,7 @@ import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -268,15 +267,14 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             description = description.trim();
         }
 
-        boolean titleNullOrEmpty = Strings.isNullOrEmpty(title);
-        boolean summaryNullOrEmpty = Strings.isNullOrEmpty(summary);
-        boolean descriptionNullOrEmpty = Strings.isNullOrEmpty(description);
+        Set<String> localizedStrings = Arrays.stream(new String[] { title, summary, description })
+                .filter((s) -> !Strings.isNullOrEmpty(s))
+                .collect(Collectors.toSet());
 
         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional =
                 pkgVersion.getPkgVersionLocalization(naturalLanguage);
 
-        if(titleNullOrEmpty && summaryNullOrEmpty && descriptionNullOrEmpty) {
-
+        if (localizedStrings.isEmpty()) {
             if(pkgVersionLocalizationOptional.isPresent()) {
                 pkgVersion.removeToManyTarget(
                         PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY,
@@ -300,20 +298,17 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
                 pkgVersionLocalization = pkgVersionLocalizationOptional.get();
             }
 
-            if(!descriptionNullOrEmpty) {
-                pkgVersionLocalization.setDescriptionLocalizationContent(
-                        LocalizationContent.getOrCreateLocalizationContent(context, description));
-            }
+            Map<String, LocalizationContent> localizationContentMap = LocalizationContent.getOrCreateLocalizationContents
+                    (context, localizedStrings);
 
-            if(!summaryNullOrEmpty) {
-                pkgVersionLocalization.setSummaryLocalizationContent(
-                        LocalizationContent.getOrCreateLocalizationContent(context, summary));
-            }
+            pkgVersionLocalization.setDescriptionLocalizationContent(
+                    localizationContentMap.getOrDefault(description, null));
 
-            if(!titleNullOrEmpty) {
-                pkgVersionLocalization.setTitleLocalizationContent(
-                        LocalizationContent.getOrCreateLocalizationContent(context, title));
-            }
+            pkgVersionLocalization.setSummaryLocalizationContent(
+                    localizationContentMap.getOrDefault(summary, null));
+
+            pkgVersionLocalization.setTitleLocalizationContent(
+                    localizationContentMap.getOrDefault(title, null));
 
             return pkgVersionLocalization;
         }

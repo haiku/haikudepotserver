@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,11 +33,12 @@ public class RepositorySource extends _RepositorySource {
 
     private final static Pattern CODE_PATTERN = Pattern.compile("^[a-z0-9]{2,16}_[a-z0-9_]+$");
 
-    public static RepositorySource get(ObjectContext context, ObjectId objectId) {
+    public static RepositorySource get(ObjectContext context, ObjectId objectId, int objectIdQueryCachePolicy) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != objectId, "the objectId must be supplied");
         Preconditions.checkArgument(objectId.getEntityName().equals(RepositorySource.class.getSimpleName()), "the objectId must be targetting RepositorySource");
-        return ((List<RepositorySource>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
+        ObjectIdQuery query = new ObjectIdQuery(objectId, false, objectIdQueryCachePolicy);
+        return ((List<RepositorySource>) context.performQuery(query)).stream().collect(SingleCollector.single());
     }
 
     public static Optional<RepositorySource> getByCode(ObjectContext context, String code) {

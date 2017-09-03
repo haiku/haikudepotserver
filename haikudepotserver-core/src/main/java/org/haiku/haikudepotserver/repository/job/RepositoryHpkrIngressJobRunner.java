@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.query.ObjectIdQuery;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -178,7 +179,10 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                 if (!repositoryImportPkgNames.contains(persistedPkgName)) {
 
                     ObjectContext removalContext = serverRuntime.getContext();
-                    RepositorySource removalRepositorySource = RepositorySource.get(removalContext, repositorySource.getObjectId());
+                    RepositorySource removalRepositorySource = RepositorySource.get(
+                            removalContext,
+                            repositorySource.getObjectId(),
+                            ObjectIdQuery.CACHE);
 
                     int changes = pkgService.deactivatePkgVersionsForPkgAssociatedWithRepositorySource(
                             removalContext,

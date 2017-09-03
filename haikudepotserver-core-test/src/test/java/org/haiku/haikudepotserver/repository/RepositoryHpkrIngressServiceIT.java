@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 })
 public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
-    private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 300 * 1000; // 60s
+    private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
 
     @Resource
     private JobService jobService;
@@ -198,7 +198,8 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 }
 
                 if(Jobs.isQueuedOrStarted(jobService.tryGetJob(guid).get())) {
-                    throw new IllegalStateException("test processing of the sample repo has taken > "+DELAY_PROCESSSUBMITTEDTESTJOB+"ms");
+                    throw new IllegalStateException("test processing of the sample repo has taken > "
+                            + DELAY_PROCESSSUBMITTEDTESTJOB + "ms");
                 }
             }
 

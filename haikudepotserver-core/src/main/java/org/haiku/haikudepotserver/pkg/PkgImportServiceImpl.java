@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.query.ObjectIdQuery;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
@@ -54,7 +55,10 @@ public class PkgImportServiceImpl implements PkgImportService {
         Preconditions.checkArgument(null != pkg, "the package must be provided");
         Preconditions.checkArgument(null != repositorySourceObjectId, "the repository source is must be provided");
 
-        RepositorySource repositorySource = RepositorySource.get(objectContext, repositorySourceObjectId);
+        RepositorySource repositorySource = RepositorySource.get(
+                objectContext,
+                repositorySourceObjectId,
+                ObjectIdQuery.CACHE);
 
         if(!repositorySource.getActive()) {
             throw new IllegalStateException("it is not possible to import from a repository source that is not active; " + repositorySource);
