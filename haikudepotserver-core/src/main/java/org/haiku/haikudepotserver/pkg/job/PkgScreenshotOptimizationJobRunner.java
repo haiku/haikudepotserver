@@ -53,7 +53,7 @@ public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScr
 
         long startMs = System.currentTimeMillis();
 
-        if(pngOptimizationService.identityOptimization()) {
+        if (!pngOptimizationService.identityOptimization()) {
             LOGGER.info("will optimize {} screenshot images", specification.getPkgScreenshotCodes().size());
 
             for (String pkgScreenshotCode : specification.getPkgScreenshotCodes()) {
