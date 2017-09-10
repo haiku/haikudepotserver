@@ -1,14 +1,13 @@
 #!/usr/bin/python
 
 # =====================================
-# Copyright 2014-2015, Andrew Lindesay
+# Copyright 2014-2017, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
 # This script is used to create a new tagged version of the software and to bump the 'current' version up one.
 # This is essentially the 'release process'.
 
-import os
 import os.path
 import sys
 import re

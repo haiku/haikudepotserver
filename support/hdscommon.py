@@ -15,6 +15,7 @@ import sys
 import xml.etree.ElementTree as etree
 import subprocess
 
+
 # This function will return the list of modules' names based on scanning the file
 # system rather than looking at the top level POM.  It does this because different
 # profiles may be employed to avoid, for example, building an RPM on a non-linux
