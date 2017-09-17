@@ -81,7 +81,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
     }
 
     private void writeRepositories(JsonGenerator jsonGenerator, List<Repository> repositories) throws IOException {
-        jsonGenerator.writeFieldName("repositories");
+        jsonGenerator.writeFieldName("items");
         jsonGenerator.writeStartArray();
 
         for (Repository repository : repositories) {
