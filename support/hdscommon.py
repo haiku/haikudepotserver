@@ -15,6 +15,14 @@ import sys
 import xml.etree.ElementTree as etree
 import subprocess
 
+# =====================================
+# DICT HANDLING
+
+
+def uniondicts(d1, d2):
+    d = dict(d1)
+    d.update(d2)
+    return d
 
 # This function will return the list of modules' names based on scanning the file
 # system rather than looking at the top level POM.  It does this because different

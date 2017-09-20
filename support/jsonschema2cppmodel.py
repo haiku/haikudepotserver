@@ -13,6 +13,7 @@ import json
 import argparse
 import os
 import hdsjsonschemacommon as jscom
+import string
 
 
 def hasanylistproperties(schema):
@@ -23,57 +24,96 @@ def hasanylistproperties(schema):
 
 
 def writelistaccessors(outputfile, cppclassname, cppname, cppmembername, cppcontainertype):
-    outputfile.write((
-        '\n\nvoid\n'
-        '%s::AddTo%s(%s* value) {\n'
-        '    if (%s == NULL)\n'
-        '        %s = new BList();\n'
-        '    %s->AddItem(value);\n'
-        '}\n') % (cppclassname, cppname, cppcontainertype, cppmembername, cppmembername, cppmembername))
-    outputfile.write((
-        '\n\nint32\n'
-        '%s::Count%s() {\n'
-        '    if (%s == NULL)\n'
-        '        return 0;\n'
-        '    return %s->CountItems();\n'
-        '}\n') % (cppclassname, cppname, cppmembername, cppmembername))
-    outputfile.write((
-        '\n\n%s*\n'
-        '%s::%sItemAt(int32 index) {\n'
-        '    return static_cast<%s*>(\n'
-        '        %s->ItemAt(index));\n'
-        '}\n') % (cppcontainertype, cppclassname, cppname, cppcontainertype, cppmembername))
-    outputfile.write((
-        '\n\nbool\n'
-        '%s::%sIsNull() {\n'
-        '    return %s == NULL;\n'
-        '}\n') % (cppclassname, cppname, cppmembername))
+
+    dict = {
+        'cppclassname' : cppclassname,
+        'cppname': cppname,
+        'cppmembername': cppmembername,
+        'cppcontainertype': cppcontainertype
+    }
+
+    outputfile.write(
+        string.Template("""
+void
+${cppclassname}::AddTo${cppname}(${cppcontainertype}* value)
+{
+    if (${cppmembername} == NULL)
+        ${cppmembername} = new BList();
+    ${cppmembername}->AddItem(value);
+}
+
+
+int32
+${cppclassname}::Count${cppname}()
+{
+    if (${cppmembername} == NULL)
+        return 0;
+    return ${cppmembername}->CountItems();
+}
+
+
+${cppcontainertype}*'
+${cppclassname}::${cppname}ItemAt(int32 index)
+{
+    return static_cast<${cppcontainertype}*>(
+        ${cppmembername}->ItemAt(index));
+}
+
+
+bool
+${cppclassname}::${cppname}IsNull()
+{
+    return %s == NULL;
+}
+""").substitute(dict))
 
 
 def writelistaccessorsheader(outputfile, cppname, cppcontainertype):
-    outputfile.write('    void AddTo%s(%s* value);\n' % (cppname, cppcontainertype))
-    outputfile.write('    int32 Count%s();\n' % cppname)
-    outputfile.write('    %s* %sItemAt(int32 index);\n' % (cppcontainertype, cppname))
-    outputfile.write('    bool %sIsNull();\n' % cppname)
+    dict = {
+        'cppname': cppname,
+        'cppcontainertype': cppcontainertype
+    }
+
+    outputfile.write(
+        string.Template("""
+    void AddTo${cppname}(${cppcontainertype}* value);
+    int32 Count${cppname}();
+    ${cppcontainertype}* ${cppname}ItemAt(int32 index);
+    bool %sIsNull();
+""").substitute(dict))
 
 
 def writetakeownershipaccessors(outputfile, cppclassname, cppname, cppmembername, cpptype):
-    outputfile.write((
-        '\n\n%s*\n'
-        '%s::%s() {\n'
-        '    return %s;\n'
-        '}\n') % (cpptype, cppclassname, cppname, cppmembername))
-    outputfile.write((
-        '\n\nvoid\n'
-        '%s::Set%s(%s* value) {\n'
-        '        // takes ownership\n'
-        '    %s = value;\n'
-        '}\n') % (cppclassname, cppname, cpptype, cppmembername))
-    outputfile.write((
-        '\n\nbool\n'
-        '%s::%sIsNull() {\n'
-        '    return %s == NULL;\n'
-        '}\n') % (cppclassname, cppname, cppmembername))
+
+    dict = {
+        'cppclassname': cppclassname,
+        'cppname': cppname,
+        'cppmembername': cppmembername,
+        'cpptype': cpptype
+    }
+
+    outputfile.write(
+        string.Template("""
+${cpptype}*
+${cppclassname}::${cppname}()
+{
+    return ${cppmembername};
+}
+
+
+void
+${cppclassname}::Set${cppname}(${cpptype}* value)
+{
+    ${cppmembername} = value;
+}
+
+
+bool
+${cppclassname}::${cppname}IsNull()
+{
+    return ${cppmembername} == NULL;
+}
+""").substitute(dict))
 
 
 def writetakeownershipaccessorsheader(outputfile, cppname, cpptype):
@@ -83,29 +123,47 @@ def writetakeownershipaccessorsheader(outputfile, cppname, cpptype):
 
 
 def writescalaraccessors(outputfile, cppclassname, cppname, cppmembername, cpptype):
-    outputfile.write((
-         '\n\n%s\n'
-         '%s::%s() {\n'
-         '    return %s;\n'
-         '}\n') % (cpptype, cppclassname, cppname, cppmembername))
-    outputfile.write((
-         '\n\nvoid\n'
-         '%s::Set%s(%s value) {\n'
-         '    if (%sIsNull())\n'
-         '        %s = new %s[1];\n'
-         '    %s[0] = value\n'
-         '}\n') % (cppclassname, cppname, cpptype, cppname, cppmembername, cppmembername, cpptype, cppmembername))
-    outputfile.write((
-         '\n\nvoid\n'
-         '%s::%sIsNull() {\n'
-         '    return %s == NULL;\n'
-         '}\n') % (cppclassname, cppname, cppmembername))
+
+    dict = {
+        'cppclassname': cppclassname,
+        'cppname': cppname,
+        'cppmembername': cppmembername,
+        'cpptype': cpptype
+    }
+
+    outputfile.write(
+        string.Template("""
+${cpptype}
+${cppclassname}::${cppname}()
+{
+    return ${cppmembername};
+}
+
+
+void
+${cppclassname}::Set${cppname}(${cpptype} value)
+{
+    if ({$cppname}IsNull())
+        ${cppmembername} = new ${cpptype}[1];
+    ${cppmembername}[0] = value;
+}
+
+
+void
+${cppclassname}::${cppname}IsNull()
+{
+    return ${cppmembername} == NULL;
+}
+""").substitute(dict))
 
 
 def writescalaraccessorsheader(outputfile, cppname, cpptype):
-    outputfile.write('    %s %s();\n' % (cpptype, cppname))
-    outputfile.write('    void Set%s(%s value);\n' % (cppname, cpptype))
-    outputfile.write('    void %sIsNull();\n' % cppname)
+    outputfile.write(
+        string.Template("""
+    ${cpptype} ${cppname}();
+    void Set${cppname}(${cpptype} value);
+    bool ${cppname}IsNull();
+""").substitute({'cppname': cppname, 'cpptype': cpptype}))
 
 
 def writeaccessors(outputfile, cppclassname, propname, propmetadata):
@@ -149,14 +207,18 @@ def writeaccessorsheader(outputfile, propname, propmetadata):
 
 
 def writedestructorlogicforlist(outputfile, propname, propmetadata):
-    outputfile.write((
-        '        for (i = 0; i < %s.CountItems(); i++) {\n'
-        '            delete static_cast<%s*>(\n'
-        '            %s->ItemAt(i));\n'
-        '        }\n') % (
-        jscom.propnametocppmembername(propname),
-        jscom.javatypetocppname(propmetadata['items']['javaType']),
-        jscom.propnametocppmembername(propname)))
+    dict = {
+        'cppmembername': jscom.propnametocppmembername(propname),
+        'cpptype': jscom.javatypetocppname(propmetadata['items']['javaType'])
+    }
+
+    outputfile.write(
+        string.Template("""
+        for (i = 0; i < ${cppmembername}.CountItems(); i++) {
+            delete static_cast<${cpptype}*>(
+            ${cppmembername}->ItemAt(i));
+        }       
+""").substitute(dict))
 
 
 def writedestructor(outputfile, cppname, schema):
@@ -209,23 +271,19 @@ def schematocppmodels(inputfile, schema, outputdirectory):
         jscom.writetopcomment(cpphfile, os.path.split(inputfile)[1], 'Model')
         guarddefname = 'GEN_JSON_SCHEMA_MODEL__%s_H' % (cppclassname.upper())
 
-        cpphfile.write((
-            '#ifndef %s\n'
-            '#define %s\n'
-            '\n'
-            '#include "List.h"\n'
-            '#include "String.h"\n'
-            '\n'
-            'class %s {\n'
-            'public:\n'
-        ) % (guarddefname, guarddefname, cppclassname))
+        cpphfile.write(string.Template("""
+#ifndef ${guarddefname}
+#define ${guarddefname}
 
-        cpphfile.write((
-            '    %s();\n'
-            '    virtual ~%s();\n'
-        ) % (cppclassname, cppclassname))
+#include "List.h"
+#include "String.h"
 
-        cpphfile.write('\n')
+class ${cppclassname} {
+public:
+    ${cppclassname}();
+    virtual ~${cppclassname}();
+    
+""").substitute({'guarddefname': guarddefname, 'cppclassname': cppclassname}))
 
         for propname, propmetadata in schema['properties'].items():
             writeaccessorsheader(cpphfile, propname, propmetadata)
@@ -247,7 +305,7 @@ def schematocppmodels(inputfile, schema, outputdirectory):
 
     with open(cppifilename, 'w') as cppifile:
 
-        jscom.writetopcomment(cpphfile, os.path.split(inputfile)[1], 'Model')
+        jscom.writetopcomment(cppifile, os.path.split(inputfile)[1], 'Model')
 
         for propname, propmetadata in schema['properties'].items():
             writeaccessors(cppifile, cppclassname, propname, propmetadata)
