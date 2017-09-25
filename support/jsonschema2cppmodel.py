@@ -38,8 +38,15 @@ void
 ${cppclassname}::AddTo${cppname}(${cppcontainertype}* value)
 {
     if (${cppmembername} == NULL)
-        ${cppmembername} = new BList();
-    ${cppmembername}->AddItem(value);
+        ${cppmembername} = new List<${cppcontainertype}*, true>();
+    ${cppmembername}->Add(value);
+}
+
+
+void
+${cppclassname}::Set${cppname}(List<${cppcontainertype}*, true>* value)
+{
+   ${cppmembername} = value; 
 }
 
 
@@ -52,18 +59,17 @@ ${cppclassname}::Count${cppname}()
 }
 
 
-${cppcontainertype}*'
+${cppcontainertype}*
 ${cppclassname}::${cppname}ItemAt(int32 index)
 {
-    return static_cast<${cppcontainertype}*>(
-        ${cppmembername}->ItemAt(index));
+    return ${cppmembername}->ItemAt(index);
 }
 
 
 bool
 ${cppclassname}::${cppname}IsNull()
 {
-    return %s == NULL;
+    return ${cppmembername} == NULL;
 }
 """).substitute(dict))
 
@@ -75,11 +81,11 @@ def writelistaccessorsheader(outputfile, cppname, cppcontainertype):
     }
 
     outputfile.write(
-        string.Template("""
-    void AddTo${cppname}(${cppcontainertype}* value);
+        string.Template("""    void AddTo${cppname}(${cppcontainertype}* value);
+    void Set${cppname}(List<${cppcontainertype}*, true>* value);
     int32 Count${cppname}();
     ${cppcontainertype}* ${cppname}ItemAt(int32 index);
-    bool %sIsNull();
+    bool ${cppname}IsNull();
 """).substitute(dict))
 
 
@@ -119,7 +125,7 @@ ${cppclassname}::${cppname}IsNull()
 def writetakeownershipaccessorsheader(outputfile, cppname, cpptype):
     outputfile.write('    %s* %s();\n' % (cpptype, cppname))
     outputfile.write('    void Set%s(%s* value);\n' % (cppname, cpptype))
-    outputfile.write('    void %sIsNull();\n' % cppname)
+    outputfile.write('    bool %sIsNull();\n' % cppname)
 
 
 def writescalaraccessors(outputfile, cppclassname, cppname, cppmembername, cpptype):
@@ -213,10 +219,9 @@ def writedestructorlogicforlist(outputfile, propname, propmetadata):
     }
 
     outputfile.write(
-        string.Template("""
-        for (i = 0; i < ${cppmembername}.CountItems(); i++) {
-            delete static_cast<${cpptype}*>(
-            ${cppmembername}->ItemAt(i));
+        string.Template("""        int32 count = ${cppmembername}->CountItems(); 
+        for (i = 0; i < count; i++) {
+            delete ${cppmembername}->ItemAt(i);
         }       
 """).substitute(dict))
 
@@ -225,7 +230,7 @@ def writedestructor(outputfile, cppname, schema):
     outputfile.write('\n\n%s::~%s() {\n' % (cppname, cppname))
 
     if hasanylistproperties(schema):
-        outputfile.write('    int32 i;\n')
+        outputfile.write('    int32 i;\n\n')
 
     for propname, propmetadata in schema['properties'].items():
         propmembername = jscom.propnametocppmembername(propname)
@@ -239,7 +244,7 @@ def writedestructor(outputfile, cppname, schema):
             '        delete %s;\n'
         ) % propmembername)
 
-        outputfile.write('    }\n')
+        outputfile.write('    }\n\n')
 
     outputfile.write('}\n')
 
@@ -251,6 +256,21 @@ def writeconstructor(outputfile, cppname, schema):
         outputfile.write('    %s = NULL;\n' % jscom.propnametocppmembername(propname))
 
     outputfile.write('}\n')
+
+
+def writeheaderincludes(outputfile, properties):
+    for propname, propmetadata in properties.items():
+        jsontype = propmetadata['type']
+        javatype = None
+
+        if jsontype == 'object':
+            javatype = propmetadata['javaType']
+
+        if jsontype == 'array':
+            javatype = propmetadata['items']['javaType']
+
+        if javatype is not None:
+            outputfile.write('#include "%s.h"\n' % jscom.javatypetocppname(javatype))
 
 
 def schematocppmodels(inputfile, schema, outputdirectory):
@@ -278,12 +298,17 @@ def schematocppmodels(inputfile, schema, outputdirectory):
 #include "List.h"
 #include "String.h"
 
+""").substitute({'guarddefname': guarddefname}))
+
+        writeheaderincludes(cpphfile, schema['properties'])
+
+        cpphfile.write(string.Template("""
 class ${cppclassname} {
 public:
     ${cppclassname}();
     virtual ~${cppclassname}();
     
-""").substitute({'guarddefname': guarddefname, 'cppclassname': cppclassname}))
+""").substitute({'cppclassname': cppclassname}))
 
         for propname, propmetadata in schema['properties'].items():
             writeaccessorsheader(cpphfile, propname, propmetadata)
@@ -299,13 +324,18 @@ public:
                 jscom.propnametocppmembername(propname)))
 
         cpphfile.write((
-            '}\n\n'
+            '};\n\n'
             '#endif // %s'
         ) % guarddefname)
 
     with open(cppifilename, 'w') as cppifile:
 
         jscom.writetopcomment(cppifile, os.path.split(inputfile)[1], 'Model')
+
+        cppifile.write('#include "%s.h"\n' % cppclassname)
+
+        writeconstructor(cppifile, cppclassname, schema)
+        writedestructor(cppifile, cppclassname, schema)
 
         for propname, propmetadata in schema['properties'].items():
             writeaccessors(cppifile, cppclassname, propname, propmetadata)
@@ -314,12 +344,12 @@ public:
     # Now write out any subordinate structures.
 
     for propname, propmetadata in schema['properties'].items():
-        type = propmetadata['type']
+        jsontype = propmetadata['type']
 
-        if type == 'array':
+        if jsontype == 'array':
             schematocppmodels(inputfile, propmetadata['items'], outputdirectory)
 
-        if type == 'object':
+        if jsontype == 'object':
             schematocppmodels(inputfile, propmetadata, outputdirectory)
 
 
