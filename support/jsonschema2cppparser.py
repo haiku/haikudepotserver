@@ -16,6 +16,7 @@ import os
 import hdsjsonschemacommon as jscom
 import hdscommon
 
+
 # This naming is related to a sub-type in the schema; maybe not the top-level.
 
 class CppParserSubTypeNaming:
@@ -35,10 +36,10 @@ class CppParserSubTypeNaming:
         return self._cppmodelclassname
 
     def cppstackedlistenerclassname(self):
-        return self._cppmodelclassname + '_' + self._naming.cppsuperstackedlistenerclassname()
+        return self._cppmodelclassname + '_' + self._naming.generatejsonlistenername('Stacked')
 
     def cppstackedlistlistenerclassname(self):
-        return self._cppmodelclassname + '_List_' + self._naming.cppsuperstackedlistenerclassname()
+        return self._cppmodelclassname + '_List_' + self._naming.generatejsonlistenername('Stacked')
 
     def todict(self):
         return {
@@ -56,7 +57,7 @@ class CppParserNaming:
     def __init__(self, schemaroot):
         self._schemaroot = schemaroot
 
-    def cppmodelclassname(self):
+    def cpprootmodelclassname(self):
         if self._schemaroot['type'] != 'object':
             raise Exception('expecting object')
 
@@ -67,46 +68,52 @@ class CppParserNaming:
 
         return jscom.javatypetocppname(javatype)
 
+    def generatejsonlistenername(self, prefix):
+        return prefix + self.cpprootmodelclassname() + 'JsonListener'
+
     def cppsupermainlistenerclassname(self):
-        return 'Abstract' + self.cppmodelclassname() + 'JsonListener'
+        return self.generatejsonlistenername('AbstractMain')
 
     def cppsinglemainlistenerclassname(self):
-        return self.cppmodelclassname() + 'JsonListener'
+        return self.generatejsonlistenername("Single")
 
     def cppbulkcontainermainlistenerclassname(self):
-        return 'BulkContainer' + self.cppsinglemainlistenerclassname()
-
-    def cppbulkcontainerstackedlistenerclassname(self):
-        return 'BulkContainer_' + self.cppsuperstackedlistenerclassname()
-
-    def cppbulkcontaineritemliststackedlistenerclassname(self):
-        return 'BulkContainer_ItemList_' + self.cppsuperstackedlistenerclassname()
+        return self.generatejsonlistenername('BulkContainer')
 
     def cppsuperstackedlistenerclassname(self):
-        return 'Stacked' + self.cppsinglemainlistenerclassname()
+        return self.generatejsonlistenername('AbstractStacked')
 
-    def cppstackeditemlistenerlistenerclassname(self):
-        return 'ItemListener_' + self.cppsuperstackedlistenerclassname()
+    def cppbulkcontainerstackedlistenerclassname(self):
+        return self.generatejsonlistenername('BulkContainerStacked')
+
+    def cppbulkcontaineritemliststackedlistenerclassname(self):
+        return self.generatejsonlistenername('BulkContainerItemsStacked')
+
+# this is a sub-class of the root object json listener that can call out to the
+# item listener as the root objects are parsed.
+
+    def cppitemlistenerstackedlistenerclassname(self):
+        return self.generatejsonlistenername('ItemEmittingStacked')
 
     def cppgeneralobjectstackedlistenerclassname(self):
-        return 'GeneralObject_' + self.cppsuperstackedlistenerclassname()
+        return self.generatejsonlistenername('GeneralObjectStacked')
 
     def cppgeneralarraystackedlistenerclassname(self):
-        return 'GeneralArray_' + self.cppsuperstackedlistenerclassname()
+        return self.generatejsonlistenername('GeneralArrayStacked')
 
     def cppitemlistenerclassname(self):
-        return self.cppmodelclassname() + 'ItemListener'
+        return self.cpprootmodelclassname() + 'Listener'
 
     def todict(self):
         return {
-            'cppmodelclassname' : self.cppmodelclassname(),
-            'cppsuperlistenerclassname' : self.cppsupermainlistenerclassname(),
-            'cpplistenerclassname': self.cppsinglemainlistenerclassname(),
-            'cppbulkcontainerlistenerclassname': self.cppbulkcontainermainlistenerclassname(),
+            'cpprootmodelclassname': self.cpprootmodelclassname(),
+            'cppsupermainlistenerclassname': self.cppsupermainlistenerclassname(),
+            'cppsinglemainlistenerclassname': self.cppsinglemainlistenerclassname(),
+            'cppbulkcontainermainlistenerclassname': self.cppbulkcontainermainlistenerclassname(),
             'cppbulkcontainerstackedlistenerclassname': self.cppbulkcontainerstackedlistenerclassname(),
             'cppbulkcontaineritemliststackedlistenerclassname': self.cppbulkcontaineritemliststackedlistenerclassname(),
-            'cppstackedlistenerclassname': self.cppsuperstackedlistenerclassname(),
-            'cppstackeditemlistenerlistenerclassname': self.cppstackeditemlistenerlistenerclassname(),
+            'cppsuperstackedlistenerclassname': self.cppsuperstackedlistenerclassname(),
+            'cppitemlistenerstackedlistenerclassname': self.cppitemlistenerstackedlistenerclassname(),
             'cppgeneralobjectstackedlistenerclassname': self.cppgeneralobjectstackedlistenerclassname(),
             'cppgeneralarraystackedlistenerclassname': self.cppgeneralarraystackedlistenerclassname(),
             'cppitemlistenerclassname': self.cppitemlistenerclassname()
@@ -146,34 +153,34 @@ class CppParserImplementationState:
 def writerootstackedlistenerinterface(istate):
     istate.outputfile().write(
         string.Template("""        
-/*! This class is the top level of the stacked listeners.  The stack structure is
-    maintained in a linked list and sub-classes implement specific behaviors
+/*! This class is the top level of the stacked listeners.  The stack structure
+    is maintained in a linked list and sub-classes implement specific behaviors
     depending where in the parse tree the stacked listener is working at.
 */        
-class ${cppstackedlistenerclassname} : public BJsonEventListener {
+class ${cppsuperstackedlistenerclassname} : public BJsonEventListener {
 public:
-    ${cppstackedlistenerclassname}(
-        ${cppsuperlistenerclassname}* mainListener,
-        ${cppstackedlistenerclassname}* parent);
-    ~${cppstackedlistenerclassname}();
+    ${cppsuperstackedlistenerclassname}(
+        ${cppsupermainlistenerclassname}* mainListener,
+        ${cppsuperstackedlistenerclassname}* parent);
+    ~${cppsuperstackedlistenerclassname}();
 
     void HandleError(status_t status, int32 line, const char* message);
     void Complete();
 
     status_t ErrorStatus();
 
-    ${cppstackedlistenerclassname}* Parent();
+    ${cppsuperstackedlistenerclassname}* Parent();
 
     void WillPop();
 
 protected:
-    ${cppsuperlistenerclassname}* fMainListener;
+    ${cppsupermainlistenerclassname}* fMainListener;
 
     void Pop();
-    void Push(${cppstackedlistenerclassname}* stackedListener);
+    void Push(${cppsuperstackedlistenerclassname}* stackedListener);
     
 private:
-    ${cppstackedlistenerclassname}* fParent;
+    ${cppsuperstackedlistenerclassname}* fParent;
 };
 """).substitute(istate.naming().todict()))
 
@@ -181,55 +188,55 @@ private:
 def writerootstackedlistenerimplementation(istate):
     istate.outputfile().write(
         string.Template("""
-${cppstackedlistenerclassname}::${cppstackedlistenerclassname} (
-    ${cppsuperlistenerclassname}* mainListener,
-    ${cppstackedlistenerclassname}* parent)
+${cppsuperstackedlistenerclassname}::${cppsuperstackedlistenerclassname} (
+    ${cppsupermainlistenerclassname}* mainListener,
+    ${cppsuperstackedlistenerclassname}* parent)
 {
     fMainListener = mainListener;
     fParent = parent;
 }
 
-${cppstackedlistenerclassname}::~${cppstackedlistenerclassname}()
+${cppsuperstackedlistenerclassname}::~${cppsuperstackedlistenerclassname}()
 {
 }
 
 void
-${cppstackedlistenerclassname}::HandleError(status_t status, int32 line, const char* message)
+${cppsuperstackedlistenerclassname}::HandleError(status_t status, int32 line, const char* message)
 {
     fMainListener->HandleError(status, line, message);
 }
 
 void
-${cppstackedlistenerclassname}::Complete()
+${cppsuperstackedlistenerclassname}::Complete()
 {
    fMainListener->Complete();
 }
 
 status_t
-${cppstackedlistenerclassname}::ErrorStatus()
+${cppsuperstackedlistenerclassname}::ErrorStatus()
 {
     return fMainListener->ErrorStatus();
 }
 
-${cppstackedlistenerclassname}*
-${cppstackedlistenerclassname}::Parent()
+${cppsuperstackedlistenerclassname}*
+${cppsuperstackedlistenerclassname}::Parent()
 {
     return fParent;
 }
 
 void
-${cppstackedlistenerclassname}::Push(${cppstackedlistenerclassname}* stackedListener)
+${cppsuperstackedlistenerclassname}::Push(${cppsuperstackedlistenerclassname}* stackedListener)
 {
     fMainListener->SetStackedListener(stackedListener);
 }
 
 void
-${cppstackedlistenerclassname}::WillPop()
+${cppsuperstackedlistenerclassname}::WillPop()
 {
 }
 
 void
-${cppstackedlistenerclassname}::Pop()
+${cppsuperstackedlistenerclassname}::Pop()
 {
     fMainListener->SetStackedListener(fParent);
 }
@@ -239,11 +246,11 @@ ${cppstackedlistenerclassname}::Pop()
 def writeageneralstackedlistenerinterface(istate, alistenerclassname):
     istate.outputfile().write(
         string.Template("""
-class ${alistenerclassname} : public ${cppstackedlistenerclassname} {
+class ${alistenerclassname} : public ${cppsuperstackedlistenerclassname} {
 public:
     ${alistenerclassname}(
-        ${cppsuperlistenerclassname}* mainListener,
-        ${cppstackedlistenerclassname}* parent);
+        ${cppsupermainlistenerclassname}* mainListener,
+        ${cppsuperstackedlistenerclassname}* parent);
     ~${alistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
@@ -264,10 +271,10 @@ def writegeneralnoopstackedlistenerconstructordestructor(istate, aclassname):
     istate.outputfile().write(
         string.Template("""
 ${aclassname}::${aclassname}(
-    ${cppsuperlistenerclassname}* mainListener,
-    ${cppstackedlistenerclassname}* parent)
+    ${cppsupermainlistenerclassname}* mainListener,
+    ${cppsuperstackedlistenerclassname}* parent)
     :
-    ${cppstackedlistenerclassname}(mainListener, parent)
+    ${cppsuperstackedlistenerclassname}(mainListener, parent)
 {
 }
 
@@ -385,11 +392,11 @@ def writestackedlistenerinterface(istate, subschema):
 
         istate.outputfile().write(
             string.Template("""
-class ${subtype_cppstackedlistenerclassname} : public ${cppstackedlistenerclassname} {
+class ${subtype_cppstackedlistenerclassname} : public ${cppsuperstackedlistenerclassname} {
 public:
     ${subtype_cppstackedlistenerclassname}(
-        ${cppsuperlistenerclassname}* mainListener,
-        ${cppstackedlistenerclassname}* parent);
+        ${cppsupermainlistenerclassname}* mainListener,
+        ${cppsuperstackedlistenerclassname}* parent);
     ~${subtype_cppstackedlistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
@@ -401,11 +408,11 @@ protected:
     BString fNextItemName;
 };
 
-class ${subtype_cppstackedlistlistenerclassname} : public ${cppstackedlistenerclassname} {
+class ${subtype_cppstackedlistlistenerclassname} : public ${cppsuperstackedlistenerclassname} {
 public:
     ${subtype_cppstackedlistlistenerclassname}(
-        ${cppsuperlistenerclassname}* mainListener,
-        ${cppstackedlistenerclassname}* parent);
+        ${cppsupermainlistenerclassname}* mainListener,
+        ${cppsuperstackedlistenerclassname}* parent);
     ~${subtype_cppstackedlistlistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
@@ -434,13 +441,13 @@ def writebulkcontainerstackedlistenerinterface(istate, schema):
 
     outfile.write(
         string.Template("""
-class ${cppstackeditemlistenerlistenerclassname} : public ${subtype_cppstackedlistenerclassname} {
+class ${cppitemlistenerstackedlistenerclassname} : public ${subtype_cppstackedlistenerclassname} {
 public:
-    ${cppstackeditemlistenerlistenerclassname}(
-        ${cppsuperlistenerclassname}* mainListener,
-        ${cppstackedlistenerclassname}* parent,
+    ${cppitemlistenerstackedlistenerclassname}(
+        ${cppsupermainlistenerclassname}* mainListener,
+        ${cppsuperstackedlistenerclassname}* parent,
         ${cppitemlistenerclassname}* itemListener);
-    ~${cppstackeditemlistenerlistenerclassname}();
+    ~${cppitemlistenerstackedlistenerclassname}();
     
     void WillPop();
         
@@ -449,11 +456,11 @@ private:
 };
 
 
-class ${cppbulkcontainerstackedlistenerclassname} : public ${cppstackedlistenerclassname} {
+class ${cppbulkcontainerstackedlistenerclassname} : public ${cppsuperstackedlistenerclassname} {
 public:
     ${cppbulkcontainerstackedlistenerclassname}(
-        ${cppsuperlistenerclassname}* mainListener,
-        ${cppstackedlistenerclassname}* parent,
+        ${cppsupermainlistenerclassname}* mainListener,
+        ${cppsuperstackedlistenerclassname}* parent,
         ${cppitemlistenerclassname}* itemListener);
     ~${cppbulkcontainerstackedlistenerclassname}();
     
@@ -465,15 +472,16 @@ private:
 };
 
 
-class ${cppbulkcontaineritemliststackedlistenerclassname} : public ${cppstackedlistenerclassname} {
+class ${cppbulkcontaineritemliststackedlistenerclassname} : public ${cppsuperstackedlistenerclassname} {
 public:
     ${cppbulkcontaineritemliststackedlistenerclassname}(
-        ${cppsuperlistenerclassname}* mainListener,
-        ${cppstackedlistenerclassname}* parent,
+        ${cppsupermainlistenerclassname}* mainListener,
+        ${cppsuperstackedlistenerclassname}* parent,
         ${cppitemlistenerclassname}* itemListener);
     ~${cppbulkcontaineritemliststackedlistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
+    void WillPop();
         
 private:
     ${cppitemlistenerclassname}* fItemListener;
@@ -526,10 +534,10 @@ def writestackedlistenertypedobjectimplementation(istate, schema):
     outfile.write(
         string.Template("""
 ${subtype_cppstackedlistenerclassname}::${subtype_cppstackedlistenerclassname}(
-    ${cppsuperlistenerclassname}* mainListener,
-    ${cppstackedlistenerclassname}* parent)
+    ${cppsupermainlistenerclassname}* mainListener,
+    ${cppsuperstackedlistenerclassname}* parent)
     :
-    ${cppstackedlistenerclassname}(mainListener, parent)
+    ${cppsuperstackedlistenerclassname}(mainListener, parent)
 {
     fTarget = new ${subtype_cppmodelclassname}();
 }
@@ -693,10 +701,10 @@ def writestackedlistenertypedobjectlistimplementation(istate, schema):
     outfile.write(
         string.Template("""
 ${subtype_cppstackedlistlistenerclassname}::${subtype_cppstackedlistlistenerclassname}(
-    ${cppsuperlistenerclassname}* mainListener,
-    ${cppstackedlistenerclassname}* parent)
+    ${cppsupermainlistenerclassname}* mainListener,
+    ${cppsuperstackedlistenerclassname}* parent)
     :
-    ${cppstackedlistenerclassname}(mainListener, parent)
+    ${cppsuperstackedlistenerclassname}(mainListener, parent)
 {
     fTarget = new List<${subtype_cppmodelclassname}*, true>();
 }
@@ -752,8 +760,8 @@ def writebulkcontainerstackedlistenerimplementation(istate, schema):
     outfile.write(
         string.Template("""
         //AAA
-${cppstackeditemlistenerlistenerclassname}::${cppstackeditemlistenerlistenerclassname}(
-    ${cppsuperlistenerclassname}* mainListener, ${cppstackedlistenerclassname}* parent,
+${cppitemlistenerstackedlistenerclassname}::${cppitemlistenerstackedlistenerclassname}(
+    ${cppsupermainlistenerclassname}* mainListener, ${cppsuperstackedlistenerclassname}* parent,
     ${cppitemlistenerclassname}* itemListener)
 :
 ${subtype_cppstackedlistenerclassname}(mainListener, parent)
@@ -762,13 +770,13 @@ ${subtype_cppstackedlistenerclassname}(mainListener, parent)
 }
 
 
-${cppstackeditemlistenerlistenerclassname}::~${cppstackeditemlistenerlistenerclassname}()
+${cppitemlistenerstackedlistenerclassname}::~${cppitemlistenerstackedlistenerclassname}()
 {
 }
 
 
 void
-${cppstackeditemlistenerlistenerclassname}::WillPop()
+${cppitemlistenerstackedlistenerclassname}::WillPop()
 {
     fItemListener->Handle(fTarget);
     delete fTarget;
@@ -776,10 +784,10 @@ ${cppstackeditemlistenerlistenerclassname}::WillPop()
 
 
 ${cppbulkcontainerstackedlistenerclassname}::${cppbulkcontainerstackedlistenerclassname}(
-    ${cppsuperlistenerclassname}* mainListener, ${cppstackedlistenerclassname}* parent,
+    ${cppsupermainlistenerclassname}* mainListener, ${cppsuperstackedlistenerclassname}* parent,
     ${cppitemlistenerclassname}* itemListener)
 :
-${cppstackedlistenerclassname}(mainListener, parent)
+${cppsuperstackedlistenerclassname}(mainListener, parent)
 {
     fItemListener = itemListener;
 }
@@ -829,10 +837,10 @@ ${cppbulkcontainerstackedlistenerclassname}::Handle(const BJsonEvent& event)
 
 
 ${cppbulkcontaineritemliststackedlistenerclassname}::${cppbulkcontaineritemliststackedlistenerclassname}(
-    ${cppsuperlistenerclassname}* mainListener, ${cppstackedlistenerclassname}* parent,
+    ${cppsupermainlistenerclassname}* mainListener, ${cppsuperstackedlistenerclassname}* parent,
     ${cppitemlistenerclassname}* itemListener)
 :
-${cppstackedlistenerclassname}(mainListener, parent)
+${cppsuperstackedlistenerclassname}(mainListener, parent)
 {
     fItemListener = itemListener;
 }
@@ -849,7 +857,7 @@ ${cppbulkcontaineritemliststackedlistenerclassname}::Handle(const BJsonEvent& ev
     switch (event.EventType()) {
         
         case B_JSON_OBJECT_START:
-            Push(new ${cppstackeditemlistenerlistenerclassname}(fMainListener, this, fItemListener));
+            Push(new ${cppitemlistenerstackedlistenerclassname}(fMainListener, this, fItemListener));
             break;
             
         case B_JSON_ARRAY_END:
@@ -863,6 +871,13 @@ ${cppbulkcontaineritemliststackedlistenerclassname}::Handle(const BJsonEvent& ev
     }
     
     return ErrorStatus() == B_OK;
+}
+
+
+void
+${cppbulkcontaineritemliststackedlistenerclassname}::WillPop()
+{
+    fItemListener->Complete();
 }
 
 
@@ -896,41 +911,41 @@ def writemainlistenerimplementation(istate, schema, supportbulkcontainer):
 
     outfile.write(
         string.Template("""
-${cppsuperlistenerclassname}::${cppsuperlistenerclassname}()
+${cppsupermainlistenerclassname}::${cppsupermainlistenerclassname}()
 {
     fErrorStatus = B_OK;
 }
 
 
-${cppsuperlistenerclassname}::~${cppsuperlistenerclassname}()
+${cppsupermainlistenerclassname}::~${cppsupermainlistenerclassname}()
 {
 }
 
 
 void
-${cppsuperlistenerclassname}::HandleError(status_t status, int32 line, const char* message)
+${cppsupermainlistenerclassname}::HandleError(status_t status, int32 line, const char* message)
 {
-    fprintf(stderr, "an error has arisen processing json for '${cppmodelclassname}'; %s", message);
+    fprintf(stderr, "an error has arisen processing json for '${cpprootmodelclassname}'; %s", message);
     fErrorStatus = status;
 }
 
 
 void
-${cppsuperlistenerclassname}::Complete()
+${cppsupermainlistenerclassname}::Complete()
 {
 }
 
 
 status_t
-${cppsuperlistenerclassname}::ErrorStatus()
+${cppsupermainlistenerclassname}::ErrorStatus()
 {
     return fErrorStatus;
 }
 
 
 void
-${cppsuperlistenerclassname}::SetStackedListener(
-    ${cppstackedlistenerclassname}* stackedListener)
+${cppsupermainlistenerclassname}::SetStackedListener(
+    ${cppsuperstackedlistenerclassname}* stackedListener)
 {
     if (fStackedListener != NULL)
         fStackedListener->WillPop();
@@ -943,21 +958,21 @@ ${cppsuperlistenerclassname}::SetStackedListener(
 
     outfile.write(
         string.Template("""
-${cpplistenerclassname}::${cpplistenerclassname}()
+${cppsinglemainlistenerclassname}::${cppsinglemainlistenerclassname}()
 :
-${cppsuperlistenerclassname}()
+${cppsupermainlistenerclassname}()
 {
     fTarget = NULL;
 }
 
 
-${cpplistenerclassname}::~${cpplistenerclassname}()
+${cppsinglemainlistenerclassname}::~${cppsinglemainlistenerclassname}()
 {
 }
 
 
 bool
-${cpplistenerclassname}::Handle(const BJsonEvent& event)
+${cppsinglemainlistenerclassname}::Handle(const BJsonEvent& event)
 {
     if (fErrorStatus != B_OK)
        return false;
@@ -978,7 +993,7 @@ ${cpplistenerclassname}::Handle(const BJsonEvent& event)
               
         default:
             HandleError(B_NOT_ALLOWED, JSON_EVENT_LISTENER_ANY_LINE,
-                "illegal state - unexpected json event parsing top level for ${cppmodelclassname}");
+                "illegal state - unexpected json event parsing top level for ${cpprootmodelclassname}");
             break;
     }
     
@@ -986,8 +1001,8 @@ ${cpplistenerclassname}::Handle(const BJsonEvent& event)
 }
 
 
-${cppmodelclassname}*
-${cpplistenerclassname}::Target()
+${cpprootmodelclassname}*
+${cppsinglemainlistenerclassname}::Target()
 {
     return fTarget;
 }
@@ -1000,20 +1015,20 @@ ${cpplistenerclassname}::Target()
 
         outfile.write(
             string.Template("""
-${cppbulkcontainerlistenerclassname}::${cppbulkcontainerlistenerclassname}(
-    ${cppitemlistenerclassname}* itemListener) : ${cppsuperlistenerclassname}()
+${cppbulkcontainermainlistenerclassname}::${cppbulkcontainermainlistenerclassname}(
+    ${cppitemlistenerclassname}* itemListener) : ${cppsupermainlistenerclassname}()
 {
     fItemListener = itemListener;
 }
 
 
-${cppbulkcontainerlistenerclassname}::~${cppbulkcontainerlistenerclassname}()
+${cppbulkcontainermainlistenerclassname}::~${cppbulkcontainermainlistenerclassname}()
 {
 }
 
 
 bool
-${cppbulkcontainerlistenerclassname}::Handle(const BJsonEvent& event)
+${cppbulkcontainermainlistenerclassname}::Handle(const BJsonEvent& event)
 {
     if (fErrorStatus != B_OK)
        return false;
@@ -1025,8 +1040,8 @@ ${cppbulkcontainerlistenerclassname}::Handle(const BJsonEvent& event)
         
         case B_JSON_OBJECT_START:
         {
-            ${cppstackeditemlistenerlistenerclassname}* nextListener =
-                new ${cppstackeditemlistenerlistenerclassname}(
+            ${cppitemlistenerstackedlistenerclassname}* nextListener =
+                new ${cppitemlistenerstackedlistenerclassname}(
                     this, NULL, fItemListener);
             SetStackedListener(nextListener);
             return true;
@@ -1035,7 +1050,7 @@ ${cppbulkcontainerlistenerclassname}::Handle(const BJsonEvent& event)
               
         default:
             HandleError(B_NOT_ALLOWED, JSON_EVENT_LISTENER_ANY_LINE,
-                "illegal state - unexpected json event parsing top level for ${cppbulkcontainerlistenerclassname}");
+                "illegal state - unexpected json event parsing top level for ${cppbulkcontainermainlistenerclassname}");
             break;
     }
     
@@ -1047,10 +1062,11 @@ ${cppbulkcontainerlistenerclassname}::Handle(const BJsonEvent& event)
 
 def schematocppparser(inputfile, schema, outputdirectory, supportbulkcontainer):
     naming = CppParserNaming(schema)
-    cpphfilename = os.path.join(outputdirectory, naming.cppsinglemainlistenerclassname() + '.h')
-    cppifilename = os.path.join(outputdirectory, naming.cppsinglemainlistenerclassname() + '.cpp')
+    cppheaderleafname = naming.cpprootmodelclassname() + 'JsonListener.h'
+    cppheaderfilename = os.path.join(outputdirectory, cppheaderleafname)
+    cppimplementationfilename = os.path.join(outputdirectory, naming.cpprootmodelclassname() + 'JsonListener.cpp')
 
-    with open(cpphfilename, 'w') as cpphfile:
+    with open(cppheaderfilename, 'w') as cpphfile:
         jscom.writetopcomment(cpphfile, os.path.split(inputfile)[1], 'Listener')
         guarddefname = 'GEN_JSON_SCHEMA_PARSER__%s_H' % (naming.cppsinglemainlistenerclassname().upper())
 
@@ -1064,38 +1080,43 @@ def schematocppparser(inputfile, schema, outputdirectory, supportbulkcontainer):
             string.Template("""
 #include <JsonEventListener.h>
 
-#include "${cppmodelclassname}.h"
+#include "${cpprootmodelclassname}.h"
 
-class ${cppstackedlistenerclassname};
+class ${cppsuperstackedlistenerclassname};
 
-class ${cppsuperlistenerclassname} : public BJsonEventListener {
-friend class ${cppstackedlistenerclassname};
+class ${cppsupermainlistenerclassname} : public BJsonEventListener {
+friend class ${cppsuperstackedlistenerclassname};
 public:
-    ${cppsuperlistenerclassname}();
-    virtual ~${cppsuperlistenerclassname}();
+    ${cppsupermainlistenerclassname}();
+    virtual ~${cppsupermainlistenerclassname}();
     
     void HandleError(status_t status, int32 line, const char* message);
     void Complete();
     status_t ErrorStatus();
     
 protected:
-    void SetStackedListener(${cppstackedlistenerclassname}* listener);
+    void SetStackedListener(${cppsuperstackedlistenerclassname}* listener);
     status_t fErrorStatus;
-    ${cppstackedlistenerclassname}* fStackedListener;
+    ${cppsuperstackedlistenerclassname}* fStackedListener;
 };
 
 
-class ${cpplistenerclassname} : ${cppsuperlistenerclassname} {
-friend class ${cppstackedlistenerclassname};
+/*! Use this listener when you want to parse some JSON data that contains
+    just a single instance of ${cpprootmodelclassname}.
+*/
+
+
+class ${cppsinglemainlistenerclassname} : ${cppsupermainlistenerclassname} {
+friend class ${cppsuperstackedlistenerclassname};
 public:
-    ${cpplistenerclassname}();
-    virtual ~${cpplistenerclassname}();
+    ${cppsinglemainlistenerclassname}();
+    virtual ~${cppsinglemainlistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
-    ${cppmodelclassname}* Target();
+    ${cpprootmodelclassname}* Target();
     
 private:
-    ${cppmodelclassname}* fTarget;
+    ${cpprootmodelclassname}* fTarget;
 };
 
 """).substitute(naming.todict()))
@@ -1109,35 +1130,36 @@ private:
         if supportbulkcontainer:
             cpphfile.write(
                 string.Template("""
+                
+/*! Concrete sub-classes of this class are able to respond to each
+    ${cpprootmodelclassname}* instance as
+    it is parsed from the bulk container.  When the stream is
+    finished, the Complete() method is invoked.
+*/ 
+                
 class ${cppitemlistenerclassname} {
 public:
-    virtual void Handle(${cppmodelclassname}* item) = 0;
+    virtual void Handle(${cpprootmodelclassname}* item) = 0;
     virtual void Complete() = 0;
 };
 """).substitute(naming.todict()))
 
-#             cpphfile.write(
-#                 string.Template("""
-# class ${cppbulk : %s {
-# friend class %s;
-# public:
-#     %s(%s& itemListener);
-#     ~%s();
-#
-#     bool Handle(const BJsonEvent& event);
-#
-# private:
-#     %s* fItemListener;
-# };
-# """).substitute(naming.todict()))
-
             cpphfile.write(
                 string.Template("""
-class ${cppbulkcontainerlistenerclassname} : ${cppsuperlistenerclassname} {
-friend class ${cppstackedlistenerclassname};
+                
+/*! Use this listener, together with an instance of a concrete
+    subclass of ${cppitemlistenerclassname}
+    in order to parse the JSON data in a specific "bulk
+    container" format.  Each time that an instance of
+    ${cpprootmodelclassname}
+    is parsed, the instance item listener will be invoked.
+*/ 
+                
+class ${cppbulkcontainermainlistenerclassname} : ${cppsupermainlistenerclassname} {
+friend class ${cppsuperstackedlistenerclassname};
 public:
-    ${cppbulkcontainerlistenerclassname}(${cppitemlistenerclassname}* itemListener);
-    ~${cppbulkcontainerlistenerclassname}();
+    ${cppbulkcontainermainlistenerclassname}(${cppitemlistenerclassname}* itemListener);
+    ~${cppbulkcontainermainlistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
     
@@ -1148,10 +1170,10 @@ private:
 
         cpphfile.write('\n#endif // %s' % guarddefname)
 
-    with open(cppifilename, 'w') as cppifile:
+    with open(cppimplementationfilename, 'w') as cppifile:
         istate = CppParserImplementationState(cppifile, naming)
         jscom.writetopcomment(cppifile, os.path.split(inputfile)[1], 'Listener')
-        cppifile.write('#include "%s"\n' % (naming.cppsinglemainlistenerclassname() + '.h'))
+        cppifile.write('#include "%s"\n' % cppheaderleafname)
         cppifile.write('#include "List.h"\n\n')
         cppifile.write('#include <stdio.h>\n\n')
 
