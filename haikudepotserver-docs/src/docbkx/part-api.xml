@@ -210,6 +210,60 @@ Distributed under the terms of the MIT License.
     </section>
 
     <section>
+        <title>Schema</title>
+
+        <para>
+            Some of the data transfer objects (DTO) in the system are generated.  This means that a software
+            artifact is stored in the project and the java objects that are used in the running software are
+            generated from the schema document.  In the java environment this is done using maven plugins, but it is
+            also made possible in the C++ environment too.  Python scripts are provided to cater for this.
+        </para>
+
+        <para>
+            To generate the DTO objects as Haiku-friendly C++ objects, use the &quot;jsonschema2cppmodel.py&quot;
+            tool.  To generate a parser that can be used with the &quot;BJson&quot; C++ class, use the
+            &quot;jsonschema2cppparser.py&quot; program.
+        </para>
+
+        <para>
+            <programlisting>python \
+jsonschema2cppmodel.py \
+-i /So...erver-core/src/main/resources/schema/repository/dumpexport.json \
+--outputdirectory /So...iku/src/apps/haikudepot/server/dumpexportrepository/
+
+python \
+jsonschema2cppparser.py \
+-i /So...erver-core/src/main/resources/schema/repository/dumpexport.json \
+--outputdirectory /So...iku/src/apps/haikudepot/server/dumpexportrepository/ \
+--supportbulkcontainer
+</programlisting>
+        </para>
+
+        <para>
+            The parser will generate a &quot;BJsonEventListener&quot; sub-class for parsing a single object as
+            described by the schema.  It will also optionally generate a &quot;BJsonEventListener&quot;
+            that is able to handle a bulk-container structure.  The bulk container expects a structure of the
+            following form and raises events through an &quot;item listener&quot; object.
+        </para>
+
+        <para>
+            <programlisting>{
+ &quot;items&quot;:[
+  { &quot;code&quot;: &quot;Adelaide&quot; },
+  { &quot;code&quot;: &quot;Brisbane&quot; },
+  { &quot;code&quot;: &quot;Melbourne&quot; }
+ ]
+}
+            </programlisting>
+        </para>
+
+        <para>
+            Each of the JSON objects within the &quot;items&quot; should conform to the specified schema.
+        </para>
+
+    </section>
+
+    <section>
         <title>REST API</title>
 
         <para>
@@ -473,6 +527,11 @@ Distributed under the terms of the MIT License.
 
             <para>
                 This API supports the <link linkend="api-ifmodifiedsince">If-Modified-Since</link> header.
+            </para>
+
+            <para>
+                The resultant data transfer objects (DTO) used in this API are available as a json schema
+                within the source.
             </para>
 
             <para>
