@@ -171,7 +171,7 @@ public:
 
     ${cppsuperstackedlistenerclassname}* Parent();
 
-    void WillPop();
+    virtual void WillPop();
 
 protected:
     ${cppsupermainlistenerclassname}* fMainListener;
@@ -238,6 +238,7 @@ ${cppsuperstackedlistenerclassname}::WillPop()
 void
 ${cppsuperstackedlistenerclassname}::Pop()
 {
+    WillPop();
     fMainListener->SetStackedListener(fParent);
 }
 """).substitute(istate.naming().todict()))
@@ -759,7 +760,6 @@ def writebulkcontainerstackedlistenerimplementation(istate, schema):
 
     outfile.write(
         string.Template("""
-        //AAA
 ${cppitemlistenerstackedlistenerclassname}::${cppitemlistenerstackedlistenerclassname}(
     ${cppsupermainlistenerclassname}* mainListener, ${cppsuperstackedlistenerclassname}* parent,
     ${cppitemlistenerclassname}* itemListener)
@@ -913,6 +913,7 @@ def writemainlistenerimplementation(istate, schema, supportbulkcontainer):
         string.Template("""
 ${cppsupermainlistenerclassname}::${cppsupermainlistenerclassname}()
 {
+    fStackedListener = NULL;
     fErrorStatus = B_OK;
 }
 
@@ -942,13 +943,10 @@ ${cppsupermainlistenerclassname}::ErrorStatus()
     return fErrorStatus;
 }
 
-
 void
 ${cppsupermainlistenerclassname}::SetStackedListener(
     ${cppsuperstackedlistenerclassname}* stackedListener)
 {
-    if (fStackedListener != NULL)
-        fStackedListener->WillPop();
     fStackedListener = stackedListener;
 }
 
@@ -1040,8 +1038,8 @@ ${cppbulkcontainermainlistenerclassname}::Handle(const BJsonEvent& event)
         
         case B_JSON_OBJECT_START:
         {
-            ${cppitemlistenerstackedlistenerclassname}* nextListener =
-                new ${cppitemlistenerstackedlistenerclassname}(
+            ${cppbulkcontainerstackedlistenerclassname}* nextListener =
+                new ${cppbulkcontainerstackedlistenerclassname}(
                     this, NULL, fItemListener);
             SetStackedListener(nextListener);
             return true;
@@ -1095,7 +1093,8 @@ public:
     status_t ErrorStatus();
     
 protected:
-    void SetStackedListener(${cppsuperstackedlistenerclassname}* listener);
+    void SetStackedListener(
+        ${cppsuperstackedlistenerclassname}* listener);
     status_t fErrorStatus;
     ${cppsuperstackedlistenerclassname}* fStackedListener;
 };
@@ -1104,9 +1103,8 @@ protected:
 /*! Use this listener when you want to parse some JSON data that contains
     just a single instance of ${cpprootmodelclassname}.
 */
-
-
-class ${cppsinglemainlistenerclassname} : ${cppsupermainlistenerclassname} {
+class ${cppsinglemainlistenerclassname}
+    : public ${cppsupermainlistenerclassname} {
 friend class ${cppsuperstackedlistenerclassname};
 public:
     ${cppsinglemainlistenerclassname}();
@@ -1129,14 +1127,16 @@ private:
 
         if supportbulkcontainer:
             cpphfile.write(
-                string.Template("""
-                
+                string.Template("""    
 /*! Concrete sub-classes of this class are able to respond to each
     ${cpprootmodelclassname}* instance as
     it is parsed from the bulk container.  When the stream is
     finished, the Complete() method is invoked.
-*/ 
-                
+    
+    Note that the item object will be deleted after the Handle method
+    is invoked.  The Handle method need not take responsibility
+    for deleting the item itself.
+*/         
 class ${cppitemlistenerclassname} {
 public:
     virtual void Handle(${cpprootmodelclassname}* item) = 0;
@@ -1154,11 +1154,12 @@ public:
     ${cpprootmodelclassname}
     is parsed, the instance item listener will be invoked.
 */ 
-                
-class ${cppbulkcontainermainlistenerclassname} : ${cppsupermainlistenerclassname} {
+class ${cppbulkcontainermainlistenerclassname}
+    : public ${cppsupermainlistenerclassname} {
 friend class ${cppsuperstackedlistenerclassname};
 public:
-    ${cppbulkcontainermainlistenerclassname}(${cppitemlistenerclassname}* itemListener);
+    ${cppbulkcontainermainlistenerclassname}(
+        ${cppitemlistenerclassname}* itemListener);
     ~${cppbulkcontainermainlistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
