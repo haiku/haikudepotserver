@@ -926,7 +926,7 @@ ${cppsupermainlistenerclassname}::~${cppsupermainlistenerclassname}()
 void
 ${cppsupermainlistenerclassname}::HandleError(status_t status, int32 line, const char* message)
 {
-    fprintf(stderr, "an error has arisen processing json for '${cpprootmodelclassname}'; %s", message);
+    fprintf(stderr, "an error has arisen processing json for '${cpprootmodelclassname}'; %s\\n", message);
     fErrorStatus = status;
 }
 
