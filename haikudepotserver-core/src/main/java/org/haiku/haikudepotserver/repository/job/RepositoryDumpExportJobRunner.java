@@ -120,7 +120,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
     private ArchiveInfo createArchiveInfo(List<Repository> repositories) {
         Date modifyTimestamp = repositories
                 .stream()
-                .sorted(Comparator.comparing(Repository::getModifyTimestamp))
+                .sorted(Comparator.comparing(Repository::getModifyTimestamp).reversed())
                 .findFirst()
                 .map(_Repository::getModifyTimestamp)
                 .orElse(new Date(0));
