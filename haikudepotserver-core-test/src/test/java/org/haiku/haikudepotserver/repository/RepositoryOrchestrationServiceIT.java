@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {
     }
 
     public void testSearchForRepositorySourceSearchUrls_ok() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         setup(context);
 
         RepositorySearchSpecification specification = new RepositorySearchSpecification();
@@ -62,7 +62,7 @@ public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {
 
     @Test
     public void testGetRepositoriesForRepositorySourceSearchUrls_notFound() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         setup(context);
 
         RepositorySearchSpecification specification = new RepositorySearchSpecification();

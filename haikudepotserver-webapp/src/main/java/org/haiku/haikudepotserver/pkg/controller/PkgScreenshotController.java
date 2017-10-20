@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -95,7 +95,7 @@ public class PkgScreenshotController extends AbstractController {
             throw new MissingOrBadFormat();
         }
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         PkgScreenshot screenshot = PkgScreenshot.tryGetByCode(context, screenshotCode).orElseThrow(ScreenshotNotFound::new);
 
         response.setContentType(MediaType.PNG.toString());
@@ -175,7 +175,7 @@ public class PkgScreenshotController extends AbstractController {
             throw new MissingScreenshotCode();
         }
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         PkgScreenshot screenshot = PkgScreenshot.tryGetByCode(context, screenshotCode).orElseThrow(ScreenshotNotFound::new);
         byte[] data = screenshot.tryGetPkgScreenshotImage().get().getData();
         org.haiku.haikudepotserver.dataobjects.MediaType mediaType = screenshot.tryGetPkgScreenshotImage().get().getMediaType();
@@ -223,7 +223,7 @@ public class PkgScreenshotController extends AbstractController {
             throw new MissingOrBadFormat();
         }
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Pkg pkg = Pkg.tryGetByName(context, pkgName).orElseThrow(PkgNotFound::new);
 
         // check the authorization

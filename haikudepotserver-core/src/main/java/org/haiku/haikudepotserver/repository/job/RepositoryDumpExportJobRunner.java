@@ -66,7 +66,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                 final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(gzipOutputStream)
                 ) {
 
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             List<Repository> repositories = Repository.getAll(context)
                     .stream()
                     .filter(_Repository::getActive)

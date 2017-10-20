@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -87,7 +87,7 @@ public class PkgDownloadController {
 
         Preconditions.checkArgument(null!=response, "the response is required");
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         Pkg pkg = Pkg.tryGetByName(context, pkgName).orElseThrow(() -> {
             LOGGER.info("unable to find the package; {}", pkgName);

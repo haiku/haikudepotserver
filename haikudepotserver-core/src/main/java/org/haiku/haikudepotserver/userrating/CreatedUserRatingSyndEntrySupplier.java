@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -136,7 +136,7 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
 
             query.setFetchLimit(specification.getLimit());
 
-            List<UserRating> userRatings = serverRuntime.getContext().performQuery(query);
+            List<UserRating> userRatings = serverRuntime.newContext().performQuery(query);
 
             return userRatings
                     .stream()

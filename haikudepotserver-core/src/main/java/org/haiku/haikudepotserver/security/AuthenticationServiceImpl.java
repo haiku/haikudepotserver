@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -113,7 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if(!Strings.isNullOrEmpty(nickname) && !Strings.isNullOrEmpty(passwordClear)) {
 
-            ObjectContext objectContext = serverRuntime.getContext();
+            ObjectContext objectContext = serverRuntime.newContext();
 
             Optional<User> userOptional = User.getByNickname(objectContext, nickname);
 
@@ -267,7 +267,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 else {
 
                     String nickname = subject.substring(0,subject.length() - SUFFIX_JSONWEBTOKEN_SUBJECT.length());
-                    ObjectContext context = serverRuntime.getContext();
+                    ObjectContext context = serverRuntime.newContext();
                     Optional<User> userOptional = User.getByNickname(context, nickname);
 
                     if (userOptional.isPresent()) {

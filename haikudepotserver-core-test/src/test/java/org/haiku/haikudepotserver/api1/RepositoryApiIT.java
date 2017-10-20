@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -62,7 +62,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         repositoryApi.updateRepository(request);
         // ------------------------------------
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Repository repository = (Repository) context.performQuery(new SelectQuery(
                 Repository.class,
                 ExpressionFactory.matchExp(Repository.CODE_PROPERTY, data.repository.getCode())
@@ -97,7 +97,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     public void setupSourceBasedUrlTest() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         integrationTestSupportService.createStandardTestData();
 
@@ -178,7 +178,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         repositoryApi.createRepository(request);
         // ------------------------------------
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<Repository> repositoryAfterOptional = Repository.getByCode(context,"differentrepo");
         Assertions.assertThat(repositoryAfterOptional.get().getActive()).isTrue();
         Assertions.assertThat(repositoryAfterOptional.get().getCode()).isEqualTo("differentrepo");
@@ -245,7 +245,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             RepositorySource repositorySourceAfter = RepositorySource.getByCode(context, "testreposrc_xyz").get();
             Assertions.assertThat(repositorySourceAfter.getUrl()).isEqualTo("http://test-example2.haiku-os.org");
             Assertions.assertThat(repositorySourceAfter.getActive()).isFalse();
@@ -268,7 +268,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, "testreposrcxx_xyz");
             Assertions.assertThat(repositorySourceOptional.get().getActive()).isTrue();
             Assertions.assertThat(repositorySourceOptional.get().getUrl()).isEqualTo("http://testtest.haiku-os.org");

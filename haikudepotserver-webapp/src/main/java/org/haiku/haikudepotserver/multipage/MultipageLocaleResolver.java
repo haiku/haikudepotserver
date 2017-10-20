@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,7 @@ public class MultipageLocaleResolver implements org.springframework.web.servlet.
 
     @Override
     public Locale resolveLocale(HttpServletRequest request) {
-        return NaturalLanguageWebHelper.deriveNaturalLanguage(serverRuntime.getContext(), request).toLocale();
+        return NaturalLanguageWebHelper.deriveNaturalLanguage(serverRuntime.newContext(), request).toLocale();
     }
 
     @Override

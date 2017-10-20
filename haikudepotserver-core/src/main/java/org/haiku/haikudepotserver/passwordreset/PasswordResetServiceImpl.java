@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -97,7 +97,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         Preconditions.checkArgument(null != user, "the user must be provided");
         Preconditions.checkState(!Strings.isNullOrEmpty(user.getEmail()), "the user must have an email configured");
 
-        ObjectContext contextLocal = serverRuntime.getContext();
+        ObjectContext contextLocal = serverRuntime.newContext();
         User userLocal = User.getByObjectId(contextLocal, user.getObjectId());
 
         UserPasswordResetToken userPasswordResetToken = contextLocal.newObject(UserPasswordResetToken.class);
@@ -130,7 +130,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "the email must be provided");
         Preconditions.checkArgument(-1 != email.indexOf('@'), "the email is malformed"); // very basic sanity check
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         List<User> users = User.findByEmail(context, email);
 
@@ -169,7 +169,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         try {
             if (!Strings.isNullOrEmpty(tokenCode)) {
 
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 Optional<UserPasswordResetToken> tokenOptional = UserPasswordResetToken.getByCode(context, tokenCode);
 
                 if (tokenOptional.isPresent()) {
@@ -206,7 +206,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                         // open a new context so that just in case something goes wrong / invalid in the other context,
                         // that the deletion of the token can still proceed.
 
-                        ObjectContext deleteContext = serverRuntime.getContext();
+                        ObjectContext deleteContext = serverRuntime.newContext();
                         Optional<UserPasswordResetToken> deleteTokenOptional = UserPasswordResetToken.getByCode(deleteContext, tokenCode);
 
                         if (deleteTokenOptional.isPresent()) {
@@ -232,7 +232,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     public void deleteExpiredPasswordResetTokens() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Instant now = Instant.now();
 
         SelectQuery query = new SelectQuery(

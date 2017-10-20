@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -122,7 +122,7 @@ public class LoggingFilter implements Filter {
             Optional<ObjectId> authenticatedUserOidOptional = AuthenticationHelper.getAuthenticatedUserObjectId();
 
             if (authenticatedUserOidOptional.isPresent()) {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 User user = User.getByObjectId(context, authenticatedUserOidOptional.get());
                 MDC.put(KEY_AUTHENTICATEDUSERNICKNAME, user.getNickname());
             }

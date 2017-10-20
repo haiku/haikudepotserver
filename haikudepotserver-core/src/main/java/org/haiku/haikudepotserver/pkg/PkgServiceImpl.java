@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -227,7 +227,8 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
 
-        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver().getQuery("SearchPkgVersions");
+        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
+                .getQueryDescriptor("SearchPkgVersions").buildQuery();
         Query query = sqlTemplate.createQuery(ImmutableMap.of(
                 "search", search,
                 "isTotal", false,
@@ -246,7 +247,9 @@ public class PkgServiceImpl implements PkgService {
             ObjectContext context,
             PkgSearchSpecification search) {
 
-        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver().getQuery("SearchPkgVersions");
+        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
+                .getQueryDescriptor("SearchPkgVersions").buildQuery();
+
         SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
                 "search", search,
                 "isTotal", true,
@@ -647,7 +650,7 @@ public class PkgServiceImpl implements PkgService {
         int attempts = 3;
 
         while(true) {
-            ObjectContext contextEdit = serverRuntime.getContext();
+            ObjectContext contextEdit = serverRuntime.newContext();
             PkgVersion pkgVersionEdit = ((List<PkgVersion>) contextEdit.performQuery(new ObjectIdQuery(pkgVersionOid)))
                     .stream()
                     .collect(SingleCollector.single());

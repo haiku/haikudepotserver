@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -87,7 +87,7 @@ public class PkgSearchController {
         Preconditions.checkArgument(null!=response);
         Preconditions.checkArgument(null!=request);
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         OpenSearchDescription model = new OpenSearchDescription();
         NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, request);
 
@@ -134,7 +134,7 @@ public class PkgSearchController {
         Optional<PkgVersion> pkgVersionOptional = Optional.empty();
 
         if(!Strings.isNullOrEmpty(query) && Pkg.PATTERN_NAME.matcher(query).matches()) {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, query);
 
             if(pkgOptional.isPresent()) {

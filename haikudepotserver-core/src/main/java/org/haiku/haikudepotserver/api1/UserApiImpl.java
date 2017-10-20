@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Andrew Lindesay
+ * Copyright 2013-2017 Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -71,7 +71,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     public SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest) {
        Preconditions.checkNotNull(synchronizeUsersRequest);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         if(!authorizationService.check(
                 context,
@@ -95,7 +95,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(updateUserRequest.nickname));
         Preconditions.checkNotNull(updateUserRequest.filter);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
         boolean activeDidChange = false;
 
@@ -203,7 +203,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             );
         }
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         //need to check that the nickname is not already in use.
 
@@ -232,7 +232,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkNotNull(getUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getUserRequest.nickname));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
 
         User user = User.getByNickname(context, getUserRequest.nickname)
@@ -282,7 +282,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             Uninterruptibles.sleepUninterruptibly(5,TimeUnit.SECONDS);
         }
         else {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             User user = User.getByObjectId(context, userOidOptional.get());
             authenticateUserResult.token = authenticationService.generateToken(user);
         }
@@ -299,7 +299,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Optional<ObjectId> userOidOptional = authenticationService.authenticateByToken(renewTokenRequest.token);
 
         if(userOidOptional.isPresent()) {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             User user = User.getByObjectId(context, userOidOptional.get());
             result.token = authenticationService.generateToken(user);
             LOGGER.debug("did renew token for user; {}", user.toString());
@@ -323,7 +323,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         // get the logged in and target user.
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         User authUser = obtainAuthenticatedUser(context);
 
@@ -388,7 +388,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     public SearchUsersResult searchUsers(SearchUsersRequest searchUsersRequest) {
         Preconditions.checkNotNull(searchUsersRequest);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         if(!authorizationService.check(
                 context,

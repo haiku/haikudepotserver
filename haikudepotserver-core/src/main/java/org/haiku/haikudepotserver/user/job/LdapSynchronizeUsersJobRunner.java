@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -42,8 +42,8 @@ public class LdapSynchronizeUsersJobRunner
         Preconditions.checkNotNull(job);
 
         try {
-            ldapSynchronizationService.ldapSynchronizeAllUsers(serverRuntime.getContext());
-            ldapSynchronizationService.ldapRemoveNonExistentUsers(serverRuntime.getContext());
+            ldapSynchronizationService.ldapSynchronizeAllUsers(serverRuntime.newContext());
+            ldapSynchronizationService.ldapRemoveNonExistentUsers(serverRuntime.newContext());
         }
         catch(LdapException le) {
             LOGGER.error("unable to ldap synchronize users", le);

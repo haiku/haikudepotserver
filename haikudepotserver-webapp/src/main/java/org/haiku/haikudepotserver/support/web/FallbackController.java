@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -80,7 +80,7 @@ public class FallbackController {
     }
 
     private void redirectToPkg(HttpServletResponse response, String term) throws IOException {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         Optional<PkgVersion> pkgVersionOptional = tryGetPkgVersion(context, term);
 

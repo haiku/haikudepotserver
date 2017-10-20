@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -142,7 +142,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new IllegalStateException("a package is not able to be configured with more than " + PKGPKGCATEGORIES_MAX + " categories");
         }
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Pkg pkg = getPkg(context, updatePkgCategoriesRequest.pkgName);
 
@@ -192,7 +192,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             request.sortOrdering = SearchPkgsRequest.SortOrdering.NAME;
         }
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         final NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
         PkgSearchSpecification specification = new PkgSearchSpecification();
@@ -376,7 +376,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         || !Strings.isNullOrEmpty(request.repositoryCode),
                 "the repository code should be supplied of the version request is not ALL or NONE");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<Architecture> architectureOptional = Optional.empty();
 
@@ -536,7 +536,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied to get the package's icons");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, request.pkgName);
 
         GetPkgIconsResult result = new GetPkgIconsResult();
@@ -553,7 +553,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, request.pkgName);
 
         User user = obtainAuthenticatedUser(context);
@@ -659,7 +659,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, request.pkgName);
 
         User user = obtainAuthenticatedUser(context);
@@ -683,7 +683,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(request.code);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.tryGetByCode(context, request.code);
 
         if(!pkgScreenshotOptional.isPresent()) {
@@ -713,7 +713,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(getPkgScreenshotsRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgScreenshotsRequest.pkgName));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         final Pkg pkg = getPkg(context, getPkgScreenshotsRequest.pkgName);
 
         GetPkgScreenshotsResult result = new GetPkgScreenshotsResult();
@@ -730,7 +730,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(removePkgScreenshotRequest);
         Preconditions.checkNotNull(removePkgScreenshotRequest.code);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, removePkgScreenshotRequest.code);
 
         if(!screenshotOptional.isPresent()) {
@@ -758,7 +758,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(reorderPkgScreenshotsRequest.pkgName);
         Preconditions.checkNotNull(reorderPkgScreenshotsRequest.codes);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, reorderPkgScreenshotsRequest.pkgName);
 
         User authUser = obtainAuthenticatedUser(context);
@@ -781,7 +781,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(null != updatePkgLocalizationRequest);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(updatePkgLocalizationRequest.pkgName), "the package name must be supplied");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, updatePkgLocalizationRequest.pkgName);
 
         User authUser = obtainAuthenticatedUser(context);
@@ -820,7 +820,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgLocalizationsRequest.pkgName), "a package name is required");
         Preconditions.checkArgument(null != getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, getPkgLocalizationsRequest.pkgName);
 
         GetPkgLocalizationsResult result = new GetPkgLocalizationsResult();
@@ -849,7 +849,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(getPkgVersionLocalizationsRequest.naturalLanguageCodes);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.repositoryCode), "the repository code must be supplied");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, getPkgVersionLocalizationsRequest.pkgName);
         Architecture architecture = getArchitecture(context, getPkgVersionLocalizationsRequest.architectureCode);
         Repository repository = getRepository(context, getPkgVersionLocalizationsRequest.repositoryCode);
@@ -1019,7 +1019,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new LimitExceededException();
         }
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         final GetBulkPkgResult result = new GetBulkPkgResult();
 
         result.pkgs = Collections.emptyList();
@@ -1086,7 +1086,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(null != request.prominenceOrdering, "the presence ordering must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code is required when updating a package prominence");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, request.pkgName);
         Repository repository = getRepository(context, request.repositoryCode);
 
@@ -1121,7 +1121,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(null!=request, "a request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<PkgChangelog> pkgChangelogOptional = getPkg(context, request.pkgName).getPkgChangelog();
         GetPkgChangelogResult result = new GetPkgChangelogResult();
 
@@ -1137,7 +1137,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(null!=request, "a request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
         Pkg pkg = getPkg(context, request.pkgName);
 
@@ -1165,7 +1165,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.architectureCode), "the architecture code must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.major), "the version major must be supplied");
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
         Pkg pkg = getPkg(context, request.pkgName);
 

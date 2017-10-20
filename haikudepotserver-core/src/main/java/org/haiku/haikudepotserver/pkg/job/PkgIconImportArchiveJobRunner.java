@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,9 +8,7 @@ package org.haiku.haikudepotserver.pkg.job;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import org.apache.cayenne.CayenneException;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -34,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -105,54 +102,45 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
-        // start a cayenne long-running txn
-        Transaction transaction = serverRuntime.getDataDomain().createTransaction();
-        Transaction.bindThreadTransaction(transaction);
-
-        try (
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')) {
-
-            String[] headings = new String[]{"path", "action", "message"};
-            writer.writeNext(headings);
-
-            // make a first sweep to delete all existing icons for packages in the spreadsheet.
+        if(!serverRuntime.performInTransaction(() -> {
 
             try (
-                    InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
-                    GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-                    TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
-            ) {
-                clearPackagesIconsAppearingInArchive(tarArchiveInputStream, writer);
-            }
+                    OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                    CSVWriter writer = new CSVWriter(outputStreamWriter, ',')) {
 
-            // now load the icons in.
+                String[] headings = new String[]{"path", "action", "message"};
+                writer.writeNext(headings);
 
-            try (
-                    InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
-                    GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-                    TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
-            ) {
-                processEntriesFromArchive(tarArchiveInputStream, writer);
-            }
+                // make a first sweep to delete all existing icons for packages in the spreadsheet.
 
-            transaction.commit();
-        } catch (SQLException | CayenneException e) {
-            throw new JobRunnerException("unable to complete job; ", e);
-        } finally {
-            Transaction.bindThreadTransaction(null);
-
-            if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
-                try {
-                    transaction.rollback();
-                } catch (Exception e) {
-                    // ignore
+                try (
+                        InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
+                        GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+                        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
+                ) {
+                    clearPackagesIconsAppearingInArchive(tarArchiveInputStream, writer);
                 }
+
+                // now load the icons in.
+
+                try (
+                        InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
+                        GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+                        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
+                ) {
+                    processEntriesFromArchive(tarArchiveInputStream, writer);
+                }
+
+                return true;
+            } catch (IOException e) {
+                LOGGER.error("unable to complete job; ", e);
             }
 
+            return false;
+        })) {
+            throw new JobRunnerException("unable to complete job");
         }
-
     }
 
     /**
@@ -173,7 +161,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
                 if(!pkgNamesProcessed.contains(pkgName)) {
                     row[CSV_COLUMN_PKGNAME] = archiveEntry.getName();
-                    ObjectContext context = serverRuntime.getContext();
+                    ObjectContext context = serverRuntime.newContext();
                     Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
                     if (pkgOptional.isPresent()) {
@@ -239,7 +227,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             String pkgName, String leafnameExtension)
             throws IOException {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
         if(pkgOptional.isPresent()) {

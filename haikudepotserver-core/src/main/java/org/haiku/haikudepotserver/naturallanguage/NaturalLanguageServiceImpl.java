@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -131,7 +131,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
     private Set<String> getNaturalLanguageCodesWithLocalizationMessages() {
 
         if(null == naturalLanguageCodesWithLocalizationMessages) {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
 
             naturalLanguageCodesWithLocalizationMessages =
                     NaturalLanguage.getAll(context)
@@ -147,7 +147,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
     }
 
     private Map<String, Boolean> assembleNaturalLanguageCodeUseMap(Query codeQuery) {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Map<String, Boolean> result = Maps.newConcurrentMap();
         List<String> usedCodes = context.performQuery(codeQuery);
 

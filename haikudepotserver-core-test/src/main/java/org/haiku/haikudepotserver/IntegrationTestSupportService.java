@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,7 +55,7 @@ public class IntegrationTestSupportService {
 
     private ObjectContext getObjectContext() {
         if(null==objectContext) {
-            objectContext = serverRuntime.getContext();
+            objectContext = serverRuntime.newContext();
         }
 
         return objectContext;
@@ -336,7 +336,7 @@ public class IntegrationTestSupportService {
 
     public void createUserRatings() {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Pkg pkg = Pkg.tryGetByName(context, "pkg3").get();
         Architecture x86_64 = Architecture.getByCode(context, "x86_64").get();
         PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(

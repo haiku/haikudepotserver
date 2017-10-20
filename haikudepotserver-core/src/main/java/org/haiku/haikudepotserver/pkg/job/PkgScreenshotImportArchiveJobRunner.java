@@ -14,9 +14,7 @@ import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.MediaType;
-import org.apache.cayenne.CayenneException;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -29,14 +27,15 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
+import org.haiku.haikudepotserver.pkg.model.PkgScreenshotImportArchiveJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.*;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -100,73 +99,62 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
-        // start a cayenne long-running txn
-        Transaction transaction = serverRuntime.getDataDomain().createTransaction();
-        Transaction.bindThreadTransaction(transaction);
+        if(!serverRuntime.performInTransaction(() -> {
+            try (
+                    OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                    CSVWriter writer = new CSVWriter(outputStreamWriter, ',')) {
 
-        try (
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')) {
+                Map<String, ScreenshotImportMetadatas> metadatas = new HashMap<>();
 
-            Map<String, ScreenshotImportMetadatas> metadatas = new HashMap<>();
+                writer.writeNext(new String[]{"path", "pkg-name", "action", "message", "code"});
 
-            writer.writeNext(new String[] {"path", "pkg-name", "action", "message", "code"});
+                // sweep through and collect meta-data about the packages in the tar file.
+                LOGGER.info("will collect data about packages' screenshots from the archive", metadatas.size());
+                consumeScreenshotArchiveEntries(
+                        jobDataWithByteSourceOptional.get().getByteSource(),
+                        (ae) -> collectScreenshotMetadataFromArchive(
+                                metadatas,
+                                ae.getArchiveInputStream(),
+                                ae.getArchiveEntry(),
+                                ae.getPkgName(),
+                                ae.getOrder()));
+                LOGGER.info("did collect data about {} packages' screenshots from the archive", metadatas.size());
 
-            // sweep through and collect meta-data about the packages in the tar file.
-            LOGGER.info("will collect data about packages' screenshots from the archive", metadatas.size());
-            consumeScreenshotArchiveEntries(
-                jobDataWithByteSourceOptional.get().getByteSource(),
-                    (ae) -> collectScreenshotMetadataFromArchive(
-                            metadatas,
-                            ae.getArchiveInputStream(),
-                            ae.getArchiveEntry(),
-                            ae.getPkgName(),
-                            ae.getOrder()));
-            LOGGER.info("did collect data about {} packages' screenshots from the archive", metadatas.size());
+                LOGGER.info("will collect data about persisted packages' screenshots");
+                collectPersistedScreenshotMetadata(metadatas);
+                LOGGER.info("did collect data about persisted packages' screenshots");
 
-            LOGGER.info("will collect data about persisted packages' screenshots");
-            collectPersistedScreenshotMetadata(metadatas);
-            LOGGER.info("did collect data about persisted packages' screenshots");
-
-            if (specification.getImportStrategy() == PkgScreenshotImportArchiveJobSpecification.ImportStrategy.REPLACE) {
-                LOGGER.info("will delete persisted screenshots that are absent from the archive");
-                int deleted = deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(writer, metadatas.values());
-                LOGGER.info("did delete {} persisted screenshots that are absent from the archive", deleted);
-            }
-
-            blendInArtificialOrderings(metadatas.values());
-
-            // sweep through the archive again and load in those screenshots that are not already present.
-            // The ordering of the inbound data should be preserved.
-            LOGGER.info("will load screenshots from archive", metadatas.size());
-            consumeScreenshotArchiveEntries(
-                    jobDataWithByteSourceOptional.get().getByteSource(),
-                    (ae) -> importScreenshotsFromArchiveAndReport(
-                            writer,
-                            metadatas.get(ae.getPkgName()),
-                            ae.getArchiveInputStream(),
-                            ae.getArchiveEntry(),
-                            ae.getPkgName(),
-                            ae.getOrder()));
-            LOGGER.info("did load screenshots from archive", metadatas.size());
-
-            transaction.commit();
-        } catch (SQLException | CayenneException e) {
-            throw new JobRunnerException("unable to complete job; ", e);
-        } finally {
-            Transaction.bindThreadTransaction(null);
-
-            if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
-                try {
-                    transaction.rollback();
-                } catch (Exception e) {
-                    // ignore
+                if (specification.getImportStrategy() == PkgScreenshotImportArchiveJobSpecification.ImportStrategy.REPLACE) {
+                    LOGGER.info("will delete persisted screenshots that are absent from the archive");
+                    int deleted = deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(writer, metadatas.values());
+                    LOGGER.info("did delete {} persisted screenshots that are absent from the archive", deleted);
                 }
+
+                blendInArtificialOrderings(metadatas.values());
+
+                // sweep through the archive again and load in those screenshots that are not already present.
+                // The ordering of the inbound data should be preserved.
+                LOGGER.info("will load screenshots from archive", metadatas.size());
+                consumeScreenshotArchiveEntries(
+                        jobDataWithByteSourceOptional.get().getByteSource(),
+                        (ae) -> importScreenshotsFromArchiveAndReport(
+                                writer,
+                                metadatas.get(ae.getPkgName()),
+                                ae.getArchiveInputStream(),
+                                ae.getArchiveEntry(),
+                                ae.getPkgName(),
+                                ae.getOrder()));
+                LOGGER.info("did load screenshots from archive", metadatas.size());
+                return true;
+            } catch (IOException e) {
+                LOGGER.error("unable to complete the job", e);
             }
 
+            return false;
+        })) {
+            throw new JobRunnerException("unable to complete job");
         }
-
     }
 
 
@@ -235,7 +223,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                 .anyMatch((as) -> as.getDataHash().equals(existingScreenshot.getDataHash()));
 
         if(!fromArchiveScreenshotMatches) {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             PkgScreenshot pkgScreenshot = PkgScreenshot.getByCode(context, existingScreenshot.getCode());
             String[] row = new String[] {
                     "",
@@ -270,7 +258,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
         if (null == metadatas) {
             metadatas = new ScreenshotImportMetadatas();
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
             if (!pkgOptional.isPresent()) {
@@ -304,7 +292,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
     private void collectPersistedScreenshotMetadata(Map<String, ScreenshotImportMetadatas> data) {
         data.entrySet().forEach((e) -> {
             if (!e.getValue().isNotFound()) {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 Pkg pkg = Pkg.getByName(context, e.getKey());
                 pkg.getPkgScreenshots().forEach((ps) -> e.getValue().add(createPersistedScreenshotMetadata(ps)));
             }
@@ -384,7 +372,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                 row[CSV_COLUMN_ACTION] = Action.PRESENT.name();
                 row[CSV_COLUMN_CODE] = existingScreenshotMetadata.get().getCode();
             } else {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
 
                 try {
                     PkgScreenshot screenshot = pkgScreenshotService.storePkgScreenshotImage(
@@ -411,7 +399,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
 
     private HashCode generateHashCode(String pkgScreenshotCode) {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         PkgScreenshot pkgScreenshot = PkgScreenshot.getByCode(context, pkgScreenshotCode);
         PkgScreenshotImage pkgScreenshotImage = pkgScreenshot.getPkgScreenshotImage();
         return HASH_FUNCTION.hashBytes(pkgScreenshotImage.getData());

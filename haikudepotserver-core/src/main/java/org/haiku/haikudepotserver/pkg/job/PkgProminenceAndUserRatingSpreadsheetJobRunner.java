@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -54,7 +54,7 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
         Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(

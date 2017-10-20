@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,14 +55,14 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
         // check that there are no icons stored for pkg2.
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Assert.assertEquals(Pkg.tryGetByName(context, "pkg2").get().getPkgIcons().size(), 0);
         }
 
         // load in an icon for pkg2 in order to check that the removal phase does happen.
 
         try (InputStream iconInputStream = Resources.asByteSource(Resources.getResource("sample-16x16-2.png")).openStream()) {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             pkgIconService.storePkgIconImage(
                     iconInputStream,
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(context,
@@ -93,7 +93,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
         // check that the pkg2 is now loaded-up with icons from the tar-ball.
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Pkg pkg2 = Pkg.tryGetByName(context, "pkg2").get();
 
             Assert.assertEquals(Pkg.tryGetByName(context, "pkg2").get().getPkgIcons().size(), 2);

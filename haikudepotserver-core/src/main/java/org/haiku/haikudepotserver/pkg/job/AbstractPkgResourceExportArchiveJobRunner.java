@@ -54,7 +54,7 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
         Preconditions.checkArgument(null != specification);
 
         Stopwatch stopwatch = Stopwatch.createStarted();
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         int offset = 0;
 
         // this will register the outbound data against the job.

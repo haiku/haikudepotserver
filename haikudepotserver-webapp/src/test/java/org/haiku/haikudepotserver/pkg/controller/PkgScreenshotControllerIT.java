@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,7 +63,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         String code = response.getHeader(PkgScreenshotController.HEADER_SCREENSHOTCODE);
         Assertions.assertThat(code).isNotEmpty();
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, code);
         Assertions.assertThat(screenshotOptional.isPresent()).isTrue();
         Assertions.assertThat(screenshotOptional.get().getPkg().getName()).isEqualTo("pkg1");

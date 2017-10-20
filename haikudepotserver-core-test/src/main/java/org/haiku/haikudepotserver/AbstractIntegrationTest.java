@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -210,7 +210,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void setAuthenticatedUser(String nickname) {
-        ObjectContext objectContext = serverRuntime.getContext();
+        ObjectContext objectContext = serverRuntime.newContext();
         Optional<User> rootUser = User.getByNickname(objectContext, nickname);
         AuthenticationHelper.setAuthenticatedUserObjectId(Optional.of(rootUser.get().getObjectId()));
     }

@@ -74,10 +74,10 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
             JsonNode dataModifiedTimestampNode = rootNode.at("/info/dataModifiedTimestamp");
             Assert.assertTrue(dataModifiedTimestampNode.asLong() >= now);
 
-            JsonNode repositoryCode = rootNode.at("/repositories/0/code");
+            JsonNode repositoryCode = rootNode.at("/items/0/code");
             Assert.assertThat(repositoryCode.asText(), CoreMatchers.is("testrepo"));
 
-            JsonNode repositorySourceCode = rootNode.at("/repositories/0/repositorySources/0/code");
+            JsonNode repositorySourceCode = rootNode.at("/items/0/repositorySources/0/code");
             Assert.assertThat(repositorySourceCode.asText(), CoreMatchers.is("testreposrc_xyz"));
         }
 

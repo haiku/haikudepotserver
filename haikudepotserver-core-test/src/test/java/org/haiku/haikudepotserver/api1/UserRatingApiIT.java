@@ -1,5 +1,5 @@
 /*
-* Copyright 2014-2016, Andrew Lindesay
+* Copyright 2014-2017, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -36,7 +36,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     PkgService pkgService;
 
     private String createTestUserAndSampleUserRating() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "password");
 
         UserRating userRating = context.newObject(UserRating.class);
@@ -96,7 +96,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<UserRating> userRatingOptional = UserRating.getByCode(context, userRatingCode);
             Assertions.assertThat(userRatingOptional.get().getActive()).isFalse();
             Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 1);
@@ -149,7 +149,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context, "testuser", "password");
         }
 
@@ -171,7 +171,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<UserRating> userRatingOptional = UserRating.getByCode(context, code);
 
             Assertions.assertThat(userRatingOptional.isPresent()).isTrue();

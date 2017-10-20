@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     public void testUpdateUser() throws Exception {
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
             setAuthenticatedUser("testuser");
         }
@@ -61,7 +61,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<User> user = User.getByNickname(context, "testuser");
             Assertions.assertThat(user.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
         }
@@ -83,7 +83,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         CreateUserResult result = userApi.createUser(request);
         // ------------------------------------
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<User> userOptional = User.getByNickname(context, "testuser");
 
         Assertions.assertThat(userOptional.isPresent()).isTrue();
@@ -98,7 +98,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     @Test
     public void testGetUser_found() throws ObjectNotFoundException {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
         setAuthenticatedUser("testuser");
 
@@ -114,7 +114,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     @Test
     public void testAuthenticateUser_succcess() {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
@@ -130,7 +130,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     @Test
     public void testAuthenticateUser_fail() {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
@@ -148,7 +148,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         ObjectId userOid;
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
             userOid = user.getObjectId();
             token = authenticationService.generateToken(user);
@@ -172,7 +172,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     public void testChangePassword() throws ObjectNotFoundException {
 
         Captcha captcha = captchaService.generate();
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
@@ -203,7 +203,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context, "onehunga", "U7vqpsu6BB");
             integrationTestSupportService.createBasicUser(context, "mangere", "U7vqpsu6BB");
             integrationTestSupportService.createBasicUser(context, "avondale", "U7vqpsu6BB");
@@ -238,14 +238,14 @@ public class UserApiIT extends AbstractIntegrationTest {
     }
 
     private void createPasswordResetTestUser() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
         user.setEmail("integration-test-recipient@haiku-os.org");
         context.commitChanges();
     }
 
     private String getOnlyPasswordResetTokenCodeForTestUser() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         List<UserPasswordResetToken> tokens = UserPasswordResetToken.findByUser(
                 context,
                 User.getByNickname(context, "testuser").get());
@@ -280,7 +280,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             User user = User.getByNickname(context, "testuser").get();
 
             // check for the presence of a token.
@@ -333,7 +333,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "kQ83hWi3oWnYY21k").isPresent()).isTrue();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<UserPasswordResetToken> token = UserPasswordResetToken.getByCode(context, request.token);
             Assertions.assertThat(token.isPresent()).isFalse();
         }

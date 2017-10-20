@@ -210,7 +210,7 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
     }
 
     private void assertScreenshotHashes(String[] expectedSha1Sums) {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Pkg pkg1 = Pkg.getByName(context, "pkg1");
 
         Assert.assertThat(pkg1.getPkgScreenshots().size(), CoreMatchers.is(expectedSha1Sums.length));

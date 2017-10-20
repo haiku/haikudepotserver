@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -58,7 +58,7 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
                 Response.class.getSimpleName()));
 
         q.setParameter("expiryTimestamp", new Timestamp(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(expirySeconds)));
-        getServerRuntime().getContext().performQuery(q);
+        getServerRuntime().newContext().performQuery(q);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
         Preconditions.checkState(!Strings.isNullOrEmpty(token));
         Preconditions.checkNotNull(serverRuntime);
 
-        ObjectContext objectContext = serverRuntime.getContext();
+        ObjectContext objectContext = serverRuntime.newContext();
 
         Optional<Response> responseOptional = Response.getByToken(objectContext, token);
 
@@ -85,7 +85,7 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
         Preconditions.checkState(!Strings.isNullOrEmpty(token));
         Preconditions.checkNotNull(serverRuntime);
 
-        ObjectContext objectContext = serverRuntime.getContext();
+        ObjectContext objectContext = serverRuntime.newContext();
 
         Optional<Response> responseOptional = Response.getByToken(objectContext, token);
 
@@ -104,7 +104,7 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
         Preconditions.checkState(!Strings.isNullOrEmpty(response));
         Preconditions.checkNotNull(serverRuntime);
 
-        ObjectContext objectContext = serverRuntime.getContext();
+        ObjectContext objectContext = serverRuntime.newContext();
 
         Response r = objectContext.newObject(Response.class);
 

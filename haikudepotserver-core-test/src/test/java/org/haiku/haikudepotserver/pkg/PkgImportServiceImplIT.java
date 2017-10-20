@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -76,7 +76,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
         {
             integrationTestSupportService.createStandardTestData();
 
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
             respositorySourceObjectId = repositorySource.getObjectId();
         }
@@ -87,7 +87,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             Pkg importPkg = createPkg("2");
 
             {
-                ObjectContext importObjectContext = serverRuntime.getContext();
+                ObjectContext importObjectContext = serverRuntime.newContext();
                 pkgImportService.importFrom(importObjectContext, respositorySourceObjectId, importPkg, false);
                 importObjectContext.commitChanges();
             }
@@ -95,7 +95,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             // now add some localization to the imported package.
 
             {
-                ObjectContext setupObjectContext = serverRuntime.getContext();
+                ObjectContext setupObjectContext = serverRuntime.newContext();
                 org.haiku.haikudepotserver.dataobjects.Pkg persistedPkg =
                         org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(setupObjectContext, importPkg.getName()).get();
                 setupObjectContext.commitChanges();
@@ -129,7 +129,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         // ---------------------------------
         {
-            ObjectContext importObjectContext = serverRuntime.getContext();
+            ObjectContext importObjectContext = serverRuntime.newContext();
             pkgImportService.importFrom(importObjectContext, respositorySourceObjectId, importDevelPkg, false);
             importObjectContext.commitChanges();
         }
@@ -138,7 +138,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
         // check it has the icon and the localization.
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
 
             org.haiku.haikudepotserver.dataobjects.Pkg persistedDevelPkg =
                     org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, importDevelPkg.getName()).get();
@@ -175,7 +175,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             // setup a test repository
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
                 repositoryDirectory = new File(repositorySource.getPackagesBaseURL().getPath());
 
@@ -193,7 +193,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             // now load the next package version in
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
 
                 // ---------------------------------
@@ -212,7 +212,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             // check the length on that package is there and is correct.
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "testpkg").get();
                 org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context,
@@ -245,7 +245,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
         int highestMinor= 6;
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg = context.newObject(
                     org.haiku.haikudepotserver.dataobjects.Pkg.class);
             pkg.setName("pkgx");
@@ -274,7 +274,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
         inputPackage.setVersion(new PkgVersion("1", "4", null, null, null)); // <-- version in middle of pkg versions
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             ObjectId repositorySourceObjectId = RepositorySource.getByCode(context, "testreposrc_xyz")
                     .orElseThrow(IllegalStateException::new).getObjectId();
 
@@ -294,7 +294,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
         // now check to see that the right outcomes have been achieved.
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.getForPkg(
                     context,
                     org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkgx")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,7 +55,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     @Override
     public GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest) {
         Preconditions.checkNotNull(getAllPkgCategoriesRequest);
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllPkgCategoriesRequest.naturalLanguageCode)
@@ -84,7 +84,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     @Override
     public GetAllNaturalLanguagesResult getAllNaturalLanguages(GetAllNaturalLanguagesRequest getAllNaturalLanguagesRequest) {
         Preconditions.checkNotNull(getAllNaturalLanguagesRequest);
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllNaturalLanguagesRequest.naturalLanguageCode)
@@ -121,7 +121,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     @Override
     public RaiseExceptionResult raiseException(RaiseExceptionRequest raiseExceptionRequest) {
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Optional<User> authUserOptional = tryObtainAuthenticatedUser(context);
 
         if(authUserOptional.isPresent() && authUserOptional.get().getIsRoot()) {
@@ -136,7 +136,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     @Override
     public GetRuntimeInformationResult getRuntimeInformation(GetRuntimeInformationRequest getRuntimeInformationRequest) {
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         Optional<User> authUserOptional = tryObtainAuthenticatedUser(context);
 
         GetRuntimeInformationResult result = new GetRuntimeInformationResult();
@@ -157,7 +157,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllArchitecturesRequest);
         GetAllArchitecturesResult result = new GetAllArchitecturesResult();
         result.architectures =
-                Architecture.getAll(serverRuntime.getContext())
+                Architecture.getAll(serverRuntime.newContext())
                         .stream()
                         .filter(a -> !a.getCode().equals(Architecture.CODE_SOURCE) && !a.getCode().equals(Architecture.CODE_ANY))
                         .map(a -> new GetAllArchitecturesResult.Architecture(a.getCode()))
@@ -171,7 +171,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllMessagesRequest);
         Preconditions.checkNotNull(getAllMessagesRequest.naturalLanguageCode);
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, getAllMessagesRequest.naturalLanguageCode);
 
@@ -195,7 +195,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     @Override
     public GetAllUserRatingStabilitiesResult getAllUserRatingStabilities(GetAllUserRatingStabilitiesRequest getAllUserRatingStabilitiesRequest) {
         Preconditions.checkNotNull(getAllUserRatingStabilitiesRequest);
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllUserRatingStabilitiesRequest.naturalLanguageCode)
@@ -226,7 +226,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     @Override
     public GetAllProminencesResult getAllProminences(GetAllProminencesRequest request) {
         Preconditions.checkNotNull(request);
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         return new GetAllProminencesResult(
                 Prominence.getAll(context)
@@ -240,7 +240,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     public GenerateFeedUrlResult generateFeedUrl(final GenerateFeedUrlRequest request) throws ObjectNotFoundException {
         Preconditions.checkNotNull(request);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         FeedSpecification specification = new FeedSpecification();
         specification.setFeedType(FeedSpecification.FeedType.ATOM);
         specification.setLimit(request.limit);

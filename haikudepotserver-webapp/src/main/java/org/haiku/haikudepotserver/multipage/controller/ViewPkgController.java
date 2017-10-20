@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -92,7 +92,7 @@ public class ViewPkgController {
 
         Integer revision = null==revisionStr ? null : Integer.parseInt(revisionStr);
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
         if(!pkgOptional.isPresent()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -47,7 +47,7 @@ public class PkgVersionPayloadLengthPopulationJobRunner
         Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         // we want to fetch the ObjectIds of PkgVersions that need to be handled.
 

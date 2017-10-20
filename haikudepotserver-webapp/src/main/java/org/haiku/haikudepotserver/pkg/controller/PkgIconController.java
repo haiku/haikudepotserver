@@ -90,7 +90,7 @@ public class PkgIconController extends AbstractController {
                 response,
                 jobService,
                 ifModifiedSinceHeader,
-                pkgIconService.getLastPkgIconModifyTimestampSecondAccuracy(serverRuntime.getContext()),
+                pkgIconService.getLastPkgIconModifyTimestampSecondAccuracy(serverRuntime.newContext()),
                 new PkgIconExportArchiveJobSpecification());
     }
 
@@ -229,7 +229,7 @@ public class PkgIconController extends AbstractController {
             throw new MissingPkgName();
         }
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<Pkg> pkg = Pkg.tryGetByName(context, pkgName); // cached
 
         if(!pkg.isPresent()) {

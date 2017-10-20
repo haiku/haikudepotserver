@@ -46,7 +46,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         GetAllUserRatingStabilitiesResult result = miscellaneousApi.getAllUserRatingStabilities(new GetAllUserRatingStabilitiesRequest());
         // ------------------------------------
 
-        ObjectContext objectContext = serverRuntime.getContext();
+        ObjectContext objectContext = serverRuntime.newContext();
 
         List<UserRatingStability> userRatingStabilities = UserRatingStability.getAll(objectContext);
 
@@ -85,7 +85,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         GetAllPkgCategoriesResult result = miscellaneousApi.getAllPkgCategories(new GetAllPkgCategoriesRequest());
         // ------------------------------------
 
-        ObjectContext objectContext = serverRuntime.getContext();
+        ObjectContext objectContext = serverRuntime.newContext();
 
         List<PkgCategory> pkgCategories = PkgCategory.getAll(objectContext);
 
@@ -129,7 +129,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
         GetAllNaturalLanguagesResult result = miscellaneousApi.getAllNaturalLanguages(new GetAllNaturalLanguagesRequest());
         // ------------------------------------
 
-        ObjectContext objectContext = serverRuntime.getContext();
+        ObjectContext objectContext = serverRuntime.newContext();
 
         List<NaturalLanguage> naturalLanguages = NaturalLanguage.getAll(objectContext);
 

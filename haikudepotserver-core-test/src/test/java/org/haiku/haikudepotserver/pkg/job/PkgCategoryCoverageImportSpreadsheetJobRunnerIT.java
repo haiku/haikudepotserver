@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -83,7 +83,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
         // one of the packages was changed; check that the change is in the database successfully.
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, "pkg1");
             Set<String> pkg1PkgCategoryCodes = pkgOptional.get().getPkgPkgCategories()
                     .stream()

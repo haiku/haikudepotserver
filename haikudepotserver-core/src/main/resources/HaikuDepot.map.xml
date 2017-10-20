@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data-map xmlns="http://cayenne.apache.org/schema/3.0/modelMap"
+<data-map xmlns="http://cayenne.apache.org/schema/9/modelMap"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://cayenne.apache.org/schema/3.0/modelMap http://cayenne.apache.org/schema/3.0/modelMap.xsd"
-	 project-version="6">
+	 xsi:schemaLocation="http://cayenne.apache.org/schema/9/modelMap http://cayenne.apache.org/schema/9/modelMap.xsd"
+	 project-version="9">
 	<property name="defaultLockType" value="optimistic"/>
 	<property name="defaultPackage" value="org.haiku.haikudepotserver.dataobjects"/>
 	<property name="defaultSchema" value="haikudepot"/>
@@ -813,7 +813,7 @@
 	<obj-relationship name="pkgVersion" source="UserRating" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="user" source="UserRating" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="userRatingStability" source="UserRating" target="UserRatingStability" deleteRule="Nullify" db-relationship-path="user_rating_stability"/>
-	<query name="SearchPkgVersions" factory="org.apache.cayenne.map.SQLTemplateBuilder" root="obj-entity" root-name="PkgVersion">
+	<query name="SearchPkgVersions" type="SQLTemplate" root="obj-entity" root-name="PkgVersion">
 		<sql><![CDATA[SELECT
 #if($isTotal)
 COUNT(DISTINCT pv.id) AS "total"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -72,7 +72,7 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
         Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         final List<NaturalLanguage> naturalLanguages = getNaturalLanguages(context);
 

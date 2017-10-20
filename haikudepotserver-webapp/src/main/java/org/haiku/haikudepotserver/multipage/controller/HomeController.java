@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -92,7 +92,7 @@ public class HomeController {
             @RequestParam(value=KEY_SEARCHEXPRESSION, required=false) String searchExpression,
             @RequestParam(value=KEY_VIEWCRITERIATYPECODE, required=false) ViewCriteriaType viewCriteriaType) {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         if(Strings.isNullOrEmpty(architectureCode)) {
             architectureCode = defaultArchitectureCode;

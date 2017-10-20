@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,12 +21,10 @@ import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
@@ -36,7 +34,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -97,7 +98,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
             query.setFetchLimit(specification.getLimit());
 
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             NaturalLanguage naturalLanguage = Strings.isBlank(specification.getNaturalLanguageCode())
                 ? NaturalLanguage.getEnglish(context)
                     : NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode())

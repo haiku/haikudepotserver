@@ -84,7 +84,7 @@ public class RepositoryController extends AbstractController {
                 response,
                 jobService,
                 ifModifiedSinceHeader,
-                repositoryService.getLastRepositoryModifyTimestampSecondAccuracy(serverRuntime.getContext()),
+                repositoryService.getLastRepositoryModifyTimestampSecondAccuracy(serverRuntime.newContext()),
                 new RepositoryDumpExportJobSpecification());
     }
 
@@ -92,7 +92,7 @@ public class RepositoryController extends AbstractController {
     public ResponseEntity<String> fetchRepository(
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode) {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
 
         if(!repositoryOptional.isPresent()) {
@@ -114,7 +114,7 @@ public class RepositoryController extends AbstractController {
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode,
             @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode) {
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
 
         if(!repositoryOptional.isPresent()) {

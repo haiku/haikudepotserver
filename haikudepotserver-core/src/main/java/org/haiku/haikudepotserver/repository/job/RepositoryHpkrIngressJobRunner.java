@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.repository.job;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.access.Transaction;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectIdQuery;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -17,8 +16,8 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressException;
+import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.pkg.HpkrFileExtractor;
 import org.haiku.pkg.PkgIterator;
@@ -66,7 +65,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
         Preconditions.checkNotNull(specification);
 
-        ObjectContext mainContext = serverRuntime.getContext();
+        ObjectContext mainContext = serverRuntime.newContext();
         Repository repository = Repository.getByCode(mainContext, specification.getRepositoryCode()).get();
         List<RepositorySource> repositorySources = RepositorySource.findActiveByRepository(mainContext, repository);
 
@@ -79,38 +78,24 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             }
             else {
 
-                // start a cayenne long-running txn
-                Transaction transaction = serverRuntime.getDataDomain().createTransaction();
-                Transaction.bindThreadTransaction(transaction);
+                serverRuntime.performInTransaction(() -> {
 
-                try {
-                    for (RepositorySource repositorySource : repositorySources) {
-                        if(
-                                null==specification.getRepositorySourceCodes() ||
-                                        specification.getRepositorySourceCodes().contains(repositorySource.getCode())) {
-                            runForRepositorySource(mainContext, repositorySource);
-                        }
-                        else {
-                            LOGGER.info("skipping repository source; {}", repositorySource.getCode());
-                        }
-                    }
-
-                    transaction.commit();
-                } catch (Throwable th) {
-                    transaction.setRollbackOnly();
-                    LOGGER.error("a problem has arisen processing a repository file for repository " + repository.getCode(), th);
-                    } finally {
-                        Transaction.bindThreadTransaction(null);
-
-                        if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
-                            try {
-                                transaction.rollback();
-                            } catch (Exception e) {
-                                // ignore
+                    try {
+                        for (RepositorySource repositorySource : repositorySources) {
+                            if (
+                                    null == specification.getRepositorySourceCodes() ||
+                                            specification.getRepositorySourceCodes().contains(repositorySource.getCode())) {
+                                runForRepositorySource(mainContext, repositorySource);
+                            } else {
+                                LOGGER.info("skipping repository source; {}", repositorySource.getCode());
                             }
                         }
-
+                    } catch (Throwable e) {
+                        LOGGER.error("a problem has arisen processing a repository file for repository " + repository.getCode(), e);
                     }
+
+                    return null;
+                });
             }
         }
 
@@ -148,7 +133,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
             while (pkgIterator.hasNext()) {
 
-                ObjectContext pkgImportContext = serverRuntime.getContext();
+                ObjectContext pkgImportContext = serverRuntime.newContext();
 
                 Pkg pkg = pkgIterator.next();
                 repositoryImportPkgNames.add(pkg.getName());
@@ -178,7 +163,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                     repositorySource).forEach((persistedPkgName) -> {
                 if (!repositoryImportPkgNames.contains(persistedPkgName)) {
 
-                    ObjectContext removalContext = serverRuntime.getContext();
+                    ObjectContext removalContext = serverRuntime.newContext();
                     RepositorySource removalRepositorySource = RepositorySource.get(
                             removalContext,
                             repositorySource.getObjectId(),

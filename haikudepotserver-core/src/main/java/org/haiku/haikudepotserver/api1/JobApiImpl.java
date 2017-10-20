@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -48,7 +48,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
         Preconditions.checkArgument(null!=request);
         final SearchJobsResult result = new SearchJobsResult();
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
         Optional<User> ownerUserOptional = Optional.empty();
 
@@ -120,7 +120,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
         Preconditions.checkArgument(null!=request);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.guid));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
 
         Optional<? extends JobSnapshot> jobOptional = jobService.tryGetJob(request.guid);

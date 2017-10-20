@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ public class AuthorizationRulesSpreadsheetJobRunner
             AuthorizationRulesSpreadsheetJobSpecification specification)
             throws IOException, JobRunnerException {
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
 

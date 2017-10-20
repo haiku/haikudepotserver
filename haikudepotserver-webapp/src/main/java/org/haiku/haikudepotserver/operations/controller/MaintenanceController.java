@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -56,7 +56,7 @@ public class MaintenanceController {
         // task for those repositories that are unable to trigger a refresh.
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
 
             for(Repository repository : Repository.getAllActive(context)) {
                 jobService.submit(
@@ -90,7 +90,7 @@ public class MaintenanceController {
         // remove any expired password reset tokens.
 
         {
-            if (UserPasswordResetToken.hasAny(serverRuntime.getContext())) {
+            if (UserPasswordResetToken.hasAny(serverRuntime.newContext())) {
                 jobService.submit(
                         new PasswordResetMaintenanceJobSpecification(),
                         JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);

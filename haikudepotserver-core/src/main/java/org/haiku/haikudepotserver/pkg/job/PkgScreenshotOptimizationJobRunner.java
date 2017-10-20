@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -58,7 +58,7 @@ public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScr
 
             for (String pkgScreenshotCode : specification.getPkgScreenshotCodes()) {
 
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.tryGetByCode(context, pkgScreenshotCode);
 
                 if (pkgScreenshotOptional.isPresent()) {

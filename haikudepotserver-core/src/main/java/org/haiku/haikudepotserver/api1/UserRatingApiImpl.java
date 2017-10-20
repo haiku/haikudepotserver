@@ -1,5 +1,5 @@
 /*
-* Copyright 2014-2016, Andrew Lindesay
+* Copyright 2014-2017, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -106,7 +106,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         if(!authorizationService.check(
                 context,
@@ -130,7 +130,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     public DeriveAndStoreUserRatingsForAllPkgsResult deriveAndStoreUserRatingsForAllPkgs(DeriveAndStoreUserRatingsForAllPkgsResult request) {
         Preconditions.checkNotNull(request);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         if(!authorizationService.check(
                 context,
@@ -156,7 +156,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.code));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         UserRating userRating = UserRating.getByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code)
@@ -178,7 +178,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionMajor),"the package version major code must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         User user = User.getByNickname(context, request.userNickname).orElseThrow(
@@ -244,7 +244,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new IllegalStateException("it is not possible to create a user rating with no meaningful rating data");
         }
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
@@ -353,7 +353,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.code));
         Preconditions.checkNotNull(request.filter);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         UserRating userRating = UserRating.getByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
@@ -433,7 +433,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkNotNull(request.limit);
         Preconditions.checkState(request.limit > 0);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         UserRatingSearchSpecification searchSpecification = new UserRatingSearchSpecification();
 

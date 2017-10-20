@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,7 +28,7 @@ import java.util.List;
 public class NaturalLanguageChooserTag extends RequestContextAwareTag {
 
     private ObjectContext getObjectContext() {
-        return getRequestContext().getWebApplicationContext().getBean(ServerRuntime.class).getContext();
+        return getRequestContext().getWebApplicationContext().getBean(ServerRuntime.class).newContext();
     }
 
     @Override

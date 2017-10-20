@@ -179,7 +179,7 @@ public class JobController extends AbstractController {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         tryObtainAuthenticatedUser(context).orElseThrow(() -> {
             LOGGER.warn("attempt to supply job data with no authenticated user");
@@ -214,7 +214,7 @@ public class JobController extends AbstractController {
 
         Preconditions.checkArgument(PATTERN_GUID.matcher(guid).matches(), "the supplied guid does not match the required pattern");
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         JobSnapshot job = jobService.tryGetJobForData(guid).orElseThrow(() -> {
             LOGGER.warn("attempt to access job data {} for which no job exists", guid);

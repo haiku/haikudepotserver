@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -280,7 +280,7 @@ public class UserRatingServiceImpl implements UserRatingService {
 
     @Override
     public void updateUserRatingDerivationsForAllPkgs() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT p.name FROM ");
@@ -309,7 +309,7 @@ public class UserRatingServiceImpl implements UserRatingService {
     public void updateUserRatingDerivation(String pkgName) {
          Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the name of the package is required");
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT r.code FROM\n");
@@ -339,7 +339,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));
         Preconditions.checkState(!Strings.isNullOrEmpty(repositoryCode));
 
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         Pkg pkg = Pkg.tryGetByName(context, pkgName)
                 .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no pkg was found; " + pkgName));
         Repository repository = Repository.getByCode(context, repositoryCode)

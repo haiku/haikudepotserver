@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -37,7 +37,7 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel = context.newObject(org.haiku.haikudepotserver.dataobjects.Pkg.class);
             pkg1Devel.setActive(true);
             pkg1Devel.setName("pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
@@ -45,7 +45,7 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
         }
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
                     org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkg1").get();
             NaturalLanguage naturalLanguageGerman = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN).get();
@@ -64,7 +64,7 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
         }
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel =
                     org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(
                             context,

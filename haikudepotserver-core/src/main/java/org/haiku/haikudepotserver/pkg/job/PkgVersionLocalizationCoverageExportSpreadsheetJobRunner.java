@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,6 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
-import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
@@ -84,7 +83,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
         Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         final List<NaturalLanguage> naturalLanguages = getNaturalLanguages(context);
         final List<Architecture> architectures = Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE));

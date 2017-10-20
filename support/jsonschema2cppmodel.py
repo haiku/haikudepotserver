@@ -220,14 +220,13 @@ def writedestructorlogicforlist(outputfile, propname, propmetadata):
 
     outputfile.write(
         string.Template("""        int32 count = ${cppmembername}->CountItems(); 
-        for (i = 0; i < count; i++) {
+        for (i = 0; i < count; i++)
             delete ${cppmembername}->ItemAt(i);
-        }       
 """).substitute(dict))
 
 
 def writedestructor(outputfile, cppname, schema):
-    outputfile.write('\n\n%s::~%s() {\n' % (cppname, cppname))
+    outputfile.write('\n\n%s::~%s()\n{\n' % (cppname, cppname))
 
     if hasanylistproperties(schema):
         outputfile.write('    int32 i;\n\n')
@@ -250,7 +249,7 @@ def writedestructor(outputfile, cppname, schema):
 
 
 def writeconstructor(outputfile, cppname, schema):
-    outputfile.write('\n\n%s::%s() {\n' % (cppname, cppname))
+    outputfile.write('\n\n%s::%s()\n{\n' % (cppname, cppname))
 
     for propname, propmetadata in schema['properties'].items():
         outputfile.write('    %s = NULL;\n' % jscom.propnametocppmembername(propname))

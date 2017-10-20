@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -44,7 +44,7 @@ public class LdapUserUpdateListener implements LifecycleListener {
 
     private void triggerUpdateUser(Object entity) {
         Preconditions.checkNotNull(entity);
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User user = User.getByObjectId(context, ((User) entity).getObjectId());
 
         try {

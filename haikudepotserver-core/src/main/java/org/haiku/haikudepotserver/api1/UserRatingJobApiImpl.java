@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
         Preconditions.checkArgument(null!=request);
         Preconditions.checkArgument(Strings.isNullOrEmpty(request.pkgName) || Strings.isNullOrEmpty(request.userNickname),"the user nickname or pkg name can be supplied, but not both");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
         UserRatingSpreadsheetJobSpecification spec = new UserRatingSpreadsheetJobSpecification();

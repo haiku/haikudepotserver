@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,7 +29,7 @@ abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecificatio
     protected PkgService pkgService;
 
     List<String> getPkgCategoryCodes() {
-        return PkgCategory.getAll(serverRuntime.getContext())
+        return PkgCategory.getAll(serverRuntime.newContext())
                 .stream()
                 .map(PkgCategory::getCode)
                 .collect(Collectors.toList());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,7 +34,6 @@ public class HpkrFileExtractorAttributeTest extends AbstractHpkrTest {
             hpkrFile = prepareTestFile();
             hpkrFileExtractor = new HpkrFileExtractor(hpkrFile);
 
-            OutputStreamWriter streamWriter = new OutputStreamWriter(System.out);
             AttributeIterator attributeIterator = hpkrFileExtractor.getPackageAttributesIterator();
             AttributeContext attributeContext = hpkrFileExtractor.getAttributeContext();
 

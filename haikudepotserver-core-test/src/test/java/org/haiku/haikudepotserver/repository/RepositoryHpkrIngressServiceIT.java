@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -72,7 +72,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             // first setup a fake repository to import that points at the local test HPKR file.
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
 
                 Repository repository = context.newObject(Repository.class);
                 repository.setCode("test");
@@ -89,7 +89,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             // setup another repository that is not related to the import test to check some stuff...
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
 
                 Repository repository = context.newObject(Repository.class);
                 repository.setCode("test2");
@@ -107,7 +107,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             // latterly check that the package version is no longer active.
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
                 Pkg pkg = context.newObject(Pkg.class);
                 pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
                 pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
@@ -144,7 +144,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             ObjectId originalFfmpegPkgOid;
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
 
                 Pkg pkg = context.newObject(Pkg.class);
                 pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
@@ -207,7 +207,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             // TODO - this is a fairly simplistic test; do some more checks.
 
             {
-                ObjectContext context = serverRuntime.getContext();
+                ObjectContext context = serverRuntime.newContext();
 
                 verifyPackage(context,"apr");
                 verifyPackage(context,"schroedinger");

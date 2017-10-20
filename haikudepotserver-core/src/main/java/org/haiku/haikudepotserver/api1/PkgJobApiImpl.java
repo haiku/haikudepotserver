@@ -56,7 +56,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
         Preconditions.checkArgument(null != request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
@@ -127,7 +127,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
         Preconditions.checkArgument(null != request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
@@ -187,7 +187,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
             Class<? extends AbstractJobSpecification> jobSpecificationClass,
             Permission permission) {
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
@@ -229,7 +229,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
     public QueuePkgScreenshotExportArchiveJobResult queuePkgScreenshotExportArchiveJob(QueuePkgScreenshotExportArchiveJobRequest request) {
         Preconditions.checkArgument(null != request, "the request must be supplied");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
@@ -256,7 +256,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
         Preconditions.checkArgument(StringUtils.isNotBlank(request.inputDataGuid), "the data guid must be supplied");
         Preconditions.checkArgument(null != request.importStrategy, "the import strategy must be supplied");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 

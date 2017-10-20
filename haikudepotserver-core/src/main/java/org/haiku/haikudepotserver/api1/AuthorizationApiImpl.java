@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -69,7 +69,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
      */
 
     private void ensureCanAuthorizationManipulate() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
 
         if(!authorizationService.check(context, authUser, null, org.haiku.haikudepotserver.security.model.Permission.AUTHORIZATION_CONFIGURE)) {
@@ -86,7 +86,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         Preconditions.checkNotNull(deriveAuthorizationRequest);
         Preconditions.checkNotNull(deriveAuthorizationRequest.targetAndPermissions);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
         CheckAuthorizationResult result = new CheckAuthorizationResult();
         result.targetAndPermissions = new ArrayList<>();
 
@@ -120,7 +120,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         Preconditions.checkState(!Strings.isNullOrEmpty(request.userNickname),"the user nickname must be supplied");
 
         ensureCanAuthorizationManipulate();
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         org.haiku.haikudepotserver.dataobjects.Permission permission = ensurePermission(context, request.permissionCode);
         User user = ensureUser(context, request.userNickname);
 
@@ -159,7 +159,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         Preconditions.checkState(!Strings.isNullOrEmpty(request.userNickname),"the user nickname is required");
 
         ensureCanAuthorizationManipulate();
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         org.haiku.haikudepotserver.dataobjects.Permission permission = ensurePermission(context, request.permissionCode);
         User user = null;
 
@@ -193,7 +193,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
 
         ensureCanAuthorizationManipulate();
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         AuthorizationPkgRuleSearchSpecification specification = new AuthorizationPkgRuleSearchSpecification();
 

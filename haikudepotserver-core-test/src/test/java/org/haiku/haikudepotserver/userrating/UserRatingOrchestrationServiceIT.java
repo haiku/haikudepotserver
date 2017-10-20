@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -102,7 +102,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
     public void testUserRatingDerivation_mixed() {
 
         integrationTestSupportService.createStandardTestData();
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
         UserRatingTestData userRatingData = createTestUserRatingData(context);
         context.commitChanges();
 

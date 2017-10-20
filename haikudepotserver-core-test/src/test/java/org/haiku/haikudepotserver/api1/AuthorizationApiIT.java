@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -99,7 +99,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context, "testuser1", "fakepassword");
         }
 
@@ -132,7 +132,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             User user1 = integrationTestSupportService.createBasicUser(context, "testuser1", "fakepassword");
             Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
 
@@ -176,7 +176,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
         }
 
@@ -210,7 +210,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
         }
 
@@ -240,7 +240,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
         }
 
@@ -254,7 +254,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Optional<PermissionUserPkg> permissionUserPkgOptional =
                     PermissionUserPkg.getByPermissionUserAndPkg(
                             context,
@@ -272,7 +272,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
         }
 
@@ -342,7 +342,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             User user = integrationTestSupportService.createBasicUser(context, "testuser", "fakepassword");
             PermissionUserPkg permissionUserPkg = context.newObject(PermissionUserPkg.class);
             permissionUserPkg.setPermission(org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITICON.name().toLowerCase()).get());
@@ -361,7 +361,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             Assertions.assertThat(
                     PermissionUserPkg.getByPermissionUserAndPkg(
                             context,
@@ -373,7 +373,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
     }
 
     private void createSearchAuthorizationRuleTestData() {
-        ObjectContext context = serverRuntime.getContext();
+        ObjectContext context = serverRuntime.newContext();
 
         User user1 = integrationTestSupportService.createBasicUser(context, "testuser1", "fakepassword");
         User user2 = integrationTestSupportService.createBasicUser(context, "testuser2", "fakepassword");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,7 +55,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(null!=getRepositoriesRequest);
         GetRepositoriesResult result = new GetRepositoriesResult();
         boolean includeInactive = null!=getRepositoriesRequest.includeInactive && getRepositoriesRequest.includeInactive;
-        result.repositories = Repository.getAll(serverRuntime.getContext())
+        result.repositories = Repository.getAll(serverRuntime.newContext())
                 .stream()
                 .filter(r -> includeInactive || r.getActive())
                 .map(r -> {
@@ -78,7 +78,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(triggerImportRepositoryRequest.repositoryCode));
         Preconditions.checkArgument(null==triggerImportRepositoryRequest.repositorySourceCodes || !triggerImportRepositoryRequest.repositorySourceCodes.isEmpty(), "bad repository sources");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<Repository> repositoryOptional = Repository.getByCode(context, triggerImportRepositoryRequest.repositoryCode);
 
@@ -129,7 +129,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     public SearchRepositoriesResult searchRepositories(SearchRepositoriesRequest request) {
         Preconditions.checkNotNull(request);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         if(!authorizationService.check(
                 context,
@@ -193,7 +193,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkNotNull(getRepositoryRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getRepositoryRequest.code));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<Repository> repositoryOptional = Repository.getByCode(context, getRepositoryRequest.code);
 
@@ -239,7 +239,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     public UpdateRepositoryResult updateRepository(UpdateRepositoryRequest updateRepositoryRequest) throws ObjectNotFoundException {
         Preconditions.checkNotNull(updateRepositoryRequest);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<Repository> repositoryOptional = Repository.getByCode(context, updateRepositoryRequest.code);
 
@@ -318,7 +318,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         Preconditions.checkNotNull(createRepositoryRequest);
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         if(!authorizationService.check(
                 context,
@@ -360,7 +360,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(null!=request);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code));
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, request.code);
 
@@ -382,7 +382,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "a code is required to identify the repository source to update");
         Preconditions.checkArgument(null!=request.filter, "filters must be provided to specify what aspects of the repository source should be updated");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, request.code);
 
@@ -440,7 +440,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository for the new repository source must be identified");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.url), "the url for the new repository source must be identified");
 
-        final ObjectContext context = serverRuntime.getContext();
+        final ObjectContext context = serverRuntime.newContext();
 
         Optional<Repository> repositoryOptional = Repository.getByCode(context, request.repositoryCode);
 

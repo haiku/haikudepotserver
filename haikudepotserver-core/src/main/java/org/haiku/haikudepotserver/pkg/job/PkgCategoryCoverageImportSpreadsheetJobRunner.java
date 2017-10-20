@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,15 +10,14 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.access.Transaction;
-import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
+import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -85,118 +84,103 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
             // read in the first row of the input and check the headings are there to quasi-validate
             // that the input is not some random rubbish.
 
-            String[] row = reader.readNext();
+            String[] headerRow = reader.readNext();
 
-            if(headings.length != row.length) {
+            if(headings.length != headerRow.length) {
                 throw new JobRunnerException("wrong number of header columns in input");
             }
 
-            if(!Arrays.equals(row,headings)) {
+            if(!Arrays.equals(headerRow,headings)) {
                 throw new JobRunnerException("mismatched input headers");
             }
 
             writer.writeNext(headings);
 
-            // start a cayenne long-running txn
-            Transaction transaction = serverRuntime.getDataDomain().createTransaction();
-            Transaction.bindThreadTransaction(transaction);
+            serverRuntime.performInTransaction(() -> {
 
-            try {
+                try {
+                    String[] row;
 
-                while (null != (row = reader.readNext())) {
-                    if (0 != row.length) {
+                    while (null != (row = reader.readNext())) {
+                        if (0 != row.length) {
 
-                        ObjectContext rowContext = serverRuntime.getContext();
+                            ObjectContext rowContext = serverRuntime.newContext();
 
-                        Action action = Action.NOACTION;
+                            Action action = Action.NOACTION;
 
-                        if (row.length < headings.length - 1) { // -1 because it is possible to omit the action column.
-                            action = Action.INVALID;
-                            LOGGER.warn("inconsistent number of cells on line");
-                        } else {
-                            String pkgName = row[0];
-                            // 1; display
-                            boolean isNone = AbstractJobRunner.MARKER.equals(row[COLUMN_NONE]);
+                            if (row.length < headings.length - 1) { // -1 because it is possible to omit the action column.
+                                action = Action.INVALID;
+                                LOGGER.warn("inconsistent number of cells on line");
+                            } else {
+                                String pkgName = row[0];
+                                // 1; display
+                                boolean isNone = AbstractJobRunner.MARKER.equals(row[COLUMN_NONE]);
 
-                            Optional<Pkg> pkgOptional = Pkg.tryGetByName(rowContext, pkgName);
-                            List<String> selectedPkgCategoryCodes = new ArrayList<>();
+                                Optional<Pkg> pkgOptional = Pkg.tryGetByName(rowContext, pkgName);
+                                List<String> selectedPkgCategoryCodes = new ArrayList<>();
 
-                            if (pkgOptional.isPresent()) {
+                                if (pkgOptional.isPresent()) {
 
-                                for (int i = 0; i < pkgCategoryCodes.size(); i++) {
-                                    if (AbstractJobRunner.MARKER.equals(row[COLUMN_NONE + 1 + i].trim())) {
+                                    for (int i = 0; i < pkgCategoryCodes.size(); i++) {
+                                        if (AbstractJobRunner.MARKER.equals(row[COLUMN_NONE + 1 + i].trim())) {
 
-                                        if(isNone) {
-                                            action = Action.INVALID;
-                                            LOGGER.warn("line for package {} has 'none' marked as well as an actual category", row[0]);
+                                            if (isNone) {
+                                                action = Action.INVALID;
+                                                LOGGER.warn("line for package {} has 'none' marked as well as an actual category", row[0]);
+                                            }
+
+                                            selectedPkgCategoryCodes.add(pkgCategoryCodes.get(i));
+                                        }
+                                    }
+
+                                    if (action == Action.NOACTION) {
+                                        List<PkgCategory> selectedPkgCategories = PkgCategory.getByCodes(rowContext, selectedPkgCategoryCodes);
+
+                                        if (selectedPkgCategories.size() != selectedPkgCategoryCodes.size()) {
+                                            throw new IllegalStateException("one or more of the package category codes was not able to be found");
                                         }
 
-                                        selectedPkgCategoryCodes.add(pkgCategoryCodes.get(i));
+                                        if (pkgService.updatePkgCategories(
+                                                rowContext,
+                                                pkgOptional.get(),
+                                                selectedPkgCategories)) {
+                                            action = Action.UPDATED;
+                                            rowContext.commitChanges();
+                                            LOGGER.debug("did update for package {}", row[0]);
+                                        }
                                     }
-                                }
 
-                                if(action == Action.NOACTION) {
-                                    List<PkgCategory> selectedPkgCategories = PkgCategory.getByCodes(rowContext, selectedPkgCategoryCodes);
-
-                                    if (selectedPkgCategories.size() != selectedPkgCategoryCodes.size()) {
-                                        throw new IllegalStateException("one or more of the package category codes was not able to be found");
-                                    }
-
-                                    if (pkgService.updatePkgCategories(
-                                            rowContext,
-                                            pkgOptional.get(),
-                                            selectedPkgCategories)) {
-                                        action = Action.UPDATED;
-                                        rowContext.commitChanges();
-                                        LOGGER.debug("did update for package {}", row[0]);
-                                    }
+                                } else {
+                                    action = Action.NOTFOUND;
+                                    LOGGER.debug("unable to find the package for {}", row[0]);
                                 }
 
                             }
-                            else {
-                                action = Action.NOTFOUND;
-                                LOGGER.debug("unable to find the package for {}", row[0]);
+
+                            // copy the row back verbatim, but with the action result at the
+                            // end.
+
+                            List<String> rowOutput = new ArrayList<>();
+                            Collections.addAll(rowOutput, row);
+
+                            while (rowOutput.size() < headings.length) {
+                                rowOutput.add("");
                             }
 
+                            rowOutput.remove(rowOutput.size() - 1);
+                            rowOutput.add(action.name());
+
+                            writer.writeNext(rowOutput.toArray(new String[rowOutput.size()]));
                         }
 
-                        // copy the row back verbatim, but with the action result at the
-                        // end.
-
-                        List<String> rowOutput = new ArrayList<>();
-                        Collections.addAll(rowOutput, row);
-
-                        while (rowOutput.size() < headings.length) {
-                            rowOutput.add("");
-                        }
-
-                        rowOutput.remove(rowOutput.size()-1);
-                        rowOutput.add(action.name());
-
-                        writer.writeNext(rowOutput.toArray(new String[rowOutput.size()]));
                     }
 
+                } catch (Throwable th) {
+                    LOGGER.error("a problem has arisen importing package categories from a spreadsheet", th);
                 }
 
-                transaction.commit();
-            }
-            catch(Throwable th) {
-                transaction.setRollbackOnly();
-                LOGGER.error("a problem has arisen importing package categories from a spreadsheet", th);
-            }
-            finally {
-                Transaction.bindThreadTransaction(null);
-
-                if (Transaction.STATUS_MARKED_ROLLEDBACK == transaction.getStatus()) {
-                    try {
-                        transaction.rollback();
-                    }
-                    catch(Exception e) {
-                        // ignore
-                    }
-                }
-
-            }
+                return null;
+            });
 
         }
 

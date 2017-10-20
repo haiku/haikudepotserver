@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -62,7 +62,7 @@ public class JobApiIT extends AbstractIntegrationTest {
     public void testSearchJobs_userOnly() throws Exception {
 
         {
-            ObjectContext context = serverRuntime.getContext();
+            ObjectContext context = serverRuntime.newContext();
             integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
             setAuthenticatedUser("testuser");
         }
