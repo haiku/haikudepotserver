@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -12,42 +13,44 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgUserRatingAggregate extends AbstractDataObject {
 
-    public static final String DERIVED_RATING_PROPERTY = "derivedRating";
-    public static final String DERIVED_RATING_SAMPLE_SIZE_PROPERTY = "derivedRatingSampleSize";
-    public static final String PKG_PROPERTY = "pkg";
-    public static final String REPOSITORY_PROPERTY = "repository";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Float> DERIVED_RATING = Property.create("derivedRating", Float.class);
+    public static final Property<Integer> DERIVED_RATING_SAMPLE_SIZE = Property.create("derivedRatingSampleSize", Integer.class);
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
+
     public void setDerivedRating(Float derivedRating) {
-        writeProperty(DERIVED_RATING_PROPERTY, derivedRating);
+        writeProperty("derivedRating", derivedRating);
     }
     public Float getDerivedRating() {
-        return (Float)readProperty(DERIVED_RATING_PROPERTY);
+        return (Float)readProperty("derivedRating");
     }
 
     public void setDerivedRatingSampleSize(Integer derivedRatingSampleSize) {
-        writeProperty(DERIVED_RATING_SAMPLE_SIZE_PROPERTY, derivedRatingSampleSize);
+        writeProperty("derivedRatingSampleSize", derivedRatingSampleSize);
     }
     public Integer getDerivedRatingSampleSize() {
-        return (Integer)readProperty(DERIVED_RATING_SAMPLE_SIZE_PROPERTY);
+        return (Integer)readProperty("derivedRatingSampleSize");
     }
 
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 
     public void setRepository(Repository repository) {
-        setToOneTarget(REPOSITORY_PROPERTY, repository, true);
+        setToOneTarget("repository", repository, true);
     }
 
     public Repository getRepository() {
-        return (Repository)readProperty(REPOSITORY_PROPERTY);
+        return (Repository)readProperty("repository");
     }
 
 

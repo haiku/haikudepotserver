@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -12,34 +13,36 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgScreenshotImage extends AbstractDataObject {
 
-    public static final String DATA_PROPERTY = "data";
-    public static final String MEDIA_TYPE_PROPERTY = "mediaType";
-    public static final String PKG_SCREENSHOT_PROPERTY = "pkgScreenshot";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<byte[]> DATA = Property.create("data", byte[].class);
+    public static final Property<MediaType> MEDIA_TYPE = Property.create("mediaType", MediaType.class);
+    public static final Property<PkgScreenshot> PKG_SCREENSHOT = Property.create("pkgScreenshot", PkgScreenshot.class);
+
     public void setData(byte[] data) {
-        writeProperty(DATA_PROPERTY, data);
+        writeProperty("data", data);
     }
     public byte[] getData() {
-        return (byte[])readProperty(DATA_PROPERTY);
+        return (byte[])readProperty("data");
     }
 
     public void setMediaType(MediaType mediaType) {
-        setToOneTarget(MEDIA_TYPE_PROPERTY, mediaType, true);
+        setToOneTarget("mediaType", mediaType, true);
     }
 
     public MediaType getMediaType() {
-        return (MediaType)readProperty(MEDIA_TYPE_PROPERTY);
+        return (MediaType)readProperty("mediaType");
     }
 
 
     public void setPkgScreenshot(PkgScreenshot pkgScreenshot) {
-        setToOneTarget(PKG_SCREENSHOT_PROPERTY, pkgScreenshot, true);
+        setToOneTarget("pkgScreenshot", pkgScreenshot, true);
     }
 
     public PkgScreenshot getPkgScreenshot() {
-        return (PkgScreenshot)readProperty(PKG_SCREENSHOT_PROPERTY);
+        return (PkgScreenshot)readProperty("pkgScreenshot");
     }
 
 

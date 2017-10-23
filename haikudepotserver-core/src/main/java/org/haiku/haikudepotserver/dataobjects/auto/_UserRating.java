@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -16,94 +17,96 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _UserRating extends AbstractDataObject {
 
-    public static final String ACTIVE_PROPERTY = "active";
-    public static final String CODE_PROPERTY = "code";
-    public static final String COMMENT_PROPERTY = "comment";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String RATING_PROPERTY = "rating";
-    public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
-    public static final String PKG_VERSION_PROPERTY = "pkgVersion";
-    public static final String USER_PROPERTY = "user";
-    public static final String USER_RATING_STABILITY_PROPERTY = "userRatingStability";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
+    public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<String> COMMENT = Property.create("comment", String.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Short> RATING = Property.create("rating", Short.class);
+    public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
+    public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
+    public static final Property<User> USER = Property.create("user", User.class);
+    public static final Property<UserRatingStability> USER_RATING_STABILITY = Property.create("userRatingStability", UserRatingStability.class);
+
     public void setActive(Boolean active) {
-        writeProperty(ACTIVE_PROPERTY, active);
+        writeProperty("active", active);
     }
     public Boolean getActive() {
-        return (Boolean)readProperty(ACTIVE_PROPERTY);
+        return (Boolean)readProperty("active");
     }
 
     public void setCode(String code) {
-        writeProperty(CODE_PROPERTY, code);
+        writeProperty("code", code);
     }
     public String getCode() {
-        return (String)readProperty(CODE_PROPERTY);
+        return (String)readProperty("code");
     }
 
     public void setComment(String comment) {
-        writeProperty(COMMENT_PROPERTY, comment);
+        writeProperty("comment", comment);
     }
     public String getComment() {
-        return (String)readProperty(COMMENT_PROPERTY);
+        return (String)readProperty("comment");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setRating(Short rating) {
-        writeProperty(RATING_PROPERTY, rating);
+        writeProperty("rating", rating);
     }
     public Short getRating() {
-        return (Short)readProperty(RATING_PROPERTY);
+        return (Short)readProperty("rating");
     }
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
-        setToOneTarget(NATURAL_LANGUAGE_PROPERTY, naturalLanguage, true);
+        setToOneTarget("naturalLanguage", naturalLanguage, true);
     }
 
     public NaturalLanguage getNaturalLanguage() {
-        return (NaturalLanguage)readProperty(NATURAL_LANGUAGE_PROPERTY);
+        return (NaturalLanguage)readProperty("naturalLanguage");
     }
 
 
     public void setPkgVersion(PkgVersion pkgVersion) {
-        setToOneTarget(PKG_VERSION_PROPERTY, pkgVersion, true);
+        setToOneTarget("pkgVersion", pkgVersion, true);
     }
 
     public PkgVersion getPkgVersion() {
-        return (PkgVersion)readProperty(PKG_VERSION_PROPERTY);
+        return (PkgVersion)readProperty("pkgVersion");
     }
 
 
     public void setUser(User user) {
-        setToOneTarget(USER_PROPERTY, user, true);
+        setToOneTarget("user", user, true);
     }
 
     public User getUser() {
-        return (User)readProperty(USER_PROPERTY);
+        return (User)readProperty("user");
     }
 
 
     public void setUserRatingStability(UserRatingStability userRatingStability) {
-        setToOneTarget(USER_RATING_STABILITY_PROPERTY, userRatingStability, true);
+        setToOneTarget("userRatingStability", userRatingStability, true);
     }
 
     public UserRatingStability getUserRatingStability() {
-        return (UserRatingStability)readProperty(USER_RATING_STABILITY_PROPERTY);
+        return (UserRatingStability)readProperty("userRatingStability");
     }
 
 

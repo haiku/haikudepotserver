@@ -3,6 +3,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.PkgChangelog;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
@@ -22,160 +23,162 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _Pkg extends AbstractDataObject {
 
-    public static final String ACTIVE_PROPERTY = "active";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String ICON_MODIFY_TIMESTAMP_PROPERTY = "iconModifyTimestamp";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String NAME_PROPERTY = "name";
-    public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
-    public static final String PKG_CHANGELOGS_PROPERTY = "pkgChangelogs";
-    public static final String PKG_ICONS_PROPERTY = "pkgIcons";
-    public static final String PKG_LOCALIZATIONS_PROPERTY = "pkgLocalizations";
-    public static final String PKG_PKG_CATEGORIES_PROPERTY = "pkgPkgCategories";
-    public static final String PKG_PROMINENCES_PROPERTY = "pkgProminences";
-    public static final String PKG_SCREENSHOTS_PROPERTY = "pkgScreenshots";
-    public static final String PKG_USER_RATING_AGGREGATES_PROPERTY = "pkgUserRatingAggregates";
-    public static final String PUBLISHER_PROPERTY = "publisher";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Date> ICON_MODIFY_TIMESTAMP = Property.create("iconModifyTimestamp", Date.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<List<PermissionUserPkg>> PERMISSION_USER_PKGS = Property.create("permissionUserPkgs", List.class);
+    public static final Property<List<PkgChangelog>> PKG_CHANGELOGS = Property.create("pkgChangelogs", List.class);
+    public static final Property<List<PkgIcon>> PKG_ICONS = Property.create("pkgIcons", List.class);
+    public static final Property<List<PkgLocalization>> PKG_LOCALIZATIONS = Property.create("pkgLocalizations", List.class);
+    public static final Property<List<PkgPkgCategory>> PKG_PKG_CATEGORIES = Property.create("pkgPkgCategories", List.class);
+    public static final Property<List<PkgProminence>> PKG_PROMINENCES = Property.create("pkgProminences", List.class);
+    public static final Property<List<PkgScreenshot>> PKG_SCREENSHOTS = Property.create("pkgScreenshots", List.class);
+    public static final Property<List<PkgUserRatingAggregate>> PKG_USER_RATING_AGGREGATES = Property.create("pkgUserRatingAggregates", List.class);
+    public static final Property<Publisher> PUBLISHER = Property.create("publisher", Publisher.class);
+
     public void setActive(Boolean active) {
-        writeProperty(ACTIVE_PROPERTY, active);
+        writeProperty("active", active);
     }
     public Boolean getActive() {
-        return (Boolean)readProperty(ACTIVE_PROPERTY);
+        return (Boolean)readProperty("active");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setIconModifyTimestamp(Date iconModifyTimestamp) {
-        writeProperty(ICON_MODIFY_TIMESTAMP_PROPERTY, iconModifyTimestamp);
+        writeProperty("iconModifyTimestamp", iconModifyTimestamp);
     }
     public Date getIconModifyTimestamp() {
-        return (Date)readProperty(ICON_MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("iconModifyTimestamp");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setName(String name) {
-        writeProperty(NAME_PROPERTY, name);
+        writeProperty("name", name);
     }
     public String getName() {
-        return (String)readProperty(NAME_PROPERTY);
+        return (String)readProperty("name");
     }
 
     public void addToPermissionUserPkgs(PermissionUserPkg obj) {
-        addToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+        addToManyTarget("permissionUserPkgs", obj, true);
     }
     public void removeFromPermissionUserPkgs(PermissionUserPkg obj) {
-        removeToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+        removeToManyTarget("permissionUserPkgs", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PermissionUserPkg> getPermissionUserPkgs() {
-        return (List<PermissionUserPkg>)readProperty(PERMISSION_USER_PKGS_PROPERTY);
+        return (List<PermissionUserPkg>)readProperty("permissionUserPkgs");
     }
 
 
     public void addToPkgChangelogs(PkgChangelog obj) {
-        addToManyTarget(PKG_CHANGELOGS_PROPERTY, obj, true);
+        addToManyTarget("pkgChangelogs", obj, true);
     }
     public void removeFromPkgChangelogs(PkgChangelog obj) {
-        removeToManyTarget(PKG_CHANGELOGS_PROPERTY, obj, true);
+        removeToManyTarget("pkgChangelogs", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgChangelog> getPkgChangelogs() {
-        return (List<PkgChangelog>)readProperty(PKG_CHANGELOGS_PROPERTY);
+        return (List<PkgChangelog>)readProperty("pkgChangelogs");
     }
 
 
     public void addToPkgIcons(PkgIcon obj) {
-        addToManyTarget(PKG_ICONS_PROPERTY, obj, true);
+        addToManyTarget("pkgIcons", obj, true);
     }
     public void removeFromPkgIcons(PkgIcon obj) {
-        removeToManyTarget(PKG_ICONS_PROPERTY, obj, true);
+        removeToManyTarget("pkgIcons", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgIcon> getPkgIcons() {
-        return (List<PkgIcon>)readProperty(PKG_ICONS_PROPERTY);
+        return (List<PkgIcon>)readProperty("pkgIcons");
     }
 
 
     public void addToPkgLocalizations(PkgLocalization obj) {
-        addToManyTarget(PKG_LOCALIZATIONS_PROPERTY, obj, true);
+        addToManyTarget("pkgLocalizations", obj, true);
     }
     public void removeFromPkgLocalizations(PkgLocalization obj) {
-        removeToManyTarget(PKG_LOCALIZATIONS_PROPERTY, obj, true);
+        removeToManyTarget("pkgLocalizations", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgLocalization> getPkgLocalizations() {
-        return (List<PkgLocalization>)readProperty(PKG_LOCALIZATIONS_PROPERTY);
+        return (List<PkgLocalization>)readProperty("pkgLocalizations");
     }
 
 
     public void addToPkgPkgCategories(PkgPkgCategory obj) {
-        addToManyTarget(PKG_PKG_CATEGORIES_PROPERTY, obj, true);
+        addToManyTarget("pkgPkgCategories", obj, true);
     }
     public void removeFromPkgPkgCategories(PkgPkgCategory obj) {
-        removeToManyTarget(PKG_PKG_CATEGORIES_PROPERTY, obj, true);
+        removeToManyTarget("pkgPkgCategories", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgPkgCategory> getPkgPkgCategories() {
-        return (List<PkgPkgCategory>)readProperty(PKG_PKG_CATEGORIES_PROPERTY);
+        return (List<PkgPkgCategory>)readProperty("pkgPkgCategories");
     }
 
 
     public void addToPkgProminences(PkgProminence obj) {
-        addToManyTarget(PKG_PROMINENCES_PROPERTY, obj, true);
+        addToManyTarget("pkgProminences", obj, true);
     }
     public void removeFromPkgProminences(PkgProminence obj) {
-        removeToManyTarget(PKG_PROMINENCES_PROPERTY, obj, true);
+        removeToManyTarget("pkgProminences", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgProminence> getPkgProminences() {
-        return (List<PkgProminence>)readProperty(PKG_PROMINENCES_PROPERTY);
+        return (List<PkgProminence>)readProperty("pkgProminences");
     }
 
 
     public void addToPkgScreenshots(PkgScreenshot obj) {
-        addToManyTarget(PKG_SCREENSHOTS_PROPERTY, obj, true);
+        addToManyTarget("pkgScreenshots", obj, true);
     }
     public void removeFromPkgScreenshots(PkgScreenshot obj) {
-        removeToManyTarget(PKG_SCREENSHOTS_PROPERTY, obj, true);
+        removeToManyTarget("pkgScreenshots", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgScreenshot> getPkgScreenshots() {
-        return (List<PkgScreenshot>)readProperty(PKG_SCREENSHOTS_PROPERTY);
+        return (List<PkgScreenshot>)readProperty("pkgScreenshots");
     }
 
 
     public void addToPkgUserRatingAggregates(PkgUserRatingAggregate obj) {
-        addToManyTarget(PKG_USER_RATING_AGGREGATES_PROPERTY, obj, true);
+        addToManyTarget("pkgUserRatingAggregates", obj, true);
     }
     public void removeFromPkgUserRatingAggregates(PkgUserRatingAggregate obj) {
-        removeToManyTarget(PKG_USER_RATING_AGGREGATES_PROPERTY, obj, true);
+        removeToManyTarget("pkgUserRatingAggregates", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgUserRatingAggregate> getPkgUserRatingAggregates() {
-        return (List<PkgUserRatingAggregate>)readProperty(PKG_USER_RATING_AGGREGATES_PROPERTY);
+        return (List<PkgUserRatingAggregate>)readProperty("pkgUserRatingAggregates");
     }
 
 
     public void setPublisher(Publisher publisher) {
-        setToOneTarget(PUBLISHER_PROPERTY, publisher, true);
+        setToOneTarget("publisher", publisher, true);
     }
 
     public Publisher getPublisher() {
-        return (Publisher)readProperty(PUBLISHER_PROPERTY);
+        return (Publisher)readProperty("publisher");
     }
 
 

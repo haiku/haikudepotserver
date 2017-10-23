@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
@@ -42,7 +43,7 @@ public class RepositoryServiceImpl implements RepositoryService {
     public Date getLastRepositoryModifyTimestampSecondAccuracy(ObjectContext context) {
         EJBQLQuery query = new EJBQLQuery(String.join(" ",
                 "SELECT",
-                "MAX(r." + Repository.MODIFY_TIMESTAMP_PROPERTY + ")",
+                "MAX(r." + Repository.MODIFY_TIMESTAMP.getName() + ")",
                 "FROM",
                 Repository.class.getSimpleName(),
                 "r WHERE r.active = true"));
@@ -118,7 +119,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
                 case CONTAINS:
                     parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                    whereExpressions.add("LOWER(r." + Repository.CODE_PROPERTY + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
+                    whereExpressions.add("LOWER(r." + Repository.CODE.getName() + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
                     break;
 
                 default:
@@ -128,7 +129,7 @@ public class RepositoryServiceImpl implements RepositoryService {
         }
 
         if(!search.getIncludeInactive()) {
-            whereExpressions.add("r." + Repository.ACTIVE_PROPERTY + " = true");
+            whereExpressions.add("r." + Repository.ACTIVE.getName() + " = true");
         }
 
         if(null!=search.getRepositorySourceSearchUrls()) {
@@ -145,7 +146,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
             whereExpressionBuilder.append(" EXISTS(SELECT rs FROM ");
             whereExpressionBuilder.append(RepositorySource.class.getSimpleName());
-            whereExpressionBuilder.append(" rs WHERE rs." + RepositorySource.REPOSITORY_PROPERTY + "=r ");
+            whereExpressionBuilder.append(" rs WHERE rs." + RepositorySource.REPOSITORY.getName() + "=r ");
             whereExpressionBuilder.append(" AND rs.url IN (");
 
             for(int i=0;i<urls.size();i++) {
@@ -187,7 +188,7 @@ public class RepositoryServiceImpl implements RepositoryService {
         }
 
         ejbql.append(" ORDER BY r.");
-        ejbql.append(Repository.CODE_PROPERTY);
+        ejbql.append(Repository.CODE.getName());
         ejbql.append(" ASC");
 
         EJBQLQuery ejbqlQuery = new EJBQLQuery(ejbql.toString());

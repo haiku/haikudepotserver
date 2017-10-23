@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Permission;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -15,44 +16,46 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PermissionUserPkg extends AbstractDataObject {
 
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String PERMISSION_PROPERTY = "permission";
-    public static final String PKG_PROPERTY = "pkg";
-    public static final String USER_PROPERTY = "user";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Permission> PERMISSION = Property.create("permission", Permission.class);
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<User> USER = Property.create("user", User.class);
+
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setPermission(Permission permission) {
-        setToOneTarget(PERMISSION_PROPERTY, permission, true);
+        setToOneTarget("permission", permission, true);
     }
 
     public Permission getPermission() {
-        return (Permission)readProperty(PERMISSION_PROPERTY);
+        return (Permission)readProperty("permission");
     }
 
 
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 
     public void setUser(User user) {
-        setToOneTarget(USER_PROPERTY, user, true);
+        setToOneTarget("user", user, true);
     }
 
     public User getUser() {
-        return (User)readProperty(USER_PROPERTY);
+        return (User)readProperty("user");
     }
 
 

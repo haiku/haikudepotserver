@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
@@ -26,16 +27,12 @@ public class Prominence extends _Prominence {
     public static Optional<Prominence> getByOrdering(ObjectContext context, Integer ordering) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkState(null != ordering && ordering >= 0, "bad ordering");
-        return ((List<Prominence>) context.performQuery(new SelectQuery(
-                        Prominence.class,
-                        ExpressionFactory.matchExp(Prominence.ORDERING_PROPERTY, ordering)))).stream().collect(SingleCollector.optional());
+        return getAll(context).stream().filter((p) -> p.getOrdering().equals(ordering)).findFirst();
     }
 
     public static List<Prominence> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
-        SelectQuery query = new SelectQuery(Prominence.class);
-        query.addOrdering(new Ordering(ORDERING_PROPERTY, SortOrder.ASCENDING));
-        return (List<Prominence>) context.performQuery(query);
+        return ObjectSelect.query(Prominence.class).orderBy(ORDERING.asc()).sharedCache().select(context);
     }
 
     @Override

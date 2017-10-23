@@ -3,6 +3,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
@@ -16,114 +17,116 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _User extends AbstractDataObject {
 
-    public static final String ACTIVE_PROPERTY = "active";
-    public static final String CAN_MANAGE_USERS_PROPERTY = "canManageUsers";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String EMAIL_PROPERTY = "email";
-    public static final String IS_ROOT_PROPERTY = "isRoot";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String NICKNAME_PROPERTY = "nickname";
-    public static final String PASSWORD_HASH_PROPERTY = "passwordHash";
-    public static final String PASSWORD_SALT_PROPERTY = "passwordSalt";
-    public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
-    public static final String PERMISSION_USER_PKGS_PROPERTY = "permissionUserPkgs";
-    public static final String USER_PASSWORD_RESET_TOKENS_PROPERTY = "userPasswordResetTokens";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
+    public static final Property<Boolean> CAN_MANAGE_USERS = Property.create("canManageUsers", Boolean.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<String> EMAIL = Property.create("email", String.class);
+    public static final Property<Boolean> IS_ROOT = Property.create("isRoot", Boolean.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<String> NICKNAME = Property.create("nickname", String.class);
+    public static final Property<String> PASSWORD_HASH = Property.create("passwordHash", String.class);
+    public static final Property<String> PASSWORD_SALT = Property.create("passwordSalt", String.class);
+    public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
+    public static final Property<List<PermissionUserPkg>> PERMISSION_USER_PKGS = Property.create("permissionUserPkgs", List.class);
+    public static final Property<List<UserPasswordResetToken>> USER_PASSWORD_RESET_TOKENS = Property.create("userPasswordResetTokens", List.class);
+
     public void setActive(Boolean active) {
-        writeProperty(ACTIVE_PROPERTY, active);
+        writeProperty("active", active);
     }
     public Boolean getActive() {
-        return (Boolean)readProperty(ACTIVE_PROPERTY);
+        return (Boolean)readProperty("active");
     }
 
     public void setCanManageUsers(Boolean canManageUsers) {
-        writeProperty(CAN_MANAGE_USERS_PROPERTY, canManageUsers);
+        writeProperty("canManageUsers", canManageUsers);
     }
     public Boolean getCanManageUsers() {
-        return (Boolean)readProperty(CAN_MANAGE_USERS_PROPERTY);
+        return (Boolean)readProperty("canManageUsers");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setEmail(String email) {
-        writeProperty(EMAIL_PROPERTY, email);
+        writeProperty("email", email);
     }
     public String getEmail() {
-        return (String)readProperty(EMAIL_PROPERTY);
+        return (String)readProperty("email");
     }
 
     public void setIsRoot(Boolean isRoot) {
-        writeProperty(IS_ROOT_PROPERTY, isRoot);
+        writeProperty("isRoot", isRoot);
     }
     public Boolean getIsRoot() {
-        return (Boolean)readProperty(IS_ROOT_PROPERTY);
+        return (Boolean)readProperty("isRoot");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setNickname(String nickname) {
-        writeProperty(NICKNAME_PROPERTY, nickname);
+        writeProperty("nickname", nickname);
     }
     public String getNickname() {
-        return (String)readProperty(NICKNAME_PROPERTY);
+        return (String)readProperty("nickname");
     }
 
     public void setPasswordHash(String passwordHash) {
-        writeProperty(PASSWORD_HASH_PROPERTY, passwordHash);
+        writeProperty("passwordHash", passwordHash);
     }
     public String getPasswordHash() {
-        return (String)readProperty(PASSWORD_HASH_PROPERTY);
+        return (String)readProperty("passwordHash");
     }
 
     public void setPasswordSalt(String passwordSalt) {
-        writeProperty(PASSWORD_SALT_PROPERTY, passwordSalt);
+        writeProperty("passwordSalt", passwordSalt);
     }
     public String getPasswordSalt() {
-        return (String)readProperty(PASSWORD_SALT_PROPERTY);
+        return (String)readProperty("passwordSalt");
     }
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
-        setToOneTarget(NATURAL_LANGUAGE_PROPERTY, naturalLanguage, true);
+        setToOneTarget("naturalLanguage", naturalLanguage, true);
     }
 
     public NaturalLanguage getNaturalLanguage() {
-        return (NaturalLanguage)readProperty(NATURAL_LANGUAGE_PROPERTY);
+        return (NaturalLanguage)readProperty("naturalLanguage");
     }
 
 
     public void addToPermissionUserPkgs(PermissionUserPkg obj) {
-        addToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+        addToManyTarget("permissionUserPkgs", obj, true);
     }
     public void removeFromPermissionUserPkgs(PermissionUserPkg obj) {
-        removeToManyTarget(PERMISSION_USER_PKGS_PROPERTY, obj, true);
+        removeToManyTarget("permissionUserPkgs", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PermissionUserPkg> getPermissionUserPkgs() {
-        return (List<PermissionUserPkg>)readProperty(PERMISSION_USER_PKGS_PROPERTY);
+        return (List<PermissionUserPkg>)readProperty("permissionUserPkgs");
     }
 
 
     public void addToUserPasswordResetTokens(UserPasswordResetToken obj) {
-        addToManyTarget(USER_PASSWORD_RESET_TOKENS_PROPERTY, obj, true);
+        addToManyTarget("userPasswordResetTokens", obj, true);
     }
     public void removeFromUserPasswordResetTokens(UserPasswordResetToken obj) {
-        removeToManyTarget(USER_PASSWORD_RESET_TOKENS_PROPERTY, obj, true);
+        removeToManyTarget("userPasswordResetTokens", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<UserPasswordResetToken> getUserPasswordResetTokens() {
-        return (List<UserPasswordResetToken>)readProperty(USER_PASSWORD_RESET_TOKENS_PROPERTY);
+        return (List<UserPasswordResetToken>)readProperty("userPasswordResetTokens");
     }
 
 

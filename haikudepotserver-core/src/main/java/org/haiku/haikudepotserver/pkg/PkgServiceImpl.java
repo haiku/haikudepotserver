@@ -16,8 +16,6 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.OptimisticLockException;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.*;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -107,17 +105,13 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != architectures && !architectures.isEmpty(), "the architectures must be provided and must not be empty");
         Preconditions.checkArgument(null != repository, "the repository must be provided");
 
-        List<Expression> expressions = new ArrayList<>();
-        expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg));
-        expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
-        expressions.add(ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE));
-        expressions.add(ExpressionFactory.inExp(PkgVersion.ARCHITECTURE_PROPERTY, architectures));
-        expressions.add(ExpressionFactory.matchExp(
-                PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
-                repository));
-
-        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
-        return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
+        return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)
+                .where(PkgVersion.PKG.eq(pkg))
+                .and(PkgVersion.ACTIVE.isTrue())
+                .and(PkgVersion.IS_LATEST.isTrue())
+                .and(PkgVersion.ARCHITECTURE.in(architectures))
+                .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).eq(repository))
+                .selectOne(context));
     }
 
     /**
@@ -136,13 +130,10 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != pkg, "the package must be supplied");
         Preconditions.checkArgument(null != architecture, "the architecture must be supplied");
 
-        List<PkgVersion> pkgVersions = (List<PkgVersion>) context.performQuery(new SelectQuery(
-                PkgVersion.class,
-                ExpressionHelper.andAll(ImmutableList.of(
-                        ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg),
-                        ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture)
-                ))
-        ));
+        List<PkgVersion> pkgVersions = ObjectSelect.query(PkgVersion.class)
+                .where(PkgVersion.PKG.eq(pkg))
+                .and(PkgVersion.ARCHITECTURE.eq(architecture))
+                .select(context);
 
         if(!pkgVersions.isEmpty()) {
 
@@ -194,20 +185,14 @@ public class PkgServiceImpl implements PkgService {
                     context,
                     Architecture.CODE_SOURCE).get();
 
-            SelectQuery query = new SelectQuery(
-                    PkgVersion.class,
-                    ExpressionHelper.andAll(ImmutableList.of(
-                            ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkgSourceOptional.get()),
-                            ExpressionFactory.matchExp(
-                                    PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
-                                    pkgVersion.getRepositorySource().getRepository()),
-                            ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE),
-                            ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, sourceArchitecture),
-                            ExpressionHelper.toExpression(pkgVersion.toVersionCoordinates(), null)
-                    ))
-            );
-
-            return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
+            return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)
+                    .where(PkgVersion.PKG.eq(pkgSourceOptional.get()))
+                    .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY)
+                            .eq(pkgVersion.getRepositorySource().getRepository()))
+                    .and(PkgVersion.ACTIVE.isTrue())
+                    .and(PkgVersion.ARCHITECTURE.eq(sourceArchitecture))
+                    .and(ExpressionHelper.toExpression(pkgVersion.toVersionCoordinates(), null))
+                    .selectOne(context));
         }
 
         return Optional.empty();
@@ -476,9 +461,9 @@ public class PkgServiceImpl implements PkgService {
         queryBuilder.append(" p WHERE EXISTS(SELECT pv FROM ");
         queryBuilder.append(PkgVersion.class.getSimpleName());
         queryBuilder.append(" pv WHERE pv.");
-        queryBuilder.append(PkgVersion.PKG_PROPERTY);
+        queryBuilder.append(PkgVersion.PKG.getName());
         queryBuilder.append("=p AND pv.");
-        queryBuilder.append(PkgVersion.REPOSITORY_SOURCE_PROPERTY);
+        queryBuilder.append(PkgVersion.REPOSITORY_SOURCE.getName());
         queryBuilder.append("=:repositorySource)");
 
         EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
@@ -525,7 +510,7 @@ public class PkgServiceImpl implements PkgService {
 
         if(!pkgProminenceOptional.isPresent()) {
             PkgProminence pkgProminence = objectContext.newObject(PkgProminence.class);
-            pkg.addToManyTarget(Pkg.PKG_PROMINENCES_PROPERTY, pkgProminence, true);
+            pkg.addToManyTarget(Pkg.PKG_PROMINENCES.getName(), pkgProminence, true);
             pkgProminence.setRepository(repository);
             pkgProminence.setProminence(prominence);
             return pkgProminence;
@@ -607,7 +592,7 @@ public class PkgServiceImpl implements PkgService {
 
         for(PkgPkgCategory pkgPkgCategory : ImmutableList.copyOf(pkg.getPkgPkgCategories())) {
             if(!pkgCategories.contains(pkgPkgCategory.getPkgCategory())) {
-                pkg.removeToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+                pkg.removeToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
                 context.deleteObjects(pkgPkgCategory);
                 didChange = true;
             }
@@ -621,7 +606,7 @@ public class PkgServiceImpl implements PkgService {
         for(PkgCategory pkgCategory : pkgCategories) {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
             pkgPkgCategory.setPkgCategory(pkgCategory);
-            pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+            pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             didChange = true;
         }
 

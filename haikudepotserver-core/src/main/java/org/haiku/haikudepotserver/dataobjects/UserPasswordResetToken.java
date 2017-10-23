@@ -8,12 +8,10 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._UserPasswordResetToken;
-import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,19 +28,16 @@ public class UserPasswordResetToken extends _UserPasswordResetToken {
     public static List<UserPasswordResetToken> findByUser(ObjectContext context, User user) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != user, "the user must be supplied");
-        return context.performQuery(new SelectQuery(
-                UserPasswordResetToken.class,
-                ExpressionFactory.matchExp(UserPasswordResetToken.USER_PROPERTY, user)));
+        return ObjectSelect.query(UserPasswordResetToken.class).where(USER.eq(user)).select(context);
     }
 
     public static Optional<UserPasswordResetToken> getByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
-        return ((List<UserPasswordResetToken>) context.performQuery(new SelectQuery(
-                        UserPasswordResetToken.class,
-                        ExpressionFactory.matchExp(UserPasswordResetToken.CODE_PROPERTY, code))))
-                .stream()
-                .collect(SingleCollector.optional());
+        return Optional.ofNullable(ObjectSelect
+                .query(UserPasswordResetToken.class)
+                .where(CODE.eq(code))
+                .selectOne(context));
     }
 
     /**
@@ -51,10 +46,8 @@ public class UserPasswordResetToken extends _UserPasswordResetToken {
      */
 
     public static boolean hasAny(ObjectContext context) {
-        Preconditions.checkArgument(null!=context, "a context must be provided");
-        SelectQuery query = new SelectQuery(UserPasswordResetToken.class);
-        query.setFetchLimit(1);
-        return 0 != context.performQuery(query).size();
+        Preconditions.checkArgument(null != context, "a context must be provided");
+        return ObjectSelect.query(UserPasswordResetToken.class).count().selectFirst(context) > 0;
     }
 
     @Override
@@ -63,7 +56,7 @@ public class UserPasswordResetToken extends _UserPasswordResetToken {
 
         if(null != getCode()) {
             if(!CODE_PATTERN.matcher(getCode()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,CODE_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, CODE.getName(), "malformed"));
             }
         }
     }

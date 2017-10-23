@@ -121,42 +121,42 @@ public class UserRatingServiceImpl implements UserRatingService {
         whereExpressions.add("ur.user.active = true");
 
         if (!search.getIncludeInactive()) {
-            whereExpressions.add("ur." + UserRating.ACTIVE_PROPERTY + " = true");
+            whereExpressions.add("ur." + UserRating.ACTIVE.getName() + " = true");
         }
 
         if(null != search.getRepository()) {
             parameterAccumulator.add(search.getRepository());
             whereExpressions.add(
                     "ur."
-                            + UserRating.PKG_VERSION_PROPERTY + "."
-                            + PkgVersion.REPOSITORY_SOURCE_PROPERTY + "."
-                            + RepositorySource.REPOSITORY_PROPERTY + " = ?" + parameterAccumulator.size());
+                            + UserRating.PKG_VERSION.getName() + "."
+                            + PkgVersion.REPOSITORY_SOURCE.getName() + "."
+                            + RepositorySource.REPOSITORY.getName() + " = ?" + parameterAccumulator.size());
         }
 
         if (null != search.getDaysSinceCreated()) {
             parameterAccumulator.add(new java.sql.Timestamp(instant.minus(search.getDaysSinceCreated(), ChronoUnit.DAYS).toEpochMilli()));
-            whereExpressions.add("ur." + UserRating.CREATE_TIMESTAMP_PROPERTY + " > ?" + parameterAccumulator.size());
+            whereExpressions.add("ur." + UserRating.CREATE_TIMESTAMP.getName() + " > ?" + parameterAccumulator.size());
         }
 
         if (null != search.getPkg() && null == search.getPkgVersion()) {
             parameterAccumulator.add(search.getPkg());
-            whereExpressions.add("ur." + UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.ACTIVE_PROPERTY + " = true");
-            whereExpressions.add("ur." + UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY + " = ?" + parameterAccumulator.size());
+            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + "." + PkgVersion.ACTIVE.getName() + " = true");
+            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + "." + PkgVersion.PKG.getName() + " = ?" + parameterAccumulator.size());
         }
 
         if (null != search.getArchitecture() && null == search.getPkgVersion()) {
             parameterAccumulator.add(search.getArchitecture());
-            whereExpressions.add("ur." + UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.ARCHITECTURE_PROPERTY + " = ?" + parameterAccumulator.size());
+            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + "." + PkgVersion.ARCHITECTURE.getName() + " = ?" + parameterAccumulator.size());
         }
 
         if (null != search.getPkgVersion()) {
             parameterAccumulator.add(search.getPkgVersion());
-            whereExpressions.add("ur." + UserRating.PKG_VERSION_PROPERTY + " = ?" + parameterAccumulator.size());
+            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + " = ?" + parameterAccumulator.size());
         }
 
         if (null != search.getUser()) {
             parameterAccumulator.add(search.getUser());
-            whereExpressions.add("ur." + UserRating.USER_PROPERTY + " = ?" + parameterAccumulator.size());
+            whereExpressions.add("ur." + UserRating.USER.getName() + " = ?" + parameterAccumulator.size());
         }
 
         return String.join(" AND ", whereExpressions);
@@ -169,7 +169,9 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkNotNull(context);
 
         List<Object> parameters = new ArrayList<>();
-        EJBQLQuery query = new EJBQLQuery("SELECT ur FROM " + UserRating.class.getSimpleName() + " AS ur WHERE " + prepareWhereClause(parameters, context, search) + " ORDER BY ur." + UserRating.CREATE_TIMESTAMP_PROPERTY + " DESC");
+        EJBQLQuery query = new EJBQLQuery("SELECT ur FROM "
+                + UserRating.class.getSimpleName() + " AS ur WHERE "
+                + prepareWhereClause(parameters, context, search)+ " ORDER BY ur." + UserRating.CREATE_TIMESTAMP.getName() + " DESC");
         query.setFetchOffset(search.getOffset());
         query.setFetchLimit(search.getLimit());
 

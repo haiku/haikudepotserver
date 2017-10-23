@@ -8,13 +8,12 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.dataobjects.auto._Architecture;
+import org.haiku.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collection;
@@ -30,10 +29,11 @@ public class Architecture extends _Architecture {
 
     public static List<Architecture> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
-        SelectQuery query = new SelectQuery(Architecture.class);
-        query.addOrdering(Architecture.CODE_PROPERTY, SortOrder.ASCENDING);
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        return (List<Architecture>) context.performQuery(query);
+        return ObjectSelect
+                .query(Architecture.class)
+                .orderBy(Architecture.CODE.asc())
+                .cacheStrategy(QueryCacheStrategy.SHARED_CACHE)
+                .select(context);
     }
 
     public static Optional<Architecture> getByCode(ObjectContext context, final String code) {

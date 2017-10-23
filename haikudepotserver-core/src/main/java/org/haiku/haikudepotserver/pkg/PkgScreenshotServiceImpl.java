@@ -134,12 +134,12 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         screenshot.setHeight(size.height);
         screenshot.setWidth(size.width);
         screenshot.setLength(pngData.length);
-        pkg.addToManyTarget(Pkg.PKG_SCREENSHOTS_PROPERTY, screenshot, true);
+        pkg.addToManyTarget(Pkg.PKG_SCREENSHOTS.getName(), screenshot, true);
 
         PkgScreenshotImage screenshotImage = context.newObject(PkgScreenshotImage.class);
         screenshotImage.setMediaType(png);
         screenshotImage.setData(pngData);
-        screenshot.addToManyTarget(PkgScreenshot.PKG_SCREENSHOT_IMAGES_PROPERTY, screenshotImage, true);
+        screenshot.addToManyTarget(PkgScreenshot.PKG_SCREENSHOT_IMAGES.getName(), screenshotImage, true);
 
         pkg.setModifyTimestamp(new java.util.Date());
 

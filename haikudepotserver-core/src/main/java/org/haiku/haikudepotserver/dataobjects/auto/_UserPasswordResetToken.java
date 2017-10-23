@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -13,32 +14,34 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _UserPasswordResetToken extends AbstractDataObject {
 
-    public static final String CODE_PROPERTY = "code";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String USER_PROPERTY = "user";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<User> USER = Property.create("user", User.class);
+
     public void setCode(String code) {
-        writeProperty(CODE_PROPERTY, code);
+        writeProperty("code", code);
     }
     public String getCode() {
-        return (String)readProperty(CODE_PROPERTY);
+        return (String)readProperty("code");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setUser(User user) {
-        setToOneTarget(USER_PROPERTY, user, true);
+        setToOneTarget("user", user, true);
     }
 
     public User getUser() {
-        return (User)readProperty(USER_PROPERTY);
+        return (User)readProperty("user");
     }
 
 

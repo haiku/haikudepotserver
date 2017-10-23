@@ -100,7 +100,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         boolean activeDidChange = false;
 
         User user = User.getByNickname(context, updateUserRequest.nickname)
-                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY));
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
 
         if (!authorizationService.check(context, authUser, user, Permission.USER_EDIT)) {
             throw new AuthorizationFailureException();
@@ -199,7 +199,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         if(Strings.isNullOrEmpty(createUserRequest.nickname)) {
             throw new ValidationException(
                     new ValidationFailure(
-                            User.NICKNAME_PROPERTY,"required")
+                            User.NICKNAME.getName(), "required")
             );
         }
 
@@ -210,7 +210,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         if(User.getByNickname(context,createUserRequest.nickname).isPresent()) {
             throw new ValidationException(
                     new ValidationFailure(
-                            User.NICKNAME_PROPERTY,"notunique")
+                            User.NICKNAME.getName(), "notunique")
             );
         }
 
@@ -236,7 +236,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         User authUser = obtainAuthenticatedUser(context);
 
         User user = User.getByNickname(context, getUserRequest.nickname)
-                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME_PROPERTY));
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
 
         if(!authorizationService.check(context, authUser, user, Permission.USER_VIEW)) {
             throw new AuthorizationFailureException();

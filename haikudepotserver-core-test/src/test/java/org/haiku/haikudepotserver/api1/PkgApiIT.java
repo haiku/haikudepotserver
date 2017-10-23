@@ -54,13 +54,13 @@ public class PkgApiIT extends AbstractIntegrationTest {
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
                 pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "games").get());
-                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             }
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
                 pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "business").get());
-                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             }
 
             context.commitChanges();

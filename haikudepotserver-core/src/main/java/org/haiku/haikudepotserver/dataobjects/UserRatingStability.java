@@ -9,9 +9,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllUserRatingStabilitiesResult;
 import org.haiku.haikudepotserver.dataobjects.auto._UserRatingStability;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -30,20 +32,16 @@ public class UserRatingStability extends _UserRatingStability implements Coded {
     public static Optional<UserRatingStability> getByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
-        return ((List<UserRatingStability>) context.performQuery(new SelectQuery(
-                        UserRatingStability.class,
-                        ExpressionFactory.matchExp(UserRatingStability.CODE_PROPERTY, code))))
-                .stream()
-                .collect(SingleCollector.optional());
+        return getAll(context).stream().filter((urs) -> urs.getCode().equals(code)).findFirst();
     }
 
     public static List<UserRatingStability> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
-        SelectQuery query = new SelectQuery(UserRatingStability.class);
-        query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
-        return (List<UserRatingStability>) context.performQuery(query);
+        return ObjectSelect.query(UserRatingStability.class)
+                .orderBy(NAME.asc())
+                .sharedCache()
+                .select(context);
     }
-
 
     public String getTitleKey() {
         return String.format("userRatingStability.%s.title", getCode());

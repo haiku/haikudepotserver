@@ -192,8 +192,12 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         // now check that the old authentication no longer works and the new one does work
-        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").isPresent()).isFalse();
-        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "8R3nlp11gX").get()).isEqualTo(user.getObjectId());
+        Assertions.assertThat(
+                authenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").isPresent())
+                .isFalse();
+        Assertions.assertThat(
+                authenticationService.authenticateByNicknameAndPassword("testuser", "8R3nlp11gX").get())
+                .isEqualTo(user.getObjectId());
 
     }
 

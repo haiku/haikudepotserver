@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.LocalizationContent;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -15,72 +16,74 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersionLocalization extends AbstractDataObject {
 
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String DESCRIPTION_LOCALIZATION_CONTENT_PROPERTY = "descriptionLocalizationContent";
-    public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
-    public static final String PKG_VERSION_PROPERTY = "pkgVersion";
-    public static final String SUMMARY_LOCALIZATION_CONTENT_PROPERTY = "summaryLocalizationContent";
-    public static final String TITLE_LOCALIZATION_CONTENT_PROPERTY = "titleLocalizationContent";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<LocalizationContent> DESCRIPTION_LOCALIZATION_CONTENT = Property.create("descriptionLocalizationContent", LocalizationContent.class);
+    public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
+    public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
+    public static final Property<LocalizationContent> SUMMARY_LOCALIZATION_CONTENT = Property.create("summaryLocalizationContent", LocalizationContent.class);
+    public static final Property<LocalizationContent> TITLE_LOCALIZATION_CONTENT = Property.create("titleLocalizationContent", LocalizationContent.class);
+
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setDescriptionLocalizationContent(LocalizationContent descriptionLocalizationContent) {
-        setToOneTarget(DESCRIPTION_LOCALIZATION_CONTENT_PROPERTY, descriptionLocalizationContent, true);
+        setToOneTarget("descriptionLocalizationContent", descriptionLocalizationContent, true);
     }
 
     public LocalizationContent getDescriptionLocalizationContent() {
-        return (LocalizationContent)readProperty(DESCRIPTION_LOCALIZATION_CONTENT_PROPERTY);
+        return (LocalizationContent)readProperty("descriptionLocalizationContent");
     }
 
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
-        setToOneTarget(NATURAL_LANGUAGE_PROPERTY, naturalLanguage, true);
+        setToOneTarget("naturalLanguage", naturalLanguage, true);
     }
 
     public NaturalLanguage getNaturalLanguage() {
-        return (NaturalLanguage)readProperty(NATURAL_LANGUAGE_PROPERTY);
+        return (NaturalLanguage)readProperty("naturalLanguage");
     }
 
 
     public void setPkgVersion(PkgVersion pkgVersion) {
-        setToOneTarget(PKG_VERSION_PROPERTY, pkgVersion, true);
+        setToOneTarget("pkgVersion", pkgVersion, true);
     }
 
     public PkgVersion getPkgVersion() {
-        return (PkgVersion)readProperty(PKG_VERSION_PROPERTY);
+        return (PkgVersion)readProperty("pkgVersion");
     }
 
 
     public void setSummaryLocalizationContent(LocalizationContent summaryLocalizationContent) {
-        setToOneTarget(SUMMARY_LOCALIZATION_CONTENT_PROPERTY, summaryLocalizationContent, true);
+        setToOneTarget("summaryLocalizationContent", summaryLocalizationContent, true);
     }
 
     public LocalizationContent getSummaryLocalizationContent() {
-        return (LocalizationContent)readProperty(SUMMARY_LOCALIZATION_CONTENT_PROPERTY);
+        return (LocalizationContent)readProperty("summaryLocalizationContent");
     }
 
 
     public void setTitleLocalizationContent(LocalizationContent titleLocalizationContent) {
-        setToOneTarget(TITLE_LOCALIZATION_CONTENT_PROPERTY, titleLocalizationContent, true);
+        setToOneTarget("titleLocalizationContent", titleLocalizationContent, true);
     }
 
     public LocalizationContent getTitleLocalizationContent() {
-        return (LocalizationContent)readProperty(TITLE_LOCALIZATION_CONTENT_PROPERTY);
+        return (LocalizationContent)readProperty("titleLocalizationContent");
     }
 
 

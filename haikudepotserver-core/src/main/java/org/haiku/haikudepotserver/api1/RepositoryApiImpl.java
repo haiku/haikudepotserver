@@ -285,7 +285,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     String name = updateRepositoryRequest.name.trim();
 
                     if(0==name.length()) {
-                        throw new ValidationException(new ValidationFailure(Repository.NAME_PROPERTY, "invalid"));
+                        throw new ValidationException(new ValidationFailure(Repository.NAME.getName(), "invalid"));
                     }
 
                     repositoryOptional.get().setName(name);
@@ -331,7 +331,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         // the code must be supplied.
 
         if(Strings.isNullOrEmpty(createRepositoryRequest.code)) {
-            throw new ValidationException(new ValidationFailure(Repository.CODE_PROPERTY, "required"));
+            throw new ValidationException(new ValidationFailure(Repository.CODE.getName(), "required"));
         }
 
         // check to see if there is an existing repository with the same code; non-unique.
@@ -340,7 +340,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             Optional<Repository> repositoryOptional = Repository.getByCode(context, createRepositoryRequest.code);
 
             if(repositoryOptional.isPresent()) {
-                throw new ValidationException(new ValidationFailure(Repository.CODE_PROPERTY, "unique"));
+                throw new ValidationException(new ValidationFailure(Repository.CODE.getName(), "unique"));
             }
         }
 
@@ -459,7 +459,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Optional<RepositorySource> existingRepositorySourceOptional = RepositorySource.getByCode(context, request.code);
 
         if(existingRepositorySourceOptional.isPresent()) {
-            throw new ValidationException(new ValidationFailure(RepositorySource.CODE_PROPERTY, "unique"));
+            throw new ValidationException(new ValidationFailure(RepositorySource.CODE.getName(), "unique"));
         }
 
         RepositorySource repositorySource = context.newObject(RepositorySource.class);

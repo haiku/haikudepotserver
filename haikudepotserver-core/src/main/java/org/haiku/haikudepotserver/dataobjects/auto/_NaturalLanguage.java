@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -10,22 +11,24 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _NaturalLanguage extends AbstractDataObject {
 
-    public static final String CODE_PROPERTY = "code";
-    public static final String IS_POPULAR_PROPERTY = "isPopular";
-    public static final String NAME_PROPERTY = "name";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<Boolean> IS_POPULAR = Property.create("isPopular", Boolean.class);
+    public static final Property<String> NAME = Property.create("name", String.class);
+
     public String getCode() {
-        return (String)readProperty(CODE_PROPERTY);
+        return (String)readProperty("code");
     }
 
     public Boolean getIsPopular() {
-        return (Boolean)readProperty(IS_POPULAR_PROPERTY);
+        return (Boolean)readProperty("isPopular");
     }
 
     public String getName() {
-        return (String)readProperty(NAME_PROPERTY);
+        return (String)readProperty("name");
     }
 
 }

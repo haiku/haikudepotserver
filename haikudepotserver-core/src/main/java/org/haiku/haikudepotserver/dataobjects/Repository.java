@@ -8,9 +8,7 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.query.ObjectIdQuery;
-import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.*;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,8 +38,9 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
     public static Repository get(ObjectContext context, ObjectId objectId) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != objectId, "the objectId must be supplied");
-        Preconditions.checkArgument(objectId.getEntityName().equals(Repository.class.getSimpleName()), "the objectId must be targetting Repository");
-        return ((List<Repository>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
+        Preconditions.checkArgument(objectId.getEntityName().equals(Repository.class.getSimpleName()),
+                "the objectId must be targetting Repository");
+        return SelectById.query(Repository.class, objectId).selectOne(context);
     }
 
     // This approach of getting them all and then filtering them may not work if there are
@@ -58,7 +57,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
 
     public static List<Repository> getAllActive(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
-        return getAll(context).stream().filter(r -> r.getActive()).collect(Collectors.toList());
+        return getAll(context).stream().filter(_Repository::getActive).collect(Collectors.toList());
     }
 
         /**
@@ -67,12 +66,10 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
 
     public static List<Repository> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
-        SelectQuery query = new SelectQuery(Repository.class);
-
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        query.setCacheGroups(HaikuDepot.CacheGroup.REPOSITORY.name());
-
-        return context.performQuery(query);
+        return ObjectSelect.query(Repository.class)
+                .sharedCache()
+                .cacheGroup(HaikuDepot.CacheGroup.REPOSITORY.name())
+                .select(context);
     }
 
     @Override
@@ -90,7 +87,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
 
         if(null != getCode()) {
             if(!AbstractDataObject.CODE_PATTERN.matcher(getCode()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,CODE_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, CODE.getName(), "malformed"));
             }
         }
 
@@ -99,7 +96,7 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
                 new URL(getInformationUrl());
             }
             catch(MalformedURLException mue) {
-                validationResult.addFailure(new BeanValidationFailure(this,INFORMATION_URL_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, INFORMATION_URL.getName(), "malformed"));
             }
         }
 

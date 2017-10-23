@@ -8,10 +8,7 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgUrlType;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -23,10 +20,7 @@ public class PkgUrlType extends _PkgUrlType implements Coded {
 
     public static List<PkgUrlType> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
-        SelectQuery query = new SelectQuery(PkgUrlType.class);
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        query.addOrdering(new Ordering(PkgUrlType.CODE_PROPERTY, SortOrder.ASCENDING));
-        return (List<PkgUrlType>) context.performQuery(query);
+        return ObjectSelect.query(PkgUrlType.class).orderBy(CODE.asc()).sharedCache().select(context);
     }
 
     public static Optional<PkgUrlType> getByCode(ObjectContext context, String code) {

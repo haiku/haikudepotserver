@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Prominence;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -13,36 +14,38 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgProminence extends AbstractDataObject {
 
-    public static final String PKG_PROPERTY = "pkg";
-    public static final String PROMINENCE_PROPERTY = "prominence";
-    public static final String REPOSITORY_PROPERTY = "repository";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<Prominence> PROMINENCE = Property.create("prominence", Prominence.class);
+    public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
+
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 
     public void setProminence(Prominence prominence) {
-        setToOneTarget(PROMINENCE_PROPERTY, prominence, true);
+        setToOneTarget("prominence", prominence, true);
     }
 
     public Prominence getProminence() {
-        return (Prominence)readProperty(PROMINENCE_PROPERTY);
+        return (Prominence)readProperty("prominence");
     }
 
 
     public void setRepository(Repository repository) {
-        setToOneTarget(REPOSITORY_PROPERTY, repository, true);
+        setToOneTarget("repository", repository, true);
     }
 
     public Repository getRepository() {
-        return (Repository)readProperty(REPOSITORY_PROPERTY);
+        return (Repository)readProperty("repository");
     }
 
 

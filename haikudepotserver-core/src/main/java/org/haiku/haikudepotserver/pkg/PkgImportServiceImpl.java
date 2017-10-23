@@ -57,8 +57,7 @@ public class PkgImportServiceImpl implements PkgImportService {
 
         RepositorySource repositorySource = RepositorySource.get(
                 objectContext,
-                repositorySourceObjectId,
-                ObjectIdQuery.CACHE);
+                repositorySourceObjectId);
 
         if(!repositorySource.getActive()) {
             throw new IllegalStateException("it is not possible to import from a repository source that is not active; " + repositorySource);

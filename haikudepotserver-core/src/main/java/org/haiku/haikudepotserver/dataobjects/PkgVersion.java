@@ -9,10 +9,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectIdQuery;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -26,7 +24,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -86,35 +83,23 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
 
-        List<Expression> expressions = new ArrayList<>();
-
-        expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg));
+        ObjectSelect<PkgVersion> select = ObjectSelect.query(PkgVersion.class).where(PKG.eq(pkg));
 
         if(!includeInactive) {
-            expressions.add(ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE));
-            expressions.add(ExpressionFactory.matchExp(
-                    PkgVersion.REPOSITORY_SOURCE_PROPERTY
-                            + "." + RepositorySource.REPOSITORY_PROPERTY
-                            + "." + Repository.ACTIVE_PROPERTY,
-                    Boolean.TRUE));
+            select = select
+                    .and(ACTIVE.isTrue())
+                    .and(REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).dot(Repository.ACTIVE).isTrue());
         }
 
         if (null != repositorySource) {
-            expressions.add(ExpressionFactory.matchExp(
-                    PkgVersion.REPOSITORY_SOURCE_PROPERTY,
-                    repositorySource));
+            select = select.and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource));
         }
 
         if (null != repository) {
-            expressions.add(ExpressionFactory.matchExp(
-                    PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
-                    repository));
+            select = select.and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).eq(repository));
         }
 
-        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
-
-        //noinspection unchecked
-        return (List<PkgVersion>) context.performQuery(query);
+        return select.select(context);
     }
 
     public static Optional<PkgVersion> getForPkg(
@@ -130,17 +115,12 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
         Preconditions.checkArgument(null != versionCoordinates && null!=versionCoordinates.getMajor(), "missing or malformed version coordinates");
         Preconditions.checkArgument(null != repository, "the repository is required to lookup a package version");
 
-        List<Expression> expressions = new ArrayList<>();
-
-        expressions.add(ExpressionHelper.toExpression(versionCoordinates));
-        expressions.add(ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY, pkg));
-        expressions.add(ExpressionFactory.matchExp(PkgVersion.ARCHITECTURE_PROPERTY, architecture));
-        expressions.add(ExpressionFactory.matchExp(
-                PkgVersion.REPOSITORY_SOURCE_PROPERTY + "." + RepositorySource.REPOSITORY_PROPERTY,
-                repository));
-
-        SelectQuery query = new SelectQuery(PkgVersion.class, ExpressionHelper.andAll(expressions));
-        return ((List<PkgVersion>) context.performQuery(query)).stream().collect(SingleCollector.optional());
+        return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)
+                .where(ExpressionHelper.toExpression(versionCoordinates))
+                .and(PKG.eq(pkg))
+                .and(ARCHITECTURE.eq(architecture))
+                .and(REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).eq(repository))
+                .selectOne(context));
     }
 
     @Override
@@ -167,36 +147,36 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
 
         if (null != getMajor()) {
             if (!MAJOR_PATTERN.matcher(getMajor()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this, MAJOR_PROPERTY, "malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, MAJOR.getName(), "malformed"));
             }
         }
 
         if (null != getMinor()) {
             if (!MINOR_PATTERN.matcher(getMinor()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this, MINOR_PROPERTY, "malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, MINOR.getName(), "malformed"));
             }
         }
 
         if (null != getMicro()) {
             if (!MICRO_PATTERN.matcher(getMicro()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this, MICRO_PROPERTY, "malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, MICRO.getName(), "malformed"));
             }
         }
 
         if (null != getPreRelease()) {
             if (!PRE_RELEASE_PATTERN.matcher(getPreRelease()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this, PRE_RELEASE_PROPERTY, "malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, PRE_RELEASE.getName(), "malformed"));
             }
         }
 
         if (null != getRevision()) {
             if (getRevision() <= 0) {
-                validationResult.addFailure(new BeanValidationFailure(this, REVISION_PROPERTY, "lessThanEqualZero"));
+                validationResult.addFailure(new BeanValidationFailure(this, REVISION.getName(), "lessThanEqualZero"));
             }
         }
 
         if (getViewCounter() < 0) {
-            validationResult.addFailure(new BeanValidationFailure(this, VIEW_COUNTER_PROPERTY, "min"));
+            validationResult.addFailure(new BeanValidationFailure(this, VIEW_COUNTER.getName(), "min"));
         }
 
     }

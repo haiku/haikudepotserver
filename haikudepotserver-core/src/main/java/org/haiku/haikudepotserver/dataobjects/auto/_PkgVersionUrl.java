@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PkgUrlType;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -12,42 +13,44 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersionUrl extends AbstractDataObject {
 
-    public static final String NAME_PROPERTY = "name";
-    public static final String URL_PROPERTY = "url";
-    public static final String PKG_URL_TYPE_PROPERTY = "pkgUrlType";
-    public static final String PKG_VERSION_PROPERTY = "pkgVersion";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<String> URL = Property.create("url", String.class);
+    public static final Property<PkgUrlType> PKG_URL_TYPE = Property.create("pkgUrlType", PkgUrlType.class);
+    public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
+
     public void setName(String name) {
-        writeProperty(NAME_PROPERTY, name);
+        writeProperty("name", name);
     }
     public String getName() {
-        return (String)readProperty(NAME_PROPERTY);
+        return (String)readProperty("name");
     }
 
     public void setUrl(String url) {
-        writeProperty(URL_PROPERTY, url);
+        writeProperty("url", url);
     }
     public String getUrl() {
-        return (String)readProperty(URL_PROPERTY);
+        return (String)readProperty("url");
     }
 
     public void setPkgUrlType(PkgUrlType pkgUrlType) {
-        setToOneTarget(PKG_URL_TYPE_PROPERTY, pkgUrlType, true);
+        setToOneTarget("pkgUrlType", pkgUrlType, true);
     }
 
     public PkgUrlType getPkgUrlType() {
-        return (PkgUrlType)readProperty(PKG_URL_TYPE_PROPERTY);
+        return (PkgUrlType)readProperty("pkgUrlType");
     }
 
 
     public void setPkgVersion(PkgVersion pkgVersion) {
-        setToOneTarget(PKG_VERSION_PROPERTY, pkgVersion, true);
+        setToOneTarget("pkgVersion", pkgVersion, true);
     }
 
     public PkgVersion getPkgVersion() {
-        return (PkgVersion)readProperty(PKG_VERSION_PROPERTY);
+        return (PkgVersion)readProperty("pkgVersion");
     }
 
 

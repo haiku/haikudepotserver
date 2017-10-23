@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.List;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
@@ -15,47 +16,49 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgIcon extends AbstractDataObject {
 
-    public static final String SIZE_PROPERTY = "size";
-    public static final String MEDIA_TYPE_PROPERTY = "mediaType";
-    public static final String PKG_PROPERTY = "pkg";
-    public static final String PKG_ICON_IMAGES_PROPERTY = "pkgIconImages";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Integer> SIZE = Property.create("size", Integer.class);
+    public static final Property<MediaType> MEDIA_TYPE = Property.create("mediaType", MediaType.class);
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<List<PkgIconImage>> PKG_ICON_IMAGES = Property.create("pkgIconImages", List.class);
+
     public void setSize(Integer size) {
-        writeProperty(SIZE_PROPERTY, size);
+        writeProperty("size", size);
     }
     public Integer getSize() {
-        return (Integer)readProperty(SIZE_PROPERTY);
+        return (Integer)readProperty("size");
     }
 
     public void setMediaType(MediaType mediaType) {
-        setToOneTarget(MEDIA_TYPE_PROPERTY, mediaType, true);
+        setToOneTarget("mediaType", mediaType, true);
     }
 
     public MediaType getMediaType() {
-        return (MediaType)readProperty(MEDIA_TYPE_PROPERTY);
+        return (MediaType)readProperty("mediaType");
     }
 
 
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 
     public void addToPkgIconImages(PkgIconImage obj) {
-        addToManyTarget(PKG_ICON_IMAGES_PROPERTY, obj, true);
+        addToManyTarget("pkgIconImages", obj, true);
     }
     public void removeFromPkgIconImages(PkgIconImage obj) {
-        removeToManyTarget(PKG_ICON_IMAGES_PROPERTY, obj, true);
+        removeToManyTarget("pkgIconImages", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgIconImage> getPkgIconImages() {
-        return (List<PkgIconImage>)readProperty(PKG_ICON_IMAGES_PROPERTY);
+        return (List<PkgIconImage>)readProperty("pkgIconImages");
     }
 
 

@@ -166,8 +166,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                     ObjectContext removalContext = serverRuntime.newContext();
                     RepositorySource removalRepositorySource = RepositorySource.get(
                             removalContext,
-                            repositorySource.getObjectId(),
-                            ObjectIdQuery.CACHE);
+                            repositorySource.getObjectId());
 
                     int changes = pkgService.deactivatePkgVersionsForPkgAssociatedWithRepositorySource(
                             removalContext,

@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -13,40 +14,42 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgChangelog extends AbstractDataObject {
 
-    public static final String CONTENT_PROPERTY = "content";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String PKG_PROPERTY = "pkg";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> CONTENT = Property.create("content", String.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+
     public void setContent(String content) {
-        writeProperty(CONTENT_PROPERTY, content);
+        writeProperty("content", content);
     }
     public String getContent() {
-        return (String)readProperty(CONTENT_PROPERTY);
+        return (String)readProperty("content");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 

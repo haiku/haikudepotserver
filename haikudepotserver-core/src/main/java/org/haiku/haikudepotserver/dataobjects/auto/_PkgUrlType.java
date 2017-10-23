@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -10,12 +11,14 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgUrlType extends AbstractDataObject {
 
-    public static final String CODE_PROPERTY = "code";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> CODE = Property.create("code", String.class);
+
     public String getCode() {
-        return (String)readProperty(CODE_PROPERTY);
+        return (String)readProperty("code");
     }
 
 }

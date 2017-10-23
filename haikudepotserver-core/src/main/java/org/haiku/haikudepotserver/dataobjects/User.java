@@ -11,10 +11,9 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectIdQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -42,10 +41,7 @@ public class User extends _User implements CreateAndModifyTimestamped {
     public static List<User> findByEmail(ObjectContext context, String email) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "the email must be supplied");
-        return context.performQuery(new SelectQuery(
-                User.class,
-                ExpressionFactory.matchExp(User.EMAIL_PROPERTY, email)
-        ));
+        return ObjectSelect.query(User.class).where(EMAIL.eq(email)).select(context);
     }
 
     public static User getByObjectId(ObjectContext context, ObjectId objectId) {
@@ -71,17 +67,10 @@ public class User extends _User implements CreateAndModifyTimestamped {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(nickname));
 
-        SelectQuery query = new SelectQuery(User.class, ExpressionFactory.matchExp(User.NICKNAME_PROPERTY, nickname));
-        query.setCacheGroups(HaikuDepot.CacheGroup.USER.name());
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-
-        List<User> users = context.performQuery(query);
-
-        switch(users.size()) {
-            case 0: return Optional.empty();
-            case 1: return Optional.of(users.get(0));
-            default: throw new IllegalStateException("found more than one user for nickname; " + nickname);
-        }
+        return Optional.ofNullable(ObjectSelect.query(User.class).where(NICKNAME.eq(nickname))
+                .sharedCache()
+                .cacheGroup(HaikuDepot.CacheGroup.USER.name())
+                .selectOne(context));
     }
 
     // configured as a listener method in the model.
@@ -117,19 +106,19 @@ public class User extends _User implements CreateAndModifyTimestamped {
 
         if(null != getNickname()) {
             if(!NICKNAME_PATTERN.matcher(getNickname()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,NICKNAME_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, NICKNAME.getName(), "malformed"));
             }
         }
 
         if(null != getPasswordHash()) {
             if(!PASSWORDHASH_PATTERN.matcher(getPasswordHash()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,PASSWORD_HASH_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, PASSWORD_HASH.getName(), "malformed"));
             }
         }
 
         if(null != getPasswordSalt()) {
             if(!PASSWORDSALT_PATTERN.matcher(getPasswordSalt()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,PASSWORD_HASH_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, PASSWORD_HASH.getName(), "malformed"));
             }
         }
 
@@ -139,7 +128,7 @@ public class User extends _User implements CreateAndModifyTimestamped {
                 internetAddress.validate();
             }
             catch(AddressException ae) {
-                validationResult.addFailure(new BeanValidationFailure(this,EMAIL_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, EMAIL.getName(), "malformed"));
             }
         }
 

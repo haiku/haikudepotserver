@@ -13,23 +13,17 @@ import com.rometools.rome.feed.synd.SyndContentImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
+import org.apache.cayenne.query.ObjectSelect;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -48,13 +42,13 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
     private final char STAR_HOLLOW = '.'; // '\u2606';
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @Value("${baseurl}")
-    String baseUrl;
+    private String baseUrl;
 
     @Resource
-    MessageSource messageSource;
+    private MessageSource messageSource;
 
     /**
      * <p>Produces a string containing a list of stars; either hollow or filled to indicate the user rating from
@@ -102,41 +96,19 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
                 return Collections.emptyList();
             }
 
-            List<Expression> expressions = new ArrayList<>();
+            ObjectSelect<UserRating> objectSelect = ObjectSelect.query(UserRating.class)
+                    .where(UserRating.ACTIVE.isTrue())
+                    .and(UserRating.PKG_VERSION.dot(PkgVersion.ACTIVE).isTrue())
+                    .and(UserRating.PKG_VERSION.dot(PkgVersion.PKG).dot(Pkg.ACTIVE).isTrue())
+                    .statementFetchSize(specification.getLimit())
+                    .orderBy(UserRating.CREATE_TIMESTAMP.desc());
 
             if(null!=specification.getPkgNames()) {
-                expressions.add(ExpressionFactory.inExp(
-                                UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
-                                specification.getPkgNames())
-                );
+                objectSelect.and(
+                        UserRating.PKG_VERSION.dot(PkgVersion.PKG).dot(Pkg.NAME).in(specification.getPkgNames()));
             }
 
-            expressions.add(ExpressionFactory.matchExp(
-                            UserRating.ACTIVE_PROPERTY,
-                            Boolean.TRUE)
-            );
-
-            expressions.add(ExpressionFactory.matchExp(
-                            UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.ACTIVE_PROPERTY,
-                            Boolean.TRUE)
-            );
-
-            expressions.add(ExpressionFactory.matchExp(
-                            UserRating.PKG_VERSION_PROPERTY + "." + PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY,
-                            Boolean.TRUE)
-            );
-
-            SelectQuery query = new SelectQuery(
-                    UserRating.class,
-                    ExpressionHelper.andAll(expressions));
-
-            query.addOrdering(new Ordering(
-                    UserRating.CREATE_TIMESTAMP_PROPERTY,
-                    SortOrder.DESCENDING));
-
-            query.setFetchLimit(specification.getLimit());
-
-            List<UserRating> userRatings = serverRuntime.newContext().performQuery(query);
+            List<UserRating> userRatings = objectSelect.select(serverRuntime.newContext());
 
             return userRatings
                     .stream()

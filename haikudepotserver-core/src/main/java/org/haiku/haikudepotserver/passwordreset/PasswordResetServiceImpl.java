@@ -8,13 +8,13 @@ package org.haiku.haikudepotserver.passwordreset;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
@@ -73,7 +73,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             String templateLeafName,
             NaturalLanguage naturalLanguage) throws PasswordResetException {
 
-        BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
+        BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
 
         try {
             StringWriter writer = new StringWriter();
@@ -235,13 +235,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         ObjectContext context = serverRuntime.newContext();
         Instant now = Instant.now();
 
-        SelectQuery query = new SelectQuery(
-                UserPasswordResetToken.class,
-                ExpressionFactory.lessExp(
-                        UserPasswordResetToken.CREATE_TIMESTAMP_PROPERTY,
-                        new java.util.Date(now.minus(timeToLiveHours, ChronoUnit.HOURS).toEpochMilli())));
-
-        List<UserPasswordResetToken> tokens = (List<UserPasswordResetToken>) context.performQuery(query);
+        List<UserPasswordResetToken> tokens = ObjectSelect.query(UserPasswordResetToken.class)
+                .where(UserPasswordResetToken.CREATE_TIMESTAMP
+                        .lt(new java.util.Date(now.minus(timeToLiveHours, ChronoUnit.HOURS).toEpochMilli())))
+                .select(context);
 
         if(tokens.isEmpty()) {
             LOGGER.debug("no expired tokens to delete");

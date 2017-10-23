@@ -6,18 +6,15 @@
 package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionPayloadLengthPopulationJobSpecification;
 import org.haiku.haikudepotserver.support.URLHelper;
-import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,24 +48,13 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
         // we want to fetch the ObjectIds of PkgVersions that need to be handled.
 
-        List<PkgVersion> pkgVersions;
-
-        {
-            SelectQuery query = new SelectQuery(
-                    PkgVersion.class,
-                    ExpressionHelper.andAll(ImmutableList.of(
-                                    ExpressionFactory.matchExp(PkgVersion.ACTIVE_PROPERTY, Boolean.TRUE),
-                                    ExpressionFactory.matchExp(PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY, Boolean.TRUE),
-                                    ExpressionFactory.matchExp(PkgVersion.IS_LATEST_PROPERTY, Boolean.TRUE),
-                                    ExpressionFactory.matchExp(PkgVersion.PAYLOAD_LENGTH_PROPERTY, null)
-                            )
-                    )
-            );
-
-            query.setPageSize(50);
-
-            pkgVersions = context.performQuery(query);
-        }
+        List<PkgVersion> pkgVersions = ObjectSelect.query(PkgVersion.class)
+                .where(PkgVersion.ACTIVE.isTrue())
+                .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                .and(PkgVersion.IS_LATEST.isTrue())
+                .and(PkgVersion.PAYLOAD_LENGTH.isNull())
+                .pageSize(50)
+                .select(context);
 
         LOGGER.info("did find {} package versions that need payload lengths to be populated", pkgVersions.size());
 

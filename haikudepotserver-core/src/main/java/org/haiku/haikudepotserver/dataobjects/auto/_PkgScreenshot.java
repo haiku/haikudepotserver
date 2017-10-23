@@ -3,6 +3,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -15,85 +16,87 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgScreenshot extends AbstractDataObject {
 
-    public static final String CODE_PROPERTY = "code";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String HEIGHT_PROPERTY = "height";
-    public static final String LENGTH_PROPERTY = "length";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String ORDERING_PROPERTY = "ordering";
-    public static final String WIDTH_PROPERTY = "width";
-    public static final String PKG_PROPERTY = "pkg";
-    public static final String PKG_SCREENSHOT_IMAGES_PROPERTY = "pkgScreenshotImages";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Integer> HEIGHT = Property.create("height", Integer.class);
+    public static final Property<Integer> LENGTH = Property.create("length", Integer.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Integer> ORDERING = Property.create("ordering", Integer.class);
+    public static final Property<Integer> WIDTH = Property.create("width", Integer.class);
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<List<PkgScreenshotImage>> PKG_SCREENSHOT_IMAGES = Property.create("pkgScreenshotImages", List.class);
+
     public void setCode(String code) {
-        writeProperty(CODE_PROPERTY, code);
+        writeProperty("code", code);
     }
     public String getCode() {
-        return (String)readProperty(CODE_PROPERTY);
+        return (String)readProperty("code");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setHeight(Integer height) {
-        writeProperty(HEIGHT_PROPERTY, height);
+        writeProperty("height", height);
     }
     public Integer getHeight() {
-        return (Integer)readProperty(HEIGHT_PROPERTY);
+        return (Integer)readProperty("height");
     }
 
     public void setLength(Integer length) {
-        writeProperty(LENGTH_PROPERTY, length);
+        writeProperty("length", length);
     }
     public Integer getLength() {
-        return (Integer)readProperty(LENGTH_PROPERTY);
+        return (Integer)readProperty("length");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setOrdering(Integer ordering) {
-        writeProperty(ORDERING_PROPERTY, ordering);
+        writeProperty("ordering", ordering);
     }
     public Integer getOrdering() {
-        return (Integer)readProperty(ORDERING_PROPERTY);
+        return (Integer)readProperty("ordering");
     }
 
     public void setWidth(Integer width) {
-        writeProperty(WIDTH_PROPERTY, width);
+        writeProperty("width", width);
     }
     public Integer getWidth() {
-        return (Integer)readProperty(WIDTH_PROPERTY);
+        return (Integer)readProperty("width");
     }
 
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 
     public void addToPkgScreenshotImages(PkgScreenshotImage obj) {
-        addToManyTarget(PKG_SCREENSHOT_IMAGES_PROPERTY, obj, true);
+        addToManyTarget("pkgScreenshotImages", obj, true);
     }
     public void removeFromPkgScreenshotImages(PkgScreenshotImage obj) {
-        removeToManyTarget(PKG_SCREENSHOT_IMAGES_PROPERTY, obj, true);
+        removeToManyTarget("pkgScreenshotImages", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgScreenshotImage> getPkgScreenshotImages() {
-        return (List<PkgScreenshotImage>)readProperty(PKG_SCREENSHOT_IMAGES_PROPERTY);
+        return (List<PkgScreenshotImage>)readProperty("pkgScreenshotImages");
     }
 
 

@@ -34,15 +34,15 @@ public class ExpressionHelper {
 
     public static Expression toExpression(VersionCoordinates coordinates, String prefix) {
         Preconditions.checkNotNull(coordinates);
-        Expression majorE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.MAJOR_PROPERTY), coordinates.getMajor());
-        Expression minorE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.MINOR_PROPERTY), coordinates.getMinor());
-        Expression microE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.MICRO_PROPERTY), coordinates.getMicro());
-        Expression preReleaseE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.PRE_RELEASE_PROPERTY), coordinates.getPreRelease());
-        Expression revisionE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.REVISION_PROPERTY), coordinates.getRevision());
+        Expression majorE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.MAJOR.getName()), coordinates.getMajor());
+        Expression minorE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.MINOR.getName()), coordinates.getMinor());
+        Expression microE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.MICRO.getName()), coordinates.getMicro());
+        Expression preReleaseE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.PRE_RELEASE.getName()), coordinates.getPreRelease());
+        Expression revisionE = ExpressionFactory.matchExp(prefixKey(prefix, PkgVersion.REVISION.getName()), coordinates.getRevision());
         return andAll(ImmutableList.of(majorE,minorE,microE,preReleaseE,revisionE));
     }
 
-    public static Expression andAll(Collection<Expression> expressions) {
+    private static Expression andAll(Collection<Expression> expressions) {
         Preconditions.checkNotNull(expressions);
         Expression result = null;
 

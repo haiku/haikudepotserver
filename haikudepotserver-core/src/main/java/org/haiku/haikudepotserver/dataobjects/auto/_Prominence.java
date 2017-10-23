@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -10,17 +11,19 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _Prominence extends AbstractDataObject {
 
-    public static final String NAME_PROPERTY = "name";
-    public static final String ORDERING_PROPERTY = "ordering";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<Integer> ORDERING = Property.create("ordering", Integer.class);
+
     public String getName() {
-        return (String)readProperty(NAME_PROPERTY);
+        return (String)readProperty("name");
     }
 
     public Integer getOrdering() {
-        return (Integer)readProperty(ORDERING_PROPERTY);
+        return (Integer)readProperty("ordering");
     }
 
 }

@@ -196,7 +196,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             pkgLocalization.setTitle(title);
             pkgLocalization.setSummary(summary);
             pkgLocalization.setDescription(description);
-            pkg.addToManyTarget(_Pkg.PKG_LOCALIZATIONS_PROPERTY, pkgLocalization, true);
+            pkg.addToManyTarget(_Pkg.PKG_LOCALIZATIONS.getName(), pkgLocalization, true);
             return pkgLocalization;
         }
 
@@ -277,7 +277,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         if (localizedStrings.isEmpty()) {
             if(pkgVersionLocalizationOptional.isPresent()) {
                 pkgVersion.removeToManyTarget(
-                        PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY,
+                        PkgVersion.PKG_VERSION_LOCALIZATIONS.getName(),
                         pkgVersionLocalizationOptional.get(),
                         true);
 
@@ -293,7 +293,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             if (!pkgVersionLocalizationOptional.isPresent()) {
                 pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
                 pkgVersionLocalization.setNaturalLanguage(naturalLanguage);
-                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS_PROPERTY, pkgVersionLocalization, true);
+                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS.getName(), pkgVersionLocalization, true);
             } else {
                 pkgVersionLocalization = pkgVersionLocalizationOptional.get();
             }

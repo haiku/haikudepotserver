@@ -8,10 +8,7 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -25,10 +22,7 @@ public class PkgCategory extends _PkgCategory implements Coded {
 
     public static List<PkgCategory> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
-        SelectQuery query = new SelectQuery(PkgCategory.class);
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
-        return (List<PkgCategory>) context.performQuery(query);
+        return ObjectSelect.query(PkgCategory.class).sharedCache().orderBy(NAME.asc()).select(context);
     }
 
     public static Optional<PkgCategory> getByCode(ObjectContext context, final String code) {

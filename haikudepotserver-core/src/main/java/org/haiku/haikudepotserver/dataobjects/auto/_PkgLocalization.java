@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -14,66 +15,68 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgLocalization extends AbstractDataObject {
 
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String DESCRIPTION_PROPERTY = "description";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String SUMMARY_PROPERTY = "summary";
-    public static final String TITLE_PROPERTY = "title";
-    public static final String NATURAL_LANGUAGE_PROPERTY = "naturalLanguage";
-    public static final String PKG_PROPERTY = "pkg";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<String> DESCRIPTION = Property.create("description", String.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<String> SUMMARY = Property.create("summary", String.class);
+    public static final Property<String> TITLE = Property.create("title", String.class);
+    public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setDescription(String description) {
-        writeProperty(DESCRIPTION_PROPERTY, description);
+        writeProperty("description", description);
     }
     public String getDescription() {
-        return (String)readProperty(DESCRIPTION_PROPERTY);
+        return (String)readProperty("description");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setSummary(String summary) {
-        writeProperty(SUMMARY_PROPERTY, summary);
+        writeProperty("summary", summary);
     }
     public String getSummary() {
-        return (String)readProperty(SUMMARY_PROPERTY);
+        return (String)readProperty("summary");
     }
 
     public void setTitle(String title) {
-        writeProperty(TITLE_PROPERTY, title);
+        writeProperty("title", title);
     }
     public String getTitle() {
-        return (String)readProperty(TITLE_PROPERTY);
+        return (String)readProperty("title");
     }
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
-        setToOneTarget(NATURAL_LANGUAGE_PROPERTY, naturalLanguage, true);
+        setToOneTarget("naturalLanguage", naturalLanguage, true);
     }
 
     public NaturalLanguage getNaturalLanguage() {
-        return (NaturalLanguage)readProperty(NATURAL_LANGUAGE_PROPERTY);
+        return (NaturalLanguage)readProperty("naturalLanguage");
     }
 
 
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 

@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -12,26 +13,28 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgPkgCategory extends AbstractDataObject {
 
-    public static final String PKG_PROPERTY = "pkg";
-    public static final String PKG_CATEGORY_PROPERTY = "pkgCategory";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<PkgCategory> PKG_CATEGORY = Property.create("pkgCategory", PkgCategory.class);
+
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 
     public void setPkgCategory(PkgCategory pkgCategory) {
-        setToOneTarget(PKG_CATEGORY_PROPERTY, pkgCategory, true);
+        setToOneTarget("pkgCategory", pkgCategory, true);
     }
 
     public PkgCategory getPkgCategory() {
-        return (PkgCategory)readProperty(PKG_CATEGORY_PROPERTY);
+        return (PkgCategory)readProperty("pkgCategory");
     }
 
 

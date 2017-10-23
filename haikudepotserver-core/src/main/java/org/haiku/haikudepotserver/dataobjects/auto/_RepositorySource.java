@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -11,40 +12,42 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _RepositorySource extends AbstractDataObject {
 
-    public static final String ACTIVE_PROPERTY = "active";
-    public static final String CODE_PROPERTY = "code";
-    public static final String URL_PROPERTY = "url";
-    public static final String REPOSITORY_PROPERTY = "repository";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
+    public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<String> URL = Property.create("url", String.class);
+    public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
+
     public void setActive(Boolean active) {
-        writeProperty(ACTIVE_PROPERTY, active);
+        writeProperty("active", active);
     }
     public Boolean getActive() {
-        return (Boolean)readProperty(ACTIVE_PROPERTY);
+        return (Boolean)readProperty("active");
     }
 
     public void setCode(String code) {
-        writeProperty(CODE_PROPERTY, code);
+        writeProperty("code", code);
     }
     public String getCode() {
-        return (String)readProperty(CODE_PROPERTY);
+        return (String)readProperty("code");
     }
 
     public void setUrl(String url) {
-        writeProperty(URL_PROPERTY, url);
+        writeProperty("url", url);
     }
     public String getUrl() {
-        return (String)readProperty(URL_PROPERTY);
+        return (String)readProperty("url");
     }
 
     public void setRepository(Repository repository) {
-        setToOneTarget(REPOSITORY_PROPERTY, repository, true);
+        setToOneTarget("repository", repository, true);
     }
 
     public Repository getRepository() {
-        return (Repository)readProperty(REPOSITORY_PROPERTY);
+        return (Repository)readProperty("repository");
     }
 
 

@@ -3,6 +3,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -14,75 +15,77 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _Publisher extends AbstractDataObject {
 
-    public static final String ACTIVE_PROPERTY = "active";
-    public static final String CODE_PROPERTY = "code";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String EMAIL_PROPERTY = "email";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String NAME_PROPERTY = "name";
-    public static final String SITE_URL_PROPERTY = "siteUrl";
-    public static final String PKGS_PROPERTY = "pkgs";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
+    public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<String> EMAIL = Property.create("email", String.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<String> SITE_URL = Property.create("siteUrl", String.class);
+    public static final Property<List<Pkg>> PKGS = Property.create("pkgs", List.class);
+
     public void setActive(Boolean active) {
-        writeProperty(ACTIVE_PROPERTY, active);
+        writeProperty("active", active);
     }
     public Boolean getActive() {
-        return (Boolean)readProperty(ACTIVE_PROPERTY);
+        return (Boolean)readProperty("active");
     }
 
     public void setCode(String code) {
-        writeProperty(CODE_PROPERTY, code);
+        writeProperty("code", code);
     }
     public String getCode() {
-        return (String)readProperty(CODE_PROPERTY);
+        return (String)readProperty("code");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setEmail(String email) {
-        writeProperty(EMAIL_PROPERTY, email);
+        writeProperty("email", email);
     }
     public String getEmail() {
-        return (String)readProperty(EMAIL_PROPERTY);
+        return (String)readProperty("email");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setName(String name) {
-        writeProperty(NAME_PROPERTY, name);
+        writeProperty("name", name);
     }
     public String getName() {
-        return (String)readProperty(NAME_PROPERTY);
+        return (String)readProperty("name");
     }
 
     public void setSiteUrl(String siteUrl) {
-        writeProperty(SITE_URL_PROPERTY, siteUrl);
+        writeProperty("siteUrl", siteUrl);
     }
     public String getSiteUrl() {
-        return (String)readProperty(SITE_URL_PROPERTY);
+        return (String)readProperty("siteUrl");
     }
 
     public void addToPkgs(Pkg obj) {
-        addToManyTarget(PKGS_PROPERTY, obj, true);
+        addToManyTarget("pkgs", obj, true);
     }
     public void removeFromPkgs(Pkg obj) {
-        removeToManyTarget(PKGS_PROPERTY, obj, true);
+        removeToManyTarget("pkgs", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<Pkg> getPkgs() {
-        return (List<Pkg>)readProperty(PKGS_PROPERTY);
+        return (List<Pkg>)readProperty("pkgs");
     }
 
 

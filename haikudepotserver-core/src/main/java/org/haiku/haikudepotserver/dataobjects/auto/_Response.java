@@ -2,6 +2,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 
 import java.util.Date;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -12,31 +13,33 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _Response extends AbstractDataObject {
 
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String RESPONSE_PROPERTY = "response";
-    public static final String TOKEN_PROPERTY = "token";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<String> RESPONSE = Property.create("response", String.class);
+    public static final Property<String> TOKEN = Property.create("token", String.class);
+
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setResponse(String response) {
-        writeProperty(RESPONSE_PROPERTY, response);
+        writeProperty("response", response);
     }
     public String getResponse() {
-        return (String)readProperty(RESPONSE_PROPERTY);
+        return (String)readProperty("response");
     }
 
     public void setToken(String token) {
-        writeProperty(TOKEN_PROPERTY, token);
+        writeProperty("token", token);
     }
     public String getToken() {
-        return (String)readProperty(TOKEN_PROPERTY);
+        return (String)readProperty("token");
     }
 
 }

@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.Ordering;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.query.SortOrder;
@@ -55,9 +56,10 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
      */
 
     private List<NaturalLanguage> getNaturalLanguages(ObjectContext context) {
-        SelectQuery query = new SelectQuery(NaturalLanguage.class);
-        query.addOrdering(new Ordering(NaturalLanguage.CODE_PROPERTY, SortOrder.ASCENDING));
-        return ((List<NaturalLanguage>) context.performQuery(query))
+        return ObjectSelect
+                .query(NaturalLanguage.class)
+                .orderBy(NaturalLanguage.CODE.asc())
+                .select(context)
                 .stream()
                 .filter(nl -> naturalLanguageService.hasData(nl.getCode()))
                 .collect(Collectors.toList());

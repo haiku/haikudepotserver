@@ -15,11 +15,7 @@ import com.rometools.rome.feed.synd.SyndEntryImpl;
 import com.rometools.utils.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -27,14 +23,12 @@ import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
-import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -69,42 +63,26 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                 return Collections.emptyList();
             }
 
-            List<Expression> expressions = new ArrayList<>();
+            ObjectSelect<PkgVersion> objectSelect = ObjectSelect
+                    .query(PkgVersion.class)
+                    .where(PkgVersion.ACTIVE.isTrue())
+                    .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                    .orderBy(PkgVersion.CREATE_TIMESTAMP.desc())
+                    .limit(specification.getLimit());
 
             if(null!=specification.getPkgNames()) {
-                expressions.add(ExpressionFactory.inExp(
-                                PkgVersion.PKG_PROPERTY + "." + Pkg.NAME_PROPERTY,
-                                specification.getPkgNames())
-                );
+                objectSelect.and(PkgVersion.PKG.dot(Pkg.NAME).in(specification.getPkgNames()));
             }
 
-            expressions.add(ExpressionFactory.matchExp(
-                            PkgVersion.ACTIVE_PROPERTY,
-                            Boolean.TRUE)
-            );
-
-            expressions.add(ExpressionFactory.matchExp(
-                            PkgVersion.PKG_PROPERTY + "." + Pkg.ACTIVE_PROPERTY,
-                            Boolean.TRUE)
-            );
-
-            SelectQuery query = new SelectQuery(
-                    PkgVersion.class,
-                    ExpressionHelper.andAll(expressions));
-
-            query.addOrdering(new Ordering(
-                    PkgVersion.CREATE_TIMESTAMP_PROPERTY,
-                    SortOrder.DESCENDING));
-
-            query.setFetchLimit(specification.getLimit());
-
             ObjectContext context = serverRuntime.newContext();
+
             NaturalLanguage naturalLanguage = Strings.isBlank(specification.getNaturalLanguageCode())
                 ? NaturalLanguage.getEnglish(context)
                     : NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode())
                     .orElseThrow(() -> new IllegalStateException("unable to find natural language; "
                             + specification.getNaturalLanguageCode()));
-            List<PkgVersion> pkgVersions = context.performQuery(query);
+
+            List<PkgVersion> pkgVersions = objectSelect.select(context);
 
             return pkgVersions
                     .stream()

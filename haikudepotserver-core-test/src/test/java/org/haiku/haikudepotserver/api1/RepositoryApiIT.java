@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SelectQuery;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
@@ -63,10 +64,10 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.newContext();
-        Repository repository = (Repository) context.performQuery(new SelectQuery(
-                Repository.class,
-                ExpressionFactory.matchExp(Repository.CODE_PROPERTY, data.repository.getCode())
-        )).stream().collect(SingleCollector.single());
+        Repository repository = ObjectSelect
+                .query(Repository.class)
+                .where(Repository.CODE.eq(data.repository.getCode()))
+                .selectOne(context);
 
         Assertions.assertThat(repository.getActive()).isFalse();
 
@@ -205,7 +206,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         catch(ValidationException ve) {
             Assertions.assertThat(ve.getValidationFailures().size()).isEqualTo(1);
             Assertions.assertThat(ve.getValidationFailures().get(0).getMessage()).isEqualTo("unique");
-            Assertions.assertThat(ve.getValidationFailures().get(0).getProperty()).isEqualTo(Repository.CODE_PROPERTY);
+            Assertions.assertThat(ve.getValidationFailures().get(0).getProperty()).isEqualTo(Repository.CODE.getName());
         }
     }
 

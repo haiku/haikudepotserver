@@ -6,8 +6,7 @@
 package org.haiku.haikudepotserver.dataobjects;
 
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._LocalizationContent;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionCollector;
 
@@ -44,16 +43,15 @@ public class LocalizationContent extends _LocalizationContent {
                 .map(Optional::get)
                 .forEach((lc) -> result.put(lc.getContent(), lc));
 
-        SelectQuery query = new SelectQuery(
-                LocalizationContent.class,
-                contents
+        List<LocalizationContent> fetchedLocalizationContents = ObjectSelect
+                .query(LocalizationContent.class)
+                .where(contents
                         .stream()
                         .filter((c) -> !result.containsKey(c))
-                        .map((c) -> ExpressionFactory.matchExp(LocalizationContent.CONTENT_PROPERTY, c))
-                        .collect(ExpressionCollector.orExp())
-        );
+                        .map(CONTENT::eq)
+                        .collect(ExpressionCollector.orExp()))
+                .select(context);
 
-        List<LocalizationContent> fetchedLocalizationContents = context.performQuery(query);
         fetchedLocalizationContents.forEach((lc) -> result.put(lc.getContent(), lc));
 
         contents

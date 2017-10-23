@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.dataobjects;
 
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SelectQuery;
 import org.haiku.haikudepotserver.dataobjects.auto._Response;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -21,9 +22,12 @@ import java.util.Optional;
 public class Response extends _Response {
 
     public static Optional<Response> getByToken(ObjectContext context, String token) {
-        return ((List<Response>) context.performQuery(new SelectQuery(
-                        Response.class,
-                        ExpressionFactory.matchExp(Response.TOKEN_PROPERTY, token)))).stream().collect(SingleCollector.optional());
+        return ObjectSelect
+                .query(Response.class)
+                .where(Response.TOKEN.eq(token))
+                .select(context)
+                .stream()
+                .collect(SingleCollector.optional());
     }
 
 }

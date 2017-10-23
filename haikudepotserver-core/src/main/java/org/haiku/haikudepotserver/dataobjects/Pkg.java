@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.ExpressionFactory;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
@@ -41,14 +42,12 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         Preconditions.checkArgument(null!=context, "a context must be provided to lookup a package");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name), "a name must be provided to get a package");
 
-        SelectQuery query = new SelectQuery(
-                Pkg.class,
-                ExpressionFactory.matchExp(Pkg.NAME_PROPERTY, name));
-
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        query.setCacheGroups(HaikuDepot.CacheGroup.PKG.name());
-
-        return ((List<Pkg>) context.performQuery(query)).stream().collect(SingleCollector.optional());
+        return Optional.ofNullable(ObjectSelect
+                .query(Pkg.class)
+                .where(NAME.eq(name))
+                .sharedCache()
+                .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
+                .selectOne(context));
     }
 
     @Override
@@ -67,7 +66,7 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
         if(null != getName()) {
             if(!PATTERN_NAME.matcher(getName()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this,NAME_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, NAME.getName(), "malformed"));
             }
         }
 
@@ -112,11 +111,11 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
 
     private List<PkgIcon> getPkgIcons(final MediaType mediaType, final Integer size) {
         Preconditions.checkNotNull(mediaType);
-        return getPkgIcons().stream().filter(pi -> {
-            return pi.getMediaType().equals(mediaType)
-                    && (null == size) == (null == pi.getSize())
-                    && ((null == size) || size.equals(pi.getSize()));
-        }).collect(Collectors.toList());
+        return getPkgIcons().stream().filter(pi ->
+                pi.getMediaType().equals(mediaType)
+                && (null == size) == (null == pi.getSize())
+                && ((null == size) || size.equals(pi.getSize()))
+        ).collect(Collectors.toList());
     }
 
     public void setModifyTimestamp() {
@@ -161,32 +160,29 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
         Preconditions.checkNotNull(codes);
 
         // first check that there are no duplicates.
-        if(codes.stream().collect(Collectors.toSet()).size() != codes.size()) {
+        if(new HashSet<>(codes).size() != codes.size()) {
             throw new IllegalArgumentException("the codes supplied contain duplicates which would interfere with the ordering");
         }
 
         List<PkgScreenshot> screenshots = new ArrayList<>(getPkgScreenshots());
-        Collections.sort(
-                screenshots,
-                (o1, o2) -> {
-                    int o1i = codes.indexOf(o1.getCode());
-                    int o2i = codes.indexOf(o2.getCode());
+        screenshots.sort((o1, o2) -> {
+            int o1i = codes.indexOf(o1.getCode());
+            int o2i = codes.indexOf(o2.getCode());
 
-                    if(-1==o1i && -1==o2i) {
-                        return o1.getCode().compareTo(o2.getCode());
-                    }
+            if (-1 == o1i && -1 == o2i) {
+                return o1.getCode().compareTo(o2.getCode());
+            }
 
-                    if(-1==o1i) {
-                        o1i = Integer.MAX_VALUE;
-                    }
+            if (-1 == o1i) {
+                o1i = Integer.MAX_VALUE;
+            }
 
-                    if(-1==o2i) {
-                        o2i = Integer.MAX_VALUE;
-                    }
+            if (-1 == o2i) {
+                o2i = Integer.MAX_VALUE;
+            }
 
-                    return Integer.compare(o1i,o2i);
-                }
-        );
+            return Integer.compare(o1i, o2i);
+        });
 
         for(int i=0;i<screenshots.size();i++) {
             PkgScreenshot pkgScreenshot = screenshots.get(i);

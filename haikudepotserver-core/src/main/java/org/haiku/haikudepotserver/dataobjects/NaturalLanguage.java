@@ -8,10 +8,7 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
+import org.apache.cayenne.query.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
@@ -38,10 +35,11 @@ public class NaturalLanguage extends _NaturalLanguage {
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
-        SelectQuery query = new SelectQuery(NaturalLanguage.class);
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        query.addOrdering(new Ordering(NAME_PROPERTY, SortOrder.ASCENDING));
-        return (List<NaturalLanguage>) context.performQuery(query);
+        return ObjectSelect
+                .query(NaturalLanguage.class)
+                .orderBy(NaturalLanguage.NAME.asc())
+                .cacheStrategy(QueryCacheStrategy.SHARED_CACHE)
+                .select(context);
     }
 
     public static List<NaturalLanguage> getAllPopular(ObjectContext context) {

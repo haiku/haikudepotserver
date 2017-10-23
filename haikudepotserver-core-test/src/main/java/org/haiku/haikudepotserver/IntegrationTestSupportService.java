@@ -157,7 +157,7 @@ public class IntegrationTestSupportService {
 
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
-            result.pkg1.addToManyTarget(Pkg.PKG_PKG_CATEGORIES_PROPERTY, pkgPkgCategory, true);
+            result.pkg1.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "graphics").get());
         }
 
@@ -307,7 +307,7 @@ public class IntegrationTestSupportService {
 
         if(!aggregateOptional.isPresent()) {
             aggregate = context.newObject(PkgUserRatingAggregate.class);
-            pkg.addToManyTarget(Pkg.PKG_USER_RATING_AGGREGATES_PROPERTY, aggregate, true);
+            pkg.addToManyTarget(Pkg.PKG_USER_RATING_AGGREGATES.getName(), aggregate, true);
             aggregate.setRepository(repository);
         }
         else {

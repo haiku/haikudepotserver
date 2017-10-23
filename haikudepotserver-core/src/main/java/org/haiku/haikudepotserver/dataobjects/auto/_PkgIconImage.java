@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -11,24 +12,26 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgIconImage extends AbstractDataObject {
 
-    public static final String DATA_PROPERTY = "data";
-    public static final String PKG_ICON_PROPERTY = "pkgIcon";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<byte[]> DATA = Property.create("data", byte[].class);
+    public static final Property<PkgIcon> PKG_ICON = Property.create("pkgIcon", PkgIcon.class);
+
     public void setData(byte[] data) {
-        writeProperty(DATA_PROPERTY, data);
+        writeProperty("data", data);
     }
     public byte[] getData() {
-        return (byte[])readProperty(DATA_PROPERTY);
+        return (byte[])readProperty("data");
     }
 
     public void setPkgIcon(PkgIcon pkgIcon) {
-        setToOneTarget(PKG_ICON_PROPERTY, pkgIcon, true);
+        setToOneTarget("pkgIcon", pkgIcon, true);
     }
 
     public PkgIcon getPkgIcon() {
-        return (PkgIcon)readProperty(PKG_ICON_PROPERTY);
+        return (PkgIcon)readProperty("pkgIcon");
     }
 
 

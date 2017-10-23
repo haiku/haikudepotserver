@@ -10,8 +10,7 @@ import com.google.common.io.Files;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -81,7 +80,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
                 repositorySource.setCode("testsrc_xyz");
                 repositorySource.setUrl("file://" + temporaryDir.getAbsolutePath());
-                repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
+                repository.addToManyTarget(Repository.REPOSITORY_SOURCES.getName(), repositorySource, true);
 
                 context.commitChanges();
             }
@@ -98,7 +97,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
                 repositorySource.setCode("testsrc2_xyz");
                 repositorySource.setUrl("file:///noop.hpkr");
-                repository.addToManyTarget(Repository.REPOSITORY_SOURCES_PROPERTY, repositorySource, true);
+                repository.addToManyTarget(Repository.REPOSITORY_SOURCES.getName(), repositorySource, true);
 
                 context.commitChanges();
             }
@@ -165,15 +164,15 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 PkgVersionUrl pkgVersionUrl = context.newObject(PkgVersionUrl.class);
                 pkgVersionUrl.setPkgUrlType(PkgUrlType.getByCode(context, org.haiku.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase()).get());
                 pkgVersionUrl.setUrl("http://noop");
-                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_URLS_PROPERTY, pkgVersionUrl, true);
+                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_URLS.getName(), pkgVersionUrl, true);
 
                 PkgVersionCopyright pkgVersionCopyright = context.newObject(PkgVersionCopyright.class);
                 pkgVersionCopyright.setBody("Norfolk pine");
-                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_COPYRIGHTS_PROPERTY, pkgVersionCopyright, true);
+                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_COPYRIGHTS.getName(), pkgVersionCopyright, true);
 
                 PkgVersionLicense pkgVersionLicense = context.newObject(PkgVersionLicense.class);
                 pkgVersionLicense.setBody("Punga");
-                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LICENSES_PROPERTY, pkgVersionLicense, true);
+                pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LICENSES.getName(), pkgVersionLicense, true);
 
                 context.commitChanges();
 
@@ -214,15 +213,10 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
                 // this one is not in the import and so should be inactive afterwards.
 
-                SelectQuery selectQuery = new SelectQuery(
-                        PkgVersion.class,
-                        ExpressionFactory.matchExp(
-                                PkgVersion.PKG_PROPERTY,
-                                Pkg.tryGetByName(context, "taranaki").get()
-                        )
-                );
-
-                List<PkgVersion> pkgVersions = (List<PkgVersion>) context.performQuery(selectQuery);
+                List<PkgVersion> pkgVersions = ObjectSelect
+                        .query(PkgVersion.class)
+                        .where(PkgVersion.PKG.dot(Pkg.NAME).eq("taranaki"))
+                        .select(context);
 
                 Assertions.assertThat(pkgVersions.size()).isEqualTo(2);
 

@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -11,24 +12,26 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersionLicense extends AbstractDataObject {
 
-    public static final String BODY_PROPERTY = "body";
-    public static final String PKG_VERSION_PROPERTY = "pkgVersion";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> BODY = Property.create("body", String.class);
+    public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
+
     public void setBody(String body) {
-        writeProperty(BODY_PROPERTY, body);
+        writeProperty("body", body);
     }
     public String getBody() {
-        return (String)readProperty(BODY_PROPERTY);
+        return (String)readProperty("body");
     }
 
     public void setPkgVersion(PkgVersion pkgVersion) {
-        setToOneTarget(PKG_VERSION_PROPERTY, pkgVersion, true);
+        setToOneTarget("pkgVersion", pkgVersion, true);
     }
 
     public PkgVersion getPkgVersion() {
-        return (PkgVersion)readProperty(PKG_VERSION_PROPERTY);
+        return (PkgVersion)readProperty("pkgVersion");
     }
 
 

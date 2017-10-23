@@ -34,13 +34,15 @@ public class PkgIcon extends _PkgIcon {
 
         if(com.google.common.net.MediaType.PNG.toString().equals(getMediaType().getCode())) {
             if(null==getSize()) {
-                validationResult.addFailure(new BeanValidationFailure(this,SIZE_PROPERTY,VALIDATION_REQUIREDFORBITMAP));
+                validationResult.addFailure(new BeanValidationFailure(
+                        this, SIZE.getName(), VALIDATION_REQUIREDFORBITMAP));
             }
         }
 
         if(MediaType.MEDIATYPE_HAIKUVECTORICONFILE.equals(getMediaType().getCode())) {
             if(null!=getSize()) {
-                validationResult.addFailure(new BeanValidationFailure(this,SIZE_PROPERTY,VALIDATION_NOTALLOWEDFORVECTOR));
+                validationResult.addFailure(new BeanValidationFailure(
+                        this, SIZE.getName(), VALIDATION_NOTALLOWEDFORVECTOR));
             }
         }
 

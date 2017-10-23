@@ -8,13 +8,11 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
-import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,10 +27,7 @@ public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScree
     public static Optional<PkgScreenshot> tryGetByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
-        List<PkgScreenshot> pkgScreenshots = (List<PkgScreenshot>) context.performQuery(new SelectQuery(
-                PkgScreenshot.class,
-                ExpressionFactory.matchExp(PkgScreenshot.CODE_PROPERTY, code)));
-        return pkgScreenshots.stream().collect(SingleCollector.optional());
+        return Optional.ofNullable(ObjectSelect.query(PkgScreenshot.class).where(CODE.eq(code)).selectOne(context));
     }
 
     public PkgScreenshotImage getPkgScreenshotImage() {
@@ -66,15 +61,15 @@ public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScree
         super.validateForSave(validationResult);
 
         if(getHeight() <= 0) {
-            validationResult.addFailure(new BeanValidationFailure(this,HEIGHT_PROPERTY,"range"));
+            validationResult.addFailure(new BeanValidationFailure(this, HEIGHT.getName(), "range"));
         }
 
         if(getWidth() <= 0) {
-            validationResult.addFailure(new BeanValidationFailure(this,WIDTH_PROPERTY,"range"));
+            validationResult.addFailure(new BeanValidationFailure(this, WIDTH.getName(), "range"));
         }
 
         if(getLength() <= 0) {
-            validationResult.addFailure(new BeanValidationFailure(this,LENGTH_PROPERTY,"range"));
+            validationResult.addFailure(new BeanValidationFailure(this, LENGTH.getName(), "range"));
         }
     }
 

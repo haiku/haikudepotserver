@@ -7,9 +7,7 @@ package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
-import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgUserRatingAggregate;
@@ -33,10 +31,11 @@ public class PkgUserRatingAggregate extends _PkgUserRatingAggregate {
     public static List<PkgUserRatingAggregate> findByPkg(ObjectContext context, Pkg pkg) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "a package is required to identify the pkg user rating aggregates to return");
-        SelectQuery query = new SelectQuery(PkgUserRatingAggregate.class, ExpressionFactory.matchExp(PKG_PROPERTY, pkg));
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        query.setCacheGroups(HaikuDepot.CacheGroup.PKG_USER_RATING_AGGREGATE.name());
-        return (List<PkgUserRatingAggregate>) context.performQuery(query);
+        return ObjectSelect.query(PkgUserRatingAggregate.class)
+                .where(PKG.eq(pkg))
+                .sharedCache()
+                .cacheGroup(HaikuDepot.CacheGroup.PKG_USER_RATING_AGGREGATE.name())
+                .select(context);
     }
 
     @Override
@@ -55,17 +54,18 @@ public class PkgUserRatingAggregate extends _PkgUserRatingAggregate {
 
         if(null!=getDerivedRatingSampleSize()) {
             if(getDerivedRatingSampleSize() <= 0) {
-                validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_SAMPLE_SIZE_PROPERTY,"min"));
+                validationResult.addFailure(
+                        new BeanValidationFailure(this, DERIVED_RATING_SAMPLE_SIZE.getName(), "min"));
             }
         }
 
         if(null!=getDerivedRating()) {
             if(getDerivedRating() < 0) {
-                validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_PROPERTY,"min"));
+                validationResult.addFailure(new BeanValidationFailure(this, DERIVED_RATING.getName(), "min"));
             }
 
             if(getDerivedRating() > 5) {
-                validationResult.addFailure(new BeanValidationFailure(this,DERIVED_RATING_PROPERTY,"max"));
+                validationResult.addFailure(new BeanValidationFailure(this, DERIVED_RATING.getName(), "max"));
             }
         }
 

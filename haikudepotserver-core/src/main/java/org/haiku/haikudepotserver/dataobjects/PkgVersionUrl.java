@@ -23,7 +23,7 @@ public class PkgVersionUrl extends _PkgVersionUrl {
                     new URL(getUrl());
             }
             catch(MalformedURLException mue) {
-                validationResult.addFailure(new BeanValidationFailure(this,URL_PROPERTY,"malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "malformed"));
             }
         }
 

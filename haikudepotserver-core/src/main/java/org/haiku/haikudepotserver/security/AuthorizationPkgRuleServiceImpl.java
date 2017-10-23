@@ -8,9 +8,8 @@ package org.haiku.haikudepotserver.security;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.cayenne.query.SelectQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.Permission;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
@@ -69,7 +68,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
             clauses.add("r.user=?"+parameterAccumulator.size());
 
             if(!specification.getIncludeInactive()) {
-                clauses.add("r.user."+User.ACTIVE_PROPERTY+"=true");
+                clauses.add("r.user." + User.ACTIVE.getName() + "=true");
             }
         }
 
@@ -78,7 +77,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
             clauses.add("r.pkg=?"+parameterAccumulator.size());
 
             if(!specification.getIncludeInactive()) {
-                clauses.add("r.pkg."+Pkg.ACTIVE_PROPERTY+"=true");
+                clauses.add("r.pkg." + Pkg.ACTIVE.getName() + "=true");
             }
         }
 
@@ -182,27 +181,20 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
         Preconditions.checkArgument(null != permission, "the permission must be provided");
         Preconditions.checkArgument(null != user, "the user must be provided");
 
-        Expression baseE = ExpressionFactory.matchExp(PermissionUserPkg.USER_PROPERTY, user)
-                .andExp(ExpressionFactory.matchExp(PermissionUserPkg.PERMISSION_PROPERTY, permission));
+        Expression baseE = PermissionUserPkg.USER.eq(user).andExp(PermissionUserPkg.PERMISSION.eq(permission));
 
-        {
-            SelectQuery query = new SelectQuery(
-                    PermissionUserPkg.class,
-                    baseE.andExp(ExpressionFactory.matchExp(PermissionUserPkg.PKG_PROPERTY, null)));
-
-            if (!context.performQuery(query).isEmpty()) {
-                return true;
-            }
+        if(ObjectSelect.query(PermissionUserPkg.class).where(baseE)
+                .and(PermissionUserPkg.PKG.isNull())
+                .count()
+                .selectFirst(context) > 0) {
+            return true;
         }
 
-        {
-            SelectQuery query = new SelectQuery(
-                    PermissionUserPkg.class,
-                    baseE.andExp(ExpressionFactory.matchExp(PermissionUserPkg.PKG_PROPERTY, pkg)));
-
-            if (!context.performQuery(query).isEmpty()) {
-                return true;
-            }
+        if(ObjectSelect.query(PermissionUserPkg.class).where(baseE)
+                .and(PermissionUserPkg.PKG.eq(pkg))
+                .count()
+                .selectFirst(context) > 0) {
+            return true;
         }
 
         return false;
@@ -225,7 +217,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
 
         PermissionUserPkg rule = context.newObject(PermissionUserPkg.class);
         rule.setPermission(permission);
-        user.addToManyTarget(User.PERMISSION_USER_PKGS_PROPERTY, rule, true);
+        user.addToManyTarget(User.PERMISSION_USER_PKGS.getName(), rule, true);
         rule.setPkg(pkg);
         LOGGER.info("did create permission user repository; {},{},{}", permission, user, pkg);
 

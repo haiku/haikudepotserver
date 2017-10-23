@@ -8,17 +8,16 @@ package org.haiku.haikudepotserver.security.job;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ResultBatchIterator;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.Ordering;
-import org.apache.cayenne.query.SelectQuery;
-import org.apache.cayenne.query.SortOrder;
+import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.Permission;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.security.model.AuthorizationRulesSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.springframework.stereotype.Component;
@@ -29,13 +28,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Component
 public class AuthorizationRulesSpreadsheetJobRunner
         extends AbstractJobRunner<AuthorizationRulesSpreadsheetJobSpecification> {
-
-    private static final int LIMIT_GENERATECSV = 100;
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -71,29 +67,22 @@ public class AuthorizationRulesSpreadsheetJobRunner
                     "pkg-name"
             });
 
-            SelectQuery query = new SelectQuery(PermissionUserPkg.class);
-            query.addOrdering(new Ordering(PermissionUserPkg.USER_PROPERTY + "." + User.NICKNAME_PROPERTY, SortOrder.ASCENDING));
-            query.addOrdering(new Ordering(PermissionUserPkg.PERMISSION_PROPERTY + "." + Permission.CODE_PROPERTY, SortOrder.ASCENDING));
-            query.setFetchLimit(LIMIT_GENERATECSV);
-            List<PermissionUserPkg> rules;
+            ResultBatchIterator<PermissionUserPkg> batchIterator = ObjectSelect.query(PermissionUserPkg.class)
+                    .orderBy(
+                            PermissionUserPkg.USER.dot(User.NICKNAME).asc(),
+                            PermissionUserPkg.PERMISSION.dot(Permission.CODE).asc())
+                    .batchIterator(context, 50);
 
-            do {
-                rules = context.performQuery(query);
-
-                for (PermissionUserPkg rule : rules) {
-                    writer.writeNext(new String[]{
-                            dateTimeFormatter.format(Instant.ofEpochMilli(rule.getCreateTimestamp().getTime())),
-                            rule.getUser().getNickname(),
-                            Boolean.toString(rule.getUser().getActive()),
-                            rule.getPermission().getCode(),
-                            rule.getPermission().getName(),
-                            null != rule.getPkg() ? rule.getPkg().getName() : ""
-                    });
-                }
-
-                query.setFetchOffset(query.getFetchOffset() + LIMIT_GENERATECSV);
+            while (batchIterator.hasNext()) {
+                batchIterator.next().forEach((pup) -> writer.writeNext(new String[]{
+                        dateTimeFormatter.format(Instant.ofEpochMilli(pup.getCreateTimestamp().getTime())),
+                        pup.getUser().getNickname(),
+                        Boolean.toString(pup.getUser().getActive()),
+                        pup.getPermission().getCode(),
+                        pup.getPermission().getName(),
+                        null != pup.getPkg() ? pup.getPkg().getName() : ""
+                }));
             }
-            while (rules.size() >= LIMIT_GENERATECSV);
 
             writer.flush();
             outputStreamWriter.flush();

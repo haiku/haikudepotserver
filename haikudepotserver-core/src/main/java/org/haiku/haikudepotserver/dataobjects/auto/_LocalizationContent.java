@@ -1,5 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -10,15 +11,17 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _LocalizationContent extends AbstractDataObject {
 
-    public static final String CONTENT_PROPERTY = "content";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> CONTENT = Property.create("content", String.class);
+
     public void setContent(String content) {
-        writeProperty(CONTENT_PROPERTY, content);
+        writeProperty("content", content);
     }
     public String getContent() {
-        return (String)readProperty(CONTENT_PROPERTY);
+        return (String)readProperty("content");
     }
 
 }

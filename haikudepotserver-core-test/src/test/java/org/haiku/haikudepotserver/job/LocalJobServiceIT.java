@@ -99,8 +99,15 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
     @Test
     public void testCoalescePicksTheMostRecentFinished() {
 
+        // make sure that no old jobs from previous tests are coming through.
+
+        Assertions.assertThat(
+                jobService.awaitAllJobsFinishedUninterruptibly(TimeUnit.MILLISECONDS.convert(3, TimeUnit.SECONDS))
+        ).isTrue();
+
         // -------------------------
         // setup the initial situation
+
         String job1FinishedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
         jobService.awaitJobFinishedUninterruptibly(job1FinishedGuid, TimeUnit.SECONDS.toMillis(10));
         String job2FinishedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);

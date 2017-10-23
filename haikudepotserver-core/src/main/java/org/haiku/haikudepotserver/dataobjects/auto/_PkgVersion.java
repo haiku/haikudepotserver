@@ -3,6 +3,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionCopyright;
@@ -20,176 +21,178 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersion extends AbstractDataObject {
 
-    public static final String ACTIVE_PROPERTY = "active";
-    public static final String CREATE_TIMESTAMP_PROPERTY = "createTimestamp";
-    public static final String IS_LATEST_PROPERTY = "isLatest";
-    public static final String MAJOR_PROPERTY = "major";
-    public static final String MICRO_PROPERTY = "micro";
-    public static final String MINOR_PROPERTY = "minor";
-    public static final String MODIFY_TIMESTAMP_PROPERTY = "modifyTimestamp";
-    public static final String PAYLOAD_LENGTH_PROPERTY = "payloadLength";
-    public static final String PRE_RELEASE_PROPERTY = "preRelease";
-    public static final String REVISION_PROPERTY = "revision";
-    public static final String VIEW_COUNTER_PROPERTY = "viewCounter";
-    public static final String ARCHITECTURE_PROPERTY = "architecture";
-    public static final String PKG_PROPERTY = "pkg";
-    public static final String PKG_VERSION_COPYRIGHTS_PROPERTY = "pkgVersionCopyrights";
-    public static final String PKG_VERSION_LICENSES_PROPERTY = "pkgVersionLicenses";
-    public static final String PKG_VERSION_LOCALIZATIONS_PROPERTY = "pkgVersionLocalizations";
-    public static final String PKG_VERSION_URLS_PROPERTY = "pkgVersionUrls";
-    public static final String REPOSITORY_SOURCE_PROPERTY = "repositorySource";
+    private static final long serialVersionUID = 1L; 
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
+    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Boolean> IS_LATEST = Property.create("isLatest", Boolean.class);
+    public static final Property<String> MAJOR = Property.create("major", String.class);
+    public static final Property<String> MICRO = Property.create("micro", String.class);
+    public static final Property<String> MINOR = Property.create("minor", String.class);
+    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Long> PAYLOAD_LENGTH = Property.create("payloadLength", Long.class);
+    public static final Property<String> PRE_RELEASE = Property.create("preRelease", String.class);
+    public static final Property<Integer> REVISION = Property.create("revision", Integer.class);
+    public static final Property<Long> VIEW_COUNTER = Property.create("viewCounter", Long.class);
+    public static final Property<Architecture> ARCHITECTURE = Property.create("architecture", Architecture.class);
+    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<List<PkgVersionCopyright>> PKG_VERSION_COPYRIGHTS = Property.create("pkgVersionCopyrights", List.class);
+    public static final Property<List<PkgVersionLicense>> PKG_VERSION_LICENSES = Property.create("pkgVersionLicenses", List.class);
+    public static final Property<List<PkgVersionLocalization>> PKG_VERSION_LOCALIZATIONS = Property.create("pkgVersionLocalizations", List.class);
+    public static final Property<List<PkgVersionUrl>> PKG_VERSION_URLS = Property.create("pkgVersionUrls", List.class);
+    public static final Property<RepositorySource> REPOSITORY_SOURCE = Property.create("repositorySource", RepositorySource.class);
+
     public void setActive(Boolean active) {
-        writeProperty(ACTIVE_PROPERTY, active);
+        writeProperty("active", active);
     }
     public Boolean getActive() {
-        return (Boolean)readProperty(ACTIVE_PROPERTY);
+        return (Boolean)readProperty("active");
     }
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty(CREATE_TIMESTAMP_PROPERTY, createTimestamp);
+        writeProperty("createTimestamp", createTimestamp);
     }
     public Date getCreateTimestamp() {
-        return (Date)readProperty(CREATE_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("createTimestamp");
     }
 
     public void setIsLatest(Boolean isLatest) {
-        writeProperty(IS_LATEST_PROPERTY, isLatest);
+        writeProperty("isLatest", isLatest);
     }
     public Boolean getIsLatest() {
-        return (Boolean)readProperty(IS_LATEST_PROPERTY);
+        return (Boolean)readProperty("isLatest");
     }
 
     public void setMajor(String major) {
-        writeProperty(MAJOR_PROPERTY, major);
+        writeProperty("major", major);
     }
     public String getMajor() {
-        return (String)readProperty(MAJOR_PROPERTY);
+        return (String)readProperty("major");
     }
 
     public void setMicro(String micro) {
-        writeProperty(MICRO_PROPERTY, micro);
+        writeProperty("micro", micro);
     }
     public String getMicro() {
-        return (String)readProperty(MICRO_PROPERTY);
+        return (String)readProperty("micro");
     }
 
     public void setMinor(String minor) {
-        writeProperty(MINOR_PROPERTY, minor);
+        writeProperty("minor", minor);
     }
     public String getMinor() {
-        return (String)readProperty(MINOR_PROPERTY);
+        return (String)readProperty("minor");
     }
 
     public void setModifyTimestamp(Date modifyTimestamp) {
-        writeProperty(MODIFY_TIMESTAMP_PROPERTY, modifyTimestamp);
+        writeProperty("modifyTimestamp", modifyTimestamp);
     }
     public Date getModifyTimestamp() {
-        return (Date)readProperty(MODIFY_TIMESTAMP_PROPERTY);
+        return (Date)readProperty("modifyTimestamp");
     }
 
     public void setPayloadLength(Long payloadLength) {
-        writeProperty(PAYLOAD_LENGTH_PROPERTY, payloadLength);
+        writeProperty("payloadLength", payloadLength);
     }
     public Long getPayloadLength() {
-        return (Long)readProperty(PAYLOAD_LENGTH_PROPERTY);
+        return (Long)readProperty("payloadLength");
     }
 
     public void setPreRelease(String preRelease) {
-        writeProperty(PRE_RELEASE_PROPERTY, preRelease);
+        writeProperty("preRelease", preRelease);
     }
     public String getPreRelease() {
-        return (String)readProperty(PRE_RELEASE_PROPERTY);
+        return (String)readProperty("preRelease");
     }
 
     public void setRevision(Integer revision) {
-        writeProperty(REVISION_PROPERTY, revision);
+        writeProperty("revision", revision);
     }
     public Integer getRevision() {
-        return (Integer)readProperty(REVISION_PROPERTY);
+        return (Integer)readProperty("revision");
     }
 
     public void setViewCounter(Long viewCounter) {
-        writeProperty(VIEW_COUNTER_PROPERTY, viewCounter);
+        writeProperty("viewCounter", viewCounter);
     }
     public Long getViewCounter() {
-        return (Long)readProperty(VIEW_COUNTER_PROPERTY);
+        return (Long)readProperty("viewCounter");
     }
 
     public void setArchitecture(Architecture architecture) {
-        setToOneTarget(ARCHITECTURE_PROPERTY, architecture, true);
+        setToOneTarget("architecture", architecture, true);
     }
 
     public Architecture getArchitecture() {
-        return (Architecture)readProperty(ARCHITECTURE_PROPERTY);
+        return (Architecture)readProperty("architecture");
     }
 
 
     public void setPkg(Pkg pkg) {
-        setToOneTarget(PKG_PROPERTY, pkg, true);
+        setToOneTarget("pkg", pkg, true);
     }
 
     public Pkg getPkg() {
-        return (Pkg)readProperty(PKG_PROPERTY);
+        return (Pkg)readProperty("pkg");
     }
 
 
     public void addToPkgVersionCopyrights(PkgVersionCopyright obj) {
-        addToManyTarget(PKG_VERSION_COPYRIGHTS_PROPERTY, obj, true);
+        addToManyTarget("pkgVersionCopyrights", obj, true);
     }
     public void removeFromPkgVersionCopyrights(PkgVersionCopyright obj) {
-        removeToManyTarget(PKG_VERSION_COPYRIGHTS_PROPERTY, obj, true);
+        removeToManyTarget("pkgVersionCopyrights", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgVersionCopyright> getPkgVersionCopyrights() {
-        return (List<PkgVersionCopyright>)readProperty(PKG_VERSION_COPYRIGHTS_PROPERTY);
+        return (List<PkgVersionCopyright>)readProperty("pkgVersionCopyrights");
     }
 
 
     public void addToPkgVersionLicenses(PkgVersionLicense obj) {
-        addToManyTarget(PKG_VERSION_LICENSES_PROPERTY, obj, true);
+        addToManyTarget("pkgVersionLicenses", obj, true);
     }
     public void removeFromPkgVersionLicenses(PkgVersionLicense obj) {
-        removeToManyTarget(PKG_VERSION_LICENSES_PROPERTY, obj, true);
+        removeToManyTarget("pkgVersionLicenses", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgVersionLicense> getPkgVersionLicenses() {
-        return (List<PkgVersionLicense>)readProperty(PKG_VERSION_LICENSES_PROPERTY);
+        return (List<PkgVersionLicense>)readProperty("pkgVersionLicenses");
     }
 
 
     public void addToPkgVersionLocalizations(PkgVersionLocalization obj) {
-        addToManyTarget(PKG_VERSION_LOCALIZATIONS_PROPERTY, obj, true);
+        addToManyTarget("pkgVersionLocalizations", obj, true);
     }
     public void removeFromPkgVersionLocalizations(PkgVersionLocalization obj) {
-        removeToManyTarget(PKG_VERSION_LOCALIZATIONS_PROPERTY, obj, true);
+        removeToManyTarget("pkgVersionLocalizations", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgVersionLocalization> getPkgVersionLocalizations() {
-        return (List<PkgVersionLocalization>)readProperty(PKG_VERSION_LOCALIZATIONS_PROPERTY);
+        return (List<PkgVersionLocalization>)readProperty("pkgVersionLocalizations");
     }
 
 
     public void addToPkgVersionUrls(PkgVersionUrl obj) {
-        addToManyTarget(PKG_VERSION_URLS_PROPERTY, obj, true);
+        addToManyTarget("pkgVersionUrls", obj, true);
     }
     public void removeFromPkgVersionUrls(PkgVersionUrl obj) {
-        removeToManyTarget(PKG_VERSION_URLS_PROPERTY, obj, true);
+        removeToManyTarget("pkgVersionUrls", obj, true);
     }
     @SuppressWarnings("unchecked")
     public List<PkgVersionUrl> getPkgVersionUrls() {
-        return (List<PkgVersionUrl>)readProperty(PKG_VERSION_URLS_PROPERTY);
+        return (List<PkgVersionUrl>)readProperty("pkgVersionUrls");
     }
 
 
     public void setRepositorySource(RepositorySource repositorySource) {
-        setToOneTarget(REPOSITORY_SOURCE_PROPERTY, repositorySource, true);
+        setToOneTarget("repositorySource", repositorySource, true);
     }
 
     public RepositorySource getRepositorySource() {
-        return (RepositorySource)readProperty(REPOSITORY_SOURCE_PROPERTY);
+        return (RepositorySource)readProperty("repositorySource");
     }
 
 
