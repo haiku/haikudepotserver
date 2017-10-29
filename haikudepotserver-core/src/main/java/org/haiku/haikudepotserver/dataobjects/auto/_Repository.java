@@ -1,6 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.cayenne.exp.Property;
@@ -21,10 +21,10 @@ public abstract class _Repository extends AbstractDataObject {
 
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
     public static final Property<String> DESCRIPTION = Property.create("description", String.class);
     public static final Property<String> INFORMATION_URL = Property.create("informationUrl", String.class);
-    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NAME = Property.create("name", String.class);
     public static final Property<List<RepositorySource>> REPOSITORY_SOURCES = Property.create("repositorySources", List.class);
 
@@ -42,11 +42,11 @@ public abstract class _Repository extends AbstractDataObject {
         return (String)readProperty("code");
     }
 
-    public void setCreateTimestamp(Date createTimestamp) {
+    public void setCreateTimestamp(Timestamp createTimestamp) {
         writeProperty("createTimestamp", createTimestamp);
     }
-    public Date getCreateTimestamp() {
-        return (Date)readProperty("createTimestamp");
+    public Timestamp getCreateTimestamp() {
+        return (Timestamp)readProperty("createTimestamp");
     }
 
     public void setDescription(String description) {
@@ -63,11 +63,11 @@ public abstract class _Repository extends AbstractDataObject {
         return (String)readProperty("informationUrl");
     }
 
-    public void setModifyTimestamp(Date modifyTimestamp) {
+    public void setModifyTimestamp(Timestamp modifyTimestamp) {
         writeProperty("modifyTimestamp", modifyTimestamp);
     }
-    public Date getModifyTimestamp() {
-        return (Date)readProperty("modifyTimestamp");
+    public Timestamp getModifyTimestamp() {
+        return (Timestamp)readProperty("modifyTimestamp");
     }
 
     public void setName(String name) {

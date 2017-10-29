@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PermissionUserPkg;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
 
+import java.time.Clock;
 import java.util.Optional;
 
 public class PermissionUserPkg extends _PermissionUserPkg implements AuthorizationPkgRule {
@@ -36,7 +37,7 @@ public class PermissionUserPkg extends _PermissionUserPkg implements Authorizati
     public void validateForInsert(ValidationResult validationResult) {
 
         if (null == getCreateTimestamp()) {
-            setCreateTimestamp(new java.util.Date());
+            setCreateTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
         }
 
         super.validateForInsert(validationResult);

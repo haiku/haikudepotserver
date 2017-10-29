@@ -1,6 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.cayenne.exp.Property;
@@ -28,9 +28,9 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final String ID_PK_COLUMN = "id";
 
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
-    public static final Property<Date> ICON_MODIFY_TIMESTAMP = Property.create("iconModifyTimestamp", Date.class);
-    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
+    public static final Property<Timestamp> ICON_MODIFY_TIMESTAMP = Property.create("iconModifyTimestamp", Timestamp.class);
+    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NAME = Property.create("name", String.class);
     public static final Property<List<PermissionUserPkg>> PERMISSION_USER_PKGS = Property.create("permissionUserPkgs", List.class);
     public static final Property<List<PkgChangelog>> PKG_CHANGELOGS = Property.create("pkgChangelogs", List.class);
@@ -49,25 +49,25 @@ public abstract class _Pkg extends AbstractDataObject {
         return (Boolean)readProperty("active");
     }
 
-    public void setCreateTimestamp(Date createTimestamp) {
+    public void setCreateTimestamp(Timestamp createTimestamp) {
         writeProperty("createTimestamp", createTimestamp);
     }
-    public Date getCreateTimestamp() {
-        return (Date)readProperty("createTimestamp");
+    public Timestamp getCreateTimestamp() {
+        return (Timestamp)readProperty("createTimestamp");
     }
 
-    public void setIconModifyTimestamp(Date iconModifyTimestamp) {
+    public void setIconModifyTimestamp(Timestamp iconModifyTimestamp) {
         writeProperty("iconModifyTimestamp", iconModifyTimestamp);
     }
-    public Date getIconModifyTimestamp() {
-        return (Date)readProperty("iconModifyTimestamp");
+    public Timestamp getIconModifyTimestamp() {
+        return (Timestamp)readProperty("iconModifyTimestamp");
     }
 
-    public void setModifyTimestamp(Date modifyTimestamp) {
+    public void setModifyTimestamp(Timestamp modifyTimestamp) {
         writeProperty("modifyTimestamp", modifyTimestamp);
     }
-    public Date getModifyTimestamp() {
-        return (Date)readProperty("modifyTimestamp");
+    public Timestamp getModifyTimestamp() {
+        return (Timestamp)readProperty("modifyTimestamp");
     }
 
     public void setName(String name) {

@@ -1,3 +1,8 @@
+/*
+ * Copyright 2017, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.pkg.model;
 
 /**
@@ -11,6 +16,15 @@ public class ResolvedPkgVersionLocalization {
     private String title;
     private String summary;
     private String description;
+
+    public ResolvedPkgVersionLocalization() {
+    }
+
+    public ResolvedPkgVersionLocalization(String title, String summary, String description) {
+        this.title = title;
+        this.summary = summary;
+        this.description = description;
+    }
 
     public String getTitle() {
         return title;

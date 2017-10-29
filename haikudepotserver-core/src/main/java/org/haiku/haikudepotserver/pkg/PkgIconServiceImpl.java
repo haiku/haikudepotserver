@@ -30,6 +30,7 @@ import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,7 +75,7 @@ public class PkgIconServiceImpl implements PkgIconService {
 
         context.deleteObjects(deriveDataObjectsToDelete(pkg.getPkgIcons()));
         pkg.setModifyTimestamp();
-        pkg.setIconModifyTimestamp();
+        pkg.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
 
         pkgServiceImpl.tryGetDevelPkg(context, pkg.getName())
                 .ifPresent(develPkg -> removePkgIcon(context, develPkg));
@@ -160,7 +161,7 @@ public class PkgIconServiceImpl implements PkgIconService {
 
         pkgIconImage.setData(imageData);
         pkg.setModifyTimestamp();
-        pkg.setIconModifyTimestamp();
+        pkg.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
         renderedPkgIconRepository.evict(context, pkg);
 
         if(null!=size) {

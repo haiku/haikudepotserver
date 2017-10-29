@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,9 +7,7 @@ package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectSelect;
-import org.apache.cayenne.query.SelectQuery;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgProminence;
 
 import java.util.List;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.Date;
 
 /**
  * <p>This automates the configuration of the create and modify timestamps against certain
@@ -48,9 +47,8 @@ public class PostAddCreateAndModifyTimestampListener implements LifecycleListene
     @Override
     public void postAdd(Object entity) {
         CreateAndModifyTimestamped createAndModifyTimestamped = (CreateAndModifyTimestamped) entity;
-        Date now = new Date();
-        createAndModifyTimestamped.setCreateTimestamp(now);
-        createAndModifyTimestamped.setModifyTimestamp(now);
+        createAndModifyTimestamped.setCreateTimestamp();
+        createAndModifyTimestamped.setModifyTimestamp();
     }
 
     @Override
@@ -72,7 +70,7 @@ public class PostAddCreateAndModifyTimestampListener implements LifecycleListene
     @Override
     public void preUpdate(Object entity) {
         CreateAndModifyTimestamped createAndModifyTimestamped = (CreateAndModifyTimestamped) entity;
-        createAndModifyTimestamped.setModifyTimestamp(new Date());
+        createAndModifyTimestamped.setModifyTimestamp();
     }
 
     @Override

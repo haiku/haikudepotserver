@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 @JsonRpcService("/__api/v1/pkg")
 public interface PkgApi {
 
+    @Deprecated
     Integer GETBULKPKG_LIMIT = 50;
 
     /**
@@ -140,6 +141,7 @@ public interface PkgApi {
      * URLs that can then be mapped back to repository sources and from there to the repositories.</p>
      */
 
+    @Deprecated // use the bulk download approach instead.
     GetBulkPkgResult getBulkPkg(GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException;
 
     /**

@@ -1,6 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
@@ -24,8 +24,8 @@ public abstract class _UserRating extends AbstractDataObject {
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<String> CODE = Property.create("code", String.class);
     public static final Property<String> COMMENT = Property.create("comment", String.class);
-    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
-    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
+    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<Short> RATING = Property.create("rating", Short.class);
     public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
     public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
@@ -53,18 +53,18 @@ public abstract class _UserRating extends AbstractDataObject {
         return (String)readProperty("comment");
     }
 
-    public void setCreateTimestamp(Date createTimestamp) {
+    public void setCreateTimestamp(Timestamp createTimestamp) {
         writeProperty("createTimestamp", createTimestamp);
     }
-    public Date getCreateTimestamp() {
-        return (Date)readProperty("createTimestamp");
+    public Timestamp getCreateTimestamp() {
+        return (Timestamp)readProperty("createTimestamp");
     }
 
-    public void setModifyTimestamp(Date modifyTimestamp) {
+    public void setModifyTimestamp(Timestamp modifyTimestamp) {
         writeProperty("modifyTimestamp", modifyTimestamp);
     }
-    public Date getModifyTimestamp() {
-        return (Date)readProperty("modifyTimestamp");
+    public Timestamp getModifyTimestamp() {
+        return (Timestamp)readProperty("modifyTimestamp");
     }
 
     public void setRating(Short rating) {

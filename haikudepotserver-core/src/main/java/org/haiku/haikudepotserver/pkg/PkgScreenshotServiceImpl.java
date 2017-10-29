@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -141,7 +141,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         screenshotImage.setData(pngData);
         screenshot.addToManyTarget(PkgScreenshot.PKG_SCREENSHOT_IMAGES.getName(), screenshotImage, true);
 
-        pkg.setModifyTimestamp(new java.util.Date());
+        pkg.setModifyTimestamp();
 
         LOGGER.info("a screenshot #{} has been added to package {} ({})",
                 actualOrdering, pkg.getName(), screenshot.getCode());

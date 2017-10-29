@@ -123,7 +123,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                 .sorted(Comparator.comparing(Repository::getModifyTimestamp).reversed())
                 .findFirst()
                 .map(_Repository::getModifyTimestamp)
-                .orElse(new Date(0));
+                .orElse(new java.sql.Timestamp(0L));
 
         return new ArchiveInfo(
                 DateTimeHelper.secondAccuracyDatePlusOneSecond(modifyTimestamp),

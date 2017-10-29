@@ -32,9 +32,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -103,7 +103,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         UserPasswordResetToken userPasswordResetToken = contextLocal.newObject(UserPasswordResetToken.class);
         userPasswordResetToken.setUser(userLocal);
         userPasswordResetToken.setCode(UUID.randomUUID().toString());
-        userPasswordResetToken.setCreateTimestamp(new Date());
+        userPasswordResetToken.setCreateTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
 
         PasswordResetMail mailModel = new PasswordResetMail();
         mailModel.setPasswordResetBaseUrl(baseUrl + "/" + URL_SEGMENT_PASSWORDRESET + "/");
@@ -237,7 +237,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         List<UserPasswordResetToken> tokens = ObjectSelect.query(UserPasswordResetToken.class)
                 .where(UserPasswordResetToken.CREATE_TIMESTAMP
-                        .lt(new java.util.Date(now.minus(timeToLiveHours, ChronoUnit.HOURS).toEpochMilli())))
+                        .lt(new java.sql.Timestamp(now.minus(timeToLiveHours, ChronoUnit.HOURS).toEpochMilli())))
                 .select(context);
 
         if(tokens.isEmpty()) {

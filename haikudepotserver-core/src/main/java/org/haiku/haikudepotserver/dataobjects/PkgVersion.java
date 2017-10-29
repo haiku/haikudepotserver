@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ComparisonChain;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectIdQuery;
@@ -19,6 +20,7 @@ import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
+import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -29,7 +31,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestamped {
+public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestamped, Comparable<PkgVersion> {
 
     private final static Pattern MAJOR_PATTERN = Pattern.compile("^[\\w_]+$");
     private final static Pattern MINOR_PATTERN = Pattern.compile("^[\\w_]+$");
@@ -364,4 +366,12 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
                 .build();
     }
 
+    @Override
+    public int compareTo(PkgVersion o) {
+        return ComparisonChain.start()
+                .compare(getArchitecture().getCode(), o.getArchitecture().getCode())
+                .compare(toVersionCoordinates(), o.toVersionCoordinates(), new VersionCoordinatesComparator())
+                .result();
+
+    }
 }

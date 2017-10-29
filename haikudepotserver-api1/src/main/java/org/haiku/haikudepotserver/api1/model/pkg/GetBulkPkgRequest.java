@@ -1,5 +1,5 @@
 /*
-* Copyright 2014-2016, Andrew Lindesay
+* Copyright 2014-2017, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -9,6 +9,7 @@ import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 
 import java.util.List;
 
+@Deprecated
 public class GetBulkPkgRequest {
 
     public enum Filter {

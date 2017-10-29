@@ -1,6 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.cayenne.exp.Property;
@@ -21,10 +21,10 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
     public static final String ID_PK_COLUMN = "id";
 
     public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
+    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
     public static final Property<Integer> HEIGHT = Property.create("height", Integer.class);
     public static final Property<Integer> LENGTH = Property.create("length", Integer.class);
-    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<Integer> ORDERING = Property.create("ordering", Integer.class);
     public static final Property<Integer> WIDTH = Property.create("width", Integer.class);
     public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
@@ -37,11 +37,11 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
         return (String)readProperty("code");
     }
 
-    public void setCreateTimestamp(Date createTimestamp) {
+    public void setCreateTimestamp(Timestamp createTimestamp) {
         writeProperty("createTimestamp", createTimestamp);
     }
-    public Date getCreateTimestamp() {
-        return (Date)readProperty("createTimestamp");
+    public Timestamp getCreateTimestamp() {
+        return (Timestamp)readProperty("createTimestamp");
     }
 
     public void setHeight(Integer height) {
@@ -58,11 +58,11 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
         return (Integer)readProperty("length");
     }
 
-    public void setModifyTimestamp(Date modifyTimestamp) {
+    public void setModifyTimestamp(Timestamp modifyTimestamp) {
         writeProperty("modifyTimestamp", modifyTimestamp);
     }
-    public Date getModifyTimestamp() {
-        return (Date)readProperty("modifyTimestamp");
+    public Timestamp getModifyTimestamp() {
+        return (Timestamp)readProperty("modifyTimestamp");
     }
 
     public void setOrdering(Integer ordering) {

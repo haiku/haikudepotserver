@@ -403,13 +403,13 @@
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 	</obj-entity>
 	<obj-entity name="PermissionUserPkg" className="org.haiku.haikudepotserver.dataobjects.PermissionUserPkg" lock-type="optimistic" dbEntityName="permission_user_pkg" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 	</obj-entity>
 	<obj-entity name="Pkg" className="org.haiku.haikudepotserver.dataobjects.Pkg" lock-type="optimistic" dbEntityName="pkg" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="iconModifyTimestamp" type="java.util.Date" db-attribute-path="icon_modify_timestamp"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="iconModifyTimestamp" type="java.sql.Timestamp" db-attribute-path="icon_modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
 	</obj-entity>
 	<obj-entity name="PkgCategory" className="org.haiku.haikudepotserver.dataobjects.PkgCategory" readOnly="true" dbEntityName="pkg_category" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
@@ -418,8 +418,8 @@
 	</obj-entity>
 	<obj-entity name="PkgChangelog" className="org.haiku.haikudepotserver.dataobjects.PkgChangelog" dbEntityName="pkg_changelog" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="content" type="java.lang.String" db-attribute-path="content"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 	</obj-entity>
 	<obj-entity name="PkgIcon" className="org.haiku.haikudepotserver.dataobjects.PkgIcon" lock-type="optimistic" dbEntityName="pkg_icon" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="size" type="java.lang.Integer" db-attribute-path="size"/>
@@ -428,9 +428,9 @@
 		<obj-attribute name="data" type="byte[]" db-attribute-path="data"/>
 	</obj-entity>
 	<obj-entity name="PkgLocalization" className="org.haiku.haikudepotserver.dataobjects.PkgLocalization" lock-type="optimistic" dbEntityName="pkg_localization" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="description" type="java.lang.String" lock="true" db-attribute-path="description"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="summary" type="java.lang.String" lock="true" db-attribute-path="summary"/>
 		<obj-attribute name="title" type="java.lang.String" lock="true" db-attribute-path="title"/>
 	</obj-entity>
@@ -440,10 +440,10 @@
 	</obj-entity>
 	<obj-entity name="PkgScreenshot" className="org.haiku.haikudepotserver.dataobjects.PkgScreenshot" lock-type="optimistic" dbEntityName="pkg_screenshot" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="height" type="java.lang.Integer" db-attribute-path="height"/>
 		<obj-attribute name="length" type="java.lang.Integer" db-attribute-path="length"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="ordering" type="java.lang.Integer" db-attribute-path="ordering"/>
 		<obj-attribute name="width" type="java.lang.Integer" db-attribute-path="width"/>
 	</obj-entity>
@@ -459,12 +459,12 @@
 	</obj-entity>
 	<obj-entity name="PkgVersion" className="org.haiku.haikudepotserver.dataobjects.PkgVersion" lock-type="optimistic" dbEntityName="pkg_version" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="isLatest" type="java.lang.Boolean" lock="true" db-attribute-path="is_latest"/>
 		<obj-attribute name="major" type="java.lang.String" db-attribute-path="major"/>
 		<obj-attribute name="micro" type="java.lang.String" db-attribute-path="micro"/>
 		<obj-attribute name="minor" type="java.lang.String" db-attribute-path="minor"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="payloadLength" type="java.lang.Long" lock="true" db-attribute-path="payload_length"/>
 		<obj-attribute name="preRelease" type="java.lang.String" db-attribute-path="pre_release"/>
 		<obj-attribute name="revision" type="java.lang.Integer" db-attribute-path="revision"/>
@@ -477,8 +477,8 @@
 		<obj-attribute name="body" type="java.lang.String" lock="true" db-attribute-path="body"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionLocalization" className="org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization" lock-type="optimistic" dbEntityName="pkg_version_localization" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionUrl" className="org.haiku.haikudepotserver.dataobjects.PkgVersionUrl" lock-type="optimistic" dbEntityName="pkg_version_url" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
@@ -491,19 +491,19 @@
 	<obj-entity name="Publisher" className="org.haiku.haikudepotserver.dataobjects.Publisher" lock-type="optimistic" dbEntityName="publisher" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="email" type="java.lang.String" lock="true" db-attribute-path="email"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
 		<obj-attribute name="siteUrl" type="java.lang.String" lock="true" db-attribute-path="site_url"/>
 	</obj-entity>
 	<obj-entity name="Repository" className="org.haiku.haikudepotserver.dataobjects.Repository" lock-type="optimistic" dbEntityName="repository" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" db-attribute-path="active"/>
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
 		<obj-attribute name="informationUrl" type="java.lang.String" db-attribute-path="information_url"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 	</obj-entity>
 	<obj-entity name="RepositorySource" className="org.haiku.haikudepotserver.dataobjects.RepositorySource" lock-type="optimistic" dbEntityName="repository_source" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
@@ -514,10 +514,10 @@
 	<obj-entity name="User" className="org.haiku.haikudepotserver.dataobjects.User" lock-type="optimistic" dbEntityName="user" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="canManageUsers" type="java.lang.Boolean" lock="true" db-attribute-path="can_manage_users"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="email" type="java.lang.String" lock="true" db-attribute-path="email"/>
 		<obj-attribute name="isRoot" type="java.lang.Boolean" lock="true" db-attribute-path="is_root"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="nickname" type="java.lang.String" lock="true" db-attribute-path="nickname"/>
 		<obj-attribute name="passwordHash" type="java.lang.String" lock="true" db-attribute-path="password_hash"/>
 		<obj-attribute name="passwordSalt" type="java.lang.String" lock="true" db-attribute-path="password_salt"/>
@@ -525,14 +525,14 @@
 	</obj-entity>
 	<obj-entity name="UserPasswordResetToken" className="org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken" lock-type="optimistic" dbEntityName="user_password_reset_token" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 	</obj-entity>
 	<obj-entity name="UserRating" className="org.haiku.haikudepotserver.dataobjects.UserRating" lock-type="optimistic" dbEntityName="user_rating" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 		<obj-attribute name="comment" type="java.lang.String" db-attribute-path="comment"/>
-		<obj-attribute name="createTimestamp" type="java.util.Date" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="modifyTimestamp" type="java.util.Date" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="rating" type="java.lang.Short" lock="true" db-attribute-path="rating"/>
 		<post-add method-name="onPostAdd"/>
 	</obj-entity>
@@ -813,7 +813,115 @@
 	<obj-relationship name="pkgVersion" source="UserRating" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="user" source="UserRating" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="userRatingStability" source="UserRating" target="UserRatingStability" deleteRule="Nullify" db-relationship-path="user_rating_stability"/>
+	<query name="PkgVersionLocalizationResolution" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[WITH
+t_loc_pv_l AS (
+  SELECT
+    pv.id as pv_id,
+    pvl_summary_c.content AS summary,
+    pvl_description_c.content AS description,
+    pvl_title_c.content AS title
+  FROM
+    haikudepot.pkg_version pv
+    LEFT JOIN haikudepot.pkg_version_localization pvl_l
+       ON pvl_l.pkg_version_id = pv.id
+    LEFT JOIN haikudepot.localization_content pvl_title_c
+  	  ON pvl_title_c.id = pvl_l.title_localization_content_id
+    LEFT JOIN haikudepot.localization_content pvl_summary_c
+	  ON pvl_summary_c.id = pvl_l.summary_localization_content_id
+    LEFT JOIN haikudepot.localization_content pvl_description_c
+  	  ON pvl_description_c.id = pvl_l.description_localization_content_id
+    LEFT JOIN haikudepot.natural_language nl
+  	  ON nl.id = pvl_l.natural_language_id
+  WHERE
+    pv.id IN (#bind($pkgVersionIds))
+    AND nl.code = #bind($naturalLanguageCode)
+),
+t_loc_pv_e AS (
+  SELECT
+    pv.id as pv_id,
+    pvl_summary_c.content AS summary,
+    pvl_description_c.content AS description,
+    pvl_title_c.content AS title
+  FROM
+    haikudepot.pkg_version pv
+    LEFT JOIN haikudepot.pkg_version_localization pvl_l
+           ON pvl_l.pkg_version_id = pv.id
+    LEFT JOIN haikudepot.localization_content pvl_title_c
+  	  ON pvl_title_c.id = pvl_l.title_localization_content_id
+    LEFT JOIN haikudepot.localization_content pvl_summary_c
+	  ON pvl_summary_c.id = pvl_l.summary_localization_content_id
+    LEFT JOIN haikudepot.localization_content pvl_description_c
+  	  ON pvl_description_c.id = pvl_l.description_localization_content_id
+    LEFT JOIN haikudepot.natural_language nl ON nl.id = pvl_l.natural_language_id
+  WHERE
+    pv.id IN (#bind($pkgVersionIds))
+    AND nl.code = 'en'
+),
+t_loc_p_l AS (
+  SELECT
+    pv.id AS pv_id,
+    pl.summary AS summary,
+    pl.description AS description,
+    pl.title AS title
+  FROM
+    haikudepot.pkg_version pv
+    JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+    LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_id = p.id
+    LEFT JOIN haikudepot.natural_language nl ON nl.id = pl.natural_language_id
+  WHERE
+    pv.id IN (#bind($pkgVersionIds))
+    AND nl.code = #bind($naturalLanguageCode)
+),
+t_loc_p_e AS (
+  SELECT
+    pv.id AS pv_id,
+    pl.summary AS summary,
+    pl.description AS description,
+    pl.title AS title
+  FROM
+    haikudepot.pkg_version pv
+    JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+    LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_id = p.id
+    LEFT JOIN haikudepot.natural_language nl ON nl.id = pl.natural_language_id
+  WHERE
+    pv.id IN (#bind($pkgVersionIds))
+    AND nl.code = 'en'
+)
+SELECT
+  #result('pv.id' 'Long' 'pv_id'),
+  #result("COALESCE(
+  	t_loc_pv_l.title,
+  	t_loc_p_l.title,
+  	t_loc_pv_e.title,
+  	t_loc_p_e.title,
+    '?')" 'String' 'title'),
+  #result("COALESCE(
+  	t_loc_pv_l.summary,
+  	t_loc_p_l.summary,
+  	t_loc_pv_e.summary,
+  	t_loc_p_e.summary,
+    '?')" 'String' 'summary'),
+  #result("COALESCE(
+  	t_loc_pv_l.description,
+  	t_loc_p_l.description,
+  	t_loc_pv_e.description,
+  	t_loc_p_e.description,
+    '?')" 'String' 'description')
+FROM
+  haikudepot.pkg_version pv
+  LEFT JOIN t_loc_pv_l ON t_loc_pv_l.pv_id = pv.id
+  LEFT JOIN t_loc_p_l ON t_loc_p_l.pv_id = pv.id
+  LEFT JOIN t_loc_pv_e ON t_loc_pv_e.pv_id = pv.id
+  LEFT JOIN t_loc_p_e ON t_loc_p_e.pv_id = pv.id
+WHERE
+  pv.id IN (#bind($pkgVersionIds))
+ORDER BY
+  pv.id DESC]]></sql>
+	</query>
 	<query name="SearchPkgVersions" type="SQLTemplate" root="obj-entity" root-name="PkgVersion">
+		<property name="cayenne.GenericSelectQuery.fetchOffset" value="0"/>
 		<sql><![CDATA[SELECT
 #if($isTotal)
 COUNT(DISTINCT pv.id) AS "total"

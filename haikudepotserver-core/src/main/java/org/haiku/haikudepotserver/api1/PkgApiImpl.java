@@ -27,6 +27,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
+import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -233,6 +234,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             List<PkgVersion> searchedPkgVersions = pkgService.search(context, specification);
 
+            // if there is a pattern then it is not possible to use the fixed lookup (which
+            // is faster).
+
+            final PkgLocalizationLookupService localPkgLocalizationLookupService =
+                    null != specification.getExpressionAsPattern()
+                        ? pkgLocalizationService
+                            : new FixedPkgLocalizationLookupServiceImpl(context, searchedPkgVersions, naturalLanguage);
+
             result.items = searchedPkgVersions
                     .stream()
                     .map(spv -> {
@@ -248,8 +257,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultPkg.derivedRating = pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating() : null;
                         resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
 
-                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgLocalizationService.resolvePkgVersionLocalization(
-                                context, spv, specification.getExpressionAsPattern(), naturalLanguage);
+                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
+                                localPkgLocalizationLookupService.resolvePkgVersionLocalization(
+                                    context, spv, specification.getExpressionAsPattern(), naturalLanguage);
 
                         SearchPkgsResult.PkgVersion resultVersion = new SearchPkgsResult.PkgVersion();
                         resultVersion.major = spv.getMajor();

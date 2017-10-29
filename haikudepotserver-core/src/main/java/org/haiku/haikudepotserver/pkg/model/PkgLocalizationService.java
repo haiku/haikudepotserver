@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,23 +10,9 @@ import org.haiku.haikudepotserver.dataobjects.*;
 
 import java.util.regex.Pattern;
 
-public interface PkgLocalizationService {
+public interface PkgLocalizationService extends PkgLocalizationLookupService {
 
     String SUFFIX_SUMMARY_DEVELOPMENT = " (development files)";
-
-    /**
-     * <p>For a given package version, this method will look at the various levels of localization and fallback
-     * options to English and will produce an object that represents the best language options.</p>
-     *
-     * <p>If the pattern is provided, any localization for the provided natural language will be taken first if
-     * it matches, otherwise the english version will be tried.</p>
-     */
-
-    ResolvedPkgVersionLocalization resolvePkgVersionLocalization(
-            ObjectContext context,
-            PkgVersion pkgVersion,
-            Pattern searchPattern,
-            NaturalLanguage naturalLanguage);
 
     /**
      * <p>This method will update the localization defined in the parameters to this method into the data

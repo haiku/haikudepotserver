@@ -517,6 +517,57 @@ jsonschema2cppparser.py \
         </section>
 
         <section>
+            <title>Get All Package Versions Details</title>
+
+            <para>
+                This API is able to provide all of the packages' details sufficient for running the desktop
+                application.
+            </para>
+
+            <para>
+                This API supports the <link linkend="api-ifmodifiedsince">If-Modified-Since</link> header.
+            </para>
+
+            <para>
+                The resultant data transfer objects (DTO) used in this API are available as a json schema
+                within the source.
+            </para>
+
+            <para>
+                Details of the API;
+            </para>
+
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>HTTP Method</term>
+                        <listitem>GET</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Path</term>
+                        <listitem>/__pkg/all-&lt;repositorySourceCode&gt;-&lt;naturalLanguageCode&gt;.json.gz</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Expected HTTP Status Codes</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>302</term>
+                                    <listitem>Redirect to the actual payload data.</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>304</term>
+                                    <listitem>The data was not modified since the supplied timestamp.</listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+
+        </section>
+
+        <section>
             <title>Get All Repositories' Details</title>
 
             <para>
@@ -546,7 +597,7 @@ jsonschema2cppparser.py \
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
-                        <listitem>/__repository/all_&lt;natural-language-code&gt;.json.gz</listitem>
+                        <listitem>/__repository/all-&lt;natural-language-code&gt;.json.gz</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Expected HTTP Status Codes</term>

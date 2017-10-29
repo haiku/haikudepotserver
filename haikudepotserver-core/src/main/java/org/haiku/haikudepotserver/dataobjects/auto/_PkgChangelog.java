@@ -1,6 +1,6 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
@@ -19,8 +19,8 @@ public abstract class _PkgChangelog extends AbstractDataObject {
     public static final String ID_PK_COLUMN = "id";
 
     public static final Property<String> CONTENT = Property.create("content", String.class);
-    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
-    public static final Property<Date> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Date.class);
+    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
+    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
 
     public void setContent(String content) {
@@ -30,18 +30,18 @@ public abstract class _PkgChangelog extends AbstractDataObject {
         return (String)readProperty("content");
     }
 
-    public void setCreateTimestamp(Date createTimestamp) {
+    public void setCreateTimestamp(Timestamp createTimestamp) {
         writeProperty("createTimestamp", createTimestamp);
     }
-    public Date getCreateTimestamp() {
-        return (Date)readProperty("createTimestamp");
+    public Timestamp getCreateTimestamp() {
+        return (Timestamp)readProperty("createTimestamp");
     }
 
-    public void setModifyTimestamp(Date modifyTimestamp) {
+    public void setModifyTimestamp(Timestamp modifyTimestamp) {
         writeProperty("modifyTimestamp", modifyTimestamp);
     }
-    public Date getModifyTimestamp() {
-        return (Date)readProperty("modifyTimestamp");
+    public Timestamp getModifyTimestamp() {
+        return (Timestamp)readProperty("modifyTimestamp");
     }
 
     public void setPkg(Pkg pkg) {

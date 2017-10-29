@@ -73,7 +73,10 @@ public class RepositoryController extends AbstractController {
 
     // TODO; observe the natural language code
 
-    @RequestMapping(value = "/all_{naturalLanguageCode}.json.gz", method = RequestMethod.GET)
+    @RequestMapping(value = {
+            "/all_{naturalLanguageCode}.json.gz", // deprecated
+            "/all-{naturalLanguageCode}.json.gz"
+    }, method = RequestMethod.GET)
     public void getAllAsJson(
             HttpServletResponse response,
             @PathVariable(value = KEY_NATURALLANGUAGECODE) String naturalLanguageCode,

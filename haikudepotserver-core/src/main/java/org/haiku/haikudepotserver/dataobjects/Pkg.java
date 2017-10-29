@@ -8,10 +8,7 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectSelect;
-import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.cayenne.query.SelectQuery;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -116,14 +113,6 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
                 && (null == size) == (null == pi.getSize())
                 && ((null == size) || size.equals(pi.getSize()))
         ).collect(Collectors.toList());
-    }
-
-    public void setModifyTimestamp() {
-        setModifyTimestamp(new java.util.Date());
-    }
-
-    public void setIconModifyTimestamp() {
-        setIconModifyTimestamp(new java.util.Date());
     }
 
     /**

@@ -74,7 +74,7 @@ public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScr
                         if(optimizedData.length < originalImageData.length) {
                             pkgScreenshotImage.setData(optimizedData);
                             pkgScreenshot.setLength(optimizedData.length);
-                            pkgScreenshot.setModifyTimestamp(new Date());
+                            pkgScreenshot.setModifyTimestamp();
                             context.commitChanges();
                             LOGGER.debug("did store optimized image for pkg screenshot; {}", pkgScreenshotCode);
                         }

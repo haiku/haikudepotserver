@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.repository.job;
+package org.haiku.haikudepotserver.pkg.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +12,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -26,10 +26,16 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * <p>This will be a fairly loose test; it just checks that the process
+ * runs smoothly and that some basic data is present.</p>
+ */
+
 @ContextConfiguration({
         "classpath:/spring/test-context.xml"
 })
-public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
+public class PkgDumpExportJobRunnerIT extends AbstractIntegrationTest {
+
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
@@ -49,11 +55,16 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
     public void testRun() throws IOException {
 
         long now = DateTimeHelper.secondAccuracyDate(new Date()).getTime();
-        integrationTestSupportService.createStandardTestData(); // creates one repo
+
+        integrationTestSupportService.createStandardTestData();
+
+        PkgDumpExportJobSpecification specification = new PkgDumpExportJobSpecification();
+        specification.setRepositorySourceCode("testreposrc_xyz");
+        specification.setNaturalLanguageCode("es");
 
         // ------------------------------------
         String guid = jobService.submit(
-                new RepositoryDumpExportJobSpecification(),
+                specification,
                 JobSnapshot.COALESCE_STATUSES_NONE);
         // ------------------------------------
 
@@ -70,17 +81,25 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
                 final InputStream inputStream = jobSource.getByteSource().openBufferedStream();
                 final GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream)
         ) {
-
             JsonNode rootNode = objectMapper.readTree(gzipInputStream);
 
             JsonNode dataModifiedTimestampNode = rootNode.at("/info/dataModifiedTimestamp");
             Assert.assertTrue(dataModifiedTimestampNode.asLong() >= now);
 
-            JsonNode repositoryCode = rootNode.at("/items/0/code");
-            Assert.assertThat(repositoryCode.asText(), CoreMatchers.is("testrepo"));
+            JsonNode repositoryCode = rootNode.at("/items/0/name");
+            Assert.assertThat(repositoryCode.asText(), CoreMatchers.is("pkg1"));
 
-            JsonNode repositorySourceCode = rootNode.at("/items/0/repositorySources/0/code");
-            Assert.assertThat(repositorySourceCode.asText(), CoreMatchers.is("testreposrc_xyz"));
+            JsonNode derivedRating = rootNode.at("/items/0/derivedRating");
+            Assert.assertThat(derivedRating.asText(), CoreMatchers.is("3.5"));
+
+            JsonNode pkgScreenshots = rootNode.at("/items/0/pkgScreenshots/0/length");
+            Assert.assertThat(pkgScreenshots.asLong(), CoreMatchers.is(41296L));
+
+            JsonNode pkgCategories = rootNode.at("/items/0/pkgCategories/0/code");
+            Assert.assertThat(pkgCategories.asText(), CoreMatchers.is("graphics"));
+
+            JsonNode pv0Summary = rootNode.at("/items/0/pkgVersions/0/summary");
+            Assert.assertThat(pv0Summary.asText(), CoreMatchers.is("pkg1Version2SummarySpanish_feijoa"));
         }
 
     }

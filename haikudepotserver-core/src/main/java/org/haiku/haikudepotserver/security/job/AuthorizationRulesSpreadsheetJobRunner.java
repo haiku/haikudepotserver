@@ -67,21 +67,20 @@ public class AuthorizationRulesSpreadsheetJobRunner
                     "pkg-name"
             });
 
-            ResultBatchIterator<PermissionUserPkg> batchIterator = ObjectSelect.query(PermissionUserPkg.class)
+            ObjectSelect<PermissionUserPkg> objectSelect = ObjectSelect.query(PermissionUserPkg.class)
                     .orderBy(
                             PermissionUserPkg.USER.dot(User.NICKNAME).asc(),
-                            PermissionUserPkg.PERMISSION.dot(Permission.CODE).asc())
-                    .batchIterator(context, 50);
+                            PermissionUserPkg.PERMISSION.dot(Permission.CODE).asc());
 
-            while (batchIterator.hasNext()) {
-                batchIterator.next().forEach((pup) -> writer.writeNext(new String[]{
+            try (ResultBatchIterator<PermissionUserPkg> batchIterator = objectSelect.batchIterator(context, 50)) {
+                batchIterator.forEach((pups) -> pups.forEach((pup) -> writer.writeNext(new String[]{
                         dateTimeFormatter.format(Instant.ofEpochMilli(pup.getCreateTimestamp().getTime())),
                         pup.getUser().getNickname(),
                         Boolean.toString(pup.getUser().getActive()),
                         pup.getPermission().getCode(),
                         pup.getPermission().getName(),
                         null != pup.getPkg() ? pup.getPkg().getName() : ""
-                }));
+                })));
             }
 
             writer.flush();

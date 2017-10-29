@@ -17,9 +17,11 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.OptimisticLockException;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -659,5 +661,37 @@ public class PkgServiceImpl implements PkgService {
             }
         }
     }
+
+    @Override
+    public Date getLastModifyTimestampSecondAccuracy(ObjectContext context, RepositorySource repositorySource) {
+        Preconditions.checkNotNull(context);
+
+        Date pkgVersionMax = ObjectUtils.firstNonNull(
+                ObjectSelect
+                        .query(PkgVersion.class)
+                        .where(PkgVersion.ACTIVE.isTrue())
+                        .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                        .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                        .max(PkgVersion.MODIFY_TIMESTAMP)
+                        .sharedCache()
+                        .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
+                        .selectFirst(context),
+                new Date(0L));
+
+        Date pkgMax = ObjectUtils.firstNonNull(
+                ObjectSelect
+                        .query(PkgVersion.class)
+                        .where(PkgVersion.ACTIVE.isTrue())
+                        .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                        .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                        .max(Pkg.MODIFY_TIMESTAMP)
+                        .sharedCache()
+                        .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
+                        .selectFirst(context),
+                new Date(0L));
+
+        return DateTimeHelper.secondAccuracyDate(new Date(Math.max(pkgVersionMax.getTime(), pkgMax.getTime())));
+    }
+
 
 }

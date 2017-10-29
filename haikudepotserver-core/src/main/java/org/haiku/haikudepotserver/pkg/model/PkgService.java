@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -178,5 +179,12 @@ public interface PkgService {
      */
 
     void incrementViewCounter(ServerRuntime serverRuntime, ObjectId pkgVersionOid);
+
+    /**
+     * <p>This method will return the highest modify timestamp on the {@link PkgVersion} in the database.
+     * This also considers the Pkg as well.</p>
+     */
+
+    Date getLastModifyTimestampSecondAccuracy(ObjectContext context, RepositorySource repositorySource);
 
 }

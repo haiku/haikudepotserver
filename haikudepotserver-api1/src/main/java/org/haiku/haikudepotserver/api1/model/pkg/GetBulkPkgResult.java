@@ -1,5 +1,5 @@
 /*
-* Copyright 2014-2015, Andrew Lindesay
+* Copyright 2014-2017, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.api1.model.pkg;
 
 import java.util.List;
 
+@Deprecated
 public class GetBulkPkgResult {
 
     public List<Pkg> pkgs;

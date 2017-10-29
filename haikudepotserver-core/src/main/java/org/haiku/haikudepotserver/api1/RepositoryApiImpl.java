@@ -466,7 +466,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         repositorySource.setRepository(repositoryOptional.get());
         repositorySource.setUrl(request.url);
         repositorySource.setCode(request.code);
-        repositoryOptional.get().setModifyTimestamp(new Date());
+        repositoryOptional.get().setModifyTimestamp();
         context.commitChanges();
 
         LOGGER.info("did create a new repository source '{}' on the repository '{}'", repositorySource, repositoryOptional.get());
