@@ -8,12 +8,15 @@ package org.haiku.haikudepotserver.pkg.job;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
+import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.PrefetchTreeNode;
+import org.apache.cayenne.query.SQLTemplate;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -116,6 +119,8 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
                         "unable to find the repository source ["
                                 + specification.getRepositorySourceCode() + "]"));
 
+        List<String> pkgNames = getPkgNames(context, repositorySource);
+
         ObjectSelect<PkgVersion> objectSelect = ObjectSelect
                 .query(PkgVersion.class)
                 .where(PkgVersion.ACTIVE.isTrue())
@@ -127,8 +132,6 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         // iterate through the pkgnames.  This is done in this manner so that if there is (erroneously)
         // two 'latest' pkg versions under the same pkg for two different architectures then these will
         // be grouped in the output instead of the same pkg appearing twice.
-
-        List<String> pkgNames = objectSelect.column(PkgVersion.PKG.dot(Pkg.NAME)).select(context);
 
         LOGGER.info("will dump pkg versions for {} pkgs", pkgNames.size());
 
@@ -144,6 +147,29 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         });
 
         jsonGenerator.writeEndArray();
+    }
+
+
+    /**
+     * <p>This method will pull down the package names that are to be included.  This will return the
+     * packages in order of their prominence.  This is helpful because the subsequent display of the
+     * packages by the client is most likely going to be in prominence order.</p>
+     */
+
+    private List<String> getPkgNames(ObjectContext context, RepositorySource repositorySource) {
+
+        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
+                .getQueryDescriptor("PkgNamesForRepositorySource").buildQuery();
+        SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
+                "resourceSourceCode", repositorySource.getCode()));
+        query.setFetchingDataRows(true);
+
+        List<DataRow> dataRows = (List<DataRow>) context.performQuery(query);
+
+        return dataRows
+                .stream()
+                .map((dr) -> String.class.cast(dr.get("name")))
+                .collect(Collectors.toList());
     }
 
     private void writePkgVersions(

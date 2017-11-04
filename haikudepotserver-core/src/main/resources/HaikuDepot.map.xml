@@ -813,6 +813,26 @@
 	<obj-relationship name="pkgVersion" source="UserRating" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="user" source="UserRating" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="userRatingStability" source="UserRating" target="UserRatingStability" deleteRule="Nullify" db-relationship-path="user_rating_stability"/>
+	<query name="PkgNamesForRepositorySource" type="SQLTemplate" root="obj-entity" root-name="PkgVersion">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="false"/>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+  #result('p.name' 'String' 'name')
+FROM
+  haikudepot.pkg_version pv
+  JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+  JOIN haikudepot.repository_source rs ON rs.id = pv.repository_source_id
+  JOIN haikudepot.repository r ON r.id = rs.repository_id
+  JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id
+  JOIN haikudepot.prominence pr ON pr.id = ppr.prominence_id
+WHERE 1 = 1
+  AND rs.code = #bind($resourceSourceCode)
+  AND pv.active = true
+  AND p.active = true
+  AND pv.is_latest = true
+ORDER BY
+  pr.ordering ASC,
+  p.name DESC]]></sql>
+	</query>
 	<query name="PkgVersionLocalizationResolution" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
 		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
 		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[WITH
