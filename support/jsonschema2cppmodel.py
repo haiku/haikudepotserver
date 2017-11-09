@@ -114,6 +114,16 @@ ${cppclassname}::Set${cppname}(${cpptype}* value)
 }
 
 
+void
+${cppclassname}::Set${cppname}Null()
+{
+    if (!${cppname}IsNull()) {
+        delete ${cppmembername};
+        ${cppmembername} = NULL;
+    }
+}
+
+
 bool
 ${cppclassname}::${cppname}IsNull()
 {
@@ -125,6 +135,7 @@ ${cppclassname}::${cppname}IsNull()
 def writetakeownershipaccessorsheader(outputfile, cppname, cpptype):
     outputfile.write('    %s* %s();\n' % (cpptype, cppname))
     outputfile.write('    void Set%s(%s* value);\n' % (cppname, cpptype))
+    outputfile.write('    void Set%sNull();\n' % cppname)
     outputfile.write('    bool %sIsNull();\n' % cppname)
 
 
@@ -142,20 +153,30 @@ def writescalaraccessors(outputfile, cppclassname, cppname, cppmembername, cppty
 ${cpptype}
 ${cppclassname}::${cppname}()
 {
-    return ${cppmembername};
+    return *${cppmembername};
 }
 
 
 void
 ${cppclassname}::Set${cppname}(${cpptype} value)
 {
-    if ({$cppname}IsNull())
+    if (${cppname}IsNull())
         ${cppmembername} = new ${cpptype}[1];
     ${cppmembername}[0] = value;
 }
 
 
 void
+${cppclassname}::Set${cppname}Null()
+{
+    if (!${cppname}IsNull()) {
+        delete ${cppmembername};
+        ${cppmembername} = NULL;
+    }
+}
+
+
+bool
 ${cppclassname}::${cppname}IsNull()
 {
     return ${cppmembername} == NULL;
@@ -168,6 +189,7 @@ def writescalaraccessorsheader(outputfile, cppname, cpptype):
         string.Template("""
     ${cpptype} ${cppname}();
     void Set${cppname}(${cpptype} value);
+    void Set${cppname}Null();
     bool ${cppname}IsNull();
 """).substitute({'cppname': cppname, 'cpptype': cpptype}))
 

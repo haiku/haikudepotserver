@@ -506,6 +506,20 @@ def writestackedlistenerfieldimplementation(
         }))
 
 
+def writenullstackedlistenerfieldimplementation(
+        istate,
+        propname):
+
+    istate.outputfile().write(
+        string.Template("""
+            if (fNextItemName == "${propname}")
+                fTarget->Set${cpppropname}Null();
+        """).substitute({
+            'propname': propname,
+            'cpppropname': jscom.propnametocppname(propname)
+        }))
+
+
 def writestackedlistenerfieldsimplementation(
         istate,
         schema,
@@ -598,7 +612,7 @@ ${subtype_cppstackedlistenerclassname}::Handle(const BJsonEvent& event)
     for propname, propmetadata in schema['properties'].items():
         # TODO; deal with array case somehow.
         if 'array' != propmetadata['type']:
-            writestackedlistenerfieldimplementation(istate, propname, 'NULL')
+            writenullstackedlistenerfieldimplementation(istate, propname)
     outfile.write('            fNextItemName.SetTo("");\n')
     outfile.write('            break;\n')
     outfile.write('        }\n')

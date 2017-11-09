@@ -80,6 +80,9 @@
           "architectureCode": {
             "type": "string"
           },
+          "title": {
+            "type": "string"
+          },
           "summary": {
             "type": "string"
           },
