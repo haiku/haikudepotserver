@@ -916,6 +916,7 @@ SELECT
   	t_loc_p_l.title,
   	t_loc_pv_e.title,
   	t_loc_p_e.title,
+	p.name,
     '?')" 'String' 'title'),
   #result("COALESCE(
   	t_loc_pv_l.summary,
@@ -931,6 +932,7 @@ SELECT
     '?')" 'String' 'description')
 FROM
   haikudepot.pkg_version pv
+  JOIN haikudepot.pkg p ON p.id = pv.pkg_id
   LEFT JOIN t_loc_pv_l ON t_loc_pv_l.pv_id = pv.id
   LEFT JOIN t_loc_p_l ON t_loc_p_l.pv_id = pv.id
   LEFT JOIN t_loc_pv_e ON t_loc_pv_e.pv_id = pv.id
