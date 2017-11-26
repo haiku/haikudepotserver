@@ -330,9 +330,12 @@ ${generalobjectclassname}::Handle(const BJsonEvent& event)
             break;
             
         case B_JSON_OBJECT_END:
+        {
             Pop();
+            bool status = (ErrorStatus() == B_OK);
             delete this;
-            break;
+            return status;
+        }
         
     }
     
@@ -373,9 +376,12 @@ ${generalarrayclassname}::Handle(const BJsonEvent& event)
             break;
             
         case B_JSON_ARRAY_END:
+        {
             Pop();
+            bool status = (ErrorStatus() == B_OK);
             delete this;
-            break;
+            return status;
+        }
         
     }
     
@@ -584,9 +590,12 @@ ${subtype_cppstackedlistenerclassname}::Handle(const BJsonEvent& event)
             break;
             
         case B_JSON_OBJECT_END:
+        {
             Pop();
+            bool status = (ErrorStatus() == B_OK);
             delete this;
-            break;
+            return status;
+        }
 
 """).substitute(hdscommon.uniondicts(
             naming.todict(),
@@ -743,9 +752,12 @@ ${subtype_cppstackedlistlistenerclassname}::Handle(const BJsonEvent& event)
     switch (event.EventType()) {
         
         case B_JSON_ARRAY_END:
+        {
             Pop();
+            bool status = (ErrorStatus() == B_OK);
             delete this;
-            break;   
+            return status;
+        }
         
         case B_JSON_OBJECT_START:
         {
@@ -837,9 +849,12 @@ ${cppbulkcontainerstackedlistenerclassname}::Handle(const BJsonEvent& event)
             break;
             
         case B_JSON_OBJECT_END:
+        {
             Pop();
+            bool status = (ErrorStatus() == B_OK);
             delete this;
-            break;
+            return status;
+        }
             
         default:
                 // ignore
@@ -875,9 +890,12 @@ ${cppbulkcontaineritemliststackedlistenerclassname}::Handle(const BJsonEvent& ev
             break;
             
         case B_JSON_ARRAY_END:
+        {
             Pop();
+            bool status = (ErrorStatus() == B_OK);
             delete this;
-            break;
+            return status;
+        }
             
         default:
             HandleError(B_NOT_ALLOWED, JSON_EVENT_LISTENER_ANY_LINE, "illegal state - unexpected json event");
