@@ -8,14 +8,15 @@ package org.haiku.haikudepotserver.support;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
+import org.apache.cayenne.validation.BeanValidationFailure;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
 
 public class URLHelper {
 
@@ -23,6 +24,19 @@ public class URLHelper {
 
     private static int PAYLOAD_LENGTH_CONNECT_TIMEOUT = 10 * 1000;
     private static int PAYLOAD_LENGTH_READ_TIMEOUT = 10 * 1000;
+
+    public static boolean isValidInfo(String urlString) {
+
+        if (StringUtils.isNotBlank(urlString)) {
+            try {
+                new URI(urlString);
+                return true;
+            } catch (URISyntaxException ignore) {
+            }
+        }
+
+        return false;
+    }
 
     public static long payloadLength(URL url) throws IOException {
         Preconditions.checkArgument(null != url, "the url must be supplied");

@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.dataobjects;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersionUrl;
+import org.haiku.haikudepotserver.support.URLHelper;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,10 +20,7 @@ public class PkgVersionUrl extends _PkgVersionUrl {
         super.validateForSave(validationResult);
 
         if(null != getUrl()) {
-            try {
-                    new URL(getUrl());
-            }
-            catch(MalformedURLException mue) {
+            if (!URLHelper.isValidInfo(getUrl())) {
                 validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "malformed"));
             }
         }
