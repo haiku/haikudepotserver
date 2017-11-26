@@ -822,7 +822,7 @@ FROM
   JOIN haikudepot.pkg p ON p.id = pv.pkg_id
   JOIN haikudepot.repository_source rs ON rs.id = pv.repository_source_id
   JOIN haikudepot.repository r ON r.id = rs.repository_id
-  JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id
+  JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
   JOIN haikudepot.prominence pr ON pr.id = ppr.prominence_id
 WHERE 1 = 1
   AND rs.code = #bind($resourceSourceCode)
@@ -831,7 +831,7 @@ WHERE 1 = 1
   AND pv.is_latest = true
 ORDER BY
   pr.ordering ASC,
-  p.name DESC]]></sql>
+  p.name ASC]]></sql>
 	</query>
 	<query name="PkgVersionLocalizationResolution" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
 		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>

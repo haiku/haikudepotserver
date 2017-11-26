@@ -45,6 +45,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -121,14 +122,6 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
 
         List<String> pkgNames = getPkgNames(context, repositorySource);
 
-        ObjectSelect<PkgVersion> objectSelect = ObjectSelect
-                .query(PkgVersion.class)
-                .where(PkgVersion.ACTIVE.isTrue())
-                .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
-                .and(PkgVersion.IS_LATEST.isTrue())
-                .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
-                .orderBy(PkgVersion.PKG.dot(Pkg.NAME).desc());
-
         // iterate through the pkgnames.  This is done in this manner so that if there is (erroneously)
         // two 'latest' pkg versions under the same pkg for two different architectures then these will
         // be grouped in the output instead of the same pkg appearing twice.
@@ -136,19 +129,27 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         LOGGER.info("will dump pkg versions for {} pkgs", pkgNames.size());
 
         Lists.partition(pkgNames, BATCH_SIZE).forEach((subPkgNames) -> {
-
-            ObjectSelect<PkgVersion> pkgVersionObjectSelect = objectSelect
-                    .and(PkgVersion.PKG.dot(Pkg.NAME).in(subPkgNames))
-                    .prefetch(createPkgVersionPrefetchTree());
-
-            List<PkgVersion> pkgVersions = pkgVersionObjectSelect.select(context);
+            List<PkgVersion> pkgVersions = createPkgVersionSelect(repositorySource, subPkgNames).select(context);
             writePkgVersions(jsonGenerator, context, pkgVersions, repositorySource, naturalLanguage);
-
         });
 
         jsonGenerator.writeEndArray();
     }
 
+
+    private ObjectSelect<PkgVersion> createPkgVersionSelect(
+            RepositorySource repositorySource,
+            Collection<String> pkgNames) {
+        return ObjectSelect
+                .query(PkgVersion.class)
+                .where(PkgVersion.ACTIVE.isTrue())
+                .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                .and(PkgVersion.IS_LATEST.isTrue())
+                .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                .orderBy(PkgVersion.PKG.dot(Pkg.NAME).desc())
+                .and(PkgVersion.PKG.dot(Pkg.NAME).in(pkgNames))
+                .prefetch(createPkgVersionPrefetchTree());
+    }
 
     /**
      * <p>This method will pull down the package names that are to be included.  This will return the
