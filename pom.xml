@@ -10,6 +10,7 @@
     <modules>
         <module>haikudepotserver-api1</module>
         <module>haikudepotserver-packagefile</module>
+        <module>haikudepotserver-driversettings</module>
         <module>haikudepotserver-core</module>
         <module>haikudepotserver-core-test</module>
         <module>haikudepotserver-parent</module>

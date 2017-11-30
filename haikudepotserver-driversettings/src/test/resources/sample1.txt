@@ -1,0 +1,16 @@
+# This input file has been taken from;
+# https://cgit.haiku-os.org/haiku/tree/src/tests/system/libroot/os/DriverSettingsTest.cpp
+
+keyA b c d {
+	keyB {
+		keyC d e f {
+			keyD e
+			keyE f
+		}
+	}}
+
+keyA {
+disabled
+}
+
+keyA = b { keyB=d =e { keyC "f g"; keyD h } };

@@ -1,0 +1,9 @@
+# This input file has been taken from;
+# https://eu.hpkg.haiku-os.org/haikuports/master/repository/x86_gcc2/current/repo.info
+
+name HaikuPorts
+vendor "Haiku Project"
+summary "The HaikuPorts repository"
+priority 1
+url https://vmpkg.haiku-os.org/haikuports/master/repository/x86_gcc2
+architecture x86_gcc2
