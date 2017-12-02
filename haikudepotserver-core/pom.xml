@@ -21,6 +21,11 @@
         </dependency>
         <dependency>
             <groupId>org.haiku</groupId>
+            <artifactId>haikudepotserver-driversettings</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.haiku</groupId>
             <artifactId>haikudepotserver-api1</artifactId>
             <version>${project.version}</version>
         </dependency>

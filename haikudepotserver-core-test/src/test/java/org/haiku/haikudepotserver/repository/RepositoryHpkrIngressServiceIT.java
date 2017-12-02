@@ -57,16 +57,19 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
     public void testImportThenCheck() throws Exception {
 
         File temporaryDir = null;
-        File temporaryFile = null;
+        File temporaryRepoFile = null;
+        File temporaryRepoInfoFile = null;
 
         try {
             temporaryDir = Files.createTempDir();
-            temporaryFile = new File(temporaryDir, "repo");
+            temporaryRepoFile = new File(temporaryDir, "repo");
+            temporaryRepoInfoFile = new File(temporaryDir, "repo.info");
 
             // get the test hpkr data and copy it into a temporary file that can be used as a source
             // for a repository.
 
-            Files.write(getResourceData("sample-repo.hpkr"), temporaryFile);
+            Files.write(getResourceData("sample-repo.info"), temporaryRepoInfoFile);
+            Files.write(getResourceData("sample-repo.hpkr"), temporaryRepoFile);
 
             // first setup a fake repository to import that points at the local test HPKR file.
 
@@ -202,6 +205,15 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 }
             }
 
+            // check that the sample url is loaded into the repository source.
+
+            {
+                ObjectContext context = serverRuntime.newContext();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testsrc_xyz").get();
+                Assertions.assertThat(repositorySource.getRepoInfoUrl())
+                        .isEqualTo("https://example.com/haikuports/master/repository/x86_gcc2");
+            }
+
             // now pull out some known packages and make sure they are imported correctly.
             // TODO - this is a fairly simplistic test; do some more checks.
 
@@ -263,9 +275,15 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             }
         }
         finally {
-            if (null != temporaryFile) {
-                if (!temporaryFile.delete()) {
-                    LOGGER.warn("unable to delete the temporary file");
+            if (null != temporaryRepoFile) {
+                if (!temporaryRepoFile.delete()) {
+                    LOGGER.warn("unable to delete the temporary 'repo' file");
+                }
+            }
+
+            if (null != temporaryRepoInfoFile) {
+                if (!temporaryRepoInfoFile.delete()) {
+                    LOGGER.warn("unable to delete the temporary 'repo.info' file");
                 }
             }
         }

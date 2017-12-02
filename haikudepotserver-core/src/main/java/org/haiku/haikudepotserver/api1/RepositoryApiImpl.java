@@ -228,6 +228,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     resultRs.active = rs.getActive();
                     resultRs.code = rs.getCode();
                     resultRs.url = rs.getUrl();
+                    resultRs.repoInfoUrl = rs.getRepoInfoUrl();
                     return resultRs;
                 })
                 .collect(Collectors.toList());

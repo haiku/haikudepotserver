@@ -18,6 +18,7 @@ public abstract class _RepositorySource extends AbstractDataObject {
 
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<String> REPO_INFO_URL = Property.create("repoInfoUrl", String.class);
     public static final Property<String> URL = Property.create("url", String.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
 
@@ -33,6 +34,13 @@ public abstract class _RepositorySource extends AbstractDataObject {
     }
     public String getCode() {
         return (String)readProperty("code");
+    }
+
+    public void setRepoInfoUrl(String repoInfoUrl) {
+        writeProperty("repoInfoUrl", repoInfoUrl);
+    }
+    public String getRepoInfoUrl() {
+        return (String)readProperty("repoInfoUrl");
     }
 
     public void setUrl(String url) {

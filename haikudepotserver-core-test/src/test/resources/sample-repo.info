@@ -1,0 +1,6 @@
+name HaikuPorts
+vendor "Haiku Project"
+summary "The HaikuPorts repository"
+priority 1
+url https://example.com/haikuports/master/repository/x86_gcc2
+architecture x86_gcc2

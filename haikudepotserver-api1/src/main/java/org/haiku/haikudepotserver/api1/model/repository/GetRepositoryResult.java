@@ -39,6 +39,8 @@ public class GetRepositoryResult {
 
         public String url;
 
+        public String repoInfoUrl;
+
     }
 
 }

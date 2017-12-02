@@ -105,6 +105,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                     DumpExportRepositorySource dumpRepositorySource = new DumpExportRepositorySource();
                     dumpRepositorySource.setCode(r.getCode());
                     dumpRepositorySource.setUrl(r.getUrl());
+                    dumpRepositorySource.setRepoInfoUrl(r.getRepoInfoUrl());
                     return dumpRepositorySource;
                 })
                 .collect(Collectors.toList())

@@ -110,10 +110,22 @@ public class RepositorySource extends _RepositorySource {
      * <p>This URL can be used to access the HPKR data for the repository source.</p>
      */
 
-    public URL getHpkrURL() {
+    public URL getDownloadHpkrURL() {
+        return getDownloadLeafURL("repo");
+    }
+
+    /**
+     * <p>This URL can be used to access the "repo.info" file for the repository.</p>
+     */
+
+    public URL getDownloadRepoInfoURL() {
+        return getDownloadLeafURL("repo.info");
+    }
+
+    private URL getDownloadLeafURL(String leaf) {
         try {
             return UriComponentsBuilder.fromUriString(getBaseURL().toString())
-                    .pathSegment("repo")
+                    .pathSegment(leaf)
                     .build()
                     .toUri()
                     .toURL();
@@ -123,10 +135,10 @@ public class RepositorySource extends _RepositorySource {
         }
     }
 
-    /**
-     * <p>Other files are able to be found in the repository.  This method provides a root for these
-     * files.</p>
-     */
+        /**
+         * <p>Other files are able to be found in the repository.  This method provides a root for these
+         * files.</p>
+         */
 
     private URL getBaseURL() {
         try {
