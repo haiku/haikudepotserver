@@ -28,7 +28,8 @@ public class PostAddCreateAndModifyTimestampListener implements LifecycleListene
 
     @PostConstruct
     public void init() {
-        LifecycleCallbackRegistry callbackRegistry = serverRuntime.getDataDomain().getEntityResolver().getCallbackRegistry();
+        LifecycleCallbackRegistry callbackRegistry = serverRuntime.getDataDomain().getEntityResolver()
+                .getCallbackRegistry();
 
         // load in the create / modify timestamp listener -- was in the model file, but moved here for consistency
         callbackRegistry.addListener(Pkg.class, this);

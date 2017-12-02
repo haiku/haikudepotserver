@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2017, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,5 +18,11 @@ public class GetRepositorySourceResult {
     public Boolean active;
 
     public String url;
+
+    /**
+     * @since 2017-12-02
+     */
+
+    public String repoInfoUrl;
 
 }

@@ -157,6 +157,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                         LOGGER.info("updated the repo info url to [{}] for repository source [{}]",
                                 urlParameterValue, repositorySource.getCode());
                         repositorySource.setRepoInfoUrl(urlParameterValue);
+                        repositorySource.getRepository().setModifyTimestamp();
                         mainContext.commitChanges();
                     }
 

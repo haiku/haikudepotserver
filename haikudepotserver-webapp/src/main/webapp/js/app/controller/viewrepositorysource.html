@@ -5,6 +5,9 @@
         <message key="viewRepositorySource.importTriggered.description"></message>
     </div>
 
+    <div class="info-container" passive-content="viewrepositorysource.html">
+    </div>
+
     <dl>
         <dt><message key="gen.code.title"></message></dt>
         <dd><code>{{repositorySource.code}}</code>&nbsp;</dd>
@@ -12,6 +15,15 @@
         <dd><active-indicator state="repositorySource.active"></active-indicator>&nbsp;</dd>
         <dt><message key="viewRepositorySource.url.title"></message></dt>
         <dd><a ng-href="{{repositorySource.url}}">{{repositorySource.url}}</a></dd>
+        <dt><message key="viewRepositorySource.repoInfoUrl.title"></message></dt>
+        <dd>
+            <span ng-show="repositorySource.repoInfoUrl">
+                <code>{{repositorySource.repoInfoUrl}}</code>
+            </span>
+            <span ng-show="!repositorySource.repoInfoUrl" class="text-error">
+                <message key="viewRepositorySource.repoInfoUrl.undefined"></message>
+            </span>
+        </dd>
         <dt><message key="viewRepositorySource.repository.title"></message></dt>
         <dd><repository-label repository="repositorySource.repository"></repository-label></dd>
     </dl>

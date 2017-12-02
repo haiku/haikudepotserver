@@ -374,6 +374,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.code = repositorySourceOptional.get().getCode();
         result.repositoryCode = repositorySourceOptional.get().getRepository().getCode();
         result.url = repositorySourceOptional.get().getUrl();
+        result.repoInfoUrl = repositorySourceOptional.get().getRepoInfoUrl();
         return result;
     }
 
@@ -423,6 +424,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         }
 
         if(context.hasChanges()) {
+            repositorySourceOptional.get().getRepository().setModifyTimestamp();
             context.commitChanges();
         }
         else {
