@@ -24,7 +24,7 @@ import javax.annotation.Resource;
 public class PostAddCreateAndModifyTimestampListener implements LifecycleListener {
 
     @Resource
-    ServerRuntime serverRuntime;
+    private ServerRuntime serverRuntime;
 
     @PostConstruct
     public void init() {

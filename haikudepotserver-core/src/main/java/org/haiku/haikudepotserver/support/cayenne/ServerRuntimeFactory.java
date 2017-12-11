@@ -5,6 +5,7 @@
 
 package org.haiku.haikudepotserver.support.cayenne;
 
+import org.apache.cayenne.cache.QueryCache;
 import org.apache.cayenne.configuration.Constants;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.di.MapBuilder;
@@ -31,6 +32,10 @@ public class ServerRuntimeFactory implements FactoryBean<ServerRuntime> {
         return ServerRuntime.builder()
                 .addConfigs("cayenne-haikudepotserver.xml")
                 .dataSource(dataSource)
+                .addModule(binder -> {
+                    binder.bind(QueryCache.class).toInstance(
+                            new org.haiku.haikudepotserver.support.cayenne.QueryCache(queryCacheSize));
+                })
                 .addModule(binder -> {
                     MapBuilder<Object> props = binder.bindMap(Constants.PROPERTIES_MAP);
                     props.put(Constants.SERVER_OBJECT_RETAIN_STRATEGY_PROPERTY, "weak"); // hard|soft|weak
