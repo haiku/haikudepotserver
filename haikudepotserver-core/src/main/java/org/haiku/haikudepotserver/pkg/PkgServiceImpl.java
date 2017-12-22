@@ -522,7 +522,7 @@ public class PkgServiceImpl implements PkgService {
     }
 
     /**
-     * <p>If this is a development package that has a parent then return it.</p>
+     * <p>If 'developPkgName' is the name of a developmental package then it could be that </p>
      */
 
     @Override

@@ -171,12 +171,12 @@ public:
 
     ${cppsuperstackedlistenerclassname}* Parent();
 
-    virtual void WillPop();
+    virtual bool WillPop();
 
 protected:
     ${cppsupermainlistenerclassname}* fMainListener;
 
-    void Pop();
+    bool Pop();
     void Push(${cppsuperstackedlistenerclassname}* stackedListener);
     
 private:
@@ -230,16 +230,18 @@ ${cppsuperstackedlistenerclassname}::Push(${cppsuperstackedlistenerclassname}* s
     fMainListener->SetStackedListener(stackedListener);
 }
 
-void
+bool
 ${cppsuperstackedlistenerclassname}::WillPop()
 {
+    return true;
 }
 
-void
+bool
 ${cppsuperstackedlistenerclassname}::Pop()
 {
-    WillPop();
+    bool result = WillPop();
     fMainListener->SetStackedListener(fParent);
+    return result;
 }
 """).substitute(istate.naming().todict()))
 
@@ -331,8 +333,7 @@ ${generalobjectclassname}::Handle(const BJsonEvent& event)
             
         case B_JSON_OBJECT_END:
         {
-            Pop();
-            bool status = (ErrorStatus() == B_OK);
+            bool status = Pop() && (ErrorStatus() == B_OK);
             delete this;
             return status;
         }
@@ -377,8 +378,7 @@ ${generalarrayclassname}::Handle(const BJsonEvent& event)
             
         case B_JSON_ARRAY_END:
         {
-            Pop();
-            bool status = (ErrorStatus() == B_OK);
+            bool status = Pop() && (ErrorStatus() == B_OK);
             delete this;
             return status;
         }
@@ -456,7 +456,7 @@ public:
         ${cppitemlistenerclassname}* itemListener);
     ~${cppitemlistenerstackedlistenerclassname}();
     
-    void WillPop();
+    bool WillPop();
         
 private:
     ${cppitemlistenerclassname}* fItemListener;
@@ -488,7 +488,7 @@ public:
     ~${cppbulkcontaineritemliststackedlistenerclassname}();
     
     bool Handle(const BJsonEvent& event);
-    void WillPop();
+    bool WillPop();
         
 private:
     ${cppitemlistenerclassname}* fItemListener;
@@ -591,8 +591,7 @@ ${subtype_cppstackedlistenerclassname}::Handle(const BJsonEvent& event)
             
         case B_JSON_OBJECT_END:
         {
-            Pop();
-            bool status = (ErrorStatus() == B_OK);
+            bool status = Pop() && (ErrorStatus() == B_OK);
             delete this;
             return status;
         }
@@ -753,8 +752,7 @@ ${subtype_cppstackedlistlistenerclassname}::Handle(const BJsonEvent& event)
         
         case B_JSON_ARRAY_END:
         {
-            Pop();
-            bool status = (ErrorStatus() == B_OK);
+            bool status = Pop() && (ErrorStatus() == B_OK);
             delete this;
             return status;
         }
@@ -801,11 +799,13 @@ ${cppitemlistenerstackedlistenerclassname}::~${cppitemlistenerstackedlistenercla
 }
 
 
-void
+bool
 ${cppitemlistenerstackedlistenerclassname}::WillPop()
 {
-    fItemListener->Handle(fTarget);
+    bool result = fItemListener->Handle(fTarget);
     delete fTarget;
+    fTarget = NULL;
+    return result;
 }
 
 
@@ -850,8 +850,7 @@ ${cppbulkcontainerstackedlistenerclassname}::Handle(const BJsonEvent& event)
             
         case B_JSON_OBJECT_END:
         {
-            Pop();
-            bool status = (ErrorStatus() == B_OK);
+            bool status = Pop() && (ErrorStatus() == B_OK);
             delete this;
             return status;
         }
@@ -891,8 +890,7 @@ ${cppbulkcontaineritemliststackedlistenerclassname}::Handle(const BJsonEvent& ev
             
         case B_JSON_ARRAY_END:
         {
-            Pop();
-            bool status = (ErrorStatus() == B_OK);
+            bool status = Pop() && (ErrorStatus() == B_OK);
             delete this;
             return status;
         }
@@ -906,10 +904,11 @@ ${cppbulkcontaineritemliststackedlistenerclassname}::Handle(const BJsonEvent& ev
 }
 
 
-void
+bool
 ${cppbulkcontaineritemliststackedlistenerclassname}::WillPop()
 {
     fItemListener->Complete();
+    return true;
 }
 
 
@@ -1175,7 +1174,7 @@ private:
 */         
 class ${cppitemlistenerclassname} {
 public:
-    virtual void Handle(${cpprootmodelclassname}* item) = 0;
+    virtual bool Handle(${cpprootmodelclassname}* item) = 0;
     virtual void Complete() = 0;
 };
 """).substitute(naming.todict()))

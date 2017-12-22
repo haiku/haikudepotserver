@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * <p>The Cayenne one seem to be broken so implementing an own one.</p>
+ * <p>Looks like this will be fixed in 4.0 FINAL so just remove this then.</p>
  */
 
 public class QueryCache implements org.apache.cayenne.cache.QueryCache {

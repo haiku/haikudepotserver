@@ -33,6 +33,7 @@ public class ServerRuntimeFactory implements FactoryBean<ServerRuntime> {
                 .addConfigs("cayenne-haikudepotserver.xml")
                 .dataSource(dataSource)
                 .addModule(binder -> {
+                    // remove at 4.0 final because the Map cache should be working again.
                     binder.bind(QueryCache.class).toInstance(
                             new org.haiku.haikudepotserver.support.cayenne.QueryCache(queryCacheSize));
                 })
