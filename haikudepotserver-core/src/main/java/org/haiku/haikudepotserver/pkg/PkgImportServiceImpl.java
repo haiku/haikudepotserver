@@ -10,12 +10,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.query.ObjectIdQuery;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
-import org.haiku.haikudepotserver.pkg.model.PkgIconService;
-import org.haiku.haikudepotserver.pkg.model.PkgImportService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.support.URLHelper;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -84,7 +80,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             pkgServiceImpl.ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
             LOGGER.info("the package {} did not exist; will create", pkg.getName());
 
-            possiblyReplicateDataFromDevelMainPkg(objectContext, persistedPkg);
+            possiblyReplicateDataFromMainPkgToSubordinatePkg(objectContext, persistedPkg);
 
         } else {
 
@@ -234,33 +230,38 @@ public class PkgImportServiceImpl implements PkgImportService {
         }
     }
 
+
     /**
-     * <p>If the imported package is a developmental package then there may be a main package that this
-     * development package relates to.  In this case, some data such as localizations should be copied
-     * from the main package to the development package.</p>
-     *
-     * <p>For example; &quot;cairo&quot; has a developmental package of &quot;cairo_devel&quot;.  If the
-     * &quot;cairo_devel&quot; is imported, it will look for the &quot;cairo&quot; package and will
-     * take data from it.</p>
+     * <p>Subordinate packages
+     * {#see {@link org.haiku.haikudepotserver.pkg.model.PkgService#findSubordinatePkgsForMainPkg(ObjectContext, String)}}
+     * need to have some of the package meta-data transferred from the main package to the subordinate package.</p>
      */
 
-    private void possiblyReplicateDataFromDevelMainPkg(ObjectContext objectContext, Pkg persistedPkg) {
-        pkgServiceImpl.tryGetDevelMainPkg(objectContext, persistedPkg.getName()).ifPresent((mainPkg) -> {
+    private void possiblyReplicateDataFromMainPkgToSubordinatePkg(
+            ObjectContext objectContext,
+            Pkg persistedPossiblySubordinatePkg) {
 
-            try {
-                pkgIconService.replicatePkgIcons(objectContext, mainPkg, persistedPkg);
-            } catch (IOException | BadPkgIconException e) {
-                LOGGER.error(
-                        "was unable to update the icon from pkg " + mainPkg.getName() + " to " + persistedPkg.getName(),
-                        e);
-            }
+        pkgServiceImpl
+                .tryGetMainPkgForSubordinatePkg(objectContext, persistedPossiblySubordinatePkg.getName())
+                .ifPresent((mainPkg) -> {
 
-            pkgLocalizationService.replicatePkgLocalizations(
-                    objectContext,
-                    mainPkg,
-                    persistedPkg,
-                    PkgLocalizationService.SUFFIX_SUMMARY_DEVELOPMENT);
-        });
+                    try {
+                        pkgIconService.replicatePkgIcons(objectContext, mainPkg, persistedPossiblySubordinatePkg);
+                    } catch (IOException | BadPkgIconException e) {
+                        LOGGER.error(
+                                "was unable to update the icon from pkg " + mainPkg.getName()
+                                        + " to " + persistedPossiblySubordinatePkg.getName(),
+                                e);
+                    }
+
+                    pkgLocalizationService.replicatePkgLocalizations(
+                            objectContext,
+                            mainPkg,
+                            persistedPossiblySubordinatePkg,
+                            pkgLocalizationService
+                                    .tryGetSummarySuffix(persistedPossiblySubordinatePkg.getName())
+                                    .orElse(null));
+                });
     }
 
     private void populatePayloadLength(PkgVersion persistedPkgVersion) {

@@ -14,9 +14,6 @@
     "prominenceOrdering": {
       "type": "integer"
     },
-    "pkgChangelogContent": {
-      "type": "string"
-    },
     "derivedRating": {
       "type": "number"
     },

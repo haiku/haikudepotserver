@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
@@ -45,6 +46,22 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
                 .sharedCache()
                 .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
                 .selectOne(context));
+    }
+
+
+    public static List<Pkg> findByNames(ObjectContext context, Collection<String> names) {
+        Preconditions.checkArgument(null!=context, "a context must be provided to lookup a package");
+
+        if (CollectionUtils.isEmpty(names)) {
+            return Collections.emptyList();
+        }
+
+        return ObjectSelect
+                .query(Pkg.class)
+                .where(NAME.in(names))
+                .sharedCache()
+                .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
+                .select(context);
     }
 
     @Override

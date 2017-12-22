@@ -77,8 +77,8 @@ public class PkgIconServiceImpl implements PkgIconService {
         pkg.setModifyTimestamp();
         pkg.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
 
-        pkgServiceImpl.tryGetDevelPkg(context, pkg.getName())
-                .ifPresent(develPkg -> removePkgIcon(context, develPkg));
+        pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName())
+                .forEach(develPkg -> removePkgIcon(context, develPkg));
 
     }
 
@@ -172,10 +172,9 @@ public class PkgIconServiceImpl implements PkgIconService {
         }
 
         PkgIcon pkgIcon = pkgIconOptional.orElseThrow(IllegalStateException::new);
-        Optional<Pkg> develPkgOptional = pkgServiceImpl.tryGetDevelPkg(context, pkg.getName());
 
-        if(develPkgOptional.isPresent()) {
-            replicatePkgIcon(context, pkgIcon, develPkgOptional.get());
+        for(Pkg subordinatePkg : pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName())) {
+            replicatePkgIcon(context, pkgIcon, subordinatePkg);
         }
 
         return pkgIcon;

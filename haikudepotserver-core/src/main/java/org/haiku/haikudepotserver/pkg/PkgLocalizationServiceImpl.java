@@ -11,6 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._Pkg;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.springframework.stereotype.Service;
 
@@ -147,10 +148,12 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         // riding off the back of this, if there is a "_devel" package of the same name
         // then its localization should be configured at the same time.
 
-        pkgServiceImpl.tryGetDevelPkg(context, pkg.getName()).ifPresent((develPkg) -> {
+        pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName()).forEach((subordinatePkg) -> {
             updatePkgLocalization(
-                    context, develPkg, naturalLanguage,
-                    title, summary + SUFFIX_SUMMARY_DEVELOPMENT, description);
+                    context, subordinatePkg, naturalLanguage,
+                    title,
+                    summary + tryGetSummarySuffix(subordinatePkg.getName()).orElse(""),
+                    description);
         });
 
         return result;
@@ -313,6 +316,15 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             return pkgVersionLocalization;
         }
 
+    }
+
+    @Override
+    public Optional<String> tryGetSummarySuffix(String pkgName) {
+        if (pkgName.endsWith(PkgService.SUFFIX_PKG_DEVELOPMENT)) {
+            return Optional.of(SUFFIX_SUMMARY_DEVELOPMENT);
+        }
+
+        return Optional.empty();
     }
 
 }

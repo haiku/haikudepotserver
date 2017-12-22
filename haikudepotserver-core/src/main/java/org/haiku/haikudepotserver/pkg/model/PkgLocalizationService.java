@@ -8,11 +8,18 @@ package org.haiku.haikudepotserver.pkg.model;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.*;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public interface PkgLocalizationService extends PkgLocalizationLookupService {
 
     String SUFFIX_SUMMARY_DEVELOPMENT = " (development files)";
+
+    /**
+     * <p>Some packages may need a suffix added to their summaries.</p>
+     */
+
+    Optional<String> tryGetSummarySuffix(String pkgName);
 
     /**
      * <p>This method will update the localization defined in the parameters to this method into the data

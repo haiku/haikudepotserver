@@ -26,6 +26,13 @@ public interface PkgService {
     String SUFFIX_PKG_DEVELOPMENT = "_devel";
 
     /**
+     * <p>This appears at the end of the package name to signify that it is a special GCC5 build
+     * for another package in the context of the gcc5-hybrid environment.</p>
+     */
+
+    String SUFFIX_PKG_X86 = "_x86";
+
+    /**
      * <p>This method will return the latest version for a package in any architecture.</p>
      */
 
@@ -149,17 +156,28 @@ public interface PkgService {
             Prominence prominence);
 
     /**
-     * <p>If this is a development package that has a parent then return it.</p>
+     * <p>If 'developPkgName' is the name of a developmental package then it could be that there is an
+     * associated main package.  This method will try to return the main package should this be a
+     * development package.  A development package will have the suffix <code>_devel</code>.</p>
+     *
+     * <p>Another case where this a subordinate package comes up is with the <code>_x86</code>
+     * variants.  In this situation, a package name has a suffix <code>_x86</code> in order to cause
+     * a special build of the package within the gcc2-hybrid build environment.</p>
      */
 
-    Optional<Pkg> tryGetDevelMainPkg(ObjectContext objectContext, String develPkgName);
+    Optional<Pkg> tryGetMainPkgForSubordinatePkg(ObjectContext objectContext, String subordinatePkgName);
 
     /**
-     * <p>If there exists a development package for this package then return it.</p>
+     * <p>If there exists packages that are subordinate to this main package then return it.  This covers
+     * situations such as;</p>
+     *
+     * <ul>
+     *     <li>Developmental package with <code>_devel</code> suffixes</li>
+     *     <li>Special-build packages with <code>_x86</code> suffixes</li>
+     * </ul>
      */
 
-    Optional<Pkg> tryGetDevelPkg(ObjectContext objectContext, String mainPkgName);
-
+    List<Pkg> findSubordinatePkgsForMainPkg(ObjectContext objectContext, String mainPkgName);
 
     String createHpkgDownloadUrl(PkgVersion pkgVersion);
 

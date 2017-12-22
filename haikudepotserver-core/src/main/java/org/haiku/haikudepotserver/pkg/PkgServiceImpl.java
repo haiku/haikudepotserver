@@ -17,6 +17,7 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.OptimisticLockException;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -521,21 +523,19 @@ public class PkgServiceImpl implements PkgService {
         return pkgProminenceOptional.get();
     }
 
-    /**
-     * <p>If 'developPkgName' is the name of a developmental package then it could be that </p>
-     */
-
     @Override
-    public Optional<Pkg> tryGetDevelMainPkg(ObjectContext objectContext, String develPkgName) {
+    public Optional<Pkg> tryGetMainPkgForSubordinatePkg(
+            ObjectContext objectContext,
+            final String subordinatePkgName) {
         Preconditions.checkArgument(null != objectContext, "the object context must be provided");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(develPkgName), "the pkg must be provided");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(subordinatePkgName), "the pkg must be provided");
 
-        if (develPkgName.endsWith(SUFFIX_PKG_DEVELOPMENT)) {
-            String mainPkgName = develPkgName.substring(0, develPkgName.length() - PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT.length());
-            return Pkg.tryGetByName(objectContext, mainPkgName);
-        }
-
-        return Optional.empty();
+        return ImmutableList.of(SUFFIX_PKG_DEVELOPMENT, SUFFIX_PKG_X86)
+                .stream()
+                .filter(subordinatePkgName::endsWith)
+                .map(suffix -> StringUtils.removeEnd(subordinatePkgName, suffix))
+                .findFirst()
+                .map(mainPackageName -> Pkg.tryGetByName(objectContext, mainPackageName).orElse(null));
     }
 
     /**
@@ -543,18 +543,16 @@ public class PkgServiceImpl implements PkgService {
      */
 
     @Override
-    public Optional<Pkg> tryGetDevelPkg(
-            ObjectContext objectContext,
-            String mainPkgName) {
-
+    public List<Pkg> findSubordinatePkgsForMainPkg(ObjectContext objectContext, String mainPkgName) {
         Preconditions.checkArgument(null != objectContext, "the object context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(mainPkgName), "the pkg must be provided");
 
-        if(!mainPkgName.endsWith(SUFFIX_PKG_DEVELOPMENT)) {
-            return Pkg.tryGetByName(objectContext, mainPkgName + SUFFIX_PKG_DEVELOPMENT);
-        }
-
-        return Optional.empty();
+        return Pkg.findByNames(
+                objectContext,
+                ImmutableList.of(SUFFIX_PKG_DEVELOPMENT, SUFFIX_PKG_X86)
+                        .stream()
+                        .map(n -> mainPkgName + n)
+                        .collect(Collectors.toSet()));
     }
 
     @Override
