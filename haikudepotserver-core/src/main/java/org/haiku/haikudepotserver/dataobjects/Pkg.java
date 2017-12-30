@@ -156,47 +156,6 @@ public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
     }
 
     /**
-     * <p>This method will re-order the screenshots according to the set of codes present in the supplied list.
-     * If the same code appears twice in the list, an {@link java.lang.IllegalArgumentException} will be
-     * thrown.  Any screenshots that are not mentioned in the list will be indeterminately ordered at the end
-     * of the list.</p>
-     */
-
-    public void reorderPkgScreenshots(final List<String> codes) {
-        Preconditions.checkNotNull(codes);
-
-        // first check that there are no duplicates.
-        if(new HashSet<>(codes).size() != codes.size()) {
-            throw new IllegalArgumentException("the codes supplied contain duplicates which would interfere with the ordering");
-        }
-
-        List<PkgScreenshot> screenshots = new ArrayList<>(getPkgScreenshots());
-        screenshots.sort((o1, o2) -> {
-            int o1i = codes.indexOf(o1.getCode());
-            int o2i = codes.indexOf(o2.getCode());
-
-            if (-1 == o1i && -1 == o2i) {
-                return o1.getCode().compareTo(o2.getCode());
-            }
-
-            if (-1 == o1i) {
-                o1i = Integer.MAX_VALUE;
-            }
-
-            if (-1 == o2i) {
-                o2i = Integer.MAX_VALUE;
-            }
-
-            return Integer.compare(o1i, o2i);
-        });
-
-        for(int i=0;i<screenshots.size();i++) {
-            PkgScreenshot pkgScreenshot = screenshots.get(i);
-            pkgScreenshot.setOrdering(i+1);
-        }
-    }
-
-    /**
      * <p>If there is a change-log then this will return it, otherwise it will return an empty optional.</p>
      */
 

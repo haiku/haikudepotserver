@@ -161,6 +161,7 @@
 	<db-entity name="pkg_screenshot" schema="haikudepot">
 		<db-attribute name="code" type="CHAR" isMandatory="true" length="36"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="hash_sha256" type="VARCHAR" isMandatory="true" length="64"/>
 		<db-attribute name="height" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="length" type="INTEGER" isMandatory="true"/>
@@ -442,6 +443,7 @@
 	<obj-entity name="PkgScreenshot" className="org.haiku.haikudepotserver.dataobjects.PkgScreenshot" lock-type="optimistic" dbEntityName="pkg_screenshot" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="hashSha256" type="java.lang.String" db-attribute-path="hash_sha256"/>
 		<obj-attribute name="height" type="java.lang.Integer" db-attribute-path="height"/>
 		<obj-attribute name="length" type="java.lang.Integer" db-attribute-path="length"/>
 		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>

@@ -82,8 +82,8 @@ angular.module('haikudepotserver').controller(
                 $scope.showHelp = true;
             };
 
-            $scope.isDevel = function() {
-                return $scope.pkg && pkg.isDevel($scope.pkg.name);
+            $scope.isSubordinate = function() {
+                return $scope.pkg && pkg.isSubordinate($scope.pkg.name);
             };
 
             $scope.goChooseTranslation = function(translation) {

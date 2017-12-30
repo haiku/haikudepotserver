@@ -22,6 +22,7 @@ import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class PkgIconServiceImpl implements PkgIconService {
     private PngOptimizationService pngOptimizationService;
 
     @Resource
-    private PkgServiceImpl pkgServiceImpl;
+    private PkgService pkgService;
 
     private ImageHelper imageHelper = new ImageHelper();
 
@@ -77,7 +78,7 @@ public class PkgIconServiceImpl implements PkgIconService {
         pkg.setModifyTimestamp();
         pkg.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
 
-        pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName())
+        pkgService.findSubordinatePkgsForMainPkg(context, pkg.getName())
                 .forEach(develPkg -> removePkgIcon(context, develPkg));
 
     }
@@ -173,7 +174,7 @@ public class PkgIconServiceImpl implements PkgIconService {
 
         PkgIcon pkgIcon = pkgIconOptional.orElseThrow(IllegalStateException::new);
 
-        for(Pkg subordinatePkg : pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName())) {
+        for(Pkg subordinatePkg : pkgService.findSubordinatePkgsForMainPkg(context, pkg.getName())) {
             replicatePkgIcon(context, pkgIcon, subordinatePkg);
         }
 
@@ -197,8 +198,7 @@ public class PkgIconServiceImpl implements PkgIconService {
 
     }
 
-    @Override
-    public PkgIcon replicatePkgIcon(
+    private PkgIcon replicatePkgIcon(
             ObjectContext context,
             PkgIcon pkgIcon,
             Pkg targetPkg) throws IOException, BadPkgIconException {

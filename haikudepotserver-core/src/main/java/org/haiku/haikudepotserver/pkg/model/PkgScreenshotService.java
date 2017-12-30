@@ -13,6 +13,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Optional;
 
 public interface PkgScreenshotService {
@@ -42,5 +43,27 @@ public interface PkgScreenshotService {
             Integer ordering) throws IOException, BadPkgScreenshotException;
 
     void deleteScreenshot(ObjectContext context, PkgScreenshot screenshot);
+
+    /**
+     * <p>Ensures that the screenshots in the source package are the same as those in the target package.</p>
+     * @since 2017-12-06
+     */
+
+    void replicatePkgScreenshots(
+            ObjectContext context,
+            Pkg sourcePkg,
+            Pkg targetPkg) throws IOException, BadPkgScreenshotException;
+
+    /**
+     * <p>This method will re-order the screenshots according to the set of codes present in the supplied list.
+     * If the same code appears twice in the list, an {@link java.lang.IllegalArgumentException} will be
+     * thrown.  Any screenshots that are not mentioned in the list will be indeterminately ordered at the end
+     * of the list.</p>
+     */
+
+    void reorderPkgScreenshots(
+            ObjectContext context,
+            Pkg pkg,
+            List<String> codes);
 
 }

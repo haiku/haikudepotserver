@@ -17,14 +17,19 @@ angular.module('haikudepotserver').factory('pkg',
 
             var SUFFIX_DEVEL = "_devel";
 
+            var SUFFIX_X86 = "_x86";
+
             /**
              * <p>This function will say if the package is a development package.</p>
              * @param {string} name
              */
 
-            function isDevel(name) {
-                var i = name.indexOf(SUFFIX_DEVEL);
-                return name && (-1 != i) && (i == (name.length - SUFFIX_DEVEL.length));
+            function isSubordinate(name) {
+                function hasSuffix(suffix) {
+                    var i = name.indexOf(suffix);
+                    return name && (-1 !== i) && (i === (name.length - suffix.length));
+                }
+                return hasSuffix(SUFFIX_DEVEL) || hasSuffix(SUFFIX_X86);
             }
 
             /**
@@ -122,8 +127,8 @@ angular.module('haikudepotserver').factory('pkg',
                     return getPkgWithSpecificVersionFromRouteParams(routeParams, incrementCounter);
                 },
 
-                isDevel : function(name) {
-                    return isDevel(name);
+                isSubordinate : function(name) {
+                    return isSubordinate(name);
                 }
             };
 

@@ -31,7 +31,11 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.pkg || undefined == $scope.pkgScreenshots || $scope.amCommunicating;
+                return !$scope.pkg || !$scope.pkgScreenshots || $scope.amCommunicating;
+            };
+
+            $scope.isSubordinate = function() {
+                return $scope.pkg && pkg.isSubordinate($scope.pkg.name);
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {

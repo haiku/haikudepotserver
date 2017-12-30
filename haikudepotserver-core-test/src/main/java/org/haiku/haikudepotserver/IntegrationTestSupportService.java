@@ -129,6 +129,8 @@ public class IntegrationTestSupportService {
         }
 
         ObjectContext context = getObjectContext();
+        context.rollbackChanges();
+
         StandardTestData result = new StandardTestData();
 
         Prominence prominence = Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get();

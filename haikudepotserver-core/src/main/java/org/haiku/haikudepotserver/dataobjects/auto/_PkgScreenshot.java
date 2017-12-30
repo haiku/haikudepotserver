@@ -22,6 +22,7 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
 
     public static final Property<String> CODE = Property.create("code", String.class);
     public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
+    public static final Property<String> HASH_SHA256 = Property.create("hashSha256", String.class);
     public static final Property<Integer> HEIGHT = Property.create("height", Integer.class);
     public static final Property<Integer> LENGTH = Property.create("length", Integer.class);
     public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
@@ -42,6 +43,13 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
     }
     public Timestamp getCreateTimestamp() {
         return (Timestamp)readProperty("createTimestamp");
+    }
+
+    public void setHashSha256(String hashSha256) {
+        writeProperty("hashSha256", hashSha256);
+    }
+    public String getHashSha256() {
+        return (String)readProperty("hashSha256");
     }
 
     public void setHeight(Integer height) {

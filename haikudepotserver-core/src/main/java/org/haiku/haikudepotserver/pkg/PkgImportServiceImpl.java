@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,9 @@ public class PkgImportServiceImpl implements PkgImportService {
 
     @Resource
     private PkgIconService pkgIconService;
+
+    @Resource
+    private PkgScreenshotService pkgScreenshotService;
 
     @Resource
     private PkgLocalizationService pkgLocalizationService;
@@ -78,7 +82,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             persistedPkg.setName(pkg.getName());
             persistedPkg.setActive(Boolean.TRUE);
             pkgServiceImpl.ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
-            LOGGER.info("the package {} did not exist; will create", pkg.getName());
+            LOGGER.info("the package [{}] did not exist; will create", pkg.getName());
 
             possiblyReplicateDataFromMainPkgToSubordinatePkg(objectContext, persistedPkg);
 
@@ -116,12 +120,12 @@ public class PkgImportServiceImpl implements PkgImportService {
             persistedPkgVersion.setPkg(persistedPkg);
 
             LOGGER.info(
-                    "the version {} of package {} did not exist; will create",
+                    "the version [{}] of package [{}] did not exist; will create",
                     pkg.getVersion().toString(),
                     pkg.getName());
         } else {
             LOGGER.debug(
-                    "the version {} of package {} did exist; will re-configure necessary data",
+                    "the version [{}] of package [{}] did exist; will re-configure necessary data",
                     pkg.getVersion().toString(),
                     pkg.getName());
 
@@ -249,8 +253,8 @@ public class PkgImportServiceImpl implements PkgImportService {
                         pkgIconService.replicatePkgIcons(objectContext, mainPkg, persistedPossiblySubordinatePkg);
                     } catch (IOException | BadPkgIconException e) {
                         LOGGER.error(
-                                "was unable to update the icon from pkg " + mainPkg.getName()
-                                        + " to " + persistedPossiblySubordinatePkg.getName(),
+                                "was unable to update the icon from pkg [" + mainPkg.getName()
+                                        + "] to [" + persistedPossiblySubordinatePkg.getName() + "]",
                                 e);
                     }
 
@@ -261,6 +265,20 @@ public class PkgImportServiceImpl implements PkgImportService {
                             pkgLocalizationService
                                     .tryGetSummarySuffix(persistedPossiblySubordinatePkg.getName())
                                     .orElse(null));
+
+                    if (persistedPossiblySubordinatePkg.getName().endsWith(PkgServiceImpl.SUFFIX_PKG_X86)) {
+                        try {
+                            pkgScreenshotService.replicatePkgScreenshots(
+                                    objectContext,
+                                    mainPkg,
+                                    persistedPossiblySubordinatePkg);
+                        } catch (IOException | BadPkgScreenshotException e) {
+                            LOGGER.error(
+                                    "was unable to update the screenshots from pkg [" + mainPkg.getName()
+                                            + "] to [" + persistedPossiblySubordinatePkg.getName() + "]",
+                                    e);
+                        }
+                    }
                 });
     }
 
@@ -302,7 +320,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                 if(0==c) {
                     if(isRealArchitecture) {
                         LOGGER.debug(
-                                "imported a package version {} of {} which is the same as the existing {}",
+                                "imported a package version [{}] of [{}] which is the same as the existing [{}]",
                                 persistedPkgVersionCoords,
                                 persistedPkgVersion.getPkg().getName(),
                                 persistedLatestExistingPkgVersionCoords);

@@ -777,10 +777,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new AuthorizationFailureException();
         }
 
-        pkg.reorderPkgScreenshots(reorderPkgScreenshotsRequest.codes);
+        pkgScreenshotService.reorderPkgScreenshots(context, pkg, reorderPkgScreenshotsRequest.codes);
         context.commitChanges();
 
-        LOGGER.info("did reorder the screenshots on package {}", pkg.getName());
+        LOGGER.info("did reorder the screenshots on package [{}]", pkg.getName());
 
         return new ReorderPkgScreenshotsResult();
     }

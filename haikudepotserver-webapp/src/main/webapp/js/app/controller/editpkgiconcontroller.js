@@ -107,8 +107,8 @@ angular.module('haikudepotserver').controller(
                 validateHvifIconFile($scope.editPkgIcon.iconHvifFile, $scope.editPkgIconForm['iconHvifFile']);
             });
 
-            $scope.isDevel = function() {
-                return $scope.pkg && pkg.isDevel($scope.pkg.name);
+            $scope.isSubordinate = function() {
+                return $scope.pkg && pkg.isSubordinate($scope.pkg.name);
             };
 
             $scope.goHelp = function() {

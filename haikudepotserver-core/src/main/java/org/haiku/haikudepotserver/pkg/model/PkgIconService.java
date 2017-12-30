@@ -45,15 +45,6 @@ public interface PkgIconService {
             ObjectContext context,
             Pkg pkg) throws IOException, BadPkgIconException;
 
-    /**
-     * <p>This method will transfer the data from the nominated pkg icon over into the target package.</p>
-     */
-
-    PkgIcon replicatePkgIcon(
-            ObjectContext context,
-            PkgIcon pkgIcon,
-            Pkg targetPkg) throws IOException, BadPkgIconException;
-
     void replicatePkgIcons(
             ObjectContext context,
             Pkg sourcePkg,
