@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -190,6 +190,13 @@ public interface PkgService {
      */
 
     boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories);
+
+    /**
+     * <p>Copies the categories from the source package to the target package.</p>
+     */
+
+    void replicatePkgCategories(ObjectContext context, Pkg sourcePkg, Pkg targetPkg);
+
     /**
      * <p>This method will increment the view counter on a package version.  If it encounters an optimistic
      * locking problem then it will pause and it will try again in a moment.  It will attempt this a few

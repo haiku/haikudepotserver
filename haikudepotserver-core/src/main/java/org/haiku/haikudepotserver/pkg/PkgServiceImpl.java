@@ -20,6 +20,7 @@ import org.apache.cayenne.query.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.auto._PkgPkgCategory;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
@@ -613,7 +614,29 @@ public class PkgServiceImpl implements PkgService {
             pkg.setModifyTimestamp();
         }
 
+        // there may be subordinate packages to this one.  If this is the case, then find them and update
+        // their categories as well.
+
+        for (Pkg subordinatePkg : findSubordinatePkgsForMainPkg(context, pkg.getName())) {
+            if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
+                updatePkgCategories(context, subordinatePkg, pkgCategories);
+            }
+        }
+
         return didChange;
+    }
+
+    @Override
+    public void replicatePkgCategories(ObjectContext context, Pkg sourcePkg, Pkg targetPkg) {
+        updatePkgCategories(
+                context,
+                targetPkg,
+                sourcePkg
+                        .getPkgPkgCategories()
+                        .stream()
+                        .map(_PkgPkgCategory::getPkgCategory)
+                        .collect(Collectors.toList())
+        );
     }
 
     /**

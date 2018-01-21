@@ -16,7 +16,9 @@ import org.springframework.mail.MailSender;
 import java.util.List;
 
 @PropertySource(
-        value = {"classpath:test-local.properties", "${config.properties:}"},
+        value = {
+                "classpath:test-local.properties",
+                "${config.properties:file-not-found.properties}"},
         ignoreResourceNotFound = true
 )
 public class TestBasicConfig {

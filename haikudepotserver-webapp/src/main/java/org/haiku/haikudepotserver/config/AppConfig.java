@@ -37,7 +37,7 @@ import java.util.Properties;
 @PropertySource(
         value = {
                 "classpath:local.properties",
-                "${config.properties:}"
+                "${config.properties:file-not-found.properties}"
         },
         ignoreResourceNotFound = true
 )

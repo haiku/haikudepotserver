@@ -268,7 +268,13 @@ public class PkgImportServiceImpl implements PkgImportService {
                                     .tryGetSummarySuffix(persistedPossiblySubordinatePkg.getName())
                                     .orElse(null));
 
-                    if (persistedPossiblySubordinatePkg.getName().endsWith(PkgServiceImpl.SUFFIX_PKG_X86)) {
+                    // if the package ends with _x86 then there is some special logic to relay
+                    // meta-data about the packages between the main and the subordinate package.
+
+                    boolean subordinateEndsWithX86 = persistedPossiblySubordinatePkg.getName()
+                            .endsWith(PkgServiceImpl.SUFFIX_PKG_X86);
+
+                    if (subordinateEndsWithX86) {
                         try {
                             pkgScreenshotService.replicatePkgScreenshots(
                                     objectContext,
@@ -281,6 +287,14 @@ public class PkgImportServiceImpl implements PkgImportService {
                                     e);
                         }
                     }
+
+                    if (subordinateEndsWithX86) {
+                        pkgServiceImpl.replicatePkgCategories(
+                                objectContext,
+                                mainPkg,
+                                persistedPossiblySubordinatePkg);
+                    }
+
                 });
     }
 
