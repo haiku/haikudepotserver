@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,11 +26,11 @@ class NaturalStringComparator implements Comparator<String> {
     @Override
     public int compare(String o1, String o2) {
 
-        if(null==o1) {
-            return null==o2 ? 0 : -1;
+        if (null == o1) {
+            return null == o2 ? 0 : -1;
         }
 
-        if(null==o2) {
+        if (null == o2) {
             return 1;
         }
 
@@ -42,23 +42,23 @@ class NaturalStringComparator implements Comparator<String> {
             NaturalChunk nc1 = (NaturalChunk) naturalChunkFormat.parseObject(o1, pos1);
             NaturalChunk nc2 = (NaturalChunk) naturalChunkFormat.parseObject(o2, pos2);
 
-            if(NaturalChunk.Type.END == nc1.getType()) {
+            if (NaturalChunk.Type.END == nc1.getType()) {
                 return NaturalChunk.Type.END == nc2.getType() ? 0 : -1;
             }
 
-            if(NaturalChunk.Type.END == nc2.getType()) {
+            if (NaturalChunk.Type.END == nc2.getType()) {
                 return 1;
             }
 
             // different types then just compare from here to the end of the string.
 
-            if(nc1.getType() != nc2.getType()) {
+            if (nc1.getType() != nc2.getType()) {
                 String remainder1 = nc1.getSource().substring(nc1.getOffset());
                 String remainder2 = nc2.getSource().substring(nc2.getOffset());
                 return remainder1.compareToIgnoreCase(remainder2);
             }
 
-            switch(nc1.getType()) {
+            switch (nc1.getType()) {
 
                 case NUMBER: {
                     if (nc1.getLength() > nc2.getLength()) {
@@ -105,7 +105,7 @@ class NaturalStringComparator implements Comparator<String> {
         }
 
         private boolean isCharacterOf(NaturalChunk.Type type, char c) {
-            switch(type) {
+            switch (type) {
                 case NUMBER:
                     return Character.isDigit(c);
 
@@ -160,13 +160,13 @@ class NaturalStringComparator implements Comparator<String> {
             do {
                 pos.setIndex(pos.getIndex()+1);
             }
-            while(pos.getIndex() < source.length() && isCharacterOf(type, source.charAt(pos.getIndex())));
+            while (pos.getIndex() < source.length() && isCharacterOf(type, source.charAt(pos.getIndex())));
 
             NaturalChunk naturalChunk = new NaturalChunk(type, source, start, pos.getIndex()-start);
 
             // go past the trailing whitespace here as well.
 
-            while(pos.getIndex() < source.length() && Character.isWhitespace(source.charAt(pos.getIndex()))) {
+            while (pos.getIndex() < source.length() && Character.isWhitespace(source.charAt(pos.getIndex()))) {
                 pos.setIndex(pos.getIndex()+1);
             }
 

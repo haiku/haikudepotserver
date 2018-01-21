@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.userrating;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ComparisonChain;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -32,14 +32,18 @@ public class UserRatingServiceImpl implements UserRatingService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingServiceImpl.class);
 
-    @Value("${userrating.aggregation.pkg.versionsback:2}")
+    private ServerRuntime serverRuntime;
     private int userRatingDerivationVersionsBack;
-
-    @Value("${userrating.aggregation.pkg.minratings:3}")
     private int userRatingsDerivationMinRatings;
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    public UserRatingServiceImpl(
+            ServerRuntime serverRuntime,
+            @Value("${userrating.aggregation.pkg.versionsback:2}") int userRatingDerivationVersionsBack,
+            @Value("${userrating.aggregation.pkg.minratings:3}") int userRatingsDerivationMinRatings) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.userRatingDerivationVersionsBack = userRatingDerivationVersionsBack;
+        this.userRatingsDerivationMinRatings = userRatingsDerivationMinRatings;
+    }
 
     // -------------------------------------
     // ITERATION
@@ -344,7 +348,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         ObjectContext context = serverRuntime.newContext();
         Pkg pkg = Pkg.tryGetByName(context, pkgName)
                 .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no pkg was found; " + pkgName));
-        Repository repository = Repository.getByCode(context, repositoryCode)
+        Repository repository = Repository.tryGetByCode(context, repositoryCode)
                 .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no repository was found; " + repositoryCode));
 
         long beforeMillis = System.currentTimeMillis();
@@ -417,9 +421,8 @@ public class UserRatingServiceImpl implements UserRatingService {
                     .stream()
                     .map(pv -> pv.toVersionCoordinates().toVersionCoordinatesWithoutPreReleaseOrRevision())
                     .distinct()
+                    .sorted(versionCoordinatesComparator)
                     .collect(Collectors.toList());
-
-            Collections.sort(versionCoordinates, versionCoordinatesComparator);
 
             // work back VERSIONS_BACK from the latest in order to find out where to start fishing out user
             // ratings from.
@@ -450,30 +453,22 @@ public class UserRatingServiceImpl implements UserRatingService {
             List<String> userNicknames = getUserNicknamesWhoHaveRatedPkgVersions(context, pkgVersions);
 
             for(String nickname : userNicknames) {
-                User user = User.getByNickname(context, nickname).get();
+                User user = User.getByNickname(context, nickname);
 
-                List<UserRating> userRatingsForUser = UserRating.getByUserAndPkgVersions(context, user, pkgVersions);
+                List<UserRating> userRatingsForUser = new ArrayList<>(UserRating.getByUserAndPkgVersions(
+                        context, user, pkgVersions));
 
-                Collections.sort(userRatingsForUser, new Comparator<UserRating>() {
-                    @Override
-                    public int compare(UserRating o1, UserRating o2) {
-                        int c = versionCoordinatesComparator.compare(
-                                o1.getPkgVersion().toVersionCoordinates(),
-                                o2.getPkgVersion().toVersionCoordinates());
-
-                        if(0==c) {
-                            c = o1.getCreateTimestamp().compareTo(o2.getCreateTimestamp());
-                        }
-
-                        // possibly not the best thing to sort on, but should provide a total ordering.
-
-                        if(0==c) {
-                            c = o1.getPkgVersion().getArchitecture().getCode().compareTo(o2.getPkgVersion().getArchitecture().getCode());
-                        }
-
-                        return c;
-                    }
-                });
+                userRatingsForUser.sort((o1, o2) ->
+                        ComparisonChain.start()
+                                .compare(
+                                        o1.getPkgVersion().toVersionCoordinates(),
+                                        o2.getPkgVersion().toVersionCoordinates(),
+                                        versionCoordinatesComparator)
+                                .compare(o1.getCreateTimestamp(), o2.getCreateTimestamp())
+                                .compare(
+                                        o1.getPkgVersion().getArchitecture().getCode(),
+                                        o2.getPkgVersion().getArchitecture().getCode())
+                                .result());
 
                 if(!userRatingsForUser.isEmpty()) {
                     UserRating latestUserRatingForUser = userRatingsForUser.get(userRatingsForUser.size()-1);

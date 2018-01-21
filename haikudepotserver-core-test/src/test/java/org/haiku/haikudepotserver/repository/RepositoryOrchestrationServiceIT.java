@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
@@ -21,9 +22,7 @@ import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {
 
     @Resource
@@ -41,7 +40,7 @@ public class RepositoryOrchestrationServiceIT extends AbstractIntegrationTest {
         RepositorySource repositorySource = context.newObject(RepositorySource.class);
         repositorySource.setCode("zigzag_x86_64");
         repositorySource.setUrl("http://example.com/zigzag");
-        repositorySource.setRepository(Repository.getByCode(context, "testrepo").get());
+        repositorySource.setRepository(Repository.tryGetByCode(context, "testrepo").get());
         context.commitChanges();
     }
 

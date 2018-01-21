@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -41,14 +40,19 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
     private final char STAR_FILLED = '*'; // '\u2605';
     private final char STAR_HOLLOW = '.'; // '\u2606';
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final String baseUrl;
+    private final MessageSource messageSource;
 
-    @Value("${baseurl}")
-    private String baseUrl;
-
-    @Resource
-    private MessageSource messageSource;
+    public CreatedUserRatingSyndEntrySupplier(
+            ServerRuntime serverRuntime,
+            @Value("${baseurl}") String baseUrl,
+            MessageSource messageSource
+    ) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.baseUrl = Preconditions.checkNotNull(baseUrl);
+        this.messageSource = Preconditions.checkNotNull(messageSource);
+    }
 
     /**
      * <p>Produces a string containing a list of stars; either hollow or filled to indicate the user rating from

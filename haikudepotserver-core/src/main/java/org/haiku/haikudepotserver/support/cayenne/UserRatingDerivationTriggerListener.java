@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -22,13 +23,19 @@ import javax.annotation.Resource;
  * async) that is able to update the derived user rating on the package involved.</p>
  */
 
+@Component
 public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
 
-    @Resource
-    private JobService jobService;
+    private final JobService jobService;
+
+    public UserRatingDerivationTriggerListener(
+            ServerRuntime serverRuntime,
+            JobService jobService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.jobService = Preconditions.checkNotNull(jobService);
+    }
 
     @PostConstruct
     public void init() {

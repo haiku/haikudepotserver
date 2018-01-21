@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,17 +39,22 @@ public class MediaType extends _MediaType {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(extension), "the extension must be provided");
 
         if(extension.equals(EXTENSION_HAIKUVECTORICONFILE)) {
-            return getByCode(context, MEDIATYPE_HAIKUVECTORICONFILE);
+            return tryGetByCode(context, MEDIATYPE_HAIKUVECTORICONFILE);
         }
 
         if(extension.equals(EXTENSION_PNG)) {
-            return getByCode(context, com.google.common.net.MediaType.PNG.toString());
+            return tryGetByCode(context, com.google.common.net.MediaType.PNG.toString());
         }
 
         return Optional.empty();
     }
 
-    public static Optional<MediaType> getByCode(ObjectContext context, final String code) {
+    public static MediaType getByCode(ObjectContext context, final String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new IllegalStateException("unable to find media type by code [" + code + "]"));
+    }
+
+    public static Optional<MediaType> tryGetByCode(ObjectContext context, final String code) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
         return getAll(context).stream().filter(mt -> mt.getCode().equals(code)).collect(SingleCollector.optional());

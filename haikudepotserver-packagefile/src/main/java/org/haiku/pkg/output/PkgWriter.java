@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,7 +34,7 @@ public class PkgWriter extends FilterWriter {
         Preconditions.checkNotNull(pkgIterator);
 
         try {
-            while(pkgIterator.hasNext()) {
+            while (pkgIterator.hasNext()) {
                 write(pkgIterator.next());
                 write('\n');
             }

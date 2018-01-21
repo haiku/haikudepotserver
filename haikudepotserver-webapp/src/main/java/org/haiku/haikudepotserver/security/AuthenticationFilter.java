@@ -1,11 +1,12 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.security;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
@@ -13,6 +14,7 @@ import org.apache.cayenne.ObjectId;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
@@ -40,6 +42,7 @@ import java.util.regex.Pattern;
  * bearer token on the parameters.  This only works on a GET request.</p>
  */
 
+@Component
 public class AuthenticationFilter implements Filter {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
@@ -50,11 +53,14 @@ public class AuthenticationFilter implements Filter {
 
     private static final String PARAM_BEARER_TOKEN = "hdsbtok";
 
-    @Resource
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
+
+    public AuthenticationFilter(AuthenticationService authenticationService) {
+        this.authenticationService = Preconditions.checkNotNull(authenticationService);
+    }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override
@@ -122,11 +128,11 @@ public class AuthenticationFilter implements Filter {
         // now continue with the rest of the servlet filter chain, keeping the thread local
 
         try {
-            AuthenticationHelper.setAuthenticatedUserObjectId(authenticatedUserObjectId);
+            AuthenticationHelper.setAuthenticatedUserObjectId(authenticatedUserObjectId.orElse(null));
             chain.doFilter(request,response);
         }
         finally {
-            AuthenticationHelper.setAuthenticatedUserObjectId(Optional.<ObjectId>empty());
+            AuthenticationHelper.setAuthenticatedUserObjectId(null);
         }
     }
 

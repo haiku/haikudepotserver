@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,7 +49,7 @@ public class LdapConnectionPoolFactory implements FactoryBean<LdapConnectionPool
     @Override
     public LdapConnectionPoolHolder getObject() throws Exception {
 
-        if(isConfigured()) {
+        if (isConfigured()) {
 
             LdapConnectionConfig config = new LdapConnectionConfig();
             config.setLdapHost(host);

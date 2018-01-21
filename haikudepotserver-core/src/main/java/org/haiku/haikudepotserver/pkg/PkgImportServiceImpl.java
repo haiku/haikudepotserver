@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -33,17 +31,21 @@ public class PkgImportServiceImpl implements PkgImportService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgImportServiceImpl.class);
 
-    @Resource
-    private PkgServiceImpl pkgServiceImpl;
+    private final PkgServiceImpl pkgServiceImpl;
+    private final PkgIconService pkgIconService;
+    private final PkgScreenshotService pkgScreenshotService;
+    private final PkgLocalizationService pkgLocalizationService;
 
-    @Resource
-    private PkgIconService pkgIconService;
-
-    @Resource
-    private PkgScreenshotService pkgScreenshotService;
-
-    @Resource
-    private PkgLocalizationService pkgLocalizationService;
+    public PkgImportServiceImpl(
+            PkgServiceImpl pkgServiceImpl,
+            PkgIconService pkgIconService,
+            PkgScreenshotService pkgScreenshotService,
+            PkgLocalizationService pkgLocalizationService) {
+        this.pkgServiceImpl = Preconditions.checkNotNull(pkgServiceImpl);
+        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
+        this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
+        this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
+    }
 
     @Override
     public void importFrom(
@@ -72,7 +74,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         Optional<Pkg> persistedPkgOptional = Pkg.tryGetByName(objectContext, pkg.getName());
         Pkg persistedPkg;
         Optional<PkgVersion> persistedLatestExistingPkgVersion = Optional.empty();
-        Architecture architecture = Architecture.getByCode(objectContext, pkg.getArchitecture().name().toLowerCase())
+        Architecture architecture = Architecture.tryGetByCode(objectContext, pkg.getArchitecture().name().toLowerCase())
                 .orElseThrow(IllegalStateException::new);
         PkgVersion persistedPkgVersion = null;
 

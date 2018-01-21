@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -42,11 +41,15 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgProminenceAndUserRatingSpreadsheetJobRunner.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgService pkgService;
 
-    @Resource
-    private PkgService pkgService;
+    public PkgProminenceAndUserRatingSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            PkgService pkgService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
 
     @Override
     public void run(JobService jobService, PkgProminenceAndUserRatingSpreadsheetJobSpecification specification) throws IOException {
@@ -114,10 +117,10 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
                                         new String[]{
                                                 pkg.getName(),
                                                 repository.getCode(),
-                                                pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getName() : "",
-                                                pkgProminenceOptional.isPresent() ? pkgProminenceOptional.get().getProminence().getOrdering().toString() : "",
-                                                pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating().toString() : "",
-                                                pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRatingSampleSize().toString() : ""
+                                                pkgProminenceOptional.map(p -> p.getProminence().getName()).orElse(""),
+                                                pkgProminenceOptional.map(p -> p.getProminence().getOrdering().toString()).orElse(""),
+                                                pkgUserRatingAggregateOptional.map(p -> p.getDerivedRating().toString()).orElse(""),
+                                                pkgUserRatingAggregateOptional.map(p -> p.getDerivedRatingSampleSize().toString()).orElse(""),
                                         }
                                 );
                             }

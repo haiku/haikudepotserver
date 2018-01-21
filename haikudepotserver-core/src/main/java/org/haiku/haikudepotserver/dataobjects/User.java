@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,7 +63,12 @@ public class User extends _User implements CreateAndModifyTimestamped {
         }
     }
 
-    public static Optional<User> getByNickname(ObjectContext context, String nickname) {
+    public static User getByNickname(ObjectContext context, String nickname) {
+        return tryGetByNickname(context, nickname)
+                .orElseThrow(() -> new IllegalStateException("unable to get the user for nickname [" + nickname + "]"));
+    }
+
+    public static Optional<User> tryGetByNickname(ObjectContext context, String nickname) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(nickname));
 

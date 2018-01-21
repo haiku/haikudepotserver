@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,23 +23,28 @@ import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Optional;
 
+@Component
 @AutoJsonRpcServiceImpl
 public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJobApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingJobApiImpl.class);
 
-    @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
     private AuthorizationService authorizationService;
-
-    @Resource
     private JobService jobService;
+
+    public UserRatingJobApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            JobService jobService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+    }
 
     @Override
     public QueueUserRatingSpreadsheetJobResult queueUserRatingSpreadsheetJob(QueueUserRatingSpreadsheetJobRequest request) throws ObjectNotFoundException {
@@ -48,7 +53,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<User> user = tryObtainAuthenticatedUser(context);
+        User user = obtainAuthenticatedUser(context);
         UserRatingSpreadsheetJobSpecification spec = new UserRatingSpreadsheetJobSpecification();
 
         if(!Strings.isNullOrEmpty(request.repositoryCode)) {
@@ -56,7 +61,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
         }
 
         if(!Strings.isNullOrEmpty(request.userNickname)) {
-            Optional<User> requestUserOptional = User.getByNickname(context, request.userNickname);
+            Optional<User> requestUserOptional = User.tryGetByNickname(context, request.userNickname);
 
             if(!requestUserOptional.isPresent()) {
                 LOGGER.warn("attempt to produce user rating report for user {}, but that user does not exist -- not allowed", request.userNickname);
@@ -65,7 +70,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
 
             if(!authorizationService.check(
                     context,
-                    user.orElse(null),
+                    user,
                     requestUserOptional.get(),
                     Permission.BULK_USERRATINGSPREADSHEETREPORT_USER)) {
                 LOGGER.warn("attempt to access a user rating report for user {}, but this was disallowed", request.userNickname);
@@ -86,7 +91,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
 
                 if (!authorizationService.check(
                         context,
-                        user.orElse(null),
+                        user,
                         requestPkgOptional.get(),
                         Permission.BULK_USERRATINGSPREADSHEETREPORT_PKG)) {
                     LOGGER.warn("attempt to access a user rating report for pkg {}, but this was disallowed", request.pkgName);
@@ -98,7 +103,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
             else {
                 if (!authorizationService.check(
                         context,
-                        user.orElse(null),
+                        user,
                         null,
                         Permission.BULK_USERRATINGSPREADSHEETREPORT_ALL)) {
                     LOGGER.warn("attempt to access a user rating report, but was unauthorized");
@@ -107,7 +112,7 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
             }
         }
 
-        spec.setOwnerUserNickname(user.get().getNickname());
+        spec.setOwnerUserNickname(user.getNickname());
 
         return new QueueUserRatingSpreadsheetJobResult(
                 jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED));

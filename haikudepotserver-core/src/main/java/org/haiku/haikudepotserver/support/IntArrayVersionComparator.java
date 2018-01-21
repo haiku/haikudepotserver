@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,16 +22,16 @@ public class IntArrayVersionComparator implements Comparator<int[]> {
 
     @Override
     public int compare(int[] a, int[] b) {
-        for (int i=0;i<Math.max(a.length, b.length);i++) {
+        for (int i = 0; i < Math.max(a.length, b.length); i++) {
             if (i >= a.length) {
                 return -1;
             }
 
-            if(i >= b.length) {
+            if (i >= b.length) {
                 return 1;
             }
 
-            int c = Integer.compare(a[i],b[i]);
+            int c = Integer.compare(a[i], b[i]);
 
             if(0 != c) {
                 return c;

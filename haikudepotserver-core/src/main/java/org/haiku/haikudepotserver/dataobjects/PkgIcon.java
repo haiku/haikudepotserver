@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,8 +22,8 @@ public class PkgIcon extends _PkgIcon {
      * {@link IllegalStateException}.</p>
      */
 
-    public Optional<PkgIconImage> getPkgIconImage() {
-        return getPkgIconImages().stream().collect(SingleCollector.optional());
+    public PkgIconImage getPkgIconImage() {
+        return getPkgIconImages().stream().collect(SingleCollector.single());
     }
 
     @Override

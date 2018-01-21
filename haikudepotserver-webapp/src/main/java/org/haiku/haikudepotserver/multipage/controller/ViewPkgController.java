@@ -1,19 +1,20 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.multipage.controller;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.multipage.MultipageConstants;
+import org.haiku.haikudepotserver.multipage.MultipageObjectNotFoundException;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haiku.haikudepotserver.support.web.WebConstants;
-import org.haiku.haikudepotserver.multipage.MultipageConstants;
-import org.haiku.haikudepotserver.multipage.MultipageObjectNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
@@ -33,8 +33,11 @@ import java.util.Optional;
 @RequestMapping(MultipageConstants.PATH_MULTIPAGE + "/pkg")
 public class ViewPkgController {
 
-    @Resource
     private ServerRuntime serverRuntime;
+
+    public ViewPkgController(ServerRuntime serverRuntime) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+    }
 
     private String hyphenToNull(String part) {
         if(null!=part && !part.equals("-")) {
@@ -51,7 +54,7 @@ public class ViewPkgController {
                 context,
                 sourcePkgOptional.get(),
                 pkgVersion.getRepositorySource().getRepository(),
-                Architecture.getByCode(context, Architecture.CODE_SOURCE).get(),
+                Architecture.getByCode(context, Architecture.CODE_SOURCE),
                 pkgVersion.toVersionCoordinates()).isPresent();
     }
 
@@ -99,10 +102,10 @@ public class ViewPkgController {
             throw new MultipageObjectNotFoundException(Pkg.class.getSimpleName(), pkgName); // 404
         }
 
-        Architecture architecture = Architecture.getByCode(context, architectureCode).orElseThrow(() ->
+        Architecture architecture = Architecture.tryGetByCode(context, architectureCode).orElseThrow(() ->
                 new MultipageObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode));
 
-        Repository repository = Repository.getByCode(context, repositoryCode).orElseThrow(() ->
+        Repository repository = Repository.tryGetByCode(context, repositoryCode).orElseThrow(() ->
                 new MultipageObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode));
 
         VersionCoordinates coordinates = new VersionCoordinates(

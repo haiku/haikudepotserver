@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2017, Andrew Lindesay
-Distributed under the terms of the MIT License.
--->
+  ~ Copyright 2018, Andrew Lindesay
+  ~ Distributed under the terms of the MIT License.
+  -->
 
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
          version="5.0" xml:id="overview">
@@ -153,42 +153,6 @@ apt-get install postgresql postgresql-client</programlisting>
                 The database schema objects will be automatically populated into the fresh database by the
                 application-server as it launches.  This technique uses
                 <ulink url="https://flywaydb.org/">Flyway</ulink>.
-            </para>
-
-        </section>
-
-        <section xml:id="overview-prerequisites-basicapachedsldapsetup">
-            <title>Basic ApacheDS LDAP Setup</title>
-
-            <note>
-                <para>
-                    The LDAP integration is not intended to be used at this point in time; these notes are here in
-                    case this aspect of the system is ever used.
-                </para>
-            </note>
-
-            <para>
-                LDAP can be used to store authentication details for the system.  In this section, it is assumed that
-                the <ulink url="http://directory.apache.org">ApacheDS</ulink> is used and is configured through the
-                Apache Studio tool, but it should be possible to use the system with another LDAP server.
-            </para>
-
-            <para>
-                <orderedlist numeration="arabic">
-                    <listitem>
-                        Edit the &quot;example&quot; partition to be &quot;hikudepotserver&quot; and change the suffix
-                        to be &quot;dc=haiku,dc=org&quot;.
-                    </listitem>
-                    <listitem>Disallow anonymous access</listitem>
-                    <listitem>Disable password policy</listitem>
-                    <listitem>Start the server</listitem>
-                    <listitem>Import the resource &quot;directory.ldif&quot; (found in the source)</listitem>
-                    <listitem>
-                        Add new SSHA-256 &quot;userPassword&quot; attribute for the ``cn=haikudepotserver'' user in LDAP.
-                    </listitem>
-                    <listitem>Configure the LDAP properties for the application and start.</listitem>
-                    <listitem>Synchronize the system's user data with LDAP using the action on the root operations page.</listitem>
-                </orderedlist>
             </para>
 
         </section>

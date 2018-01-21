@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.junit.Test;
@@ -18,9 +19,7 @@ import javax.annotation.Resource;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
     /**
@@ -70,10 +69,10 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
 
         UserRatingTestData userRatingTestData = new UserRatingTestData();
 
-        Repository repository = Repository.getByCode(context, "testrepo").get();
+        Repository repository = Repository.tryGetByCode(context, "testrepo").get();
         RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
-        Architecture x86_64 = Architecture.getByCode(context, "x86_64").get();
-        Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2").get();
+        Architecture x86_64 = Architecture.tryGetByCode(context, "x86_64").get();
+        Architecture x86_gcc2 = Architecture.tryGetByCode(context, "x86_gcc2").get();
 
         userRatingTestData.pkg = context.newObject(Pkg.class);
         userRatingTestData.pkg.setName("urtestpkg");
@@ -126,7 +125,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         Optional<UserRatingServiceImpl.DerivedUserRating> result = userRatingServiceImpl.userRatingDerivation(
                 context,
                 userRatingData.pkg,
-                Repository.getByCode(context, "testrepo").get());
+                Repository.tryGetByCode(context, "testrepo").get());
         // ----------------------------
 
         Assertions.assertThat(result.isPresent()).isTrue();

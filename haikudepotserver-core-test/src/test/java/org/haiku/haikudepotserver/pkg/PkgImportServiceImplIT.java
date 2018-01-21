@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
@@ -32,9 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
     @Resource
@@ -113,7 +112,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 try (InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
                     pkgIconService.storePkgIconImage(
                             inputStream,
-                            MediaType.getByCode(setupObjectContext, com.google.common.net.MediaType.PNG.toString()).get(),
+                            MediaType.tryGetByCode(setupObjectContext, com.google.common.net.MediaType.PNG.toString()).get(),
                             32,
                             setupObjectContext,
                             persistedPkg);
@@ -217,9 +216,9 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkg,
-                        Repository.getByCode(context, "testrepo").get(),
+                        Repository.tryGetByCode(context, "testrepo").get(),
                         Collections.singletonList(
-                                Architecture.getByCode(context, "x86_64").get()
+                                Architecture.tryGetByCode(context, "x86_64").get()
                         )).get();
 
                 Assertions.assertThat(pkgVersion.getPayloadLength()).isEqualTo(expectedPayloadLength);
@@ -255,7 +254,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                         org.haiku.haikudepotserver.dataobjects.PkgVersion.class);
                 pkgVersion.setPkg(pkg);
                 pkgVersion.setIsLatest(i == highestMinor);
-                pkgVersion.setArchitecture(org.haiku.haikudepotserver.dataobjects.Architecture.getByCode(
+                pkgVersion.setArchitecture(org.haiku.haikudepotserver.dataobjects.Architecture.tryGetByCode(
                         context, Architecture.CODE_X86_64).orElseThrow(IllegalStateException::new));
                 pkgVersion.setMajor("1");
                 pkgVersion.setMinor(Integer.toString(i));

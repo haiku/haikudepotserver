@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,7 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
     protected Architecture getArchitecture(ObjectContext context, String architectureCode) throws ObjectNotFoundException {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(architectureCode), "an architecture code is required to get the architecture");
-        return Architecture.getByCode(context,architectureCode)
+        return Architecture.tryGetByCode(context,architectureCode)
                 .orElseThrow(() -> new ObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode));
     }
 
@@ -43,7 +43,7 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
     protected Repository getRepository(ObjectContext context, String repositoryCode) throws ObjectNotFoundException {
         Preconditions.checkNotNull(context);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(repositoryCode), "a repository code is required to search for the repository");
-        return Repository.getByCode(context, repositoryCode)
+        return Repository.tryGetByCode(context, repositoryCode)
                 .orElseThrow(() -> new ObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode));
     }
 

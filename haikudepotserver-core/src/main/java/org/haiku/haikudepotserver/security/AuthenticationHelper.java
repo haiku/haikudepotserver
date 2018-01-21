@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,20 +16,18 @@ import java.util.Optional;
 
 public class AuthenticationHelper {
 
-    private static ThreadLocal<Optional<ObjectId>> authenticatedUserObjectIdHolder = new ThreadLocal<>();
+    private static ThreadLocal<ObjectId> authenticatedUserObjectIdHolder = new ThreadLocal<>();
 
     public static Optional<ObjectId> getAuthenticatedUserObjectId() {
-        Optional<ObjectId> value = authenticatedUserObjectIdHolder.get();
-
-        if(null==value) {
-            value = Optional.empty();
-        }
-
-        return value;
+        return Optional.ofNullable(authenticatedUserObjectIdHolder.get());
     }
 
-    public static void setAuthenticatedUserObjectId(Optional<ObjectId> value) {
-        authenticatedUserObjectIdHolder.set(value);
+    public static void setAuthenticatedUserObjectId(ObjectId value) {
+        if (null != value) {
+            authenticatedUserObjectIdHolder.set(value);
+        } else {
+            authenticatedUserObjectIdHolder.remove();
+        }
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
@@ -19,9 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 import java.io.InputStream;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class PkgIconServiceImplIT extends AbstractIntegrationTest {
 
     @Resource
@@ -54,7 +53,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
                     org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkg1").get();
-            MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
+            MediaType pngMediaType = MediaType.tryGetByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
 
             try(InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
 
@@ -74,7 +73,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
+            MediaType pngMediaType = MediaType.tryGetByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel =
                     org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(
                             context,

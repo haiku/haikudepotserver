@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,40 +33,35 @@ public class QueryCacheRemoveGroupListener implements LifecycleListener {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(QueryCacheRemoveGroupListener.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
 
-    private List<String> groups;
+    private final List<String> groups;
 
-    private List<Class<CayenneDataObject>> entityClasses;
+    private final List<Class<? extends CayenneDataObject>> entityClasses;
 
-    public QueryCacheRemoveGroupListener() {
-        super();
+    public QueryCacheRemoveGroupListener(
+            ServerRuntime serverRuntime,
+            Class<? extends CayenneDataObject> entityClasses,
+            String group) {
+        this(serverRuntime, Collections.singletonList(entityClasses), Collections.singletonList(group));
     }
 
-    public void setEntityClass(Class<CayenneDataObject> entityClass) {
-        this.entityClasses = Collections.singletonList(entityClass);
-    }
-
-    public void setEntityClasses(List<Class<CayenneDataObject>> entityClasses) {
+    public QueryCacheRemoveGroupListener(
+            ServerRuntime serverRuntime,
+            List<Class<? extends CayenneDataObject>> entityClasses,
+            List<String> groups) {
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(entityClasses), "entity classes must be provided");
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(groups), "groups must be provided");
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.entityClasses = entityClasses;
-    }
-
-    public void setGroup(String group) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(group));
-        this.groups = Collections.singletonList(group);
-    }
-
-    public void setGroups(List<String> groups) {
         this.groups = groups;
     }
 
     @PostConstruct
     public void init() {
-        Preconditions.checkState(null!=entityClasses && !entityClasses.isEmpty(), "the entity classes must be provided");
         LifecycleCallbackRegistry callbackRegistry = serverRuntime.getDataDomain().getEntityResolver().getCallbackRegistry();
 
-        for(Class entityClass : entityClasses) {
+        for (Class entityClass : entityClasses) {
             callbackRegistry.addListener(entityClass, this);
         }
 
@@ -89,14 +85,15 @@ public class QueryCacheRemoveGroupListener implements LifecycleListener {
             CayenneDataObject cdo = (CayenneDataObject) entity;
             ObjectContext context = cdo.getObjectContext();
 
-            if(null==context) {
+            if (null == context) {
                 throw new IllegalStateException("an entity was encountered with no context");
             }
 
             @SuppressWarnings("unchecked")
-            Set<String> contextGroups = (Set<String>) context.getUserProperty(QueryCacheRemoveGroupDataChannelFilter.KEY_QUERYCACHEREMOVEGROUPS);
+            Set<String> contextGroups = (Set<String>) context.getUserProperty(
+                    QueryCacheRemoveGroupDataChannelFilter.KEY_QUERYCACHEREMOVEGROUPS);
 
-            if(null==contextGroups) {
+            if (null == contextGroups) {
                 contextGroups = new HashSet<>();
                 context.setUserProperty(QueryCacheRemoveGroupDataChannelFilter.KEY_QUERYCACHEREMOVEGROUPS, contextGroups);
             }

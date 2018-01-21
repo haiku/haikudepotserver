@@ -1,15 +1,18 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotExportArchiveJobSpecification;
+import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,6 +34,13 @@ public class PkgScreenshotExportArchiveJobRunner
     private static int ROW_ORDERING = 3;
 
     public static String PATH_COMPONENT_TOP = "hscr";
+
+    public PkgScreenshotExportArchiveJobRunner(
+            ServerRuntime serverRuntime,
+            RuntimeInformationService runtimeInformationService,
+            ObjectMapper objectMapper) {
+        super(serverRuntime, runtimeInformationService, objectMapper);
+    }
 
     int getBatchSize() {
         return BATCH_SIZE;

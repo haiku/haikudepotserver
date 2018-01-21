@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,15 +49,15 @@ public class ExpressionCollector {
             Optional<Expression> aeO = a.tryGet();
             Optional<Expression> beO = b.tryGet();
 
-            if(!aeO.isPresent() && beO.isPresent()) {
+            if (!aeO.isPresent() && beO.isPresent()) {
                 value = beO.get();
             }
 
-            if(aeO.isPresent() && !beO.isPresent()) {
+            if (aeO.isPresent() && !beO.isPresent()) {
                 value = aeO.get();
             }
 
-            if(aeO.isPresent() && beO.isPresent()) {
+            if (aeO.isPresent() && beO.isPresent()) {
                 value = aeO.get();
                 combine(beO.get());
             }

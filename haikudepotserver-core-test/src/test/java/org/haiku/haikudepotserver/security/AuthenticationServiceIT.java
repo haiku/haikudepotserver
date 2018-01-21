@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.security;
 
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.junit.Test;
@@ -14,9 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class AuthenticationServiceIT extends AbstractIntegrationTest {
 
     @Resource

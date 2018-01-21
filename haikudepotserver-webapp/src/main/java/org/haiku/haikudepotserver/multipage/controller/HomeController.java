@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,13 +11,12 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.model.Pagination;
-import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
-import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
@@ -68,14 +66,18 @@ public class HomeController {
 
     private final static int PAGESIZE = 15;
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgService pkgService;
+    private final String defaultArchitectureCode;
 
-    @Resource
-    private PkgService pkgService;
-
-    @Value("${architecture.default.code}")
-    private String defaultArchitectureCode;
+    public HomeController(
+            ServerRuntime serverRuntime,
+            PkgService pkgService,
+            @Value("${architecture.default.code}") String defaultArchitectureCode) {
+        this.serverRuntime = serverRuntime;
+        this.pkgService = pkgService;
+        this.defaultArchitectureCode = defaultArchitectureCode;
+    }
 
     /**
      * <p>This is the entry point for the home page.  It will look at the parameters supplied and will
@@ -115,7 +117,7 @@ public class HomeController {
         Optional<Repository> repositoryOptional = Optional.empty();
 
         if(0!=repositoryCodes.length()) {
-            repositoryOptional = Repository.getByCode(context, repositoryCodes);
+            repositoryOptional = Repository.tryGetByCode(context, repositoryCodes);
 
             if (!repositoryOptional.isPresent()) {
                 throw new IllegalStateException("unable to obtain the repository; " + repositoryCodes);
@@ -129,7 +131,7 @@ public class HomeController {
             searchSpecification.setRepositories(Repository.getAllActive(context));
         }
 
-        Optional<Architecture> architectureOptional = Architecture.getByCode(context, architectureCode);
+        Optional<Architecture> architectureOptional = Architecture.tryGetByCode(context, architectureCode);
 
         if(!architectureOptional.isPresent()) {
             throw new IllegalStateException("unable to obtain the architecture; " + architectureCode);
@@ -138,7 +140,7 @@ public class HomeController {
         searchSpecification.setArchitectures(
                 ImmutableList.of(
                         architectureOptional.get(),
-                        Architecture.getByCode(context, Architecture.CODE_ANY).get()
+                        Architecture.getByCode(context, Architecture.CODE_ANY)
                 )
         );
 

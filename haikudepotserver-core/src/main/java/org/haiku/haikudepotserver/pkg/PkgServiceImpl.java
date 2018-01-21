@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -51,8 +51,12 @@ public class PkgServiceImpl implements PkgService {
     // TODO; should be injected as a pattern because this should not know about paths for the controller.
     public final static String URL_SEGMENT_PKGDOWNLOAD = "__pkgdownload";
 
-    @Value("${architecture.default.code}")
-    private String defaultArchitectureCode;
+    private final String defaultArchitectureCode;
+
+    public PkgServiceImpl(
+            @Value("${architecture.default.code}") String defaultArchitectureCode) {
+        this.defaultArchitectureCode = defaultArchitectureCode;
+    }
 
     // ------------------------------
     // QUERY
@@ -74,7 +78,7 @@ public class PkgServiceImpl implements PkgService {
                 context,
                 pkg,
                 repository,
-                Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode).get()));
+                Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode)));
 
         if(!pkgVersionOptional.isPresent()) {
             List<Architecture> architectures = Architecture.getAllExceptByCode(
@@ -149,9 +153,7 @@ public class PkgServiceImpl implements PkgService {
                     .sorted((pv1, pv2) -> comparator.compare(pv2.toVersionCoordinates(), pv1.toVersionCoordinates()))
                     .findFirst();
 
-            if(pkgVersionOptional.isPresent()) {
-                pkgVersionOptional.get().setIsLatest(true);
-            }
+            pkgVersionOptional.ifPresent(pv -> pv.setIsLatest(true));
 
             for (PkgVersion pkgVersion : pkgVersions) {
                 if (pkgVersion.getIsLatest() &&
@@ -184,17 +186,12 @@ public class PkgServiceImpl implements PkgService {
         Optional<Pkg> pkgSourceOptional = Pkg.tryGetByName(context, pkgVersion.getPkg().getName() + "_source");
 
         if(pkgSourceOptional.isPresent()) {
-
-            Architecture sourceArchitecture = Architecture.getByCode(
-                    context,
-                    Architecture.CODE_SOURCE).get();
-
             return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)
                     .where(PkgVersion.PKG.eq(pkgSourceOptional.get()))
                     .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY)
                             .eq(pkgVersion.getRepositorySource().getRepository()))
                     .and(PkgVersion.ACTIVE.isTrue())
-                    .and(PkgVersion.ARCHITECTURE.eq(sourceArchitecture))
+                    .and(PkgVersion.ARCHITECTURE.eq(Architecture.getByCode(context, Architecture.CODE_SOURCE)))
                     .and(ExpressionHelper.toExpression(pkgVersion.toVersionCoordinates(), null))
                     .selectOne(context));
         }
@@ -266,7 +263,7 @@ public class PkgServiceImpl implements PkgService {
         if(!allowSourceOnly) {
             ejbql.append("AND EXISTS(");
             ejbql.append("SELECT pv FROM PkgVersion pv WHERE pv.pkg=p AND pv.active=true AND pv.architecture <> ?");
-            parameterList.add(Architecture.getByCode(context,Architecture.CODE_SOURCE).get());
+            parameterList.add(Architecture.getByCode(context,Architecture.CODE_SOURCE));
             ejbql.append(Integer.toString(parameterList.size()));
             ejbql.append(")");
         }

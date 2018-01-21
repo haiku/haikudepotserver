@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.api1.model.pkg.*;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgScreenshot;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
@@ -31,9 +32,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class PkgApiIT extends AbstractIntegrationTest {
 
     @Resource
@@ -361,20 +360,20 @@ public class PkgApiIT extends AbstractIntegrationTest {
             Optional<Pkg> pkgOptionalafter = Pkg.tryGetByName(objectContext, "pkg1");
 
             org.haiku.haikudepotserver.dataobjects.MediaType mediaTypePng
-                    = org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
+                    = org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
                     objectContext,
                     MediaType.PNG.toString()).get();
 
             Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(3);
 
             Optional<PkgIcon> pkgIcon16Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 16);
-            Assertions.assertThat(pkgIcon16Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample16);
+            Assertions.assertThat(pkgIcon16Optional.get().getPkgIconImage().getData()).isEqualTo(sample16);
 
             Optional<PkgIcon> pkgIcon32Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 32);
-            Assertions.assertThat(pkgIcon32Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample32);
+            Assertions.assertThat(pkgIcon32Optional.get().getPkgIconImage().getData()).isEqualTo(sample32);
 
             Optional<PkgIcon> pkgIcon64Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 64);
-            Assertions.assertThat(pkgIcon64Optional.get().getPkgIconImage().get().getData()).isEqualTo(sample64);
+            Assertions.assertThat(pkgIcon64Optional.get().getPkgIconImage().getData()).isEqualTo(sample64);
         }
     }
 
@@ -409,14 +408,14 @@ public class PkgApiIT extends AbstractIntegrationTest {
             Optional<Pkg> pkgOptionalafter = Pkg.tryGetByName(objectContext, "pkg1");
 
             org.haiku.haikudepotserver.dataobjects.MediaType mediaTypeHvif
-                    = org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
+                    = org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
                     objectContext,
                     org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get();
 
             Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(1);
 
             Optional<PkgIcon> pkgIconHvifOptional = pkgOptionalafter.get().getPkgIcon(mediaTypeHvif, null);
-            Assertions.assertThat(pkgIconHvifOptional.get().getPkgIconImage().get().getData()).isEqualTo(sampleHvif);
+            Assertions.assertThat(pkgIconHvifOptional.get().getPkgIconImage().getData()).isEqualTo(sampleHvif);
         }
     }
 
@@ -770,7 +769,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
-            Repository repository = Repository.getByCode(context, "testrepo").get();
+            Repository repository = Repository.tryGetByCode(context, "testrepo").get();
             Assertions.assertThat(pkg1.getPkgProminence(repository).get().getProminence().getOrdering()).isEqualTo(200);
         }
 
@@ -863,8 +862,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
-            Repository repository = Repository.getByCode(context, "testrepo").get();
-            Architecture architecture = Architecture.getByCode(context, "x86_64").get();
+            Repository repository = Repository.tryGetByCode(context, "testrepo").get();
+            Architecture architecture = Architecture.tryGetByCode(context, "x86_64").get();
             PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
             Assertions.assertThat(pkgVersion.getActive()).isFalse();
         }

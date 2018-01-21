@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -25,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,31 +48,35 @@ public class PkgIconController extends AbstractController {
     @Deprecated
     private final static String SEGMENT_PKGICON_LEGACY = "pkgicon";
 
-    public final static String SEGMENT_GENERICPKGICON = "__genericpkgicon.png";
+    private final static String SEGMENT_GENERICPKGICON = "__genericpkgicon.png";
 
     @Deprecated
     private final static String SEGMENT_GENERICPKGICON_LEGACY = "genericpkgicon.png";
 
     private final static String SEGMENT_ALL_TAR_BALL = "all.tar.gz";
 
-    public final static String KEY_PKGNAME = "pkgname";
-    public final static String KEY_FORMAT = "format";
+    private final static String KEY_PKGNAME = "pkgname";
+    private final static String KEY_FORMAT = "format";
     public final static String KEY_SIZE = "s";
     public final static String KEY_FALLBACK = "f";
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgIconService pkgIconService;
+    private final JobService jobService;
+    private final RenderedPkgIconRepository renderedPkgIconRepository;
+    private final long startupMillis;
 
-    @Resource
-    private PkgIconService pkgIconService;
-
-    @Resource
-    private JobService jobService;
-
-    @Resource
-    private RenderedPkgIconRepository renderedPkgIconRepository;
-
-    private long startupMillis = System.currentTimeMillis();
+    public PkgIconController(
+            ServerRuntime serverRuntime,
+            PkgIconService pkgIconService,
+            JobService jobService,
+            RenderedPkgIconRepository renderedPkgIconRepository) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+        this.renderedPkgIconRepository = Preconditions.checkNotNull(renderedPkgIconRepository);
+        startupMillis = System.currentTimeMillis();
+    }
 
     /**
      * <p>This method will provide a tar-ball of all of the icons.  This can be used by the desktop application.  It
@@ -221,37 +225,39 @@ public class PkgIconController extends AbstractController {
             Boolean fallback)
             throws IOException {
 
-        if(null==format) {
+        if (null == format) {
             throw new MissingOrBadFormat();
         }
 
-        if(Strings.isNullOrEmpty(pkgName) || !Pkg.PATTERN_NAME.matcher(pkgName).matches()) {
+        if (Strings.isNullOrEmpty(pkgName) || !Pkg.PATTERN_NAME.matcher(pkgName).matches()) {
             throw new MissingPkgName();
         }
 
         ObjectContext context = serverRuntime.newContext();
         Optional<Pkg> pkg = Pkg.tryGetByName(context, pkgName); // cached
 
-        if(!pkg.isPresent()) {
+        if (!pkg.isPresent()) {
             LOGGER.debug("request for icon for package '{}', but no such package was able to be found", pkgName);
             throw new PkgNotFound();
         }
 
-        switch(format) {
+        switch (format) {
 
             case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_HAIKUVECTORICONFILE:
                 Optional<PkgIcon> hvifPkgIcon = pkg.get().getPkgIcon(
                         org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, format).get(),
                         null);
 
-                if(hvifPkgIcon.isPresent()) {
-                    byte[] data = hvifPkgIcon.get().getPkgIconImage().get().getData();
+                if (hvifPkgIcon.isPresent()) {
+                    byte[] data = hvifPkgIcon.get().getPkgIconImage().getData();
                     response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
                     response.setContentType(org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
                     response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
 
-                    if(requestMethod == RequestMethod.GET) {
-                        response.getOutputStream().write(data);
+                    if (requestMethod == RequestMethod.GET) {
+                        OutputStream outputStream = response.getOutputStream();
+                        outputStream.write(data);
+                        outputStream.flush();
                     }
                 }
                 else {
@@ -299,15 +305,15 @@ public class PkgIconController extends AbstractController {
     // these are the various errors that can arise in supplying or providing a package icon.
 
     @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the package name must be supplied")
-    public class MissingPkgName extends RuntimeException {}
+    private class MissingPkgName extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the format must be supplied and must (presently) be 'png'")
-    public class MissingOrBadFormat extends RuntimeException {}
+    private class MissingOrBadFormat extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
-    public class PkgNotFound extends RuntimeException {}
+    private class PkgNotFound extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package icon was unable to found")
-    public class PkgIconNotFound extends RuntimeException {}
+    private class PkgIconNotFound extends RuntimeException {}
 
 }

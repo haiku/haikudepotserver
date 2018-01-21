@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -26,9 +27,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class AuthorizationApiIT extends AbstractIntegrationTest {
 
     @Resource
@@ -259,7 +258,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
                     PermissionUserPkg.getByPermissionUserAndPkg(
                             context,
                             org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITSCREENSHOT.name().toLowerCase()).get(),
-                            User.getByNickname(context, "testuser").get(),
+                            User.tryGetByNickname(context, "testuser").get(),
                             Pkg.tryGetByName(context, "pkg1").get());
 
             Assertions.assertThat(permissionUserPkgOptional.isPresent()).isTrue();
@@ -366,7 +365,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
                     PermissionUserPkg.getByPermissionUserAndPkg(
                             context,
                             org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, Permission.PKG_EDITICON.name().toLowerCase()).get(),
-                            User.getByNickname(context, "testuser").get(),
+                            User.tryGetByNickname(context, "testuser").get(),
                             Pkg.tryGetByName(context, "pkg1").get()).isPresent()).isFalse();
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ class Hvif2PngHvifRenderingServiceImpl
 
     protected static Logger LOGGER = LoggerFactory.getLogger(Hvif2PngHvifRenderingServiceImpl.class);
 
-    private String hvif2pngPath;
+    private final String hvif2pngPath;
 
     Hvif2PngHvifRenderingServiceImpl(String hvif2pngPath) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(hvif2pngPath), "the path is required");

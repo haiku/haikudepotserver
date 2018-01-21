@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,19 +9,19 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -39,14 +39,21 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgCategoryCoverageExportSpreadsheetJobRunner.class);
 
-    @Resource
     private RepositoryService repositoryService;
+
+    public PkgCategoryCoverageExportSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            PkgService pkgService,
+            RepositoryService repositoryService) {
+        super(serverRuntime, pkgService);
+        this.repositoryService = Preconditions.checkNotNull(repositoryService);
+    }
 
     @Override
     public void run(
             JobService jobService,
             PkgCategoryCoverageExportSpreadsheetJobSpecification specification)
-            throws IOException, JobRunnerException {
+            throws IOException {
 
         Preconditions.checkArgument(null!= jobService);
         Preconditions.checkArgument(null!=specification);
@@ -85,7 +92,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                         List<String> cols = new ArrayList<>();
                         Optional<PkgVersionLocalization> locOptional = Optional.empty();
 
-                        if(null!=pkg) {
+                        if (null != pkg) {
                             locOptional = PkgVersionLocalization.getAnyPkgVersionLocalizationForPkg(context, pkg);
                         }
 

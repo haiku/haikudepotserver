@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.job.model.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,9 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class LocalJobServiceIT extends AbstractIntegrationTest {
 
     @Resource

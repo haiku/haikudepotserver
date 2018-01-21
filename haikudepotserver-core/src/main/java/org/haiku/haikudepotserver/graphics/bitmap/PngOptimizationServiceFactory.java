@@ -1,10 +1,11 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.graphics.bitmap;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +20,14 @@ public class PngOptimizationServiceFactory implements FactoryBean<PngOptimizatio
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PngOptimizationServiceFactory.class);
 
-    @Value("${optipng.path:}")
-    private String optiPngPath;
+    private final String optiPngPath;
+
+    public PngOptimizationServiceFactory(String optiPngPath) {
+        this.optiPngPath = optiPngPath;
+    }
 
     @Override
-    public PngOptimizationService getObject() throws Exception {
+    public PngOptimizationService getObject() {
         if(!Strings.isNullOrEmpty(optiPngPath)) {
             LOGGER.info("will use optipng; {}", optiPngPath);
             return new OptipngPngOptimizationServiceImpl(optiPngPath);

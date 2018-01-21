@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,7 +32,7 @@ public class AttributeWriter extends FilterWriter {
         Preconditions.checkNotNull(attribute);
         Preconditions.checkState(indent >= 0);
 
-        for(int i=0;i<indent;i++) {
+        for(int i = 0; i < indent; i++) {
             write(' ');
         }
 
@@ -42,7 +42,7 @@ public class AttributeWriter extends FilterWriter {
         write(" : ");
 
         try {
-            switch(attribute.getAttributeType()) {
+            switch (attribute.getAttributeType()) {
 
                 case RAW:
                     byte[] data = (byte[]) attribute.getValue(context);
@@ -63,15 +63,14 @@ public class AttributeWriter extends FilterWriter {
 
             }
         }
-        catch(HpkException e) {
+        catch (HpkException e) {
             throw new IOException("unable to process an attribute '"+attribute.toString()+"'",e);
         }
 
         write("\n");
 
-        if(attribute.hasChildAttributes()) {
-
-            for(Attribute childAttribute : attribute.getChildAttributes()) {
+        if (attribute.hasChildAttributes()) {
+            for (Attribute childAttribute : attribute.getChildAttributes()) {
                 write(indent+2, context, childAttribute);
             }
         }
@@ -86,11 +85,11 @@ public class AttributeWriter extends FilterWriter {
     public void write(AttributeIterator attributeIterator) throws IOException {
         Preconditions.checkNotNull(attributeIterator);
 
-        while(attributeIterator.hasNext()) {
+        while (attributeIterator.hasNext()) {
             try {
                 write(attributeIterator.getContext(), attributeIterator.next());
             }
-            catch(HpkException e) {
+            catch (HpkException e) {
                 throw new IOException("unable to get the next attribute on the interator",e);
             }
         }

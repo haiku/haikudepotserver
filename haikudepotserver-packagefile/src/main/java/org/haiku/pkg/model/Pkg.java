@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -72,7 +72,7 @@ public class Pkg {
     }
 
     public List<String> getCopyrights() {
-        if(null==copyrights) {
+        if(null == copyrights) {
             return Collections.emptyList();
         }
         return copyrights;
@@ -81,7 +81,7 @@ public class Pkg {
     public void addCopyright(String copyright) {
         Preconditions.checkNotNull(copyright);
 
-        if(null==copyrights) {
+        if(null == copyrights) {
             copyrights = new ArrayList<>();
         }
 
@@ -89,7 +89,7 @@ public class Pkg {
     }
 
     public List<String> getLicenses() {
-        if(null==licenses) {
+        if(null == licenses) {
             return Collections.emptyList();
         }
         return licenses;
@@ -98,7 +98,7 @@ public class Pkg {
     public void addLicense(String license) {
         Preconditions.checkNotNull(license);
 
-        if(null==licenses) {
+        if(null == licenses) {
             licenses = new ArrayList<>();
         }
 
@@ -117,11 +117,11 @@ public class Pkg {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(null==name?"???":name);
+        stringBuilder.append(null == name ? "???" : name);
         stringBuilder.append(" : ");
-        stringBuilder.append(null==version?"???":version.toString());
+        stringBuilder.append(null == version ? "???" : version.toString());
         stringBuilder.append(" : ");
-        stringBuilder.append(null==architecture?"???":getArchitecture().toString());
+        stringBuilder.append(null == architecture ? "???" : getArchitecture().toString());
         return stringBuilder.toString();
     }
 

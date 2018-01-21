@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,11 +25,11 @@ public class QueryCacheRemoveGroupDataChannelFilter implements DataChannelFilter
 
     final static String KEY_QUERYCACHEREMOVEGROUPS = "org.haiku.haikudepotserver.QueryCacheRemoveNames";
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
 
-    public QueryCacheRemoveGroupDataChannelFilter() {
+    public QueryCacheRemoveGroupDataChannelFilter(ServerRuntime serverRuntime) {
         super();
+        this.serverRuntime = serverRuntime;
     }
 
     @PostConstruct

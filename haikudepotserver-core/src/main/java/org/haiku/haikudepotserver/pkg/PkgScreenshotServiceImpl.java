@@ -1,12 +1,11 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -43,10 +41,13 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
     private static final HashFunction HASH_FUNCTION = Hashing.sha256();
 
-    private ImageHelper imageHelper = new ImageHelper();
+    private final ImageHelper imageHelper;
+    private final PkgService pkgService;
 
-    @Resource
-    private PkgService pkgService;
+    public PkgScreenshotServiceImpl(PkgService pkgService) {
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+        imageHelper = new ImageHelper();
+    }
 
     // these seem like reasonable limits for the size of image data to have to
     // handle in-memory.
@@ -102,6 +103,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
     }
 
     /**
+     * <p>Note that if the screenshot is already stored then this method will simply return that screenshot.</p>
      * @param ordering can be NULL; in which case the screenshot will come at the end.
      */
 
@@ -137,12 +139,12 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
         for (PkgScreenshot pkgScreenshot : pkg.getPkgScreenshots()) {
             if (pkgScreenshot.getHashSha256().equals(hashSha256)) {
-                LOGGER.warn("attempt to sure a screenshot image that is already stored for this package");
-                throw new BadPkgScreenshotException();
+                LOGGER.warn("attempt to store a screenshot image that is already stored for this package");
+                return pkgScreenshot;
             }
         }
 
-        MediaType png = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
+        MediaType png = MediaType.tryGetByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
 
         // now we need to know the largest ordering so we can add this one at the end of the orderings
         // such that it is the next one in the list.

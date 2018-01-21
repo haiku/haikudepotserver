@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,6 @@ public interface StringTable {
      * of {@link HpkException} if there is any problems associated with achieving this.</p>
      */
 
-    public String getString(int index) throws HpkException;
+    String getString(int index) throws HpkException;
 
 }

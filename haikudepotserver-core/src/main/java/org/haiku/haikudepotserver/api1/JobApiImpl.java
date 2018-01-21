@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,27 +21,32 @@ import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/job") // TODO; legacy path - remove
 public class JobApiImpl extends AbstractApiImpl implements JobApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobApiImpl.class);
 
-    @Resource
+    private ServerRuntime serverRuntime;
     private AuthorizationService authorizationService;
-
-    @Resource
     private JobService jobService;
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    public JobApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            JobService jobService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+    }
 
     @Override
     public SearchJobsResult searchJobs(SearchJobsRequest request) throws ObjectNotFoundException {
@@ -61,7 +66,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
             }
         }
         else {
-            ownerUserOptional = User.getByNickname(context, request.ownerUserNickname);
+            ownerUserOptional = User.tryGetByNickname(context, request.ownerUserNickname);
 
             if(!ownerUserOptional.isPresent()) {
                 throw new ObjectNotFoundException(User.class.getSimpleName(), request.ownerUserNickname);
@@ -140,7 +145,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
             }
         }
         else {
-            Optional<User> ownerUserOptional = User.getByNickname(context, job.getOwnerUserNickname());
+            Optional<User> ownerUserOptional = User.tryGetByNickname(context, job.getOwnerUserNickname());
 
             if(!ownerUserOptional.isPresent()) {
                 throw new ObjectNotFoundException(User.class.getSimpleName(), job.getOwnerUserNickname());

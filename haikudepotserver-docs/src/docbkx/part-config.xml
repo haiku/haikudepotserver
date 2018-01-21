@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
-Distributed under the terms of the MIT License.
--->
+  ~ Copyright 2018, Andrew Lindesay
+  ~ Distributed under the terms of the MIT License.
+  -->
 
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
          version="5.0" xml:id="config">
@@ -325,26 +325,6 @@ key2=value2</programlisting>
                 </para>
             </section>
 
-        </section>
-
-        <section>
-            <title>LDAP</title>
-
-            <warning>
-                <para>
-                    The LDAP integration is not intended to be used at this point in time.
-                </para>
-            </warning>
-
-            <para>
-                <itemizedlist>
-                    <listitem>ldap.host</listitem>
-                    <listitem>ldap.port</listitem>
-                    <listitem>ldap.user.dn</listitem>
-                    <listitem>ldap.password</listitem>
-                    <listitem>ldap.people.dn</listitem>
-                </itemizedlist>
-            </para>
         </section>
 
     </section>

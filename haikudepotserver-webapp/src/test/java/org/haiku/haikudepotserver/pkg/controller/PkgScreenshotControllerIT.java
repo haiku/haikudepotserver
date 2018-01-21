@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,8 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.config.TestAppConfig;
+import org.haiku.haikudepotserver.config.TestServletConfig;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
@@ -22,10 +24,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Optional;
 
-@ContextConfiguration({
-        "classpath:/spring/test-servlet-context.xml",
-        "classpath:/spring/test-application-context.xml"
-})
+@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
 @WebAppConfiguration
 public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
 
@@ -39,7 +38,11 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
      * <p>This will return an image that can be used as a sample screenshot.</p>
      */
 
-    private byte[] getScreenshotData() throws IOException {
+    private byte[] getScreenshotDataD() throws IOException {
+        return getResourceData("sample-320x180-d.png");
+    }
+
+    private byte[] getScreenshotDataA() throws IOException {
         return getResourceData("sample-320x240-a.png");
     }
 
@@ -48,8 +51,8 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
 
         setAuthenticatedUserToRoot();
 
-        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        byte[] imageData = getScreenshotData();
+        integrationTestSupportService.createStandardTestData();
+        byte[] imageData = getScreenshotDataD();
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -75,7 +78,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
     public void testGet_noScaling() throws Exception {
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        byte[] imageData = getScreenshotData();
+        byte[] imageData = getScreenshotDataA();
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -96,7 +99,6 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
     public void testGet_scaling() throws Exception {
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        byte[] imageData = getScreenshotData();
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 

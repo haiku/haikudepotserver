@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -27,9 +28,7 @@ import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.InputStream;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
     @Resource
@@ -65,7 +64,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             pkgIconService.storePkgIconImage(
                     iconInputStream,
-                    org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(context,
+                    org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG).get(),
                     16, // expected size along both axiis
                     context,
@@ -99,14 +98,14 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
             Assert.assertEquals(Pkg.tryGetByName(context, "pkg2").get().getPkgIcons().size(), 2);
 
             Assert.assertTrue(pkg2.getPkgIcon(
-                    org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
+                    org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE
                     ).get(),
                     null).isPresent());
 
             Assert.assertTrue(pkg2.getPkgIcon(
-                    org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
+                    org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG
                     ).get(),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -37,14 +36,18 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgLocalizationCoverageExportSpreadsheetJobRunner.class);
 
-    @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
     private PkgService pkgService;
-
-    @Resource
     private NaturalLanguageService naturalLanguageService;
+
+    public PkgLocalizationCoverageExportSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            PkgService pkgService,
+            NaturalLanguageService naturalLanguageService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+        this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
+    }
 
     /**
      * <P>Returns a list of all of the natural languages sorted on the code rather than

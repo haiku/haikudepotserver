@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,14 +12,19 @@ import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.captcha.model.Captcha;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/captcha") // TODO; legacy path - remove
 public class CaptchaApiImpl implements CaptchaApi {
 
-    @Resource
-    private CaptchaService captchaService;
+    private final CaptchaService captchaService;
+
+    public CaptchaApiImpl(CaptchaService captchaService) {
+        this.captchaService = Preconditions.checkNotNull(captchaService);
+    }
 
     @Override
     public GenerateCaptchaResult generateCaptcha(GenerateCaptchaRequest generateCaptchaRequest) {

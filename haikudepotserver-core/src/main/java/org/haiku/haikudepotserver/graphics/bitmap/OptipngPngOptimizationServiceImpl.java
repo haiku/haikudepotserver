@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,7 +26,7 @@ class OptipngPngOptimizationServiceImpl
 
     protected static Logger LOGGER = LoggerFactory.getLogger(OptipngPngOptimizationServiceImpl.class);
 
-    private String optiPngPath;
+    private final String optiPngPath;
 
     OptipngPngOptimizationServiceImpl(String optiPngPath) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(optiPngPath), "the path should be supplied");

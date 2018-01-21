@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,8 +15,11 @@ import java.util.Locale;
 
 public class MultipageLocaleResolver implements org.springframework.web.servlet.LocaleResolver {
 
-    @Resource
     ServerRuntime serverRuntime;
+
+    public MultipageLocaleResolver(ServerRuntime serverRuntime) {
+        this.serverRuntime = serverRuntime;
+    }
 
     @Override
     public Locale resolveLocale(HttpServletRequest request) {

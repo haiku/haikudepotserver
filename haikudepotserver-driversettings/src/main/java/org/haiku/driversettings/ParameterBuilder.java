@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,7 +25,7 @@ public class ParameterBuilder {
     }
 
     public void withWord(String word) {
-        if(null == name) {
+        if (null == name) {
             name = word;
         } else {
             values.add(word);

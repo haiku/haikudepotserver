@@ -1,10 +1,11 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.cayenne;
 
+import com.google.common.base.Preconditions;
 import org.apache.cayenne.cache.QueryCache;
 import org.apache.cayenne.configuration.Constants;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -21,14 +22,19 @@ import javax.sql.DataSource;
 
 public class ServerRuntimeFactory implements FactoryBean<ServerRuntime> {
 
-    @Resource
-    private DataSource dataSource;
+    private final DataSource dataSource;
+    private final Integer queryCacheSize;
 
-    @Value("${cayenne.query.cache.size:250}")
-    private Integer queryCacheSize;
+    public ServerRuntimeFactory(
+            DataSource dataSource,
+            Integer queryCacheSize
+    ) {
+        this.dataSource = Preconditions.checkNotNull(dataSource);
+        this.queryCacheSize = queryCacheSize;
+    }
 
     @Override
-    public ServerRuntime getObject() throws Exception {
+    public ServerRuntime getObject() {
         return ServerRuntime.builder()
                 .addConfigs("cayenne-haikudepotserver.xml")
                 .dataSource(dataSource)

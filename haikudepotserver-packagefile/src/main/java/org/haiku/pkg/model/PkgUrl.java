@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,7 @@ public class PkgUrl {
 
     private static Pattern PATTERN_NAMEANDURL = Pattern.compile("^([^<>]*)(\\s+)?<([^<> ]+)>$");
 
-    private String url = null;
+    private String url;
 
     private String name = null;
 

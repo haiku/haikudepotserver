@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -36,17 +36,21 @@ public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScr
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotOptimizationJobRunner.class);
 
-    @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
     private PngOptimizationService pngOptimizationService;
+
+    public PkgScreenshotOptimizationJobRunner(
+            ServerRuntime serverRuntime,
+            PngOptimizationService pngOptimizationService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
+    }
 
     @Override
     public void run(
             JobService jobService,
             PkgScreenshotOptimizationJobSpecification specification)
-            throws IOException, JobRunnerException {
+            throws IOException {
 
         Preconditions.checkArgument(null!= jobService);
         Preconditions.checkArgument(null!=specification);

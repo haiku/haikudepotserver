@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2017, Andrew Lindesay
-Distributed under the terms of the MIT License.
--->
+  ~ Copyright 2018, Andrew Lindesay
+  ~ Distributed under the terms of the MIT License.
+  -->
 
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
          version="5.0" xml:id="architecture">
@@ -55,8 +55,7 @@ Distributed under the terms of the MIT License.
 
         <para>
             The application server stores all of its core data in a database.  It also uses local storage for
-            temporary data storage.  The application is able to synchronize its user data with an LDAP
-            database<footnote><para>Not presently in-use</para></footnote>.
+            temporary data storage.
         </para>
 
         <para>

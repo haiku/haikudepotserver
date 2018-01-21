@@ -1,12 +1,11 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
@@ -27,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,16 +41,20 @@ public class PkgIconServiceImpl implements PkgIconService {
     @SuppressWarnings("FieldCanBeLocal")
     private static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
-    @Resource
-    private RenderedPkgIconRepository renderedPkgIconRepository;
+    private final RenderedPkgIconRepository renderedPkgIconRepository;
+    private final PngOptimizationService pngOptimizationService;
+    private final PkgService pkgService;
+    private final ImageHelper imageHelper;
 
-    @Resource
-    private PngOptimizationService pngOptimizationService;
-
-    @Resource
-    private PkgService pkgService;
-
-    private ImageHelper imageHelper = new ImageHelper();
+    public PkgIconServiceImpl(
+            RenderedPkgIconRepository renderedPkgIconRepository,
+            PngOptimizationService pngOptimizationService,
+            PkgService pkgService) {
+        this.renderedPkgIconRepository = Preconditions.checkNotNull(renderedPkgIconRepository);
+        this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+        imageHelper = new ImageHelper();
+    }
 
     @Override
     public Date getLastPkgIconModifyTimestampSecondAccuracy(ObjectContext context) {
@@ -148,7 +150,7 @@ public class PkgIconServiceImpl implements PkgIconService {
         PkgIconImage pkgIconImage;
 
         if(pkgIconOptional.isPresent()) {
-            pkgIconImage = pkgIconOptional.get().getPkgIconImage().get();
+            pkgIconImage = pkgIconOptional.get().getPkgIconImage();
         }
         else {
             PkgIcon pkgIcon = context.newObject(PkgIcon.class);
@@ -193,7 +195,7 @@ public class PkgIconServiceImpl implements PkgIconService {
 
         return codes
                 .stream()
-                .map(c -> MediaType.getByCode(context, c).get())
+                .map(c -> MediaType.tryGetByCode(context, c).get())
                 .collect(Collectors.toList());
 
     }
@@ -202,11 +204,8 @@ public class PkgIconServiceImpl implements PkgIconService {
             ObjectContext context,
             PkgIcon pkgIcon,
             Pkg targetPkg) throws IOException, BadPkgIconException {
-
-        byte[] data = pkgIcon.getPkgIconImage().orElseThrow(IllegalStateException::new).getData();
-
         return storePkgIconImage(
-                new ByteArrayInputStream(data),
+                new ByteArrayInputStream(pkgIcon.getPkgIconImage().getData()),
                 pkgIcon.getMediaType(),
                 pkgIcon.getSize(),
                 context,
@@ -227,9 +226,9 @@ public class PkgIconServiceImpl implements PkgIconService {
 
         List<DataObject> targetPkgIconsDataObjectsToDelete = deriveDataObjectsToDelete(targetPkg.getPkgIcons()
                 .stream()
-                .filter((tpi) -> !sourcePkg.getPkgIcons()
+                .filter((tpi) -> sourcePkg.getPkgIcons()
                         .stream()
-                        .anyMatch((spi) -> Objects.equals(spi.getMediaType(), tpi.getMediaType()) &&
+                        .noneMatch((spi) -> Objects.equals(spi.getMediaType(), tpi.getMediaType()) &&
                                 Objects.equals(spi.getSize(), tpi.getSize()))
                 )
                 .collect(Collectors.toList()));
@@ -285,12 +284,7 @@ public class PkgIconServiceImpl implements PkgIconService {
 
     private List<DataObject> deriveDataObjectsToDelete(List<PkgIcon> pkgIcons) {
         return pkgIcons.stream()
-                .flatMap((pi) ->
-                        pi.getPkgIconImage()
-                                .map((pii) -> (List<DataObject>) ImmutableList.<DataObject>of(pii, pi))
-                                .orElse(Collections.singletonList(pi))
-                                .stream()
-                )
+                .flatMap((pi) -> Arrays.stream(new DataObject[] {pi.getPkgIconImage(), pi}))
                 .collect(Collectors.toList());
     }
 

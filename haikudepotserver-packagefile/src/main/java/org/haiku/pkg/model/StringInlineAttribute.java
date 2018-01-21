@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,7 +25,7 @@ public class StringInlineAttribute extends StringAttribute {
     }
 
     @Override
-    public String getValue(AttributeContext context)  throws HpkException {
+    public String getValue(AttributeContext context) {
         return stringValue;
     }
 
@@ -54,7 +54,7 @@ public class StringInlineAttribute extends StringAttribute {
 
     @Override
     public String toString() {
-        return String.format("%s : %s",super.toString(),stringValue.toString());
+        return String.format("%s : %s",super.toString(), stringValue);
     }
 
 }

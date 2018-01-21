@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
 import org.haiku.pkg.AttributeContext;
-import org.haiku.pkg.HpkException;
 
 import java.math.BigInteger;
 
@@ -27,7 +26,7 @@ public class IntAttribute extends Attribute {
     }
 
     @Override
-    public BigInteger getValue(AttributeContext context)  throws HpkException {
+    public BigInteger getValue(AttributeContext context) {
         return numericValue;
     }
 
@@ -56,7 +55,7 @@ public class IntAttribute extends Attribute {
 
     @Override
     public String toString() {
-        return String.format("%s : %s",super.toString(),numericValue.toString());
+        return String.format("%s : %s",super.toString(), numericValue.toString());
     }
 
 }

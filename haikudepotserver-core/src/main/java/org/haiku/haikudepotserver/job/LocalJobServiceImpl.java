@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,8 +21,8 @@ import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,14 +50,13 @@ public class LocalJobServiceImpl
 
     private final static long TTL_DEFAULT = TimeUnit.HOURS.toMillis(2);
 
-    private DataStorageService dataStorageService;
+    private final DataStorageService dataStorageService;
+
+    private final List<JobRunner> jobRunners;
 
     private ThreadPoolExecutor executor = null;
 
-    private ArrayBlockingQueue<Runnable> runnables = Queues.newArrayBlockingQueue(SIZE_QUEUE);
-
-    @Autowired
-    private List<JobRunner> jobRunners;
+    private final ArrayBlockingQueue<Runnable> runnables = Queues.newArrayBlockingQueue(SIZE_QUEUE);
 
     /**
      * <p>Contains a mapping from the GUID to the job.</p>
@@ -69,15 +68,23 @@ public class LocalJobServiceImpl
      * <p>Job data that the system knows about.</p>
      */
 
-    private Set<JobData> datas = Sets.newHashSet();
+    private final Set<JobData> datas = Sets.newHashSet();
+
+    public LocalJobServiceImpl(
+            DataStorageService dataStorageService,
+            List<JobRunner> jobRunners) {
+        this.dataStorageService = dataStorageService;
+        this.jobRunners = jobRunners;
+    }
+
+    @PostConstruct
+    public void init() {
+        startAsyncAndAwaitRunning();
+    }
 
     @PreDestroy
     public void tearDown() {
         stopAsyncAndAwaitTerminated();
-    }
-
-    public void setJobDataStorageService(DataStorageService dataStorageService) {
-        this.dataStorageService = dataStorageService;
     }
 
     // ------------------------------
@@ -625,7 +632,6 @@ public class LocalJobServiceImpl
             executor = null;
             notifyStopped();
 
-            jobRunners = null;
             jobs = null;
 
             LOGGER.info("did stop service");

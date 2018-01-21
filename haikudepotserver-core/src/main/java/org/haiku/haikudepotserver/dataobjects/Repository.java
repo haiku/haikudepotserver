@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,13 +46,18 @@ public class Repository extends _Repository implements CreateAndModifyTimestampe
     // This approach of getting them all and then filtering them may not work if there are
     // quite a large number of repositories, but this eventuality is unlikely.
 
-    public static Optional<Repository> getByCode(ObjectContext context, String code) {
+    public static Optional<Repository> tryGetByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != code, "the code must be supplied");
         return getAll(context)
                 .stream()
                 .filter(r -> r.getCode().equals(code))
                 .collect(SingleCollector.optional());
+    }
+
+    public static Repository getByCode(ObjectContext context, String code) {
+        return tryGetByCode(context, code).orElseThrow(
+                () -> new IllegalStateException("unable to find repository by code [" + code + "]"));
     }
 
     public static List<Repository> getAllActive(ObjectContext context) {

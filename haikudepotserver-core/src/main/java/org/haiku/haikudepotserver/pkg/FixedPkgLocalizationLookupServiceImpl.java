@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -31,7 +31,7 @@ public class FixedPkgLocalizationLookupServiceImpl implements PkgLocalizationLoo
 
     private Map<ObjectId, ResolvedPkgVersionLocalization> cachedResult;
 
-    private String naturalLanguageCode;
+    private final String naturalLanguageCode;
 
     public FixedPkgLocalizationLookupServiceImpl(
             ObjectContext context,

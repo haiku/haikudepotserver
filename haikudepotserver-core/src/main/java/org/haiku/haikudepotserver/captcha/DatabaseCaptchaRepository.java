@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,20 +29,19 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(DatabaseCaptchaRepository.class);
 
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
 
-    private Long expirySeconds;
+    private final Long expirySeconds;
+
+    public DatabaseCaptchaRepository(
+            ServerRuntime serverRuntime,
+            Long expirySeconds) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.expirySeconds = Preconditions.checkNotNull(expirySeconds);
+    }
 
     public ServerRuntime getServerRuntime() {
         return serverRuntime;
-    }
-
-    public void setServerRuntime(ServerRuntime serverRuntime) {
-        this.serverRuntime = serverRuntime;
-    }
-
-    public void setExpirySeconds(Long expirySeconds) {
-        this.expirySeconds = expirySeconds;
     }
 
     public void init() {

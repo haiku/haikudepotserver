@@ -1,10 +1,11 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.graphics.hvif;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,13 @@ public class HvifRenderingServiceFactory implements FactoryBean<HvifRenderingSer
 
     protected static Logger LOGGER = LoggerFactory.getLogger(HvifRenderingServiceFactory.class);
 
-    @Value("${hvif2png.path:}")
-    private String hvif2pngPath;
+    private final String hvif2pngPath;
+
+    public HvifRenderingServiceFactory(
+            @Value("${hvif2png.path:}") String hvif2pngPath
+    ) {
+        this.hvif2pngPath = hvif2pngPath;
+    }
 
     @Override
     public HvifRenderingService getObject() throws Exception {

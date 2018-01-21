@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.FactoryBean;
 public class ObjectMapperFactory implements FactoryBean<ObjectMapper> {
 
     @Override
-    public ObjectMapper getObject() throws Exception {
+    public ObjectMapper getObject() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

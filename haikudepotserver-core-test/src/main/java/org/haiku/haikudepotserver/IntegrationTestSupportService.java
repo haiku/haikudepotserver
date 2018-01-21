@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -75,7 +75,7 @@ public class IntegrationTestSupportService {
         try (InputStream inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png", size, size))) {
             pkgIconService.storePkgIconImage(
                     inputStream,
-                    MediaType.getByCode(objectContext, com.google.common.net.MediaType.PNG.toString()).get(),
+                    MediaType.tryGetByCode(objectContext, com.google.common.net.MediaType.PNG.toString()).get(),
                     size,
                     objectContext,
                     pkg);
@@ -91,7 +91,7 @@ public class IntegrationTestSupportService {
 
             pkgIconService.storePkgIconImage(
                     inputStream,
-                    MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get(),
+                    MediaType.tryGetByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get(),
                     null,
                     objectContext,
                     pkg);
@@ -105,7 +105,6 @@ public class IntegrationTestSupportService {
         addPngPkgIcon(objectContext, pkg, 16);
         addPngPkgIcon(objectContext, pkg, 32);
         addPngPkgIcon(objectContext, pkg, 64);
-//        addHvifPkgIcon(objectContext, pkg);
     }
 
     private void addDummyLocalization(ObjectContext context, PkgVersion pkgVersion) {
@@ -135,9 +134,9 @@ public class IntegrationTestSupportService {
 
         Prominence prominence = Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get();
 
-        Architecture x86_64 = Architecture.getByCode(context, "x86_64").get();
-        Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2").get();
-        Architecture any = Architecture.getByCode(context, "any").get();
+        Architecture x86_64 = Architecture.tryGetByCode(context, "x86_64").get();
+        Architecture x86_gcc2 = Architecture.tryGetByCode(context, "x86_gcc2").get();
+        Architecture any = Architecture.tryGetByCode(context, "any").get();
 
         result.repository = context.newObject(Repository.class);
         result.repository.setCode("testrepo");
@@ -340,11 +339,11 @@ public class IntegrationTestSupportService {
 
         ObjectContext context = serverRuntime.newContext();
         Pkg pkg = Pkg.tryGetByName(context, "pkg3").get();
-        Architecture x86_64 = Architecture.getByCode(context, "x86_64").get();
+        Architecture x86_64 = Architecture.tryGetByCode(context, "x86_64").get();
         PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                 context,
                 pkg,
-                Repository.getByCode(context, "testrepo").get(),
+                Repository.tryGetByCode(context, "testrepo").get(),
                 Collections.singletonList(x86_64)).get();
 
         NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get();

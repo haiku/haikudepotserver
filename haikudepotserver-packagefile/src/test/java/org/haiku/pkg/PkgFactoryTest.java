@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,25 +21,25 @@ public class PkgFactoryTest {
 
     private Attribute createTestPackageAttributes() {
 
-        StringInlineAttribute topA = new StringInlineAttribute(AttributeId.PACKAGE,"testpkg");
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_NAME,"testpkg"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VENDOR,"Test Vendor"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_SUMMARY,"This is a test package summary"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_DESCRIPTION,"This is a test package description"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_URL,"http://www.haiku-os.org"));
-        topA.addChildAttribute(new IntAttribute(AttributeId.PACKAGE_ARCHITECTURE,new BigInteger("1"))); // X86
+        StringInlineAttribute topA = new StringInlineAttribute(AttributeId.PACKAGE, "testpkg");
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_NAME, "testpkg"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VENDOR, "Test Vendor"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_SUMMARY, "This is a test package summary"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_DESCRIPTION, "This is a test package description"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_URL, "http://www.haiku-os.org"));
+        topA.addChildAttribute(new IntAttribute(AttributeId.PACKAGE_ARCHITECTURE, new BigInteger("1"))); // X86
 
-        StringInlineAttribute majorVersionA = new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MAJOR,"6");
-        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MINOR,"32"));
-        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MICRO,"9"));
-        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_PRE_RELEASE,"beta"));
-        majorVersionA.addChildAttribute(new IntAttribute(AttributeId.PACKAGE_VERSION_REVISION,new BigInteger("8")));
+        StringInlineAttribute majorVersionA = new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MAJOR, "6");
+        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MINOR, "32"));
+        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MICRO, "9"));
+        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_PRE_RELEASE, "beta"));
+        majorVersionA.addChildAttribute(new IntAttribute(AttributeId.PACKAGE_VERSION_REVISION, new BigInteger("8")));
         topA.addChildAttribute(majorVersionA);
 
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT,"Some copyright A"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT,"Some copyright B"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_LICENSE,"Some license A"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_LICENSE,"Some license B"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT, "Some copyright A"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT, "Some copyright B"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_LICENSE, "Some license A"));
+        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_LICENSE, "Some license B"));
 
         return topA;
     }
@@ -74,9 +74,9 @@ public class PkgFactoryTest {
         assertThat(pkg.getVersion().getPreRelease()).isEqualTo("beta");
         assertThat(pkg.getVersion().getRevision()).isEqualTo(8);
 
-        assertThat(pkg.getCopyrights().stream().filter(x -> x.equals("Some copyright A")).findFirst().isPresent()).isTrue();
-        assertThat(pkg.getLicenses().stream().filter(x -> x.equals("Some license A")).findFirst().isPresent()).isTrue();
-        assertThat(pkg.getLicenses().stream().filter(x -> x.equals("Some license B")).findFirst().isPresent()).isTrue();
+        assertThat(pkg.getCopyrights().stream().anyMatch(x -> x.equals("Some copyright A"))).isTrue();
+        assertThat(pkg.getLicenses().stream().anyMatch(x -> x.equals("Some license A"))).isTrue();
+        assertThat(pkg.getLicenses().stream().anyMatch(x -> x.equals("Some license B"))).isTrue();
 
     }
 

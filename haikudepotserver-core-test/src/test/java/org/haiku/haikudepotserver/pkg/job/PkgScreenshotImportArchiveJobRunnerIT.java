@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
@@ -58,9 +59,7 @@ import java.util.List;
  * </table>
  */
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
     @Resource

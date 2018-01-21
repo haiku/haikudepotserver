@@ -1,7 +1,7 @@
 /*
-* Copyright 2014-2017, Andrew Lindesay
-* Distributed under the terms of the MIT License.
-*/
+ * Copyright 2018, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 
 package org.haiku.haikudepotserver.api1;
 
@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.api1.model.userrating.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -24,9 +25,7 @@ import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Optional;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class UserRatingApiIT extends AbstractIntegrationTest {
 
     @Resource
@@ -45,8 +44,8 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,
                 Pkg.tryGetByName(context, "pkg1").get(),
-                Repository.getByCode(context, "testrepo").get(),
-                Collections.singletonList(Architecture.getByCode(context, "x86_64").get())).get());
+                Repository.tryGetByCode(context, "testrepo").get(),
+                Collections.singletonList(Architecture.tryGetByCode(context, "x86_64").get())).get());
         userRating.setRating((short) 3);
         userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_VERYUNSTABLE).get());
         userRating.setUser(user);

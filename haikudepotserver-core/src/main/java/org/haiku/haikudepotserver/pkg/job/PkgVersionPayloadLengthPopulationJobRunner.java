@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,8 +35,12 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgVersionPayloadLengthPopulationJobRunner.class);
 
-    @Resource
     private ServerRuntime serverRuntime;
+
+    public PkgVersionPayloadLengthPopulationJobRunner(
+            ServerRuntime serverRuntime) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+    }
 
     @Override
     public void run(JobService jobService, PkgVersionPayloadLengthPopulationJobSpecification specification) throws IOException {

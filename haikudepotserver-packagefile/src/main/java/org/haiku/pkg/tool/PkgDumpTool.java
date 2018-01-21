@@ -1,11 +1,10 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.tool;
 
-import org.haiku.pkg.HpkException;
 import org.haiku.pkg.HpkrFileExtractor;
 import org.haiku.pkg.PkgIterator;
 import org.haiku.pkg.output.PkgWriter;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 /**
@@ -31,7 +29,7 @@ public class PkgDumpTool {
     @Option(name = "-f", required = true, usage = "the HPKR file is required")
     private File hpkrFile;
 
-    public static void main(String[] args) throws HpkException, IOException {
+    public static void main(String[] args) {
         PkgDumpTool main = new PkgDumpTool();
         CmdLineParser parser = new CmdLineParser(main);
 
@@ -47,23 +45,13 @@ public class PkgDumpTool {
     public void run() {
         new CmdLineParser(this);
 
-        HpkrFileExtractor hpkrFileExtractor = null;
-
-        try {
-            hpkrFileExtractor = new HpkrFileExtractor(hpkrFile);
-
+        try (HpkrFileExtractor hpkrFileExtractor = new HpkrFileExtractor(hpkrFile)) {
             OutputStreamWriter streamWriter = new OutputStreamWriter(System.out);
             PkgWriter pkgWriter = new PkgWriter(streamWriter);
             pkgWriter.write(new PkgIterator(hpkrFileExtractor.getPackageAttributesIterator()));
             pkgWriter.flush();
-        }
-        catch(Throwable th) {
+        } catch (Throwable th) {
             LOGGER.error("unable to dump packages", th);
-        }
-        finally {
-            if(null!=hpkrFileExtractor) {
-                hpkrFileExtractor.close();
-            }
         }
 
     }

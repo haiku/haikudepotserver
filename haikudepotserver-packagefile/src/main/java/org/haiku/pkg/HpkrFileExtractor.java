@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -57,11 +57,11 @@ public class HpkrFileExtractor implements Closeable {
                     header.getPackagesStringsCount());
 
         }
-        catch(Exception e) {
+        catch (Exception e) {
             close();
             throw new HpkException("unable to setup the hpkr file extractor",e);
         }
-        catch(Throwable th) {
+        catch (Throwable th) {
             close();
             throw new RuntimeException("unable to setup the hpkr file extractor",th);
         }
@@ -69,7 +69,7 @@ public class HpkrFileExtractor implements Closeable {
 
     @Override
     public void close() {
-        if(null!=heapReader) {
+        if (null != heapReader) {
             heapReader.close();
         }
     }
@@ -95,7 +95,7 @@ public class HpkrFileExtractor implements Closeable {
         try {
             randomAccessFile = new RandomAccessFile(file, "r");
 
-            if(!Arrays.equals(new char[] { 'h','p','k','r' }, fileHelper.readMagic(randomAccessFile))) {
+            if (!Arrays.equals(new char[] {'h', 'p', 'k', 'r'}, fileHelper.readMagic(randomAccessFile))) {
                 throw new HpkException("magic incorrect at the start of the hpkr file");
             }
 
@@ -109,7 +109,7 @@ public class HpkrFileExtractor implements Closeable {
             int compression = fileHelper.readUnsignedShortToInt(randomAccessFile);
 
             // heap information
-            switch(compression) {
+            switch (compression) {
                 case 0:
                     result.setHeapCompression(HeapCompression.NONE);
                     break;
@@ -136,9 +136,8 @@ public class HpkrFileExtractor implements Closeable {
             result.setPackagesStringsCount(fileHelper.readUnsignedLongToLong(randomAccessFile));
 
             return result;
-        }
-        finally {
-            if(null!=randomAccessFile) {
+        } finally {
+            if (null!=randomAccessFile) {
                 try {
                     randomAccessFile.close();
                 }

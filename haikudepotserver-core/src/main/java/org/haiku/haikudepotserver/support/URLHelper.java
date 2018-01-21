@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -59,24 +59,21 @@ public class URLHelper {
 
                     String contentLengthHeader = connection.getHeaderField(HttpHeaders.CONTENT_LENGTH);
 
-                    if(!Strings.isNullOrEmpty(contentLengthHeader)) {
+                    if (!Strings.isNullOrEmpty(contentLengthHeader)) {
                         long contentLength;
 
                         try {
                             contentLength = Long.parseLong(contentLengthHeader);
 
-                            if(contentLength > 0) {
+                            if (contentLength > 0) {
                                 result = contentLength;
-                            }
-                            else {
+                            } else {
                                 LOGGER.warn("bad content length; {}", contentLength);
                             }
-                        }
-                        catch(NumberFormatException nfe) {
+                        } catch(NumberFormatException nfe) {
                             LOGGER.warn("malformed content length; {}", contentLengthHeader);
                         }
-                    }
-                    else {
+                    } else {
                         LOGGER.warn("unable to get the content length header");
                     }
 
@@ -90,10 +87,9 @@ public class URLHelper {
             case "file":
                 File file = new File(url.getPath());
 
-                if(file.exists() && file.isFile()) {
+                if (file.exists() && file.isFile()) {
                     result = file.length();
-                }
-                else {
+                } else {
                     LOGGER.warn("unable to find the local file; {}", url.getPath());
                 }
                 break;

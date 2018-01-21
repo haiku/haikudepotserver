@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,16 +12,24 @@ import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecif
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+/**
+ * Processes the user rating requests for a package and store them into the
+ * package entity.
+ */
 
+@Component
 public class UserRatingDerivationJobRunner
         extends AbstractJobRunner<UserRatingDerivationJobSpecification> {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingDerivationJobRunner.class);
 
-    @Resource
-    private UserRatingService userRatingService;
+    private final UserRatingService userRatingService;
+
+    public UserRatingDerivationJobRunner(UserRatingService userRatingService) {
+        this.userRatingService = Preconditions.checkNotNull(userRatingService);
+    }
 
     public void run(JobService jobService, UserRatingDerivationJobSpecification job) {
         Preconditions.checkNotNull(job);

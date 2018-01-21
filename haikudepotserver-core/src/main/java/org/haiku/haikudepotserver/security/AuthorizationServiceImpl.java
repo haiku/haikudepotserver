@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -79,11 +79,11 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                     break;
 
                 case REPOSITORY:
-                    targetOptional = Repository.getByCode(objectContext, targetIdentifier);
+                    targetOptional = Repository.tryGetByCode(objectContext, targetIdentifier);
                     break;
 
                 case USER:
-                    targetOptional = User.getByNickname(objectContext, targetIdentifier);
+                    targetOptional = User.tryGetByNickname(objectContext, targetIdentifier);
                     break;
 
                 case USERRATING:

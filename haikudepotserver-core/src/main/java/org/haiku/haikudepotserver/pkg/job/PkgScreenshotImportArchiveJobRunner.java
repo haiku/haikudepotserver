@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -70,11 +69,15 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
         REMOVED
     }
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgScreenshotService pkgScreenshotService;
 
-    @Resource
-    private PkgScreenshotService pkgScreenshotService;
+    public PkgScreenshotImportArchiveJobRunner(
+            ServerRuntime serverRuntime,
+            PkgScreenshotService pkgScreenshotService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
+    }
 
     @Override
     public void run(
@@ -290,11 +293,11 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
      */
 
     private void collectPersistedScreenshotMetadata(Map<String, ScreenshotImportMetadatas> data) {
-        data.entrySet().forEach((e) -> {
-            if (!e.getValue().isNotFound()) {
+        data.forEach((k, v) -> {
+            if (!v.isNotFound()) {
                 ObjectContext context = serverRuntime.newContext();
-                Pkg pkg = Pkg.getByName(context, e.getKey());
-                pkg.getPkgScreenshots().forEach((ps) -> e.getValue().add(createPersistedScreenshotMetadata(ps)));
+                Pkg pkg = Pkg.getByName(context, k);
+                pkg.getPkgScreenshots().forEach((ps) -> v.add(createPersistedScreenshotMetadata(ps)));
             }
         });
     }
@@ -432,11 +435,11 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             this.order = order;
         }
 
-        public ArchiveInputStream getArchiveInputStream() {
+        ArchiveInputStream getArchiveInputStream() {
             return archiveInputStream;
         }
 
-        public ArchiveEntry getArchiveEntry() {
+        ArchiveEntry getArchiveEntry() {
             return archiveEntry;
         }
 
@@ -464,11 +467,11 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
         private boolean notFound = false;
 
 
-        public Collection<ExistingScreenshotMetadata> getExistingScreenshots() {
+        Collection<ExistingScreenshotMetadata> getExistingScreenshots() {
             return existingScreenshots;
         }
 
-        public Collection<FromArchiveScreenshotMetadata> getFromArchiveScreenshots() {
+        Collection<FromArchiveScreenshotMetadata> getFromArchiveScreenshots() {
             return fromArchiveScreenshots;
         }
 
@@ -480,11 +483,11 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             fromArchiveScreenshots.add(value);
         }
 
-        public void setNotFound() {
+        void setNotFound() {
             notFound = true;
         }
 
-        public boolean isNotFound() {
+        boolean isNotFound() {
             return notFound;
         }
     }
@@ -504,7 +507,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
         private HashCode dataHash = null;
 
-        public ExistingScreenshotMetadata(int order, long length, String code) {
+        ExistingScreenshotMetadata(int order, long length, String code) {
             this.order = order;
             this.length = length;
             this.code = code;
@@ -522,7 +525,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             return code;
         }
 
-        public HashCode getDataHash() {
+        HashCode getDataHash() {
             if (null == dataHash) {
                 dataHash = generateHashCode(code);
             }
@@ -547,7 +550,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
         private final String path;
 
-        public FromArchiveScreenshotMetadata(int order, long length, HashCode dataHash, String path) {
+        FromArchiveScreenshotMetadata(int order, long length, HashCode dataHash, String path) {
             this.order = order;
             this.length = length;
             this.dataHash = dataHash;
@@ -562,7 +565,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             return length;
         }
 
-        public HashCode getDataHash() {
+        HashCode getDataHash() {
             return dataHash;
         }
 
@@ -570,11 +573,11 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             return path;
         }
 
-        public int getDerivedOrder() {
+        int getDerivedOrder() {
             return derivedOrder;
         }
 
-        public void setDerivedOrder(int derivedOrder) {
+        void setDerivedOrder(int derivedOrder) {
             this.derivedOrder = derivedOrder;
         }
     }

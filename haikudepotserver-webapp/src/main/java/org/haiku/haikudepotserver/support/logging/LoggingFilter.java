@@ -1,10 +1,11 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.logging;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
@@ -13,6 +14,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.AuthenticationHelper;
 import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
@@ -25,6 +27,7 @@ import java.util.Optional;
  * <a href="http://logback.qos.ch/manual/mdc.html">MDC</a> so that it can be logged on.</p>
  */
 
+@Component
 public class LoggingFilter implements Filter {
 
     private final static String KEY_AUTHENTICATEDUSERNICKNAME = "authUserNickname";
@@ -56,8 +59,11 @@ public class LoggingFilter implements Filter {
 
     }
 
-    @Resource
-    ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+
+    public LoggingFilter(ServerRuntime serverRuntime) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+    }
 
     /**
      * <p>This method will try to make a crude guess at the user agent.  This is not very conclusive, but will be
@@ -107,7 +113,7 @@ public class LoggingFilter implements Filter {
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override

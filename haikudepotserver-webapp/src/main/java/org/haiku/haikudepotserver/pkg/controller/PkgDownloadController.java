@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +43,7 @@ public class PkgDownloadController {
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgDownloadController.class);
 
     // TODO; should be injected into the orchestration service.
-    public final static String SEGMENT_PKGDOWNLOAD = PkgServiceImpl.URL_SEGMENT_PKGDOWNLOAD;
+    private final static String SEGMENT_PKGDOWNLOAD = PkgServiceImpl.URL_SEGMENT_PKGDOWNLOAD;
 
     private final static String KEY_PKGNAME = "pkgName";
     private final static String KEY_REPOSITORYCODE = "repositoryCode";
@@ -58,8 +57,11 @@ public class PkgDownloadController {
     private final static String PATH = "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
             KEY_MICRO + "}/{" + KEY_PRERELEASE + "}/{" + KEY_REVISION + "}/{" + KEY_ARCHITECTURECODE + "}/package.hpkg";
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+
+    public PkgDownloadController(ServerRuntime serverRuntime) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+    }
 
     private String hyphenToNull(String part) {
         if(null!=part && !part.equals("-")) {
@@ -94,12 +96,12 @@ public class PkgDownloadController {
             return new RequestObjectNotFound();
         });
 
-        Repository repository = Repository.getByCode(context, repositoryCode).orElseThrow(() -> {
+        Repository repository = Repository.tryGetByCode(context, repositoryCode).orElseThrow(() -> {
             LOGGER.info("unable to find the repository; {}", repositoryCode);
             return new RequestObjectNotFound();
         });
 
-        Architecture architecture = Architecture.getByCode(context, architectureCode).orElseThrow(() -> {
+        Architecture architecture = Architecture.tryGetByCode(context, architectureCode).orElseThrow(() -> {
             LOGGER.info("unable to find the architecture; {}", architectureCode);
             return new RequestObjectNotFound();
         });
@@ -155,6 +157,6 @@ public class PkgDownloadController {
     }
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
-    public class RequestObjectNotFound extends RuntimeException {}
+    private class RequestObjectNotFound extends RuntimeException {}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,33 +22,33 @@ public class FileHelper {
 
     public int readUnsignedShortToInt(RandomAccessFile randomAccessFile) throws IOException, HpkException {
 
-        if(2!=randomAccessFile.read(buffer8,0,2)) {
+        if (2!=randomAccessFile.read(buffer8, 0, 2)) {
             throw new HpkException("not enough bytes read for an unsigned short");
         }
 
-        int i0 = buffer8[0]&0xff;
-        int i1 = buffer8[1]&0xff;
+        int i0 = buffer8[0] & 0xff;
+        int i1 = buffer8[1] & 0xff;
 
         return i0 << 8 | i1;
     }
 
     public long readUnsignedIntToLong(RandomAccessFile randomAccessFile) throws IOException, HpkException {
 
-        if(4!=randomAccessFile.read(buffer8,0,4)) {
+        if (4 != randomAccessFile.read(buffer8, 0, 4)) {
             throw new HpkException("not enough bytes read for an unsigned int");
         }
 
-        long l0 = buffer8[0]&0xff;
-        long l1 = buffer8[1]&0xff;
-        long l2 = buffer8[2]&0xff;
-        long l3 = buffer8[3]&0xff;
+        long l0 = buffer8[0] & 0xff;
+        long l1 = buffer8[1] & 0xff;
+        long l2 = buffer8[2] & 0xff;
+        long l3 = buffer8[3] & 0xff;
 
         return l0 << 24 | l1 << 16 | l2 << 8 | l3;
     }
 
     public BigInteger readUnsignedLong(RandomAccessFile randomAccessFile) throws IOException, HpkException {
 
-        if(8!=randomAccessFile.read(buffer8)) {
+        if (8 != randomAccessFile.read(buffer8)) {
             throw new HpkException("not enough bytes read for an unsigned long");
         }
 
@@ -68,7 +68,7 @@ public class FileHelper {
 
     public char[] readMagic(RandomAccessFile randomAccessFile) throws IOException, HpkException {
 
-        if(4!=randomAccessFile.read(buffer8,0,4)) {
+        if (4 != randomAccessFile.read(buffer8, 0, 4)) {
             throw new HpkException("not enough bytes read for a 4-byte magic");
         }
 

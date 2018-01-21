@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,6 @@ import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -36,14 +35,18 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
 
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractPkgResourceExportArchiveJobRunner.class);
 
-    @Resource
     protected ServerRuntime serverRuntime;
+    private RuntimeInformationService runtimeInformationService;
+    private ObjectMapper objectMapper;
 
-    @Resource
-    protected RuntimeInformationService runtimeInformationService;
-
-    @Resource
-    protected ObjectMapper objectMapper;
+    public AbstractPkgResourceExportArchiveJobRunner(
+            ServerRuntime serverRuntime,
+            RuntimeInformationService runtimeInformationService,
+            ObjectMapper objectMapper) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
+        this.objectMapper = Preconditions.checkNotNull(objectMapper);
+    }
 
     @Override
     public void run(
@@ -83,7 +86,7 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
                 offset += countLastQuery;
 
                 if (0 == offset % 100) {
-                    LOGGER.info("processed {} entries", offset + 1);
+                    LOGGER.debug("processed {} entries", offset + 1);
                 }
 
             } while(countLastQuery > 0);
@@ -101,7 +104,7 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
 
     abstract String getPathComponentTop();
 
-    void appendFromRawRows(State state, List<Object[]> rows)
+    private void appendFromRawRows(State state, List<Object[]> rows)
             throws IOException {
         for(Object[] row : rows) {
             appendFromRawRow(state, row);
@@ -114,7 +117,7 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
      * <p>Adds a little informational file into the tar-ball.</p>
      */
 
-    void appendArchiveInfo(State state) throws IOException {
+    private void appendArchiveInfo(State state) throws IOException {
         ArchiveInfo archiveInfo = new ArchiveInfo(
                 DateTimeHelper.secondAccuracyDatePlusOneSecond(state.latestModifiedTimestamp),
                 runtimeInformationService.getProjectVersion());
@@ -137,10 +140,8 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
     }
 
     final static class State {
-
         TarArchiveOutputStream tarArchiveOutputStream;
         Date latestModifiedTimestamp = new Date(0);
-
     }
 
 }

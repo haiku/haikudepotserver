@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.user.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetException;
 import org.haiku.haikudepotserver.api1.support.AbstractSearchRequest;
@@ -28,9 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class UserApiIT extends AbstractIntegrationTest {
 
     @Resource
@@ -62,7 +61,7 @@ public class UserApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Optional<User> user = User.getByNickname(context, "testuser");
+            Optional<User> user = User.tryGetByNickname(context, "testuser");
             Assertions.assertThat(user.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
         }
 
@@ -84,7 +83,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<User> userOptional = User.getByNickname(context, "testuser");
+        Optional<User> userOptional = User.tryGetByNickname(context, "testuser");
 
         Assertions.assertThat(userOptional.isPresent()).isTrue();
         Assertions.assertThat(userOptional.get().getActive()).isTrue();
@@ -252,7 +251,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         ObjectContext context = serverRuntime.newContext();
         List<UserPasswordResetToken> tokens = UserPasswordResetToken.findByUser(
                 context,
-                User.getByNickname(context, "testuser").get());
+                User.tryGetByNickname(context, "testuser").get());
 
         switch (tokens.size()) {
             case 0:
@@ -285,7 +284,7 @@ public class UserApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            User user = User.getByNickname(context, "testuser").get();
+            User user = User.tryGetByNickname(context, "testuser").get();
 
             // check for the presence of a token.
             List<UserPasswordResetToken> tokens = UserPasswordResetToken.findByUser(context, user);

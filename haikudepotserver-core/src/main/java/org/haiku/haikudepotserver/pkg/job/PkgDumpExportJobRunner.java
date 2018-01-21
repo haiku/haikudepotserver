@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
@@ -59,17 +58,21 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
 
     private final static int BATCH_SIZE = 100;
 
-    @Resource
-    private RuntimeInformationService runtimeInformationService;
+    private final ServerRuntime serverRuntime;
+    private final RuntimeInformationService runtimeInformationService;
+    private final ObjectMapper objectMapper;
+    private final PkgService pkgService;
 
-    @Resource
-    private ServerRuntime serverRuntime;
-
-    @Resource
-    private ObjectMapper objectMapper;
-
-    @Resource
-    private PkgService pkgService;
+    public PkgDumpExportJobRunner(
+            ServerRuntime serverRuntime,
+            RuntimeInformationService runtimeInformationService,
+            ObjectMapper objectMapper,
+            PkgService pkgService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
+        this.objectMapper = Preconditions.checkNotNull(objectMapper);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
 
     @Override
     public void run(JobService jobService, PkgDumpExportJobSpecification specification)

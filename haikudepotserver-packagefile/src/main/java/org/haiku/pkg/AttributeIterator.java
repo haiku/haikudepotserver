@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -53,7 +53,7 @@ public class AttributeIterator {
 
     private BigInteger nextTag = null;
 
-    public AttributeIterator(AttributeContext context, long offset) {
+    AttributeIterator(AttributeContext context, long offset) {
         super();
 
         Preconditions.checkNotNull(context);
@@ -72,23 +72,23 @@ public class AttributeIterator {
     }
 
     private int deriveAttributeTagType(BigInteger tag) {
-        return tag.subtract(BigInteger.valueOf(1l)).shiftRight(7).and(BigInteger.valueOf(0x7l)).intValue();
+        return tag.subtract(BigInteger.ONE).shiftRight(7).and(BigInteger.valueOf(0x7L)).intValue();
     }
 
     private int deriveAttributeTagId(BigInteger tag) {
-        return tag.subtract(BigInteger.valueOf(1l)).and(BigInteger.valueOf(0x7fl)).intValue();
+        return tag.subtract(BigInteger.ONE).and(BigInteger.valueOf(0x7FL)).intValue();
     }
 
     private int deriveAttributeTagEncoding(BigInteger tag) {
-        return tag.subtract(BigInteger.valueOf(1l)).shiftRight(11).and(BigInteger.valueOf(3l)).intValue();
+        return tag.subtract(BigInteger.ONE).shiftRight(11).and(BigInteger.valueOf(3L)).intValue();
     }
 
     private boolean deriveAttributeTagHasChildAttributes(BigInteger tag) {
-        return 0!=tag.subtract(BigInteger.valueOf(1l)).shiftRight(10).and(BigInteger.valueOf(1l)).intValue();
+        return 0!=tag.subtract(BigInteger.valueOf(1L)).shiftRight(10).and(BigInteger.ONE).intValue();
     }
 
     private BigInteger getNextTag() {
-        if(null==nextTag) {
+        if (null == nextTag) {
             nextTag = readUnsignedLeb128();
         }
 
@@ -99,13 +99,13 @@ public class AttributeIterator {
         BigInteger result = BigInteger.valueOf(0l);
         int shift = 0;
 
-        while(true) {
+        while (true) {
             int b = context.getHeapReader().readHeap(offset);
             offset++;
 
             result = result.or(BigInteger.valueOf((long) (b & 0x7f)).shiftLeft(shift));
 
-            if(0 == (b & 0x80)) {
+            if (0 == (b & 0x80)) {
                 return result;
             }
 
@@ -131,7 +131,7 @@ public class AttributeIterator {
      */
 
     public boolean hasNext() {
-        return 0!=getNextTag().signum();
+        return 0 != getNextTag().signum();
     }
 
     /**
@@ -151,17 +151,17 @@ public class AttributeIterator {
 
         // if we encounter 0 tag then we know that we have finished the list.
 
-        if(0!=tag.signum()) {
+        if (0 != tag.signum()) {
 
             int encoding = deriveAttributeTagEncoding(tag);
             int id = deriveAttributeTagId(tag);
 
-            if(id <= 0 || id >= AttributeId.values().length) {
+            if (id <= 0 || id >= AttributeId.values().length) {
                 throw new HpkException("illegal id; "+Integer.toString(id));
             }
             AttributeId attributeId = AttributeId.values()[id];
 
-            switch(deriveAttributeTagType(tag)) {
+            switch (deriveAttributeTagType(tag)) {
 
                 case ATTRIBUTE_TYPE_INVALID:
                     throw new HpkException("an invalid attribute tag type has been encountered");
@@ -170,8 +170,8 @@ public class AttributeIterator {
                 {
                     ensureValidEncodingForInt(encoding);
                     byte[] buffer = new byte[encoding+1];
-                    context.getHeapReader().readHeap(buffer,0,new HeapCoordinates(offset,encoding+1));
-                    offset+=encoding+1;
+                    context.getHeapReader().readHeap(buffer, 0, new HeapCoordinates(offset, encoding + 1));
+                    offset += encoding + 1;
                     result = new IntAttribute(attributeId, new BigInteger(buffer));
                 }
                 break;
@@ -180,25 +180,25 @@ public class AttributeIterator {
                 {
                     ensureValidEncodingForInt(encoding);
                     byte[] buffer = new byte[encoding+1];
-                    context.getHeapReader().readHeap(buffer,0,new HeapCoordinates(offset,encoding+1));
-                    offset+=encoding+1;
+                    context.getHeapReader().readHeap(buffer, 0, new HeapCoordinates(offset, encoding + 1));
+                    offset+=encoding + 1;
                     result = new IntAttribute(attributeId, new BigInteger(1,buffer));
                 }
                 break;
 
                 case ATTRIBUTE_TYPE_STRING:
                 {
-                    switch(encoding) {
+                    switch (encoding) {
 
                         case ATTRIBUTE_ENCODING_STRING_INLINE:
                         {
                             ByteArrayDataOutput assembly = ByteStreams.newDataOutput();
 
-                            while(null==result) {
+                            while (null==result) {
                                 int b = context.getHeapReader().readHeap(offset);
                                 offset++;
 
-                                if(0!=b) {
+                                if (0 != b) {
                                     assembly.write(b);
                                 }
                                 else {
@@ -216,7 +216,7 @@ public class AttributeIterator {
                         {
                             BigInteger index = readUnsignedLeb128();
 
-                            if(index.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+                            if (index.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
                                 throw new IllegalStateException("the string table index is preposterously large");
                             }
 
@@ -232,7 +232,7 @@ public class AttributeIterator {
 
                 case ATTRIBUTE_TYPE_RAW:
                 {
-                    switch(encoding) {
+                    switch (encoding) {
                         case ATTRIBUTE_ENCODING_RAW_INLINE:
                         {
                             BigInteger length = readUnsignedLeb128();
@@ -242,7 +242,7 @@ public class AttributeIterator {
                             }
 
                             byte[] buffer = new byte[length.intValue()];
-                            context.getHeapReader().readHeap(buffer,0,new HeapCoordinates(offset,length.intValue()));
+                            context.getHeapReader().readHeap(buffer, 0, new HeapCoordinates(offset,length.intValue()));
                             offset += length.intValue();
 
                             result = new RawInlineAttribute(attributeId, buffer);
@@ -254,11 +254,11 @@ public class AttributeIterator {
                             BigInteger rawLength = readUnsignedLeb128();
                             BigInteger rawOffset = readUnsignedLeb128();
 
-                            if(rawLength.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+                            if (rawLength.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
                                 throw new HpkException("the length of the heap data is too large");
                             }
 
-                            if(rawOffset.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+                            if (rawOffset.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
                                 throw new HpkException("the offset of the heap data is too large");
                             }
 
@@ -295,11 +295,11 @@ public class AttributeIterator {
             // possibly there are child attributes after this attribute; if this is the
             // case then open-up a new iterator to work across those and load them in.
 
-            if(deriveAttributeTagHasChildAttributes(tag)) {
+            if (deriveAttributeTagHasChildAttributes(tag)) {
 
                 AttributeIterator childAttributeIterator = new AttributeIterator(context, offset);
 
-                while(childAttributeIterator.hasNext()) {
+                while (childAttributeIterator.hasNext()) {
                     result.addChildAttribute(childAttributeIterator.next());
                 }
 

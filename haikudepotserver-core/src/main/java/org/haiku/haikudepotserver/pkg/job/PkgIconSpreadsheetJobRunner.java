@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -42,17 +42,21 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
 
     private static String MARKER = "*";
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final RepositoryService repositoryService;
+    private final PkgService pkgService;
+    private final PkgIconService pkgIconService;
 
-    @Resource
-    private RepositoryService repositoryService;
-
-    @Resource
-    private PkgService pkgService;
-
-    @Resource
-    private PkgIconService pkgIconService;
+    public PkgIconSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            RepositoryService repositoryService,
+            PkgService pkgService,
+            PkgIconService pkgIconService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.repositoryService = Preconditions.checkNotNull(repositoryService);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
+    }
 
     @Override
     public void run(

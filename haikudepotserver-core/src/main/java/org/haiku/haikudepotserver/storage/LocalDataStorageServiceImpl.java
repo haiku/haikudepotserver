@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,23 +32,26 @@ public class LocalDataStorageServiceImpl implements DataStorageService {
 
     private File tmpDir;
 
-    @Value("${deployment.isproduction:false}")
-    private Boolean isProduction;
+    private final Boolean isProduction;
+
+    public LocalDataStorageServiceImpl(Boolean isProduction) {
+        this.isProduction = isProduction;
+    }
 
     @PostConstruct
     public void init() {
         String platformTmpDirPath = System.getProperty("java.io.tmpdir");
 
-        if(Strings.isNullOrEmpty(platformTmpDirPath)) {
+        if (Strings.isNullOrEmpty(platformTmpDirPath)) {
             throw new IllegalStateException("unable to ascertain the java temporary directory");
         }
 
         tmpDir = new File(
                 platformTmpDirPath,
-                PATH_APPTMPDIR + (null==isProduction||!isProduction ? "-test" : ""));
+                PATH_APPTMPDIR + (null == isProduction || !isProduction ? "-test" : ""));
 
-        if(!tmpDir.exists()) {
-            if(tmpDir.mkdirs()) {
+        if (!tmpDir.exists()) {
+            if (tmpDir.mkdirs()) {
                LOGGER.info("did create the application temporary directory path; {}", tmpDir.getAbsolutePath());
             }
             else {
@@ -69,13 +72,13 @@ public class LocalDataStorageServiceImpl implements DataStorageService {
     }
 
     @Override
-    public ByteSink put(final String key) throws IOException {
+    public ByteSink put(final String key) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         return Files.asByteSink(fileForKey(key));
     }
 
     @Override
-    public Optional<? extends ByteSource> get(final String key) throws IOException {
+    public Optional<? extends ByteSource> get(final String key) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         File file = fileForKey(key);
         return file.exists() ? Optional.of(Files.asByteSource(file)) : Optional.empty();
@@ -92,12 +95,11 @@ public class LocalDataStorageServiceImpl implements DataStorageService {
     public void clear() {
         LOGGER.info("will clear");
 
-        for(File f : tmpDir.listFiles()) {
-            if(f.isFile()) {
-                if(f.delete()) {
+        for (File f : tmpDir.listFiles()) {
+            if (f.isFile()) {
+                if (f.delete()) {
                     LOGGER.info("did delete; {}", f.getAbsolutePath());
-                }
-                else {
+                } else {
                     LOGGER.error("was not able to delete; {}", f.getAbsolutePath());
                 }
             }

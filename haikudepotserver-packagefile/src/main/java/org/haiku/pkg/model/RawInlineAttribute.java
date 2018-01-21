@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
 import org.haiku.pkg.AttributeContext;
-import org.haiku.pkg.HpkException;
 
 import java.util.Arrays;
 
@@ -41,7 +40,7 @@ public class RawInlineAttribute extends RawAttribute {
     }
 
     @Override
-    public byte[] getValue(AttributeContext context) throws HpkException {
+    public byte[] getValue(AttributeContext context) {
         return rawValue;
     }
 

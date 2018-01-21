@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,8 +29,8 @@ import org.haiku.pkg.model.Pkg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.*;
 import java.net.URL;
 import java.util.List;
@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
  * will undertake the import process.</p>
  */
 
+@Component
 public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<RepositoryHpkrIngressJobSpecification> {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryHpkrIngressJobRunner.class);
@@ -55,17 +56,21 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
     private final static String PARAMETER_NAME_URL = "url";
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgService pkgService;
+    private final PkgImportService pkgImportService;
+    private final boolean shouldPopulatePayloadLength;
 
-    @Resource
-    private PkgService pkgService;
-
-    @Resource
-    private PkgImportService pkgImportService;
-
-    @Value("${repository.import.populatepayloadlength:false}")
-    private boolean shouldPopulatePayloadLength;
+    public RepositoryHpkrIngressJobRunner(
+            ServerRuntime serverRuntime,
+            PkgService pkgService,
+            PkgImportService pkgImportService,
+            @Value("${repository.import.populatepayloadlength:false}") boolean shouldPopulatePayloadLength) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+        this.pkgImportService = Preconditions.checkNotNull(pkgImportService);
+        this.shouldPopulatePayloadLength = shouldPopulatePayloadLength;
+    }
 
     @Override
     public void run(JobService jobService, RepositoryHpkrIngressJobSpecification specification) {
@@ -73,7 +78,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
         Preconditions.checkNotNull(specification);
 
         ObjectContext mainContext = serverRuntime.newContext();
-        Repository repository = Repository.getByCode(mainContext, specification.getRepositoryCode()).get();
+        Repository repository = Repository.getByCode(mainContext, specification.getRepositoryCode());
         List<RepositorySource> repositorySources = RepositorySource.findActiveByRepository(mainContext, repository);
 
         if(repositorySources.isEmpty()) {
@@ -178,8 +183,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
     private void runImportHpkrForRepositorySource(
             ObjectContext mainContext,
-            RepositorySource repositorySource)
-            throws RepositoryHpkrIngressException {
+            RepositorySource repositorySource) {
         URL url = repositorySource.getDownloadHpkrURL();
 
         // now shift the URL's data into a temporary file and then process it.
@@ -245,7 +249,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
                     int changes = pkgService.deactivatePkgVersionsForPkgAssociatedWithRepositorySource(
                             removalContext,
-                            org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(removalContext, persistedPkgName).get(),
+                            org.haiku.haikudepotserver.dataobjects.Pkg.getByName(removalContext, persistedPkgName),
                             removalRepositorySource);
 
                     if (changes > 0) {

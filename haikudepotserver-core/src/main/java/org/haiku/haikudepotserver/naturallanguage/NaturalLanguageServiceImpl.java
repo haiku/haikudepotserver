@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,6 +21,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -42,11 +43,8 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
 
     private static final String PREFIX_BASE_NAME_CLASSPATH = "classpath:";
 
-    @Resource(name = "messageSourceBaseNames")
-    private List<String> messageSourceBaseNames;
-
-    @Resource
     private ServerRuntime serverRuntime;
+    private List<String> messageSourceBaseNames;
 
     /**
      * <p>This data cannot change over the life-span of the application server so
@@ -59,17 +57,26 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
      * <p>Maintains a cache of all of the localized messages.</p>
      */
 
-    private LoadingCache<String, Properties> allLocalizationMessages = CacheBuilder
-            .newBuilder()
-            .maximumSize(5)
-            .expireAfterAccess(1, TimeUnit.HOURS)
-            .build(new CacheLoader<String, Properties>() {
-                @Override
-                public Properties load(@SuppressWarnings("NullableProblems") String key) throws Exception {
-                    Preconditions.checkArgument(null != key);
-                    return assembleAllLocalizationMessages(key);
-                }
-            });
+    private final LoadingCache<String, Properties> allLocalizationMessages;
+
+    public NaturalLanguageServiceImpl(
+            ServerRuntime serverRuntime,
+            @Qualifier("messageSourceBaseNames") List<String> messageSourceBaseNames
+    ) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.messageSourceBaseNames = Preconditions.checkNotNull(messageSourceBaseNames);
+
+        allLocalizationMessages = CacheBuilder
+                .newBuilder()
+                .maximumSize(5)
+                .expireAfterAccess(1, TimeUnit.HOURS)
+                .build(new CacheLoader<String, Properties>() {
+                    @Override
+                    public Properties load(String key) {
+                        return assembleAllLocalizationMessages(key);
+                    }
+                });
+    }
 
     private Properties assembleAllLocalizationMessages(String naturalLanguageCode) {
         Properties result = new Properties();
@@ -96,9 +103,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
     private boolean hasLocalizationMessagesPrimative(String naturalLanguageCode) {
         return messageSourceBaseNames
                 .stream()
-                .filter((bn) -> getLocalizationMessagesPrimative(naturalLanguageCode, bn).isPresent())
-                .findFirst()
-                .isPresent();
+                .anyMatch((bn) -> getLocalizationMessagesPrimative(naturalLanguageCode, bn).isPresent());
     }
 
     private Optional<Properties> getLocalizationMessagesPrimative(String naturalLanguageCode, String naturalLanguageBaseName) {

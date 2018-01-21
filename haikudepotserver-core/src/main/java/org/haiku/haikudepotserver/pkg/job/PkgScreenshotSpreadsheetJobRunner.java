@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -34,14 +33,18 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotSpreadsheetJobRunner.class);
 
-    @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
     private RepositoryService repositoryService;
-
-    @Resource
     private PkgService pkgService;
+
+    public PkgScreenshotSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            RepositoryService repositoryService,
+            PkgService pkgService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.repositoryService = Preconditions.checkNotNull(repositoryService);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
 
     @Override
     public void run(
@@ -90,10 +93,10 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
                                 .map(Repository::getCode)
                                 .collect(Collectors.joining(";"));
                         cells[2] = Integer.toString(pkg.getPkgScreenshots().size());
-                        cells[3] = pkg.getPkgScreenshots()
+                        cells[3] = Integer.toString(pkg.getPkgScreenshots()
                                 .stream()
-                                .collect(Collectors.summingInt(_PkgScreenshot::getLength))
-                                .toString();
+                                .mapToInt(_PkgScreenshot::getLength)
+                                .sum());
 
                         writer.writeNext(cells);
 

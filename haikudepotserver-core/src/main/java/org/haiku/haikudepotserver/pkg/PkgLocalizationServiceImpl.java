@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,7 +15,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,8 +22,11 @@ import java.util.stream.Collectors;
 @Service
 public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
-    @Resource
-    private PkgServiceImpl pkgServiceImpl;
+    private final PkgServiceImpl pkgServiceImpl;
+
+    public PkgLocalizationServiceImpl(PkgServiceImpl pkgServiceImpl) {
+        this.pkgServiceImpl = Preconditions.checkNotNull(pkgServiceImpl);
+    }
 
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgVersionLocalization pvl) {
         if(Strings.isNullOrEmpty(result.getTitle())
@@ -74,43 +76,31 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             NaturalLanguage naturalLanguage) {
 
         if(!result.hasAll()) {
-            Optional<PkgVersionLocalization> pvlNl = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
-                    context, pkgVersion, naturalLanguage.getCode());
-
-            if (pvlNl.isPresent()) {
-                fill(result, searchPattern, pvlNl.get());
-            }
+            PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
+                context, pkgVersion, naturalLanguage.getCode())
+                    .ifPresent(pvlNl -> fill(result, searchPattern, pvlNl));
         }
 
         if(!result.hasAll()) {
-            Optional<PkgLocalization> plNl = PkgLocalization.getForPkgAndNaturalLanguageCode(
+            PkgLocalization.getForPkgAndNaturalLanguageCode(
                     context,
                     pkgVersion.getPkg(),
-                    naturalLanguage.getCode());
-
-            if(plNl.isPresent()) {
-                fill(result, searchPattern, plNl.get());
-            }
+                    naturalLanguage.getCode())
+                    .ifPresent(plNl -> fill(result, searchPattern, plNl));
         }
 
         if(!result.hasAll()) {
-            Optional<PkgVersionLocalization> pvlEn = PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
-                    context, pkgVersion, NaturalLanguage.CODE_ENGLISH);
-
-            if(pvlEn.isPresent()) {
-                fill(result, searchPattern, pvlEn.get());
-            }
+            PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
+                    context, pkgVersion, NaturalLanguage.CODE_ENGLISH)
+                    .ifPresent(pvlEn -> fill(result, searchPattern, pvlEn));
         }
 
         if(!result.hasAll()) {
-            Optional<PkgLocalization> plEn = PkgLocalization.getForPkgAndNaturalLanguageCode(
+            PkgLocalization.getForPkgAndNaturalLanguageCode(
                     context,
                     pkgVersion.getPkg(),
-                    NaturalLanguage.CODE_ENGLISH);
-
-            if(plEn.isPresent()) {
-                fill(result, searchPattern, plEn.get());
-            }
+                    NaturalLanguage.CODE_ENGLISH)
+                    .ifPresent(plEn -> fill(result, searchPattern, plEn));
         }
 
         if(null!=searchPattern) {
@@ -148,13 +138,12 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         // riding off the back of this, if there is a "_devel" package of the same name
         // then its localization should be configured at the same time.
 
-        pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName()).forEach((subordinatePkg) -> {
-            updatePkgLocalization(
-                    context, subordinatePkg, naturalLanguage,
-                    title,
-                    summary + tryGetSummarySuffix(subordinatePkg.getName()).orElse(""),
-                    description);
-        });
+        pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName()).forEach(
+                (subordinatePkg) -> updatePkgLocalization(
+                        context, subordinatePkg, naturalLanguage,
+                        title,
+                        summary + tryGetSummarySuffix(subordinatePkg.getName()).orElse(""),
+                        description));
 
         return result;
     }
@@ -186,10 +175,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         Optional<PkgLocalization> pkgLocalizationOptional = pkg.getPkgLocalization(naturalLanguage);
 
         if(Strings.isNullOrEmpty(title) && Strings.isNullOrEmpty(summary) && Strings.isNullOrEmpty(description)) {
-            if(pkgLocalizationOptional.isPresent()) {
-                context.deleteObject(pkgLocalizationOptional.get());
-            }
-
+            pkgLocalizationOptional.ifPresent((context::deleteObject));
             return null;
         }
 
@@ -234,9 +220,9 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
         List<PkgLocalization> pkgLocalizationsToDelete = targetPkg.getPkgLocalizations()
                 .stream()
-                .filter((spl) -> !sourcePkg.getPkgLocalizations()
+                .filter((spl) -> sourcePkg.getPkgLocalizations()
                         .stream()
-                        .anyMatch((tpl) -> !tpl.getNaturalLanguage().equals(spl.getNaturalLanguage())))
+                        .noneMatch((tpl) -> !tpl.getNaturalLanguage().equals(spl.getNaturalLanguage())))
                 .collect(Collectors.toList());
 
         context.deleteObjects(pkgLocalizationsToDelete);

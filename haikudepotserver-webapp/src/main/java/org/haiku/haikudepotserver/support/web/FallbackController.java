@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -56,20 +55,24 @@ public class FallbackController {
 
     private final static String VALUE_FAVICON = "favicon";
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgService pkgService;
+    private final RepositoryService repositoryService;
+    private final String baseUrl;
 
-    @Resource
-    private PkgService pkgService;
-
-    @Resource
-    private RepositoryService repositoryService;
-
-    @Value("${baseurl}")
-    private String baseUrl;
-
-    @Autowired(required = false) // so that integration tests run ok
+    @Autowired(required = false)
     private ServletContext servletContext;
+
+    public FallbackController(
+            ServerRuntime serverRuntime,
+            PkgService pkgService,
+            RepositoryService repositoryService,
+            @Value("${baseurl}") String baseUrl) {
+        this.serverRuntime = serverRuntime;
+        this.pkgService = pkgService;
+        this.repositoryService = repositoryService;
+        this.baseUrl = baseUrl;
+    }
 
     private String termDebug(String term) {
         if(term.length() > 64) {

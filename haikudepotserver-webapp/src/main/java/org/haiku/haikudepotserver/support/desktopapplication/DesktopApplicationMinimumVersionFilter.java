@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
  * versions and disallows them.</p>
  */
 
+@Component
 public class DesktopApplicationMinimumVersionFilter implements Filter {
 
     private final static Pattern PATTERN_MINIMUMVERSIONSTRING = Pattern.compile("^[0-9]+(\\.[0-9]+)*$");
@@ -40,15 +41,31 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(DesktopApplicationMinimumVersionFilter.class);
 
-    @Value("${desktop.application.version.min:}")
-    private String minimumVersionString;
+    private final String minimumVersionString;
 
-    private int[] minimumVersion = null;
+    private final int[] minimumVersion;
 
-    private IntArrayVersionComparator intArrayVersionComparator = new IntArrayVersionComparator();
+    private final IntArrayVersionComparator intArrayVersionComparator = new IntArrayVersionComparator();
 
-    public void setMinimumVersionString(String minimumVersionString) {
+    public DesktopApplicationMinimumVersionFilter(
+            @Value("${desktop.application.version.min:}") String minimumVersionString) {
         this.minimumVersionString = minimumVersionString;
+        this.minimumVersion = deriveVersion(minimumVersionString);
+    }
+
+    private int[] deriveVersion(String versionString) {
+        if(!Strings.isNullOrEmpty(versionString)) {
+            int[] version = parseVersion(versionString);
+
+            if (null == version) {
+                throw new IllegalStateException("not able to parse the minimum version string; " + versionString);
+            }
+
+            LOGGER.info("desktop application min version; {}", versionString);
+            return version;
+        }
+
+        return null;
     }
 
     private int[] parseVersion(String versionString) {
@@ -102,21 +119,8 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
                 || intArrayVersionComparator.compare(requestVersion, minimumVersion) >= 0;
     }
 
-    @PostConstruct
-    public void init() {
-        if(!Strings.isNullOrEmpty(minimumVersionString)) {
-            minimumVersion = parseVersion(minimumVersionString);
-
-            if (null == minimumVersion) {
-                throw new IllegalStateException("not able to parse the minimum version string; " + minimumVersionString);
-            }
-
-            LOGGER.info("desktop application min version; {}", minimumVersionString);
-        }
-    }
-
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override

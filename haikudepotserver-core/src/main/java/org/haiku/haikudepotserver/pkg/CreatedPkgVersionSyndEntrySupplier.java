@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,7 +28,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -41,17 +40,21 @@ import java.util.stream.Collectors;
 @Component
 public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
-    @Resource
     private ServerRuntime serverRuntime;
-
-    @Value("${baseurl}")
     private String baseUrl;
-
-    @Resource
     private MessageSource messageSource;
-
-    @Resource
     private PkgLocalizationService pkgLocalizationService;
+
+    public CreatedPkgVersionSyndEntrySupplier(
+            ServerRuntime serverRuntime,
+            @Value("${baseurl}") String baseUrl,
+            MessageSource messageSource,
+            PkgLocalizationService pkgLocalizationService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.baseUrl = Preconditions.checkNotNull(baseUrl);
+        this.messageSource = Preconditions.checkNotNull(messageSource);
+        this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
+    }
 
     @Override
     public List<SyndEntry> generate(final FeedSpecification specification) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.repository.job;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -25,7 +26,6 @@ import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Comparator;
@@ -41,14 +41,20 @@ import java.util.zip.GZIPOutputStream;
 @Component
 public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryDumpExportJobSpecification> {
 
-    @Resource
-    private RuntimeInformationService runtimeInformationService;
+    private final ServerRuntime serverRuntime;
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final RuntimeInformationService runtimeInformationService;
 
-    @Resource
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
+    public RepositoryDumpExportJobRunner(
+            ServerRuntime serverRuntime,
+            RuntimeInformationService runtimeInformationService,
+            ObjectMapper objectMapper) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
+        this.objectMapper = Preconditions.checkNotNull(objectMapper);
+    }
 
     @Override
     public void run(JobService jobService, RepositoryDumpExportJobSpecification specification)
@@ -120,9 +126,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
 
     private ArchiveInfo createArchiveInfo(List<Repository> repositories) {
         Date modifyTimestamp = repositories
-                .stream()
-                .sorted(Comparator.comparing(Repository::getModifyTimestamp).reversed())
-                .findFirst()
+                .stream().max(Comparator.comparing(Repository::getModifyTimestamp))
                 .map(_Repository::getModifyTimestamp)
                 .orElse(new java.sql.Timestamp(0L));
 

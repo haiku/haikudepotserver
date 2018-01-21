@@ -1,10 +1,11 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.controller;
 
+import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -37,14 +38,18 @@ public class PkgController {
     private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
     private final static String KEY_NATURALLANGUAGECODE = "naturalLanguageCode";
 
-    @Resource
-    private JobService jobService;
+    private final ServerRuntime serverRuntime;
+    private final JobService jobService;
+    private final PkgService pkgService;
 
-    @Resource
-    private PkgService pkgService;
-
-    @Resource
-    private ServerRuntime serverRuntime;
+    public PkgController(
+            ServerRuntime serverRuntime,
+            JobService jobService,
+            PkgService pkgService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.jobService = Preconditions.checkNotNull(jobService);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
 
     /**
      * <p>This streams back a redirect to report data that contains a JSON stream gzip-compressed

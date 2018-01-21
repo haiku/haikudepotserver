@@ -1,10 +1,11 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.operations.controller;
 
+import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -38,11 +39,15 @@ public class MaintenanceController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(MaintenanceController.class);
 
-    @Resource
-    private JobService jobService;
+    private final ServerRuntime serverRuntime;
+    private final JobService jobService;
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    public MaintenanceController(
+            ServerRuntime serverRuntime,
+            JobService jobService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.jobService = Preconditions.checkNotNull(jobService);
+    }
 
     /**
      * <p>This triggers daily tasks.</p>

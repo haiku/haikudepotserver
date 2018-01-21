@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.singlepage;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * the page.</p>
  */
 
+@Component
 public class SinglePageTemplateFrequencyMetrics {
 
     private Map<String, AtomicLong> templateCounter = new HashMap<>();

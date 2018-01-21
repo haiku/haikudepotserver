@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
@@ -59,60 +58,70 @@ public class FeedController {
 
     private final static long EXPIRY_CACHE_SECONDS = 60;
 
-    @Resource
-    private List<SyndEntrySupplier> syndEntrySuppliers;
+    private final List<SyndEntrySupplier> syndEntrySuppliers;
+    private final MessageSource messageSource;
+    private final String baseUrl;
 
-    @Resource
-    private MessageSource messageSource;
+    private final LoadingCache<FeedSpecification,SyndFeed> feedCache;
 
-    @Value("${baseurl}")
-    private String baseUrl;
+    public FeedController(
+            List<SyndEntrySupplier> syndEntrySuppliers,
+            MessageSource messageSource,
+            @Value("${baseurl}") String baseUrl) {
+        this.syndEntrySuppliers = Preconditions.checkNotNull(syndEntrySuppliers);
+        this.messageSource = Preconditions.checkNotNull(messageSource);
+        this.baseUrl = Preconditions.checkNotNull(baseUrl);
 
-    private LoadingCache<FeedSpecification,SyndFeed> feedCache = CacheBuilder
-            .newBuilder()
-            .maximumSize(10)
-            .expireAfterWrite(EXPIRY_CACHE_SECONDS, TimeUnit.SECONDS)
-            .build(new CacheLoader<FeedSpecification, SyndFeed>() {
-                @Override
-                public SyndFeed load(FeedSpecification key) throws Exception {
-                    Preconditions.checkNotNull(key);
-                    Locale locale = Locale.ENGLISH;
-
-                    if (!Strings.isNullOrEmpty(key.getNaturalLanguageCode())) {
-                        locale = new Locale(key.getNaturalLanguageCode());
+        feedCache = CacheBuilder
+                .newBuilder()
+                .maximumSize(10)
+                .expireAfterWrite(EXPIRY_CACHE_SECONDS, TimeUnit.SECONDS)
+                .build(new CacheLoader<FeedSpecification, SyndFeed>() {
+                    @Override
+                    public SyndFeed load(FeedSpecification key) {
+                        return createFeed(key);
                     }
+                });
+    }
 
-                    SyndFeed feed = new SyndFeedImpl();
-                    feed.setFeedType(key.getFeedType().getFeedType());
-                    feed.setTitle(FEED_TITLE);
-                    feed.setDescription(messageSource.getMessage("feed.description", new Object[] {}, locale));
-                    feed.setLink(baseUrl);
-                    feed.setPublishedDate(new java.util.Date());
+    private SyndFeed createFeed(FeedSpecification key) {
+        Preconditions.checkNotNull(key);
+        Locale locale = Locale.ENGLISH;
 
-                    SyndImage image = new SyndImageImpl();
-                    image.setUrl(baseUrl + "/__img/haikudepot32.png");
-                    image.setTitle(FEED_ICON_TITLE);
-                    feed.setImage(image);
+        if (!Strings.isNullOrEmpty(key.getNaturalLanguageCode())) {
+            locale = new Locale(key.getNaturalLanguageCode());
+        }
 
-                    List<SyndEntry> entries = new ArrayList<>();
+        SyndFeed feed = new SyndFeedImpl();
+        feed.setFeedType(key.getFeedType().getFeedType());
+        feed.setTitle(FEED_TITLE);
+        feed.setDescription(messageSource.getMessage("feed.description", new Object[] {}, locale));
+        feed.setLink(baseUrl);
+        feed.setPublishedDate(new java.util.Date());
 
-                    for(SyndEntrySupplier supplier : syndEntrySuppliers) {
-                        entries.addAll(supplier.generate(key));
-                    }
+        SyndImage image = new SyndImageImpl();
+        image.setUrl(baseUrl + "/__img/haikudepot32.png");
+        image.setTitle(FEED_ICON_TITLE);
+        feed.setImage(image);
 
-                    // sort the entries and then take the first number of them up to the limit.
+        List<SyndEntry> entries = new ArrayList<>();
 
-                    entries.sort((o1, o2) -> -1 * o1.getPublishedDate().compareTo(o2.getPublishedDate()));
+        for(SyndEntrySupplier supplier : syndEntrySuppliers) {
+            entries.addAll(supplier.generate(key));
+        }
 
-                    if(entries.size() > key.getLimit()) {
-                        entries = entries.subList(0,key.getLimit());
-                    }
+        // sort the entries and then take the first number of them up to the limit.
 
-                    feed.setEntries(entries);
+        entries.sort((o1, o2) -> -1 * o1.getPublishedDate().compareTo(o2.getPublishedDate()));
 
-                    return feed;
-                }
-            });
+        if(entries.size() > key.getLimit()) {
+            entries = entries.subList(0,key.getLimit());
+        }
+
+        feed.setEntries(entries);
+
+        return feed;
+    }
 
     @RequestMapping(
             value = "{pathBase:pkg\\.}{" + FeedServiceImpl.KEY_EXTENSION + ":atom|rss}",

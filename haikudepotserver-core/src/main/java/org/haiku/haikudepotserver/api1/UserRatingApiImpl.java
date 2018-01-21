@@ -1,7 +1,7 @@
 /*
-* Copyright 2014-2017, Andrew Lindesay
-* Distributed under the terms of the MIT License.
-*/
+ * Copyright 2018, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 
 package org.haiku.haikudepotserver.api1;
 
@@ -26,33 +26,38 @@ import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/userrating") // TODO; legacy path - remove
 public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
-    @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
     private AuthorizationService authorizationService;
-
-    @Resource
     private JobService jobService;
-
-    @Resource
     private UserRatingService userRatingService;
-
-    @Resource
     private PkgService pkgService;
+
+    public UserRatingApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            JobService jobService,
+            UserRatingService userRatingService,
+            PkgService pkgService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+        this.userRatingService = Preconditions.checkNotNull(userRatingService);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
 
     private AbstractGetUserRatingResult.User createUser(User user) {
         Preconditions.checkNotNull(user);
@@ -181,7 +186,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         final ObjectContext context = serverRuntime.newContext();
 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
-        User user = User.getByNickname(context, request.userNickname).orElseThrow(
+        User user = User.tryGetByNickname(context, request.userNickname).orElseThrow(
             () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
         Pkg pkg = Pkg.tryGetByName(context, request.pkgName).orElseThrow(
                 () -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
@@ -223,7 +228,6 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode));
-        Preconditions.checkNotNull(null != request.pkgVersionType);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
         Preconditions.checkArgument(null == request.rating || request.rating >= UserRating.MIN_USER_RATING,
                 "the user rating " + request.rating + " is less than the minimum allowed of " + UserRating.MIN_USER_RATING);
@@ -255,7 +259,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
         Repository repository = getRepository(context, request.repositoryCode);
-        User user = User.getByNickname(context, request.userNickname).orElseThrow(
+        User user = User.tryGetByNickname(context, request.userNickname).orElseThrow(
                 () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
 
         Optional<UserRatingStability> userRatingStabilityOptional = Optional.empty();
@@ -460,10 +464,9 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Optional<Repository> repositoryOptional = Optional.empty();
 
         if(!Strings.isNullOrEmpty(request.repositoryCode)) {
-            repositoryOptional = Optional.of(getRepository(
+            searchSpecification.setRepository(getRepository(
                     context,
                     request.repositoryCode));
-            searchSpecification.setRepository(repositoryOptional.get());
         }
 
         // if there is a major version specified then we must be requesting a specific package version,
@@ -508,7 +511,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         }
 
         if(null!=request.userNickname) {
-            Optional<User> userOptional = User.getByNickname(context, request.userNickname);
+            Optional<User> userOptional = User.tryGetByNickname(context, request.userNickname);
 
             if(!userOptional.isPresent()) {
                 throw new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname);

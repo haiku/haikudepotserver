@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.pkg;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
@@ -16,9 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
 
     @Resource

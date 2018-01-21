@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ public class HpkStringTable implements StringTable {
 
     private String[] values = null;
 
-    public HpkStringTable(
+    HpkStringTable(
             HpkHeapReader heapReader,
             long heapOffset,
             long heapLength,
@@ -52,40 +52,36 @@ public class HpkStringTable implements StringTable {
         String[] result = new String[(int) expectedCount];
         byte[] stringsDataBuffer = new byte[(int) heapLength];
 
-        heapReader.readHeap(
-                stringsDataBuffer,
-                0,
-                new HeapCoordinates(
-                        heapOffset,
-                        heapLength));
+        heapReader.readHeap(stringsDataBuffer, 0,
+                new HeapCoordinates(heapOffset, heapLength));
 
         // now work through the data and load them into the strings.
 
         int stringIndex = 0;
         int offset = 0;
 
-        while(offset < stringsDataBuffer.length) {
+        while (offset < stringsDataBuffer.length) {
 
-            if(0==stringsDataBuffer[offset]) {
-                if(stringIndex != result.length) {
+            if (0 == stringsDataBuffer[offset]) {
+                if (stringIndex != result.length) {
                     throw new HpkException(String.format("expected to read %d package strings from the strings table, but actually found %d",expectedCount,stringIndex));
                 }
 
                 return result;
             }
 
-            if(stringIndex >= expectedCount) {
+            if (stringIndex >= expectedCount) {
                 throw new HpkException("have already read all of the strings from the string table, but have not exhausted the string table data");
             }
 
             int start = offset;
 
-            while(offset < stringsDataBuffer.length && 0!=stringsDataBuffer[offset]) {
+            while (offset < stringsDataBuffer.length && 0 != stringsDataBuffer[offset]) {
                 offset++;
             }
 
-            if(offset < stringsDataBuffer.length) {
-                result[stringIndex] = new String(stringsDataBuffer,start,offset-start, Charsets.UTF_8);
+            if (offset < stringsDataBuffer.length) {
+                result[stringIndex] = new String(stringsDataBuffer, start, offset-start, Charsets.UTF_8);
                 stringIndex++;
                 offset++;
             }
@@ -96,11 +92,10 @@ public class HpkStringTable implements StringTable {
     }
 
     private String[] getStrings() throws HpkException {
-        if(null==values) {
-            if(0==heapLength) {
+        if (null == values) {
+            if (0 == heapLength) {
                 values = new String[] {};
-            }
-            else {
+            } else {
                 values = readStrings();
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -74,11 +73,15 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         REMOVED
     }
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgIconService pkgIconService;
 
-    @Resource
-    private PkgIconService pkgIconService;
+    public PkgIconImportArchiveJobRunner(
+            ServerRuntime serverRuntime,
+            PkgIconService pkgIconService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
+    }
 
     @Override
     public void run(

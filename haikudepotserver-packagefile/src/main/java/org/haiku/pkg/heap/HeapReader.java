@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,12 +19,12 @@ public interface HeapReader {
      * writes those bytes into the supplied buffer at the offset supplied.</p>
      */
 
-    public void readHeap(byte[] buffer, int bufferOffset, HeapCoordinates coordinates);
+    void readHeap(byte[] buffer, int bufferOffset, HeapCoordinates coordinates);
 
     /**
      * <p>This method reads a single byte of the heap at the given offset.</p>
      */
 
-    public int readHeap(long offset);
+    int readHeap(long offset);
 
 }

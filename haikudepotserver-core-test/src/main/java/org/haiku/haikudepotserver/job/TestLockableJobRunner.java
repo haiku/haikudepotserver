@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,10 +10,12 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.TestLockableJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
+@Component
 public class TestLockableJobRunner extends AbstractJobRunner<TestLockableJobSpecification> {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(TestNumberedLinesJobRunner.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,16 +9,19 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.job.*;
+import org.haiku.haikudepotserver.config.BasicConfig;
+import org.haiku.haikudepotserver.config.TestBasicConfig;
 import org.haiku.haikudepotserver.job.TestJobServiceImpl;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.junit.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.EnumSet;
 
-@ContextConfiguration({
-        "classpath:/spring/test-jobapi-context.xml"
-})
+@ContextConfiguration(classes = JobApiIT.SpecificTestConfig.class)
 public class JobApiIT extends AbstractIntegrationTest {
 
     @Resource
@@ -102,6 +105,19 @@ public class JobApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.finishTimestamp).isNull();
         Assertions.assertThat(result.ownerUserNickname).isNull();
         Assertions.assertThat(result.jobStatus).isEqualTo(JobStatus.STARTED);
+
+    }
+
+    @Import({
+            TestBasicConfig.class,
+            BasicConfig.class
+    })
+    public final static class SpecificTestConfig {
+
+        @Bean
+        JobService jobService() {
+            return new TestJobServiceImpl();
+        }
 
     }
 

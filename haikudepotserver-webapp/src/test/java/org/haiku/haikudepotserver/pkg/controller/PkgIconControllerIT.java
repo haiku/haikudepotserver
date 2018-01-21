@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,19 +9,24 @@ import com.google.common.net.MediaType;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestAppConfig;
+import org.haiku.haikudepotserver.config.TestServletConfig;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 
-@ContextConfiguration({
-        "classpath:/spring/test-servlet-context.xml",
-        "classpath:/spring/test-application-context.xml"
-})
+@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
 @WebAppConfiguration
 public class PkgIconControllerIT extends AbstractIntegrationTest {
 

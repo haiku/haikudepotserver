@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -45,17 +45,21 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgVersionLocalizationCoverageExportSpreadsheetJobRunner.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final PkgService pkgService;
+    private final RepositoryService repositoryService;
+    private final NaturalLanguageService naturalLanguageService;
 
-    @Resource
-    private PkgService pkgService;
-
-    @Resource
-    private RepositoryService repositoryService;
-
-    @Resource
-    private NaturalLanguageService naturalLanguageService;
+    public PkgVersionLocalizationCoverageExportSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            PkgService pkgService,
+            RepositoryService repositoryService,
+            NaturalLanguageService naturalLanguageService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+        this.repositoryService = Preconditions.checkNotNull(repositoryService);
+        this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
+    }
 
     /**
      * <P>Returns a list of all of the natural languages sorted on the code rather than

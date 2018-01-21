@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,7 +33,7 @@ public abstract class AbstractExternalToolService<T> {
     private File temporaryDirectory = null;
 
     private synchronized File getTemporaryDirectory() {
-        if(null==temporaryDirectory) {
+        if (null == temporaryDirectory) {
             temporaryDirectory = Files.createTempDir();
             temporaryDirectory.deleteOnExit();
             LOGGER.info("did create the temporary directory; {}", temporaryDirectory);
@@ -43,8 +43,8 @@ public abstract class AbstractExternalToolService<T> {
     }
 
     private void quietlyDeleteTemporaryFile(File f) {
-        if(f.exists()) {
-            if(f.delete()) {
+        if (f.exists()) {
+            if (f.delete()) {
                 LOGGER.debug("deleted temporary file; {}", f.getAbsolutePath());
             }
             else {
@@ -64,7 +64,7 @@ public abstract class AbstractExternalToolService<T> {
                 ByteSource.wrap(input),
                 new ByteSink() {
                     @Override
-                    public OutputStream openStream() throws IOException {
+                    public OutputStream openStream() {
                         return baos;
                     }
                 }
@@ -103,7 +103,7 @@ public abstract class AbstractExternalToolService<T> {
 
                 String line;
 
-                while(null != (line = bufferedReader.readLine())) {
+                while (null != (line = bufferedReader.readLine())) {
                     LOGGER.debug(line);
                 }
 
@@ -111,7 +111,7 @@ public abstract class AbstractExternalToolService<T> {
 
             try {
                 if (process.waitFor(TIMEOUT, TimeUnit.MILLISECONDS)) {
-                    if(0 != process.exitValue()) {
+                    if (0 != process.exitValue()) {
                         throw new RuntimeException("unable to execute " + args.get(0));
                     }
                 }

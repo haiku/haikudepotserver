@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,9 +24,7 @@ public class DesktopApplicationMinimumVersionFilterTest {
         MockServlet mockServlet = new MockServlet();
         MockFilterChain filterChain = new MockFilterChain(mockServlet);
 
-        DesktopApplicationMinimumVersionFilter filter = new DesktopApplicationMinimumVersionFilter();
-        filter.setMinimumVersionString(minimumVersionString);
-        filter.init();
+        DesktopApplicationMinimumVersionFilter filter = new DesktopApplicationMinimumVersionFilter(minimumVersionString);
 
         // --------------------------
         filter.doFilter(request, response, filterChain);
@@ -42,9 +40,7 @@ public class DesktopApplicationMinimumVersionFilterTest {
         MockServlet mockServlet = new MockServlet();
         MockFilterChain filterChain = new MockFilterChain(mockServlet);
 
-        DesktopApplicationMinimumVersionFilter filter = new DesktopApplicationMinimumVersionFilter();
-        filter.setMinimumVersionString("1.2.3");
-        filter.init();
+        DesktopApplicationMinimumVersionFilter filter = new DesktopApplicationMinimumVersionFilter("1.2.3");
 
         // --------------------------
         filter.doFilter(request, response, filterChain);

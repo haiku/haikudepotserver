@@ -1,13 +1,13 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.model;
 
-public abstract class StringAttribute extends Attribute {
+abstract class StringAttribute extends Attribute {
 
-    public StringAttribute(AttributeId attributeId) {
+    StringAttribute(AttributeId attributeId) {
         super(attributeId);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -36,7 +36,12 @@ public class Architecture extends _Architecture {
                 .select(context);
     }
 
-    public static Optional<Architecture> getByCode(ObjectContext context, final String code) {
+    public static Architecture getByCode(ObjectContext context, final String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new IllegalStateException("unable to find architecture for code [" + code + "]"));
+    }
+
+    public static Optional<Architecture> tryGetByCode(ObjectContext context, final String code) {
         Preconditions.checkNotNull(context, "the context must be provided");
         Preconditions.checkState(!Strings.isNullOrEmpty(code));
         return getAll(context).stream().filter(a -> a.getCode().equals(code)).collect(SingleCollector.optional());

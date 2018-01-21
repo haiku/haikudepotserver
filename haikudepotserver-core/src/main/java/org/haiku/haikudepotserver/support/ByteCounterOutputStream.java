@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,26 +28,24 @@ public class ByteCounterOutputStream extends FilterOutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        if(!amWriting) {
+        if (!amWriting) {
             amWriting = true;
             counter++;
             super.write(b);
             amWriting = false;
-        }
-        else {
+        } else {
             super.write(b);
         }
     }
 
     @Override
     public void write(byte[] b) throws IOException {
-        if(!amWriting) {
+        if (!amWriting) {
             amWriting = true;
             counter+=b.length;
             super.write(b);
             amWriting = false;
-        }
-        else {
+        } else {
             super.write(b);
         }
     }
@@ -56,14 +54,13 @@ public class ByteCounterOutputStream extends FilterOutputStream {
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         Preconditions.checkNotNull(b);
-        if(!amWriting) {
+        if (!amWriting) {
             amWriting = true;
             counter+=len;
-            super.write(b,off,len);
+            super.write(b, off, len);
             amWriting = false;
-        }
-        else {
-            super.write(b,off,len);
+        } else {
+            super.write(b, off, len);
         }
     }
 

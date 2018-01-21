@@ -1,11 +1,13 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.singlepage;
 
+import com.google.common.base.Preconditions;
 import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
@@ -20,19 +22,23 @@ import java.util.regex.Pattern;
  * templates into the single-page.</p>
  */
 
+@Component
 public class SinglePageTemplateFrequencyMetricsFilter implements Filter {
 
     private static Pattern PATTERN_PATH = Pattern.compile("^/js/app/(controller|directive)/[a-z0-9]+\\.html$");
 
-    @Resource
     private SinglePageTemplateFrequencyMetrics metrics;
+
+    public SinglePageTemplateFrequencyMetricsFilter(SinglePageTemplateFrequencyMetrics metrics) {
+        this.metrics = Preconditions.checkNotNull(metrics);
+    }
 
     public void setMetrics(SinglePageTemplateFrequencyMetrics metrics) {
         this.metrics = metrics;
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override

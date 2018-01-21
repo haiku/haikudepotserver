@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -49,11 +48,15 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
 
     private static Logger LOGGER = LoggerFactory.getLogger(UserRatingSpreadsheetJobRunner.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final UserRatingService userRatingService;
 
-    @Resource
-    private UserRatingService userRatingService;
+    public UserRatingSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            UserRatingService userRatingService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.userRatingService = Preconditions.checkNotNull(userRatingService);
+    }
 
     @Override
     public void run(JobService jobService, UserRatingSpreadsheetJobSpecification specification) throws IOException {
@@ -80,7 +83,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             Optional<Repository> paramRepositoryOptional = Optional.empty();
 
             if (!Strings.isNullOrEmpty(specification.getRepositoryCode())) {
-                paramRepositoryOptional = Repository.getByCode(context, specification.getRepositoryCode());
+                paramRepositoryOptional = Repository.tryGetByCode(context, specification.getRepositoryCode());
 
                 if(!paramRepositoryOptional.isPresent()) {
                     throw new IllegalStateException("unable to find the repository; " + specification.getRepositoryCode());
@@ -88,7 +91,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             }
 
             if (!Strings.isNullOrEmpty(specification.getUserNickname())) {
-                paramUserOptional = User.getByNickname(context, specification.getUserNickname());
+                paramUserOptional = User.tryGetByNickname(context, specification.getUserNickname());
 
                 if(!paramUserOptional.isPresent()) {
                     throw new IllegalStateException("unable to find the user; " + specification.getUserNickname());

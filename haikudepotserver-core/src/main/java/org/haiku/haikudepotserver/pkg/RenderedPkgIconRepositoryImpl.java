@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,13 +13,14 @@ import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
+import org.haiku.haikudepotserver.dataobjects.auto._PkgIcon;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
+import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
 import org.springframework.stereotype.Repository;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -28,29 +29,35 @@ import java.util.stream.Collectors;
 @Repository
 public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository {
 
-    @Resource
-    private HvifRenderingService hvifRenderingService;
-
-    @Resource
-    private PngOptimizationService pngOptimizationService;
-
-    private byte[] genericHvif;
-
-    private Cache<String, Cache<Integer, Optional<byte[]>>> cache = CacheBuilder
-            .newBuilder()
-            .maximumSize(256)
-            .expireAfterAccess(12, TimeUnit.HOURS)
-            .build();
+    private final HvifRenderingService hvifRenderingService;
+    private final PngOptimizationService pngOptimizationService;
+    private final Cache<String, Cache<Integer, Optional<byte[]>>> cache;
 
     /**
      * <p>Holds a cache of generic icons rather than those that are specific to a given package.</p>
      */
 
-    private Cache<Integer, byte[]> genericCache = CacheBuilder
-            .newBuilder()
-            .maximumSize(10)
-            .expireAfterAccess(1, TimeUnit.HOURS)
-            .build();
+    private final Cache<Integer, byte[]> genericCache;
+
+    private byte[] genericHvif;
+
+    public RenderedPkgIconRepositoryImpl(HvifRenderingService hvifRenderingService, PngOptimizationService pngOptimizationService) {
+        this.hvifRenderingService = hvifRenderingService;
+        this.pngOptimizationService = pngOptimizationService;
+
+        cache = CacheBuilder
+                .newBuilder()
+                .maximumSize(256)
+                .expireAfterAccess(12, TimeUnit.HOURS)
+                .build();
+
+        genericCache = CacheBuilder
+                .newBuilder()
+                .maximumSize(10)
+                .expireAfterAccess(1, TimeUnit.HOURS)
+                .build();
+
+    }
 
     private Cache<Integer, Optional<byte[]>> getOrCreatePkgCache(String name) {
         try {
@@ -73,7 +80,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
     }
 
     private synchronized byte[] getGenericHvif() {
-        if(null==genericHvif) {
+        if (null == genericHvif) {
             try (InputStream inputStream = RenderedPkgIconRepositoryImpl.class.getResourceAsStream("/img/generic.hvif")) {
                 genericHvif = ByteStreams.toByteArray(inputStream);
             }
@@ -117,11 +124,11 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
                 // first look for the HVIF icon and render the icon from that.
 
                 {
-                    MediaType hvifMediaType = MediaType.getByCode(context, MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get();
+                    MediaType hvifMediaType = MediaType.getByCode(context, MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
                     Optional<PkgIcon> hvifPkgIconOptional = pkg.getPkgIcon(hvifMediaType, null);
 
                     if (hvifPkgIconOptional.isPresent()) {
-                        byte[] hvifData = hvifPkgIconOptional.get().getPkgIconImage().get().getData();
+                        byte[] hvifData = hvifPkgIconOptional.get().getPkgIconImage().getData();
                         byte[] pngData = pngOptimizationService.optimize(hvifRenderingService.render(size, hvifData));
                         return Optional.of(pngData);
                     }
@@ -133,17 +140,17 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
                     List<PkgIcon> pkgIconList = pkg.getPkgIcons()
                             .stream()
                             .filter(pi -> pi.getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.toString()))
-                            .sorted((pi1, pi2) -> pi1.getSize().compareTo(pi2.getSize()))
+                            .sorted(Comparator.comparing(_PkgIcon::getSize))
                             .collect(Collectors.toList());
 
                     for(PkgIcon pkgIcon : pkgIconList) {
                         if(pkgIcon.getSize() >= size) {
-                            return Optional.of(pkgIcon.getPkgIconImage().get().getData());
+                            return Optional.of(pkgIcon.getPkgIconImage().getData());
                         }
                     }
 
                     if(!pkgIconList.isEmpty()) {
-                        return Optional.of(pkgIconList.get(pkgIconList.size()-1).getPkgIconImage().get().getData());
+                        return Optional.of(pkgIconList.get(pkgIconList.size()-1).getPkgIconImage().getData());
                     }
 
                 }

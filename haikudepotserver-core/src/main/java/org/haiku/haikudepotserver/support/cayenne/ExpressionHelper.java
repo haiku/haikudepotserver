@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,8 +46,8 @@ public class ExpressionHelper {
         Preconditions.checkNotNull(expressions);
         Expression result = null;
 
-        for(Expression expression : expressions) {
-            if(null==result) {
+        for (Expression expression : expressions) {
+            if (null==result) {
                 result = expression;
             }
             else {

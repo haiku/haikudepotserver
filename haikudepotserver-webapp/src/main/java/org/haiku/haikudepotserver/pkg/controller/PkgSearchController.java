@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.OpenSearchDescription;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -50,29 +50,33 @@ public class PkgSearchController {
 
     private final static String KEY_QUERY = "srchexpr";
 
-    public final static String SEGMENT_SEARCH = "__pkgsearch";
-    public final static String SEGMENT_SEARCH_LEGACY = "pkgsearch";
+    final static String SEGMENT_SEARCH = "__pkgsearch";
+    final static String SEGMENT_SEARCH_LEGACY = "pkgsearch";
 
-    @Resource(name = "opensearchFreemarkerConfiguration")
-    private Configuration freemarkerConfiguration;
+    private final Configuration freemarkerConfiguration;
+    private final ServerRuntime serverRuntime;
+    private final MessageSource messageSource;
+    private final PkgService pkgService;
+    private final String baseUrl;
+    private final String defaultArchitectureCode;
+    private final Boolean isProduction;
 
-    @Resource
-    private ServerRuntime serverRuntime;
-
-    @Value("${baseurl}")
-    private String baseUrl;
-
-    @Value("${architecture.default.code}")
-    private String defaultArchitectureCode;
-
-    @Value("${deployment.isproduction:false}")
-    private Boolean isProduction;
-
-    @Resource
-    private MessageSource messageSource;
-
-    @Resource
-    private PkgService pkgService;
+    public PkgSearchController(
+            ServerRuntime serverRuntime,
+            MessageSource messageSource,
+            PkgService pkgService,
+            @Qualifier("opensearchFreemarkerConfiguration") Configuration freemarkerConfiguration,
+            @Value("${baseurl}") String baseUrl,
+            @Value("${architecture.default.code}") String defaultArchitectureCode,
+            @Value("${deployment.isproduction:false}") Boolean isProduction) {
+        this.serverRuntime = serverRuntime;
+        this.messageSource = messageSource;
+        this.pkgService = pkgService;
+        this.freemarkerConfiguration = freemarkerConfiguration;
+        this.baseUrl = baseUrl;
+        this.defaultArchitectureCode = defaultArchitectureCode;
+        this.isProduction = isProduction;
+    }
 
     /**
      * <p>This method returns XML data that defines how a browser might search the site.  It uses an
@@ -141,8 +145,8 @@ public class PkgSearchController {
                 pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
-                        Repository.getByCode(context, Repository.CODE_DEFAULT).get(), // TODO - user interface for choosing?
-                        Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode).get()));
+                        Repository.getByCode(context, Repository.CODE_DEFAULT), // TODO - user interface for choosing?
+                        Collections.singletonList(Architecture.tryGetByCode(context, defaultArchitectureCode).get()));
             }
         }
 

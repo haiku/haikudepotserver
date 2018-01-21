@@ -1,10 +1,11 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.singlepage.controller;
 
+import com.google.common.base.Preconditions;
 import org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -25,8 +26,11 @@ public class EntryPointController {
 
     private static int MAX_TOPTEMPLATES = 25;
 
-    @Resource
     private SinglePageTemplateFrequencyMetrics singlePageTemplateFrequencyMetrics;
+
+    public EntryPointController(SinglePageTemplateFrequencyMetrics singlePageTemplateFrequencyMetrics) {
+        this.singlePageTemplateFrequencyMetrics = Preconditions.checkNotNull(singlePageTemplateFrequencyMetrics);
+    }
 
     @ModelAttribute("topTemplates")
     public List<String> getTopTemplates() {

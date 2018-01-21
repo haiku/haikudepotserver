@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,22 +20,28 @@ import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
+@Component
 @AutoJsonRpcServiceImpl
 public class AuthorizationJobApiImpl extends AbstractApiImpl implements AuthorizationJobApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationJobApiImpl.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final AuthorizationService authorizationService;
+    private final JobService jobService;
 
-    @Resource
-    private AuthorizationService authorizationService;
-
-    @Resource
-    private JobService jobService;
+    public AuthorizationJobApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            JobService jobService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+    }
 
     @Override
     public QueueAuthorizationRulesSpreadsheetResult queueAuthorizationRulesSpreadsheet(QueueAuthorizationRulesSpreadsheetRequest request) {

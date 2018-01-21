@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,33 +27,30 @@ import java.util.regex.Pattern;
  * language.  This object fits into the Freemarker template system.</p>
  */
 
-public class LocalizedTemplateLoader implements TemplateLoader, ResourceLoaderAware {
+public class LocalizedTemplateLoader implements TemplateLoader {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(LocalizedTemplateLoader.class);
 
     private final static Pattern PATTERN_NAME = Pattern.compile("^([a-z0-9]+-[a-z0-9]+)_([a-z]{2,2})$");
 
-    private ResourceLoader resourceLoader;
-
-    private String base;
+    private final ResourceLoader resourceLoader;
 
     /**
      * <p>This is a URL such as "classpath:/mail/".</p>
      */
 
-    public void setBase(String value) {
-        this.base = value;
-    }
+    private final String base;
 
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
+    public LocalizedTemplateLoader(ResourceLoader resourceLoader, String base) {
+        this.resourceLoader = Preconditions.checkNotNull(resourceLoader);
+        this.base = Preconditions.checkNotNull(base);
     }
 
     private Resource getTemplateResource(String naturalLanguageCode, String leafName) {
 
         Resource rsrc = resourceLoader.getResource(base + leafName + "_" + naturalLanguageCode + ".ftl");
 
-        if(!rsrc.exists()) {
+        if (!rsrc.exists()) {
             rsrc = resourceLoader.getResource(base + leafName + ".ftl");
         }
 
@@ -76,7 +73,7 @@ public class LocalizedTemplateLoader implements TemplateLoader, ResourceLoaderAw
         Preconditions.checkState(!Strings.isNullOrEmpty(name));
         Matcher matcher = PATTERN_NAME.matcher(name);
 
-        if(!matcher.matches()) {
+        if (!matcher.matches()) {
             throw new IllegalStateException("illegal template name; "+name);
         }
 
@@ -88,7 +85,7 @@ public class LocalizedTemplateLoader implements TemplateLoader, ResourceLoaderAw
         Preconditions.checkNotNull(templateSource);
         Preconditions.checkState(Resource.class.isAssignableFrom(templateSource.getClass()));
 
-        if(Strings.isNullOrEmpty(encoding)) {
+        if (Strings.isNullOrEmpty(encoding)) {
             encoding = Charsets.UTF_8.name();
         }
 

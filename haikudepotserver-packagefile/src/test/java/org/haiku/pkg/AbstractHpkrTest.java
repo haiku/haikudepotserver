@@ -1,50 +1,50 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg;
 
 import com.google.common.io.ByteStreams;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
-public abstract class AbstractHpkrTest {
+abstract class AbstractHpkrTest {
+
+    private static final String RESOURCE_TEST = "/repo.hpkr";
+
+    private TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Rule
+    public TemporaryFolder getTemporaryFolder() {
+        return temporaryFolder;
+    }
 
     /**
      * <p>This will copy the supplied test classpath resource into a temporary file to work with during the test.  It
      * is the responsibility of the caller to clean up the temporary file afterwards.</p>
      */
 
-    protected File prepareTestFile() throws IOException {
-        InputStream inputStream = getClass().getResourceAsStream("/repo.hpkr");
+    File prepareTestFile() throws IOException {
+        File temporaryFile;
 
-        if(null==inputStream) {
-            throw new IllegalStateException("unable to find the test hpkr resource");
-        }
+        try (InputStream inputStream = getClass().getResourceAsStream(RESOURCE_TEST)) {
 
-        File temporaryFile = File.createTempFile("repo-test-","hpkr");
-        FileOutputStream fileOutputStream = null;
+            if (null == inputStream) {
+                Assert.fail("unable to find the resource [" + RESOURCE_TEST + "]");
+            }
 
-        try {
-            fileOutputStream = new FileOutputStream(temporaryFile);
-            ByteStreams.copy(inputStream, fileOutputStream);
-        }
-        catch(IOException ioe) {
-            temporaryFile.delete();
-            throw new IOException("unable to copy the test hpkr resource to a temporary file; "+temporaryFile.getAbsolutePath());
-        }
-        finally {
-            if(null!=fileOutputStream) {
-                try {
-                    fileOutputStream.close();
-                }
-                catch(IOException ioe) {
-                    // ignore
-                }
+            temporaryFile = getTemporaryFolder().newFile("repo-test.hpkr");
+
+            try (OutputStream fileOutputStream = new FileOutputStream(temporaryFile)) {
+                ByteStreams.copy(inputStream, fileOutputStream);
+            } catch (IOException ioe) {
+                throw new IOException(
+                        "unable to copy [" + RESOURCE_TEST + "] to a temporary file ["
+                                + temporaryFile.getAbsolutePath() + "]", ioe);
             }
         }
 

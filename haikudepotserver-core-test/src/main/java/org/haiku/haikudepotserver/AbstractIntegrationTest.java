@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -210,9 +210,9 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void setAuthenticatedUser(String nickname) {
-        ObjectContext objectContext = serverRuntime.newContext();
-        Optional<User> rootUser = User.getByNickname(objectContext, nickname);
-        AuthenticationHelper.setAuthenticatedUserObjectId(Optional.of(rootUser.get().getObjectId()));
+        AuthenticationHelper.setAuthenticatedUserObjectId(User.getByNickname(
+                serverRuntime.newContext(),
+                nickname).getObjectId());
     }
 
     /**
@@ -225,8 +225,8 @@ public abstract class AbstractIntegrationTest {
         setAuthenticatedUser("root");
     }
 
-    protected void setUnauthenticated() {
-        AuthenticationHelper.setAuthenticatedUserObjectId(Optional.<ObjectId>empty());
+    private void setUnauthenticated() {
+        AuthenticationHelper.setAuthenticatedUserObjectId(null);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.WrapWithNoCloseInputStream;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -32,9 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunnerIT.class);

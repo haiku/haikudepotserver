@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,7 +22,7 @@ public class DriverSettings {
     }
 
     private static void skipToStartOfNextLine(Reader reader) throws IOException {
-        while(true) {
+        while (true) {
             reader.mark(1);
             int c = reader.read();
 

@@ -1,17 +1,17 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
+import com.google.common.base.Preconditions;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,11 +22,15 @@ abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecificatio
 
     static final int COLUMN_NONE = 3;
 
-    @Resource
     protected ServerRuntime serverRuntime;
-
-    @Resource
     protected PkgService pkgService;
+
+    public AbstractPkgCategorySpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            PkgService pkgService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
 
     List<String> getPkgCategoryCodes() {
         return PkgCategory.getAll(serverRuntime.newContext())

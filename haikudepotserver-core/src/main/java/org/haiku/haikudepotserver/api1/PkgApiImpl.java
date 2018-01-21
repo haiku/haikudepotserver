@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,6 +26,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haiku.haikudepotserver.dataobjects.auto._PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.*;
@@ -37,9 +38,8 @@ import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
  * <p>See {@link PkgApi} for details on the methods this API affords.</p>
  */
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/pkg") // TODO - remove old endpoint
 public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
@@ -57,29 +58,15 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final AuthorizationService authorizationService;
+    private final PkgIconService pkgIconService;
+    private final PkgScreenshotService pkgScreenshotService;
+    private final PkgService pkgService;
+    private final PkgLocalizationService pkgLocalizationService;
+    private final ClientIdentifierSupplier clientIdentifierSupplier;
 
-    @Resource
-    private AuthorizationService authorizationService;
-
-    @Resource
-    private PkgIconService pkgIconService;
-
-    @Resource
-    private PkgScreenshotService pkgScreenshotService;
-
-    @Resource
-    private PkgService pkgService;
-
-    @Resource
-    private PkgLocalizationService pkgLocalizationService;
-
-    @Value("${pkgversion.viewcounter.protectrecurringincrementfromsameclient:true}")
-    private Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient;
-
-    @Resource
-    private ClientIdentifierSupplier clientIdentifierSupplier;
+    private final Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient = true;
 
     /**
      * <p>This cache is used to keep track (in memory) of who has viewed a package so that repeat increments of the
@@ -91,6 +78,23 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             .maximumSize(2048)
             .expireAfterAccess(2, TimeUnit.DAYS)
             .build();
+
+    public PkgApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            PkgIconService pkgIconService,
+            PkgScreenshotService pkgScreenshotService,
+            PkgService pkgService,
+            PkgLocalizationService pkgLocalizationService,
+            ClientIdentifierSupplier clientIdentifierSupplier) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
+        this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
+        this.pkgService = Preconditions.checkNotNull(pkgService);
+        this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
+        this.clientIdentifierSupplier = Preconditions.checkNotNull(clientIdentifierSupplier);
+    }
 
     private Pkg getPkg(ObjectContext context, String pkgName) throws ObjectNotFoundException {
         Preconditions.checkNotNull(context);
@@ -391,7 +395,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Optional<Architecture> architectureOptional = Optional.empty();
 
         if(!Strings.isNullOrEmpty(request.architectureCode)) {
-            architectureOptional = Architecture.getByCode(context, request.architectureCode);
+            architectureOptional = Architecture.tryGetByCode(context, request.architectureCode);
         }
 
         Pkg pkg = getPkg(context, request.name);
@@ -502,8 +506,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         context, pkg, repository,
                         ImmutableList.of(
                                 architectureOptional.get(),
-                                Architecture.getByCode(context, Architecture.CODE_ANY).get(),
-                                Architecture.getByCode(context, Architecture.CODE_SOURCE).get())
+                                Architecture.tryGetByCode(context, Architecture.CODE_ANY).get(),
+                                Architecture.tryGetByCode(context, Architecture.CODE_SOURCE).get())
                 ).orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), request.name));
 
                 if (null != request.incrementViewCounter && request.incrementViewCounter) {
@@ -603,7 +607,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             for(ConfigurePkgIconRequest.PkgIcon pkgIconApi : request.pkgIcons) {
 
-                MediaType mediaType = MediaType.getByCode(context, pkgIconApi.mediaTypeCode).orElseThrow(
+                MediaType mediaType = MediaType.tryGetByCode(context, pkgIconApi.mediaTypeCode).orElseThrow(
                         () -> new IllegalStateException("unknown media type; "+pkgIconApi.mediaTypeCode)
                 );
 
@@ -642,7 +646,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         for(org.haiku.haikudepotserver.dataobjects.PkgIcon pkgIcon : ImmutableList.copyOf(pkg.getPkgIcons())) {
             if(!createdOrUpdatedPkgIcons.contains(pkgIcon)) {
                 context.deleteObjects(
-                        pkgIcon.getPkgIconImage().get(),
+                        pkgIcon.getPkgIconImage(),
                         pkgIcon);
 
                 removed++;
@@ -959,7 +963,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 PkgUserRatingAggregate.getByPkgAndRepository(
                         context,
                         pkg, pkgVersion.getRepositorySource().getRepository())
-                .map(pkgUserRatingAggregate -> pkgUserRatingAggregate.getDerivedRating())
+                .map(_PkgUserRatingAggregate::getDerivedRating)
                 .orElse(null);
 
         if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
@@ -986,11 +990,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCHANGELOG)) {
-            Optional<PkgChangelog> pkgChangelogOptional = pkg.getPkgChangelog();
+            pkg.getPkgChangelog().ifPresent(cl -> {
+                resultPkg.pkgChangelogContent = Strings.emptyToNull(cl.getContent());
 
-            if (pkgChangelogOptional.isPresent()) {
-                resultPkg.pkgChangelogContent = Strings.emptyToNull(pkgChangelogOptional.get().getContent());
-            }
+            });
         }
 
         switch(getBulkPkgRequest.versionType) {

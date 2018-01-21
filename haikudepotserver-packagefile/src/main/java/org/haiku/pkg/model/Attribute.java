@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -64,9 +64,14 @@ public abstract class Attribute {
         return getChildAttributes().stream().filter(a -> a.getAttributeId() == attributeId).collect(Collectors.toList());
     }
 
-    public Optional<Attribute> getChildAttribute(final AttributeId attributeId) {
+    public Optional<Attribute> tryGetChildAttribute(final AttributeId attributeId) {
         Preconditions.checkNotNull(attributeId);
         return getChildAttributes().stream().filter(a -> a.getAttributeId() == attributeId).findFirst();
+    }
+
+    public Attribute getChildAttribute(final AttributeId attributeId) {
+        return tryGetChildAttribute(attributeId)
+                .orElseThrow(() -> new IllegalStateException("unable to find the attribute [" + attributeId.name() + "]"));
     }
 
     @Override

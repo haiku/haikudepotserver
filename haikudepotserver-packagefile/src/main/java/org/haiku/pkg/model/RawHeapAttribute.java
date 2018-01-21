@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -44,7 +44,7 @@ public class RawHeapAttribute extends RawAttribute {
     }
 
     @Override
-    public byte[] getValue(AttributeContext context) throws HpkException {
+    public byte[] getValue(AttributeContext context) {
         byte[] buffer = new byte[(int) heapCoordinates.getLength()];
         context.getHeapReader().readHeap(buffer, 0, heapCoordinates);
         return buffer;

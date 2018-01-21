@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,6 +16,7 @@ import org.haiku.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
 import org.haiku.haikudepotserver.api1.model.repository.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.junit.Test;
@@ -25,9 +26,7 @@ import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Optional;
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class RepositoryApiIT extends AbstractIntegrationTest {
 
     @Resource
@@ -102,7 +101,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         RepositorySource repositorySource = context.newObject(RepositorySource.class);
         repositorySource.setCode("zigzag_x86_64");
         repositorySource.setUrl("http://example.com/zigzag");
-        repositorySource.setRepository(Repository.getByCode(context, "testrepo").get());
+        repositorySource.setRepository(Repository.tryGetByCode(context, "testrepo").get());
         context.commitChanges();
     }
 
@@ -177,7 +176,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<Repository> repositoryAfterOptional = Repository.getByCode(context,"differentrepo");
+        Optional<Repository> repositoryAfterOptional = Repository.tryGetByCode(context,"differentrepo");
         Assertions.assertThat(repositoryAfterOptional.get().getActive()).isTrue();
         Assertions.assertThat(repositoryAfterOptional.get().getCode()).isEqualTo("differentrepo");
         Assertions.assertThat(repositoryAfterOptional.get().getName()).isEqualTo("Different Repo");

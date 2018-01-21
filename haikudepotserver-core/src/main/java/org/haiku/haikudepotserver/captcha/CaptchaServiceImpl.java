@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,15 +14,14 @@ import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 
 public class CaptchaServiceImpl implements CaptchaService {
 
-    private CaptchaAlgorithm captchaAlgorithm;
-    private CaptchaRepository captchaRepository;
+    private final CaptchaAlgorithm captchaAlgorithm;
+    private final CaptchaRepository captchaRepository;
 
-    public void setCaptchaAlgorithm(CaptchaAlgorithm captchaAlgorithm) {
-        this.captchaAlgorithm = captchaAlgorithm;
-    }
-
-    public void setCaptchaRepository(CaptchaRepository captchaRepository) {
-        this.captchaRepository = captchaRepository;
+    public CaptchaServiceImpl(
+            CaptchaAlgorithm captchaAlgorithm,
+            CaptchaRepository captchaRepository) {
+        this.captchaAlgorithm = Preconditions.checkNotNull(captchaAlgorithm);
+        this.captchaRepository = Preconditions.checkNotNull(captchaRepository);
     }
 
     @Override

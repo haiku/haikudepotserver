@@ -1,10 +1,11 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.repository.controller;
 
+import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
@@ -56,14 +56,18 @@ public class RepositoryController extends AbstractController {
     private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
     private final static String KEY_NATURALLANGUAGECODE = "naturalLanguageCode";
 
-    @Resource
-    private JobService jobService;
+    private final ServerRuntime serverRuntime;
+    private final JobService jobService;
+    private final RepositoryService repositoryService;
 
-    @Resource
-    private ServerRuntime serverRuntime;
-
-    @Resource
-    private RepositoryService repositoryService;
+    public RepositoryController(
+            ServerRuntime serverRuntime,
+            JobService jobService,
+            RepositoryService repositoryService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.jobService = Preconditions.checkNotNull(jobService);
+        this.repositoryService = Preconditions.checkNotNull(repositoryService);
+    }
 
     /**
      * <p>This streams back a redirect to report data that contains a JSON stream gzip-compressed
@@ -96,7 +100,7 @@ public class RepositoryController extends AbstractController {
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode) {
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
+        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, repositoryCode);
 
         if(!repositoryOptional.isPresent()) {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
@@ -118,7 +122,7 @@ public class RepositoryController extends AbstractController {
             @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode) {
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, repositoryCode);
+        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, repositoryCode);
 
         if(!repositoryOptional.isPresent()) {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);

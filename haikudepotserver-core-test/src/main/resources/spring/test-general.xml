@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright 2018, Andrew Lindesay
+  ~ Distributed under the terms of the MIT License.
+  -->
+
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
@@ -6,7 +11,6 @@
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean class="org.haiku.haikudepotserver.user.NoopLdapSynchronizeJobRunner"/>
     <bean id="mailSender" class="org.haiku.haikudepotserver.CapturingMailSender"/>
     <bean class="org.haiku.haikudepotserver.support.NoopClientIdentifierSupplier"/>
 

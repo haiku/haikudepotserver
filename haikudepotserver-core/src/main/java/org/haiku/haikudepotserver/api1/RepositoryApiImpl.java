@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,27 +28,32 @@ import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/repository") // TODO; legacy path - remove
 public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryApiImpl.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final AuthorizationService authorizationService;
+    private final RepositoryService repositoryService;
+    private final JobService jobService;
 
-    @Resource
-    private AuthorizationService authorizationService;
-
-    @Resource
-    private RepositoryService repositoryService;
-
-    @Resource
-    private JobService jobService;
+    public RepositoryApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            RepositoryService repositoryService,
+            JobService jobService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.repositoryService = Preconditions.checkNotNull(repositoryService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+    }
 
     @Override
     public GetRepositoriesResult getRepositories(final GetRepositoriesRequest getRepositoriesRequest) {
@@ -80,7 +85,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, triggerImportRepositoryRequest.repositoryCode);
+        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, triggerImportRepositoryRequest.repositoryCode);
 
         if(!repositoryOptional.isPresent()) {
             throw new ObjectNotFoundException(Repository.class.getSimpleName(), triggerImportRepositoryRequest.repositoryCode);
@@ -195,7 +200,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, getRepositoryRequest.code);
+        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, getRepositoryRequest.code);
 
         if(!repositoryOptional.isPresent()) {
             throw new ObjectNotFoundException(Repository.class.getSimpleName(), getRepositoryRequest.code);
@@ -242,7 +247,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, updateRepositoryRequest.code);
+        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, updateRepositoryRequest.code);
 
         if(!repositoryOptional.isPresent()) {
             throw new ObjectNotFoundException(Repository.class.getSimpleName(), updateRepositoryRequest.code);
@@ -338,7 +343,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         // check to see if there is an existing repository with the same code; non-unique.
 
         {
-            Optional<Repository> repositoryOptional = Repository.getByCode(context, createRepositoryRequest.code);
+            Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, createRepositoryRequest.code);
 
             if(repositoryOptional.isPresent()) {
                 throw new ValidationException(new ValidationFailure(Repository.CODE.getName(), "unique"));
@@ -445,7 +450,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<Repository> repositoryOptional = Repository.getByCode(context, request.repositoryCode);
+        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, request.repositoryCode);
 
         if(!repositoryOptional.isPresent()) {
             throw new ObjectNotFoundException(Repository.class.getSimpleName(), request.repositoryCode);

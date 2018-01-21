@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,9 +28,9 @@ class PkgFactory {
         Preconditions.checkNotNull(attribute);
         Preconditions.checkNotNull(attributeContext);
 
-        Optional<Attribute> nameAttributeOptional = attribute.getChildAttribute(attributeId);
+        Optional<Attribute> nameAttributeOptional = attribute.tryGetChildAttribute(attributeId);
 
-        if(!nameAttributeOptional.isPresent()) {
+        if (!nameAttributeOptional.isPresent()) {
             return null;
         }
 
@@ -45,9 +45,9 @@ class PkgFactory {
         Preconditions.checkNotNull(attribute);
         Preconditions.checkNotNull(attributeContext);
 
-        Optional<Attribute> nameAttributeOptional = attribute.getChildAttribute(attributeId);
+        Optional<Attribute> nameAttributeOptional = attribute.tryGetChildAttribute(attributeId);
 
-        if(!nameAttributeOptional.isPresent()) {
+        if (!nameAttributeOptional.isPresent()) {
             throw new PkgException(String.format("the %s attribute must be present",attributeId.getName()));
         }
 
@@ -62,10 +62,10 @@ class PkgFactory {
         Preconditions.checkNotNull(attributeContext);
         Preconditions.checkState(AttributeId.PACKAGE_VERSION_MAJOR == attribute.getAttributeId());
 
-        Optional<Attribute> revisionAttribute = attribute.getChildAttribute(AttributeId.PACKAGE_VERSION_REVISION);
+        Optional<Attribute> revisionAttribute = attribute.tryGetChildAttribute(AttributeId.PACKAGE_VERSION_REVISION);
         Integer revision = null;
 
-        if(revisionAttribute.isPresent()) {
+        if (revisionAttribute.isPresent()) {
             revision = ((IntAttribute) revisionAttribute.get()).getValue(attributeContext).intValue();
         }
 
@@ -80,7 +80,7 @@ class PkgFactory {
 
     private PkgArchitecture createArchitecture(
             AttributeContext attributeContext,
-            Attribute attribute) throws PkgException, HpkException {
+            Attribute attribute) throws HpkException {
 
         Preconditions.checkNotNull(attribute);
         Preconditions.checkNotNull(attributeContext);
@@ -109,13 +109,13 @@ class PkgFactory {
 
             String packageUrl = getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_URL);
 
-            if(!Strings.isNullOrEmpty(packageUrl)) {
-                result.setHomePageUrl(new PkgUrl(packageUrl,PkgUrlType.HOMEPAGE));
+            if (!Strings.isNullOrEmpty(packageUrl)) {
+                result.setHomePageUrl(new PkgUrl(packageUrl, PkgUrlType.HOMEPAGE));
             }
 
             // get the architecture.
 
-            Optional<Attribute> architectureAttributeOptional = attribute.getChildAttribute(AttributeId.PACKAGE_ARCHITECTURE);
+            Optional<Attribute> architectureAttributeOptional = attribute.tryGetChildAttribute(AttributeId.PACKAGE_ARCHITECTURE);
 
             if(!architectureAttributeOptional.isPresent()) {
                 throw new PkgException(String.format("the attribute %s is required", AttributeId.PACKAGE_ARCHITECTURE));
@@ -125,9 +125,9 @@ class PkgFactory {
 
             // get the version.
 
-            Optional<Attribute> majorVersionAttributeOptional = attribute.getChildAttribute(AttributeId.PACKAGE_VERSION_MAJOR);
+            Optional<Attribute> majorVersionAttributeOptional = attribute.tryGetChildAttribute(AttributeId.PACKAGE_VERSION_MAJOR);
 
-            if(!majorVersionAttributeOptional.isPresent()) {
+            if (!majorVersionAttributeOptional.isPresent()) {
                 throw new PkgException(String.format("the attribute %s is required", AttributeId.PACKAGE_VERSION_MAJOR));
             }
 
@@ -135,23 +135,22 @@ class PkgFactory {
 
             // get the copyrights.
 
-            for(Attribute copyrightAttribute : attribute.getChildAttributes(AttributeId.PACKAGE_COPYRIGHT)) {
-                if(copyrightAttribute.getAttributeType() == AttributeType.STRING) { // illegal not to be, but be lenient
+            for (Attribute copyrightAttribute : attribute.getChildAttributes(AttributeId.PACKAGE_COPYRIGHT)) {
+                if (copyrightAttribute.getAttributeType() == AttributeType.STRING) { // illegal not to be, but be lenient
                     result.addCopyright(copyrightAttribute.getValue(attributeContext).toString());
                 }
             }
 
             // get the licenses.
 
-            for(Attribute licenseAttribute : attribute.getChildAttributes(AttributeId.PACKAGE_LICENSE)) {
-                if(licenseAttribute.getAttributeType() == AttributeType.STRING) { // illegal not to be, but be lenient
+            for (Attribute licenseAttribute : attribute.getChildAttributes(AttributeId.PACKAGE_LICENSE)) {
+                if (licenseAttribute.getAttributeType() == AttributeType.STRING) { // illegal not to be, but be lenient
                     result.addLicense(licenseAttribute.getValue(attributeContext).toString());
                 }
             }
 
 
-        }
-        catch(HpkException he) {
+        } catch(HpkException he) {
             throw new PkgException("unable to create a package owing to a problem with the hpk packaging",he);
         }
 

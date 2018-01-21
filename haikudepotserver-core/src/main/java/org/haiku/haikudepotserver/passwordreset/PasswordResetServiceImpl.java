@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,13 +23,13 @@ import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Clock;
@@ -47,26 +47,31 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final static String MAIL_SUBJECT = "passwordreset-subject";
     private final static String MAIL_PLAINTEXT = "passwordreset-plaintext";
 
-    @Resource
-    private MailSender mailSender;
+    private final MailSender mailSender;
+    private final ServerRuntime serverRuntime;
+    private final AuthenticationService authenticationService;
+    private final Configuration freemarkerConfiguration;
+    private final Integer timeToLiveHours;
+    private final String baseUrl;
+    private final String from;
 
-    @Resource
-    private ServerRuntime serverRuntime;
-
-    @Resource
-    private AuthenticationService authenticationService;
-
-    @Resource(name = "emailFreemarkerConfiguration")
-    private Configuration freemarkerConfiguration;
-
-    @Value("${passwordreset.ttlhours:1}")
-    private Integer timeToLiveHours;
-
-    @Value("${baseurl}")
-    private String baseUrl;
-
-    @Value("${email.from}")
-    private String from;
+    public PasswordResetServiceImpl(
+            ServerRuntime serverRuntime,
+            MailSender mailSender,
+            AuthenticationService authenticationService,
+            @Qualifier("emailFreemarkerConfiguration") Configuration freemarkerConfiguration,
+            @Value("${passwordreset.ttlhours:1}") Integer timeToLiveHours,
+            @Value("${baseurl}") String baseUrl,
+            @Value("${email.from}") String from
+    ) {
+        this.mailSender = Preconditions.checkNotNull(mailSender);
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authenticationService = Preconditions.checkNotNull(authenticationService);
+        this.freemarkerConfiguration = Preconditions.checkNotNull(freemarkerConfiguration);
+        this.timeToLiveHours = Preconditions.checkNotNull(timeToLiveHours);
+        this.baseUrl = Preconditions.checkNotNull(baseUrl);
+        this.from = Preconditions.checkNotNull(from);
+    }
 
     private String fillFreemarkerTemplate(
             PasswordResetMail mailModel,

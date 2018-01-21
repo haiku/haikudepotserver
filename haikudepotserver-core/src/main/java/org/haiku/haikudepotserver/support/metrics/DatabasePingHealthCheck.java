@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -40,7 +40,7 @@ public class DatabasePingHealthCheck extends HealthCheck {
                 PreparedStatement statement = connection.prepareStatement(STATEMENT);
                 ResultSet resultSet = statement.executeQuery()) {
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 categories.add(resultSet.getString(1));
             }
 

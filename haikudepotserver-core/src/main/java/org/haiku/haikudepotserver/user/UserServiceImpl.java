@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,8 +29,8 @@ public class UserServiceImpl implements UserService {
 
         ObjectSelect<User> objectSelect = ObjectSelect.query(User.class);
 
-        if(!Strings.isNullOrEmpty(search.getExpression())) {
-            switch(search.getExpressionType()) {
+        if (!Strings.isNullOrEmpty(search.getExpression())) {
+            switch (search.getExpressionType()) {
 
                 case CONTAINS:
                     objectSelect = objectSelect.where(User.NICKNAME.likeIgnoreCase(
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if(!search.getIncludeInactive()) {
+        if (!search.getIncludeInactive()) {
             objectSelect = objectSelect.where(User.ACTIVE.isTrue());
         }
 

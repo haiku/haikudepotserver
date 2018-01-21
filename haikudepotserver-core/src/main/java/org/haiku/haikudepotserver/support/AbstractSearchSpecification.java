@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -85,9 +85,8 @@ public abstract class AbstractSearchSpecification {
      * <p>Returns the expression as a regular expression that can be interpreted with the {@link Pattern}
      * class.</p>
      */
-
     public Pattern getExpressionAsPattern() {
-        if(null==getExpression()) {
+        if (null == getExpression()) {
             return null;
         }
 
@@ -106,11 +105,11 @@ public abstract class AbstractSearchSpecification {
 
     @SuppressWarnings("unused") // used in Cayenne SQL template.
     public String getExpressionAsSqlLike() {
-        if(null==getExpression()) {
+        if (null == getExpression()) {
             return null;
         }
 
-        switch(getExpressionType()) {
+        switch (getExpressionType()) {
             case CONTAINS:
                 return "%" + LikeHelper.ESCAPER.escape(getExpression()) + "%";
 

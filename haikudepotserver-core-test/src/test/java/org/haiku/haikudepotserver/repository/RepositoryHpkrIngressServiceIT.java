@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectSelect;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.Jobs;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -32,9 +33,7 @@ import java.util.concurrent.TimeUnit;
  * <p>This test will load in a fake repository HPKR file and will then check to see that it imported correctly.</p>
  */
 
-@ContextConfiguration({
-        "classpath:/spring/test-context.xml"
-})
+@ContextConfiguration(classes = TestConfig.class)
 public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
     private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
@@ -111,8 +110,8 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
                 Pkg pkg = context.newObject(Pkg.class);
-                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
-                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test2").get());
                 pkg.setName("taranaki");
 
                 // this one should get deactivated
@@ -121,7 +120,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setPkg(pkg);
                     pkgVersion.setMajor("1");
                     pkgVersion.setMinor("2");
-                    pkgVersion.setArchitecture(Architecture.getByCode(context, "x86_64").get());
+                    pkgVersion.setArchitecture(Architecture.tryGetByCode(context, "x86_64").get());
                     pkgVersion.setIsLatest(true);
                     pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
                 }
@@ -132,7 +131,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setPkg(pkg);
                     pkgVersion.setMajor("1");
                     pkgVersion.setMinor("3");
-                    pkgVersion.setArchitecture(Architecture.getByCode(context, "x86_64").get());
+                    pkgVersion.setArchitecture(Architecture.tryGetByCode(context, "x86_64").get());
                     pkgVersion.setIsLatest(true);
                     pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc2_xyz").get());
                 }
@@ -149,8 +148,8 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 ObjectContext context = serverRuntime.newContext();
 
                 Pkg pkg = context.newObject(Pkg.class);
-                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test").get());
-                pkgService.ensurePkgProminence(context, pkg, Repository.getByCode(context, "test2").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test").get());
+                pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test2").get());
                 pkg.setName("ffmpeg");
 
                 PkgVersion pkgVersion = context.newObject(PkgVersion.class);
@@ -159,7 +158,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 pkgVersion.setMinor("3");
                 pkgVersion.setMicro("2");
                 pkgVersion.setRevision(1);
-                pkgVersion.setArchitecture(Architecture.getByCode(context, "x86_64").get());
+                pkgVersion.setArchitecture(Architecture.tryGetByCode(context, "x86_64").get());
                 pkgVersion.setIsLatest(true);
                 pkgVersion.setActive(false); // to be sure!
                 pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
@@ -246,7 +245,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     Assertions.assertThat(PkgVersion.getForPkg(
                             context,
                             pkgVersion.getPkg(),
-                            Repository.getByCode(context, "test").get(),
+                            Repository.tryGetByCode(context, "test").get(),
                             true).size())
                             .isEqualTo(1); // include inactive
 

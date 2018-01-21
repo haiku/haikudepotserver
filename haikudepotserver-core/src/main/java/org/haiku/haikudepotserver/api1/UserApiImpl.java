@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,49 +23,53 @@ import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.user.model.LdapSynchronizeUsersJobSpecification;
 import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
 import org.haiku.haikudepotserver.user.model.UserService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/user") // TODO; legacy path - remove
 public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final AuthorizationService authorizationService;
+    private final CaptchaService captchaService;
+    private final AuthenticationService authenticationService;
+    private final UserService userService;
+    private final UserRatingService userRatingService;
+    private final PasswordResetService passwordResetService;
+    private final JobService jobService;
 
-    @Resource
-    private AuthorizationService authorizationService;
-
-    @Resource
-    private CaptchaService captchaService;
-
-    @Resource
-    private AuthenticationService authenticationService;
-
-    @Resource
-    private UserService userService;
-
-    @Resource
-    private UserRatingService userRatingService;
-
-    @Resource
-    private PasswordResetService passwordResetService;
-
-    @Resource
-    private JobService jobService;
+    public UserApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            CaptchaService captchaService,
+            AuthenticationService authenticationService,
+            UserService userService,
+            UserRatingService userRatingService,
+            PasswordResetService passwordResetService,
+            JobService jobService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.captchaService = Preconditions.checkNotNull(captchaService);
+        this.authenticationService = Preconditions.checkNotNull(authenticationService);
+        this.userService = Preconditions.checkNotNull(userService);
+        this.userRatingService = Preconditions.checkNotNull(userRatingService);
+        this.passwordResetService = Preconditions.checkNotNull(passwordResetService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+    }
 
     @Override
     public SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest) {
@@ -81,10 +85,6 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             throw new AuthorizationFailureException();
         }
 
-        jobService.submit(
-                new LdapSynchronizeUsersJobSpecification(),
-                JobSnapshot.COALESCE_STATUSES_QUEUED);
-
         return new SynchronizeUsersResult();
     }
 
@@ -99,7 +99,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         User authUser = obtainAuthenticatedUser(context);
         boolean activeDidChange = false;
 
-        User user = User.getByNickname(context, updateUserRequest.nickname)
+        User user = User.tryGetByNickname(context, updateUserRequest.nickname)
                 .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
 
         if (!authorizationService.check(context, authUser, user, Permission.USER_EDIT)) {
@@ -207,7 +207,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         //need to check that the nickname is not already in use.
 
-        if(User.getByNickname(context,createUserRequest.nickname).isPresent()) {
+        if(User.tryGetByNickname(context,createUserRequest.nickname).isPresent()) {
             throw new ValidationException(
                     new ValidationFailure(
                             User.NICKNAME.getName(), "notunique")
@@ -235,7 +235,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         final ObjectContext context = serverRuntime.newContext();
         User authUser = obtainAuthenticatedUser(context);
 
-        User user = User.getByNickname(context, getUserRequest.nickname)
+        User user = User.tryGetByNickname(context, getUserRequest.nickname)
                 .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
 
         if(!authorizationService.check(context, authUser, user, Permission.USER_VIEW)) {
@@ -327,7 +327,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        User targetUser = User.getByNickname(context, changePasswordRequest.nickname).orElseThrow(
+        User targetUser = User.tryGetByNickname(context, changePasswordRequest.nickname).orElseThrow(
                 () -> new ObjectNotFoundException(User.class.getSimpleName(), changePasswordRequest.nickname)
         );
 

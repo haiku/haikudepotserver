@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,12 +22,12 @@ public class RuntimeInformationService {
     private Properties buildProperties = null;
 
     private Properties getBuildProperties() {
-        if(null==buildProperties) {
+        if (null == buildProperties) {
             buildProperties = new Properties();
 
             try (InputStream inputStream = RuntimeInformationService.class.getResourceAsStream("/build.properties")) {
 
-                if(null==inputStream) {
+                if (null == inputStream) {
                     throw new IllegalStateException("the build properties do not seem to be present.");
                 }
 

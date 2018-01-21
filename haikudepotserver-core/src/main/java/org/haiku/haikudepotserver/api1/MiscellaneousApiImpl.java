@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,36 +21,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/miscellaneous") // TODO; legacy path - remove
 public class MiscellaneousApiImpl extends AbstractApiImpl implements MiscellaneousApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
-    private final static String RESOURCE_MESSAGES = "/messages%s.properties";
-    private final static String RESOURCE_MESSAGES_NATURALLANGUAGE = "/naturallanguagemessages.properties";
+    private final ServerRuntime serverRuntime;
+    private final RuntimeInformationService runtimeInformationService;
+    private final FeedService feedService;
+    private final MessageSource messageSource;
+    private final NaturalLanguageService naturalLanguageService;
+    private final Boolean isProduction;
 
-    @Resource
-    private ServerRuntime serverRuntime;
-
-    @Resource
-    private RuntimeInformationService runtimeInformationService;
-
-    @Resource
-    private FeedService feedService;
-
-    @Resource
-    private MessageSource messageSource;
-
-    @Resource
-    private NaturalLanguageService naturalLanguageService;
-
-    @Value("${deployment.isproduction:false}")
-    private Boolean isProduction;
+    public MiscellaneousApiImpl(
+            ServerRuntime serverRuntime,
+            RuntimeInformationService runtimeInformationService,
+            FeedService feedService,
+            MessageSource messageSource,
+            NaturalLanguageService naturalLanguageService,
+            @Value("${deployment.isproduction:false}") Boolean isProduction) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
+        this.feedService = Preconditions.checkNotNull(feedService);
+        this.messageSource = Preconditions.checkNotNull(messageSource);
+        this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
+        this.isProduction = Preconditions.checkNotNull(isProduction);
+    }
 
     @Override
     public GetAllPkgCategoriesResult getAllPkgCategories(GetAllPkgCategoriesRequest getAllPkgCategoriesRequest) {

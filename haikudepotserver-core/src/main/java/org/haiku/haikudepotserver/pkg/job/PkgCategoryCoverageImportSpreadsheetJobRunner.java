@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -18,6 +19,7 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,6 +42,12 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
         INVALID,
         UPDATED,
         NOTFOUND
+    }
+
+    public PkgCategoryCoverageImportSpreadsheetJobRunner(
+            ServerRuntime serverRuntime,
+            PkgService pkgService) {
+        super(serverRuntime, pkgService);
     }
 
     @Override

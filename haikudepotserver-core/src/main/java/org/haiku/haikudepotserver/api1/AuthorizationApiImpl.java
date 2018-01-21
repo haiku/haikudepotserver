@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,25 +23,31 @@ import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/authorization") // TODO; legacy path - remove
 public class AuthorizationApiImpl extends AbstractApiImpl implements AuthorizationApi {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationApiImpl.class);
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final AuthorizationService authorizationService;
+    private final AuthorizationPkgRuleService authorizationPkgRulesService;
 
-    @Resource
-    private AuthorizationService authorizationService;
-
-    @Resource
-    private AuthorizationPkgRuleService authorizationPkgRulesService;
+    public AuthorizationApiImpl(
+            ServerRuntime serverRuntime,
+            AuthorizationService authorizationService,
+            AuthorizationPkgRuleService authorizationPkgRulesService
+    ) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.authorizationPkgRulesService = Preconditions.checkNotNull(authorizationPkgRulesService);
+    }
 
     // -------------------------------
     // HELPERS
@@ -59,7 +65,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     }
 
     private User ensureUser(ObjectContext context, String nickname) throws ObjectNotFoundException {
-        return User.getByNickname(context, nickname)
+        return User.tryGetByNickname(context, nickname)
                 .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), nickname));
     }
 

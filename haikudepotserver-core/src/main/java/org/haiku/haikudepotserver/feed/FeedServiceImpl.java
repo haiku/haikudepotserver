@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,8 +17,13 @@ import java.util.stream.Collectors;
 @Service
 public class FeedServiceImpl implements FeedService {
 
-    @Value("${baseurl}")
-    private String baseUrl;
+    private final String baseUrl;
+
+    public FeedServiceImpl(
+            @Value("${baseurl}") String baseUrl
+    ) {
+        this.baseUrl = Preconditions.checkNotNull(baseUrl);
+    }
 
     /**
      * <p>Given a specification for a feed, this method will generate a URL that external users can query in order

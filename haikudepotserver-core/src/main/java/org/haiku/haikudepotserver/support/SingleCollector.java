@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,23 +22,22 @@ public class SingleCollector {
         //noinspection Convert2MethodRef
         return Collector.of(
                 ResultHolder::new,
-                (h,i) -> {
-                    if(!h.isPresent()) {
+                (h, i) -> {
+                    if (!h.isPresent()) {
                         h.setValue(i);
-                    }
-                    else {
+                    } else {
                         throw new IllegalStateException("expecting none or one element");
                     }
                 },
                 (h1, h2) -> {
-                    if(h1.isPresent() && h2.isPresent()) {
+                    if (h1.isPresent() && h2.isPresent()) {
                         throw new IllegalStateException("expecting none or one element");
                     }
 
                     return h1.isPresent() ? h1 : h2;
                 },
                 h -> {
-                    if(!h.isPresent()) {
+                    if (!h.isPresent()) {
                         throw new IllegalStateException("expecting one element");
                     }
 
@@ -51,7 +50,7 @@ public class SingleCollector {
         //noinspection Convert2MethodRef
         return Collector.of(
                 ResultHolder::new,
-                (h,i) -> {
+                (h, i) -> {
                     if(!h.isPresent()) {
                         h.setValue(i);
                     }

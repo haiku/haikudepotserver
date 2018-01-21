@@ -1,10 +1,11 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.controller;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
@@ -30,7 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -58,17 +58,21 @@ public class PkgScreenshotController extends AbstractController {
 
     private static int SCREENSHOT_SIDE_LIMIT = 1500;
 
-    @Resource
     private ServerRuntime serverRuntime;
-
-    @Resource
     private PkgScreenshotService pkgScreenshotService;
-
-    @Resource
     private JobService jobService;
-
-    @Resource
     private AuthorizationService authorizationService;
+
+    public PkgScreenshotController(
+            ServerRuntime serverRuntime,
+            PkgScreenshotService pkgScreenshotService,
+            JobService jobService,
+            AuthorizationService authorizationService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
+        this.jobService = Preconditions.checkNotNull(jobService);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+    }
 
     private void handleHeadOrGet(
             RequestMethod requestMethod,

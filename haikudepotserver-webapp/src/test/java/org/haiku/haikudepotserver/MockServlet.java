@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ public class MockServlet implements Servlet {
     private boolean wasInvoked = false;
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
     }
 
     @Override
@@ -27,7 +27,7 @@ public class MockServlet implements Servlet {
     }
 
     @Override
-    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+    public void service(ServletRequest req, ServletResponse res) {
         wasInvoked = true;
     }
 

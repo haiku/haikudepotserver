@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,7 @@ public class PkgIterator {
         this(attributeIterator, new PkgFactory());
     }
 
-    public PkgIterator(AttributeIterator attributeIterator, PkgFactory pkgFactory) {
+    private PkgIterator(AttributeIterator attributeIterator, PkgFactory pkgFactory) {
         super();
         Preconditions.checkNotNull(attributeIterator);
         this.attributeIterator = attributeIterator;

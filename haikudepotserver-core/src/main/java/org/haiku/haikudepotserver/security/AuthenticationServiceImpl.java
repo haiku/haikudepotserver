@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,9 +14,11 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import freemarker.template.utility.StringUtil;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
@@ -25,7 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.time.Instant;
@@ -44,26 +45,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final static Pattern PATTERN_JSONWEBTOKEN_ISSUER = Pattern.compile("^[a-z0-9]+\\.hds$");
 
+    private final ServerRuntime serverRuntime;
+
     /**
      * <p>This secret is used to sign a token containing username / password / time for token-based authentication.
      * </p>
      */
 
-    @Value("${authentication.jws.sharedkey:}")
-    private String jsonWebTokenSharedKey;
-
-    @Value("${authentication.jws.expiryseconds:300}")
-    private Integer jsonWebTokenExpirySeconds;
-
-    @Value("${authentication.jws.issuer}")
-    private String jsonWebTokenIssuer;
-
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final Integer jsonWebTokenExpirySeconds;
+    private final String jsonWebTokenIssuer;
 
     private JWSSigner jsonWebTokenSigner = null;
-
     private JWSVerifier jsonWebTokenVerifier = null;
+    private String jsonWebTokenSharedKey;
+
+    public AuthenticationServiceImpl(
+            ServerRuntime serverRuntime,
+            @Value("${authentication.jws.sharedkey:}") String jsonWebTokenSharedKey,
+            @Value("${authentication.jws.expiryseconds:300}") Integer jsonWebTokenExpirySeconds,
+            @Value("${authentication.jws.issuer}") String jsonWebTokenIssuer) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.jsonWebTokenExpirySeconds = Preconditions.checkNotNull(jsonWebTokenExpirySeconds);
+        this.jsonWebTokenIssuer = Preconditions.checkNotNull(jsonWebTokenIssuer);
+        this.jsonWebTokenSharedKey = StringUtils.isNotBlank(jsonWebTokenSharedKey)
+            ? jsonWebTokenSharedKey : UUID.randomUUID().toString();
+    }
 
     @PostConstruct
     public void init() {
@@ -98,14 +104,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    public ServerRuntime getServerRuntime() {
-        return serverRuntime;
-    }
-
-    public void setServerRuntime(ServerRuntime serverRuntime) {
-        this.serverRuntime = serverRuntime;
-    }
-
     @Override
     public Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear) {
 
@@ -115,7 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             ObjectContext objectContext = serverRuntime.newContext();
 
-            Optional<User> userOptional = User.getByNickname(objectContext, nickname);
+            Optional<User> userOptional = User.tryGetByNickname(objectContext, nickname);
 
             if(userOptional.isPresent()) {
                 User user = userOptional.get();
@@ -190,12 +188,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         // get a count of digits - should be at least two.
-        if (countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 48 && c <= 57; } }) < 2) {
+        if (countMatches(passwordClear, c -> c >= 48 && c <= 57) < 2) {
             return false;
         }
 
         // get a count of upper case letters - should be at least one.
-        if (countMatches(passwordClear, new CharToBooleanFunction() { public boolean test(char c) { return c >= 65 && c <= 90; } }) < 1) {
+        if (countMatches(passwordClear, c -> c >= 65 && c <= 90) < 1) {
             return false;
         }
 
@@ -268,7 +266,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
                     String nickname = subject.substring(0,subject.length() - SUFFIX_JSONWEBTOKEN_SUBJECT.length());
                     ObjectContext context = serverRuntime.newContext();
-                    Optional<User> userOptional = User.getByNickname(context, nickname);
+                    Optional<User> userOptional = User.tryGetByNickname(context, nickname);
 
                     if (userOptional.isPresent()) {
                         return Optional.of(userOptional.get().getObjectId());

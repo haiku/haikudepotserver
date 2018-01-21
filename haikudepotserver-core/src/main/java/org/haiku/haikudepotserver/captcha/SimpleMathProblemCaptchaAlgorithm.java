@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,12 +25,12 @@ public class SimpleMathProblemCaptchaAlgorithm implements CaptchaAlgorithm {
     private static final int WIDTH = 128;
     private static final int HEIGHT = 24;
 
-    private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
+    private final Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
 
-    private BufferedImage bufferedImage;
-    private Graphics bufferedImageGraphics;
-    private FontMetrics fontMetrics;
-    private Random random = new Random(System.currentTimeMillis());
+    private final BufferedImage bufferedImage;
+    private final Graphics bufferedImageGraphics;
+    private final FontMetrics fontMetrics;
+    private final Random random = new Random(System.currentTimeMillis());
 
     public SimpleMathProblemCaptchaAlgorithm() {
         super();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -58,9 +57,9 @@ public class JobController extends AbstractController {
 
     private final static Pattern PATTERN_GUID = Pattern.compile("^[A-Za-z0-9_-]+$");
 
-    public final static String SEGMENT_JOBDATA = "jobdata";
+    private final static String SEGMENT_JOBDATA = "jobdata";
 
-    public final static String SEGMENT_DOWNLOAD = "download";
+    private final static String SEGMENT_DOWNLOAD = "download";
 
     private final static long MAX_SUPPLY_DATA_LENGTH = 1 * 1024 * 1024; // 1MB
 
@@ -68,18 +67,22 @@ public class JobController extends AbstractController {
 
     private final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
 
-    public final static String KEY_GUID = "guid";
+    private final static String KEY_GUID = "guid";
 
     private final static String KEY_USECODE = "usecode";
 
-    @Resource
-    private JobService jobService;
+    private final JobService jobService;
+    private final ServerRuntime serverRuntime;
+    private final AuthorizationService authorizationService;
 
-    @Resource
-    private ServerRuntime serverRuntime;
-
-    @Resource
-    private AuthorizationService authorizationService;
+    public JobController(
+            ServerRuntime serverRuntime,
+            JobService jobService,
+            AuthorizationService authorizationService) {
+        this.jobService = Preconditions.checkNotNull(jobService);
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+    }
 
     /**
      * <p>This is helper-code that can be used to check to see if the data is stale and
@@ -231,7 +234,7 @@ public class JobController extends AbstractController {
                 return new JobDataAuthorizationFailure();
             });
 
-            User ownerUser= User.getByNickname(context, job.getOwnerUserNickname()).orElseThrow(() -> {
+            User ownerUser= User.tryGetByNickname(context, job.getOwnerUserNickname()).orElseThrow(() -> {
                 LOGGER.warn("owner of job does not seem to exist; {}", job.getOwnerUserNickname());
                 return new JobDataAuthorizationFailure();
             });
