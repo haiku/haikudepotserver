@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -69,7 +69,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         ejbql.append("SELECT DISTINCT r FROM\n");
         ejbql.append(Repository.class.getSimpleName());
-        ejbql.append(" r WHERE EXISTS (SELECT pv FROM \n");
+        ejbql.append(" r WHERE r.active = true AND EXISTS (SELECT pv FROM \n");
         ejbql.append(PkgVersion.class.getSimpleName());
         ejbql.append(" pv WHERE pv.repositorySource.repository=r");
         ejbql.append(" AND pv.pkg=:pkg");

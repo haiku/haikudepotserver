@@ -119,6 +119,7 @@ public class PkgServiceImpl implements PkgService {
                 .and(PkgVersion.ACTIVE.isTrue())
                 .and(PkgVersion.IS_LATEST.isTrue())
                 .and(PkgVersion.ARCHITECTURE.in(architectures))
+                .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.ACTIVE).isTrue())
                 .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).eq(repository))
                 .selectOne(context));
     }
