@@ -13,6 +13,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.model.Pagination;
+import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
@@ -229,6 +230,12 @@ public class HomeController {
         if(0!=totalPkgVersions.intValue()) {
             data.setPagination(new Pagination(totalPkgVersions.intValue(), offset, PAGESIZE));
         }
+
+        httpServletRequest.setAttribute(
+                MultipageConstants.KEY_PKGLOCALIZATIONLOOKUPSERVICE,
+                new FixedPkgLocalizationLookupServiceImpl(context, pkgVersions, naturalLanguage));
+
+        httpServletRequest.setAttribute(MultipageConstants.KEY_SERVERRUNTIME, serverRuntime);
 
         ModelAndView result = new ModelAndView("multipage/home");
         result.addObject("data", data);

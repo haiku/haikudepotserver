@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  ~ Copyright 2018, Andrew Lindesay
+  ~ Distributed under the terms of the MIT License.
+  -->
+
 <taglib>
     <tlib-version>1.0</tlib-version>
     <jsp-version>1.2</jsp-version>
@@ -46,6 +51,24 @@
         <attribute>
             <name>size</name>
             <required>true</required>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>pkgVersionTitle</name>
+        <tag-class>org.haiku.haikudepotserver.multipage.markup.PkgVersionTitleTag</tag-class>
+        <description>
+            Renders the title of the package version.
+        </description>
+        <attribute>
+            <name>pkgVersion</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue> <!-- can use SPEL expressions -->
+        </attribute>
+        <attribute>
+            <name>naturalLanguage</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue> <!-- can use SPEL expressions -->
         </attribute>
     </tag>
 

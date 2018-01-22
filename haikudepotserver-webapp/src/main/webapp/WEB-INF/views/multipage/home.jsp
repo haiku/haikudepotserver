@@ -1,6 +1,11 @@
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@include file="/WEB-INF/views/multipage/includes/prelude.jsp"%>
 
+<%--
+  ~ Copyright 2018, Andrew Lindesay
+  ~ Distributed under the terms of the MIT License.
+  --%>
+
 <html>
 
 <head>
@@ -162,7 +167,9 @@
                                 </td>
                                 <td>
                                     <multipage:pkgVersionLink pkgVersion="${pkgVersion}">
-                                        <c:out value="${pkgVersion.pkg.name}"></c:out>
+                                        <multipage:pkgVersionTitle
+                                                naturalLanguage="${data.naturalLanguage}"
+                                                pkgVersion="${pkgVersion}"/>
                                     </multipage:pkgVersionLink>
                                 </td>
                                 <td>
