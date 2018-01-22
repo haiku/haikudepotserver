@@ -18,12 +18,13 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 
 /**
  * <p>This is a spring-construct that is auto-discovered in order to bootstrap the
- * servlet environment.</p>
+ * servlet environment.  This (mostly) replaces the <code>web.xml</code> file.</p>
  */
 
 public class WebInitializer implements WebApplicationInitializer {
@@ -63,8 +64,9 @@ public class WebInitializer implements WebApplicationInitializer {
             ServletContext servletContext,
             String beanName,
             String... urlPatterns) {
-        servletContext.addFilter(beanName, new DelegatingFilterProxy(beanName))
-                .addMappingForUrlPatterns(null, false, urlPatterns);
+        FilterRegistration.Dynamic dynamic = servletContext.addFilter(beanName, new DelegatingFilterProxy(beanName));
+        dynamic.addMappingForUrlPatterns(null, false, urlPatterns);
+        dynamic.setAsyncSupported(true);
     }
 
     private void registerJawrServlet(ServletContext servletContext, String type) {
@@ -76,6 +78,7 @@ public class WebInitializer implements WebApplicationInitializer {
         dispatcher.setInitParameter("type", type);
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/__jawr/" + type + "/*");
+        dispatcher.setAsyncSupported(true);
     }
 
     private void registerMetricsServlets(ServletContext servletContext) {
@@ -83,24 +86,28 @@ public class WebInitializer implements WebApplicationInitializer {
                 "metric-admin-health-check", HealthCheckServlet.class);
         healthCheckDispatcher.setLoadOnStartup(1);
         healthCheckDispatcher.addMapping("/__metric/healthcheck");
+        healthCheckDispatcher.setAsyncSupported(true);
 
         ServletRegistration.Dynamic adminDispatcher = servletContext.addServlet(
                 "metric-admin-metrics",
                 new MetricsServlet());
         adminDispatcher.setLoadOnStartup(1);
         adminDispatcher.addMapping("/__metric/metrics");
+        adminDispatcher.setAsyncSupported(true);
 
         ServletRegistration.Dynamic pingDispatcher = servletContext.addServlet(
                 "metric-admin-ping",
                 new PingServlet());
         pingDispatcher.setLoadOnStartup(1);
         pingDispatcher.addMapping("/__metric/ping");
+        pingDispatcher.setAsyncSupported(true);
     }
 
     private void registerErrorServlet(ServletContext servletContext) {
         ServletRegistration.Dynamic dispatcher = servletContext.addServlet("error-servlet", ErrorServlet.class);
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/__error");
+        dispatcher.setAsyncSupported(true);
     }
 
     private void registerRemoteLogCaptureServlet(ServletContext servletContext) {
@@ -108,6 +115,7 @@ public class WebInitializer implements WebApplicationInitializer {
                 "remote-log-capture", RemoteLogCaptureServlet.class);
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/__log/capture");
+        dispatcher.setAsyncSupported(true);
     }
 
     private void registerSpringDispatcherServlet(ServletContext servletContext) {
@@ -119,6 +127,7 @@ public class WebInitializer implements WebApplicationInitializer {
                 new DispatcherServlet(dispatcherContext));
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/");
+        dispatcher.setAsyncSupported(true);
     }
 
 }
