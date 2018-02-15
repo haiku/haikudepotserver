@@ -49,11 +49,7 @@ public class WebInitializer implements WebApplicationInitializer {
         registerSpringFilter(servletContext, "authenticationFilter", "/*");
         registerSpringFilter(servletContext, "loggingFilter", "/*");
         registerSpringFilter(servletContext, "singlePageTemplateFrequencyMetricsFilter", "/__js/app/*");
-        registerSpringFilter(servletContext, "desktopApplicationMinimumVersionFilter",
-                "/__api/*",
-                "/__repository/all*",
-                "/__pkg/all*",
-                "/__pkgicon/all*");
+        registerSpringFilter(servletContext, "desktopApplicationMinimumVersionFilter", "/*");
 
         // would be nice to add the error handler here, but this not possible in this
         // mechanism right now evidently.
