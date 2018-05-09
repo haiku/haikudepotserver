@@ -187,7 +187,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         User user = User.tryGetByNickname(context, request.userNickname).orElseThrow(
-            () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
+                () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
         Pkg pkg = Pkg.tryGetByName(context, request.pkgName).orElseThrow(
                 () -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
 
@@ -307,6 +307,17 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                         pkgOptional.get(),
                         repository,
                         Collections.singletonList(architecture));
+                break;
+
+            case SPECIFIC:
+                pkgVersionOptional = PkgVersion.getForPkg(
+                        context, pkgOptional.get(), repository, architecture,
+                        new VersionCoordinates(
+                                request.pkgVersionMajor,
+                                request.pkgVersionMinor,
+                                request.pkgVersionMicro,
+                                request.pkgVersionPreRelease,
+                                request.pkgVersionRevision));
                 break;
 
             default:
