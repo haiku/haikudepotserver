@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,16 +8,20 @@ package org.haiku.haikudepotserver.pkg.model;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
-import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Optional;
 
 public interface PkgScreenshotService {
 
+    /**
+     * @return true if the image was changed.
+     */
+
+    boolean optimizeScreenshot(ObjectContext context, PkgScreenshot screenshot)
+            throws IOException, BadPkgScreenshotException;
 
     /**
      * <p>This method will write the package's screenshot to the output stream.  It will constrain the output to the

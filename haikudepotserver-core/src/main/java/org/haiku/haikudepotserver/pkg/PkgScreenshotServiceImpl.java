@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
+import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
@@ -39,13 +40,15 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconServiceImpl.class);
 
-    private static final HashFunction HASH_FUNCTION = Hashing.sha256();
+    public static final HashFunction HASH_FUNCTION = Hashing.sha256();
 
     private final ImageHelper imageHelper;
     private final PkgService pkgService;
+    private final PngOptimizationService pngOptimizationService;
 
-    public PkgScreenshotServiceImpl(PkgService pkgService) {
+    public PkgScreenshotServiceImpl(PkgService pkgService, PngOptimizationService pngOptimizationService) {
         this.pkgService = Preconditions.checkNotNull(pkgService);
+        this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
         imageHelper = new ImageHelper();
     }
 
@@ -57,6 +60,46 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
     @SuppressWarnings("FieldCanBeLocal")
     private static final int SCREENSHOT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
+
+    @Override
+    public boolean optimizeScreenshot(ObjectContext context, PkgScreenshot screenshot)
+            throws IOException, BadPkgScreenshotException {
+        if (!pngOptimizationService.identityOptimization()) {
+            PkgScreenshotImage pkgScreenshotImage = screenshot.tryGetPkgScreenshotImage().get();
+
+            if (pkgScreenshotImage.getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.withoutParameters().toString())) {
+
+                byte[] originalImageData = pkgScreenshotImage.getData();
+                byte[] optimizedData = pngOptimizationService.optimize(originalImageData);
+
+                if (optimizedData.length < originalImageData.length) {
+                    pkgScreenshotImage.setData(optimizedData);
+                    screenshot.setLength(optimizedData.length);
+                    screenshot.setModifyTimestamp();
+                    screenshot.setHashSha256(HASH_FUNCTION.hashBytes(optimizedData).toString());
+
+                    LOGGER.debug("did store optimized image for pkg screenshot [{}]", screenshot.getCode());
+
+                    relayScreenshotStorageToSubordinatePkgs(context, screenshot, screenshot.getOrdering());
+
+                    return true;
+                } else {
+                    LOGGER.warn("optimized data is larger than the original data for pkg screenshot [{}]",
+                            screenshot.getCode());
+                }
+
+            } else {
+                LOGGER.warn(
+                        "pkg screenshot '{}' in unknown image format '{}'; will ignore",
+                        screenshot.getCode(),
+                        pkgScreenshotImage.getMediaType().getCode());
+            }
+        } else {
+            LOGGER.warn("skipping identity optimization for screenshot [{}]", screenshot.getCode());
+        }
+
+        return false;
+    }
 
     /**
      * <p>This method will write the package's screenshot to the output stream.  It will constrain the output to the
@@ -170,18 +213,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         LOGGER.info("a screenshot #{} has been added to package [{}] ({})",
                 actualOrdering, pkg.getName(), screenshot.getCode());
 
-        for(Pkg subordinatePkg : pkgService.findSubordinatePkgsForMainPkg(context, pkg.getName())) {
-            if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
-                storePkgScreenshotImage(
-                        new ByteArrayInputStream(pngData),
-                        context,
-                        subordinatePkg,
-                        actualOrdering);
-
-                LOGGER.info("store of screenshot was extended [{}] -> [{}]", pkg.getName(),
-                        subordinatePkg.getName());
-            }
-        }
+        relayScreenshotStorageToSubordinatePkgs(context, screenshot, actualOrdering);
 
         return screenshot;
     }
@@ -309,6 +341,25 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
             if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
                 reorderPkgScreenshotsByHashSha256s(subordinatePkg, hashSha256s);
                 LOGGER.info("reordering of screenshots was extended [{}] -> [{}]", pkg.getName(),
+                        subordinatePkg.getName());
+            }
+        }
+    }
+
+    private void relayScreenshotStorageToSubordinatePkgs(
+            ObjectContext context,
+            PkgScreenshot screenshot,
+            Integer actualOrdering) throws IOException, BadPkgScreenshotException {
+        for(Pkg subordinatePkg : pkgService.findSubordinatePkgsForMainPkg(context, screenshot.getPkg().getName())) {
+            if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
+                storePkgScreenshotImage(
+                        new ByteArrayInputStream(screenshot.getPkgScreenshotImage().getData()),
+                        context,
+                        subordinatePkg,
+                        actualOrdering);
+
+                LOGGER.info("store of screenshot was extended [{}] -> [{}]",
+                        screenshot.getPkg().getName(),
                         subordinatePkg.getName());
             }
         }
