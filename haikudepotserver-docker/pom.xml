@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Copyright 2018, Andrew Lindesay
+  ~ Distributed under the terms of the MIT License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <artifactId>haikudepotserver-parent</artifactId>
+        <groupId>org.haiku</groupId>
+        <relativePath>../haikudepotserver-parent</relativePath>
+        <version>1.0.103-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>haikudepotserver-docker</artifactId>
+
+    <description>
+        This project will assemble a docker image for this build product.
+    </description>
+
+    <properties>
+        <!-- prevents a jar file from being produced for this module -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <jar.skipIfEmpty>true</jar.skipIfEmpty>
+    </properties>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>haikudepotserver-webapp</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>haikudepotserver-webapp-${project.version}.war</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <!--<goal>push</goal>-->
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>haiku/haikudepotserver-webapp</repository>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <HDS_VERSION>${project.version}</HDS_VERSION>
+                        <HDS_WAR_FILE>haikudepotserver-webapp-${project.version}.war</HDS_WAR_FILE>
+                        <JETTY_VERSION>${jetty.version}</JETTY_VERSION>
+                        <PG_VERSION>${postgresql.version}</PG_VERSION>
+                    </buildArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
