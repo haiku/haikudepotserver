@@ -381,6 +381,7 @@ public class UserRatingServiceImpl implements UserRatingService {
 
             pkgUserRatingAggregate.setDerivedRating(rating.get().getRating());
             pkgUserRatingAggregate.setDerivedRatingSampleSize(rating.get().getSampleSize());
+            pkg.setModifyTimestamp();
         }
         else {
 
@@ -390,6 +391,7 @@ public class UserRatingServiceImpl implements UserRatingService {
             if(pkgUserRatingAggregateOptional.isPresent()) {
                 pkg.removeFromPkgUserRatingAggregates(pkgUserRatingAggregateOptional.get());
                 context.deleteObject(pkgUserRatingAggregateOptional.get());
+                pkg.setModifyTimestamp();
             }
         }
 
