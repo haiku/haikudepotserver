@@ -5,7 +5,6 @@
 
 package org.haiku.haikudepotserver.pkg.job;
 
-import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -14,6 +13,7 @@ import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.MediaType;
+import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;

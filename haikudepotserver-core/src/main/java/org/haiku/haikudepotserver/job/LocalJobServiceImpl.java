@@ -13,7 +13,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Uninterruptibles;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;

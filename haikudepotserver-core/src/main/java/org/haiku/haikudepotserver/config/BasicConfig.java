@@ -6,8 +6,8 @@
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.io.Charsets;
 import org.haiku.haikudepotserver.api1.support.ObjectMapperFactory;
 import org.haiku.haikudepotserver.captcha.CaptchaServiceImpl;
 import org.haiku.haikudepotserver.captcha.DatabaseCaptchaRepository;
@@ -24,7 +24,10 @@ import org.haiku.haikudepotserver.support.logging.LoggingSetupOrchestration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;

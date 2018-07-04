@@ -5,8 +5,8 @@
 
 package org.haiku.haikudepotserver.security.job;
 
-import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.net.MediaType;
+import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ResultBatchIterator;
 import org.apache.cayenne.configuration.server.ServerRuntime;

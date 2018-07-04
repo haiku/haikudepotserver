@@ -10,7 +10,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
-import org.apache.commons.io.input.BoundedInputStream;
+import org.apache.commons.compress.utils.BoundedInputStream;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;

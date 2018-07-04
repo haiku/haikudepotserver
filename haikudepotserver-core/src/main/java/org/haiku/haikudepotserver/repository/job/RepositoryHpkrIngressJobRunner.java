@@ -11,7 +11,7 @@ import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.driversettings.DriverSettings;
 import org.haiku.driversettings.DriverSettingsException;
 import org.haiku.haikudepotserver.dataobjects.Repository;

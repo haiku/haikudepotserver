@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # --------------------------------------------
 # This script will create a tarball file for installing the hvif2png tool into a
