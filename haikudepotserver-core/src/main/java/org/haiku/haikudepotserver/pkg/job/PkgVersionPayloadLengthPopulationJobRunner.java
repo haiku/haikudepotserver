@@ -19,9 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>It can come to be that a pkg version is missing its payload length; perhaps because it was unable to get the
@@ -43,7 +44,10 @@ public class PkgVersionPayloadLengthPopulationJobRunner
     }
 
     @Override
-    public void run(JobService jobService, PkgVersionPayloadLengthPopulationJobSpecification specification) throws IOException {
+    public void run(
+            JobService jobService,
+            PkgVersionPayloadLengthPopulationJobSpecification specification)
+            throws IOException {
 
         Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null!=specification);
@@ -64,18 +68,25 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
         for(int i=0;i<pkgVersions.size();i++) {
             PkgVersion pkgVersion = pkgVersions.get(i);
-            long len;
+            Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL();
 
-            try {
-                len = URLHelper.payloadLength(pkgVersion.getHpkgURL());
+            if (urlOptional.isPresent()) {
+                long len;
 
-                if(len > 0) {
-                    pkgVersion.setPayloadLength(len);
-                    context.commitChanges();
+                try {
+                    len = URLHelper.payloadLength(urlOptional.get());
+
+                    if(len > 0) {
+                        pkgVersion.setPayloadLength(len);
+                        context.commitChanges();
+                    }
                 }
-            }
-            catch(IOException ioe) {
-                LOGGER.error("unable to get the payload length for " + pkgVersion.toString(), ioe);
+                catch(IOException ioe) {
+                    LOGGER.error("unable to get the payload length for " + pkgVersion.toString(), ioe);
+                }
+            } else {
+                LOGGER.info("unable to get the length of [{}] because no url" +
+                        "hpkg url was able to be obtained");
             }
 
             jobService.setJobProgressPercent(

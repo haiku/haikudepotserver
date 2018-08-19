@@ -77,4 +77,27 @@ public interface RepositoryApi {
 
     CreateRepositorySourceResult createRepositorySource(CreateRepositorySourceRequest request) throws ObjectNotFoundException;
 
+    /**
+     * <p>Creates a new mirror for a repository source.</p>
+     * @since 2018-07-23
+     */
+
+    CreateRepositorySourceMirrorResult createRepositorySourceMirror(CreateRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+
+    /**
+     * <p>Updates an existing mirror.  The mirror should be identified by its code.
+     * A number of fields can be supplied to change.  The changes that are applied
+     * are determined by a set of update filters that should be supplied with the
+     * request.</p>
+     * @since 2018-07-24
+     */
+
+    UpdateRepositorySourceMirrorResult updateRepositorySourceMirror(UpdateRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+
+    /**
+     * @since 2018-07-29
+     */
+
+    GetRepositorySourceMirrorResult getRepositorySourceMirror(GetRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+
 }

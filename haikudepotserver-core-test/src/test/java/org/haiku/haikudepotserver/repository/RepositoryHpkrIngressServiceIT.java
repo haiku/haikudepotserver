@@ -55,7 +55,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
     @Test
     public void testImportThenCheck() throws Exception {
 
-        File temporaryDir = null;
+        File temporaryDir;
         File temporaryRepoFile = null;
         File temporaryRepoInfoFile = null;
 
@@ -84,6 +84,14 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 repositorySource.setUrl("file://" + temporaryDir.getAbsolutePath());
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES.getName(), repositorySource, true);
 
+                RepositorySourceMirror repositorySourceMirror = context.newObject(RepositorySourceMirror.class);
+                repositorySourceMirror.setBaseUrl("file://" + temporaryDir.getAbsolutePath());
+                repositorySourceMirror.setIsPrimary(true);
+                repositorySourceMirror.setCode("testsrc_xyz_mirror");
+                repositorySourceMirror.setCountry(Country.getByCode(context, Country.CODE_NZ));
+                repositorySource.addToManyTarget(RepositorySource.REPOSITORY_SOURCE_MIRRORS.getName(),
+                        repositorySourceMirror, true);
+
                 context.commitChanges();
             }
 
@@ -98,8 +106,15 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
                 repositorySource.setCode("testsrc2_xyz");
-                repositorySource.setUrl("file:///noop.hpkr");
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES.getName(), repositorySource, true);
+
+                RepositorySourceMirror repositorySourceMirror = context.newObject(RepositorySourceMirror.class);
+                repositorySourceMirror.setBaseUrl("file://does-not-exist/path");
+                repositorySourceMirror.setIsPrimary(true);
+                repositorySourceMirror.setCode("testsrc2_xyz_mirror");
+                repositorySourceMirror.setCountry(Country.getByCode(context, Country.CODE_NZ));
+                repositorySource.addToManyTarget(RepositorySource.REPOSITORY_SOURCE_MIRRORS.getName(),
+                        repositorySourceMirror, true);
 
                 context.commitChanges();
             }
@@ -122,7 +137,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setMinor("2");
                     pkgVersion.setArchitecture(Architecture.tryGetByCode(context, "x86_64").get());
                     pkgVersion.setIsLatest(true);
-                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
+                    pkgVersion.setRepositorySource(RepositorySource.tryGetByCode(context, "testsrc_xyz").get());
                 }
 
                 // this one should remain
@@ -133,7 +148,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     pkgVersion.setMinor("3");
                     pkgVersion.setArchitecture(Architecture.tryGetByCode(context, "x86_64").get());
                     pkgVersion.setIsLatest(true);
-                    pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc2_xyz").get());
+                    pkgVersion.setRepositorySource(RepositorySource.tryGetByCode(context, "testsrc2_xyz").get());
                 }
 
                 context.commitChanges();
@@ -161,7 +176,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 pkgVersion.setArchitecture(Architecture.tryGetByCode(context, "x86_64").get());
                 pkgVersion.setIsLatest(true);
                 pkgVersion.setActive(false); // to be sure!
-                pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testsrc_xyz").get());
+                pkgVersion.setRepositorySource(RepositorySource.tryGetByCode(context, "testsrc_xyz").get());
 
                 PkgVersionUrl pkgVersionUrl = context.newObject(PkgVersionUrl.class);
                 pkgVersionUrl.setPkgUrlType(PkgUrlType.getByCode(context, org.haiku.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase()).get());
@@ -208,8 +223,8 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.newContext();
-                RepositorySource repositorySource = RepositorySource.getByCode(context, "testsrc_xyz").get();
-                Assertions.assertThat(repositorySource.getRepoInfoUrl())
+                RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testsrc_xyz").get();
+                Assertions.assertThat(repositorySource.getUrl())
                         .isEqualTo("https://example.com/haikuports/master/repository/x86_gcc2");
             }
 

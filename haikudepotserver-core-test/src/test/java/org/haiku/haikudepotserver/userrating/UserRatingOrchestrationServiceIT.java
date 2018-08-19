@@ -70,7 +70,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         UserRatingTestData userRatingTestData = new UserRatingTestData();
 
         Repository repository = Repository.tryGetByCode(context, "testrepo").get();
-        RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
+        RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
         Architecture x86_64 = Architecture.tryGetByCode(context, "x86_64").get();
         Architecture x86_gcc2 = Architecture.tryGetByCode(context, "x86_gcc2").get();
 

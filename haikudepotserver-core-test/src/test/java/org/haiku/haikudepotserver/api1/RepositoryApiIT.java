@@ -17,8 +17,10 @@ import org.haiku.haikudepotserver.api1.model.repository.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -220,7 +222,16 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.active).isTrue();
         Assertions.assertThat(result.code).isEqualTo("testreposrc_xyz");
         Assertions.assertThat(result.repositoryCode).isEqualTo("testrepo");
-        Assertions.assertThat(result.url).startsWith("file://");
+        Assertions.assertThat(result.url).isEqualTo("http://www.example.com/test/identifier/url");
+        Assertions.assertThat(result.repositorySourceMirrors.size()).isEqualTo(2);
+
+        GetRepositorySourceResult.RepositorySourceMirror mirror0 = result.repositorySourceMirrors.get(0);
+        GetRepositorySourceResult.RepositorySourceMirror mirror1 = result.repositorySourceMirrors.get(1);
+
+        Assertions.assertThat(mirror0.code).isEqualTo("testreposrc_xyz_m_pri");
+        Assertions.assertThat(mirror0.baseUrl).isEqualTo("file:///tmp/repository");
+        Assertions.assertThat(mirror1.code).isEqualTo("testreposrc_xyz_m_notpri");
+        Assertions.assertThat(mirror1.baseUrl).isEqualTo("file://not-found/on-disk");
 
     }
 
@@ -232,10 +243,8 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         UpdateRepositorySourceRequest request = new UpdateRepositorySourceRequest();
         request.code = "testreposrc_xyz";
         request.active = false;
-        request.url = "http://test-example2.haiku-os.org";
-        request.filter = ImmutableList.of(
-                UpdateRepositorySourceRequest.Filter.ACTIVE,
-                UpdateRepositorySourceRequest.Filter.URL);
+        request.filter = Collections.singletonList(
+                UpdateRepositorySourceRequest.Filter.ACTIVE);
 
         // ------------------------------------
         repositoryApi.updateRepositorySource(request);
@@ -243,8 +252,9 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            RepositorySource repositorySourceAfter = RepositorySource.getByCode(context, "testreposrc_xyz").get();
-            Assertions.assertThat(repositorySourceAfter.getUrl()).isEqualTo("http://test-example2.haiku-os.org");
+            RepositorySource repositorySourceAfter = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
+            // this url was set before and is retained after the update.
+            Assertions.assertThat(repositorySourceAfter.getUrl()).isEqualTo("http://www.example.com/test/identifier/url");
             Assertions.assertThat(repositorySourceAfter.getActive()).isFalse();
         }
 
@@ -258,7 +268,6 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         CreateRepositorySourceRequest request = new CreateRepositorySourceRequest();
         request.code = "testreposrcxx_xyz";
         request.repositoryCode = "testrepo";
-        request.url = "http://testtest.haiku-os.org";
 
         // ------------------------------------
         repositoryApi.createRepositorySource(request);
@@ -266,13 +275,95 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, "testreposrcxx_xyz");
+            Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, "testreposrcxx_xyz");
             Assertions.assertThat(repositorySourceOptional.get().getActive()).isTrue();
-            Assertions.assertThat(repositorySourceOptional.get().getUrl()).isEqualTo("http://testtest.haiku-os.org");
+            Assertions.assertThat(repositorySourceOptional.get().getUrl()).isNull();
             Assertions.assertThat(repositorySourceOptional.get().getRepository().getCode()).isEqualTo("testrepo");
             Assertions.assertThat(repositorySourceOptional.get().getCode()).isEqualTo("testreposrcxx_xyz");
         }
 
+    }
+
+    @Test
+    public void testCreateRepositorySourceMirror() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+        setAuthenticatedUserToRoot();
+
+        CreateRepositorySourceMirrorRequest request = new CreateRepositorySourceMirrorRequest();
+        request.baseUrl = "http://testtest.haiku-os.org";
+        request.countryCode = "DE";
+        request.description = "Landkarte";
+        request.repositorySourceCode = "testreposrc_xyz";
+
+        // ------------------------------------
+        String code = repositoryApi.createRepositorySourceMirror(request).code;
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            RepositorySourceMirror mirror = RepositorySourceMirror.tryGetByCode(context, code).get();
+            Assertions.assertThat(mirror.getActive()).isTrue();
+            Assertions.assertThat(mirror.getBaseUrl()).isEqualTo("http://testtest.haiku-os.org");
+            Assertions.assertThat(mirror.getDescription()).isEqualTo("Landkarte");
+        }
+
+    }
+
+    @Test
+    public void testUpdateRepositorySourceMirror() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+        setAuthenticatedUserToRoot();
+
+        UpdateRepositorySourceMirrorRequest request = new UpdateRepositorySourceMirrorRequest();
+        request.code = "testreposrc_xyz_m_notpri";
+        request.isPrimary = true;
+        request.baseUrl = "http://www.example.com/changed";
+        request.description = "Cheramoia";
+        request.countryCode = "DE";
+        request.filter = ImmutableList.of(
+                UpdateRepositorySourceMirrorRequest.Filter.DESCRIPTION,
+                UpdateRepositorySourceMirrorRequest.Filter.IS_PRIMARY,
+                UpdateRepositorySourceMirrorRequest.Filter.BASE_URL,
+                UpdateRepositorySourceMirrorRequest.Filter.COUNTRY);
+
+        // ------------------------------------
+        repositoryApi.updateRepositorySourceMirror(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            RepositorySourceMirror mirror = RepositorySourceMirror
+                    .tryGetByCode(context, "testreposrc_xyz_m_notpri").get();
+            Assertions.assertThat(mirror.getActive()).isTrue();
+            Assertions.assertThat(mirror.getDescription()).isEqualTo("Cheramoia");
+            Assertions.assertThat(mirror.getBaseUrl()).isEqualTo("http://www.example.com/changed");
+            Assertions.assertThat(mirror.getDescription()).isEqualTo("Cheramoia");
+            Assertions.assertThat(mirror.getIsPrimary()).isEqualTo(true);
+        }
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            RepositorySourceMirror mirror = RepositorySourceMirror
+                    .tryGetByCode(context, "testreposrc_xyz_m_pri").get();
+            Assertions.assertThat(mirror.getIsPrimary()).isEqualTo(false);
+        }
+    }
+
+    @Test
+    public void testGetRepositorySourceMirror() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+
+        GetRepositorySourceMirrorRequest request = new GetRepositorySourceMirrorRequest();
+        request.code = "testreposrc_xyz_m_notpri";
+
+        // ------------------------------------
+        GetRepositorySourceMirrorResult result = repositoryApi.getRepositorySourceMirror(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.code).isEqualTo("testreposrc_xyz_m_notpri");
+        Assertions.assertThat(result.baseUrl).isEqualTo("file://not-found/on-disk");
+        Assertions.assertThat(result.countryCode).isEqualTo("ZA");
+        // ....
     }
 
 }

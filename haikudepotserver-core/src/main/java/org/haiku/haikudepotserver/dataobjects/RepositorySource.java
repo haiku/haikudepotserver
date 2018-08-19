@@ -15,7 +15,10 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
+import org.haiku.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
@@ -38,7 +41,7 @@ public class RepositorySource extends _RepositorySource {
                 .selectOne(context);
     }
 
-    public static Optional<RepositorySource> getByCode(ObjectContext context, String code) {
+    public static Optional<RepositorySource> tryGetByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return Optional.ofNullable(ObjectSelect.query(RepositorySource.class).where(CODE.eq(code)).selectOne(context));
@@ -93,60 +96,86 @@ public class RepositorySource extends _RepositorySource {
      * <p>This is the URL at which one might find the packages for this repository.</p>
      */
 
-    public URL getPackagesBaseURL() {
-        try {
-            return UriComponentsBuilder.fromUriString(getBaseURL().toString())
-                    .pathSegment("packages")
-                    .build()
-                    .toUri()
-                    .toURL();
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
-        }
+    public Optional<URL> tryGetPackagesBaseURL() {
+        return tryGetBaseURL()
+                .map(bu -> {
+                    try {
+                        return UriComponentsBuilder.fromUriString(bu.toString())
+                                .pathSegment("packages")
+                                .build()
+                                .toUri()
+                                .toURL();
+                    }
+                    catch(MalformedURLException mue) {
+                        throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
+                    }
+                });
     }
 
     /**
      * <p>This URL can be used to access the HPKR data for the repository source.</p>
      */
 
-    public URL getDownloadHpkrURL() {
-        return getDownloadLeafURL("repo");
+    public Optional<URL> tryGetDownloadHpkrURL() {
+        return tryGetDownloadLeafURL("repo");
     }
 
     /**
      * <p>This URL can be used to access the "repo.info" file for the repository.</p>
      */
 
-    public URL getDownloadRepoInfoURL() {
-        return getDownloadLeafURL("repo.info");
+    public Optional<URL> tryGetDownloadRepoInfoURL() {
+        return tryGetDownloadLeafURL("repo.info");
     }
 
-    private URL getDownloadLeafURL(String leaf) {
-        try {
-            return UriComponentsBuilder.fromUriString(getBaseURL().toString())
-                    .pathSegment(leaf)
-                    .build()
-                    .toUri()
-                    .toURL();
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
-        }
+    private Optional<URL> tryGetDownloadLeafURL(String leaf) {
+        return tryGetBaseURL()
+                .map(bu -> {
+                    try {
+                        return UriComponentsBuilder.fromUriString(bu.toString())
+                                .pathSegment(leaf)
+                                .build()
+                                .toUri()
+                                .toURL();
+                    }
+                    catch(MalformedURLException mue) {
+                        throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
+                    }
+                });
     }
 
-        /**
-         * <p>Other files are able to be found in the repository.  This method provides a root for these
-         * files.</p>
-         */
+    /**
+     * <p>Other files are able to be found in the repository.  This method provides a root for these
+     * files.</p>
+     */
 
-    private URL getBaseURL() {
-        try {
-            return new URL(getUrl());
-        }
-        catch(MalformedURLException mue) {
-            throw new IllegalStateException("malformed url should not be stored in a repository");
-        }
+    private Optional<URL> tryGetBaseURL() {
+        return tryGetPrimaryMirror()
+                .map(p -> {
+                    try {
+                        return new URL(p.getBaseUrl());
+                    }
+                    catch(MalformedURLException mue) {
+                        throw new IllegalStateException("malformed url should not be stored in a repository");
+                    }
+                });
+    }
+
+    public RepositorySourceMirror getPrimaryMirror() {
+        return tryGetPrimaryMirror()
+                .orElseThrow(() -> new IllegalStateException(
+                        "unable to get the primary mirror for [" + getCode() + "]"));
+    }
+
+    /**
+     * <p>This is the master mirror or the one that the other ones should be copying from.</p>
+     */
+
+    public Optional<RepositorySourceMirror> tryGetPrimaryMirror() {
+        return getRepositorySourceMirrors()
+                .stream()
+                .filter(_RepositorySourceMirror::getIsPrimary)
+                .collect(SingleCollector.optional());
     }
 
     @Override

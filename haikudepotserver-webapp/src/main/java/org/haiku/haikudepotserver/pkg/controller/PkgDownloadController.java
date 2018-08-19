@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Optional;
 
 /**
  * <p>This controller allows the user to download a package.</p>
@@ -121,37 +122,42 @@ public class PkgDownloadController {
                     return new RequestObjectNotFound();
                 });
 
-        URL url = pkgVersion.getHpkgURL();
+        Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL();
 
-        // if it is an HTTP URL then it should be possible to redirect the browser to that URL
-        // instead of piping it through the application server.
+        if (!urlOptional.isPresent()) {
+            LOGGER.info("unable to allow download of the hpkg data as no url was able to be generated");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } else {
+            URL url = urlOptional.get();
 
-        if(ImmutableSet.of("http","https").contains(url.getProtocol())) {
-            response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-            response.setHeader(HttpHeaders.LOCATION, url.toString());
-            response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
+            // if it is an HTTP URL then it should be possible to redirect the browser to that URL
+            // instead of piping it through the application server.
 
-            PrintWriter writer = response.getWriter();
-            writer.print(url.toString());
-            writer.flush();
-        }
-        else {
-            response.setContentType(MediaType.OCTET_STREAM.toString());
-            response.setHeader(
-                    HttpHeaders.CONTENT_DISPOSITION,
-                    String.format(
-                            "attachment; filename=\"%s\"",
-                            pkgVersion.getHpkgFilename())
-            );
+            if (ImmutableSet.of("http", "https").contains(url.getProtocol())) {
+                response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+                response.setHeader(HttpHeaders.LOCATION, url.toString());
+                response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
 
-            try (InputStream inputStream = url.openStream()) {
-                LOGGER.info("downloaded package version; {} - {}", pkg.getName(), pkgVersion);
-                ByteStreams.copy(inputStream, response.getOutputStream());
-            }
-            catch(IOException ioe) {
-                // logged without a stack trace because it happens fairly often that a robot will initiate the download and then drop it.
-                LOGGER.error("unable to relay data to output stream from '{}'; {} -- {}",
-                        url.toString(), ioe.getClass().getSimpleName(), ioe.getMessage());
+                PrintWriter writer = response.getWriter();
+                writer.print(url.toString());
+                writer.flush();
+            } else {
+                response.setContentType(MediaType.OCTET_STREAM.toString());
+                response.setHeader(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        String.format(
+                                "attachment; filename=\"%s\"",
+                                pkgVersion.getHpkgFilename())
+                );
+
+                try (InputStream inputStream = url.openStream()) {
+                    LOGGER.info("downloaded package version; {} - {}", pkg.getName(), pkgVersion);
+                    ByteStreams.copy(inputStream, response.getOutputStream());
+                } catch (IOException ioe) {
+                    // logged without a stack trace because it happens fairly often that a robot will initiate the download and then drop it.
+                    LOGGER.error("unable to relay data to output stream from '{}'; {} -- {}",
+                            url.toString(), ioe.getClass().getSimpleName(), ioe.getMessage());
+                }
             }
         }
     }

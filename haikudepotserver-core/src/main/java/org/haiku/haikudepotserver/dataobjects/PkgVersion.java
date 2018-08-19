@@ -282,18 +282,20 @@ public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestampe
      * <p>This method will provide a URL to the actual data of the package.</p>
      */
 
-    public URL getHpkgURL() {
-        URL packagesBaseUrl = getRepositorySource().getPackagesBaseURL();
-
-        try {
-            return new URL(
-                    packagesBaseUrl.getProtocol(),
-                    packagesBaseUrl.getHost(),
-                    packagesBaseUrl.getPort(),
-                    packagesBaseUrl.getPath() + "/" + getHpkgFilename());
-        } catch (MalformedURLException mue) {
-            throw new IllegalStateException("unable to create the URL to the hpkg data", mue);
-        }
+    public Optional<URL> tryGetHpkgURL() {
+        return getRepositorySource().tryGetPackagesBaseURL()
+                .map(u -> {
+                    try {
+                        return new URL(
+                                u.getProtocol(),
+                                u.getHost(),
+                                u.getPort(),
+                                u.getPath() + "/" + getHpkgFilename());
+                    } catch (MalformedURLException mue) {
+                        throw new IllegalStateException(
+                                "unable to create the URL to the hpkg data", mue);
+                    }
+                });
     }
 
     /**

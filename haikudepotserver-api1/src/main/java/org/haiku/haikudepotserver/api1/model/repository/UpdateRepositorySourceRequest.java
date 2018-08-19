@@ -15,7 +15,6 @@ public class UpdateRepositorySourceRequest {
 
     public enum Filter {
         ACTIVE,
-        URL,
     }
 
     /**
@@ -25,8 +24,6 @@ public class UpdateRepositorySourceRequest {
     public String code;
 
     public Boolean active;
-
-    public String url;
 
     /**
      * <p>The filter controls what aspects of the repository source to alter.</p>

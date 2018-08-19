@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * <p>This class is designed to help out with creating some common test data that can be re-used between tests.</p>
@@ -146,7 +147,21 @@ public class IntegrationTestSupportService {
         result.repositorySource = context.newObject(RepositorySource.class);
         result.repositorySource.setCode("testreposrc_xyz");
         result.repositorySource.setRepository(result.repository);
-        result.repositorySource.setUrl("file://" + new File(platformTmpDirPath, "repository").getAbsolutePath());
+        result.repositorySource.setUrl("http://www.example.com/test/identifier/url");
+
+        RepositorySourceMirror primaryMirror = context.newObject(RepositorySourceMirror.class);
+        primaryMirror.setCountry(Country.getByCode(context, "NZ"));
+        primaryMirror.setIsPrimary(true);
+        primaryMirror.setBaseUrl("file://" + new File(platformTmpDirPath, "repository").getAbsolutePath());
+        primaryMirror.setRepositorySource(result.repositorySource);
+        primaryMirror.setCode("testreposrc_xyz_m_pri");
+
+        RepositorySourceMirror nonPrimaryMirror = context.newObject(RepositorySourceMirror.class);
+        nonPrimaryMirror.setCountry(Country.getByCode(context, "ZA"));
+        nonPrimaryMirror.setIsPrimary(false);
+        nonPrimaryMirror.setBaseUrl("file://not-found/on-disk");
+        nonPrimaryMirror.setRepositorySource(result.repositorySource);
+        nonPrimaryMirror.setCode("testreposrc_xyz_m_notpri");
 
         result.pkg1 = context.newObject(Pkg.class);
         result.pkg1.setActive(true);

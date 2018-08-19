@@ -130,7 +130,10 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             ObjectContext mainContext,
             RepositorySource repositorySource)
     throws RepositoryHpkrIngressException {
-        URL url = repositorySource.getDownloadRepoInfoURL();
+        URL url = repositorySource.tryGetDownloadRepoInfoURL().orElseThrow(
+                () -> new RepositoryHpkrIngressException(
+                        "unable to download for [" + repositorySource.getCode()
+                        + "] as no download repo info url was available"));
 
         // now shift the URL's data into a temporary file and then process it.
         File temporaryFile = null;
@@ -158,10 +161,10 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                                     + "a ["  + PARAMETER_NAME_URL + "] entry as identifier, but this appears to be "
                                     + "missing"));
 
-                    if (!Objects.equals(urlParameterValue, repositorySource.getRepoInfoUrl())) {
+                    if (!Objects.equals(urlParameterValue, repositorySource.getUrl())) {
                         LOGGER.info("updated the repo info url to [{}] for repository source [{}]",
                                 urlParameterValue, repositorySource.getCode());
-                        repositorySource.setRepoInfoUrl(urlParameterValue);
+                        repositorySource.setUrl(urlParameterValue);
                         repositorySource.getRepository().setModifyTimestamp();
                         mainContext.commitChanges();
                     }
@@ -184,7 +187,11 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     private void runImportHpkrForRepositorySource(
             ObjectContext mainContext,
             RepositorySource repositorySource) {
-        URL url = repositorySource.getDownloadHpkrURL();
+        URL url = repositorySource.tryGetDownloadHpkrURL()
+                .orElseThrow(() -> new RuntimeException(
+                        "unable to import for ["
+                                + repositorySource
+                                + "] as there is no download url able to be derived."));
 
         // now shift the URL's data into a temporary file and then process it.
         File temporaryFile = null;

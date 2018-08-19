@@ -116,7 +116,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
                 () -> new IllegalStateException("unable to find the natural language [" + specification.getNaturalLanguageCode() + "]")
         );
 
-        RepositorySource repositorySource = RepositorySource.getByCode(
+        RepositorySource repositorySource = RepositorySource.tryGetByCode(
                 context,
                 specification.getRepositorySourceCode()).orElseThrow(
                 () -> new IllegalStateException(
@@ -281,7 +281,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
     }
 
     private ArchiveInfo createArchiveInfo(ObjectContext context, PkgDumpExportJobSpecification specification) {
-        RepositorySource repositorySource = RepositorySource.getByCode(
+        RepositorySource repositorySource = RepositorySource.tryGetByCode(
                 context,
                 specification.getRepositorySourceCode()
         ).orElseThrow(() -> new IllegalStateException(

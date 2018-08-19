@@ -128,7 +128,7 @@ public class RepositoryController extends AbstractController {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
         }
 
-        Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, repositorySourceCode);
+        Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, repositorySourceCode);
 
         if(
                 !repositorySourceOptional.isPresent()

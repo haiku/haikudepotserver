@@ -8,8 +8,6 @@ public class CreateRepositorySourceRequest {
 
     public String code;
 
-    public String url;
-
     public String repositoryCode;
 
 }

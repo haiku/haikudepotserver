@@ -5,6 +5,8 @@
 
 package org.haiku.haikudepotserver.api1.model.repository;
 
+import java.util.List;
+
 /**
  * @since 2015-06-09
  */
@@ -17,12 +19,33 @@ public class GetRepositorySourceResult {
 
     public Boolean active;
 
+    /**
+     * <p>Previous releases of this API used this field as the base-url for the
+     * repository.  Now this field, as with the C/C++ equivalent is the
+     * identifier URL for the repository itself.  This URL will be the same
+     * across mirrors.</p>
+     */
+
     public String url;
 
     /**
-     * @since 2017-12-02
+     * @since 2018-07-28
      */
 
-    public String repoInfoUrl;
+    public List<RepositorySourceMirror> repositorySourceMirrors;
+
+    public static class RepositorySourceMirror {
+
+        public Boolean active;
+
+        public String countryCode;
+
+        public String code;
+
+        public String baseUrl;
+
+        public Boolean isPrimary;
+
+    }
 
 }

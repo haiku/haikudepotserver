@@ -76,7 +76,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             integrationTestSupportService.createStandardTestData();
 
             ObjectContext context = serverRuntime.newContext();
-            RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
+            RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
             respositorySourceObjectId = repositorySource.getObjectId();
         }
 
@@ -175,8 +175,8 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.newContext();
-                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
-                repositoryDirectory = new File(repositorySource.getPackagesBaseURL().getPath());
+                RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
+                repositoryDirectory = new File(repositorySource.tryGetPackagesBaseURL().get().getPath());
 
                 if (!repositoryDirectory.mkdirs()) {
                     throw new IllegalStateException("unable to create the on-disk repository");
@@ -193,7 +193,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.newContext();
-                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz").get();
+                RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
 
                 // ---------------------------------
 
@@ -258,7 +258,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                         context, Architecture.CODE_X86_64).orElseThrow(IllegalStateException::new));
                 pkgVersion.setMajor("1");
                 pkgVersion.setMinor(Integer.toString(i));
-                pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testreposrc_xyz")
+                pkgVersion.setRepositorySource(RepositorySource.tryGetByCode(context, "testreposrc_xyz")
                         .orElseThrow(IllegalStateException::new));
             }
 
@@ -274,7 +274,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            ObjectId repositorySourceObjectId = RepositorySource.getByCode(context, "testreposrc_xyz")
+            ObjectId repositorySourceObjectId = RepositorySource.tryGetByCode(context, "testreposrc_xyz")
                     .orElseThrow(IllegalStateException::new).getObjectId();
 
             // ---------------------------------

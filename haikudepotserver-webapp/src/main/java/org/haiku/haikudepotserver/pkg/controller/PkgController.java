@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
@@ -73,7 +72,7 @@ public class PkgController {
         ObjectContext objectContext = serverRuntime.newContext();
 
         Optional<RepositorySource> repositorySourceOptional =
-                RepositorySource.getByCode(objectContext, repositorySourceCode);
+                RepositorySource.tryGetByCode(objectContext, repositorySourceCode);
 
         if(!repositorySourceOptional.isPresent()) {
             LOGGER.info("repository source [" + repositorySourceCode + "] not found");

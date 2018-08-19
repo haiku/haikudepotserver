@@ -300,16 +300,22 @@ public class PkgImportServiceImpl implements PkgImportService {
 
     private void populatePayloadLength(PkgVersion persistedPkgVersion) {
         long length = -1;
-        URL pkgVersionHpkgURL = persistedPkgVersion.getHpkgURL();
+        Optional<URL> pkgVersionHpkgURLOptional = persistedPkgVersion.tryGetHpkgURL();
 
-        try {
-            length = URLHelper.payloadLength(pkgVersionHpkgURL);
-        } catch(IOException ioe) {
-            LOGGER.error("unable to get the payload length for; " + persistedPkgVersion, ioe);
-        }
+        if (pkgVersionHpkgURLOptional.isPresent()) {
 
-        if(length > 0) {
-            persistedPkgVersion.setPayloadLength(length);
+            try {
+                length = URLHelper.payloadLength(pkgVersionHpkgURLOptional.get());
+            } catch (IOException ioe) {
+                LOGGER.error("unable to get the payload length for; " + persistedPkgVersion, ioe);
+            }
+
+            if (length > 0) {
+                persistedPkgVersion.setPayloadLength(length);
+            }
+        } else {
+            LOGGER.info("no package length recorded because there is no "
+                    + "hpkg url for [" + persistedPkgVersion + "]");
         }
     }
 

@@ -556,16 +556,15 @@ public class PkgServiceImpl implements PkgService {
 
     @Override
     public String createHpkgDownloadUrl(PkgVersion pkgVersion) {
-        URL packagesBaseUrl = pkgVersion.getRepositorySource().getPackagesBaseURL();
-
-        if(ImmutableSet.of("http","https").contains(packagesBaseUrl.getProtocol())) {
-            return pkgVersion.getHpkgURL().toString();
-        }
-
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(URL_SEGMENT_PKGDOWNLOAD);
-        pkgVersion.appendPathSegments(builder);
-        builder.path("package.hpkg");
-        return builder.build().toUriString();
+        return pkgVersion.tryGetHpkgURL()
+                .filter(u -> ImmutableSet.of("http", "https").contains(u.getProtocol()))
+                .map(URL::toString)
+                .orElseGet(() -> {
+                    UriComponentsBuilder builder = UriComponentsBuilder.fromPath(URL_SEGMENT_PKGDOWNLOAD);
+                    pkgVersion.appendPathSegments(builder);
+                    builder.path("package.hpkg");
+                    return builder.build().toUriString();
+                });
     }
 
     /**

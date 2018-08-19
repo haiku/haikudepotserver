@@ -10,13 +10,17 @@ import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.repository.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
+import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -232,8 +236,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     GetRepositoryResult.RepositorySource resultRs = new GetRepositoryResult.RepositorySource();
                     resultRs.active = rs.getActive();
                     resultRs.code = rs.getCode();
-                    resultRs.url = rs.getUrl();
-                    resultRs.repoInfoUrl = rs.getRepoInfoUrl();
+                    resultRs.url = rs.getPrimaryMirror().getBaseUrl();
+                    resultRs.repoInfoUrl = rs.getUrl();
                     return resultRs;
                 })
                 .collect(Collectors.toList());
@@ -319,8 +323,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
     @Override
     public CreateRepositoryResult createRepository(
-            CreateRepositoryRequest createRepositoryRequest)
-            throws ObjectNotFoundException {
+            CreateRepositoryRequest createRepositoryRequest) {
 
         Preconditions.checkNotNull(createRepositoryRequest);
 
@@ -368,7 +371,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, request.code);
+        Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, request.code);
 
         if(!repositorySourceOptional.isPresent()) {
             throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
@@ -379,7 +382,20 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.code = repositorySourceOptional.get().getCode();
         result.repositoryCode = repositorySourceOptional.get().getRepository().getCode();
         result.url = repositorySourceOptional.get().getUrl();
-        result.repoInfoUrl = repositorySourceOptional.get().getRepoInfoUrl();
+        result.repositorySourceMirrors = repositorySourceOptional.get().getRepositorySourceMirrors()
+                .stream()
+                .sorted()
+                .map(rsm -> {
+                    GetRepositorySourceResult.RepositorySourceMirror mirror =
+                            new GetRepositorySourceResult.RepositorySourceMirror();
+                    mirror.active = rsm.getActive();
+                    mirror.baseUrl = rsm.getBaseUrl();
+                    mirror.countryCode = rsm.getCountry().getCode();
+                    mirror.isPrimary = rsm.getIsPrimary();
+                    mirror.code = rsm.getCode();
+                    return mirror;
+                })
+                .collect(Collectors.toList());
         return result;
     }
 
@@ -391,7 +407,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<RepositorySource> repositorySourceOptional = RepositorySource.getByCode(context, request.code);
+        Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, request.code);
 
         if(!repositorySourceOptional.isPresent()) {
             throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
@@ -415,10 +431,6 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     }
                     repositorySourceOptional.get().setActive(request.active);
                     LOGGER.info("did set the repository source {} active to {}", repositorySourceOptional.get(), request.active);
-                    break;
-
-                case URL:
-                    repositorySourceOptional.get().setUrl(request.url);
                     break;
 
                 default:
@@ -446,7 +458,6 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(null!=request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "the code for the new repository source must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository for the new repository source must be identified");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.url), "the url for the new repository source must be identified");
 
         final ObjectContext context = serverRuntime.newContext();
 
@@ -464,7 +475,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new AuthorizationFailureException();
         }
 
-        Optional<RepositorySource> existingRepositorySourceOptional = RepositorySource.getByCode(context, request.code);
+        Optional<RepositorySource> existingRepositorySourceOptional = RepositorySource.tryGetByCode(context, request.code);
 
         if(existingRepositorySourceOptional.isPresent()) {
             throw new ValidationException(new ValidationFailure(RepositorySource.CODE.getName(), "unique"));
@@ -472,7 +483,6 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         RepositorySource repositorySource = context.newObject(RepositorySource.class);
         repositorySource.setRepository(repositoryOptional.get());
-        repositorySource.setUrl(request.url);
         repositorySource.setCode(request.code);
         repositoryOptional.get().setModifyTimestamp();
         context.commitChanges();
@@ -480,6 +490,139 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         LOGGER.info("did create a new repository source '{}' on the repository '{}'", repositorySource, repositoryOptional.get());
 
         return new CreateRepositorySourceResult();
+    }
+
+    @Override
+    public CreateRepositorySourceMirrorResult createRepositorySourceMirror(CreateRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request, "the request must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositorySourceCode), "the code for the new repository source mirror");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.countryCode), "the country code should be supplied");
+
+        final ObjectContext context = serverRuntime.newContext();
+
+        Country country = Country.tryGetByCode(context, request.countryCode)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        Country.class.getSimpleName(), request.countryCode));
+        RepositorySource repositorySource = RepositorySource.tryGetByCode(context, request.repositorySourceCode)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        RepositorySource.class.getSimpleName(), request.repositorySourceCode));
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orElse(null),
+                repositorySource.getRepository(),
+                Permission.REPOSITORY_EDIT)) {
+            throw new AuthorizationFailureException();
+        }
+
+        // if there is no other mirror then this should be the primary.
+
+        RepositorySourceMirror mirror = context.newObject(RepositorySourceMirror.class);
+        mirror.setIsPrimary(!repositorySource.tryGetPrimaryMirror().isPresent());
+        mirror.setBaseUrl(request.baseUrl);
+        mirror.setRepositorySource(repositorySource);
+        mirror.setCountry(country);
+        mirror.setDescription(StringUtils.trimToNull(request.description));
+        mirror.setCode(UUID.randomUUID().toString());
+        context.commitChanges();
+
+        LOGGER.info("did add mirror [{}] to repository source [{}]",
+                country.getCode(), repositorySource.getCode());
+
+        CreateRepositorySourceMirrorResult result = new CreateRepositorySourceMirrorResult();
+        result.code = mirror.getCode();
+        return result;
+    }
+
+    @Override
+    public UpdateRepositorySourceMirrorResult updateRepositorySourceMirror(UpdateRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null!=request, "the request must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "the code for the mirror to update");
+
+        final ObjectContext context = serverRuntime.newContext();
+
+        RepositorySourceMirror repositorySourceMirror = RepositorySourceMirror.tryGetByCode(context, request.code)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        RepositorySourceMirror.class.getSimpleName(), request.code));
+
+        if(!authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orElse(null),
+                repositorySourceMirror.getRepositorySource().getRepository(),
+                Permission.REPOSITORY_EDIT)) {
+            throw new AuthorizationFailureException();
+        }
+
+        for (UpdateRepositorySourceMirrorRequest.Filter filter : CollectionUtils.emptyIfNull(request.filter)) {
+            switch (filter) {
+                case ACTIVE:
+                    if (repositorySourceMirror.getIsPrimary()) {
+                        throw new ValidationException(new ValidationFailure(
+                                RepositorySourceMirror.ACTIVE.getName(), "confict"));
+                    }
+                    repositorySourceMirror.setActive(null != request.active && request.active);
+                    break;
+                case BASE_URL:
+                    repositorySourceMirror.setBaseUrl(request.baseUrl);
+                    break;
+                case COUNTRY:
+                    Country country = Country.tryGetByCode(context, request.countryCode)
+                            .orElseThrow(() -> new ObjectNotFoundException(
+                                    Country.class.getSimpleName(), request.countryCode));
+                    repositorySourceMirror.setCountry(country);
+                    break;
+                case IS_PRIMARY:
+                    boolean isPrimary = null != request.isPrimary && request.isPrimary;
+
+                    if (isPrimary != repositorySourceMirror.getIsPrimary()) {
+                        if (isPrimary) {
+                            // in this case, the former primary should loose it's primary
+                            // status so that it can be swapped to this one.
+                            repositorySourceMirror.getRepositorySource().getPrimaryMirror().setIsPrimary(false);
+                            repositorySourceMirror.setIsPrimary(true);
+                        } else {
+                            throw new ValidationException(new ValidationFailure(
+                                    RepositorySourceMirror.IS_PRIMARY.getName(), "confict"));
+                        }
+                    }
+                    break;
+                case DESCRIPTION:
+                    repositorySourceMirror.setDescription(StringUtils.trimToNull(request.description));
+                    break;
+                default:
+                    throw new IllegalStateException("unknown change filter for mirror [" + filter + "]");
+            }
+        }
+
+        context.commitChanges();
+        LOGGER.info("did update mirror [{}]", repositorySourceMirror.getCode());
+        return new UpdateRepositorySourceMirrorResult();
+    }
+
+    @Override
+    public GetRepositorySourceMirrorResult getRepositorySourceMirror(
+            GetRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+
+        Preconditions.checkArgument(null != request, "the request must be provided");
+        Preconditions.checkArgument(StringUtils.isNotBlank(request.code), "a mirror code must be provided");
+
+        final ObjectContext context = serverRuntime.newContext();
+
+        RepositorySourceMirror repositorySourceMirror = RepositorySourceMirror.tryGetByCode(context, request.code)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        RepositorySourceMirror.class.getSimpleName(), request.code));
+
+        GetRepositorySourceMirrorResult result = new GetRepositorySourceMirrorResult();
+        result.active = repositorySourceMirror.getActive();
+        result.baseUrl = repositorySourceMirror.getBaseUrl();
+        result.code = repositorySourceMirror.getCode();
+        result.countryCode = repositorySourceMirror.getCountry().getCode();
+        result.createTimestamp = repositorySourceMirror.getCreateTimestamp().getTime();
+        result.modifyTimestamp = repositorySourceMirror.getModifyTimestamp().getTime();
+        result.description = repositorySourceMirror.getDescription();
+        result.isPrimary = repositorySourceMirror.getIsPrimary();
+        result.repositorySourceCode = repositorySourceMirror.getRepositorySource().getCode();
+        return result;
     }
 
 }

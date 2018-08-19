@@ -107,11 +107,11 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                 .stream()
                 .filter(_RepositorySource::getActive)
                 .sorted(Comparator.comparing(_RepositorySource::getCode))
-                .map((r) -> {
+                .map((rs) -> {
                     DumpExportRepositorySource dumpRepositorySource = new DumpExportRepositorySource();
-                    dumpRepositorySource.setCode(r.getCode());
-                    dumpRepositorySource.setUrl(r.getUrl());
-                    dumpRepositorySource.setRepoInfoUrl(r.getRepoInfoUrl());
+                    dumpRepositorySource.setCode(rs.getCode());
+                    dumpRepositorySource.setUrl(rs.getPrimaryMirror().getBaseUrl());
+                    dumpRepositorySource.setRepoInfoUrl(rs.getUrl());
                     return dumpRepositorySource;
                 })
                 .collect(Collectors.toList())

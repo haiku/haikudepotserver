@@ -1,7 +1,10 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.util.List;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -18,9 +21,9 @@ public abstract class _RepositorySource extends AbstractDataObject {
 
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<String> REPO_INFO_URL = Property.create("repoInfoUrl", String.class);
     public static final Property<String> URL = Property.create("url", String.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
+    public static final Property<List<RepositorySourceMirror>> REPOSITORY_SOURCE_MIRRORS = Property.create("repositorySourceMirrors", List.class);
 
     public void setActive(Boolean active) {
         writeProperty("active", active);
@@ -36,13 +39,6 @@ public abstract class _RepositorySource extends AbstractDataObject {
         return (String)readProperty("code");
     }
 
-    public void setRepoInfoUrl(String repoInfoUrl) {
-        writeProperty("repoInfoUrl", repoInfoUrl);
-    }
-    public String getRepoInfoUrl() {
-        return (String)readProperty("repoInfoUrl");
-    }
-
     public void setUrl(String url) {
         writeProperty("url", url);
     }
@@ -56,6 +52,18 @@ public abstract class _RepositorySource extends AbstractDataObject {
 
     public Repository getRepository() {
         return (Repository)readProperty("repository");
+    }
+
+
+    public void addToRepositorySourceMirrors(RepositorySourceMirror obj) {
+        addToManyTarget("repositorySourceMirrors", obj, true);
+    }
+    public void removeFromRepositorySourceMirrors(RepositorySourceMirror obj) {
+        removeToManyTarget("repositorySourceMirrors", obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<RepositorySourceMirror> getRepositorySourceMirrors() {
+        return (List<RepositorySourceMirror>)readProperty("repositorySourceMirrors");
     }
 
 
