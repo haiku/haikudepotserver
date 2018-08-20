@@ -42,12 +42,6 @@
             </modules>
 
         </profile>
-        <profile>
-            <id>docker-capable-build</id>
-            <modules>
-                <module>haikudepotserver-docker</module>
-            </modules>
-        </profile>
 
     </profiles>
 

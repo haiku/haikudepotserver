@@ -1,6 +1,7 @@
 # launch file for the haikudepotserver system.
 
 . "$(dirname $0)/launchenv.sh"
+. "/secrets/hds_secrets"
 
 "${JAVA_BIN}" \
 "-Dfile.encoding=UTF-8" \
