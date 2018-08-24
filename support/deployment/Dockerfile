@@ -1,12 +1,23 @@
+# =====================================
+# Copyright 2018, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+# =====================================
+
+# This Dockerfile is used to build an image that is able to run an HDS server.
+# Do not use this file from the master or other working branch, but instead
+# use one from a release tag because this version of the file will have the
+# correct versions inserted into it.  See the documentation for further
+# details on how this deployment mechanism works.
+
 FROM ubuntu:16.04
 
-# TODO; get these to be written by the release process from the top-level pom file
-#ARG HDS_VERSION
-#ARG JETTY_VERSION
-#ARG PG_VERSION
-ENV HDS_VERSION "1.0.103"
-ENV JETTY_VERSION "9.3.15.v20161220"
-ENV PG_VERSION "9.4.1212"
+# These environment variables will be set using the release script.  It will
+# copy the correct values from the poms into these variables so that the right
+# versions of the artefacts are used in the Docker container.
+
+ENV HDS_VERSION "???"
+ENV JETTY_VERSION "???"
+ENV PG_VERSION "???"
 
 ENV JAVA_BIN "java"
 
