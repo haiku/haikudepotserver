@@ -13,4 +13,10 @@ public class GetRepositorySourceRequest {
 
     public String code;
 
+    /**
+     * @since 2018-08-25
+     */
+
+    public Boolean includeInactiveRepositorySourceMirrors;
+
 }

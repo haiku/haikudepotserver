@@ -1,6 +1,7 @@
 .*
 *.iml
 target
+venv
 haikudepotserver-webapp/src/main/webapp/js/lib/**
 haikudepotserver-webapp/src/main/resources/local.properties
 

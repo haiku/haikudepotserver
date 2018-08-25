@@ -16,6 +16,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.didTriggerImportRepositorySource = false;
             $scope.repositorySource = undefined;
+            $scope.amShowingInactiveRepositorySourceMirrors = false;
             var amUpdatingActive = false;
 
             refetchRepositorySource();
@@ -78,6 +79,11 @@ angular.module('haikudepotserver').controller(
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepositorySourceMirror(repositorySourceMirror));
             };
 
+            $scope.goIncludeInactiveRepositorySourceMirrors = function() {
+                $scope.amShowingInactiveRepositorySourceMirrors = true;
+                refetchRepositorySource();
+            };
+
             /**
              * <p>This function will initiate an import of a repository.  These run sequentially so it may not happen
              * immediately; it may be queued to go later.</p>
@@ -106,11 +112,6 @@ angular.module('haikudepotserver').controller(
                 );
             };
 
-            //
-            //$scope.goEdit = function() {
-            //    breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepository($scope.repository));
-            //};
-
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
                     breadcrumbFactory.createHome(),
@@ -127,7 +128,10 @@ angular.module('haikudepotserver').controller(
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_REPOSITORY,
                     "getRepositorySource",
-                    [{ code: $routeParams.repositorySourceCode }]
+                    [{
+                        code: $routeParams.repositorySourceCode,
+                        includeInactiveRepositorySourceMirrors: $scope.amShowingInactiveRepositorySourceMirrors
+                    }]
                 ).then(
                     function(repositorySourceResult) {
 

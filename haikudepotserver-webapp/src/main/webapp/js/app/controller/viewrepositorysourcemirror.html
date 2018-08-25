@@ -9,6 +9,12 @@
         <dd><code>{{repositorySourceMirror.countryCode}}</code></dd>
         <dt><message key="viewRepositorySourceMirror.baseUrl.title"></message></dt>
         <dd><a ng-href="{{repositorySourceMirror.baseUrl}}">{{repositorySourceMirror.baseUrl}}</a></dd>
+        <dt ng-show="repositorySourceMirror.description.length">
+            <message key="viewRepositorySourceMirror.description.title"></message>
+        </dt>
+        <dd ng-show="repositorySourceMirror.description.length">
+            <plain-text-content value="repositorySourceMirror.description"></plain-text-content>
+        </dd>
     </dl>
 
     <ul>

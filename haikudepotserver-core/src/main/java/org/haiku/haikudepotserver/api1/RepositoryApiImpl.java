@@ -11,6 +11,7 @@ import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.repository.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
@@ -385,6 +386,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.url = repositorySourceOptional.get().getUrl();
         result.repositorySourceMirrors = repositorySourceOptional.get().getRepositorySourceMirrors()
                 .stream()
+                .filter(m -> m.getActive() || BooleanUtils.isTrue(request.includeInactiveRepositorySourceMirrors))
                 .sorted()
                 .map(rsm -> {
                     GetRepositorySourceResult.RepositorySourceMirror mirror =
