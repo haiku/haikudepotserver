@@ -7,17 +7,17 @@ angular.module('haikudepotserver').controller(
     'AddEditRepositorySourceController',
     [
         '$scope','$log','$routeParams',
-        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling','referenceData',
+        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
         function(
             $scope,$log,$routeParams,
-            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,referenceData) {
+            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
             $scope.workingRepositorySource = undefined;
             $scope.amEditing = !!$routeParams.repositorySourceCode;
             var amSaving = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.workingRepositorySource || amSaving;
+                return !$scope.workingRepositorySource || amSaving;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
@@ -30,10 +30,6 @@ angular.module('haikudepotserver').controller(
 
             $scope.codeChanged = function() {
                 $scope.addEditRepositorySourceForm.code.$setValidity('unique',true);
-            };
-
-            $scope.urlChanged = function() {
-                $scope.addEditRepositorySourceForm.url.$setValidity('malformed',true);
             };
 
             function refreshBreadcrumbItems() {
@@ -96,43 +92,15 @@ angular.module('haikudepotserver').controller(
                 amSaving = true;
 
                 if($scope.amEditing) {
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "updateRepositorySource",
-                        [{
-                            filter : [ 'URL' ],
-                            url : $scope.workingRepositorySource.url,
-                            code : $routeParams.repositorySourceCode
-                        }]
-                    ).then(
-                        function() {
-                            $log.info('did update repository source; '+$routeParams.repositorySourceCode);
-                            breadcrumbs.popAndNavigate();
-                        },
-                        function(err) {
-
-                            switch(err.code) {
-                                case jsonRpc.errorCodes.VALIDATION:
-                                    errorHandling.relayValidationFailuresIntoForm(
-                                        err.data.validationfailures,
-                                        $scope.addEditRepositorySourceForm);
-                                    break;
-
-                                default:
-                                    errorHandling.handleJsonRpcError(err);
-                                    break;
-                            }
-
-                            amSaving = false;
-                        }
-                    );
+                    // this was once available, but there is nothing to edit on a
+                    // repository source now.
+                    throw Error('editing a repository source is not supported');
                 }
                 else {
                     jsonRpc.call(
                         constants.ENDPOINT_API_V1_REPOSITORY,
                         "createRepositorySource",
                         [{
-                            url : $scope.workingRepositorySource.url,
                             repositoryCode : $scope.workingRepositorySource.repositoryCode,
                             code : $scope.workingRepositorySource.code
                         }]

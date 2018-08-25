@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,6 +25,7 @@ angular.module('haikudepotserver').config(
                 .when('/repository/:repositoryCode/sources/add',{controller:'AddEditRepositorySourceController',templateUrl:controllerTemplatePathPrefix + '/addeditrepositorysource.html'})
                 .when('/repository/:repositoryCode/source/:repositorySourceCode/edit',{controller:'AddEditRepositorySourceController',templateUrl:controllerTemplatePathPrefix + '/addeditrepositorysource.html'})
                 .when('/repository/:repositoryCode/source/:repositorySourceCode',{controller:'ViewRepositorySourceController',templateUrl:controllerTemplatePathPrefix + '/viewrepositorysource.html'})
+                .when('/repository/:repositoryCode/source/:repositorySourceCode/mirror/:repositorySourceMirrorCode',{controller:'ViewRepositorySourceMirrorController',templateUrl:controllerTemplatePathPrefix + '/viewrepositorysourcemirror.html'})
                 .when('/repository/:code/edit',{controller:'AddEditRepositoryController',templateUrl:controllerTemplatePathPrefix + '/addeditrepository.html'})
                 .when('/repository/:code',{controller:'ViewRepositoryController', templateUrl:controllerTemplatePathPrefix + '/viewrepository.html'})
                 .when('/repositories',{controller:'ListRepositoriesController', templateUrl:controllerTemplatePathPrefix + '/listrepositories.html'})

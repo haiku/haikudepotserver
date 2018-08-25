@@ -300,6 +300,7 @@ INSERT INTO haikudepot.country (id, code, name, active) VALUES
 
 INSERT INTO haikudepot.repository_source_mirror (
   id,
+  code,
   repository_source_id,
   country_id,
   base_url,
@@ -310,6 +311,7 @@ INSERT INTO haikudepot.repository_source_mirror (
   modify_timestamp)
   SELECT
     NEXTVAL('haikudepot.repository_source_mirror_seq'),
+    rs.code || 'pri',
     rs.id,
     c.id,
     rs.url,

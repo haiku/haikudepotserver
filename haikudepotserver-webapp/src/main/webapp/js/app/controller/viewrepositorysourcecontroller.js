@@ -21,7 +21,7 @@ angular.module('haikudepotserver').controller(
             refetchRepositorySource();
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.repositorySource;
+                return !$scope.repositorySource;
             };
 
             function updateActive(flag) {
@@ -72,6 +72,10 @@ angular.module('haikudepotserver').controller(
 
             $scope.goEdit = function() {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepositorySource($scope.repositorySource));
+            };
+
+            $scope.goViewRepositorySourceMirror = function(repositorySourceMirror) {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepositorySourceMirror(repositorySourceMirror));
             };
 
             /**
@@ -126,6 +130,14 @@ angular.module('haikudepotserver').controller(
                     [{ code: $routeParams.repositorySourceCode }]
                 ).then(
                     function(repositorySourceResult) {
+
+                        // each of the mirrors that are related in the result need to link
+                        // back to the repository source.
+
+                        _.each(
+                            repositorySourceResult.repositorySourceMirrors,
+                            function(m) { m.repositorySource = repositorySourceResult; }
+                        );
 
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_REPOSITORY,

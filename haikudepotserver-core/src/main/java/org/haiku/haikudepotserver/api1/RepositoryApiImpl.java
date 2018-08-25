@@ -21,6 +21,7 @@ import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
+import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -236,7 +237,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     GetRepositoryResult.RepositorySource resultRs = new GetRepositoryResult.RepositorySource();
                     resultRs.active = rs.getActive();
                     resultRs.code = rs.getCode();
-                    resultRs.url = rs.getPrimaryMirror().getBaseUrl();
+                    resultRs.url = rs.tryGetPrimaryMirror().map(_RepositorySourceMirror::getBaseUrl).orElse(null);
                     resultRs.repoInfoUrl = rs.getUrl();
                     return resultRs;
                 })

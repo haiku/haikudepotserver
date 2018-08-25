@@ -14,19 +14,46 @@
         <dt><message key="viewRepositorySource.active.title"></message></dt>
         <dd><active-indicator state="repositorySource.active"></active-indicator>&nbsp;</dd>
         <dt><message key="viewRepositorySource.url.title"></message></dt>
-        <dd><a ng-href="{{repositorySource.url}}">{{repositorySource.url}}</a></dd>
-        <dt><message key="viewRepositorySource.repoInfoUrl.title"></message></dt>
         <dd>
-            <span ng-show="repositorySource.repoInfoUrl">
-                <code>{{repositorySource.repoInfoUrl}}</code>
+            <span ng-show="repositorySource.url">
+                <a ng-href="{{repositorySource.url}}">{{repositorySource.url}}</a>
             </span>
-            <span ng-show="!repositorySource.repoInfoUrl" class="text-error">
-                <message key="viewRepositorySource.repoInfoUrl.undefined"></message>
+            <span ng-show="!repositorySource.url" class="text-error">
+                <message key="viewRepositorySource.url.undefined"></message>
             </span>
         </dd>
         <dt><message key="viewRepositorySource.repository.title"></message></dt>
         <dd><repository-label repository="repositorySource.repository"></repository-label></dd>
     </dl>
+
+    <h2><message key="viewRepositorySource.mirrors.title"></message></h2>
+
+    <div class="info-container"
+         ng-show="!repositorySource.repositorySourceMirrors || !repositorySource.repositorySourceMirrors.length">
+        <strong><message key="viewRepositorySource.repositorySourceMirrors.none.title"></message>;</strong>
+        <message key="viewRepositorySource.repositorySourceMirrors.none.description"></message>
+    </div>
+
+    <table class="table-general table-repository-sources"
+           ng-show="repositorySource.repositorySourceMirrors && repositorySource.repositorySourceMirrors.length">
+        <thead>
+        <th><message key="viewRepositorySource.repositorySourceMirrors.table.isPrimary.title"></message></th>
+        <th><message key="viewRepositorySource.repositorySourceMirrors.table.active.title"></message></th>
+        <th><message key="viewRepositorySource.repositorySourceMirrors.table.countryCode.title"></message></th>
+        <th><message key="viewRepositorySource.repositorySourceMirrors.table.baseUrl.title"></message></th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="repositorySourceMirror in repositorySource.repositorySourceMirrors">
+            <td><boolean-indicator state="repositorySourceMirror.isPrimary"></boolean-indicator></td>
+            <td><active-indicator state="repositorySourceMirror.active"></active-indicator></td>
+            <td><code>{{repositorySourceMirror.countryCode}}</code></td>
+            <td>
+                <a ng-href="{{repositorySourceMirror.baseUrl}}">{{repositorySourceMirror.baseUrl}}</a>
+                (<a href="" ng-click="goViewRepositorySourceMirror(repositorySourceMirror)"><message key="viewRepositorySource.repositorySourceMirrors.detail.title"></message></a>)
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
     <ul>
         <li ng-show="canDeactivate()" repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
@@ -42,11 +69,6 @@
         <li ng-show="canTriggerImport()" repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_IMPORT'">
             <a href="" ng-click="goTriggerImport()">
                 <message key="viewRepositorySource.triggerImportAction.title"></message>
-            </a>
-        </li>
-        <li repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
-            <a href="" ng-click="goEdit()">
-                <message key="viewRepositorySource.editAction.title"></message>
             </a>
         </li>
     </ul>

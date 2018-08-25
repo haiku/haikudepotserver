@@ -1,0 +1,30 @@
+<div class="content-container">
+
+    <dl>
+        <dt><message key="viewRepositorySourceMirror.isPrimary.title"></message></dt>
+        <dd><boolean-indicator state="repositorySourceMirror.isPrimary"></boolean-indicator></dd>
+        <dt><message key="viewRepositorySourceMirror.active.title"></message></dt>
+        <dd><active-indicator state="repositorySourceMirror.active"></active-indicator>&nbsp;</dd>
+        <dt><message key="viewRepositorySourceMirror.countryCode.title"></message></dt>
+        <dd><code>{{repositorySourceMirror.countryCode}}</code></dd>
+        <dt><message key="viewRepositorySourceMirror.baseUrl.title"></message></dt>
+        <dd><a ng-href="{{repositorySourceMirror.baseUrl}}">{{repositorySourceMirror.baseUrl}}</a></dd>
+    </dl>
+
+    <ul>
+        <li ng-show="canDeactivate()" repository="repositorySourceMirror.repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goDeactivate()">
+                <message key="viewRepositorySourceMirror.deactivateAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="canReactivate()" repository="repositorySourceMirror.repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goReactivate()">
+                <message key="viewRepositorySourceMirror.reactivateAction.title"></message>
+            </a>
+        </li>
+    </ul>
+
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

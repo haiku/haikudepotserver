@@ -19,20 +19,6 @@
             <error-messages key-prefix="addEditRepositorySource.code" error="addEditRepositorySourceForm.code.$error"></error-messages>
         </div>
 
-        <label for="url"><message key="addEditRepositorySource.url.title"></message></label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('url')">
-            <input
-                    id="url"
-                    type="text"
-                    size="64"
-                    name="url"
-                    autocomplete="off"
-                    ng-change="urlChanged()"
-                    ng-required="true"
-                    ng-model="workingRepositorySource.url"/>
-            <error-messages key-prefix="addEditRepositorySource.url" error="addEditRepositorySourceForm.url.$error"></error-messages>
-        </div>
-
         <div class="form-action-container">
             <button
                     ng-disabled="addEditRepositorySourceForm.$invalid"
