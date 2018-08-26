@@ -106,6 +106,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
         dumpRepository.setRepositorySources(repository.getRepositorySources()
                 .stream()
                 .filter(_RepositorySource::getActive)
+                .filter(rs -> rs.tryGetPrimaryMirror().isPresent())
                 .sorted(Comparator.comparing(_RepositorySource::getCode))
                 .map((rs) -> {
                     DumpExportRepositorySource dumpRepositorySource = new DumpExportRepositorySource();

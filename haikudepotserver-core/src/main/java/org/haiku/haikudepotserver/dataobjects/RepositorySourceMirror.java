@@ -64,6 +64,11 @@ public class RepositorySourceMirror
     protected void validateForSave(ValidationResult validationResult) {
         super.validateForSave(validationResult);
 
+        if (getIsPrimary() && !getActive()) {
+            validationResult.addFailure(new BeanValidationFailure(
+                    this, IS_PRIMARY.getName(), "mustbeactive"));
+        }
+
         if(null != getBaseUrl()) {
             try {
                 new URL(getBaseUrl());

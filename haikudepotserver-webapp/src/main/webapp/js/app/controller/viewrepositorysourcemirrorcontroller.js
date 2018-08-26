@@ -23,28 +23,32 @@ angular.module('haikudepotserver').controller(
                 return !$scope.repositorySourceMirror;
             };
 
-            function updateActive(flag) {
-
+            function runUpdate(requestPayload) {
                 amUpdatingActive = true;
 
-                jsonRpc.call(
+                return jsonRpc.call(
                     constants.ENDPOINT_API_V1_REPOSITORY,
                     "updateRepositorySourceMirror",
-                    [{
-                        code : $scope.repositorySourceMirror.code,
-                        active : flag,
-                        filter : [ 'ACTIVE' ]
-                    }]
+                    [_.extend({code : $scope.repositorySourceMirror.code}, requestPayload)]
                 ).then(
-                    function() {
+                    function(data) {
                         amUpdatingActive = false;
-                        $scope.repositorySourceMirror.active = flag;
-                        $log.info('did set the active flag on ' + $scope.repositorySourceMirror.code+' to ' + flag);
+                        return data;
                     },
                     function(err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
+            }
+
+            function updateActive(flag) {
+                return runUpdate({
+                    active : flag,
+                    filter : [ 'ACTIVE' ]
+                }).then(function() {
+                    $scope.repositorySourceMirror.active = flag;
+                    $log.info('did set the active flag on ' + $scope.repositorySourceMirror.code+' to ' + flag);
+                });
             }
 
             $scope.canReactivate = function() {
@@ -66,6 +70,25 @@ angular.module('haikudepotserver').controller(
 
             $scope.goDeactivate = function() {
                 updateActive(false);
+            };
+
+            $scope.canSetPrimary = function() {
+                return $scope.repositorySourceMirror &&
+                $scope.repositorySourceMirror.active &&
+                !$scope.repositorySourceMirror.isPrimary &&
+                !amUpdatingActive;
+            };
+
+            $scope.goSetPrimary = function() {
+                runUpdate({
+                    isPrimary : true,
+                    filter : [ 'IS_PRIMARY' ]
+                }).then(
+                    function() {
+                        $scope.repositorySourceMirror.isPrimary = true;
+                        $log.info('did configure [' + $scope.repositorySourceMirror.code + '] to primary');
+                    }
+                )
             };
 
             // $scope.goEdit = function() {

@@ -18,6 +18,11 @@
     </dl>
 
     <ul>
+        <li ng-show="canSetPrimary()" repository="repositorySourceMirror.repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goSetPrimary()">
+                <message key="viewRepositorySourceMirror.setPrimary.title"></message>
+            </a>
+        </li>
         <li ng-show="canDeactivate()" repository="repositorySourceMirror.repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goDeactivate()">
                 <message key="viewRepositorySourceMirror.deactivateAction.title"></message>
