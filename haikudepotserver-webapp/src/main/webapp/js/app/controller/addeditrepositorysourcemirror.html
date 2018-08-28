@@ -1,0 +1,55 @@
+<div class="content-container">
+    <form name="addEditRepositorySourceMirrorForm" novalidate="novalidate">
+
+        <label for="country"><message key="addEditRepositorySourceMirror.countryCode.title"></message></label>
+        <div class="form-control-group">
+            <select
+                    name="country"
+                    id="country"
+                    required="true"
+                    ng-model="workingRepositorySourceMirror.country"
+                    ng-options="aCountry.name + ' (' + aCountry.code + ')' for aCountry in allCountries">
+            </select>
+        </div>
+
+        <label for="baseUrl"><message key="addEditRepositorySourceMirror.baseUrl.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('baseUrl')">
+            <input
+                    id="baseUrl"
+                    type="text"
+                    size="64"
+                    name="baseUrl"
+                    autocomplete="off"
+                    ng-required="false"
+                    ng-model="workingRepositorySourceMirror.baseUrl"/>
+            <error-messages key-prefix="addEditRepositorySourceMirror.baseUrl" error="addEditRepositorySourceMirrorForm.baseUrl.$error"></error-messages>
+        </div>
+
+        <label for="description"><message key="addEditRepositorySourceMirror.description.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('description')">
+            <textarea
+                    id="description"
+                    name="description"
+                    ng-model="workingRepositorySourceMirror.description"
+                    autocomplete="off"
+                    ng-maxlength="1024"
+                    rows="5"></textarea>
+            <error-messages key-prefix="addEditRepositorySourceMirror.description" error="addEditRepositorySourceMirrorForm.description.$error"></error-messages>
+        </div>
+
+        <div class="form-action-container">
+            <button
+                    ng-disabled="addEditRepositorySourceMirrorForm.$invalid"
+                    ng-click="goSave()"
+                    type="submit"
+                    class="main-action">
+                <span ng-show="amEditing"><message key="addEditRepositorySourceMirror.saveChangesAction.title"></message></span>
+                <span ng-show="!amEditing"><message key="addEditRepositorySourceMirror.addAction.title"></message></span>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<spinner spin="shouldSpin()"></spinner>
+

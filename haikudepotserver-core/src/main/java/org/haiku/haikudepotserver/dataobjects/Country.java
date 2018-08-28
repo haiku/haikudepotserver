@@ -1,3 +1,8 @@
+/*
+ * Copyright 2018, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
@@ -21,7 +26,7 @@ public class Country extends _Country {
         Preconditions.checkArgument(null != context, "the context must be provided");
         return ObjectSelect
                 .query(Country.class)
-                .orderBy(Country.CODE.asc())
+                .orderBy(Country.NAME.asc())
                 .cacheStrategy(QueryCacheStrategy.SHARED_CACHE)
                 .select(context);
     }

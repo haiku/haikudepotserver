@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','errorHandling','breadcrumbs',
-        'breadcrumbFactory',
+        'breadcrumbFactory', 'referenceData',
         function(
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,errorHandling,breadcrumbs,
-            breadcrumbFactory) {
+            breadcrumbFactory, referenceData) {
 
             $scope.repositorySourceMirror = undefined;
             var amUpdatingActive = false;
@@ -82,7 +82,7 @@ angular.module('haikudepotserver').controller(
             $scope.goSetPrimary = function() {
                 runUpdate({
                     isPrimary : true,
-                    filter : [ 'IS_PRIMARY' ]
+                    filter : ['IS_PRIMARY']
                 }).then(
                     function() {
                         $scope.repositorySourceMirror.isPrimary = true;
@@ -91,9 +91,10 @@ angular.module('haikudepotserver').controller(
                 )
             };
 
-            // $scope.goEdit = function() {
-            //     breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepositorySource($scope.repositorySource));
-            // };
+            $scope.goEdit = function() {
+                breadcrumbs.pushAndNavigate(
+                    breadcrumbFactory.createEditRepositorySourceMirror($scope.repositorySourceMirror));
+            };
 
             function refreshBreadcrumbItems() {
                 breadcrumbs.mergeCompleteStack([
@@ -164,6 +165,21 @@ angular.module('haikudepotserver').controller(
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );
+                    },
+
+                    function(chain) {
+                        referenceData.countries().then(function(countries) {
+                            var country = _.findWhere(
+                                countries,
+                                {code: repositorySourceMirror.countryCode});
+
+                            if (!country) {
+                                throw Error('unable to find the mirror country');
+                            }
+
+                            repositorySourceMirror.country = country;
+                            fnChain(chain);
+                        })
                     },
 
                     function(chain) {

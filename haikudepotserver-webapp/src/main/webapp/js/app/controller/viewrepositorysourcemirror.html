@@ -6,7 +6,7 @@
         <dt><message key="viewRepositorySourceMirror.active.title"></message></dt>
         <dd><active-indicator state="repositorySourceMirror.active"></active-indicator>&nbsp;</dd>
         <dt><message key="viewRepositorySourceMirror.countryCode.title"></message></dt>
-        <dd><code>{{repositorySourceMirror.countryCode}}</code></dd>
+        <dd>{{repositorySourceMirror.country.name}} (<code>{{repositorySourceMirror.country.code}}</code>)</dd>
         <dt><message key="viewRepositorySourceMirror.baseUrl.title"></message></dt>
         <dd><a ng-href="{{repositorySourceMirror.baseUrl}}">{{repositorySourceMirror.baseUrl}}</a></dd>
         <dt ng-show="repositorySourceMirror.description.length">
@@ -31,6 +31,11 @@
         <li ng-show="canReactivate()" repository="repositorySourceMirror.repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goReactivate()">
                 <message key="viewRepositorySourceMirror.reactivateAction.title"></message>
+            </a>
+        </li>
+        <li repository="repositorySourceMirror.repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goEdit()">
+                <message key="viewRepositorySourceMirror.editAction.title"></message>
             </a>
         </li>
     </ul>

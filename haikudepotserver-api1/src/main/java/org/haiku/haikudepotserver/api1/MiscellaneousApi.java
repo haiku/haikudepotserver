@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -68,6 +68,12 @@ public interface MiscellaneousApi {
      */
 
     GetAllProminencesResult getAllProminences(GetAllProminencesRequest request);
+
+    /**
+     * @since 2018-08-27
+     */
+
+    GetAllCountriesResult getAllCountries(GetAllCountriesRequest request);
 
     /**
      * <p>This method will return a feed URL based on the supplied information in the request.  If

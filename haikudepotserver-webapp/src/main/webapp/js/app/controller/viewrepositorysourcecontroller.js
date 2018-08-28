@@ -84,6 +84,11 @@ angular.module('haikudepotserver').controller(
                 refetchRepositorySource();
             };
 
+            $scope.goAddRepositorySourceMirror = function() {
+                breadcrumbs.pushAndNavigate(breadcrumbFactory
+                    .createAddRepositorySourceMirror($scope.repositorySource));
+            };
+
             /**
              * <p>This function will initiate an import of a repository.  These run sequentially so it may not happen
              * immediately; it may be queued to go later.</p>

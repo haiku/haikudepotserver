@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -289,6 +289,21 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     });
                 },
 
+                createEditRepositorySourceMirror : function(repositorySourceMirror) {
+                    if(!repositorySourceMirror) {
+                        throw Error('a repository source mirror must be provided');
+                    }
+
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.editRepositorySourceMirror.title',
+                        path : '/repository/' +
+                            repositorySourceMirror.repositorySource.repository.code +
+                            '/source/' + repositorySourceMirror.repositorySource.code +
+                            '/mirror/' + repositorySourceMirror.code +
+                            '/edit'
+                    });
+                },
+
                 createEditRepository : function(repository) {
                     return applyDefaults({
                         titleKey : 'breadcrumb.editRepository.title',
@@ -305,6 +320,18 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return applyDefaults({
                         titleKey : 'breadcrumb.addRepositorySource.title',
                         path : '/repository/' + repository.code + '/sources/add'
+                    });
+                },
+
+                createAddRepositorySourceMirror : function(repositorySource) {
+                    if(!repositorySource) {
+                        throw Error('a repository source needs to be supplied in order to add a repository source mirror');
+                    }
+
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.addRepositorySourceMirror.title',
+                        path : '/repository/' + repositorySource.repository.code +
+                            '/source/' + repositorySource.code + '/mirrors/add'
                     });
                 },
 

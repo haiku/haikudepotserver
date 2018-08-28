@@ -239,6 +239,18 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     }
 
     @Override
+    public GetAllCountriesResult getAllCountries(GetAllCountriesRequest request) {
+        Preconditions.checkNotNull(request);
+        final ObjectContext context = serverRuntime.newContext();
+
+        return new GetAllCountriesResult(
+                Country.getAll(context)
+                .stream()
+                .map(c -> new GetAllCountriesResult.Country(c.getCode(), c.getName()))
+                .collect(Collectors.toList()));
+    }
+
+    @Override
     public GenerateFeedUrlResult generateFeedUrl(final GenerateFeedUrlRequest request) throws ObjectNotFoundException {
         Preconditions.checkNotNull(request);
 

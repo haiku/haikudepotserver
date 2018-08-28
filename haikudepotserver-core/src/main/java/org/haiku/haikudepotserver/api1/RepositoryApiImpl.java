@@ -527,6 +527,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         mirror.setCountry(country);
         mirror.setDescription(StringUtils.trimToNull(request.description));
         mirror.setCode(UUID.randomUUID().toString());
+
+        repositorySource.getRepository().setModifyTimestamp();
         context.commitChanges();
 
         LOGGER.info("did add mirror [{}] to repository source [{}]",
@@ -595,6 +597,10 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                 default:
                     throw new IllegalStateException("unknown change filter for mirror [" + filter + "]");
             }
+        }
+
+        if (context.hasChanges()) {
+            repositorySourceMirror.getRepositorySource().getRepository().setModifyTimestamp();
         }
 
         context.commitChanges();

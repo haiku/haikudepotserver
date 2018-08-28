@@ -72,6 +72,11 @@
                 <message key="viewRepositorySource.triggerImportAction.title"></message>
             </a>
         </li>
+        <li repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_IMPORT'">
+            <a href="" ng-click="goAddRepositorySourceMirror()">
+                <message key="viewRepositorySource.addMirrorAction.title"></message>
+            </a>
+        </li>
         <li ng-show="!amShowingInactiveRepositorySourceMirrors">
             <a href="" ng-click="goIncludeInactiveRepositorySourceMirrors()">
                 <message key="viewRepositorySource.includeInactiveRepositorySourceMirrorsAction.title"></message>
