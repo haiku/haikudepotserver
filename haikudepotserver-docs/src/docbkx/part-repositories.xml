@@ -69,6 +69,11 @@ architecture x86_gcc2
                 </programlisting>
             </para>
 
+            <para>
+                The 'url' parameter is important because it acts as a unique identifier for
+                the repository.
+            </para>
+
         </section>
 
         <section>
@@ -97,9 +102,19 @@ architecture x86_gcc2
         <para>
             Haiku Depot Server's (HDS) concept of a Repository is, in nomenclature, slightly mis-aligned with the On-Net
             concept.  An HDS Repository represents the collection of On-Net Repositories that are conceptually serving
-            the same or similar packages for different architectures.  A Repository Source points to the different
-            architectures.
+            the same or similar packages for different architectures.  A RepositorySource is a placeholder for the
+            different architectures.  A RepositorySource may then have one or more RepositorySourceMirrors
+            in order to store a URL to the repository data for a given geo-location identified by a country code; for example...
         </para>
+
+        <para>
+            <itemizedlist>
+                <listitem>NZ - New Zealand</listitem>
+                <listitem>DE - Germany</listitem>
+                <listitem>CZ - Czech Republic</listitem>
+            </itemizedlist>
+        </para>
+
         <para>
             The following diagram illustrates the relationship between the Haiku Depot Server
             Repositories and the On-Net repositories of the operating system.  The yellow elements are the HDS elements
@@ -117,9 +132,11 @@ architecture x86_gcc2
         </figure>
 
         <para>
-            In this artificial example, an HDS Repository &quot;Peanut&quot; has two HDS Repository Sources for the two
-            architectures supported by this repository; x86_gcc and x86_64.  In this case, two On-Net repositories
-            exist and are related inside HDS by URL reference.
+            In this artificial example, an HDS Repository &quot;Peanut&quot; exists.  Consider for
+            example that a given system is x86_gcc2 architecture and is located in
+            New Zealand then it would be possible to follow the path through the Repository
+            to the RepositorySource to the RepositorySourceMirror in order to obtain the
+            Base URL to be used in order to access the On-Net files of the repository.
         </para>
 
 
