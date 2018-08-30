@@ -12,8 +12,10 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
@@ -21,6 +23,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepository;
 import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepositorySource;
+import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepositorySourceMirror;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
@@ -113,6 +116,19 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                     dumpRepositorySource.setCode(rs.getCode());
                     dumpRepositorySource.setUrl(rs.getPrimaryMirror().getBaseUrl());
                     dumpRepositorySource.setRepoInfoUrl(rs.getUrl());
+                    dumpRepositorySource.setRepositorySourceMirrors(
+                            rs.getRepositorySourceMirrors()
+                            .stream()
+                            .filter(_RepositorySourceMirror::getActive)
+                            .map(rsm -> {
+                                DumpExportRepositorySourceMirror dumpMirror = new DumpExportRepositorySourceMirror();
+                                dumpMirror.setBaseUrl(rsm.getBaseUrl());
+                                dumpMirror.setCountryCode(rsm.getCountry().getCode());
+                                dumpMirror.setDescription(rsm.getDescription());
+                                dumpMirror.setIsPrimary(rsm.getIsPrimary());
+                                return dumpMirror;
+                            })
+                            .collect(Collectors.toList()));
                     return dumpRepositorySource;
                 })
                 .collect(Collectors.toList())

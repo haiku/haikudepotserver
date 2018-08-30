@@ -31,6 +31,27 @@
           },
           "repoInfoUrl": {
             "type": "string"
+          },
+          "repositorySourceMirrors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "javaType": "org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepositorySourceMirror",
+              "properties": {
+                "countryCode": {
+                  "type": "string"
+                },
+                "baseUrl": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "isPrimary": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }

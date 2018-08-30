@@ -122,7 +122,10 @@ public class PersistenceConfig {
     @Bean
     public LifecycleListener repositoryQueryCacheRemoveGroupListener(ServerRuntime serverRuntime) {
         return new QueryCacheRemoveGroupListener(serverRuntime,
-                ImmutableList.of(Repository.class, RepositorySource.class),
+                ImmutableList.of(
+                        Repository.class,
+                        RepositorySource.class,
+                        RepositorySourceMirror.class),
                 Collections.singletonList(HaikuDepot.CacheGroup.REPOSITORY.name()));
     }
 

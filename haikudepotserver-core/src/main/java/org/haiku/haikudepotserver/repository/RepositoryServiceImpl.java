@@ -47,7 +47,7 @@ public class RepositoryServiceImpl implements RepositoryService {
                 Repository.class.getSimpleName(),
                 "r WHERE r.active = true"));
 
-        query.setCacheGroups(HaikuDepot.CacheGroup.REPOSITORY.name());
+        query.setCacheGroup(HaikuDepot.CacheGroup.REPOSITORY.name());
 
         List<Object> result = context.performQuery(query);
 
