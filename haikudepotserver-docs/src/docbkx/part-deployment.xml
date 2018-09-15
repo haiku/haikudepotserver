@@ -54,15 +54,15 @@ Distributed under the terms of the MIT License.
 
     <para>
         <programlisting>java \
--Xmx256m \
--Dfile.encoding=UTF-8 \
--Duser.timezone=GMT0 \
--Djava.awt.headless=true \
--Dconfig.properties=file:///etc/haikudepotserver/config.properties \
--jar /opt/haikudepotserver/jetty-runner.jar \
---jar /opt/haikudepotserver/postgresql.jar \
---port 8801 \
-/opt/haikudepotserver/haikudepotserver-webapp.war</programlisting>
+            -Xmx256m \
+            -Dfile.encoding=UTF-8 \
+            -Duser.timezone=GMT0 \
+            -Djava.awt.headless=true \
+            -Dconfig.properties=file:///etc/haikudepotserver/config.properties \
+            -jar /opt/haikudepotserver/jetty-runner.jar \
+            --jar /opt/haikudepotserver/postgresql.jar \
+            --port 8801 \
+            /opt/haikudepotserver/haikudepotserver-webapp.war</programlisting>
     </para>
 
     <para>
@@ -110,6 +110,83 @@ Distributed under the terms of the MIT License.
         <para>
             Once running, the web environment will be accessible from; &quot;http://localhost:8080/&quot;
         </para>
+    </section>
+
+    <section>
+        <title>Deployment with Docker</title>
+
+        <figure>
+            <title>The processes involved in a Docker build and release process.</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/img-docker-build-process.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <para>
+            The coloured lines represent scripted or automated data flows and
+            the black more manual flows or processes.  There is a mix of
+            automation and manual-intervention.
+        </para>
+
+        <section>
+            <title>Haiku Vector Icon Rendering</title>
+            <para>
+                The hvif2png program is packaged as a tar-ball in the HDS source.
+                It is build for the correct platform that the HDS Docker image will
+                use as its base image.  This tar-ball is then included in the HDS
+                source.
+            </para>
+        </section>
+
+        <section>
+            <title>Release Process</title>
+
+            <para>
+                This process is driven by Python scripts in the HDS repository.
+                Based on a template, it will render a Dockerfile into the
+                source.  The Dockerfile contains the correct, coordinated
+                versions of;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>Haiku Depot Server (.war)</listitem>
+                    <listitem>Postgres Driver (.jar)</listitem>
+                    <listitem>Jetty Runner (.jar)</listitem>
+                </itemizedlist>
+            </para>
+
+            <para>
+                The new release is tagged in GitHub.
+            </para>
+
+        </section>
+
+        <section>
+            <title>Build Process</title>
+            <para>
+                Now the source is checked out by hand at the release tag.  From
+                this process, driven by the Maven build tool, a Java Servlet
+                .war file is generated.  Once generated, the .war file can be
+                uploaded to the GitHub release page for HDS at the correct
+                version.  This last step is done by hand.
+            </para>
+        </section>
+
+        <section>
+            <title>Docker Image</title>
+            <para>
+                The source can again be checked out at the correct tag.  This
+                provides a Dockerfile ready to go.  The Docker tooling is used
+                to create the image.  This will use the files in the HDS source
+                as well as resources from the internet to assemble a Docker
+                image that can be run in Docker on a suitable virtual
+                environment.
+            </para>
+        </section>
+
     </section>
 
     <section>

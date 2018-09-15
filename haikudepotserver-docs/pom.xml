@@ -56,10 +56,10 @@
                             <id>build-html</id>
                             <configuration>
                                 <postProcess>
-                                    <copy todir="${basedir}/target/site/index/css">
+                                    <copy todir="${basedir}/target/site/css">
                                         <fileset dir="${basedir}/src/css" />
                                     </copy>
-                                    <copy todir="${basedir}/target/site/index/images">
+                                    <copy todir="${basedir}/target/site/images">
                                         <fileset dir="${basedir}/src/images" />
                                     </copy>
                                 </postProcess>
