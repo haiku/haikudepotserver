@@ -21,6 +21,9 @@ import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -42,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class LocalJobServiceImpl
         extends AbstractService
-        implements JobService {
+        implements JobService, ApplicationContextAware {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
@@ -52,9 +55,16 @@ public class LocalJobServiceImpl
 
     private final DataStorageService dataStorageService;
 
-    private final List<JobRunner> jobRunners;
+    /**
+     * <p>This gets setup through an query into the {@link ApplicationContext}.
+     * </p>
+     */
+
+    private Collection<JobRunner> jobRunners = null;
 
     private ThreadPoolExecutor executor = null;
+
+    private ApplicationContext applicationContext;
 
     private final ArrayBlockingQueue<Runnable> runnables = Queues.newArrayBlockingQueue(SIZE_QUEUE);
 
@@ -71,20 +81,39 @@ public class LocalJobServiceImpl
     private final Set<JobData> datas = Sets.newHashSet();
 
     public LocalJobServiceImpl(
+            DataStorageService dataStorageService) {
+        this.dataStorageService = dataStorageService;
+    }
+
+    public LocalJobServiceImpl(
             DataStorageService dataStorageService,
-            List<JobRunner> jobRunners) {
+            Collection<JobRunner> jobRunners) {
         this.dataStorageService = dataStorageService;
         this.jobRunners = jobRunners;
     }
 
     @PostConstruct
     public void init() {
+        if (null == jobRunners) {
+            jobRunners = applicationContext.getBeansOfType(JobRunner.class).values();
+            LOGGER.info("configured {} job runners from the application context",
+                    jobRunners.size());
+        } else {
+            LOGGER.info("{} job runners were already configured - will not "
+                    + "populate any from the application context",
+                    jobRunners.size());
+        }
         startAsyncAndAwaitRunning();
     }
 
     @PreDestroy
     public void tearDown() {
         stopAsyncAndAwaitTerminated();
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     // ------------------------------

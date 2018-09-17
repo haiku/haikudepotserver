@@ -1,26 +1,27 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 angular.module('haikudepotserver').controller(
     'ViewUserRatingController',
     [
-        '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','errorHandling','breadcrumbs',
-        'breadcrumbFactory','userState',
+        '$scope', '$log', '$location', '$routeParams',
+        'jsonRpc', 'constants', 'errorHandling', 'breadcrumbs',
+        'breadcrumbFactory', 'userState',
         function(
-            $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling,breadcrumbs,
-            breadcrumbFactory,userState) {
+            $scope, $log, $location, $routeParams,
+            jsonRpc, constants, errorHandling, breadcrumbs,
+            breadcrumbFactory, userState) {
 
             var amUpdating = false;
             $scope.breadcrumbItems = undefined;
             $scope.userRating = undefined;
             $scope.canEdit = undefined;
+            $scope.toRemoveUserRating = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.userRating || amUpdating;
+                return undefined === $scope.userRating || amUpdating;
             };
 
             $scope.hasRating = function() {
@@ -98,6 +99,36 @@ angular.module('haikudepotserver').controller(
 
             $scope.goDeactivate = function() {
                 setActive(false);
+            };
+
+            $scope.goRemove = function() {
+                $scope.toRemoveUserRating = true;
+            };
+
+            $scope.goCancelRemove = function() {
+                $scope.toRemoveUserRating = false;
+            };
+
+            $scope.goConfirmRemove = function() {
+
+                amUpdating = true;
+
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_USERRATING,
+                    "removeUserRating",
+                    [{code : $scope.userRating.code}]
+                ).then(
+                    function() {
+                        $log.info('did remove the user rating');
+                        amUpdating = false;
+                        $scope.toRemoveUserRating = false;
+                        breadcrumbs.popAndNavigate();
+                    },
+                    function(err) {
+                        $log.info('an error arose removing the user rating');
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             };
 
             /**

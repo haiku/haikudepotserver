@@ -352,7 +352,7 @@ jsonschema2cppparser.py \
             </para>
 
             <para>
-                An example URL is &quot;http://localhost:8080/repository/haikudepot/import&quot;
+                An example URL is &quot;http://localhost:8080/__repository/haikudepot/import&quot;
             </para>
 
         </section>

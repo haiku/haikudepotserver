@@ -6,14 +6,11 @@
 package org.haiku.haikudepotserver.config;
 
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
-import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-
-import java.util.List;
 
 @Import({
         BasicConfig.class,
@@ -22,8 +19,8 @@ import java.util.List;
 public class TestConfig {
 
     @Bean
-    public JobService localJobService(DataStorageService dataStorageService, List<JobRunner> jobRunners) {
-        return new LocalJobServiceImpl(dataStorageService, jobRunners);
+    public JobService localJobService(DataStorageService dataStorageService) {
+        return new LocalJobServiceImpl(dataStorageService);
     }
 
     @Bean

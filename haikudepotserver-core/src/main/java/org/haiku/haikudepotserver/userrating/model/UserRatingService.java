@@ -50,4 +50,10 @@ public interface UserRatingService {
 
     void updateUserRatingDerivation(String pkgName);
 
+    /**
+     * <p>This method will delete the {@link UserRating}.</p>
+     */
+
+    void removeUserRatingAtomically(String userRatingCode);
+
 }

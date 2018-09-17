@@ -87,7 +87,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                     break;
 
                 case USERRATING:
-                    targetOptional = UserRating.getByCode(objectContext, targetIdentifier);
+                    targetOptional = UserRating.tryGetByCode(objectContext, targetIdentifier);
                     break;
 
                 default:

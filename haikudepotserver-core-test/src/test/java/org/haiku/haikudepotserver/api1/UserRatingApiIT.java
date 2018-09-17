@@ -5,7 +5,6 @@
 
 package org.haiku.haikudepotserver.api1;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
@@ -96,7 +95,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Optional<UserRating> userRatingOptional = UserRating.getByCode(context, userRatingCode);
+            Optional<UserRating> userRatingOptional = UserRating.tryGetByCode(context, userRatingCode);
             Assertions.assertThat(userRatingOptional.get().getActive()).isFalse();
             Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 1);
             Assertions.assertThat(userRatingOptional.get().getComment()).isEqualTo("Highlighter orange");
@@ -171,7 +170,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Optional<UserRating> userRatingOptional = UserRating.getByCode(context, code);
+            Optional<UserRating> userRatingOptional = UserRating.tryGetByCode(context, code);
 
             Assertions.assertThat(userRatingOptional.isPresent()).isTrue();
             Assertions.assertThat(userRatingOptional.get().getActive()).isTrue();
@@ -247,19 +246,27 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
 
     }
 
-    public static class ResultUserRatingFunction implements Predicate<SearchUserRatingsResult.UserRating> {
+    @Test
+    public void testRemoveUserRatings() throws Exception {
 
-        private String code;
+        integrationTestSupportService.createStandardTestData();
+        integrationTestSupportService.createUserRatings();
 
-        public ResultUserRatingFunction(String code) {
-            super();
-            this.code = code;
+        setAuthenticatedUser("urtest2");
+
+        RemoveUserRatingRequest request = new RemoveUserRatingRequest();
+        request.code = "GHIJKL";
+
+        // ------------------------------------
+        userRatingApi.removeUserRating(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Optional<UserRating> userRatingOptional = UserRating.tryGetByCode(context, "GHIJKL");
+            Assertions.assertThat(userRatingOptional.isPresent()).isFalse();
         }
 
-        @Override
-        public boolean apply(SearchUserRatingsResult.UserRating input) {
-            return input.code.equals(code);
-        }
     }
 
 }

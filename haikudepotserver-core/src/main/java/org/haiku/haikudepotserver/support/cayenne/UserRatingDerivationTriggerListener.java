@@ -6,9 +6,12 @@
 package org.haiku.haikudepotserver.support.cayenne;
 
 import com.google.common.base.Preconditions;
+import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.LifecycleListener;
+import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
+import org.apache.commons.collections4.CollectionUtils;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
@@ -16,7 +19,8 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>This listener will detect changes in the user rating entities and will then trigger a process (probably
@@ -43,10 +47,17 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
         callbackRegistry.addListener(UserRating.class, this);
     }
 
-    private void triggerUpdateUserRatingDerivationForAssociatedPackage(Object entity) {
+    private String derivePkgName(Object entity) {
         Preconditions.checkNotNull(entity);
         UserRating userRating = (UserRating) entity;
-        String pkgName = userRating.getPkgVersion().getPkg().getName();
+        return userRating.getPkgVersion().getPkg().getName();
+    }
+
+    private void triggerUpdateUserRatingDerivationForAssociatedPkg(Object entity) {
+        triggerUpdateUserRatingDerivationForPkgName(derivePkgName(entity));
+    }
+
+    private void triggerUpdateUserRatingDerivationForPkgName(String pkgName) {
         jobService.submit(
                 new UserRatingDerivationJobSpecification(pkgName),
                 JobSnapshot.COALESCE_STATUSES_QUEUED);
@@ -62,7 +73,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postPersist(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
+        triggerUpdateUserRatingDerivationForAssociatedPkg(entity);
     }
 
     @Override
@@ -79,7 +90,7 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
 
     @Override
     public void postUpdate(Object entity) {
-        triggerUpdateUserRatingDerivationForAssociatedPackage(entity);
+        triggerUpdateUserRatingDerivationForAssociatedPkg(entity);
     }
 
     @Override

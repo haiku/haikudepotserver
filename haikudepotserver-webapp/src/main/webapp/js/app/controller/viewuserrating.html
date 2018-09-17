@@ -29,6 +29,11 @@
                 <message key="viewUserRating.deactiveAction.title"></message>
             </a>
         </li>
+        <li ng-show="canEdit">
+            <a href="" ng-click="goRemove()">
+                <message key="viewUserRating.removeAction.title"></message>
+            </a>
+        </li>
         <li ng-show="canReactivate() && canEdit">
             <a href="" ng-click="goReactivate()">
                 <message key="viewUserRating.reactiveAction.title"></message>
@@ -42,6 +47,22 @@
             </a>
         </li>
     </ul>
+
+    <modal-container show="!!toRemoveUserRating" width="320" height="210" close="goCancelRemove()">
+
+        <h3><message key="viewUserRating.removeModal.title"></message></h3>
+        <p><message key="viewUserRating.removeModal.description"></message></p>
+
+        <div>
+            <button ng-click="goConfirmRemove()">
+                <message key="viewUserRating.removeModal.confirmAction.title"></message>
+            </button>
+            <button ng-click="goCancelRemove()">
+                <message key="viewUserRating.removeModal.cancelAction.title"></message>
+            </button>
+        </div>
+
+    </modal-container>
 
 </div>
 

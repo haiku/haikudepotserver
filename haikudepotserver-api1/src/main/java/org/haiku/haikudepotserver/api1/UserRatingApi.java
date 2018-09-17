@@ -66,4 +66,10 @@ public interface UserRatingApi {
 
     SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequest request) throws ObjectNotFoundException;
 
+    /**
+     * <p>This method will delete a user rating so that it is no longer stored.</p>
+     */
+
+    RemoveUserRatingResult removeUserRating(RemoveUserRatingRequest request) throws ObjectNotFoundException;
+
 }

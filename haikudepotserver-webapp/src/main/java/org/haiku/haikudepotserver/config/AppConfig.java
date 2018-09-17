@@ -51,9 +51,8 @@ public class AppConfig {
 
     @Bean
     public JobService jobService(
-            DataStorageService dataStorageService,
-            List<JobRunner> jobRunners) {
-        return new LocalJobServiceImpl(dataStorageService, jobRunners);
+            DataStorageService dataStorageService) {
+        return new LocalJobServiceImpl(dataStorageService);
     }
 
     @Bean

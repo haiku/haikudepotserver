@@ -23,10 +23,15 @@ public class UserRating extends _UserRating implements CreateAndModifyTimestampe
     public final static int MIN_USER_RATING = 0;
     public final static int MAX_USER_RATING = 5;
 
-    public static Optional<UserRating> getByCode(ObjectContext context, String code) {
+    public static Optional<UserRating> tryGetByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return Optional.ofNullable(ObjectSelect.query(UserRating.class).where(CODE.eq(code)).selectOne(context));
+    }
+
+    public static UserRating getByCode(ObjectContext context, String code) {
+        return tryGetByCode(context, code).orElseThrow(
+                () -> new IllegalStateException("unable to find the user rating with code [" + code + "]"));
     }
 
     public static List<UserRating> findByUserAndPkg(ObjectContext context, User user, Pkg pkg) {

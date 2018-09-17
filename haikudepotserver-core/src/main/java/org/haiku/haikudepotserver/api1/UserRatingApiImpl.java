@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.api1.model.userrating.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
@@ -163,7 +164,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        UserRating userRating = UserRating.getByCode(context, request.code).orElseThrow(
+        UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code)
         );
 
@@ -370,7 +371,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        UserRating userRating = UserRating.getByCode(context, request.code).orElseThrow(
+        UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
 
         User authenticatedUser = obtainAuthenticatedUser(context);
@@ -557,6 +558,28 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 .collect(Collectors.toList());
 
         return result;
+    }
+
+    @Override
+    public RemoveUserRatingResult removeUserRating(RemoveUserRatingRequest request) throws ObjectNotFoundException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkState(StringUtils.isNotBlank(request.code));
+
+        final ObjectContext context = serverRuntime.newContext();
+
+        UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
+                () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
+
+        User authenticatedUser = obtainAuthenticatedUser(context);
+
+        if(!authorizationService.check(context, authenticatedUser, userRating, Permission.USERRATING_EDIT)) {
+            LOGGER.error("unable to delete the userrating as {}", authenticatedUser.toString());
+            throw new AuthorizationFailureException();
+        }
+
+        userRatingService.removeUserRatingAtomically(userRating.getCode());
+
+        return new RemoveUserRatingResult();
     }
 
 }

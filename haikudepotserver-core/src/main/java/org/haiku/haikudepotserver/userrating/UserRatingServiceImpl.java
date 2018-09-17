@@ -12,9 +12,12 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
@@ -32,15 +35,19 @@ public class UserRatingServiceImpl implements UserRatingService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingServiceImpl.class);
 
-    private ServerRuntime serverRuntime;
-    private int userRatingDerivationVersionsBack;
-    private int userRatingsDerivationMinRatings;
+    private final ServerRuntime serverRuntime;
+    private final int userRatingDerivationVersionsBack;
+    private final int userRatingsDerivationMinRatings;
+    private final JobService jobService;
+
 
     public UserRatingServiceImpl(
             ServerRuntime serverRuntime,
+            JobService jobService,
             @Value("${userrating.aggregation.pkg.versionsback:2}") int userRatingDerivationVersionsBack,
             @Value("${userrating.aggregation.pkg.minratings:3}") int userRatingsDerivationMinRatings) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.jobService = Preconditions.checkNotNull(jobService);
         this.userRatingDerivationVersionsBack = userRatingDerivationVersionsBack;
         this.userRatingsDerivationMinRatings = userRatingsDerivationMinRatings;
     }
@@ -493,6 +500,27 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         return Optional.empty();
     }
+
+    @Override
+    public void removeUserRatingAtomically(String userRatingCode) {
+        ObjectContext context = serverRuntime.newContext();
+        UserRating userRating = UserRating.getByCode(context, userRatingCode);
+        String pkgName = userRating.getPkgVersion().getPkg().getName();
+
+        context.deleteObject(userRating);
+        context.commitChanges();
+
+        LOGGER.info("did delete user rating [{}]", userRatingCode);
+
+        // This cannot be done via a listener because it is, after the deletion
+        // no longer possible to find out the package that was attached to the
+        // user rating.
+
+        jobService.submit(
+                new UserRatingDerivationJobSpecification(pkgName),
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
+    }
+
 
     /**
      * <P>This is used as a model class / return value for the derivation of the user rating.</P>
