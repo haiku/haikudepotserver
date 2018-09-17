@@ -58,4 +58,5 @@ RUN echo "PG_JAR=${PG_JAR}" >> ${INSTALL_ROOT}/launchenv.sh
 
 CMD [ "sh", "/opt/haikudepotserver/launch.sh" ]
 
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8080/__metric/healthcheck
 EXPOSE ${HDS_PORT}
