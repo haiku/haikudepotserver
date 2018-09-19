@@ -83,11 +83,11 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
             Assert.assertThat(repositorySourceCode.asText(), CoreMatchers.is("testreposrc_xyz"));
 
             JsonNode mirror0CountryCode = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/0/countryCode");
-            Assert.assertThat(mirror0CountryCode.asText(), CoreMatchers.is("NZ"));
+            Assert.assertThat(mirror0CountryCode.asText(), CoreMatchers.is("ZA"));
             JsonNode mirror0BaseUrl = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/0/baseUrl");
             Assertions.assertThat(mirror0BaseUrl.asText()).startsWith("file://");
             JsonNode mirror1BaseUrl = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/1/baseUrl");
-            Assertions.assertThat(mirror1BaseUrl.asText()).startsWith("file://not-found/on-disk");
+            Assertions.assertThat(mirror1BaseUrl.asText()).isEqualTo("file:///tmp/repository");
         }
 
     }
