@@ -31,7 +31,7 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
     protected NaturalLanguage getNaturalLanguage(ObjectContext context, String naturalLanguageCode) throws ObjectNotFoundException  {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-        return NaturalLanguage.getByCode(context, naturalLanguageCode)
+        return NaturalLanguage.tryGetByCode(context, naturalLanguageCode)
                 .orElseThrow(() -> new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), naturalLanguageCode));
     }
 

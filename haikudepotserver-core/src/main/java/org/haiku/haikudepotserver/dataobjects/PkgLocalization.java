@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,14 +11,14 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgLocalization;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class PkgLocalization extends _PkgLocalization implements CreateAndModifyTimestamped {
+public class PkgLocalization extends _PkgLocalization implements MutableCreateAndModifyTimestamped {
 
     public static List<PkgLocalization> findForPkg(ObjectContext context, Pkg pkg) {
         Preconditions.checkArgument(null != context, "the context must be supplied");

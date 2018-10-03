@@ -109,7 +109,7 @@
             </para>
 
             <para>
-                Using the Cayenne &quot;listeners&quot; such as PostAddCreateAndModifyTimestampListener and
+                Using the Cayenne &quot;listeners&quot; such as PostAddMutableCreateAndModifyTimestampListener and
                 UserRatingDerivationTriggerListener the system is able to use changes to entities as a trigger to
                 perform tasks such as update the create and modify timestamp attributes on entities.
             </para>

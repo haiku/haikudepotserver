@@ -16,7 +16,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class Repository extends _Repository implements CreateAndModifyTimestamped, Coded, Comparable<Repository> {
+public class Repository extends _Repository implements MutableCreateAndModifyTimestamped, Coded, Comparable<Repository> {
 
     /**
      * <p>Prior to mid 2015 there was no 'proper' concept of a repository and so to allow for clients

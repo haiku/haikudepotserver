@@ -43,7 +43,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setUser(user);
         userRating.setPkgVersion(pkgVersion);
-        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+        userRating.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get());
         userRating.setRating(rating);
         return userRating;
     }

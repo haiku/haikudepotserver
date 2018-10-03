@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,12 +12,12 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 
 import java.util.List;
 import java.util.Optional;
 
-public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScreenshot>, CreateAndModifyTimestamped {
+public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScreenshot>, MutableCreateAndModifyTimestamped {
 
     public static PkgScreenshot getByCode(ObjectContext context, String code) {
         return tryGetByCode(context, code)

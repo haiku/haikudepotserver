@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * <p>This class is designed to help out with creating some common test data that can be re-used between tests.</p>
@@ -179,21 +178,21 @@ public class IntegrationTestSupportService {
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get());
             pkgLocalization.setTitle("Package 1");
             pkgLocalization.setPkg(result.pkg1);
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN).get());
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_GERMAN).get());
             pkgLocalization.setTitle("Packet 1");
             pkgLocalization.setPkg(result.pkg1);
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get());
             pkgLocalization.setTitle("Ping 1");
             pkgLocalization.setPkg(result.pkg1);
         }
@@ -235,7 +234,7 @@ public class IntegrationTestSupportService {
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86_64,
-                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
+                NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get(),
                 null,
                 "pkg1Version2SummarySpanish_feijoa",
                 "pkg1Version2DescriptionSpanish_mango");
@@ -255,7 +254,7 @@ public class IntegrationTestSupportService {
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86_gcc2,
-                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get(),
+                NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get(),
                 null,
                 "pkg1Version2SummarySpanish_apple",
                 "pkg1Version2DescriptionSpanish_guava");
@@ -339,7 +338,7 @@ public class IntegrationTestSupportService {
         user.setNickname(nickname);
         user.setPasswordSalt(); // random
         user.setPasswordHash(authenticationService.hashPassword(user, password));
-        user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+        user.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get());
         context.commitChanges();
         return user;
     }
@@ -361,7 +360,7 @@ public class IntegrationTestSupportService {
                 Repository.tryGetByCode(context, "testrepo").get(),
                 Collections.singletonList(x86_64)).get();
 
-        NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get();
+        NaturalLanguage english = NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get();
 
         {
             User user = createBasicUser(context, "urtest1", "password");

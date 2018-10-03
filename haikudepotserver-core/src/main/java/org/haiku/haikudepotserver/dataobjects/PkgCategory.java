@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
+import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.Collection;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class PkgCategory extends _PkgCategory implements Coded {
+public class PkgCategory extends _PkgCategory implements Coded, CreateAndModifyTimestamped {
 
     public static List<PkgCategory> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");

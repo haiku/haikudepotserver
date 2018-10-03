@@ -112,7 +112,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
 
         final ObjectContext context = serverRuntime.newContext();
 
-        NaturalLanguage naturalLanguage = NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode()).orElseThrow(
+        NaturalLanguage naturalLanguage = NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode()).orElseThrow(
                 () -> new IllegalStateException("unable to find the natural language [" + specification.getNaturalLanguageCode() + "]")
         );
 

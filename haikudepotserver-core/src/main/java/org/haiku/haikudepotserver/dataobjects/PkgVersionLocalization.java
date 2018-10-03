@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,13 +10,13 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersionLocalization;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
 import java.util.Optional;
 
-public class PkgVersionLocalization extends _PkgVersionLocalization implements CreateAndModifyTimestamped {
+public class PkgVersionLocalization extends _PkgVersionLocalization implements MutableCreateAndModifyTimestamped {
 
     private static List<PkgVersionLocalization> getForPkgVersion(ObjectContext context, PkgVersion pkgVersion) {
         Preconditions.checkArgument(null != context, "the context must be supplied");

@@ -62,7 +62,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllPkgCategoriesRequest.naturalLanguageCode)
                 ? Optional.empty()
-                        : NaturalLanguage.getByCode(context, getAllPkgCategoriesRequest.naturalLanguageCode);
+                        : NaturalLanguage.tryGetByCode(context, getAllPkgCategoriesRequest.naturalLanguageCode);
 
         return new GetAllPkgCategoriesResult(
                 PkgCategory.getAll(context).stream().map(pc -> {
@@ -91,7 +91,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllNaturalLanguagesRequest.naturalLanguageCode)
                         ? Optional.empty()
-                        : NaturalLanguage.getByCode(context, getAllNaturalLanguagesRequest.naturalLanguageCode);
+                        : NaturalLanguage.tryGetByCode(context, getAllNaturalLanguagesRequest.naturalLanguageCode);
 
         return new GetAllNaturalLanguagesResult(
                 NaturalLanguage.getAll(context).stream().map(nl -> {
@@ -175,7 +175,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         ObjectContext context = serverRuntime.newContext();
 
-        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, getAllMessagesRequest.naturalLanguageCode);
+        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.tryGetByCode(context, getAllMessagesRequest.naturalLanguageCode);
 
         if(!naturalLanguageOptional.isPresent()) {
             throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), getAllMessagesRequest.naturalLanguageCode);
@@ -202,7 +202,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         final Optional<NaturalLanguage> naturalLanguageOptional =
                 Strings.isNullOrEmpty(getAllUserRatingStabilitiesRequest.naturalLanguageCode)
                         ? Optional.empty()
-                        : NaturalLanguage.getByCode(context, getAllUserRatingStabilitiesRequest.naturalLanguageCode);
+                        : NaturalLanguage.tryGetByCode(context, getAllUserRatingStabilitiesRequest.naturalLanguageCode);
 
         return new GetAllUserRatingStabilitiesResult(
                 UserRatingStability.getAll(context)

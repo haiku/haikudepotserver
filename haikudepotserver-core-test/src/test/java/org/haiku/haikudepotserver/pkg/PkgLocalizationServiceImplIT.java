@@ -47,7 +47,7 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
                     org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkg1").get();
-            NaturalLanguage naturalLanguageGerman = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN).get();
+            NaturalLanguage naturalLanguageGerman = NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_GERMAN).get();
 
             // ---------------------------------
             pkgLocalizationService.updatePkgLocalization(

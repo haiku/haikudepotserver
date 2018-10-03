@@ -1,5 +1,7 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.sql.Timestamp;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -16,15 +18,25 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
     public static final String ID_PK_COLUMN = "id";
 
     public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
     public static final Property<Boolean> IS_POPULAR = Property.create("isPopular", Boolean.class);
+    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NAME = Property.create("name", String.class);
 
     public String getCode() {
         return (String)readProperty("code");
     }
 
+    public Timestamp getCreateTimestamp() {
+        return (Timestamp)readProperty("createTimestamp");
+    }
+
     public Boolean getIsPopular() {
         return (Boolean)readProperty("isPopular");
+    }
+
+    public Timestamp getModifyTimestamp() {
+        return (Timestamp)readProperty("modifyTimestamp");
     }
 
     public String getName() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,7 +15,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._Pkg;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.springframework.util.CollectionUtils;
@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Pkg extends _Pkg implements CreateAndModifyTimestamped {
+public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
 
     public static final String PATTERN_STRING_NAME_CHAR = "[^\\s/=!<>-]";
 

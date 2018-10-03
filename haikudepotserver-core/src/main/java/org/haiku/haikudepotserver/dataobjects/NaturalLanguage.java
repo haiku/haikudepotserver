@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,8 @@ import org.apache.cayenne.query.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.support.Coded;
+import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.List;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
  * referenced by <a href="https://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a> values such as "en", "de" etc...</P>
  */
 
-public class NaturalLanguage extends _NaturalLanguage {
+public class NaturalLanguage extends _NaturalLanguage implements Coded, CreateAndModifyTimestamped {
 
     public final static String CODE_ENGLISH = "en";
     public final static String CODE_GERMAN = "de";
@@ -47,14 +49,20 @@ public class NaturalLanguage extends _NaturalLanguage {
         return getAll(context).stream().filter(_NaturalLanguage::getIsPopular).collect(Collectors.toList());
     }
 
-    public static Optional<NaturalLanguage> getByCode(ObjectContext context, final String code) {
+    public static Optional<NaturalLanguage> tryGetByCode(ObjectContext context, final String code) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
         return getAll(context).stream().filter(nl -> nl.getCode().equals(code)).collect(SingleCollector.optional());
     }
 
+    public static NaturalLanguage getByCode(ObjectContext context, final String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new IllegalStateException(
+                        "unable to find natural language with code [" + code + "]"));
+    }
+
     public static NaturalLanguage getEnglish(ObjectContext context) {
-        return getByCode(context, CODE_ENGLISH).get();
+        return tryGetByCode(context, CODE_ENGLISH).get();
     }
 
     /**

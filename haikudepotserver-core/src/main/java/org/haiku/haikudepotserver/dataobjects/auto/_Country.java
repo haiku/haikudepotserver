@@ -1,5 +1,7 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.sql.Timestamp;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -17,26 +19,27 @@ public abstract class _Country extends AbstractDataObject {
 
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
+    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NAME = Property.create("name", String.class);
 
-    public void setActive(boolean active) {
-        writeProperty("active", active);
-    }
 	public boolean isActive() {
         Boolean value = (Boolean)readProperty("active");
         return (value != null) ? value.booleanValue() : false;
     }
 
-    public void setCode(String code) {
-        writeProperty("code", code);
-    }
     public String getCode() {
         return (String)readProperty("code");
     }
 
-    public void setName(String name) {
-        writeProperty("name", name);
+    public Timestamp getCreateTimestamp() {
+        return (Timestamp)readProperty("createTimestamp");
     }
+
+    public Timestamp getModifyTimestamp() {
+        return (Timestamp)readProperty("modifyTimestamp");
+    }
+
     public String getName() {
         return (String)readProperty("name");
     }

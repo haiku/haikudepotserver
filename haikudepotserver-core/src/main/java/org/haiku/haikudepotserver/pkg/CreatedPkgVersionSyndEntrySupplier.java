@@ -81,7 +81,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
             NaturalLanguage naturalLanguage = Strings.isBlank(specification.getNaturalLanguageCode())
                 ? NaturalLanguage.getEnglish(context)
-                    : NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode())
+                    : NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode())
                     .orElseThrow(() -> new IllegalStateException("unable to find natural language; "
                             + specification.getNaturalLanguageCode()));
 

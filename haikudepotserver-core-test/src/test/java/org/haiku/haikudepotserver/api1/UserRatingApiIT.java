@@ -38,7 +38,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "password");
 
         UserRating userRating = context.newObject(UserRating.class);
-        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH).get());
+        userRating.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get());
         userRating.setComment("How now brown cow");
         userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,

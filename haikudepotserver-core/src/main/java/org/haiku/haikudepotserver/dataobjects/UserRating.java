@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,11 +14,11 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._UserRating;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 
 import java.util.*;
 
-public class UserRating extends _UserRating implements CreateAndModifyTimestamped {
+public class UserRating extends _UserRating implements MutableCreateAndModifyTimestamped {
 
     public final static int MIN_USER_RATING = 0;
     public final static int MAX_USER_RATING = 5;

@@ -1,3 +1,8 @@
+/*
+ * Copyright 2018, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
@@ -9,7 +14,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,7 +23,7 @@ import java.util.Optional;
 
 public class RepositorySourceMirror
         extends _RepositorySourceMirror
-        implements CreateAndModifyTimestamped, Comparable<RepositorySourceMirror> {
+        implements MutableCreateAndModifyTimestamped, Comparable<RepositorySourceMirror> {
 
     private static final long serialVersionUID = 1L;
 

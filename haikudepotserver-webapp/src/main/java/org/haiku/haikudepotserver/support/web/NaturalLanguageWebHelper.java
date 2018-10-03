@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,7 +39,7 @@ public class NaturalLanguageWebHelper {
             String naturalLanguageCode = request.getParameter(WebConstants.KEY_NATURALLANGUAGECODE);
 
             if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
-                Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, naturalLanguageCode);
+                Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.tryGetByCode(context, naturalLanguageCode);
 
                 if(naturalLanguageOptional.isPresent()) {
                     return naturalLanguageOptional.get();
@@ -57,7 +57,7 @@ public class NaturalLanguageWebHelper {
                 Iterator<String> langI = Splitter.on(Pattern.compile("[-_]")).split(locale.toLanguageTag()).iterator();
 
                 if(langI.hasNext()) {
-                    Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.getByCode(context, langI.next());
+                    Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.tryGetByCode(context, langI.next());
 
                     if(naturalLanguageOptional.isPresent() && naturalLanguageOptional.get().getIsPopular()) {
                         return naturalLanguageOptional.get();
@@ -67,7 +67,7 @@ public class NaturalLanguageWebHelper {
             }
         }
 
-        return NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH).get();
+        return NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get();
     }
 
 }

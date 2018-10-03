@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class PkgVersion extends _PkgVersion implements CreateAndModifyTimestamped, Comparable<PkgVersion> {
+public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTimestamped, Comparable<PkgVersion> {
 
     private final static Pattern MAJOR_PATTERN = Pattern.compile("^[\\w_]+$");
     private final static Pattern MINOR_PATTERN = Pattern.compile("^[\\w_]+$");

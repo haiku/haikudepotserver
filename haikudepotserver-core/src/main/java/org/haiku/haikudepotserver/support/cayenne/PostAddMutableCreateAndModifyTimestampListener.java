@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,7 +9,7 @@ import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -17,11 +17,11 @@ import javax.annotation.Resource;
 
 /**
  * <p>This automates the configuration of the create and modify timestamps against certain
- * entities that support the {@link CreateAndModifyTimestamped} interface.</p>
+ * entities that support the {@link MutableCreateAndModifyTimestamped} interface.</p>
  */
 
 @Component
-public class PostAddCreateAndModifyTimestampListener implements LifecycleListener {
+public class PostAddMutableCreateAndModifyTimestampListener implements LifecycleListener {
 
     @Resource
     private ServerRuntime serverRuntime;
@@ -48,9 +48,9 @@ public class PostAddCreateAndModifyTimestampListener implements LifecycleListene
 
     @Override
     public void postAdd(Object entity) {
-        CreateAndModifyTimestamped createAndModifyTimestamped = (CreateAndModifyTimestamped) entity;
-        createAndModifyTimestamped.setCreateTimestamp();
-        createAndModifyTimestamped.setModifyTimestamp();
+        MutableCreateAndModifyTimestamped mutableCreateAndModifyTimestamped = (MutableCreateAndModifyTimestamped) entity;
+        mutableCreateAndModifyTimestamped.setCreateTimestamp();
+        mutableCreateAndModifyTimestamped.setModifyTimestamp();
     }
 
     @Override
@@ -71,8 +71,8 @@ public class PostAddCreateAndModifyTimestampListener implements LifecycleListene
 
     @Override
     public void preUpdate(Object entity) {
-        CreateAndModifyTimestamped createAndModifyTimestamped = (CreateAndModifyTimestamped) entity;
-        createAndModifyTimestamped.setModifyTimestamp();
+        MutableCreateAndModifyTimestamped mutableCreateAndModifyTimestamped = (MutableCreateAndModifyTimestamped) entity;
+        mutableCreateAndModifyTimestamped.setModifyTimestamp();
     }
 
     @Override
