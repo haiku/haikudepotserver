@@ -9,15 +9,12 @@ import com.google.common.base.Preconditions;
 import org.haiku.haikudepotserver.metrics.model.RequestStart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * <p>This class intercepts SpringMVC calls and is able to relay information about how long the invocation has
@@ -28,29 +25,10 @@ public class MetricsInterceptor extends HandlerInterceptorAdapter {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(MetricsInterceptor.class);
 
-    private final Set<String> pathPrefixesForMetricsCapture;
+    public final String label;
 
-    public MetricsInterceptor(
-            Set<String> pathPrefixesForMetricsCapture) {
-        this.pathPrefixesForMetricsCapture = Preconditions.checkNotNull(pathPrefixesForMetricsCapture);
-    }
-
-    private Optional<String> derivePathPrefix(HttpServletRequest request) {
-        final String path = StringUtils.trimLeadingCharacter(request.getRequestURI(), '/');
-
-        return pathPrefixesForMetricsCapture
-                .stream()
-                .filter(path::startsWith)
-                .findFirst();
-    }
-
-    private Optional<String> deriveMetricName(HttpServletRequest request) {
-        return derivePathPrefix(request).map((p) -> "springmvc-" + p);
-    }
-
-    @PostConstruct
-    public void init() {
-        Preconditions.checkState(null!=pathPrefixesForMetricsCapture, "the path prefixes should have been configured");
+    public MetricsInterceptor(String label) {
+        this.label = "springmvc." + Preconditions.checkNotNull(label);
     }
 
     @Override
@@ -67,12 +45,11 @@ public class MetricsInterceptor extends HandlerInterceptorAdapter {
             HttpServletResponse response,
             Object handler,
             ModelAndView modelAndView) {
-        int status = response.getStatus();
+        HttpStatus status = HttpStatus.valueOf(response.getStatus());
 
-        if (0 != status && 2 == status / 100) {
+        if (status.is2xxSuccessful() || status.is3xxRedirection()) {
             try {
-                deriveMetricName(request).ifPresent(
-                        mn -> request.setAttribute(MetricsFilter.KEY_REQUEST_METRIC, new RequestStart(mn)));
+                request.setAttribute(MetricsFilter.KEY_REQUEST_METRIC, new RequestStart(label));
             } catch (Throwable th) {
                 // don't fail the request.
                 LOGGER.error("an issue has arisen capturing metrics for a spring-mvc invocation", th);

@@ -238,7 +238,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
 
         URL url = new URL(urlString);
 
-        Assertions.assertThat(url.getPath()).endsWith("/feed/pkg.atom");
+        Assertions.assertThat(url.getPath()).endsWith("/__feed/pkg.atom");
 
         // this is a bit rough, but will do for assertion...
         Map<String,String> queryParams = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(url.getQuery());

@@ -45,7 +45,10 @@ import java.util.stream.Collectors;
  */
 
 @Controller
-@RequestMapping(FeedService.PATH_ROOT)
+@RequestMapping(path = {
+        "/feed", // [apl 3.okt.2018] legacy - to be removed
+        FeedService.PATH_ROOT
+})
 public class FeedController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(FeedController.class);

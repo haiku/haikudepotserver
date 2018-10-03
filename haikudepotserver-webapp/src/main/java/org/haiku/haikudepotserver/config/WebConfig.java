@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
 
+import java.util.stream.Stream;
+
 @EnableWebMvc
 @ComponentScan(
         basePackages = { "org.haiku.haikudepotserver" },
@@ -49,23 +51,30 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry
-                .addInterceptor(new MetricsInterceptor(
-                        ImmutableSet.of(
-                                "__maintenance",
-                                "__pkgdownload",
-                                "__pkgsearch",
-                                "__pkgicon",
-                                "__genericpkgicon",
-                                "__pkgscreenshot",
-                                "__repository",
-                                "__pkg"
-                        )
-                ))
-                .addPathPatterns(
-                        "/__**",
-                        "/__**/*"
-                );
+
+        // This is a seemingly ad-hoc list of things to monitor, but it is
+        // unfortunately so that some things need to be wild-carded and others
+        // not -- it is not entirely systematic.
+
+        Stream.of(
+                "/__maintence/**",
+                "/__feed/**",
+                "/__secured/jobdata/*/download",
+                "/__multipage/**",
+                "/__passwordreset/*",
+                "/__pkg/all*.json.gz",
+                "/__pkgdownload/**",
+                "/__pkgicon/all.tar.gz",
+                "/__genericpkgicon.png",
+                "/__pkgicon/**",
+                "/__pkgscreenshot/**",
+                "/__pkgsearch/**",
+                "/opensearch.xml",
+                "/__reference/all*.json.gz",
+                "/__repository/all*.json.gz",
+                "/__repository/**/import")
+                .forEach(p -> registry.addInterceptor(new MetricsInterceptor(p))
+                        .addPathPatterns(p));
     }
 
     @Override
