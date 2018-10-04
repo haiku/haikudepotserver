@@ -23,26 +23,4 @@
         <module>haikudepotserver-webapp</module>
     </modules>
 
-    <profiles>
-        <profile>
-            <id>rpm-capable-build</id>
-
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>Linux</name>
-                </os>
-            </activation>
-
-            <modules>
-                <module>haikudepotserver-rpm-production</module>
-                <module>haikudepotserver-rpm-common</module>
-                <module>haikudepotserver-rpm-parent</module>
-                <module>haikudepotserver-rpm-test</module>
-            </modules>
-
-        </profile>
-
-    </profiles>
-
 </project>

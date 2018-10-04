@@ -9,7 +9,7 @@
 # --------------------------------------------
 
 syntax() {
-	echo "build_hvif2png_rpm <generated-directory>"
+	echo "buildhvif2pngtarball.sh <generated-directory>"
 	exit 1
 }
 
