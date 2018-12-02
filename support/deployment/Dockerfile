@@ -25,7 +25,7 @@ ENV INSTALL_ROOT "/opt/haikudepotserver"
 ENV INSTALL_HVIF2PNG_PATH "${INSTALL_ROOT}/hvif2png-hrev51165/bin/hvif2png.sh"
 
 ENV HDS_WAR "haikudepotserver-webapp-${HDS_VERSION}.war"
-ENV HDS_WAR_DOWNLOAD_URL "https://github.com/aplgithub/haikudepotserver/releases/download/haikudepotserver-${HDS_VERSION}/${HDS_WAR}"
+ENV HDS_WAR_DOWNLOAD_URL "https://github.com/haiku/haikudepotserver/releases/download/haikudepotserver-${HDS_VERSION}/${HDS_WAR}"
 ENV HDS_PORT 8080
 
 ENV JETTY_JAR "jetty-runner-${JETTY_VERSION}.jar"
