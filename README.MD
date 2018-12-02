@@ -18,7 +18,6 @@ This web application is an online tool for working with the software packages of
 | Environment | Modern Web | Simple Web |
 | --- | --- | --- |
 | Production | https://depot.haiku-os.org | https://depot.haiku-os.org/__multipage |
-| Test (on Request) | https://depot-test.haiku-os.org | https://depot-test.haiku-os.org/__multipage |
 
 ## Mailing List
 
