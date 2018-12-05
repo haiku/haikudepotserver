@@ -49,7 +49,7 @@ environment is working.
         </div>
         
         <div class="unsupported-message-container">
-            Esta aplicação não funciona de forma adequada no seu navegador atual.
+            Esta aplica&#xE7;&#xE3;o n&#xE3;o funciona de forma adequada no seu navegador atual.
             &#xC9; poss&#xED;vel que o seu navegador tenha o JavaScript desativado ou este navegador n&#xE3;o &#xE9; suportado.
             As vers&#xF5;es mais recentes dos navegadores
             <a href="https://www.haiku-os.org/docs/userguide/pt_PT/applications/webpositive.html">WebPositive</a>,
