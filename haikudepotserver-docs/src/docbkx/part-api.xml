@@ -878,51 +878,6 @@ jsonschema2cppparser.py \
 
         </section>
 
-        <section>
-            <title>Medium-Term Maintenance</title>
-
-            <para>
-                Medium-term maintenance includes tasks that should be undertaken every hour or so that clean-up
-                disused resources.  An example is removing expired password-reset tokens from the database.
-                Medium-term maintenance is triggered externally (from a process such as &quot;cron&quot;)
-                rather than on an internal scheduler in order to simplify a multi-instance deployment.
-            </para>
-
-
-            <para>
-                <variablelist>
-                    <varlistentry>
-                        <term>HTTP Method</term>
-                        <listitem>GET</listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>Path</term>
-                        <listitem>/__maintenance/hourly</listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>Path</term>
-                        <listitem>/__maintenance/daily</listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>Expected HTTP Status Codes</term>
-                        <listitem>
-                            <variablelist>
-                                <varlistentry>
-                                    <term>200</term>
-                                    <listitem>The maintenance request was accepted</listitem>
-                                </varlistentry>
-                                <varlistentry>
-                                    <term>*</term>
-                                    <listitem>The maintenance job was not accepted</listitem>
-                                </varlistentry>
-                            </variablelist>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </para>
-
-        </section>
-
     </section>
 
 </chapter>

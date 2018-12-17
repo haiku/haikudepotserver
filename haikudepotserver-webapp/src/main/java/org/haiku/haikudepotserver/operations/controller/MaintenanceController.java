@@ -8,29 +8,24 @@ package org.haiku.haikudepotserver.operations.controller;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
+import org.haiku.haikudepotserver.maintenance.model.MaintenanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
  * <p>This controller takes care of scheduling maintenance tasks.  Invocations come into here from a CURL
- * or similar request driven by cron.</p>
+ * or similar request driven by cron.  This controller should no longer be required
+ * as cron-configured maintenance has been replaced with Spring-based scheduling inside
+ * the application server.</p>
  */
 
+@Deprecated
 @Controller
 @RequestMapping(path = {
         "/maintenance", // TODO; remove
@@ -39,39 +34,21 @@ public class MaintenanceController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(MaintenanceController.class);
 
-    private final ServerRuntime serverRuntime;
-    private final JobService jobService;
+    private final MaintenanceService maintenanceService;
 
-    public MaintenanceController(
-            ServerRuntime serverRuntime,
-            JobService jobService) {
-        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.jobService = Preconditions.checkNotNull(jobService);
+    public MaintenanceController(MaintenanceService maintenanceService) {
+        this.maintenanceService = Preconditions.checkNotNull(maintenanceService);
     }
 
     /**
      * <p>This triggers daily tasks.</p>
      */
 
+    @Deprecated
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public void daily(
             HttpServletResponse response) throws IOException {
-
-        // go through all of the repositories and fetch them.  This is essentially a mop-up
-        // task for those repositories that are unable to trigger a refresh.
-
-        {
-            ObjectContext context = serverRuntime.newContext();
-
-            for(Repository repository : Repository.getAllActive(context)) {
-                jobService.submit(
-                        new RepositoryHpkrIngressJobSpecification(repository.getCode()),
-                        JobSnapshot.COALESCE_STATUSES_QUEUED);
-            }
-        }
-
-        LOGGER.info("did trigger daily maintenance");
-
+        maintenanceService.daily();
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
         response.getWriter().print("accepted request for daily maintenance");
@@ -82,31 +59,11 @@ public class MaintenanceController {
      * <p>This triggers hourly tasks.</p>
      */
 
-    // TODO; remove "mediumterm".
-
-    @RequestMapping(path = { "/mediumterm", "/hourly" }, method = RequestMethod.GET)
+    @Deprecated
+    @RequestMapping(path = { "/hourly" }, method = RequestMethod.GET)
     public void hourly(
             HttpServletResponse response) throws IOException {
-
-        // remove any jobs which are too old and are no longer required.
-
-        jobService.clearExpiredJobs();
-
-        // remove any expired password reset tokens.
-
-        {
-            if (UserPasswordResetToken.hasAny(serverRuntime.newContext())) {
-                jobService.submit(
-                        new PasswordResetMaintenanceJobSpecification(),
-                        JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
-            }
-            else {
-                LOGGER.debug("did not submit task for password reset maintenance as there are no tokens stored");
-            }
-        }
-
-        LOGGER.info("did trigger hourly maintenance");
-
+        maintenanceService.hourly();
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString());
         response.getWriter().print("accepted request for hourly maintenance");

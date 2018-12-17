@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
-import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
@@ -33,7 +32,7 @@ import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Properties;
 
-@Import(BasicConfig.class)
+@Import({BasicConfig.class, ScheduleConfig.class})
 @PropertySource(
         value = {
                 "classpath:local.properties",
