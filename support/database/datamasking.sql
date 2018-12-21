@@ -3,13 +3,9 @@
 -- Distributed under the terms of the MIT License.
 --
 -- -------------
+--
 -- This script is designed to be run on an HDS database in order to scramble
 -- some data so that it contains less personal data and no password hashes.
--- Note that this script will leave the following unmodified;
---
--- * nicknames
--- * allocated user permissions
--- * user-rating 'stars' and 'stability' values
 --
 -- -------------
 
@@ -53,6 +49,10 @@ DELETE FROM haikudepot.user_password_reset_token;
 
 -- reset all users' passwords to the default root password and emails to
 -- some non-routable email addresses.  The default password is 'p4mphl3t'.
+
+UPDATE haikudepot.user SET
+  nickname = 'user' || substr(md5(nickname || password_salt), 1, 6)
+  WHERE nickname <> 'root';
 
 UPDATE haikudepot.user SET
   password_hash = 'c65fef911c57a7f8b5db96c7b291586d53e80ab654a33a6195aff5dcdf3246d2',
