@@ -20,6 +20,12 @@
         <dd>{{repository.createTimestamp|timestamp}}</dd>
         <dt><message key="gen.modified.title"></message></dt>
         <dd>{{repository.modifyTimestamp|timestamp}}</dd>
+        <dt repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <message key="viewRepository.password.title"></message>
+        </dt>
+        <dd repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <boolean-indicator state="repository.hasPassword"></boolean-indicator>
+        </dd>
     </dl>
 
     <h2><message key="viewRepository.sources.title"></message></h2>
@@ -45,6 +51,11 @@
     </table>
 
     <ul>
+        <li ng-show="repository.hasPassword" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goDeletePassword()">
+                <message key="viewRepository.deletePasswordAction.title"></message>
+            </a>
+        </li>
         <li ng-show="!amShowingInactiveRepositorySources" repository="repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goShowInactiveRepositorySources()">
                 <message key="viewRepository.showInactiveRepositorySourcesAction.title"></message>

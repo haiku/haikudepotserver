@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,8 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractDataObject extends CayenneDataObject {
 
-    public final static Pattern CODE_PATTERN = Pattern.compile("^[a-z0-9]{2,16}$");
+    public final static String CODE_PATTERN_STRING = "[a-z0-9]{2,16}";
+    public final static Pattern CODE_PATTERN = Pattern.compile("^" + CODE_PATTERN_STRING + "$");
 
     @Override
     protected void validateForSave(ValidationResult validationResult) {

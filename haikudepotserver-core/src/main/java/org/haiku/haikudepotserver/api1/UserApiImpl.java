@@ -217,7 +217,6 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         User user = context.newObject(User.class);
         user.setNaturalLanguage(getNaturalLanguage(context, createUserRequest.naturalLanguageCode));
         user.setNickname(createUserRequest.nickname);
-        user.setPasswordSalt(); // random
         user.setEmail(createUserRequest.email);
         user.setPasswordHash(authenticationService.hashPassword(user, createUserRequest.passwordClear));
         context.commitChanges();

@@ -9,6 +9,7 @@ import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.codahale.metrics.servlets.PingServlet;
 import net.jawr.web.servlet.JawrServlet;
+import org.haiku.haikudepotserver.repository.controller.RepositoryController;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
 import org.haiku.haikudepotserver.support.web.SessionListener;
@@ -47,6 +48,7 @@ public class WebInitializer implements WebApplicationInitializer {
 
         registerSpringFilter(servletContext, "metricsFilter", "/*");
         registerSpringFilter(servletContext, "authenticationFilter", "/*");
+        registerSpringFilter(servletContext, "repositoryAuthenticationFilter", "/" + RepositoryController.SEGMENT_REPOSITORY + "/*");
         registerSpringFilter(servletContext, "loggingFilter", "/*");
         registerSpringFilter(servletContext, "singlePageTemplateFrequencyMetricsFilter", "/__js/app/*");
         registerSpringFilter(servletContext, "desktopApplicationMinimumVersionFilter", "/*");

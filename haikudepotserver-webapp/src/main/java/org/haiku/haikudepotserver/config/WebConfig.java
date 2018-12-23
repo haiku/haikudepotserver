@@ -7,23 +7,19 @@ package org.haiku.haikudepotserver.config;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableSet;
 import com.googlecode.jsonrpc4j.MultipleInvocationListener;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.support.ErrorResolverImpl;
+import org.haiku.haikudepotserver.metrics.MetricsInterceptor;
+import org.haiku.haikudepotserver.metrics.MetricsInvocationListener;
 import org.haiku.haikudepotserver.multipage.MultipageLocaleResolver;
 import org.haiku.haikudepotserver.support.jsonrpc4j.ErrorLoggingInvocationListener;
 import org.haiku.haikudepotserver.support.jsonrpc4j.HttpStatusCodeProvider;
-import org.haiku.haikudepotserver.metrics.MetricsInvocationListener;
-import org.haiku.haikudepotserver.metrics.MetricsInterceptor;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2015-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,6 +27,14 @@ public class GetRepositorySourceResult {
      */
 
     public String url;
+
+    /**
+     * <p>This URL is only shown to some users.  If it is not able to be
+     * provided in the current authentication context, it will be NULL.</p>
+     * @since 2018-12-18
+     */
+
+    public String forcedInternalBaseUrl;
 
     /**
      * @since 2018-07-28

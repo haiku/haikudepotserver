@@ -283,7 +283,7 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
      */
 
     public Optional<URL> tryGetHpkgURL() {
-        return getRepositorySource().tryGetPackagesBaseURL()
+        return getRepositorySource().tryGetExternalFacingPackagesBaseURL()
                 .map(u -> {
                     try {
                         return new URL(

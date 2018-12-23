@@ -130,7 +130,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             ObjectContext mainContext,
             RepositorySource repositorySource)
     throws RepositoryHpkrIngressException {
-        URL url = repositorySource.tryGetDownloadRepoInfoURL().orElseThrow(
+        URL url = repositorySource.tryGetInternalFacingDownloadRepoInfoURL().orElseThrow(
                 () -> new RepositoryHpkrIngressException(
                         "unable to download for [" + repositorySource.getCode()
                         + "] as no download repo info url was available"));
@@ -187,7 +187,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     private void runImportHpkrForRepositorySource(
             ObjectContext mainContext,
             RepositorySource repositorySource) {
-        URL url = repositorySource.tryGetDownloadHpkrURL()
+        URL url = repositorySource.tryGetInternalFacingDownloadHpkrURL()
                 .orElseThrow(() -> new RuntimeException(
                         "unable to import for ["
                                 + repositorySource

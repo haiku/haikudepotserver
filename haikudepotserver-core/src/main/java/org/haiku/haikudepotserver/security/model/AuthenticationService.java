@@ -1,11 +1,12 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.security.model;
 
 import org.apache.cayenne.ObjectId;
+import org.apache.commons.lang3.tuple.Pair;
 import org.haiku.haikudepotserver.dataobjects.User;
 
 import java.util.Optional;
@@ -20,6 +21,12 @@ import java.util.Optional;
 public interface AuthenticationService {
 
     Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear);
+
+    /**
+     * <p>This method will hash the password in a consistent manner across the whole system.</p>
+     */
+
+    String hashPassword(String salt, String passwordClear);
 
     /**
      * <p>This method will hash the password in a consistent manner across the whole system.</p>
@@ -45,5 +52,12 @@ public interface AuthenticationService {
      */
 
     String generateToken(User user);
+
+    /**
+     * <p>This will extract the username, password couple that are transported in the Authorization header
+     * when Basic authentication is used on an HTTP request.</p>
+     */
+
+    Optional<Pair<String, String>> tryExtractCredentialsFromBasicAuthorizationHeader(String header);
 
 }

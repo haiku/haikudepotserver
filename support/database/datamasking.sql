@@ -47,8 +47,8 @@ DELETE FROM captcha.response;
 
 DELETE FROM haikudepot.user_password_reset_token;
 
--- reset all users' passwords to the default root password and emails to
--- some non-routable email addresses.  The default password is 'p4mphl3t'.
+-- reset all users' passwords to 'zimmer' and emails to some non-routable email
+-- addresses.
 
 UPDATE haikudepot.user SET
   nickname = 'user' || substr(md5(nickname || password_salt), 1, 6)

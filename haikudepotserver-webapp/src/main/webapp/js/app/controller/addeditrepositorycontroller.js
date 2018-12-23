@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,7 @@ angular.module('haikudepotserver').controller(
             var amSaving = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.workingRepository || amSaving;
+                return !$scope.workingRepository || amSaving;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
@@ -61,7 +61,8 @@ angular.module('haikudepotserver').controller(
                         [{ code : $routeParams.code }]
                     ).then(
                         function(result) {
-                            $scope.workingRepository = _.clone(result);
+                            $scope.workingRepository = _.extend(
+                                _.clone(result), { 'changePassword': false });
                             refreshBreadcrumbItems();
                             $log.info('fetched repository; '+result.code);
                         },
@@ -91,14 +92,22 @@ angular.module('haikudepotserver').controller(
                 amSaving = true;
 
                 if($scope.amEditing) {
+
+                    var filter = [ 'INFORMATIONURL', 'NAME' ];
+
+                    if ($scope.workingRepository.changePassword) {
+                        filter.push('PASSWORD');
+                    }
+
                     jsonRpc.call(
                             constants.ENDPOINT_API_V1_REPOSITORY,
                             "updateRepository",
                             [{
-                                filter : [ 'INFORMATIONURL', 'NAME' ],
+                                filter : filter,
                                 informationUrl : $scope.workingRepository.informationUrl,
                                 name : $scope.workingRepository.name,
-                                code : $scope.workingRepository.code
+                                code : $scope.workingRepository.code,
+                                passwordClear : $scope.workingRepository.passwordClear
                             }]
                         ).then(
                         function() {

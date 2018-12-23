@@ -15,13 +15,23 @@
         <dd><active-indicator state="repositorySource.active"></active-indicator>&nbsp;</dd>
         <dt><message key="viewRepositorySource.url.title"></message></dt>
         <dd>
-            <span ng-show="repositorySource.url">
-                <a ng-href="{{repositorySource.url}}">{{repositorySource.url}}</a>
-            </span>
+            <span ng-show="repositorySource.url">{{repositorySource.url}}</span>
             <span ng-show="!repositorySource.url" class="text-error">
                 <message key="viewRepositorySource.url.undefined"></message>
             </span>
         </dd>
+        <dt repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <message key="viewRepositorySource.forcedInternalBaseUrl.title"></message>
+        </dt>
+        <dd repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <span ng-show="repositorySource.forcedInternalBaseUrl">
+                {{repositorySource.forcedInternalBaseUrl}}
+            </span>
+            <span ng-show="!repositorySource.forcedInternalBaseUrl">
+                <message key="viewRepositorySource.forcedInternalBaseUrl.undefined"></message>
+            </span>
+        </dd>
+
         <dt><message key="viewRepositorySource.repository.title"></message></dt>
         <dd><repository-label repository="repositorySource.repository"></repository-label></dd>
     </dl>
@@ -57,6 +67,11 @@
     </table>
 
     <ul>
+        <li repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goEdit()">
+                <message key="viewRepositorySource.editAction.title"></message>
+            </a>
+        </li>
         <li ng-show="canDeactivate()" repository="repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
             <a href="" ng-click="goDeactivate()">
                 <message key="viewRepositorySource.deactivateAction.title"></message>

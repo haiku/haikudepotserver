@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,8 @@ public class UpdateRepositoryRequest {
     public enum Filter {
         ACTIVE,
         NAME,
-        INFORMATIONURL
+        INFORMATIONURL,
+        PASSWORD
     }
 
     public String code;
@@ -26,6 +27,14 @@ public class UpdateRepositoryRequest {
     public Boolean active;
 
     public String informationUrl;
+
+    /**
+     * <p>If this field is NULL or the empty string then the password will
+     * be cleared.</p>
+     * @since 2018-12-20
+     */
+
+    public String passwordClear;
 
     public List<Filter> filter;
 

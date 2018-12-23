@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,11 +18,12 @@ angular.module('haikudepotserver').controller(
             $scope.didTriggerImportRepository = false;
             $scope.amShowingInactiveRepositorySources = false;
             var amUpdatingActive = false;
+            var amDeletingPassword = false;
 
             refetchRepository();
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.repository;
+                return !$scope.repository || amUpdatingActive || amDeletingPassword;
             };
 
             function updateActive(flag) {
@@ -99,6 +100,29 @@ angular.module('haikudepotserver').controller(
                         return rs.active;
                     }
                 );
+            };
+
+            $scope.goDeletePassword = function() {
+                amDeletingPassword = true;
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_REPOSITORY,
+                    "updateRepository",
+                    [{
+                        filter: ['PASSWORD'],
+                        code: $routeParams.code,
+                        passwordClear: null
+                    }]
+                ).then(
+                    function() {
+                        $log.info('did delete password for repository [' + $scope.repository.code + ']');
+                        $scope.repository.hasPassword = false;
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                ).finally(function() {
+                    amDeletingPassword = false;
+                });
             };
 
             /**

@@ -46,6 +46,20 @@
             <error-messages key-prefix="addEditRepository.informationUrl" error="addEditRepositoryForm.informationUrl.$error"></error-messages>
         </div>
 
+        <label ng-show="amEditing" for="passwordClear"><message key="addEditRepository.passwordClear.title"></message></label>
+        <div ng-show="amEditing" class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClear')">
+            <input type="checkbox" ng-model="workingRepository.changePassword">
+            <input
+                    id="passwordClear"
+                    type="text"
+                    name="passwordClear"
+                    autocomplete="off"
+                    ng-disabled="!workingRepository.changePassword"
+                    ng-required="workingRepository.changePassword"
+                    ng-model="workingRepository.passwordClear"/>
+            <error-messages key-prefix="addEditRepository.passwordClear" error="addEditRepositoryForm.passwordClear.$error"></error-messages>
+        </div>
+
         <div class="form-action-container">
             <button
                     ng-disabled="addEditRepositoryForm.$invalid"

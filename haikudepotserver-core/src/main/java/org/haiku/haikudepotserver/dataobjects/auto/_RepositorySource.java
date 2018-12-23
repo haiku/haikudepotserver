@@ -21,6 +21,7 @@ public abstract class _RepositorySource extends AbstractDataObject {
 
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<String> CODE = Property.create("code", String.class);
+    public static final Property<String> FORCED_INTERNAL_BASE_URL = Property.create("forcedInternalBaseUrl", String.class);
     public static final Property<String> URL = Property.create("url", String.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
     public static final Property<List<RepositorySourceMirror>> REPOSITORY_SOURCE_MIRRORS = Property.create("repositorySourceMirrors", List.class);
@@ -37,6 +38,13 @@ public abstract class _RepositorySource extends AbstractDataObject {
     }
     public String getCode() {
         return (String)readProperty("code");
+    }
+
+    public void setForcedInternalBaseUrl(String forcedInternalBaseUrl) {
+        writeProperty("forcedInternalBaseUrl", forcedInternalBaseUrl);
+    }
+    public String getForcedInternalBaseUrl() {
+        return (String)readProperty("forcedInternalBaseUrl");
     }
 
     public void setUrl(String url) {

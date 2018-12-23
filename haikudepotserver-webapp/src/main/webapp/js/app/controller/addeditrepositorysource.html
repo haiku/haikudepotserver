@@ -19,6 +19,19 @@
             <error-messages key-prefix="addEditRepositorySource.code" error="addEditRepositorySourceForm.code.$error"></error-messages>
         </div>
 
+        <label for="code"><message key="addEditRepositorySource.forcedInternalBaseUrl.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('forcedInternalBaseUrl')">
+            <input
+                    id="forcedInternalBaseUrl"
+                    type="text"
+                    size="64"
+                    name="forcedInternalBaseUrl"
+                    autocomplete="off"
+                    ng-change="forcedInternalBaseUrlChanged()"
+                    ng-model="workingRepositorySource.forcedInternalBaseUrl"/>
+            <error-messages key-prefix="addEditRepositorySource.forcedInternalBaseUrl" error="addEditRepositorySourceForm.forcedInternalBaseUrl.$error"></error-messages>
+        </div>
+
         <div class="form-action-container">
             <button
                     ng-disabled="addEditRepositorySourceForm.$invalid"

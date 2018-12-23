@@ -40,16 +40,15 @@ import java.util.Optional;
  * an easy way to achieve that; basically done manually.</p>
  */
 
+@SuppressWarnings("unused") // spring setup
 @Controller
-@RequestMapping(path = {
-        "repository", // TODO - remove
-        "__repository"
-})
+@RequestMapping(path = RepositoryController.SEGMENT_REPOSITORY)
 public class RepositoryController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryController.class);
 
-    private final static String SEGMENT_IMPORT = "import";
+    public final static String SEGMENT_REPOSITORY = "__repository";
+    public final static String SEGMENT_IMPORT = "import";
     private final static String SEGMENT_SOURCE = "source";
 
     private final static String KEY_REPOSITORYCODE = "repositoryCode";
@@ -95,8 +94,13 @@ public class RepositoryController extends AbstractController {
                 new RepositoryDumpExportJobSpecification());
     }
 
-    @RequestMapping(value = "{"+KEY_REPOSITORYCODE+"}/" + SEGMENT_IMPORT,  method = RequestMethod.GET)
-    public ResponseEntity<String> fetchRepository(
+    /**
+     * <p>Instructs HDS to start importing data for all repository sources of
+     * the nominated repository</p>
+     */
+
+    @RequestMapping(value = "{" + KEY_REPOSITORYCODE + "}/" + SEGMENT_IMPORT,  method = RequestMethod.GET)
+    public ResponseEntity<String> importRepository(
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode) {
 
         ObjectContext context = serverRuntime.newContext();
@@ -114,10 +118,15 @@ public class RepositoryController extends AbstractController {
 
     }
 
+    /**
+     * <p>Instructs HDS to import repository data for a repository source of
+     * a repository.</p>
+     */
+
     @RequestMapping(
             value = "{"+KEY_REPOSITORYCODE+"}/" + SEGMENT_SOURCE + "/{"+KEY_REPOSITORYSOURCECODE+"}/" + SEGMENT_IMPORT,
             method = RequestMethod.GET)
-    public ResponseEntity<String> fetchRepository(
+    public ResponseEntity<String> importRepository(
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode,
             @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode) {
 

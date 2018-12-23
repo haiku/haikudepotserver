@@ -18,10 +18,7 @@ import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
-import org.haiku.haikudepotserver.dataobjects.Country;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -29,6 +26,7 @@ import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -47,16 +45,19 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
     private final ServerRuntime serverRuntime;
     private final AuthorizationService authorizationService;
+    private final AuthenticationService authenticationService;
     private final RepositoryService repositoryService;
     private final JobService jobService;
 
     public RepositoryApiImpl(
             ServerRuntime serverRuntime,
             AuthorizationService authorizationService,
+            AuthenticationService authenticationService,
             RepositoryService repositoryService,
             JobService jobService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.authenticationService = Preconditions.checkNotNull(authenticationService);
         this.repositoryService = Preconditions.checkNotNull(repositoryService);
         this.jobService = Preconditions.checkNotNull(jobService);
     }
@@ -111,16 +112,16 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
             repositorySources = new HashSet<>();
 
-             for(String repositorySourceCode : triggerImportRepositoryRequest.repositorySourceCodes) {
-                 repositorySources.add(
-                         repositoryOptional.get()
-                                 .getRepositorySources()
-                                 .stream()
-                                 .filter(rs -> rs.getCode().equals(repositorySourceCode))
-                                 .collect(SingleCollector.optional())
-                         .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), repositorySourceCode))
-                 );
-             }
+            for(String repositorySourceCode : triggerImportRepositoryRequest.repositorySourceCodes) {
+                repositorySources.add(
+                        repositoryOptional.get()
+                                .getRepositorySources()
+                                .stream()
+                                .filter(rs -> rs.getCode().equals(repositorySourceCode))
+                                .collect(SingleCollector.optional())
+                                .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), repositorySourceCode))
+                );
+            }
         }
 
         jobService.submit(
@@ -220,13 +221,16 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new AuthorizationFailureException();
         }
 
+        Repository repository = repositoryOptional.get();
+
         GetRepositoryResult result = new GetRepositoryResult();
-        result.active = repositoryOptional.get().getActive();
-        result.code = repositoryOptional.get().getCode();
-        result.name = repositoryOptional.get().getName();
-        result.createTimestamp = repositoryOptional.get().getCreateTimestamp().getTime();
-        result.modifyTimestamp = repositoryOptional.get().getModifyTimestamp().getTime();
-        result.informationUrl = repositoryOptional.get().getInformationUrl();
+        result.active = repository.getActive();
+        result.code = repository.getCode();
+        result.name = repository.getName();
+        result.createTimestamp = repository.getCreateTimestamp().getTime();
+        result.modifyTimestamp = repository.getModifyTimestamp().getTime();
+        result.informationUrl = repository.getInformationUrl();
+        result.hasPassword = StringUtils.isNotBlank(repository.getPasswordHash());
         result.repositorySources = repositoryOptional.get().getRepositorySources()
                 .stream()
                 .filter(
@@ -252,17 +256,12 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkNotNull(updateRepositoryRequest);
 
         final ObjectContext context = serverRuntime.newContext();
-
-        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, updateRepositoryRequest.code);
-
-        if(!repositoryOptional.isPresent()) {
-            throw new ObjectNotFoundException(Repository.class.getSimpleName(), updateRepositoryRequest.code);
-        }
+        Repository repository = getRepositoryOrThrow(context, updateRepositoryRequest.code);
 
         authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
-                repositoryOptional.get(),
+                repository,
                 Permission.REPOSITORY_EDIT);
 
         for(UpdateRepositoryRequest.Filter filter : updateRepositoryRequest.filter) {
@@ -273,13 +272,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                         throw new IllegalStateException("the active flag must be supplied");
                     }
 
-                    if(repositoryOptional.get().getActive() != updateRepositoryRequest.active) {
-                        repositoryOptional.get().setActive(updateRepositoryRequest.active);
+                    if(repository.getActive() != updateRepositoryRequest.active) {
+                        repository.setActive(updateRepositoryRequest.active);
                         LOGGER.info("did set the active flag on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.active);
                     }
 
                     if(!updateRepositoryRequest.active) {
-                        for(RepositorySource repositorySource : repositoryOptional.get().getRepositorySources()) {
+                        for(RepositorySource repositorySource : repository.getRepositorySources()) {
                             if(repositorySource.getActive()) {
                                 repositorySource.setActive(false);
                                 LOGGER.info("did set the active flag on the repository source {} to false", repositorySource.getCode());
@@ -300,12 +299,23 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                         throw new ValidationException(new ValidationFailure(Repository.NAME.getName(), "invalid"));
                     }
 
-                    repositoryOptional.get().setName(name);
+                    repository.setName(name);
                     break;
 
                 case INFORMATIONURL:
-                    repositoryOptional.get().setInformationUrl(updateRepositoryRequest.informationUrl);
+                    repository.setInformationUrl(updateRepositoryRequest.informationUrl);
                     LOGGER.info("did set the information url on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.informationUrl);
+                    break;
+
+                case PASSWORD:
+                    if (StringUtils.isBlank(updateRepositoryRequest.passwordClear)) {
+                        repository.setPasswordHash(null);
+                        LOGGER.info("cleared the password for repository [{}]", repository);
+                    } else {
+                        repository.setPasswordHash(authenticationService.hashPassword(
+                                repository.getPasswordSalt(), updateRepositoryRequest.passwordClear));
+                        LOGGER.info("did update the repository [{}] password", repository);
+                    }
                     break;
 
                 default:
@@ -372,6 +382,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code));
 
         final ObjectContext context = serverRuntime.newContext();
+        User authenticatedUser = tryObtainAuthenticatedUser(context).orElse(null);
 
         Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, request.code);
 
@@ -399,6 +410,15 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     return mirror;
                 })
                 .collect(Collectors.toList());
+
+        if(authorizationService.check(
+                context,
+                tryObtainAuthenticatedUser(context).orElse(null),
+                repositorySourceOptional.get().getRepository(),
+                Permission.REPOSITORY_EDIT)) {
+            result.forcedInternalBaseUrl = repositorySourceOptional.get().getForcedInternalBaseUrl();
+        }
+
         return result;
     }
 
@@ -416,6 +436,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
         }
 
+        RepositorySource repositorySource = repositorySourceOptional.get();
+
         if(!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
@@ -432,8 +454,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     if(null==request.active) {
                         throw new IllegalArgumentException("the active field must be provided if the request requires it to be updated");
                     }
-                    repositorySourceOptional.get().setActive(request.active);
+                    repositorySource.setActive(request.active);
                     LOGGER.info("did set the repository source {} active to {}", repositorySourceOptional.get(), request.active);
+                    break;
+
+                case FORCED_INTERNAL_BASE_URL:
+                    repositorySource.setForcedInternalBaseUrl(
+                            StringUtils.trimToNull(request.forcedInternalBaseUrl));
+                    LOGGER.info("did set the repository source forced internal base url");
                     break;
 
                 default:
@@ -462,18 +490,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "the code for the new repository source must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository for the new repository source must be identified");
 
+
         final ObjectContext context = serverRuntime.newContext();
-
-        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, request.repositoryCode);
-
-        if(!repositoryOptional.isPresent()) {
-            throw new ObjectNotFoundException(Repository.class.getSimpleName(), request.repositoryCode);
-        }
+        Repository repository = getRepositoryOrThrow(context, request.repositoryCode);
 
         if(!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
-                repositoryOptional.get(),
+                repository,
                 Permission.REPOSITORY_EDIT)) {
             throw new AuthorizationFailureException();
         }
@@ -485,12 +509,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         }
 
         RepositorySource repositorySource = context.newObject(RepositorySource.class);
-        repositorySource.setRepository(repositoryOptional.get());
+        repositorySource.setRepository(repository);
         repositorySource.setCode(request.code);
-        repositoryOptional.get().setModifyTimestamp();
+        repository.setModifyTimestamp();
         context.commitChanges();
 
-        LOGGER.info("did create a new repository source '{}' on the repository '{}'", repositorySource, repositoryOptional.get());
+        LOGGER.info("did create a new repository source '{}' on the repository '{}'",
+                repositorySource, repository);
 
         return new CreateRepositorySourceResult();
     }
@@ -632,6 +657,17 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.isPrimary = repositorySourceMirror.getIsPrimary();
         result.repositorySourceCode = repositorySourceMirror.getRepositorySource().getCode();
         return result;
+    }
+
+    private Repository getRepositoryOrThrow(
+            ObjectContext context, String code) throws ObjectNotFoundException {
+        Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, code);
+
+        if(!repositoryOptional.isPresent()) {
+            throw new ObjectNotFoundException(Repository.class.getSimpleName(), code);
+        }
+
+        return repositoryOptional.get();
     }
 
 }

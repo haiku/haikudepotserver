@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -125,11 +125,11 @@ angular.module('haikudepotserver')
             targetType,
             targetIdentifier) {
 
-            if(null==targetType && targetIdentifier) {
+            if(!targetType && targetIdentifier) {
                 throw Error('if the target type is null (check on principal) then the target identifier is also expected to be null');
             }
 
-            if(!permissionCode||(!targetIdentifier&&null!=targetType)) {
+            if(!permissionCode || (!targetIdentifier && !!targetType)) {
                 element.addClass('app-hide');
             }
             else {

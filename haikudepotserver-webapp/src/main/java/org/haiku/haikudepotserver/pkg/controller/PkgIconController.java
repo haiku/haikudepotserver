@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
@@ -45,13 +44,7 @@ public class PkgIconController extends AbstractController {
 
     public final static String SEGMENT_PKGICON = "__pkgicon";
 
-    @Deprecated
-    private final static String SEGMENT_PKGICON_LEGACY = "pkgicon";
-
     private final static String SEGMENT_GENERICPKGICON = "__genericpkgicon.png";
-
-    @Deprecated
-    private final static String SEGMENT_GENERICPKGICON_LEGACY = "genericpkgicon.png";
 
     private final static String SEGMENT_ALL_TAR_BALL = "all.tar.gz";
 
@@ -89,7 +82,7 @@ public class PkgIconController extends AbstractController {
     public void getAllAsTarBall(
             HttpServletResponse response,
             @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSinceHeader)
-        throws IOException {
+            throws IOException {
         JobController.handleRedirectToJobData(
                 response,
                 jobService,
@@ -98,10 +91,7 @@ public class PkgIconController extends AbstractController {
                 new PkgIconExportArchiveJobSpecification());
     }
 
-    @RequestMapping(value = {
-            "/" + SEGMENT_GENERICPKGICON,
-            "/" + SEGMENT_GENERICPKGICON_LEGACY // TODO; remove
-    }, method = RequestMethod.HEAD)
+    @RequestMapping(value = "/" + SEGMENT_GENERICPKGICON, method = RequestMethod.HEAD)
     public void handleGenericHead(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size)
@@ -113,10 +103,7 @@ public class PkgIconController extends AbstractController {
                 false);
     }
 
-    @RequestMapping(value = {
-            "/" + SEGMENT_GENERICPKGICON,
-            "/" + SEGMENT_GENERICPKGICON_LEGACY // TODO; remove
-    }, method = RequestMethod.GET)
+    @RequestMapping(value = "/" + SEGMENT_GENERICPKGICON, method = RequestMethod.GET)
     public void handleGenericGet(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size)
@@ -128,10 +115,9 @@ public class PkgIconController extends AbstractController {
                 false);
     }
 
-    @RequestMapping(value = {
-            "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}",
-            "/" + SEGMENT_PKGICON_LEGACY + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}", // TODO; remove
-    }, method = RequestMethod.HEAD)
+    @RequestMapping(
+            value = "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}",
+            method = RequestMethod.HEAD)
     public void handleHeadPkgIcon(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size,
@@ -148,17 +134,16 @@ public class PkgIconController extends AbstractController {
                 fallback);
     }
 
-    @RequestMapping(value = {
-            "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}",
-            "/" + SEGMENT_PKGICON_LEGACY + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}" // TODO; remove
-    }, method = RequestMethod.GET)
+    @RequestMapping(
+            value = "/" + SEGMENT_PKGICON + "/{"+KEY_PKGNAME+"}.{"+KEY_FORMAT+"}",
+            method = RequestMethod.GET)
     public void handleGetPkgIcon(
             HttpServletResponse response,
             @RequestParam(value = KEY_SIZE, required = false) Integer size,
             @PathVariable(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName,
             @RequestParam(value = KEY_FALLBACK, required = false) Boolean fallback)
-    throws IOException {
+            throws IOException {
         handleHeadOrGetPkgIcon(
                 RequestMethod.GET,
                 response,

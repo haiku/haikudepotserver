@@ -17,7 +17,6 @@ import org.haiku.haikudepotserver.api1.model.repository.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
@@ -68,7 +67,31 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
                 .selectOne(context);
 
         Assertions.assertThat(repository.getActive()).isFalse();
+    }
 
+    @Test
+    public void testUpdateRepository_password() throws ObjectNotFoundException {
+        IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
+        Assertions.assertThat(data.repository.getPasswordHash()).isNull();
+        setAuthenticatedUserToRoot();
+
+        UpdateRepositoryRequest request = new UpdateRepositoryRequest();
+        request.code = "testrepo";
+        request.active = false;
+        request.passwordClear = "Quatsch";
+        request.filter = Collections.singletonList(UpdateRepositoryRequest.Filter.PASSWORD);
+
+        // ------------------------------------
+        repositoryApi.updateRepository(request);
+        // ------------------------------------
+
+        ObjectContext context = serverRuntime.newContext();
+        Repository repository = ObjectSelect
+                .query(Repository.class)
+                .where(Repository.CODE.eq(data.repository.getCode()))
+                .selectOne(context);
+
+        Assertions.assertThat(repository.getPasswordHash()).matches("^[A-Za-z0-9]+$");
     }
 
     private void assertFoundRepository(SearchRepositoriesResult result) {

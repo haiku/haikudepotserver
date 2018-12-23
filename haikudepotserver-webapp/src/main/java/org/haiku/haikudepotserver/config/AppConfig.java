@@ -9,9 +9,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.repository.controller.RepositoryController;
+import org.haiku.haikudepotserver.security.RepositoryAuthenticationFilter;
+import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
@@ -128,6 +132,19 @@ public class AppConfig {
                 "classpath:messages",
                 "classpath:webmessages",
                 "classpath:naturallanguagemessages"
+        );
+    }
+
+    @Bean(name = "repositoryAuthenticationFilter")
+    public RepositoryAuthenticationFilter repositoryAuthenticationFilter(
+            ServerRuntime serverRuntime,
+            AuthenticationService authenticationService
+    ) {
+        return new RepositoryAuthenticationFilter(
+                serverRuntime,
+                authenticationService,
+                s -> s.startsWith("/" + RepositoryController.SEGMENT_REPOSITORY)
+                        && s.endsWith("/" + RepositoryController.SEGMENT_IMPORT)
         );
     }
 

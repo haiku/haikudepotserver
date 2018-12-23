@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,6 +30,11 @@ angular.module('haikudepotserver').controller(
 
             $scope.codeChanged = function() {
                 $scope.addEditRepositorySourceForm.code.$setValidity('unique',true);
+            };
+
+            $scope.forcedInternalBaseUrlChanged = function() {
+                $scope.addEditRepositorySourceForm.forcedInternalBaseUrl.$setValidity('malformed', true);
+                $scope.addEditRepositorySourceForm.forcedInternalBaseUrl.$setValidity('trailingslash', true);
             };
 
             function refreshBreadcrumbItems() {
@@ -92,9 +97,36 @@ angular.module('haikudepotserver').controller(
                 amSaving = true;
 
                 if($scope.amEditing) {
-                    // this was once available, but there is nothing to edit on a
-                    // repository source now.
-                    throw Error('editing a repository source is not supported');
+                    jsonRpc.call(
+                        constants.ENDPOINT_API_V1_REPOSITORY,
+                        "updateRepositorySource",
+                        [{
+                            filter : [ 'FORCED_INTERNAL_BASE_URL' ],
+                            forcedInternalBaseUrl : $scope.workingRepositorySource.forcedInternalBaseUrl,
+                            code : $routeParams.repositorySourceCode
+                        }]
+                    ).then(
+                        function() {
+                            $log.info('did update repository source; '+$routeParams.repositorySourceCode);
+                            breadcrumbs.popAndNavigate();
+                        },
+                        function(err) {
+
+                            switch(err.code) {
+                                case jsonRpc.errorCodes.VALIDATION:
+                                    errorHandling.relayValidationFailuresIntoForm(
+                                        err.data.validationfailures,
+                                        $scope.addEditRepositorySourceForm);
+                                    break;
+
+                                default:
+                                    errorHandling.handleJsonRpcError(err);
+                                    break;
+                            }
+
+                            amSaving = false;
+                        }
+                    );
                 }
                 else {
                     jsonRpc.call(

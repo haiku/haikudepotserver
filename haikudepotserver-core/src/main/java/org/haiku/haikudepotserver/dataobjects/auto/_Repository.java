@@ -26,6 +26,8 @@ public abstract class _Repository extends AbstractDataObject {
     public static final Property<String> INFORMATION_URL = Property.create("informationUrl", String.class);
     public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<String> PASSWORD_HASH = Property.create("passwordHash", String.class);
+    public static final Property<String> PASSWORD_SALT = Property.create("passwordSalt", String.class);
     public static final Property<List<RepositorySource>> REPOSITORY_SOURCES = Property.create("repositorySources", List.class);
 
     public void setActive(Boolean active) {
@@ -75,6 +77,20 @@ public abstract class _Repository extends AbstractDataObject {
     }
     public String getName() {
         return (String)readProperty("name");
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        writeProperty("passwordHash", passwordHash);
+    }
+    public String getPasswordHash() {
+        return (String)readProperty("passwordHash");
+    }
+
+    public void setPasswordSalt(String passwordSalt) {
+        writeProperty("passwordSalt", passwordSalt);
+    }
+    public String getPasswordSalt() {
+        return (String)readProperty("passwordSalt");
     }
 
     public void addToRepositorySources(RepositorySource obj) {

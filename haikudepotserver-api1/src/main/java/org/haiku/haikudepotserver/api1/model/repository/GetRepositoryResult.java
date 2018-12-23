@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,6 +24,12 @@ public class GetRepositoryResult {
     public Long modifyTimestamp;
 
     public String informationUrl;
+
+    /**
+     * @since 2018-12-19
+     */
+
+    public Boolean hasPassword;
 
     /**
      * @since 2015-06-22

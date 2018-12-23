@@ -176,7 +176,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
                 RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
-                repositoryDirectory = new File(repositorySource.tryGetPackagesBaseURL().get().getPath());
+                repositoryDirectory = new File(repositorySource.tryGetExternalFacingPackagesBaseURL().get().getPath());
 
                 if (!repositoryDirectory.mkdirs()) {
                     throw new IllegalStateException("unable to create the on-disk repository");

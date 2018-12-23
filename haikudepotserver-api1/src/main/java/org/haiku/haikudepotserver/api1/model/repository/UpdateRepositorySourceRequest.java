@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,6 +15,7 @@ public class UpdateRepositorySourceRequest {
 
     public enum Filter {
         ACTIVE,
+        FORCED_INTERNAL_BASE_URL
     }
 
     /**
@@ -24,6 +25,12 @@ public class UpdateRepositorySourceRequest {
     public String code;
 
     public Boolean active;
+
+    /**
+     * @since 2018-12-18
+     */
+
+    public String forcedInternalBaseUrl;
 
     /**
      * <p>The filter controls what aspects of the repository source to alter.</p>

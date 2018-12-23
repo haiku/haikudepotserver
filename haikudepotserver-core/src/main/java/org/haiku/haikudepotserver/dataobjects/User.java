@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.dataobjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.hash.Hashing;
-import com.google.common.io.BaseEncoding;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectIdQuery;
@@ -94,7 +93,7 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
         }
 
         if(null==getPasswordSalt()) {
-            setPasswordSalt(UUID.randomUUID().toString());
+            setPasswordSalt();
         }
 
         // create and modify timestamp handled by listener.
@@ -150,38 +149,6 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
                 .stream()
                 .filter(pup -> null == pup.getPkg() || pup.getPkg().equals(pkg))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * <p>The LDAP entry for a person can have a 'userPassword' attribute.  This has the format
-     * {SSHA-256}&lt;base64data&gt;.  The base 64 data, decoded to bytes contains 20 bytes of
-     * hash and the rest is salt.</p>
-     *
-     * <p>This method will convert the information stored in this user over into a format suitable
-     * for storage in this format for LDAP.</p>
-     *
-     * <p>SSHA stands for salted SHA hash.</p>
-     *
-     * <p>RFC-2307</p>
-     */
-
-    public String toLdapUserPasswordAttributeValue() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{SSHA-256}");
-
-        byte[] hash = BaseEncoding.base16().decode(getPasswordHash().toUpperCase());
-
-        if(32 != hash.length) {
-            throw new IllegalStateException("the password hash should be 20 bytes long");
-        }
-
-        byte[] salt = BaseEncoding.base16().decode(getPasswordSalt().toUpperCase());
-
-        byte[] hashAndSalt = new byte[hash.length + salt.length];
-        System.arraycopy(hash, 0, hashAndSalt, 0, hash.length);
-        System.arraycopy(salt, 0, hashAndSalt, hash.length, salt.length);
-
-        return "{SSHA-256}" + BaseEncoding.base64().encode(hashAndSalt);
     }
 
     /**

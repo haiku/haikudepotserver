@@ -327,6 +327,8 @@
 		<db-attribute name="information_url" type="VARCHAR" length="4096"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="password_hash" type="VARCHAR" length="255"/>
+		<db-attribute name="password_salt" type="VARCHAR" length="255"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.repository_seq</db-generator-name>
@@ -336,6 +338,7 @@
 	<db-entity name="repository_source" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="forced_internal_base_url" type="VARCHAR" length="1024"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="url" type="VARCHAR" length="1024"/>
@@ -545,17 +548,21 @@
 		<obj-attribute name="siteUrl" type="java.lang.String" lock="true" db-attribute-path="site_url"/>
 	</obj-entity>
 	<obj-entity name="Repository" className="org.haiku.haikudepotserver.dataobjects.Repository" lock-type="optimistic" dbEntityName="repository" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="active" type="java.lang.Boolean" db-attribute-path="active"/>
-		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
+		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
 		<obj-attribute name="informationUrl" type="java.lang.String" db-attribute-path="information_url"/>
 		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+		<obj-attribute name="passwordHash" type="java.lang.String" lock="true" db-attribute-path="password_hash"/>
+		<obj-attribute name="passwordSalt" type="java.lang.String" lock="true" db-attribute-path="password_salt"/>
+		<post-add method-name="onPostAdd"/>
 	</obj-entity>
 	<obj-entity name="RepositorySource" className="org.haiku.haikudepotserver.dataobjects.RepositorySource" lock-type="optimistic" dbEntityName="repository_source" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
+		<obj-attribute name="forcedInternalBaseUrl" type="java.lang.String" lock="true" db-attribute-path="forced_internal_base_url"/>
 		<obj-attribute name="url" type="java.lang.String" lock="true" db-attribute-path="url"/>
 	</obj-entity>
 	<obj-entity name="RepositorySourceMirror" className="org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror" lock-type="optimistic" dbEntityName="repository_source_mirror" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject" exclude-default-listeners="true">

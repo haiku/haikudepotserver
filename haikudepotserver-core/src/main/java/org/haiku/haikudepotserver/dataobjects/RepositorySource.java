@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Andrew Lindesay
+ * Copyright 2015-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,9 +15,9 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
+import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -75,29 +75,33 @@ public class RepositorySource extends _RepositorySource {
             }
         }
 
-        if(null != getUrl()) {
+        validateUrl(validationResult, getUrl(), URL.getName());
+        validateUrl(validationResult, getForcedInternalBaseUrl(), FORCED_INTERNAL_BASE_URL.getName());
+    }
+
+    private void validateUrl(ValidationResult validationResult, String url, String propertyName) {
+        if(null != url) {
             try {
-                new URL(getUrl());
+                new URL(url);
             }
             catch(MalformedURLException mue) {
-                validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, propertyName, "malformed"));
             }
         }
 
-        if(null != getUrl()) {
-            if(getUrl().endsWith("/")) {
-                validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "trailingslash"));
+        if(null != url) {
+            if(url.endsWith("/")) {
+                validationResult.addFailure(new BeanValidationFailure(this, propertyName, "trailingslash"));
             }
         }
-
     }
 
     /**
      * <p>This is the URL at which one might find the packages for this repository.</p>
      */
 
-    public Optional<URL> tryGetPackagesBaseURL() {
-        return tryGetBaseURL()
+    public Optional<URL> tryGetExternalFacingPackagesBaseURL() {
+        return tryGetBaseURL(ExposureType.EXTERNAL_FACING)
                 .map(bu -> {
                     try {
                         return UriComponentsBuilder.fromUriString(bu.toString())
@@ -116,20 +120,20 @@ public class RepositorySource extends _RepositorySource {
      * <p>This URL can be used to access the HPKR data for the repository source.</p>
      */
 
-    public Optional<URL> tryGetDownloadHpkrURL() {
-        return tryGetDownloadLeafURL("repo");
+    public Optional<URL> tryGetInternalFacingDownloadHpkrURL() {
+        return tryGetInternalFacingDownloadLeafURL("repo");
     }
 
     /**
      * <p>This URL can be used to access the "repo.info" file for the repository.</p>
      */
 
-    public Optional<URL> tryGetDownloadRepoInfoURL() {
-        return tryGetDownloadLeafURL("repo.info");
+    public Optional<URL> tryGetInternalFacingDownloadRepoInfoURL() {
+        return tryGetInternalFacingDownloadLeafURL("repo.info");
     }
 
-    private Optional<URL> tryGetDownloadLeafURL(String leaf) {
-        return tryGetBaseURL()
+    private Optional<URL> tryGetInternalFacingDownloadLeafURL(String leaf) {
+        return tryGetBaseURL(ExposureType.INTERNAL_FACING)
                 .map(bu -> {
                     try {
                         return UriComponentsBuilder.fromUriString(bu.toString())
@@ -149,16 +153,22 @@ public class RepositorySource extends _RepositorySource {
      * files.</p>
      */
 
-    private Optional<URL> tryGetBaseURL() {
-        return tryGetPrimaryMirror()
-                .map(p -> {
+    private Optional<URL> tryGetBaseURL(ExposureType exposureType) {
+        return tryGetBaseURLString(exposureType)
+                .map(u -> {
                     try {
-                        return new URL(p.getBaseUrl());
+                        return new URL(u);
                     }
                     catch(MalformedURLException mue) {
                         throw new IllegalStateException("malformed url should not be stored in a repository");
                     }
                 });
+    }
+
+    private Optional<String> tryGetBaseURLString(ExposureType exposureType) {
+        return Optional.ofNullable(Optional.ofNullable(getForcedInternalBaseUrl())
+                .filter(u -> exposureType == ExposureType.INTERNAL_FACING)
+                .orElseGet(() -> tryGetPrimaryMirror().map(_RepositorySourceMirror::getBaseUrl).orElse(null)));
     }
 
     public RepositorySourceMirror getPrimaryMirror() {

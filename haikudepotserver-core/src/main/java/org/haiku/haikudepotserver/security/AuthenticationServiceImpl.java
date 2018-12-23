@@ -18,6 +18,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -136,13 +138,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return result;
     }
 
-    /**
-     * <p>This method will hash the password in a consistent manner across the whole system.</p>
-     */
-
     @Override
-    public String hashPassword(User user, String passwordClear) {
-        byte[] saltBytes = BaseEncoding.base16().decode(user.getPasswordSalt().toUpperCase());
+    public String hashPassword(String salt, String passwordClear) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(salt));
+        Preconditions.checkArgument(StringUtils.isNotBlank(passwordClear));
+        byte[] saltBytes = BaseEncoding.base16().decode(salt.toUpperCase());
 
         MessageDigest sha;
         try {
@@ -156,6 +156,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         sha.update(saltBytes);
 
         return BaseEncoding.base16().encode(sha.digest()).toLowerCase();
+    }
+
+    @Override
+    public String hashPassword(User user, String passwordClear) {
+        return hashPassword(user.getPasswordSalt(), passwordClear);
     }
 
     private int countMatches(String s, CharToBooleanFunction fn) {
@@ -340,5 +345,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return signedJWT.serialize();
     }
 
+    @Override
+    public Optional<Pair<String, String>> tryExtractCredentialsFromBasicAuthorizationHeader(String header) {
+        return Optional.ofNullable(header)
+                .filter(h -> h.startsWith("Basic "))
+                .map(h -> h.substring(6))
+                .map(s -> new String(Base64.getDecoder().decode(s), Charsets.UTF_8))
+                .map(s -> {
+                    int colonIndex = s.indexOf(":");
+
+                    if (-1 == colonIndex) {
+                        return null;
+                    }
+
+                    return Pair.of(s.substring(0, colonIndex), s.substring(colonIndex + 1));
+                });
+    }
 
 }
