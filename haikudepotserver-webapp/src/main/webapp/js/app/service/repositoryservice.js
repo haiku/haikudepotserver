@@ -9,11 +9,11 @@
 
 angular.module('haikudepotserver').factory('repositoryService',
     [
-        '$log','$q','jsonRpc','userState','errorHandling',
-        'constants',
+        '$log', '$q', 'jsonRpc', 'userState', 'errorHandling',
+        'constants', 'runtimeInformation',
         function(
-            $log,$q,jsonRpc,userState,errorHandling,
-            constants) {
+            $log, $q, jsonRpc, userState, errorHandling,
+            constants, runtimeInformation) {
 
             var repositoriesPromise = undefined;
 
@@ -58,38 +58,51 @@ angular.module('haikudepotserver').factory('repositoryService',
                     }
                 }
 
-                return getRepositories().then(
-                    function(allRepositories) {
-                        var result;
+                var runtimeInformationData = undefined;
 
-                        if(!allRepositories || !allRepositories.length) {
-                            throw Error('no repositories can be found');
-                        }
+                return runtimeInformation.getRuntimeInformation().then(
+                    function(result) {
+                        $log.info('**Y**');
+                        runtimeInformationData = result;
+                    }
+                ).then(function() {
+                    $log.info('**Z**');
+                    return getRepositories();
+                }).then(function(allRepositories) {
+                    var result;
 
-                        if (window.localStorage) {
-                            var codesStr = window.localStorage.getItem(constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY);
+                    if(!allRepositories || !allRepositories.length) {
+                        $log.info('**X1**');
+                        throw Error('no repositories can be found');
+                    }
 
-                            if(codesStr && codesStr.length) {
-                                var codes = angular.fromJson(codesStr);
+                    if (window.localStorage) {
+                        var codesStr = window.localStorage.getItem(constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY);
 
-                                if(codes && codes.length) {
-                                    result = _.filter(allRepositories, function (r) { return _.contains(codes, r.code) });
-                                }
+                        if(codesStr && codesStr.length) {
+                            var codes = angular.fromJson(codesStr);
+
+                            if(codes && codes.length) {
+                                result = _.filter(allRepositories, function (r) { return _.contains(codes, r.code) });
                             }
                         }
-
-                        if(!result || !result.length) {
-                            result = _.filter(allRepositories, function(r) { return r.code == constants.REPOSITORY_CODE_DEFAULT; });
-                        }
-
-                        if(!result || !result.length) {
-                            throw Error('unable to establish the preferential search repositories');
-                        }
-
-                        return result;
                     }
-                );
 
+                    if(!result || !result.length) {
+                        result = _.filter(
+                            allRepositories,
+                            function(r) {
+                                return r.code === runtimeInformationData.defaults.repositoryCode;
+                            });
+                    }
+
+                    if(!result || !result.length) {
+                        $log.info('**X2**; ' + runtimeInformationData.defaults.repositoryCode);
+                        throw Error('unable to establish the preferential search repositories');
+                    }
+
+                    return result;
+                });
             }
 
             return {

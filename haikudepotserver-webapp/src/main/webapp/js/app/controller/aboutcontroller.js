@@ -1,18 +1,18 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 angular.module('haikudepotserver').controller(
     'AboutController',
     [
-        '$scope','$log','$location',
-        'jsonRpc','constants','userState',
-        'breadcrumbs','breadcrumbFactory','errorHandling',
+        '$scope', '$log', '$location',
+        'jsonRpc', 'constants', 'userState', 'runtimeInformation',
+        'breadcrumbs', 'breadcrumbFactory', 'errorHandling',
         function(
-            $scope,$log,$location,
-            jsonRpc,constants,userState,
-            breadcrumbs,breadcrumbFactory,errorHandling) {
+            $scope, $log, $location,
+            jsonRpc, constants, userState, runtimeInformation,
+            breadcrumbs, breadcrumbFactory, errorHandling) {
 
             breadcrumbs.mergeCompleteStack([
                 breadcrumbFactory.createHome(),
@@ -60,17 +60,9 @@ angular.module('haikudepotserver').controller(
             // RUNTIME INFORMATION
 
             function refreshRuntimeInformation() {
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                        "getRuntimeInformation",
-                        [{}]
-                    ).then(
+                runtimeInformation.getRuntimeInformation().then(
                     function(result) {
                         $scope.serverProjectVersion = result.projectVersion;
-                        $log.info('have fetched the runtime information');
-                    },
-                    function(err) {
-                        errorHandling.handleJsonRpcError(err);
                     }
                 );
             }

@@ -17,9 +17,6 @@ angular.module('haikudepotserver')
 
         RECENT_DAYS : 90,
 
-        ARCHITECTURE_CODE_DEFAULT : 'x86_gcc2', // TODO; from API somehow
-        REPOSITORY_CODE_DEFAULT : 'haikuports', // TODO; from API somehow
-
         ENDPOINT_API_V1_REPOSITORY : '/__api/v1/repository',
         ENDPOINT_API_V1_PKG : '/__api/v1/pkg',
         ENDPOINT_API_V1_PKG_JOB: '/__api/v1/pkg/job',

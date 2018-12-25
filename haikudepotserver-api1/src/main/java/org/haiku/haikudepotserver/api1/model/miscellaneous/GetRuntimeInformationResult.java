@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,4 +17,17 @@ public class GetRuntimeInformationResult {
 
     public Boolean isProduction;
 
+    /**
+     * @since 2018-12-24
+     */
+
+    public Defaults defaults;
+
+    public static class Defaults {
+
+        public String architectureCode;
+
+        public String repositoryCode;
+
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,13 +17,15 @@ angular.module('haikudepotserver').directive('banner',function() {
         },
         controller:
             [
-                '$rootScope','$scope','$log','$location','$route','$window',
-                'userState','referenceData','messageSource','breadcrumbs',
-                'errorHandling','breadcrumbFactory','jsonRpc','constants',
+                '$rootScope', '$scope', '$log', '$location', '$route', '$window',
+                'userState', 'referenceData', 'messageSource', 'breadcrumbs',
+                'errorHandling', 'breadcrumbFactory', 'jsonRpc', 'constants',
+                'runtimeInformation',
                 function(
-                    $rootScope,$scope,$log,$location,$route,$window,
-                    userState,referenceData,messageSource,breadcrumbs,
-                    errorHandling,breadcrumbFactory,jsonRpc,constants) {
+                    $rootScope, $scope, $log, $location, $route, $window,
+                    userState, referenceData, messageSource, breadcrumbs,
+                    errorHandling, breadcrumbFactory, jsonRpc, constants,
+                    runtimeInformation) {
 
                     $scope.showActions = false;
                     $scope.showWarnNonProduction = undefined;
@@ -31,18 +33,10 @@ angular.module('haikudepotserver').directive('banner',function() {
                     $scope.naturalLanguageCode = userState.naturalLanguageCode();
 
                     function refreshShowWarnNonProduction() {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                            "getRuntimeInformation",
-                            [{}]
-                        ).then(
-                            function(result) {
+                        runtimeInformation.getRuntimeInformation().then(
+                            function (result) {
                                 $scope.showWarnNonProduction = !result.isProduction;
-                            },
-                            function(err) {
-                                errorHandling.handleJsonRpcError(err);
-                            }
-                        );
+                            });
                     }
 
                     refreshShowWarnNonProduction();
@@ -51,7 +45,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                         var p = $location.path();
 
-                        if(0==p.indexOf('/completepasswordreset/')) {
+                        if(0 === p.indexOf('/completepasswordreset/')) {
                             return true;
                         }
 
@@ -88,7 +82,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.canGoMore = function() {
                         var p = $location.path();
-                        return '/about' != p;
+                        return '/about' !== p;
                     };
 
                     // This will take the user to a page about the application.
@@ -168,7 +162,7 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     $scope.canShowRepository = function() {
                         var p = $location.path();
-                        return '/repositories' != p;
+                        return '/repositories' !== p;
                     };
 
                     $scope.goListRepositories = function() {
@@ -227,7 +221,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     // not from a permissions perspective, but from a navigational perspective.
                     $scope.canGoListUsers = function() {
                         var p = $location.path();
-                        return '/users' != p;
+                        return '/users' !== p;
                     };
 
                     $scope.goListUsers = function() {
@@ -297,7 +291,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                                 var nlc;
                                 nlc = userState.naturalLanguageCode();
 
-                                if ($scope.naturalLanguageCode != nlc) {
+                                if ($scope.naturalLanguageCode !== nlc) {
                                     $scope.naturalLanguageCode = nlc;
                                 }
                             }

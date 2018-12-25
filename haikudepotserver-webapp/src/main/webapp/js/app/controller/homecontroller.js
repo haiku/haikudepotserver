@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,16 +9,16 @@ angular.module('haikudepotserver').controller(
         '$log','$scope','$rootScope','$q','$location',
         'jsonRpc','constants','userState','messageSource','errorHandling',
         'referenceData','breadcrumbs','breadcrumbFactory','searchMixins',
-        'repositoryService',
+        'repositoryService', 'runtimeInformation',
         function(
             $log,$scope,$rootScope,$q,$location,
             jsonRpc,constants,userState,messageSource,errorHandling,
             referenceData,breadcrumbs,breadcrumbFactory,searchMixins,
-            repositoryService) {
+            repositoryService, runtimeInformation) {
 
             angular.extend(this,searchMixins);
 
-            const PAGESIZE = 15;
+            var PAGESIZE = 15;
 
             // keys used in the search of the location
             var KEY_OFFSET = 'o';
@@ -40,6 +40,7 @@ angular.module('haikudepotserver').controller(
 
             var amFetchingPkgs = false;
 
+            $scope.runtimeInformationData = undefined; // pulled in with a promise later...
             $scope.selectedViewCriteriaTypeOption = undefined;
             $scope.searchExpression = $location.search()[KEY_SEARCHEXPRESSION] ? $location.search()[KEY_SEARCHEXPRESSION] : '';
             $scope.lastRefetchPkgsSearchExpression = '';
@@ -179,7 +180,7 @@ angular.module('haikudepotserver').controller(
                 if(!$scope.selectedArchitecture) {
                     $scope.selectedArchitecture = _.findWhere(
                         $scope.architectures,
-                        { code : constants.ARCHITECTURE_CODE_DEFAULT });
+                        { code : $scope.runtimeInformationData.defaults.architectureCode });
                 }
 
                 if(!$scope.selectedArchitecture) {
@@ -295,6 +296,19 @@ angular.module('haikudepotserver').controller(
 
             fnChain([
 
+                // fetch the runtime information to get the meta-data.
+                function(chain) {
+                    runtimeInformation.getRuntimeInformation().then(
+                        function(result) {
+                            $scope.runtimeInformationData = result;
+                            fnChain(chain); // carry on...
+                        },
+                        function(err) {
+                            errorHandling.handleJsonRpcError(err);
+                        }
+                    );
+                },
+
                 // fetch the repositories
                 function(chain) {
                     repositoryService.getRepositories().then(
@@ -363,7 +377,7 @@ angular.module('haikudepotserver').controller(
                 function(chain) {
 
                     $scope.$watch('pkgs.offset', function(newValue, oldValue) {
-                        if(undefined!=oldValue && null!=oldValue && newValue!=oldValue) { // already initialized elsewhere
+                        if(undefined != oldValue && null != oldValue && newValue != oldValue) { // already initialized elsewhere
                             $log.debug('offset change -> refetching pkgs');
                             refetchPkgs();
                         }

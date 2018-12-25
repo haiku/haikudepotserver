@@ -19,6 +19,7 @@ import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
@@ -38,20 +39,27 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     private final MessageSource messageSource;
     private final NaturalLanguageService naturalLanguageService;
     private final Boolean isProduction;
+    private final String architectureDefaultCode;
+    private final String repositoryDefaultCode;
 
+    @Autowired
     public MiscellaneousApiImpl(
             ServerRuntime serverRuntime,
             RuntimeInformationService runtimeInformationService,
             FeedService feedService,
             MessageSource messageSource,
             NaturalLanguageService naturalLanguageService,
-            @Value("${deployment.isproduction:false}") Boolean isProduction) {
+            @Value("${deployment.isproduction:false}") Boolean isProduction,
+            @Value("${architecture.default.code}") String architectureDefaultCode,
+            @Value("${repository.default.code}") String repositoryDefaultCode) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
         this.feedService = Preconditions.checkNotNull(feedService);
         this.messageSource = Preconditions.checkNotNull(messageSource);
         this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
         this.isProduction = Preconditions.checkNotNull(isProduction);
+        this.architectureDefaultCode = Preconditions.checkNotNull(architectureDefaultCode);
+        this.repositoryDefaultCode = Preconditions.checkNotNull(repositoryDefaultCode);
     }
 
     @Override
@@ -150,6 +158,11 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             result.javaVersion = runtimeInformationService.getJavaVersion();
             result.startTimestamp = runtimeInformationService.getStartTimestamp();
         }
+
+        GetRuntimeInformationResult.Defaults defaults = new GetRuntimeInformationResult.Defaults();
+        defaults.architectureCode = architectureDefaultCode;
+        defaults.repositoryCode = repositoryDefaultCode;
+        result.defaults = defaults;
 
         return result;
     }
