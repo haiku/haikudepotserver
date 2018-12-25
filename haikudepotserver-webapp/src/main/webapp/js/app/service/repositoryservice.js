@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -42,8 +42,8 @@ angular.module('haikudepotserver').factory('repositoryService',
             }
 
             function preferentialSearchRepositories(repositories) {
-                if(undefined != repositories) {
-                    if(!repositories || !repositories.length) {
+                if (undefined !== repositories) {
+                    if (!repositories || !repositories.length) {
                         if (window.localStorage) {
                             window.localStorage.removeItem(constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY);
                         }
@@ -62,17 +62,14 @@ angular.module('haikudepotserver').factory('repositoryService',
 
                 return runtimeInformation.getRuntimeInformation().then(
                     function(result) {
-                        $log.info('**Y**');
                         runtimeInformationData = result;
                     }
                 ).then(function() {
-                    $log.info('**Z**');
                     return getRepositories();
                 }).then(function(allRepositories) {
                     var result;
 
                     if(!allRepositories || !allRepositories.length) {
-                        $log.info('**X1**');
                         throw Error('no repositories can be found');
                     }
 
@@ -97,7 +94,6 @@ angular.module('haikudepotserver').factory('repositoryService',
                     }
 
                     if(!result || !result.length) {
-                        $log.info('**X2**; ' + runtimeInformationData.defaults.repositoryCode);
                         throw Error('unable to establish the preferential search repositories');
                     }
 

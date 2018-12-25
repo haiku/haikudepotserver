@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ angular.module('haikudepotserver').controller(
             $scope.user = undefined;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.user;
+                return undefined === $scope.user;
             };
 
             refreshUser();
@@ -52,7 +52,7 @@ angular.module('haikudepotserver').controller(
             $scope.canLogout = function() {
                 return userState.user() &&
                     $scope.user &&
-                    userState.user().nickname == $scope.user.nickname;
+                    userState.user().nickname === $scope.user.nickname;
             };
 
             /**
@@ -61,7 +61,7 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goLogout = function() {
-                userState.user(null);
+                userState.token(null);
                 breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
             };
 
@@ -69,14 +69,14 @@ angular.module('haikudepotserver').controller(
                 return userState.user() &&
                     $scope.user &&
                     $scope.user.active &&
-                    $scope.user.nickname != userState.user().nickname;
+                    $scope.user.nickname !== userState.user().nickname;
             };
 
             $scope.canReactivate = function() {
                 return userState.user() &&
                     $scope.user &&
                     !$scope.user.active &&
-                    $scope.user.nickname != userState.user().nickname;
+                    $scope.user.nickname !== userState.user().nickname;
             };
 
             function setActive(flag) {
@@ -91,7 +91,7 @@ angular.module('haikudepotserver').controller(
                         active : flag
                     }]
                 ).then(
-                    function(result) {
+                    function() {
                         $scope.user.active = flag;
                         $log.info('did update user active flag; '+flag);
                     },

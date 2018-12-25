@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -48,22 +48,20 @@ angular.module('haikudepotserver').factory('userState',
 
             function naturalLanguageCode(value) {
 
-                if(undefined !== value) {
+                if (undefined !== value) {
 
-                    if(!value || !value.match(/^[a-z]{2}$/)) {
+                    if (!value && !value.match(/^[a-z]{2}$/)) {
                         throw Error('the value \''+value+'\' is not a valid natural language code');
                     }
 
-                    if(naturalLanguageCode() != value) {
+                    if (naturalLanguageCode() !== value) {
 
                         var oldNaturalLanguageCode = naturalLanguageCode();
 
-                        if(null==value) {
-
+                        if (null === value) {
                             if(window.localStorage) {
-                                window.localStorage.removeItem(HDS_USER_KEY);
+                                window.localStorage.removeItem(HDS_NATURALLANGUAGECODE_KEY);
                             }
-
                             userStateData.naturalLanguageCode = undefined;
                         }
                         else {
@@ -73,7 +71,6 @@ angular.module('haikudepotserver').factory('userState',
                             }
 
                             userStateData.naturalLanguageCode = value;
-
                         }
 
                         $rootScope.$broadcast(
@@ -137,7 +134,8 @@ angular.module('haikudepotserver').factory('userState',
 
                         var newUser = { nickname : jwt.tokenNickname(value) };
 
-                        if(!userStateData.currentTokenUserNickname || userStateData.currentTokenUserNickname != newUser.nickname) {
+                        if (!userStateData.currentTokenUserNickname ||
+                            userStateData.currentTokenUserNickname !== newUser.nickname) {
                             $rootScope.$broadcast('userChangeStart', newUser);
                         }
 
@@ -156,7 +154,8 @@ angular.module('haikudepotserver').factory('userState',
 
                         configureTokenRenewal();
 
-                        if(!userStateData.currentTokenUserNickname || userStateData.currentTokenUserNickname != newUser.nickname) {
+                        if (!userStateData.currentTokenUserNickname ||
+                            userStateData.currentTokenUserNickname !== newUser.nickname) {
                             resetAuthorization();
                             $rootScope.$broadcast('userChangeSuccess', newUser);
                         }
@@ -217,10 +216,10 @@ angular.module('haikudepotserver').factory('userState',
 
                                     var nowMs = new Date().getTime();
 
-                                    if(timestampsOfLastTokenRenewals.length = SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS) {
+                                    if (timestampsOfLastTokenRenewals.length === SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS) {
                                         var firstMs = timestampsOfLastTokenRenewals.shift();
 
-                                        if(nowMs - firstMs < MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS) {
+                                        if (nowMs - firstMs < MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS) {
                                             throw Error('10 or more renewals of tokens in < ' + MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS + 'ms -- something wrong; failing');
                                         }
                                     }
@@ -291,7 +290,7 @@ angular.module('haikudepotserver').factory('userState',
             // this event fires when another window has made a change to the token.
 
             window.addEventListener('storage', function(e) {
-                if(e.key == HDS_TOKEN_KEY) {
+                if (e.key === HDS_TOKEN_KEY) {
                     $log.info('did receive token storage change from another window');
                     token(e.newValue);
                 }
@@ -456,7 +455,7 @@ angular.module('haikudepotserver').factory('userState',
                     targetAndPermissions : targetAndPermissions
                 });
 
-                if(1==userStateData.checkQueue.length) {
+                if (1 === userStateData.checkQueue.length) {
                     handleNextInCheckQueue();
                 }
 
