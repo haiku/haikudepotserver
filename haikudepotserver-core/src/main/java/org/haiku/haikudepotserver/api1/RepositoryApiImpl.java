@@ -244,6 +244,11 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     resultRs.code = rs.getCode();
                     resultRs.url = rs.tryGetPrimaryMirror().map(_RepositorySourceMirror::getBaseUrl).orElse(null);
                     resultRs.repoInfoUrl = rs.getUrl();
+
+                    if (null != rs.getLastImportTimestamp()) {
+                        resultRs.lastImportTimestamp = rs.getLastImportTimestamp().getTime();
+                    }
+
                     return resultRs;
                 })
                 .collect(Collectors.toList());
@@ -390,12 +395,19 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
         }
 
+        RepositorySource repositorySource = repositorySourceOptional.get();
+
         GetRepositorySourceResult result = new GetRepositorySourceResult();
-        result.active = repositorySourceOptional.get().getActive();
-        result.code = repositorySourceOptional.get().getCode();
-        result.repositoryCode = repositorySourceOptional.get().getRepository().getCode();
-        result.url = repositorySourceOptional.get().getUrl();
-        result.repositorySourceMirrors = repositorySourceOptional.get().getRepositorySourceMirrors()
+        result.active = repositorySource.getActive();
+        result.code = repositorySource.getCode();
+        result.repositoryCode = repositorySource.getRepository().getCode();
+        result.url = repositorySource.getUrl();
+
+        if (null != repositorySource.getLastImportTimestamp()) {
+            result.lastImportTimestamp = repositorySource.getLastImportTimestamp().getTime();
+        }
+
+        result.repositorySourceMirrors = repositorySource.getRepositorySourceMirrors()
                 .stream()
                 .filter(m -> m.getActive() || BooleanUtils.isTrue(request.includeInactiveRepositorySourceMirrors))
                 .sorted()
@@ -414,7 +426,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         if(authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
-                repositorySourceOptional.get().getRepository(),
+                repositorySource.getRepository(),
                 Permission.REPOSITORY_EDIT)) {
             result.forcedInternalBaseUrl = repositorySourceOptional.get().getForcedInternalBaseUrl();
         }

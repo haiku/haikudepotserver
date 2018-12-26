@@ -106,6 +106,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
                 repositorySource.setCode("testsrc2_xyz");
+                repositorySource.setLastImportTimestamp(new java.sql.Timestamp(12345L)); // just after epoc second.
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES.getName(), repositorySource, true);
 
                 RepositorySourceMirror repositorySourceMirror = context.newObject(RepositorySourceMirror.class);
@@ -287,8 +288,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 }
 
             }
-        }
-        finally {
+        } finally {
             if (null != temporaryRepoFile) {
                 if (!temporaryRepoFile.delete()) {
                     LOGGER.warn("unable to delete the temporary 'repo' file");

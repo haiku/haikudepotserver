@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -78,47 +77,39 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
         Preconditions.checkNotNull(specification);
 
         ObjectContext mainContext = serverRuntime.newContext();
-        Repository repository = Repository.getByCode(mainContext, specification.getRepositoryCode());
-        List<RepositorySource> repositorySources = RepositorySource.findActiveByRepository(mainContext, repository);
+        Set<String> allowedRepositorySourceCodes = specification.getRepositorySourceCodes();
 
-        if(repositorySources.isEmpty()) {
-            LOGGER.warn("did not import for repository {} as there are no sources", specification.getRepositoryCode());
-        }
-        else {
-            if(null!=specification.getRepositorySourceCodes() && specification.getRepositorySourceCodes().isEmpty()) {
-                LOGGER.warn("specification contains an empty set of repository source codes");
-            }
-            else {
-
-                serverRuntime.performInTransaction(() -> {
-
-                    try {
-                        for (RepositorySource repositorySource : repositorySources) {
-                            if (
-                                    null == specification.getRepositorySourceCodes() ||
-                                            specification.getRepositorySourceCodes().contains(repositorySource.getCode())) {
-                                runForRepositorySource(mainContext, repositorySource);
-                            } else {
-                                LOGGER.info("skipping repository source; {}", repositorySource.getCode());
+        RepositorySource.findActiveByRepository(
+                mainContext,
+                Repository.getByCode(mainContext, specification.getRepositoryCode()))
+                .stream()
+                .filter(rs -> null == allowedRepositorySourceCodes || allowedRepositorySourceCodes.contains(rs.getCode()))
+                .forEach(rs ->
+                        serverRuntime.performInTransaction(() -> {
+                            try {
+                                runForRepositorySource(mainContext, rs);
+                            } catch (Throwable e) {
+                                LOGGER.error(
+                                        "a problem has arisen processing a repository file for repository source [{}]",
+                                        rs.getCode(), e);
                             }
-                        }
-                    } catch (Throwable e) {
-                        LOGGER.error("a problem has arisen processing a repository file for repository " + repository.getCode(), e);
-                    }
 
-                    return null;
-                });
-            }
-        }
-
+                            return null;
+                        })
+                );
     }
 
     private void runForRepositorySource(
             ObjectContext mainContext,
             RepositorySource repositorySource)
             throws RepositoryHpkrIngressException {
+        LOGGER.info("will import for repository source [{}]", repositorySource);
+
         runImportInfoForRepositorySource(mainContext, repositorySource);
         runImportHpkrForRepositorySource(mainContext, repositorySource);
+
+        repositorySource.setLastImportTimestamp();
+        mainContext.commitChanges();
     }
 
     /**

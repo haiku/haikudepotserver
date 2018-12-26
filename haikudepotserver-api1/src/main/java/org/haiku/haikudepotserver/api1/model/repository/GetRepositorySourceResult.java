@@ -37,6 +37,12 @@ public class GetRepositorySourceResult {
     public String forcedInternalBaseUrl;
 
     /**
+     * @since 2018-12-26
+     */
+
+    public Long lastImportTimestamp;
+
+    /**
      * @since 2018-07-28
      */
 

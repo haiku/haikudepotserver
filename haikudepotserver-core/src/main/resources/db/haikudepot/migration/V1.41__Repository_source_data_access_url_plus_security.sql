@@ -26,3 +26,8 @@ UPDATE haikudepot.repository_source_mirror
 UPDATE haikudepot.repository_source_mirror
   SET base_url = 'https://eu.hpkg.haiku-os.org/haiku/master/x86_64/current'
   WHERE base_url = 'http://buildmaster:80/haikuports/repository/master/x86_64/current';
+
+-- a small addition to store the time of last import against the repository.
+
+ALTER TABLE haikudepot.repository_source
+  ADD COLUMN last_import_timestamp TIMESTAMP;

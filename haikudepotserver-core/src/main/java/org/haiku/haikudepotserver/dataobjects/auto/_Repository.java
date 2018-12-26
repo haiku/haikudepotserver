@@ -105,4 +105,6 @@ public abstract class _Repository extends AbstractDataObject {
     }
 
 
+    protected abstract void onPostAdd();
+
 }

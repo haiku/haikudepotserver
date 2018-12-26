@@ -23,6 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -39,6 +40,12 @@ public class RepositorySource extends _RepositorySource {
         return SelectById.query(RepositorySource.class, objectId)
                 .sharedCache()
                 .selectOne(context);
+    }
+
+    public static RepositorySource getByCode(ObjectContext context, String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new IllegalStateException(
+                        "unable to find the repository source for code [" + code + "]"));
     }
 
     public static Optional<RepositorySource> tryGetByCode(ObjectContext context, String code) {
@@ -186,6 +193,11 @@ public class RepositorySource extends _RepositorySource {
                 .stream()
                 .filter(_RepositorySourceMirror::getIsPrimary)
                 .collect(SingleCollector.optional());
+    }
+
+    public void setLastImportTimestamp() {
+        setLastImportTimestamp(
+                new java.sql.Timestamp(Clock.systemUTC().millis()));
     }
 
     @Override

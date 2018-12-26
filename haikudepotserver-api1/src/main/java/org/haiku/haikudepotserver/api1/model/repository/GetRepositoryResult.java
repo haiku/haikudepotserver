@@ -47,6 +47,12 @@ public class GetRepositoryResult {
 
         public String repoInfoUrl;
 
+        /**
+         * @since 2018-12-26
+         */
+
+        public Long lastImportTimestamp;
+
     }
 
 }
