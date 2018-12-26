@@ -78,14 +78,12 @@ Distributed under the terms of the MIT License.
             The application server will pull &quot;.hpkr&quot; files from remote repositories that contain
             information about the packages at that repository.  Authenticated as root, it is possible to use
             the &quot;hamburger&quot; link at the top of the home page to get to the repositories, to add a repository
-            and to trigger the import of a repository.  There also exists an HTTP GET invocation
-            (see <link linkend="api-importrepositorydata">here</link> for more information)
-            that can be made to trigger the import of a repository from another system
-            <footnote>
-                <para>
-                    Such as the HPKR assembly process
-                </para>
-            </footnote>
+            and to trigger the import of a repository.
+        </para>
+
+        <para>
+            You can find out more about repositories in HDS
+            <link linkend="repositories">here</link>.
         </para>
     </section>
 

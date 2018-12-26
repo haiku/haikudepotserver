@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2016-2017, Andrew Lindesay
+Copyright 2016-2018, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -71,7 +71,10 @@ architecture x86_gcc2
 
             <para>
                 The 'url' parameter is important because it acts as a unique identifier for
-                the repository.
+                the repository.  It is not actually a URL that addresses anything other
+                than a single repository within the space of all possible repositories.  It
+                is important to remember that the 'url parameter here is consistent across
+                mirrors of the same repository.
             </para>
 
         </section>
@@ -80,8 +83,8 @@ architecture x86_gcc2
             <title>packages</title>
 
             <para>
-                This directory contains the packages themselves.  The packages are in HPKR binary format.  The package
-                files have standard names.  Some examples;
+                This directory contains the packages themselves.  The packages are in HPKR
+                binary format.  The package files have standard names.  Some examples;
             </para>
 
             <para>
@@ -104,7 +107,8 @@ architecture x86_gcc2
             concept.  An HDS Repository represents the collection of On-Net Repositories that are conceptually serving
             the same or similar packages for different architectures.  A RepositorySource is a placeholder for the
             different architectures.  A RepositorySource may then have one or more RepositorySourceMirrors
-            in order to store a URL to the repository data for a given geo-location identified by a country code; for example...
+            in order to store a URL to the repository data for a given geo-location identified by a country code;
+            for example...
         </para>
 
         <para>
@@ -139,6 +143,39 @@ architecture x86_gcc2
             Base URL to be used in order to access the On-Net files of the repository.
         </para>
 
+
+    </section>
+
+    <section>
+        <title>Refreshing Repositories</title>
+
+        <para>
+            HDS has its own view of an 'on-net' repository and it is possible that
+            the 'on-net' repository has been updated and so is newer than the
+            HDS view of the same data.  This section discusses how the HDS data can
+            be updated so that its data is synchronized with the remote 'on-net' data.
+        </para>
+
+        <para>
+            Ultimately what happens is that through some mechanism, HDS is prompted
+            to fetch the remote data and to import it.  A periodic process will run
+            that will cause HDS to run from time to time and to import the remote
+            data for each RepositorySource.  In a specific example, for "haikuports"
+            repository for x86_64, each day, HDS will pull down the HPKR data and
+            will import it.
+        </para>
+
+        <para>
+            Often the 'on-net' remote repository data is updated.  This might happen
+            because a package has been updated and the remote HPKR data is re-built
+            with the new package data included in it.  At this moment, after the
+            build is complete, it would be ideal for HDS to be prompted to poll the
+            repository in order to pull down the HPKR data and update its own
+            records.  HDS <link linkend="api-importrepositorydata">provides a
+            simple API</link> for this and the administrators of
+            repositories are invited to use this API in order to cause HDS to update
+            its own records in a timely fashion.
+        </para>
 
     </section>
 

@@ -95,11 +95,24 @@ public class RepositoryController extends AbstractController {
     }
 
     /**
+     * @deprecated to be replaced with POST.
+     */
+
+    // TODO; remove
+
+    @Deprecated
+    @RequestMapping(value = "{" + KEY_REPOSITORYCODE + "}/" + SEGMENT_IMPORT,  method = RequestMethod.GET)
+    public ResponseEntity<String> importRepositoryGet(
+            @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode) {
+        return importRepository(repositoryCode);
+    }
+
+    /**
      * <p>Instructs HDS to start importing data for all repository sources of
      * the nominated repository</p>
      */
 
-    @RequestMapping(value = "{" + KEY_REPOSITORYCODE + "}/" + SEGMENT_IMPORT,  method = RequestMethod.GET)
+    @RequestMapping(value = "{" + KEY_REPOSITORYCODE + "}/" + SEGMENT_IMPORT,  method = RequestMethod.POST)
     public ResponseEntity<String> importRepository(
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode) {
 
@@ -119,14 +132,30 @@ public class RepositoryController extends AbstractController {
     }
 
     /**
+     * @deprecated replaced with a POST equivalent.
+     */
+
+    // TODO; remove
+
+    @Deprecated
+    @RequestMapping(
+            value = "{"+KEY_REPOSITORYCODE+"}/" + SEGMENT_SOURCE + "/{"+KEY_REPOSITORYSOURCECODE+"}/" + SEGMENT_IMPORT,
+            method = RequestMethod.GET)
+    public ResponseEntity<String> importRepositorySourceGet(
+            @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode,
+            @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode) {
+        return importRepositorySource(repositoryCode, repositorySourceCode);
+    }
+
+    /**
      * <p>Instructs HDS to import repository data for a repository source of
      * a repository.</p>
      */
 
     @RequestMapping(
             value = "{"+KEY_REPOSITORYCODE+"}/" + SEGMENT_SOURCE + "/{"+KEY_REPOSITORYSOURCECODE+"}/" + SEGMENT_IMPORT,
-            method = RequestMethod.GET)
-    public ResponseEntity<String> importRepository(
+            method = RequestMethod.POST)
+    public ResponseEntity<String> importRepositorySource(
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode,
             @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode) {
 

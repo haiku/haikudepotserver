@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2017, Andrew Lindesay
+Copyright 2015-2018, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -311,15 +311,23 @@ jsonschema2cppparser.py \
             </para>
 
             <para>
-                In order to prevent the possibility of this API causing undue load on the aopplication server, it will
-                coalesce overlapping requests.
+                In order to prevent the possibility of this API causing undue load on the application server, it will
+                coalesce overlapping requests.  This means that if a succession of requests come in requesting that
+                the repository &quot;xyz&quot; is imported then onle the first one will be honoured and only after the
+                first one is completed with another be accepted.
+            </para>
+
+            <para>
+                It is possible for an administrator to configure a password on the Repository.  If this is the case
+                then this API will require a Basic authentication header to be sent to authenticate the request with
+                the configured password.  The username provided in the Basic authentication header is ignored.
             </para>
 
             <para>
                 <variablelist>
                     <varlistentry>
                         <term>HTTP Method</term>
-                        <listitem>GET</listitem>
+                        <listitem>POST</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
@@ -328,6 +336,21 @@ jsonschema2cppparser.py \
                     <varlistentry>
                         <term>Path</term>
                         <listitem>/__repository/&lt;repositorycode&gt;/source/&lt;repositorysourcecode&gt;/import</listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Specific Request Headers</term>
+                        <listitem>
+                            <variablelist>
+                                <varlistentry>
+                                    <term>Authorization</term>
+                                    <listitem>
+                                        Allows for "Basic" authentication
+                                        mechanism for situations where the
+                                        repository has a password configured.
+                                    </listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Response Content-Type</term>
@@ -339,7 +362,11 @@ jsonschema2cppparser.py \
                             <variablelist>
                                 <varlistentry>
                                     <term>200</term>
-                                    <listitem>The import job was accepted</listitem>
+                                    <listitem>The import job was accepted.</listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>401</term>
+                                    <listitem>The provided password was rejected.</listitem>
                                 </varlistentry>
                                 <varlistentry>
                                     <term>404</term>
@@ -351,9 +378,26 @@ jsonschema2cppparser.py \
                 </variablelist>
             </para>
 
+            <example>
+            <title>Example: Prompt Repository Update</title>
+
             <para>
-                An example URL is &quot;http://localhost:8080/__repository/haikudepot/import&quot;
+                In this example, a remote system build script has just completed the assembly of
+                repository and would now like to prompt HDS to import the HPKR data for processing.
+                The Repository and the RepositorySource are correctly configured on the HDS system.
+                The Repository code is &quot;haikuports&quot; and the RepositorySource is
+                &quot;haikuports_x86_64&quot;.  Using the CURL command, HDS could be prompted as
+                follows;
             </para>
+
+                <para>
+                    <programlisting>curl -X POST \
+-u ":password" \
+"http://depot.haiku-os.org/__repository/haikuports/source/haikuports_x86_64/import"</programlisting>
+                </para>
+
+
+            </example>
 
         </section>
 
