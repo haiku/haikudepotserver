@@ -9,24 +9,6 @@ UPDATE haikudepot.repository SET password_salt = MD5(id || random()::text);
 
 ALTER TABLE haikudepot.repository_source ADD COLUMN forced_internal_base_url VARCHAR(1024);
 
-UPDATE haikudepot.repository_source
-  SET forced_internal_base_url =
-    'http://buildmaster:80/haikuports/repository/master/x86_gcc2/current'
-  WHERE code = 'haikuports_x86_gcc2';
-
-UPDATE haikudepot.repository_source
-  SET forced_internal_base_url =
-    'http://buildmaster:80/haikuports/repository/master/x86_64/current'
-  WHERE code = 'haikuports_x86_64';
-
-UPDATE haikudepot.repository_source_mirror
-  SET base_url = 'https://eu.hpkg.haiku-os.org/haiku/master/x86_gcc2/current'
-  WHERE base_url = 'http://buildmaster:80/haikuports/repository/master/x86_gcc2/current';
-
-UPDATE haikudepot.repository_source_mirror
-  SET base_url = 'https://eu.hpkg.haiku-os.org/haiku/master/x86_64/current'
-  WHERE base_url = 'http://buildmaster:80/haikuports/repository/master/x86_64/current';
-
 -- a small addition to store the time of last import against the repository.
 
 ALTER TABLE haikudepot.repository_source
