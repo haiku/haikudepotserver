@@ -9,6 +9,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.PersistentObject;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -537,6 +539,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(null!=request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositorySourceCode), "the code for the new repository source mirror");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.countryCode), "the country code should be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.baseUrl), "the base url should be supplied");
 
         final ObjectContext context = serverRuntime.newContext();
 
@@ -553,6 +556,17 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                 repositorySource.getRepository(),
                 Permission.REPOSITORY_EDIT)) {
             throw new AuthorizationFailureException();
+        }
+
+        // check that a mirror with this base URL on this repository source
+        // does not already exist.
+
+        if (tryGetRepositorySourceMirrorObjectIdForBaseUrl(
+                repositorySource.getCode(), request.baseUrl).isPresent()) {
+            LOGGER.info("attempt to add a repository source mirror for a url [{}] that is "
+                    + " already in use", request.baseUrl);
+            throw new ValidationException(new ValidationFailure(
+                    RepositorySourceMirror.BASE_URL.getName(), "unique"));
         }
 
         // if there is no other mirror then this should be the primary.
@@ -605,7 +619,21 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     repositorySourceMirror.setActive(null != request.active && request.active);
                     break;
                 case BASE_URL:
-                    repositorySourceMirror.setBaseUrl(request.baseUrl);
+                    if (StringUtils.isBlank(request.baseUrl)) {
+                        throw new ValidationException(new ValidationFailure(
+                                RepositorySourceMirror.BASE_URL.getName(), "required"));
+                    }
+
+                    if (!repositorySourceMirror.getBaseUrl().equals(request.baseUrl)) {
+                        if (tryGetRepositorySourceMirrorObjectIdForBaseUrl(
+                                repositorySourceMirror.getRepositorySource().getCode(),
+                                request.baseUrl).isPresent()) {
+                            throw new ValidationException(new ValidationFailure(
+                                    RepositorySourceMirror.BASE_URL.getName(), "unique"));
+                        }
+
+                        repositorySourceMirror.setBaseUrl(request.baseUrl);
+                    }
                     break;
                 case COUNTRY:
                     Country country = Country.tryGetByCode(context, request.countryCode)
@@ -680,6 +708,28 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         }
 
         return repositoryOptional.get();
+    }
+
+    /**
+     * <p>This will look for the {@link RepositorySourceMirror} that is related
+     * to the nominated {@link RepositorySource} and has the supplied baseUrl.
+     * This is so that a check can be made to ensure that there are not more
+     * than one mirror with the same baseUrl on the one {@link RepositorySource}
+     * .</p>
+     */
+
+    private Optional<ObjectId> tryGetRepositorySourceMirrorObjectIdForBaseUrl(
+            String repositorySourceCode,
+            String baseUrl) {
+        ObjectContext context = serverRuntime.newContext();
+        return RepositorySourceMirror.findByRepositorySource(
+                context,
+                RepositorySource.getByCode(context, repositorySourceCode),
+                true)
+                .stream()
+                .filter(rsm -> rsm.getBaseUrl().equals(baseUrl))
+                .findFirst()
+                .map(PersistentObject::getObjectId);
     }
 
 }

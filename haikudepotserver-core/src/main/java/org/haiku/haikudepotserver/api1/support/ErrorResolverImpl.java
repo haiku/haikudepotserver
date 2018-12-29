@@ -30,14 +30,14 @@ public class ErrorResolverImpl implements ErrorResolver {
     @Override
     public JsonError resolveError(Throwable t, Method method, List<JsonNode> arguments) {
 
-        if(AuthorizationRuleConflictException.class.isAssignableFrom(t.getClass())) {
+        if (AuthorizationRuleConflictException.class.isAssignableFrom(t.getClass())) {
             return new JsonError(
                     Constants.ERROR_CODE_AUTHORIZATIONRULECONFLICT,
                     "authorizationruleconflict",
                     null);
         }
 
-        if(LimitExceededException.class.isAssignableFrom(t.getClass())) {
+        if (LimitExceededException.class.isAssignableFrom(t.getClass())) {
             return new JsonError(
                     Constants.ERROR_CODE_LIMITEXCEEDED,
                     "limitexceeded",
@@ -101,13 +101,16 @@ public class ErrorResolverImpl implements ErrorResolver {
             return new JsonError(
                     Constants.ERROR_CODE_VALIDATION,
                     "validationerror",
-                    validationException.getValidationFailures()
-                    .stream()
-                    .map(vf -> ImmutableMap.of(
-                            "property",vf.getProperty(),
-                            "message",vf.getMessage()
-                    ))
-                    .collect(Collectors.toList())
+                    Collections.singletonMap(
+                            "validationfailures",
+                            validationException.getValidationFailures()
+                                    .stream()
+                                    .map(vf -> ImmutableMap.of(
+                                            "property",vf.getProperty(),
+                                            "message",vf.getMessage()
+                                    ))
+                                    .collect(Collectors.toList())
+                    )
             );
         }
 
