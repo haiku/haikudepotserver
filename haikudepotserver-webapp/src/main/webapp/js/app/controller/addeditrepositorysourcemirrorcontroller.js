@@ -27,6 +27,11 @@ angular.module('haikudepotserver').controller(
                 return $scope.addEditRepositorySourceMirrorForm[name].$invalid ? ['form-control-group-error'] : [];
             };
 
+            $scope.forcedBaseUrlChanged = function() {
+                $scope.addEditRepositorySourceMirrorForm.baseUrl.$setValidity('malformed', true);
+                $scope.addEditRepositorySourceMirrorForm.baseUrl.$setValidity('unique', true);
+            };
+
             function refreshBreadcrumbItems() {
 
                 var repository = {code: $routeParams.repositoryCode};

@@ -20,7 +20,8 @@
                     size="64"
                     name="baseUrl"
                     autocomplete="off"
-                    ng-required="false"
+                    ng-required="true"
+                    ng-change="forcedBaseUrlChanged()"
                     ng-model="workingRepositorySourceMirror.baseUrl"/>
             <error-messages key-prefix="addEditRepositorySourceMirror.baseUrl" error="addEditRepositorySourceMirrorForm.baseUrl.$error"></error-messages>
         </div>

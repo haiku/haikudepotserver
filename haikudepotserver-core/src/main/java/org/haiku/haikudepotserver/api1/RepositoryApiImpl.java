@@ -699,6 +699,31 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         return result;
     }
 
+    @Override
+    public RemoveRepositorySourceMirrorResult removeRepositorySourceMirror(
+            RemoveRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+        Preconditions.checkArgument(null != request, "the request is required");
+        Preconditions.checkArgument(StringUtils.isNotBlank(request.code), "the code is required on the request");
+
+        final ObjectContext context = serverRuntime.newContext();
+
+        RepositorySourceMirror repositorySourceMirror = RepositorySourceMirror.tryGetByCode(context, request.code)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        RepositorySourceMirror.class.getSimpleName(), request.code));
+
+        if (repositorySourceMirror.getIsPrimary()) {
+            throw new IllegalStateException("unable to remove the primary mirror");
+        }
+
+        repositorySourceMirror.getRepositorySource().getRepository().setModifyTimestamp();
+        context.deleteObject(repositorySourceMirror);
+        context.commitChanges();
+
+        LOGGER.info("did remote the repository source mirror [{}]", request.code);
+
+        return new RemoveRepositorySourceMirrorResult();
+    }
+
     private Repository getRepositoryOrThrow(
             ObjectContext context, String code) throws ObjectNotFoundException {
         Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, code);

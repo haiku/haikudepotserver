@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -99,5 +99,11 @@ public interface RepositoryApi {
      */
 
     GetRepositorySourceMirrorResult getRepositorySourceMirror(GetRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+
+    /**
+     * @since 2018-12-29
+     */
+
+    RemoveRepositorySourceMirrorResult removeRepositorySourceMirror(RemoveRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
 
 }

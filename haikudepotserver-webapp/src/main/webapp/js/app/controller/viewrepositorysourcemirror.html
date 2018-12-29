@@ -38,7 +38,28 @@
                 <message key="viewRepositorySourceMirror.editAction.title"></message>
             </a>
         </li>
+        <li ng-show="canRemove()" repository="repositorySourceMirror.repositorySource.repository" show-if-repository-permission="'REPOSITORY_EDIT'">
+            <a href="" ng-click="goRemove()">
+                <message key="viewRepositorySourceMirror.removeAction.title"></message>
+            </a>
+        </li>
     </ul>
+
+    <modal-container show="!!amDeleting" width="320" height="210" close="goCancelRemove()">
+
+        <h3><message key="viewRepositorySourceMirror.removeActionModal.title"></message></h3>
+        <p><message key="viewRepositorySourceMirror.removeActionModal.description"></message></p>
+
+        <div>
+            <button ng-click="goConfirmRemove()">
+                <message key="viewRepositorySourceMirror.removeActionModal.confirmAction.title"></message>
+            </button>
+            <button ng-click="goCancelRemove()">
+                <message key="viewRepositorySourceMirror.removeActionModal.cancelAction.title"></message>
+            </button>
+        </div>
+
+    </modal-container>
 
 </div>
 

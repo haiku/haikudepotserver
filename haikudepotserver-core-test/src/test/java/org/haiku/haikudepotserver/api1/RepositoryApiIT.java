@@ -389,4 +389,28 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ....
     }
 
+    @Test
+    public void testRemoveRepositorySourceMirror() throws Exception {
+        integrationTestSupportService.createStandardTestData();
+
+        RemoveRepositorySourceMirrorRequest request = new RemoveRepositorySourceMirrorRequest();
+        request.code = "testreposrc_xyz_m_notpri";
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Assertions.assertThat(RepositorySourceMirror
+                    .tryGetByCode(context, "testreposrc_xyz_m_notpri").isPresent()).isTrue();
+        }
+
+        // ------------------------------------
+        repositoryApi.removeRepositorySourceMirror(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Assertions.assertThat(RepositorySourceMirror
+                    .tryGetByCode(context, "testreposrc_xyz_m_notpri").isPresent()).isFalse();
+        }
+    }
+
 }

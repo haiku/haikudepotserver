@@ -6,15 +6,16 @@
 angular.module('haikudepotserver').controller(
     'ViewRepositorySourceMirrorController',
     [
-        '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','errorHandling','breadcrumbs',
+        '$scope', '$log', '$location', '$routeParams',
+        'jsonRpc', 'constants', 'errorHandling', 'breadcrumbs',
         'breadcrumbFactory', 'referenceData',
         function(
-            $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling,breadcrumbs,
+            $scope, $log, $location, $routeParams,
+            jsonRpc, constants, errorHandling, breadcrumbs,
             breadcrumbFactory, referenceData) {
 
             $scope.repositorySourceMirror = undefined;
+            $scope.amDeleting = false;
             var amUpdatingActive = false;
 
             refetchRepositorySourceMirror();
@@ -79,6 +80,12 @@ angular.module('haikudepotserver').controller(
                 !amUpdatingActive;
             };
 
+            $scope.canRemove = function() {
+                return $scope.repositorySourceMirror &&
+                    !$scope.repositorySourceMirror.isPrimary &&
+                    !amUpdatingActive;
+            };
+
             $scope.goSetPrimary = function() {
                 runUpdate({
                     isPrimary : true,
@@ -94,6 +101,36 @@ angular.module('haikudepotserver').controller(
             $scope.goEdit = function() {
                 breadcrumbs.pushAndNavigate(
                     breadcrumbFactory.createEditRepositorySourceMirror($scope.repositorySourceMirror));
+            };
+
+            $scope.goRemove = function() {
+                $scope.amDeleting = true;
+            };
+
+            $scope.goCancelRemove = function() {
+                $scope.amDeleting = false;
+            };
+
+            $scope.goConfirmRemove = function() {
+                if (!$scope.amDeleting) {
+                    throw Error('cannot delete the mirror when not in delete mode');
+                }
+
+                jsonRpc.call(
+                    constants.ENDPOINT_API_V1_REPOSITORY,
+                    "removeRepositorySourceMirror",
+                    [{ code: $routeParams.repositorySourceMirrorCode }]
+                ).then(
+                    function() {
+                        $scope.amDeleting = false;
+                        $log.info('did remove the mirror [' +
+                            $routeParams.repositorySourceMirrorCode + ']');
+                        breadcrumbs.popAndNavigate();
+                    },
+                    function(err) {
+                        errorHandling.handleJsonRpcError(err);
+                    }
+                );
             };
 
             function refreshBreadcrumbItems() {
