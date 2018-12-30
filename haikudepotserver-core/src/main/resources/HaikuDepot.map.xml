@@ -373,6 +373,7 @@
 		<db-attribute name="email" type="VARCHAR" length="255"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="is_root" type="BOOLEAN" isMandatory="true"/>
+		<db-attribute name="last_authentication_timestamp" type="TIMESTAMP"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="natural_language_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="nickname" type="VARCHAR" isMandatory="true" length="32"/>
@@ -582,6 +583,7 @@
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="email" type="java.lang.String" lock="true" db-attribute-path="email"/>
 		<obj-attribute name="isRoot" type="java.lang.Boolean" lock="true" db-attribute-path="is_root"/>
+		<obj-attribute name="lastAuthenticationTimestamp" type="java.sql.Timestamp" db-attribute-path="last_authentication_timestamp"/>
 		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="nickname" type="java.lang.String" lock="true" db-attribute-path="nickname"/>
 		<obj-attribute name="passwordHash" type="java.lang.String" lock="true" db-attribute-path="password_hash"/>

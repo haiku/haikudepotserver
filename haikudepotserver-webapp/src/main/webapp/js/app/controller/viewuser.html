@@ -15,6 +15,16 @@
         <dd>{{user.createTimestamp|timestamp}}</dd>
         <dt><message key="gen.modified.title"></message></dt>
         <dd>{{user.modifyTimestamp|timestamp}}</dd>
+        <dt><message key="viewUser.lastAuthenticationTimestamp.title"></message></dt>
+        <dd>
+            <span ng-show="user.lastAuthenticationTimestamp">
+            {{user.lastAuthenticationTimestamp|timestampHourResolution}}
+            <message key="viewUser.lastAuthenticationTimestamp.accuracyNote"></message>
+            </span>
+            <span ng-show="!user.lastAuthenticationTimestamp">
+                <message key="viewUser.lastAuthenticationTimestamp.undefined"></message>
+            </span>
+        </dd>
     </dl>
 
     <h2><message key="gen.actions.title"></message></h2>

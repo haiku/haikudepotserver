@@ -249,6 +249,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         result.naturalLanguageCode = user.getNaturalLanguage().getCode();
         result.createTimestamp = user.getCreateTimestamp().getTime();
         result.modifyTimestamp = user.getModifyTimestamp().getTime();
+        result.lastAuthenticationTimestamp = user.getLastAuthenticationTimestamp().getTime();
         return result;
     }
 

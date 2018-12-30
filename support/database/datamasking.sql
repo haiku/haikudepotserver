@@ -55,8 +55,8 @@ UPDATE haikudepot.user SET
   WHERE nickname <> 'root';
 
 UPDATE haikudepot.user SET
-  password_hash = 'c65fef911c57a7f8b5db96c7b291586d53e80ab654a33a6195aff5dcdf3246d2',
-  password_salt = '984ad9a98d9c52d257b35dea5fde02ef07f65ccf0a08dd42c6f5450488583266',
+  password_hash = 'f925e5a026bb425cc5691e101605eacaf5f05f71a10cf5a9ffb2f96828f8a0c6',
+  password_salt = 'cad3422ea02761f8',
   email = nickname || '@example.com';
 
 -- remove special rights for all users except for root so that anybody getting

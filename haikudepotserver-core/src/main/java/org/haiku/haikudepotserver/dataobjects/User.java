@@ -30,11 +30,9 @@ import java.util.stream.Collectors;
 
 public class User extends _User implements MutableCreateAndModifyTimestamped {
 
-    public final static String NICKNAME_ROOT = "root";
-
-    public final static Pattern NICKNAME_PATTERN = Pattern.compile("^[a-z0-9]{4,16}$");
-    public final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
-    public final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{10,32}$");
+    private final static Pattern NICKNAME_PATTERN = Pattern.compile("^[a-z0-9]{4,16}$");
+    private final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
+    private final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{10,32}$");
 
     public static List<User> findByEmail(ObjectContext context, String email) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
@@ -121,7 +119,7 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
 
         if(null != getPasswordSalt()) {
             if(!PASSWORDSALT_PATTERN.matcher(getPasswordSalt()).matches()) {
-                validationResult.addFailure(new BeanValidationFailure(this, PASSWORD_HASH.getName(), "malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, PASSWORD_SALT.getName(), "malformed"));
             }
         }
 

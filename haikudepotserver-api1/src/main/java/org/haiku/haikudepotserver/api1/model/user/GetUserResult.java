@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2018, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,5 +20,11 @@ public class GetUserResult {
     public Long modifyTimestamp;
 
     public String naturalLanguageCode;
+
+    /**
+     * @since 2018-12-30
+     */
+
+    public Long lastAuthenticationTimestamp;
 
 }

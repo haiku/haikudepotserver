@@ -26,6 +26,7 @@ public abstract class _User extends AbstractDataObject {
     public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
     public static final Property<String> EMAIL = Property.create("email", String.class);
     public static final Property<Boolean> IS_ROOT = Property.create("isRoot", Boolean.class);
+    public static final Property<Timestamp> LAST_AUTHENTICATION_TIMESTAMP = Property.create("lastAuthenticationTimestamp", Timestamp.class);
     public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NICKNAME = Property.create("nickname", String.class);
     public static final Property<String> PASSWORD_HASH = Property.create("passwordHash", String.class);
@@ -67,6 +68,13 @@ public abstract class _User extends AbstractDataObject {
     }
     public Boolean getIsRoot() {
         return (Boolean)readProperty("isRoot");
+    }
+
+    public void setLastAuthenticationTimestamp(Timestamp lastAuthenticationTimestamp) {
+        writeProperty("lastAuthenticationTimestamp", lastAuthenticationTimestamp);
+    }
+    public Timestamp getLastAuthenticationTimestamp() {
+        return (Timestamp)readProperty("lastAuthenticationTimestamp");
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {

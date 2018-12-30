@@ -28,12 +28,15 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.security.MessageDigest;
+import java.sql.Timestamp;
 import java.text.ParseException;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 
@@ -107,7 +110,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear) {
-
         Optional<ObjectId> result = Optional.empty();
 
         if(!Strings.isNullOrEmpty(nickname) && !Strings.isNullOrEmpty(passwordClear)) {
@@ -122,6 +124,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
                 if(hash.equals(user.getPasswordHash())) {
                     result = Optional.ofNullable(userOptional.get().getObjectId());
+                    maybeUpdateLastAuthenticationTimestamp(objectContext, user);
                 }
                 else {
                     LOGGER.info("the authentication for the user; {} failed", nickname);
@@ -137,6 +140,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         return result;
     }
+
+    /**
+     * <p>This will update the time at which the user last authenticated with
+     * the system.  It will only keep this timestamp at a resolution of an
+     * hour.  It does this so that if the user is often authenticating, that
+     * the system is not writing to the user table too often causing low-value
+     * IO load.</p>
+     */
+
+    private void maybeUpdateLastAuthenticationTimestamp(
+            ObjectContext context, User user) {
+        long millisNow = Clock.systemUTC().millis();
+        long millisStored = Optional.ofNullable(user.getLastAuthenticationTimestamp())
+                .map(Timestamp::getTime)
+                .orElse(0L);
+
+        if (Math.abs(millisNow - millisStored) > TimeUnit.MILLISECONDS.convert(1, TimeUnit.HOURS)) {
+            user.setLastAuthenticationTimestamp(new java.sql.Timestamp(millisNow));
+            context.commitChanges();
+            LOGGER.debug("did store last authenticated timestamp for user [{}]", user.getNickname());
+        }
+
+    }
+
 
     @Override
     public String hashPassword(String salt, String passwordClear) {
