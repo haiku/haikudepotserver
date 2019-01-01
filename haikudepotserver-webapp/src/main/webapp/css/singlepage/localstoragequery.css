@@ -1,0 +1,10 @@
+#local-storage-query {
+    color: white;
+    padding: 5px;
+    background: red;
+    border-bottom: 1px solid black;
+}
+
+#local-storage-query a {
+    color: white;
+}

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright 2019, Andrew Lindesay
+Distributed under the terms of the MIT License.
+-->
+
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0" xml:id="datahandling">
+
+    <title>Data Handling</title>
+
+    <para>
+        This section covers how data is handled in Haiku Depot Server (HDS) in
+        terms of its use and persistence from a user perspective.
+    </para>
+
+    <section>
+        <title>Browser</title>
+        <para>
+            A Browser is a piece of software that can be run on a computing
+            device in order to view web sites and web applications.  HDS is such
+            a web application.  Browsers such as
+            <ulink url="https://www.mozilla.org/firefox/">Firefox</ulink>
+            and
+            <ulink url="https://www.google.com/chrome/">Google Chrome</ulink>
+            can be used to access HDS and as it does so, there is the
+            possibility that some data may be stored in the Browser.
+        </para>
+
+        <section>
+            <title>Tracking</title>
+            <para>
+                HDS does not use a form of tracking technology with
+                third-parties.
+            </para>
+        </section>
+
+        <section>
+            <title>Cookies</title>
+            <para>
+                HDS does not use Cookie technology.
+            </para>
+        </section>
+
+        <section>
+            <title>Local Storage</title>
+            <para>
+                Local Storage is a mechanism that is available in some Browsers
+                for maintaining data in the Browser.  HDS can optionally use
+                local storage for conveniently storing some data for the user.
+                Using the Browser's Local Storage is optional and the user is
+                given the choice to allow or disallow HDS to use Local Storage.
+                The HDS system is entirely functional without using Local
+                Storage, but some aspects may not be as convenient.
+                The data stored by HDS using Local Storage includes the
+                following at the time of writing;
+            </para>
+
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        The user of the Browser's preferred natural language
+                        such as English or Russian.
+                    </listitem>
+                    <listitem>
+                        If applicable, the user's current authentication.  This
+                        is convenient because the authentication is then able,
+                        for a short time, survive a Browser restart and is also
+                        able to be shared between tabs of the same Browser.
+                    </listitem>
+                    <listitem>
+                        Some user selections related to search.  For example,
+                        the user's selection of repositories.  This is more
+                        convenient because the user does not need to re-select
+                        their repositories each time they open a new HDS Browser
+                        window.
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+    </section>
+
+</chapter>

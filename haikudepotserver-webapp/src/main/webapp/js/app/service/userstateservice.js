@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,13 +13,13 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log','$q','$rootScope','$timeout','$window','$location',
-        'jsonRpc','pkgScreenshot','errorHandling',
-        'constants','referenceData','jobs','jwt',
+        '$log', '$q', '$rootScope', '$timeout', '$window', '$location',
+        'jsonRpc', 'pkgScreenshot', 'errorHandling',
+        'constants', 'referenceData', 'jobs', 'jwt', 'localStorageProxy',
         function(
-            $log,$q,$rootScope,$timeout,$window,$location,
-            jsonRpc,pkgScreenshot,errorHandling,
-            constants,referenceData,jobs,jwt) {
+            $log, $q, $rootScope, $timeout, $window, $location,
+            jsonRpc, pkgScreenshot, errorHandling,
+            constants, referenceData, jobs, jwt, localStorageProxy) {
 
             var SIZE_CHECKED_PERMISSION_CACHE = 25;
             var SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 10;
@@ -30,15 +30,9 @@ angular.module('haikudepotserver').factory('userState',
 
             var timestampsOfLastTokenRenewals = [];
             var tokenRenewalTimeoutPromise = undefined;
-
-            // this storage is only used if the local storage is not available.
-
-            var userStateData = {
-                checkedPermissionCache : [],
-                checkQueue : [],
-                naturalLanguageCode : 'en',
-                token : undefined,
-                currentTokenUserNickname : undefined
+            var authorizationData = {
+                checkedPermissionCache: [],
+                checkQueue: []
             };
 
             // ------------------------------
@@ -59,18 +53,10 @@ angular.module('haikudepotserver').factory('userState',
                         var oldNaturalLanguageCode = naturalLanguageCode();
 
                         if (null === value) {
-                            if(window.localStorage) {
-                                window.localStorage.removeItem(HDS_NATURALLANGUAGECODE_KEY);
-                            }
-                            userStateData.naturalLanguageCode = undefined;
+                            localStorageProxy.removeItem(HDS_NATURALLANGUAGECODE_KEY);
                         }
                         else {
-
-                            if(window.localStorage) {
-                                window.localStorage.setItem(HDS_NATURALLANGUAGECODE_KEY, value);
-                            }
-
-                            userStateData.naturalLanguageCode = value;
+                            localStorageProxy.setItem(HDS_NATURALLANGUAGECODE_KEY, value);
                         }
 
                         $rootScope.$broadcast(
@@ -81,11 +67,7 @@ angular.module('haikudepotserver').factory('userState',
                     }
                 }
 
-                if(window.localStorage) {
-                    return window.localStorage.getItem(HDS_NATURALLANGUAGECODE_KEY);
-                }
-
-                return userStateData.naturalLanguageCode;
+                return localStorageProxy.getItem(HDS_NATURALLANGUAGECODE_KEY);
             }
 
             function user() {
@@ -100,20 +82,11 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             function token(value) {
-
                 if(undefined !== value) {
-
                     if (null == value) {
-
-                        if (userStateData.currentTokenUserNickname || token()) {
-
-                            if (window.localStorage) {
-                                window.localStorage.removeItem(HDS_TOKEN_KEY);
-                            }
-
+                        if (token()) {
+                            localStorageProxy.removeItem(HDS_TOKEN_KEY);
                             $rootScope.$broadcast('userChangeStart', null);
-
-                            userStateData.token = undefined;
 
                             // remove the Authorization header for HTTP transport
                             jsonRpc.setHeader('Authorization');
@@ -121,31 +94,26 @@ angular.module('haikudepotserver').factory('userState',
                             jobs.setHeader('Authorization');
 
                             cancelTokenRenewalTimeout();
-                            userStateData.currentTokenUserNickname = undefined;
                             resetAuthorization();
 
                             $rootScope.$broadcast('userChangeSuccess', null);
                         }
                     }
                     else {
+
                         if (jwt.millisUntilExpirationForToken(value) <= 0) {
                             throw Error('at attempt has been made to set a token that has expired already');
                         }
 
+                        var oldUser = user();
                         var newUser = { nickname : jwt.tokenNickname(value) };
+                        var userChanging = !oldUser || oldUser.nickname !== newUser.nickname;
 
-                        if (!userStateData.currentTokenUserNickname ||
-                            userStateData.currentTokenUserNickname !== newUser.nickname) {
+                        if (userChanging) {
                             $rootScope.$broadcast('userChangeStart', newUser);
                         }
 
-                        if (window.localStorage) {
-                            window.localStorage.setItem(HDS_TOKEN_KEY, value);
-                        }
-                        else {
-                            userStateData.token = value;
-                        }
-
+                        localStorageProxy.setItem(HDS_TOKEN_KEY, value);
                         var authenticationContent = 'Bearer ' + value;
 
                         jsonRpc.setHeader('Authorization', authenticationContent);
@@ -154,21 +122,14 @@ angular.module('haikudepotserver').factory('userState',
 
                         configureTokenRenewal();
 
-                        if (!userStateData.currentTokenUserNickname ||
-                            userStateData.currentTokenUserNickname !== newUser.nickname) {
+                        if (userChanging) {
                             resetAuthorization();
                             $rootScope.$broadcast('userChangeSuccess', newUser);
                         }
-
-                        userStateData.currentTokenUserNickname = newUser.nickname;
                     }
                 }
 
-                if(window.localStorage) {
-                    return window.localStorage.getItem(HDS_TOKEN_KEY);
-                }
-
-                return userStateData.token;
+                return localStorageProxy.getItem(HDS_TOKEN_KEY);
             }
 
             // ------------------------------
@@ -316,8 +277,8 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             function resetAuthorization() {
-                userStateData.checkedPermissionCache = [];
-                userStateData.checkQueue = [];
+                authorizationData.checkedPermissionCache = [];
+                authorizationData.checkQueue = [];
             }
 
             function check(targetAndPermissions) {
@@ -332,7 +293,7 @@ angular.module('haikudepotserver').factory('userState',
                         return null;
                     }
 
-                    if(!userStateData.checkedPermissionCache.length) {
+                    if(!authorizationData.checkedPermissionCache.length) {
                         return null;
                     }
 
@@ -340,7 +301,7 @@ angular.module('haikudepotserver').factory('userState',
 
                     for(var i=0;i<targetAndPermissionsToCheckAgainstCache.length;i++) {
                         var cachedTargetAndPermission = _.findWhere(
-                            userStateData.checkedPermissionCache,
+                            authorizationData.checkedPermissionCache,
                             targetAndPermissionsToCheckAgainstCache[i]);
 
                         if(!cachedTargetAndPermission) {
@@ -358,13 +319,13 @@ angular.module('haikudepotserver').factory('userState',
                 // local cache or by talking to the remote application server.
 
                 function handleNextInCheckQueue() {
-                    if(userStateData.checkQueue.length) {
-                        var request = userStateData.checkQueue[0];
+                    if(authorizationData.checkQueue.length) {
+                        var request = authorizationData.checkQueue[0];
                         var result = tryDeriveFromCache(request.targetAndPermissions);
 
                         if(null!=result) {
                             request.deferred.resolve(result);
-                            userStateData.checkQueue.shift();
+                            authorizationData.checkQueue.shift();
                             handleNextInCheckQueue();
                         }
                         else {
@@ -374,7 +335,7 @@ angular.module('haikudepotserver').factory('userState',
                             var uncachedTargetAndPermissions = _.filter(
                                 request.targetAndPermissions,
                                 function(targetAndPermission) {
-                                    return !_.findWhere(userStateData.checkedPermissionCache, targetAndPermission);
+                                    return !_.findWhere(authorizationData.checkedPermissionCache, targetAndPermission);
                                 }
                             );
 
@@ -396,7 +357,7 @@ angular.module('haikudepotserver').factory('userState',
 
                                     // blend the new material into the cache.
 
-                                    userStateData.checkedPermissionCache = data.targetAndPermissions.concat(userStateData.checkedPermissionCache);
+                                    authorizationData.checkedPermissionCache = data.targetAndPermissions.concat(authorizationData.checkedPermissionCache);
 
                                     // we should now be in a position to resolve the permission from the cache.
 
@@ -411,16 +372,16 @@ angular.module('haikudepotserver').factory('userState',
                                     // now cull the cache so that we're not storing too much material.  This is very
                                     // simplistic; no LRU or anything.
 
-                                    if(userStateData.checkedPermissionCache.length > SIZE_CHECKED_PERMISSION_CACHE) {
-                                        userStateData.checkedPermissionCache.splice(
+                                    if(authorizationData.checkedPermissionCache.length > SIZE_CHECKED_PERMISSION_CACHE) {
+                                        authorizationData.checkedPermissionCache.splice(
                                             SIZE_CHECKED_PERMISSION_CACHE,
-                                            userStateData.checkedPermissionCache.length-SIZE_CHECKED_PERMISSION_CACHE);
+                                            authorizationData.checkedPermissionCache.length-SIZE_CHECKED_PERMISSION_CACHE);
                                     }
 
                                     // drop this request now that it has been dealt with and move onto checking the
                                     // next one.
 
-                                    userStateData.checkQueue.shift();
+                                    authorizationData.checkQueue.shift();
                                     handleNextInCheckQueue();
                                 },
                                 function(err) {
@@ -450,12 +411,12 @@ angular.module('haikudepotserver').factory('userState',
 
                 // push this request to the queue.
 
-                userStateData.checkQueue.push( {
+                authorizationData.checkQueue.push( {
                     deferred : deferred,
                     targetAndPermissions : targetAndPermissions
                 });
 
-                if (1 === userStateData.checkQueue.length) {
+                if (1 === authorizationData.checkQueue.length) {
                     handleNextInCheckQueue();
                 }
 
@@ -504,7 +465,7 @@ angular.module('haikudepotserver').factory('userState',
                 // if there is an existing natural language code on the local storage then use that
                 // and there is actually no need to initialize the natural language.
 
-                if(!window.localStorage || !window.localStorage.getItem(HDS_NATURALLANGUAGECODE_KEY)) {
+                if(!localStorageProxy.getItem(HDS_NATURALLANGUAGECODE_KEY)) {
                     naturalLanguageCode(constants.NATURALLANGUAGECODE_ENGLISH);
                     referenceData.naturalLanguages().then(
                         function (naturalLanguages) {

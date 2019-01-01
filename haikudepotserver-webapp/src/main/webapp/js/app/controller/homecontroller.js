@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -309,19 +309,19 @@ angular.module('haikudepotserver').controller(
             function updateViewCriteriaTypeOptionsTitles() {
                 _.each(
                     $scope.viewCriteriaTypeOptions,
-                    function(o) {
+                    function (o) {
                         messageSource
                             .get(
-                            userState.naturalLanguageCode(),
-                            o.titleKey)
+                                userState.naturalLanguageCode(),
+                                o.titleKey)
                             .then(
-                            function(value) {
-                                o.title = value;
-                            },
-                            function() { // error already logged
-                                o.title = '???';
-                            }
-                        );
+                                function (value) {
+                                    o.title = value;
+                                },
+                                function () { // error already logged
+                                    o.title = '???';
+                                }
+                            );
                     }
                 );
             }

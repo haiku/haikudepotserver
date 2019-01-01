@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -108,7 +108,10 @@ angular.module('haikudepotserver').factory('errorHandling',
 
             /**
              * <p>Local storage might contain some data about the user state; this should
-             * be removed so that the user is effectively logged out.</p>
+             * be removed so that the user is effectively logged out.  Note that this does
+             * not go through the local storage proxy because if there is an error then it
+             * is not too clear what is and what is not working; for safety's sake, this
+             * will go direct to the window.localStorage.</p>
              */
 
             function clearLocalStorage() {

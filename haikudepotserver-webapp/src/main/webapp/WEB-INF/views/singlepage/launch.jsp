@@ -37,6 +37,7 @@ web-resources and then this starts the java-script single page environment drive
 <c:if test="${param['breadcrumbs']==null || param['breadcrumbs']=='true'}">
     <breadcrumbs></breadcrumbs>
 </c:if>
+<local-storage-query></local-storage-query>
 
 <div class="container">
     <div ng-view></div>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!--
-  ~ Copyright 2018, Andrew Lindesay
+  ~ Copyright 2018-2019, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -50,6 +50,7 @@
                         <chunkedOutput>true</chunkedOutput>
                         <chunkSectionDepth>0</chunkSectionDepth>
                         <htmlStylesheet>css/haikudepotserver-docs.css</htmlStylesheet>
+                        <useIdAsFilename>true</useIdAsFilename>
                     </configuration>
                     <executions>
                         <execution>

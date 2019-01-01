@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,12 +20,12 @@ angular.module('haikudepotserver').directive('banner',function() {
                 '$rootScope', '$scope', '$log', '$location', '$route', '$window',
                 'userState', 'referenceData', 'messageSource', 'breadcrumbs',
                 'errorHandling', 'breadcrumbFactory', 'jsonRpc', 'constants',
-                'runtimeInformation',
+                'runtimeInformation', 'localStorageProxy',
                 function(
                     $rootScope, $scope, $log, $location, $route, $window,
                     userState, referenceData, messageSource, breadcrumbs,
                     errorHandling, breadcrumbFactory, jsonRpc, constants,
-                    runtimeInformation) {
+                    runtimeInformation, localStorageProxy) {
 
                     $scope.showActions = false;
                     $scope.showWarnNonProduction = undefined;
@@ -196,6 +196,14 @@ angular.module('haikudepotserver').directive('banner',function() {
                         $scope.showActions = false;
                         userState.token(null);
                         breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
+                    };
+
+                    $scope.canDisallowLocalStorage = function() {
+                        return localStorageProxy.isLocalStorageAllowed();
+                    };
+
+                    $scope.goDisallowLocalStorage = function() {
+                        localStorageProxy.setLocalStorageAllowed(false);
                     };
 
                     // -----------------

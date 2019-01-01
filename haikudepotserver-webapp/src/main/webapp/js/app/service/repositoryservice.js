@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,10 +10,10 @@
 angular.module('haikudepotserver').factory('repositoryService',
     [
         '$log', '$q', 'jsonRpc', 'userState', 'errorHandling',
-        'constants', 'runtimeInformation',
+        'constants', 'runtimeInformation', 'localStorageProxy',
         function(
             $log, $q, jsonRpc, userState, errorHandling,
-            constants, runtimeInformation) {
+            constants, runtimeInformation, localStorageProxy) {
 
             var repositoriesPromise = undefined;
 
@@ -44,17 +44,13 @@ angular.module('haikudepotserver').factory('repositoryService',
             function preferentialSearchRepositories(repositories) {
                 if (undefined !== repositories) {
                     if (!repositories || !repositories.length) {
-                        if (window.localStorage) {
-                            window.localStorage.removeItem(constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY);
-                        }
+                        localStorageProxy.removeItem(constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY);
                     }
                     else {
-                        if (window.localStorage) {
-                            window.localStorage.setItem(
-                                constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY,
-                                angular.toJson(_.pluck(repositories,'code'))
-                            );
-                        }
+                        localStorageProxy.setItem(
+                            constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY,
+                            angular.toJson(_.pluck(repositories,'code'))
+                        );
                     }
                 }
 
@@ -69,23 +65,21 @@ angular.module('haikudepotserver').factory('repositoryService',
                 }).then(function(allRepositories) {
                     var result;
 
-                    if(!allRepositories || !allRepositories.length) {
+                    if (!allRepositories || !allRepositories.length) {
                         throw Error('no repositories can be found');
                     }
 
-                    if (window.localStorage) {
-                        var codesStr = window.localStorage.getItem(constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY);
+                    var codesStr = localStorageProxy.getItem(constants.STORAGE_PREFERENTIAL_REPOSITORY_CODES_KEY);
 
-                        if(codesStr && codesStr.length) {
-                            var codes = angular.fromJson(codesStr);
+                    if (codesStr && codesStr.length) {
+                        var codes = angular.fromJson(codesStr);
 
-                            if(codes && codes.length) {
-                                result = _.filter(allRepositories, function (r) { return _.contains(codes, r.code) });
-                            }
+                        if(codes && codes.length) {
+                            result = _.filter(allRepositories, function (r) { return _.contains(codes, r.code) });
                         }
                     }
 
-                    if(!result || !result.length) {
+                    if (!result || !result.length) {
                         result = _.filter(
                             allRepositories,
                             function(r) {
@@ -93,7 +87,7 @@ angular.module('haikudepotserver').factory('repositoryService',
                             });
                     }
 
-                    if(!result || !result.length) {
+                    if (!result || !result.length) {
                         throw Error('unable to establish the preferential search repositories');
                     }
 
