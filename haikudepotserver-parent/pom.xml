@@ -31,6 +31,9 @@
         <spring.version>5.0.2.RELEASE</spring.version>
         <postgresql.version>9.4.1212</postgresql.version>
 
+        <web-lru-cache.versionbase>2.5.0</web-lru-cache.versionbase>
+        <web-lru-cache.versionextension />
+
         <web-angularjs.versionbase>1.7.2</web-angularjs.versionbase>
         <web-angularjs.versionextension />
 
@@ -309,6 +312,11 @@
                 <groupId>org.webjars</groupId>
                 <artifactId>modernizr</artifactId>
                 <version>${web-modernizr.versionbase}${web-modernizr.versionextension}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>lru-cache</artifactId>
+                <version>${web-lru-cache.versionbase}${web-lru-cache.versionextension}</version>
             </dependency>
 
         </dependencies>

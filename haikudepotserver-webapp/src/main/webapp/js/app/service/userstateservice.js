@@ -13,15 +13,16 @@
 
 angular.module('haikudepotserver').factory('userState',
     [
-        '$log', '$q', '$rootScope', '$timeout', '$window', '$location',
+        '$log', '$q', '$rootScope', '$timeout', '$window', '$location', '$cacheFactory',
         'jsonRpc', 'pkgScreenshot', 'errorHandling',
         'constants', 'referenceData', 'jobs', 'jwt', 'localStorageProxy',
         function(
-            $log, $q, $rootScope, $timeout, $window, $location,
+            $log, $q, $rootScope, $timeout, $window, $location, $cacheFactory,
             jsonRpc, pkgScreenshot, errorHandling,
             constants, referenceData, jobs, jwt, localStorageProxy) {
 
-            var SIZE_CHECKED_PERMISSION_CACHE = 25;
+            var CHECKED_PERMISSION_CACHE_SIZE = 1000;
+
             var SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 10;
             var MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 60 * 1000; // 1 min.
 
@@ -30,10 +31,9 @@ angular.module('haikudepotserver').factory('userState',
 
             var timestampsOfLastTokenRenewals = [];
             var tokenRenewalTimeoutPromise = undefined;
-            var authorizationData = {
-                checkedPermissionCache: [],
-                checkQueue: []
-            };
+
+            var authorizationData = undefined;
+            resetAuthorization();
 
             // ------------------------------
             // STATE ACCESSOR
@@ -277,150 +277,172 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             function resetAuthorization() {
-                authorizationData.checkedPermissionCache = [];
-                authorizationData.checkQueue = [];
+                $log.info('reset authorization');
+                authorizationData = {
+                    checkedPermissionCache: new LRUCache(CHECKED_PERMISSION_CACHE_SIZE),
+                    checkQueue: []
+                };
             }
 
-            function check(targetAndPermissions) {
+            function checkAuthorizations(targetAndPermissions) {
 
-                // this function will see if it is able to resolve the top-most item in the queue by just looking
-                // in the cache.  This function will return the result if there is one from cache; otherwise it
-                // will return null.
-
-                function tryDeriveFromCache(targetAndPermissionsToCheckAgainstCache) {
-
-                    if(!targetAndPermissionsToCheckAgainstCache.length) {
-                        return null;
-                    }
-
-                    if(!authorizationData.checkedPermissionCache.length) {
-                        return null;
-                    }
-
-                    var result = [];
-
-                    for(var i=0;i<targetAndPermissionsToCheckAgainstCache.length;i++) {
-                        var cachedTargetAndPermission = _.findWhere(
-                            authorizationData.checkedPermissionCache,
-                            targetAndPermissionsToCheckAgainstCache[i]);
-
-                        if(!cachedTargetAndPermission) {
-                            return null;
-                        }
-                        else {
-                            result.push(cachedTargetAndPermission);
-                        }
-                    }
-
-                    return result;
+                if (!targetAndPermissions.length) {
+                    throw Error('requested a check on target and permissions, but there were none supplied');
                 }
 
-                // this function will take the item from the queue and handle it either by looking in the
-                // local cache or by talking to the remote application server.
+                validateTargetAndPermissions(targetAndPermissions);
 
-                function handleNextInCheckQueue() {
-                    if(authorizationData.checkQueue.length) {
-                        var request = authorizationData.checkQueue[0];
-                        var result = tryDeriveFromCache(request.targetAndPermissions);
+                var localAd = authorizationData;
 
-                        if(null!=result) {
-                            request.deferred.resolve(result);
-                            authorizationData.checkQueue.shift();
-                            handleNextInCheckQueue();
+                function findIndexInCheckQueue(targetAndPermission) {
+                    return _.findIndex(
+                        localAd.checkQueue,
+                        function (item) {
+                            return matchesTargetAndPermission(item, targetAndPermission);
+                        });
+                }
+
+                function toCacheKey(targetAndPermission) {
+                    function orPlaceholder(v) {
+                        return v ? v : 'undefined';
+                    }
+
+                    return [
+                        targetAndPermission.permissionCode,
+                        orPlaceholder(targetAndPermission.targetType),
+                        orPlaceholder(targetAndPermission.targetIdentifier)
+                    ].join('::');
+                }
+
+                function putToCache(targetAndPermission) {
+                    localAd.checkedPermissionCache.set(
+                        toCacheKey(targetAndPermission), targetAndPermission);
+                }
+
+                function getFromCache(targetAndPermission) {
+                    return localAd.checkedPermissionCache.get(toCacheKey(targetAndPermission));
+                }
+
+                function matchesTargetAndPermission(item, targetAndPermission) {
+                    return item.targetType === targetAndPermission.targetType &&
+                        item.targetIdentifier === targetAndPermission.targetIdentifier &&
+                        item.permissionCode === targetAndPermission.permissionCode;
+                }
+
+                // check the cache and then if there's nothing there then create
+                // a promise.
+
+                function toPromise(targetAndPermission) {
+                    function enqueueTargetAndPermission() {
+                        var queueItem = _.extend(targetAndPermission, {'deferred': $q.defer()});
+                        localAd.checkQueue.push(queueItem);
+                        return queueItem.deferred.promise;
+                    }
+
+                    function findExistingInCheckQueue(targetAndPermission) {
+                        var checkQueueIndex = findIndexInCheckQueue(targetAndPermission);
+                        if (-1 !== checkQueueIndex) {
+                            return localAd.checkQueue[checkQueueIndex];
                         }
-                        else {
+                    }
 
-                            // we will have to go off to the application server to get the authorizations that we need
+                    var existing = getFromCache(targetAndPermission);
 
-                            var uncachedTargetAndPermissions = _.filter(
-                                request.targetAndPermissions,
-                                function(targetAndPermission) {
-                                    return !_.findWhere(authorizationData.checkedPermissionCache, targetAndPermission);
-                                }
-                            );
+                    if (!existing) {
+                        existing = findExistingInCheckQueue(targetAndPermission);
+                    }
 
-                            // TODO - might be faster?
-                            // if we have not exceeded the cache size, it would make sense to blend in a few more
-                            // up-coming requests' data at the same time so that they will also be cached too.  We
-                            // might be able to be a bit smarter about this in the future.
+                    return existing ? existing.deferred.promise : enqueueTargetAndPermission();
+                }
 
-                            if(!uncachedTargetAndPermissions.length) {
-                                throw Error('illegal state; top-most request has no uncached target and permissions');
+                function pollQueue() {
+                    if (0 !== localAd.checkQueue.length) {
+
+                        function rejectAllQueued() {
+                            _.each(localAd.checkQueue, function (item) {
+                                item.deferred.reject();
+                            });
+                        }
+
+                        // this will need to match the inbound data with the data
+                        // in the queue.  It then removes the items from the check
+                        // queue and resolve the promise there and shifts the entry
+                        // into the cache so that further queries will come from
+                        // the cache.
+
+                        function handleInboundDataItem(inboundDataItem) {
+                            var checkQueueIndex = findIndexInCheckQueue(inboundDataItem);
+
+                            if (-1 !== checkQueueIndex) {
+                                var checkQueueItem = localAd.checkQueue.splice(checkQueueIndex, 1)[0];
+                                checkQueueItem.authorized = inboundDataItem.authorized;
+                                checkQueueItem.deferred.resolve(checkQueueItem);
+                                putToCache(checkQueueItem);
+                            } else {
+                                debugger;
+                                $log.warn('inbound authorization data [' +
+                                    toCacheKey(inboundDataItem) +
+                                    '] does not match to items in the queue');
+                                errorHandling.navigateToError();
+                                rejectAllQueued();
+                                resetAuthorization();
                             }
-
-                            jsonRpc.call(
-                                constants.ENDPOINT_API_V1_AUTHORIZATION,
-                                'checkAuthorization',
-                                [{ targetAndPermissions : uncachedTargetAndPermissions }]
-                            ).then(
-                                function(data) {
-
-                                    // blend the new material into the cache.
-
-                                    authorizationData.checkedPermissionCache = data.targetAndPermissions.concat(authorizationData.checkedPermissionCache);
-
-                                    // we should now be in a position to resolve the permission from the cache.
-
-                                    result = tryDeriveFromCache(request.targetAndPermissions);
-
-                                    if(!result) {
-                                        throw Error('illegal state; was not able to resolve the request from cache after fetching from application server');
-                                    }
-
-                                    request.deferred.resolve(result);
-
-                                    // now cull the cache so that we're not storing too much material.  This is very
-                                    // simplistic; no LRU or anything.
-
-                                    if(authorizationData.checkedPermissionCache.length > SIZE_CHECKED_PERMISSION_CACHE) {
-                                        authorizationData.checkedPermissionCache.splice(
-                                            SIZE_CHECKED_PERMISSION_CACHE,
-                                            authorizationData.checkedPermissionCache.length-SIZE_CHECKED_PERMISSION_CACHE);
-                                    }
-
-                                    // drop this request now that it has been dealt with and move onto checking the
-                                    // next one.
-
-                                    authorizationData.checkQueue.shift();
-                                    handleNextInCheckQueue();
-                                },
-                                function(err) {
-
-                                    // if there is a problem then treat it as 'fatal'
-
-                                    $log.error('a problem has arisen checking the authorization');
-                                    errorHandling.handleJsonRpcError(err);
-                                    request.deferred.reject();
-                                    resetAuthorization();
-                                }
-                            );
-
                         }
+
+                        var callTargetAndPermissions = _.map(
+                            localAd.checkQueue,
+                            function (item) {
+                                return {
+                                    targetType: item.targetType,
+                                    targetIdentifier: item.targetIdentifier,
+                                    permissionCode: item.permissionCode
+                                };
+                            }
+                        );
+
+                        jsonRpc.call(
+                            constants.ENDPOINT_API_V1_AUTHORIZATION,
+                            'checkAuthorization',
+                            [{targetAndPermissions: callTargetAndPermissions}]
+                        ).then(
+                            function (data) {
+                                _.each(data.targetAndPermissions, function (item) {
+                                    handleInboundDataItem(item);
+                                });
+                                if (0 !== localAd.checkQueue.length) {
+                                    pollQueue();
+                                }
+                            },
+                            function (err) {
+                                $log.error('a problem has arisen checking the authorization');
+                                errorHandling.handleJsonRpcError(err);
+                                rejectAllQueued();
+                                resetAuthorization();
+                            }
+                        );
                     }
                 }
 
-                // try handle this from the cached data.
+                var checkQueueWasEmptyBefore = 0 === localAd.checkQueue.length;
+                var result = $q.all(_.map(targetAndPermissions, toPromise));
+                var checkQueueIsEmptyAfter = 0 === localAd.checkQueue.length;
 
-                var resultFromCache = tryDeriveFromCache(targetAndPermissions);
-
-                if(resultFromCache) {
-                    return $q.when(resultFromCache);
+                if (checkQueueWasEmptyBefore && !checkQueueIsEmptyAfter) {
+                    // so that the processing occurs a little later allowing any other
+                    // permissions checks to be captured at once.
+                    $timeout(pollQueue, 1);
                 }
 
-                var deferred = $q.defer();
+                return result;
+            }
 
-                // push this request to the queue.
-
-                authorizationData.checkQueue.push( {
-                    deferred : deferred,
-                    targetAndPermissions : targetAndPermissions
-                });
-
-                if (1 === authorizationData.checkQueue.length) {
-                    handleNextInCheckQueue();
-                }
-
-                return deferred.promise;
+            function checkAllAuthorizationsAreAuthorized(targetAndPermissions) {
+                return checkAuthorizations(targetAndPermissions).then(
+                    function(data) {
+                        // now filter through and make sure everything is true.
+                        return !_.find(data, function(item) { return !item.authorized; });
+                    }
+                );
             }
 
             // ------------------------------
@@ -494,17 +516,13 @@ angular.module('haikudepotserver').factory('userState',
                  * @param value
                  */
 
-                naturalLanguageCode : function(value) {
-                    return naturalLanguageCode(value)
-                },
+                naturalLanguageCode : naturalLanguageCode,
 
                 /**
                  * <p>This will obtain the current user.</p>
                  */
 
-                user : function() {
-                    return user();
-                },
+                user : user,
 
                 /**
                  * <p>This function will either set or get the token.  Invoked with no token value, the function
@@ -512,9 +530,7 @@ angular.module('haikudepotserver').factory('userState',
                  * return it.</p>
                  */
 
-                token : function(tokenValue) {
-                    return token(tokenValue);
-                },
+                token : token,
 
                 /**
                  * <p>This function will check to make sure that the target and permissions supplied are authorized.
@@ -530,17 +546,7 @@ angular.module('haikudepotserver').factory('userState',
                  * <p>Returned is a promise which resolves to a true if all of the queries are true.</p>
                  */
 
-                areAuthorized : function(targetAndPermissions) {
-                    validateTargetAndPermissions(targetAndPermissions);
-
-                    return check(targetAndPermissions).then(
-                        function(data) {
-                            // now filter through and make sure everything is true.
-                            return !_.find(data, function(item) { return !item.authorized; });
-                        }
-                    );
-                }
-
+                areAuthorized : checkAllAuthorizationsAreAuthorized
 
             };
 

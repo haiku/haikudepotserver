@@ -75,6 +75,10 @@
             <groupId>org.webjars</groupId>
             <artifactId>modernizr</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>lru-cache</artifactId>
+        </dependency>
 
         <!-- This one will pull in the ...-core module's test resources so that they
         can be used here in these tests.  This is very useful for setting up scenarios.
@@ -167,6 +171,7 @@
                         <source>/webjars/angularjs/${web-angularjs.versionbase}/angular-route.min.js</source>
                         <source>/webjars/angularjs/${web-angularjs.versionbase}/angular-mocks.js</source>
                         <source>/webjars/modernizr/${web-modernizr.versionbase}/modernizr.min.js</source>
+                        <source>/webjars/lru-cache/${web-lru-cache.versionbase}/lib/lru-cache.js</source>
                     </preloadSources>
 
                     <jsSrcDir>${project.basedir}/src/main/webapp/js/app</jsSrcDir>
