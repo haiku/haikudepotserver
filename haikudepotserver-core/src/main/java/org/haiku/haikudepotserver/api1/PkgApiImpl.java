@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -411,6 +411,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         result.name = pkg.getName();
         result.modifyTimestamp = pkg.getModifyTimestamp().getTime();
+        result.vanityLinkUrl = pkgService.createVanityLinkUrl(pkg);
         result.pkgCategoryCodes = pkg.getPkgPkgCategories()
                 .stream()
                 .map(ppc -> ppc.getPkgCategory().getCode())

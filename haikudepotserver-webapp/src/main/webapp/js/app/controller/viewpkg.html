@@ -1,7 +1,10 @@
 <div class="content-container">
 
     <div id="pkg-title">
-        <div id="pkg-title-feed">
+        <div id="pkg-title-feed-and-link">
+            <a ng-href="{{pkg.vanityLinkUrl}}" target="_blank">
+                <img src="/__img/link.svg" img-downgrade="">
+            </a>
             <img src="/__img/feed.svg" img-downgrade="" ng-click="goPkgFeedBuilder()">
         </div>
         <div id="pkg-title-icon">

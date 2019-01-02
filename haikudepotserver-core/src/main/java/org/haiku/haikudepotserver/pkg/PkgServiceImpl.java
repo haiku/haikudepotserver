@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -709,6 +709,11 @@ public class PkgServiceImpl implements PkgService {
                 new Date(0L));
 
         return DateTimeHelper.secondAccuracyDate(new Date(Math.max(pkgVersionMax.getTime(), pkgMax.getTime())));
+    }
+
+    @Override
+    public String createVanityLinkUrl(Pkg pkg) {
+        return "/" + pkg.getName();
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -211,5 +211,11 @@ public interface PkgService {
      */
 
     Date getLastModifyTimestampSecondAccuracy(ObjectContext context, RepositorySource repositorySource);
+
+    /**
+     * <p>This is a URL that is nice to look at for the package.</p>
+     */
+
+    String createVanityLinkUrl(Pkg pkg);
 
 }

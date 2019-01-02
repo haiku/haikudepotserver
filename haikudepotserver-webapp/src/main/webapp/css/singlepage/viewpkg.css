@@ -2,13 +2,17 @@
     margin-bottom: 6px;
 }
 
-#pkg-title-feed {
+#pkg-title-feed-and-link {
     float: right;
 }
 
 #pkg-title-icon {
     display: inline;
     float:left;
+}
+
+#pkg-title-feed-and-link a {
+    text-decoration: none;
 }
 
 #pkg-title-text {

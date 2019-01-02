@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,6 +35,12 @@ public class GetPkgResult {
      */
 
     public Integer prominenceOrdering;
+
+    /**
+     * @since 2019-01-02
+     */
+
+    public String vanityLinkUrl;
 
     public static class PkgVersion {
 
