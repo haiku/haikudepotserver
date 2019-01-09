@@ -9,7 +9,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpNaturalLanguage",
+        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceNaturalLanguage",
         "properties": {
           "code": {
             "type": "string"
@@ -24,7 +24,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpPkgCategory",
+        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferencePkgCategory",
         "properties": {
           "code": {
             "type": "string"
@@ -39,7 +39,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpUserRatingStability",
+        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceUserRatingStability",
         "properties": {
           "code": {
             "type": "string"
@@ -54,7 +54,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpCountry",
+        "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceCountry",
         "properties": {
           "code": {
             "type": "string"

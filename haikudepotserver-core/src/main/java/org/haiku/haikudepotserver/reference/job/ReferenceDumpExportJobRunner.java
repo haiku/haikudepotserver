@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,10 +19,10 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.job.PkgDumpExportJobRunner;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpCountry;
 import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReference;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpNaturalLanguage;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpPkgCategory;
+import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceCountry;
+import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceNaturalLanguage;
+import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferencePkgCategory;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.haiku.haikudepotserver.support.cayenne.GeneralQueryHelper;
@@ -118,7 +118,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                 Country.getAll(context)
                         .stream()
                         .map(c -> {
-                            DumpCountry dc = new DumpCountry();
+                            DumpExportReferenceCountry dc = new DumpExportReferenceCountry();
                             dc.setCode(c.getCode());
                             dc.setName(c.getName());
                             return dc;
@@ -129,7 +129,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                 NaturalLanguage.getAll(context)
                         .stream()
                         .map(nl -> {
-                            DumpNaturalLanguage dnl = new DumpNaturalLanguage();
+                            DumpExportReferenceNaturalLanguage dnl = new DumpExportReferenceNaturalLanguage();
                             dnl.setCode(nl.getCode());
                             dnl.setName(
                                     messageSource.getMessage(
@@ -144,7 +144,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                 PkgCategory.getAll(context)
                         .stream()
                         .map(pc -> {
-                            DumpPkgCategory dpc = new DumpPkgCategory();
+                            DumpExportReferencePkgCategory dpc = new DumpExportReferencePkgCategory();
                             dpc.setCode(pc.getCode());
                             dpc.setName(
                                     messageSource.getMessage(

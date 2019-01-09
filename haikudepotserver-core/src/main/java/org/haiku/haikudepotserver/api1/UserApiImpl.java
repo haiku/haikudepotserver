@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -249,7 +250,10 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         result.naturalLanguageCode = user.getNaturalLanguage().getCode();
         result.createTimestamp = user.getCreateTimestamp().getTime();
         result.modifyTimestamp = user.getModifyTimestamp().getTime();
-        result.lastAuthenticationTimestamp = user.getLastAuthenticationTimestamp().getTime();
+        result.lastAuthenticationTimestamp =
+                Optional.ofNullable(user.getLastAuthenticationTimestamp())
+                        .map(Timestamp::getTime)
+                        .orElse(null);
         return result;
     }
 
