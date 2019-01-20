@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,8 +11,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgIcon;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
@@ -73,10 +73,10 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
     }
 
     @Override
-    public void evict(ObjectContext context, Pkg pkg) {
-        Preconditions.checkArgument(null!=context, "an object context is required");
-        Preconditions.checkArgument(null!=pkg, "a package is required");
-        cache.invalidate(pkg.getName());
+    public void evict(ObjectContext context, PkgSupplement pkgSupplement) {
+        Preconditions.checkArgument(null != context, "an object context is required");
+        Preconditions.checkArgument(null != pkgSupplement, "a pkg supplement is required");
+        cache.invalidate(pkgSupplement.getBasePkgName());
     }
 
     private synchronized byte[] getGenericHvif() {
@@ -110,13 +110,13 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
     public Optional<byte[]> render(
             int size,
             ObjectContext context,
-            Pkg pkg) {
+            PkgSupplement pkgSupplement) {
 
         Preconditions.checkArgument(size <= SIZE_MAX && size >= SIZE_MIN, "bad size");
         Preconditions.checkArgument(null != context, "an object context is required");
-        Preconditions.checkArgument(null != pkg, "a package is required");
+        Preconditions.checkArgument(null != pkgSupplement, "a pkg supplement is required");
 
-        Cache<Integer, Optional<byte[]>> pkgCache = getOrCreatePkgCache(pkg.getName());
+        Cache<Integer, Optional<byte[]>> pkgCache = getOrCreatePkgCache(pkgSupplement.getBasePkgName());
 
         try {
             return pkgCache.get(size, () -> {
@@ -125,7 +125,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
 
                 {
                     MediaType hvifMediaType = MediaType.getByCode(context, MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
-                    Optional<PkgIcon> hvifPkgIconOptional = pkg.getPkgIcon(hvifMediaType, null);
+                    Optional<PkgIcon> hvifPkgIconOptional = pkgSupplement.getPkgIcon(hvifMediaType, null);
 
                     if (hvifPkgIconOptional.isPresent()) {
                         byte[] hvifData = hvifPkgIconOptional.get().getPkgIconImage().getData();
@@ -137,7 +137,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
                 // If there is no HVIF then it is possible to fall back to PNG images.
 
                 {
-                    List<PkgIcon> pkgIconList = pkg.getPkgIcons()
+                    List<PkgIcon> pkgIconList = pkgSupplement.getPkgIcons()
                             .stream()
                             .filter(pi -> pi.getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.toString()))
                             .sorted(Comparator.comparing(_PkgIcon::getSize))
@@ -159,7 +159,8 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
             });
         }
         catch(Exception e) {
-            throw new RuntimeException("unable to get the rendered package icon for; " + pkg.getName(), e);
+            throw new RuntimeException("unable to get the rendered package icon for; "
+                    + pkgSupplement.getBasePkgName(), e);
         }
 
     }

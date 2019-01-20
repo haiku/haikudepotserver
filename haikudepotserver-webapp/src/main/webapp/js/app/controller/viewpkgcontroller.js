@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -363,25 +363,6 @@ angular.module('haikudepotserver').controller(
 
             // ---------------------
             // ACTIONS FOR PACKAGE
-
-            $scope.goDownloadHpkg = function() {
-                var url = $scope.pkg.versions[0].hpkgDownloadURL;
-
-                if(url.charAt(0) === '/') {
-                    var iframeEl = document.getElementById("download-iframe");
-
-                    if(!iframeEl) {
-                        throw Error('unable to find the download iframe');
-                    }
-
-                    iframeEl.src = url;
-                }
-                else {
-                    window.open(url);
-                }
-
-                return false;
-            };
 
             $scope.goPkgFeedBuilder = function() {
                 var item = breadcrumbFactory.createPkgFeedBuilder();

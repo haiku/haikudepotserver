@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -22,8 +22,8 @@ public abstract class _PkgIcon extends AbstractDataObject {
 
     public static final Property<Integer> SIZE = Property.create("size", Integer.class);
     public static final Property<MediaType> MEDIA_TYPE = Property.create("mediaType", MediaType.class);
-    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
     public static final Property<List<PkgIconImage>> PKG_ICON_IMAGES = Property.create("pkgIconImages", List.class);
+    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
 
     public void setSize(Integer size) {
         writeProperty("size", size);
@@ -41,15 +41,6 @@ public abstract class _PkgIcon extends AbstractDataObject {
     }
 
 
-    public void setPkg(Pkg pkg) {
-        setToOneTarget("pkg", pkg, true);
-    }
-
-    public Pkg getPkg() {
-        return (Pkg)readProperty("pkg");
-    }
-
-
     public void addToPkgIconImages(PkgIconImage obj) {
         addToManyTarget("pkgIconImages", obj, true);
     }
@@ -59,6 +50,15 @@ public abstract class _PkgIcon extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PkgIconImage> getPkgIconImages() {
         return (List<PkgIconImage>)readProperty("pkgIconImages");
+    }
+
+
+    public void setPkgSupplement(PkgSupplement pkgSupplement) {
+        setToOneTarget("pkgSupplement", pkgSupplement, true);
+    }
+
+    public PkgSupplement getPkgSupplement() {
+        return (PkgSupplement)readProperty("pkgSupplement");
     }
 
 

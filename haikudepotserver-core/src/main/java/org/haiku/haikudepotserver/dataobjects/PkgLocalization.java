@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018, Andrew Lindesay
+ * Copyright 2016-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,7 +25,7 @@ public class PkgLocalization extends _PkgLocalization implements MutableCreateAn
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
         return ObjectSelect
                 .query(PkgLocalization.class)
-                .where(PKG.eq(pkg))
+                .where(PKG_SUPPLEMENT.dot(PkgSupplement.PKGS).dot(Pkg.NAME).eq(pkg.getName()))
                 .sharedCache()
                 .cacheGroup(HaikuDepot.CacheGroup.PKG_LOCALIZATION.name())
                 .select(context);

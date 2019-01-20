@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -230,7 +230,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             PkgScreenshot pkgScreenshot = PkgScreenshot.getByCode(context, existingScreenshot.getCode());
             String[] row = new String[] {
                     "",
-                    pkgScreenshot.getPkg().getName(),
+                    pkgScreenshot.getPkgSupplement().getBasePkgName(),
                     Action.REMOVED.name(),
                     "",
                     pkgScreenshot.getCode()
@@ -297,7 +297,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             if (!v.isNotFound()) {
                 ObjectContext context = serverRuntime.newContext();
                 Pkg pkg = Pkg.getByName(context, k);
-                pkg.getPkgScreenshots().forEach((ps) -> v.add(createPersistedScreenshotMetadata(ps)));
+                pkg.getPkgSupplement().getPkgScreenshots().forEach((ps) -> v.add(createPersistedScreenshotMetadata(ps)));
             }
         });
     }
@@ -381,7 +381,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                     PkgScreenshot screenshot = pkgScreenshotService.storePkgScreenshotImage(
                             archiveInputStream,
                             context,
-                            Pkg.getByName(context, pkgName),
+                            Pkg.getByName(context, pkgName).getPkgSupplement(),
                             fromArchiveScreenshotMetadata.getDerivedOrder());
 
                     row[CSV_COLUMN_CODE] = screenshot.getCode();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,7 +32,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
 
     /**
      * <p>When a "_devel" package exists and an update is made to the icon of the parent
-     * package then the icon should flow down to the "_devel" package too.</p>
+     * package then the icon should be visible from the "_devel" package too.</p>
      */
 
     @Test
@@ -46,14 +47,15 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel = context.newObject(org.haiku.haikudepotserver.dataobjects.Pkg.class);
             pkg1Devel.setActive(true);
             pkg1Devel.setName("pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
+            pkg1Devel.setPkgSupplement(PkgSupplement.getByBasePkgName(context, "pkg1"));
             context.commitChanges();
         }
 
         {
             ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkg1").get();
-            MediaType pngMediaType = MediaType.tryGetByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkg1");
+            MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString());
 
             try(InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
 
@@ -63,7 +65,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
                         pngMediaType,
                         32,
                         context,
-                        pkg1);
+                        pkg1.getPkgSupplement());
                 // ---------------------------------
 
             }
@@ -73,13 +75,13 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            MediaType pngMediaType = MediaType.tryGetByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
+            MediaType pngMediaType = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString());
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(
                             context,
-                            "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT).get();
+                            "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
 
-            PkgIcon pkgIcon = pkg1Devel.getPkgIcon(pngMediaType, 32).get();
+            PkgIcon pkgIcon = pkg1Devel.getPkgSupplement().getPkgIcon(pngMediaType, 32).get();
 
             Assertions.assertThat(pkgIcon.getSize()).isEqualTo(32);
         }

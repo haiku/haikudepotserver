@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,8 +10,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.pkg.model.PkgImportService;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.support.URLHelper;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -32,18 +34,12 @@ public class PkgImportServiceImpl implements PkgImportService {
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgImportServiceImpl.class);
 
     private final PkgServiceImpl pkgServiceImpl;
-    private final PkgIconService pkgIconService;
-    private final PkgScreenshotService pkgScreenshotService;
     private final PkgLocalizationService pkgLocalizationService;
 
     public PkgImportServiceImpl(
             PkgServiceImpl pkgServiceImpl,
-            PkgIconService pkgIconService,
-            PkgScreenshotService pkgScreenshotService,
             PkgLocalizationService pkgLocalizationService) {
         this.pkgServiceImpl = Preconditions.checkNotNull(pkgServiceImpl);
-        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
-        this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
         this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
     }
 
@@ -61,11 +57,11 @@ public class PkgImportServiceImpl implements PkgImportService {
                 objectContext,
                 repositorySourceObjectId);
 
-        if(!repositorySource.getActive()) {
+        if (!repositorySource.getActive()) {
             throw new IllegalStateException("it is not possible to import from a repository source that is not active; " + repositorySource);
         }
 
-        if(!repositorySource.getRepository().getActive()) {
+        if (!repositorySource.getRepository().getActive()) {
             throw new IllegalStateException("it is not possible to import from a repository that is not active; " + repositorySource.getRepository());
         }
 
@@ -78,16 +74,10 @@ public class PkgImportServiceImpl implements PkgImportService {
                 .orElseThrow(IllegalStateException::new);
         PkgVersion persistedPkgVersion = null;
 
-        if(!persistedPkgOptional.isPresent()) {
-
-            persistedPkg = objectContext.newObject(Pkg.class);
-            persistedPkg.setName(pkg.getName());
-            persistedPkg.setActive(Boolean.TRUE);
+        if (!persistedPkgOptional.isPresent()) {
+            persistedPkg = createPkg(objectContext, pkg.getName());
             pkgServiceImpl.ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
             LOGGER.info("the package [{}] did not exist; will create", pkg.getName());
-
-            possiblyReplicateDataFromMainPkgToSubordinatePkg(objectContext, persistedPkg);
-
         } else {
 
             persistedPkg = persistedPkgOptional.get();
@@ -109,7 +99,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                     Collections.singletonList(architecture));
         }
 
-        if (null==persistedPkgVersion) {
+        if (null == persistedPkgVersion) {
 
             persistedPkgVersion = objectContext.newObject(PkgVersion.class);
             persistedPkgVersion.setMajor(pkg.getVersion().getMajor());
@@ -139,7 +129,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         importLicenses(objectContext, pkg, persistedPkgVersion);
         importUrls(objectContext, pkg, persistedPkgVersion);
 
-        if(!Strings.isNullOrEmpty(pkg.getSummary()) || !Strings.isNullOrEmpty(pkg.getDescription())) {
+        if (!Strings.isNullOrEmpty(pkg.getSummary()) || !Strings.isNullOrEmpty(pkg.getDescription())) {
             pkgLocalizationService.updatePkgVersionLocalization(
                     objectContext,
                     persistedPkgVersion,
@@ -167,6 +157,31 @@ public class PkgImportServiceImpl implements PkgImportService {
 
         LOGGER.debug("have processed package {}", pkg.toString());
 
+    }
+
+    private Pkg createPkg(ObjectContext objectContext, String name) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(name), "the name is required");
+
+        Pkg pkg = objectContext.newObject(Pkg.class);
+        pkg.setName(name);
+        pkg.setActive(Boolean.TRUE);
+
+        String basePkgName = pkgServiceImpl
+                .tryGetMainPkgNameForSubordinatePkg(objectContext, name)
+                .orElse(name);
+
+        PkgSupplement pkgSupplement = PkgSupplement
+                .tryGetByBasePkgName(objectContext, basePkgName)
+                .orElseGet(() -> {
+                    PkgSupplement result = objectContext.newObject(PkgSupplement.class);
+                    result.setBasePkgName(basePkgName);
+                    return result;
+                });
+
+        pkg.setPkgSupplement(pkgSupplement);
+        pkgSupplement.addToPkgs(pkg);
+
+        return pkg;
     }
 
     private void importUrls(ObjectContext objectContext, org.haiku.pkg.model.Pkg pkg, PkgVersion persistedPkgVersion) {
@@ -234,68 +249,6 @@ public class PkgImportServiceImpl implements PkgImportService {
                 objectContext.deleteObjects(pkgVersionCopyright);
             }
         }
-    }
-
-
-    /**
-     * <p>Subordinate packages
-     * {#see {@link org.haiku.haikudepotserver.pkg.model.PkgService#findSubordinatePkgsForMainPkg(ObjectContext, String)}}
-     * need to have some of the package meta-data transferred from the main package to the subordinate package.</p>
-     */
-
-    private void possiblyReplicateDataFromMainPkgToSubordinatePkg(
-            ObjectContext objectContext,
-            Pkg persistedPossiblySubordinatePkg) {
-
-        pkgServiceImpl
-                .tryGetMainPkgForSubordinatePkg(objectContext, persistedPossiblySubordinatePkg.getName())
-                .ifPresent((mainPkg) -> {
-
-                    try {
-                        pkgIconService.replicatePkgIcons(objectContext, mainPkg, persistedPossiblySubordinatePkg);
-                    } catch (IOException | BadPkgIconException e) {
-                        LOGGER.error(
-                                "was unable to update the icon from pkg [" + mainPkg.getName()
-                                        + "] to [" + persistedPossiblySubordinatePkg.getName() + "]",
-                                e);
-                    }
-
-                    pkgLocalizationService.replicatePkgLocalizations(
-                            objectContext,
-                            mainPkg,
-                            persistedPossiblySubordinatePkg,
-                            pkgLocalizationService
-                                    .tryGetSummarySuffix(persistedPossiblySubordinatePkg.getName())
-                                    .orElse(null));
-
-                    // if the package ends with _x86 then there is some special logic to relay
-                    // meta-data about the packages between the main and the subordinate package.
-
-                    boolean subordinateEndsWithX86 = persistedPossiblySubordinatePkg.getName()
-                            .endsWith(PkgServiceImpl.SUFFIX_PKG_X86);
-
-                    if (subordinateEndsWithX86) {
-                        try {
-                            pkgScreenshotService.replicatePkgScreenshots(
-                                    objectContext,
-                                    mainPkg,
-                                    persistedPossiblySubordinatePkg);
-                        } catch (IOException | BadPkgScreenshotException e) {
-                            LOGGER.error(
-                                    "was unable to update the screenshots from pkg [" + mainPkg.getName()
-                                            + "] to [" + persistedPossiblySubordinatePkg.getName() + "]",
-                                    e);
-                        }
-                    }
-
-                    if (subordinateEndsWithX86) {
-                        pkgServiceImpl.replicatePkgCategories(
-                                objectContext,
-                                mainPkg,
-                                persistedPossiblySubordinatePkg);
-                    }
-
-                });
     }
 
     private void populatePayloadLength(PkgVersion persistedPkgVersion) {

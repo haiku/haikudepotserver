@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -89,6 +90,8 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                     context,
                     false,
                     pkg -> {
+                        PkgSupplement pkgSupplement = pkg.getPkgSupplement();
+
                         List<String> cols = new ArrayList<>();
                         Optional<PkgVersionLocalization> locOptional = Optional.empty();
 
@@ -102,10 +105,10 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                                 .map(Repository::getCode)
                                 .collect(Collectors.joining(";")));
                         cols.add(locOptional.isPresent() ? locOptional.get().getSummary().orElse("") : "");
-                        cols.add(pkg.getPkgPkgCategories().isEmpty() ? AbstractJobRunner.MARKER : "");
+                        cols.add(pkgSupplement.getPkgPkgCategories().isEmpty() ? AbstractJobRunner.MARKER : "");
 
                         for (String pkgCategoryCode : pkgCategoryCodes) {
-                            cols.add(pkg.getPkgPkgCategory(pkgCategoryCode).isPresent() ? AbstractJobRunner.MARKER : "");
+                            cols.add(pkgSupplement.getPkgPkgCategory(pkgCategoryCode).isPresent() ? AbstractJobRunner.MARKER : "");
                         }
 
                         cols.add(""); // no action

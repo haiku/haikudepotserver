@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,18 +10,18 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.api1.model.pkg.*;
+import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgScreenshot;
-import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.api1.model.PkgVersionType;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.api1.model.pkg.*;
 import org.haiku.haikudepotserver.api1.support.BadPkgIconException;
 import org.haiku.haikudepotserver.api1.support.LimitExceededException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.IntegrationTestSupportService;
+import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -48,18 +48,18 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkg = Pkg.tryGetByName(context, data.pkg1.getName()).get();
+            Pkg pkg = Pkg.getByName(context, data.pkg1.getName());
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
                 pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "games").get());
-                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
+                pkg.getPkgSupplement().addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             }
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
                 pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "business").get());
-                pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
+                pkg.getPkgSupplement().addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             }
 
             context.commitChanges();
@@ -78,10 +78,13 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkg = Pkg.tryGetByName(context, data.pkg1.getName()).get();
+            PkgSupplement pkgSupplementAfter = Pkg.getByName(context, data.pkg1.getName()).getPkgSupplement();
 
             Assertions.assertThat(ImmutableSet.of("business", "development")).isEqualTo(
-                    pkg.getPkgPkgCategories().stream().map(ppc -> ppc.getPkgCategory().getCode()).collect(Collectors.toSet())
+                    pkgSupplementAfter.getPkgPkgCategories()
+                            .stream()
+                            .map(ppc -> ppc.getPkgCategory().getCode())
+                            .collect(Collectors.toSet())
             );
         }
 
@@ -357,22 +360,23 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.newContext();
-            Optional<Pkg> pkgOptionalafter = Pkg.tryGetByName(objectContext, "pkg1");
+            Pkg pkgAfter = Pkg.getByName(objectContext, "pkg1");
+            PkgSupplement pkgSupplementAfter = pkgAfter.getPkgSupplement();
 
             org.haiku.haikudepotserver.dataobjects.MediaType mediaTypePng
-                    = org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
+                    = org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                     objectContext,
-                    MediaType.PNG.toString()).get();
+                    MediaType.PNG.toString());
 
-            Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(3);
+            Assertions.assertThat(pkgSupplementAfter.getPkgIcons().size()).isEqualTo(3);
 
-            Optional<PkgIcon> pkgIcon16Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 16);
+            Optional<PkgIcon> pkgIcon16Optional = pkgSupplementAfter.getPkgIcon(mediaTypePng, 16);
             Assertions.assertThat(pkgIcon16Optional.get().getPkgIconImage().getData()).isEqualTo(sample16);
 
-            Optional<PkgIcon> pkgIcon32Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 32);
+            Optional<PkgIcon> pkgIcon32Optional = pkgSupplementAfter.getPkgIcon(mediaTypePng, 32);
             Assertions.assertThat(pkgIcon32Optional.get().getPkgIconImage().getData()).isEqualTo(sample32);
 
-            Optional<PkgIcon> pkgIcon64Optional = pkgOptionalafter.get().getPkgIcon(mediaTypePng, 64);
+            Optional<PkgIcon> pkgIcon64Optional = pkgSupplementAfter.getPkgIcon(mediaTypePng, 64);
             Assertions.assertThat(pkgIcon64Optional.get().getPkgIconImage().getData()).isEqualTo(sample64);
         }
     }
@@ -405,16 +409,16 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.newContext();
-            Optional<Pkg> pkgOptionalafter = Pkg.tryGetByName(objectContext, "pkg1");
+            PkgSupplement pkgSupplementAfter = Pkg.getByName(objectContext, "pkg1").getPkgSupplement();
 
             org.haiku.haikudepotserver.dataobjects.MediaType mediaTypeHvif
-                    = org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
+                    = org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                     objectContext,
-                    org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get();
+                    org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
 
-            Assertions.assertThat(pkgOptionalafter.get().getPkgIcons().size()).isEqualTo(1);
+            Assertions.assertThat(pkgSupplementAfter.getPkgIcons().size()).isEqualTo(1);
 
-            Optional<PkgIcon> pkgIconHvifOptional = pkgOptionalafter.get().getPkgIcon(mediaTypeHvif, null);
+            Optional<PkgIcon> pkgIconHvifOptional = pkgSupplementAfter.getPkgIcon(mediaTypeHvif, null);
             Assertions.assertThat(pkgIconHvifOptional.get().getPkgIconImage().getData()).isEqualTo(sampleHvif);
         }
     }
@@ -432,8 +436,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.newContext();
-            Optional<Pkg> pkgOptionalBefore = Pkg.tryGetByName(objectContext, "pkg1");
-            Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(3); // 16 and 32 px sizes + hvif
+            PkgSupplement pkgSupplementBefore = Pkg.getByName(objectContext, "pkg1").getPkgSupplement();
+            Assertions.assertThat(pkgSupplementBefore.getPkgIcons().size()).isEqualTo(3); // 16 and 32 px sizes + hvif
         }
 
         // ------------------------------------
@@ -442,8 +446,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext objectContext = serverRuntime.newContext();
-            Optional<Pkg> pkgOptionalBefore = Pkg.tryGetByName(objectContext, "pkg1");
-            Assertions.assertThat(pkgOptionalBefore.get().getPkgIcons().size()).isEqualTo(0);
+            PkgSupplement pkgSupplementAfter = Pkg.getByName(objectContext, "pkg1").getPkgSupplement();
+            Assertions.assertThat(pkgSupplementAfter.getPkgIcons().size()).isEqualTo(0);
         }
     }
 
@@ -459,14 +463,15 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgScreenshotsResult result = pkgApi.getPkgScreenshots(new GetPkgScreenshotsRequest(data.pkg1.getName()));
         // ------------------------------------
 
-        Assertions.assertThat(result.items.size()).isEqualTo(data.pkg1.getPkgScreenshots().size());
-        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshots = data.pkg1.getSortedPkgScreenshots();
+        PkgSupplement pkgSupplement = data.pkg1.getPkgSupplement();
+        Assertions.assertThat(result.items.size()).isEqualTo(pkgSupplement.getPkgScreenshots().size());
+        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshots = pkgSupplement.getSortedPkgScreenshots();
 
         Assert.assertThat(sortedScreenshots.size(), CoreMatchers.is(3));
 
-        int widths[] = { 320, 240, 320 };
-        int heights[] = { 240, 320, 240 };
-        int lengths[] = { 41296, 28303, 33201 };
+        int[] widths = { 320, 240, 320 };
+        int[] heights = { 240, 320, 240 };
+        int[] lengths = { 41296, 28303, 33201 };
 
         for(int i=0;i<sortedScreenshots.size();i++) {
             org.haiku.haikudepotserver.dataobjects.PkgScreenshot pkgScreenshot = sortedScreenshots.get(i);
@@ -490,7 +495,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     @Test
     public void testGetPkgScreenshot() throws ObjectNotFoundException {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        String code = data.pkg1.getSortedPkgScreenshots().get(0).getCode();
+        String code = data.pkg1.getPkgSupplement().getSortedPkgScreenshots().get(0).getCode();
 
         // ------------------------------------
         GetPkgScreenshotResult result = pkgApi.getPkgScreenshot(new GetPkgScreenshotRequest(code));
@@ -511,7 +516,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsBefore = data.pkg1.getSortedPkgScreenshots();
+        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsBefore
+                = data.pkg1.getPkgSupplement().getSortedPkgScreenshots();
 
         if(sortedScreenshotsBefore.size() < 2) {
             throw new IllegalStateException("the test cannot run without more than two screenshots");
@@ -524,11 +530,12 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, data.pkg1.getName());
-        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsAfter = pkgOptional.get().getSortedPkgScreenshots();
+        PkgSupplement pkgSupplementAfter = Pkg.getByName(context, data.pkg1.getName()).getPkgSupplement();
+        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsAfter
+                = pkgSupplementAfter.getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(sortedScreenshotsBefore.size()-1);
-        Assertions.assertThat(sortedScreenshotsAfter.stream().filter(s -> s.getCode().equals(code1)).findFirst().isPresent()).isFalse();
+        Assertions.assertThat(sortedScreenshotsAfter.stream().anyMatch(s -> s.getCode().equals(code1))).isFalse();
     }
 
     /**
@@ -540,7 +547,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
-        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsBefore = data.pkg1.getSortedPkgScreenshots();
+        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsBefore
+                = data.pkg1.getPkgSupplement().getSortedPkgScreenshots();
 
         if(3 != sortedScreenshotsBefore.size()) {
             throw new IllegalStateException("the test requires that pkg1 has three screenshots associated with it");
@@ -557,8 +565,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, data.pkg1.getName());
-        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsAfter = pkgOptional.get().getSortedPkgScreenshots();
+        PkgSupplement pkgSupplement = Pkg.getByName(context, data.pkg1.getName()).getPkgSupplement();
+        List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsAfter
+                = pkgSupplement.getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(3);
         Assertions.assertThat(sortedScreenshotsAfter.get(0).getCode()).isEqualTo(sortedScreenshotsBefore.get(2).getCode());
@@ -584,7 +593,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
+            Pkg pkg1 = Pkg.getByName(context, "pkg1");
             List<String[]> rules = ImmutableList.of(
                     new String[] { NaturalLanguage.CODE_ENGLISH, "flourescence" },
                     new String[] { NaturalLanguage.CODE_FRENCH, "treacle" },
@@ -768,8 +777,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
-            Repository repository = Repository.tryGetByCode(context, "testrepo").get();
+            Pkg pkg1 = Pkg.getByName(context, "pkg1");
+            Repository repository = Repository.getByCode(context, "testrepo");
             Assertions.assertThat(pkg1.getPkgProminence(repository).get().getProminence().getOrdering()).isEqualTo(200);
         }
 
@@ -808,8 +817,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkgAfter = Pkg.tryGetByName(context, "pkg1").get();
-            Assertions.assertThat(pkgAfter.getPkgChangelog().get().getContent()).isEqualTo("das Zimmer");
+            PkgSupplement pkgSupplementAfter = Pkg.getByName(context, "pkg1").getPkgSupplement();
+            Assertions.assertThat(pkgSupplementAfter.getPkgChangelog().get().getContent()).isEqualTo("das Zimmer");
         }
 
     }
@@ -833,8 +842,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkgAfter = Pkg.tryGetByName(context, "pkg1").get();
-            Assertions.assertThat(pkgAfter.getPkgChangelog().isPresent()).isFalse();
+            PkgSupplement pkgSupplementAfter = Pkg.getByName(context, "pkg1").getPkgSupplement();
+            Assertions.assertThat(pkgSupplementAfter.getPkgChangelog().isPresent()).isFalse();
         }
 
     }
@@ -861,9 +870,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
-            Repository repository = Repository.tryGetByCode(context, "testrepo").get();
-            Architecture architecture = Architecture.tryGetByCode(context, "x86_64").get();
+            Pkg pkg1 = Pkg.getByName(context, "pkg1");
+            Repository repository = Repository.getByCode(context, "testrepo");
+            Architecture architecture = Architecture.getByCode(context, "x86_64");
             PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
             Assertions.assertThat(pkgVersion.getActive()).isFalse();
         }

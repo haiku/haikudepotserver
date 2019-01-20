@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,25 +8,21 @@ package org.haiku.haikudepotserver.pkg;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.dataobjects.auto._Pkg;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class PkgLocalizationServiceImpl implements PkgLocalizationService {
-
-    private final PkgServiceImpl pkgServiceImpl;
-
-    public PkgLocalizationServiceImpl(PkgServiceImpl pkgServiceImpl) {
-        this.pkgServiceImpl = Preconditions.checkNotNull(pkgServiceImpl);
-    }
 
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgVersionLocalization pvl) {
         if(Strings.isNullOrEmpty(result.getTitle())
@@ -122,115 +118,57 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
     @Override
     public PkgLocalization updatePkgLocalization(
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             NaturalLanguage naturalLanguage,
             String title,
             String summary,
             String description) {
 
-        Preconditions.checkArgument(null != pkg, "the package must be provided");
+        Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement must be provided");
         Preconditions.checkArgument(null != naturalLanguage, "the naturallanguage must be provided");
 
-        PkgLocalization result = updatePkgLocalizationWithoutSideEffects(
-                context, pkg, naturalLanguage,
+        return updatePkgLocalizationWithoutSideEffects(
+                context, pkgSupplement, naturalLanguage,
                 title, summary, description);
-
-        // riding off the back of this, if there is a "_devel" package of the same name
-        // then its localization should be configured at the same time.
-
-        pkgServiceImpl.findSubordinatePkgsForMainPkg(context, pkg.getName()).forEach(
-                (subordinatePkg) -> updatePkgLocalization(
-                        context, subordinatePkg, naturalLanguage,
-                        title,
-                        summary + tryGetSummarySuffix(subordinatePkg.getName()).orElse(""),
-                        description));
-
-        return result;
     }
 
     private PkgLocalization updatePkgLocalizationWithoutSideEffects(
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             NaturalLanguage naturalLanguage,
             String title,
             String summary,
             String description) {
 
-        Preconditions.checkArgument(null != pkg, "the package must be provided");
+        Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement must be provided");
         Preconditions.checkArgument(null != naturalLanguage, "the naturallanguage must be provided");
 
-        if(null!=title) {
-            title = title.trim();
-        }
-
-        if(null!=summary) {
-            summary = summary.trim();
-        }
-
-        if(null!=description) {
-            description = description.trim();
-        }
+        title = StringUtils.trimToNull(title);
+        summary = StringUtils.trimToNull(summary);
+        description = StringUtils.trimToNull(description);
 
         // was using the static method, but won't work with temporary objects.
-        Optional<PkgLocalization> pkgLocalizationOptional = pkg.getPkgLocalization(naturalLanguage);
+        Optional<PkgLocalization> pkgLocalizationOptional = pkgSupplement.getPkgLocalization(naturalLanguage);
 
         if(Strings.isNullOrEmpty(title) && Strings.isNullOrEmpty(summary) && Strings.isNullOrEmpty(description)) {
             pkgLocalizationOptional.ifPresent((context::deleteObject));
             return null;
         }
 
-        if(!pkgLocalizationOptional.isPresent()) {
-            PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(naturalLanguage);
-            pkgLocalization.setTitle(title);
-            pkgLocalization.setSummary(summary);
-            pkgLocalization.setDescription(description);
-            pkg.addToManyTarget(_Pkg.PKG_LOCALIZATIONS.getName(), pkgLocalization, true);
-            return pkgLocalization;
-        }
-
-        PkgLocalization pkgLocalization = pkgLocalizationOptional.get();
+        PkgLocalization pkgLocalization = pkgLocalizationOptional.orElseGet(() -> {
+            PkgLocalization created = context.newObject(PkgLocalization.class);
+            created.setNaturalLanguage(naturalLanguage);
+            pkgSupplement.addToManyTarget(PkgSupplement.PKG_LOCALIZATIONS.getName(), created, true);
+            return created;
+        });
 
         pkgLocalization.setTitle(title);
         pkgLocalization.setSummary(summary);
         pkgLocalization.setDescription(description);
 
+        pkgSupplement.setModifyTimestamp();
+
         return pkgLocalization;
-    }
-
-    private PkgLocalization replicatePkgLocalizationWithoutSideEffects(
-            ObjectContext context,
-            PkgLocalization pkgLocalization,
-            Pkg targetPkg,
-            String summarySuffix) {
-        return updatePkgLocalizationWithoutSideEffects(
-                context, targetPkg, pkgLocalization.getNaturalLanguage(),
-                pkgLocalization.getTitle(), pkgLocalization.getSummary() + (null != summarySuffix ? summarySuffix : ""),
-                pkgLocalization.getDescription());
-    }
-
-    @Override
-    public void replicatePkgLocalizations(
-            ObjectContext context,
-            Pkg sourcePkg,
-            Pkg targetPkg,
-            String summarySuffix) {
-
-        // delete any pkg localizations from the target which are not present in the source.
-
-        List<PkgLocalization> pkgLocalizationsToDelete = targetPkg.getPkgLocalizations()
-                .stream()
-                .filter((spl) -> sourcePkg.getPkgLocalizations()
-                        .stream()
-                        .noneMatch((tpl) -> !tpl.getNaturalLanguage().equals(spl.getNaturalLanguage())))
-                .collect(Collectors.toList());
-
-        context.deleteObjects(pkgLocalizationsToDelete);
-
-        // now override the target with the source.
-
-        sourcePkg.getPkgLocalizations()
-                .forEach((spl) -> replicatePkgLocalizationWithoutSideEffects(context, spl, targetPkg, summarySuffix));
     }
 
     @Override
@@ -244,17 +182,9 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
         Preconditions.checkArgument(null != naturalLanguage, "the natural language must be provided");
 
-        if(null!=title) {
-            title = title.trim();
-        }
-
-        if(null!=summary) {
-            summary = summary.trim();
-        }
-
-        if(null!=description) {
-            description = description.trim();
-        }
+        title = StringUtils.trimToNull(title);
+        summary = StringUtils.trimToNull(summary);
+        description = StringUtils.trimToNull(description);
 
         Set<String> localizedStrings = Arrays.stream(new String[] { title, summary, description })
                 .filter((s) -> !Strings.isNullOrEmpty(s))
@@ -302,15 +232,6 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             return pkgVersionLocalization;
         }
 
-    }
-
-    @Override
-    public Optional<String> tryGetSummarySuffix(String pkgName) {
-        if (pkgName.endsWith(PkgService.SUFFIX_PKG_DEVELOPMENT)) {
-            return Optional.of(SUFFIX_SUMMARY_DEVELOPMENT);
-        }
-
-        return Optional.empty();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.FileHelper;
-import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.pkg.model.Pkg;
 import org.haiku.pkg.model.PkgArchitecture;
 import org.haiku.pkg.model.PkgVersion;
@@ -96,12 +95,12 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             {
                 ObjectContext setupObjectContext = serverRuntime.newContext();
                 org.haiku.haikudepotserver.dataobjects.Pkg persistedPkg =
-                        org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(setupObjectContext, importPkg.getName()).get();
+                        org.haiku.haikudepotserver.dataobjects.Pkg.getByName(setupObjectContext, importPkg.getName());
                 setupObjectContext.commitChanges();
 
                 pkgLocalizationService.updatePkgLocalization(
                         setupObjectContext,
-                        persistedPkg,
+                        persistedPkg.getPkgSupplement(),
                         NaturalLanguage.tryGetByCode(setupObjectContext, NaturalLanguage.CODE_GERMAN).get(),
                         "title_kingston_black",
                         "summary_kingston_black",
@@ -112,10 +111,10 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 try (InputStream inputStream = Resources.asByteSource(Resources.getResource("sample-32x32.png")).openStream()) {
                     pkgIconService.storePkgIconImage(
                             inputStream,
-                            MediaType.tryGetByCode(setupObjectContext, com.google.common.net.MediaType.PNG.toString()).get(),
+                            MediaType.getByCode(setupObjectContext, com.google.common.net.MediaType.PNG.toString()),
                             32,
                             setupObjectContext,
-                            persistedPkg);
+                            persistedPkg.getPkgSupplement());
                 }
                 setupObjectContext.commitChanges();
             }
@@ -140,15 +139,16 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
 
             org.haiku.haikudepotserver.dataobjects.Pkg persistedDevelPkg =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, importDevelPkg.getName()).get();
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, importDevelPkg.getName());
+            PkgSupplement persistedDevelPkgSupplement = persistedDevelPkg.getPkgSupplement();
 
-            Assertions.assertThat(persistedDevelPkg.getPkgIcons().size()).isEqualTo(1);
-            Assertions.assertThat(persistedDevelPkg.getPkgIcons().get(0).getSize()).isEqualTo(32);
+            Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().size()).isEqualTo(1);
+            Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().get(0).getSize()).isEqualTo(32);
 
-            PkgLocalization pkgLocalization = persistedDevelPkg.getPkgLocalization(NaturalLanguage.CODE_GERMAN).get();
+            PkgLocalization pkgLocalization = persistedDevelPkgSupplement.getPkgLocalization(NaturalLanguage.CODE_GERMAN).get();
 
             Assertions.assertThat(pkgLocalization.getTitle()).isEqualTo("title_kingston_black");
-            Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kingston_black (development files)");
+            Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kingston_black");
             Assertions.assertThat(pkgLocalization.getDescription()).isEqualTo("description_kingston_black");
         }
 
@@ -212,7 +212,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.newContext();
-                org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "testpkg").get();
+                org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "testpkg");
                 org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkg,
@@ -245,21 +245,18 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            org.haiku.haikudepotserver.dataobjects.Pkg pkg = context.newObject(
-                    org.haiku.haikudepotserver.dataobjects.Pkg.class);
-            pkg.setName("pkgx");
+            org.haiku.haikudepotserver.dataobjects.Pkg pkg = integrationTestSupportService.createPkg(context, "pkgx");
 
-            for(int i = 1; i <= 6; i++) {
+            for (int i = 1; i <= 6; i++) {
                 org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = context.newObject(
                         org.haiku.haikudepotserver.dataobjects.PkgVersion.class);
                 pkgVersion.setPkg(pkg);
                 pkgVersion.setIsLatest(i == highestMinor);
-                pkgVersion.setArchitecture(org.haiku.haikudepotserver.dataobjects.Architecture.tryGetByCode(
-                        context, Architecture.CODE_X86_64).orElseThrow(IllegalStateException::new));
+                pkgVersion.setArchitecture(org.haiku.haikudepotserver.dataobjects.Architecture.getByCode(
+                        context, Architecture.CODE_X86_64));
                 pkgVersion.setMajor("1");
                 pkgVersion.setMinor(Integer.toString(i));
-                pkgVersion.setRepositorySource(RepositorySource.tryGetByCode(context, "testreposrc_xyz")
-                        .orElseThrow(IllegalStateException::new));
+                pkgVersion.setRepositorySource(RepositorySource.getByCode(context, "testreposrc_xyz"));
             }
 
             context.commitChanges();
@@ -274,8 +271,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            ObjectId repositorySourceObjectId = RepositorySource.tryGetByCode(context, "testreposrc_xyz")
-                    .orElseThrow(IllegalStateException::new).getObjectId();
+            ObjectId repositorySourceObjectId = RepositorySource.getByCode(context, "testreposrc_xyz").getObjectId();
 
             // ---------------------------------
 
@@ -296,8 +292,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.getForPkg(
                     context,
-                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkgx")
-                            .orElseThrow(IllegalStateException::new),
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkgx"),
                     true);
 
             Assertions.assertThat(pkgVersions.size()).isEqualTo(6);

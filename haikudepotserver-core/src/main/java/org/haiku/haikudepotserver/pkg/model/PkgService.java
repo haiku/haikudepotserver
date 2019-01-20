@@ -110,7 +110,7 @@ public interface PkgService {
 
     void updatePkgChangelog(
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             String newContent);
 
     /**
@@ -157,27 +157,17 @@ public interface PkgService {
 
     /**
      * <p>If 'developPkgName' is the name of a developmental package then it could be that there is an
-     * associated main package.  This method will try to return the main package should this be a
+     * associated main package.  This method will try to return the main package name should this be a
      * development package.  A development package will have the suffix <code>_devel</code>.</p>
      *
      * <p>Another case where this a subordinate package comes up is with the <code>_x86</code>
      * variants.  In this situation, a package name has a suffix <code>_x86</code> in order to cause
      * a special build of the package within the gcc2-hybrid build environment.</p>
-     */
-
-    Optional<Pkg> tryGetMainPkgForSubordinatePkg(ObjectContext objectContext, String subordinatePkgName);
-
-    /**
-     * <p>If there exists packages that are subordinate to this main package then return it.  This covers
-     * situations such as;</p>
      *
-     * <ul>
-     *     <li>Developmental package with <code>_devel</code> suffixes</li>
-     *     <li>Special-build packages with <code>_x86</code> suffixes</li>
-     * </ul>
+     * <p>Note that the combination <code>_x86_devel</code> is also possible.</p>
      */
 
-    List<Pkg> findSubordinatePkgsForMainPkg(ObjectContext objectContext, String mainPkgName);
+    Optional<String> tryGetMainPkgNameForSubordinatePkg(ObjectContext objectContext, String subordinatePkgName);
 
     String createHpkgDownloadUrl(PkgVersion pkgVersion);
 
@@ -190,12 +180,6 @@ public interface PkgService {
      */
 
     boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories);
-
-    /**
-     * <p>Copies the categories from the source package to the target package.</p>
-     */
-
-    void replicatePkgCategories(ObjectContext context, Pkg sourcePkg, Pkg targetPkg);
 
     /**
      * <p>This method will increment the view counter on a package version.  If it encounters an optimistic

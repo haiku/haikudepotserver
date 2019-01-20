@@ -1,12 +1,12 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
 import org.apache.cayenne.ObjectContext;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -25,14 +25,14 @@ public interface RenderedPkgIconRepository {
      * <p>Removes any cached icons for the nominated pkg.</p>
      */
 
-    void evict(ObjectContext context, Pkg pkg);
+    void evict(ObjectContext context, PkgSupplement pkgSupplement);
 
     /**
      * <p>Optionally produces a bitmap icon at the specified size.  If no icon can be produced then it
      * will return an absent optional.</p>
      */
 
-    Optional<byte[]> render(int size, ObjectContext context, Pkg pkg);
+    Optional<byte[]> render(int size, ObjectContext context, PkgSupplement pkgSupplement);
 
     /**
      * <p>This renders a generic icon that is not for a specific package.</p>

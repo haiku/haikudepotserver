@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2016-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,18 +8,7 @@ package org.haiku.haikudepotserver.pkg.model;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.*;
 
-import java.util.Optional;
-import java.util.regex.Pattern;
-
 public interface PkgLocalizationService extends PkgLocalizationLookupService {
-
-    String SUFFIX_SUMMARY_DEVELOPMENT = " (development files)";
-
-    /**
-     * <p>Some packages may need a suffix added to their summaries.</p>
-     */
-
-    Optional<String> tryGetSummarySuffix(String pkgName);
 
     /**
      * <p>This method will update the localization defined in the parameters to this method into the data
@@ -28,17 +17,11 @@ public interface PkgLocalizationService extends PkgLocalizationLookupService {
 
     PkgLocalization updatePkgLocalization(
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             NaturalLanguage naturalLanguage,
             String title,
             String summary,
             String description);
-
-    void replicatePkgLocalizations(
-            ObjectContext context,
-            Pkg sourcePkg,
-            Pkg targetPkg,
-            String summarySuffix);
 
     /**
      * <p>This method will either find the existing localization or create a new one.  It will then set the localized

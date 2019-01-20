@@ -4,8 +4,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.cayenne.exp.Property;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -28,8 +28,8 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
     public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<Integer> ORDERING = Property.create("ordering", Integer.class);
     public static final Property<Integer> WIDTH = Property.create("width", Integer.class);
-    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
     public static final Property<List<PkgScreenshotImage>> PKG_SCREENSHOT_IMAGES = Property.create("pkgScreenshotImages", List.class);
+    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
 
     public void setCode(String code) {
         writeProperty("code", code);
@@ -87,15 +87,6 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
         return (Integer)readProperty("width");
     }
 
-    public void setPkg(Pkg pkg) {
-        setToOneTarget("pkg", pkg, true);
-    }
-
-    public Pkg getPkg() {
-        return (Pkg)readProperty("pkg");
-    }
-
-
     public void addToPkgScreenshotImages(PkgScreenshotImage obj) {
         addToManyTarget("pkgScreenshotImages", obj, true);
     }
@@ -105,6 +96,15 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PkgScreenshotImage> getPkgScreenshotImages() {
         return (List<PkgScreenshotImage>)readProperty("pkgScreenshotImages");
+    }
+
+
+    public void setPkgSupplement(PkgSupplement pkgSupplement) {
+        setToOneTarget("pkgSupplement", pkgSupplement, true);
+    }
+
+    public PkgSupplement getPkgSupplement() {
+        return (PkgSupplement)readProperty("pkgSupplement");
     }
 
 

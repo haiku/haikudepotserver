@@ -1,13 +1,13 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.model;
 
 import org.apache.cayenne.ObjectContext;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,20 +43,10 @@ public interface PkgScreenshotService {
     PkgScreenshot storePkgScreenshotImage(
             InputStream input,
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkg,
             Integer ordering) throws IOException, BadPkgScreenshotException;
 
     void deleteScreenshot(ObjectContext context, PkgScreenshot screenshot);
-
-    /**
-     * <p>Ensures that the screenshots in the source package are the same as those in the target package.</p>
-     * @since 2017-12-06
-     */
-
-    void replicatePkgScreenshots(
-            ObjectContext context,
-            Pkg sourcePkg,
-            Pkg targetPkg) throws IOException, BadPkgScreenshotException;
 
     /**
      * <p>This method will re-order the screenshots according to the set of codes present in the supplied list.
@@ -67,7 +57,7 @@ public interface PkgScreenshotService {
 
     void reorderPkgScreenshots(
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkg,
             List<String> codes);
 
 }

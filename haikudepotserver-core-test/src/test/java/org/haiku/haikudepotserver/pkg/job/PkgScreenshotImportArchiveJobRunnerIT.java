@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -211,10 +212,10 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
     private void assertScreenshotHashes(String[] expectedSha1Sums) {
         ObjectContext context = serverRuntime.newContext();
         Pkg pkg1 = Pkg.getByName(context, "pkg1");
+        PkgSupplement pkg1Supplement = pkg1.getPkgSupplement();
 
-        Assert.assertThat(pkg1.getPkgScreenshots().size(), CoreMatchers.is(expectedSha1Sums.length));
-
-        List<PkgScreenshot> screenshots = pkg1.getSortedPkgScreenshots();
+        Assert.assertThat(pkg1Supplement.getPkgScreenshots().size(), CoreMatchers.is(expectedSha1Sums.length));
+        List<PkgScreenshot> screenshots = pkg1Supplement.getSortedPkgScreenshots();
 
         for (int i = 0 ; i < screenshots.size(); i++) {
             PkgScreenshot screenshot = screenshots.get(i);

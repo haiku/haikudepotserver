@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,20 +13,18 @@ import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.compress.utils.BoundedInputStream;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
@@ -43,25 +41,21 @@ public class PkgIconServiceImpl implements PkgIconService {
 
     private final RenderedPkgIconRepository renderedPkgIconRepository;
     private final PngOptimizationService pngOptimizationService;
-    private final PkgService pkgService;
     private final ImageHelper imageHelper;
 
     public PkgIconServiceImpl(
             RenderedPkgIconRepository renderedPkgIconRepository,
-            PngOptimizationService pngOptimizationService,
-            PkgService pkgService) {
+            PngOptimizationService pngOptimizationService) {
         this.renderedPkgIconRepository = Preconditions.checkNotNull(renderedPkgIconRepository);
         this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
-        this.pkgService = Preconditions.checkNotNull(pkgService);
         imageHelper = new ImageHelper();
     }
 
     @Override
     public Date getLastPkgIconModifyTimestampSecondAccuracy(ObjectContext context) {
         Date result = ObjectSelect
-                .query(Pkg.class)
-                .where(Pkg.ACTIVE.isTrue())
-                .max(Pkg.ICON_MODIFY_TIMESTAMP)
+                .query(PkgSupplement.class)
+                .max(PkgSupplement.ICON_MODIFY_TIMESTAMP)
                 .selectOne(context);
 
         if (null == result) {
@@ -72,17 +66,12 @@ public class PkgIconServiceImpl implements PkgIconService {
     }
 
     @Override
-    public void removePkgIcon(ObjectContext context, Pkg pkg) {
+    public void removePkgIcon(ObjectContext context, PkgSupplement pkgSupplement) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
-        Preconditions.checkArgument(null != pkg, "the package must be supplied");
-
-        context.deleteObjects(deriveDataObjectsToDelete(pkg.getPkgIcons()));
-        pkg.setModifyTimestamp();
-        pkg.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
-
-        pkgService.findSubordinatePkgsForMainPkg(context, pkg.getName())
-                .forEach(develPkg -> removePkgIcon(context, develPkg));
-
+        Preconditions.checkArgument(null != pkgSupplement, "the package must be supplied");
+        context.deleteObjects(deriveDataObjectsToDelete(pkgSupplement.getPkgIcons()));
+        pkgSupplement.setModifyTimestamp();
+        pkgSupplement.setIconModifyTimestamp();
     }
 
     @Override
@@ -91,12 +80,12 @@ public class PkgIconServiceImpl implements PkgIconService {
             MediaType mediaType,
             Integer expectedSize,
             ObjectContext context,
-            Pkg pkg) throws IOException, BadPkgIconException {
+            PkgSupplement pkgSupplement) throws IOException, BadPkgIconException {
 
         Preconditions.checkArgument(null != context, "the context is not supplied");
         Preconditions.checkArgument(null != input, "the input must be provided");
         Preconditions.checkArgument(null != mediaType, "the mediaType must be provided");
-        Preconditions.checkArgument(null != pkg, "the pkg must be provided");
+        Preconditions.checkArgument(null != pkgSupplement, "the pkgSupplement must be provided");
 
         byte[] imageData = ByteStreams.toByteArray(new BoundedInputStream(input, ICON_SIZE_LIMIT));
 
@@ -109,17 +98,21 @@ public class PkgIconServiceImpl implements PkgIconService {
                 ImageHelper.Size pngSize =  imageHelper.derivePngSize(imageData);
 
                 if(null==pngSize) {
-                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it is not a valid png image", pkg.getName());
+                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid;"
+                            + "it is not a valid png image", pkgSupplement.getBasePkgName());
                     throw new BadPkgIconException("invalid png");
                 }
 
                 if(!pngSize.areSides(16) && !pngSize.areSides(32) && !pngSize.areSides(64)) {
-                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; it must be either 32x32 or 16x16 px, but was {}", pkg.getName(), pngSize.toString());
+                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size was invalid; "
+                            + "it must be either 32x32 or 16x16 px, but was {}",
+                            pkgSupplement.getBasePkgName(), pngSize.toString());
                     throw new BadPkgIconException("non-square sizing or unexpected sizing");
                 }
 
                 if(null!=expectedSize && !pngSize.areSides(expectedSize)) {
-                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not match the expected size", pkg.getName());
+                    LOGGER.warn("attempt to set the bitmap (png) package icon for package {}, but the size did not "
+                            + " match the expected size", pkgSupplement.getBasePkgName());
                     throw new BadPkgIconException("size of image was not as expected");
                 }
 
@@ -131,15 +124,16 @@ public class PkgIconServiceImpl implements PkgIconService {
                 }
 
                 size = pngSize.width;
-                pkgIconOptional = pkg.getPkgIcon(mediaType, pngSize.width);
+                pkgIconOptional = pkgSupplement.getPkgIcon(mediaType, pngSize.width);
                 break;
 
             case MediaType.MEDIATYPE_HAIKUVECTORICONFILE:
                 if(!imageHelper.looksLikeHaikuVectorIconFormat(imageData)) {
-                    LOGGER.warn("attempt to set the vector (hvif) package icon for package {}, but the data does not look like hvif", pkg.getName());
+                    LOGGER.warn("attempt to set the vector (hvif) package icon for package {}, but the data does not "
+                            + "look like hvif", pkgSupplement.getBasePkgName());
                     throw new BadPkgIconException();
                 }
-                pkgIconOptional = pkg.getPkgIcon(mediaType, null);
+                pkgIconOptional = pkgSupplement.getPkgIcon(mediaType, null);
                 break;
 
             default:
@@ -154,7 +148,7 @@ public class PkgIconServiceImpl implements PkgIconService {
         }
         else {
             PkgIcon pkgIcon = context.newObject(PkgIcon.class);
-            pkg.addToManyTarget(Pkg.PKG_ICONS.getName(), pkgIcon, true);
+            pkgSupplement.addToManyTarget(PkgSupplement.PKG_ICONS.getName(), pkgIcon, true);
             pkgIcon.setMediaType(mediaType);
             pkgIcon.setSize(size);
             pkgIconImage = context.newObject(PkgIconImage.class);
@@ -163,24 +157,18 @@ public class PkgIconServiceImpl implements PkgIconService {
         }
 
         pkgIconImage.setData(imageData);
-        pkg.setModifyTimestamp();
-        pkg.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
-        renderedPkgIconRepository.evict(context, pkg);
+        pkgSupplement.setModifyTimestamp();
+        pkgSupplement.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
+        renderedPkgIconRepository.evict(context, pkgSupplement);
 
-        if(null!=size) {
-            LOGGER.info("the icon {}px for package {} has been updated", size, pkg.getName());
+        if (null != size) {
+            LOGGER.info("the icon {}px for package {} has been updated", size, pkgSupplement.getBasePkgName());
         }
         else {
-            LOGGER.info("the icon for package {} has been updated", pkg.getName());
+            LOGGER.info("the icon for package {} has been updated", pkgSupplement.getBasePkgName());
         }
 
-        PkgIcon pkgIcon = pkgIconOptional.orElseThrow(IllegalStateException::new);
-
-        for(Pkg subordinatePkg : pkgService.findSubordinatePkgsForMainPkg(context, pkg.getName())) {
-            replicatePkgIcon(context, pkgIcon, subordinatePkg);
-        }
-
-        return pkgIcon;
+        return pkgIconOptional.orElseThrow(IllegalStateException::new);
     }
 
     private List<MediaType> getInUsePkgIconMediaTypes(final ObjectContext context) {
@@ -198,48 +186,6 @@ public class PkgIconServiceImpl implements PkgIconService {
                 .map(c -> MediaType.tryGetByCode(context, c).get())
                 .collect(Collectors.toList());
 
-    }
-
-    private PkgIcon replicatePkgIcon(
-            ObjectContext context,
-            PkgIcon pkgIcon,
-            Pkg targetPkg) throws IOException, BadPkgIconException {
-        return storePkgIconImage(
-                new ByteArrayInputStream(pkgIcon.getPkgIconImage().getData()),
-                pkgIcon.getMediaType(),
-                pkgIcon.getSize(),
-                context,
-                targetPkg);
-    }
-
-    @Override
-    public void replicatePkgIcons(
-            ObjectContext context,
-            Pkg sourcePkg,
-            Pkg targetPkg) throws IOException, BadPkgIconException {
-
-        Preconditions.checkArgument(null != context, "the context must be supplied");
-        Preconditions.checkArgument(null != sourcePkg, "the source pkg must be supplied");
-        Preconditions.checkArgument(null != targetPkg, "the target pkg must be supplied");
-
-        // first remove all of the icons from the target pkg that do not exist in the source.
-
-        List<DataObject> targetPkgIconsDataObjectsToDelete = deriveDataObjectsToDelete(targetPkg.getPkgIcons()
-                .stream()
-                .filter((tpi) -> sourcePkg.getPkgIcons()
-                        .stream()
-                        .noneMatch((spi) -> Objects.equals(spi.getMediaType(), tpi.getMediaType()) &&
-                                Objects.equals(spi.getSize(), tpi.getSize()))
-                )
-                .collect(Collectors.toList()));
-
-        context.deleteObjects(targetPkgIconsDataObjectsToDelete);
-
-        // now merge in those from the source.
-
-        for(PkgIcon pkgIcon : sourcePkg.getPkgIcons()) {
-            replicatePkgIcon(context, pkgIcon, targetPkg);
-        }
     }
 
     private List<Integer> getInUsePkgIconSizes(ObjectContext context, MediaType mediaType) {

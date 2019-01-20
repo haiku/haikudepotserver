@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -162,13 +162,13 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             if (matcher.matches()) {
                 String pkgName = matcher.group(GROUP_PKGNAME);
 
-                if(!pkgNamesProcessed.contains(pkgName)) {
+                if (!pkgNamesProcessed.contains(pkgName)) {
                     row[CSV_COLUMN_PKGNAME] = archiveEntry.getName();
                     ObjectContext context = serverRuntime.newContext();
                     Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
                     if (pkgOptional.isPresent()) {
-                        pkgIconService.removePkgIcon(context, pkgOptional.get());
+                        pkgIconService.removePkgIcon(context, pkgOptional.get().getPkgSupplement());
                         LOGGER.info("removed icons for pkg; {}", pkgName);
                         row[CSV_COLUMN_ACTION] = Action.REMOVED.name();
                     } else {
@@ -188,15 +188,15 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
         ArchiveEntry archiveEntry;
 
-        while(null != (archiveEntry = archiveInputStream.getNextEntry())) {
+        while (null != (archiveEntry = archiveInputStream.getNextEntry())) {
             if (!archiveEntry.isDirectory()) {
                 Matcher nameMatcher = PATTERN_PATH.matcher(archiveEntry.getName());
                 ArchiveEntryResult result;
                 row[CSV_COLUMN_PKGNAME] = archiveEntry.getName();
 
-                if(nameMatcher.matches()) {
+                if (nameMatcher.matches()) {
 
-                    if(archiveEntry.getSize() <= MAX_ICON_PAYLOAD) {
+                    if (archiveEntry.getSize() <= MAX_ICON_PAYLOAD) {
                         result = processMatchingFileEntryFromArchive(
                                 archiveInputStream,
                                 nameMatcher.group(GROUP_PKGNAME),
@@ -233,16 +233,16 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         ObjectContext context = serverRuntime.newContext();
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
-        if(pkgOptional.isPresent()) {
+        if (pkgOptional.isPresent()) {
 
             Optional<org.haiku.haikudepotserver.dataobjects.MediaType> mediaType =
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, leafnameExtension);
 
-            if(!mediaType.isPresent()) {
+            if (!mediaType.isPresent()) {
                 return new ArchiveEntryResult(Action.INVALID, "unknown file-extension");
             }
 
-            switch(mediaType.get().getCode()) {
+            switch (mediaType.get().getCode()) {
 
                 case org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE:
                 case org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG:
@@ -258,7 +258,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                         mediaType.get(),
                         null, // there is no expected icon size
                         context,
-                        pkgOptional.get());
+                        pkgOptional.get().getPkgSupplement());
             } catch (BadPkgIconException e) {
                 return new ArchiveEntryResult(Action.INVALID, e.getMessage());
             }

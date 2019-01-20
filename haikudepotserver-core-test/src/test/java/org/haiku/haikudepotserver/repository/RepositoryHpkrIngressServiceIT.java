@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -125,10 +125,9 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.newContext();
-                Pkg pkg = context.newObject(Pkg.class);
+                Pkg pkg = integrationTestSupportService.createPkg(context, "taranaki");
                 pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test").get());
                 pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test2").get());
-                pkg.setName("taranaki");
 
                 // this one should get deactivated
                 {
@@ -163,10 +162,9 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
 
-                Pkg pkg = context.newObject(Pkg.class);
+                Pkg pkg = integrationTestSupportService.createPkg(context, "ffmpeg");
                 pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test").get());
                 pkgService.ensurePkgProminence(context, pkg, Repository.tryGetByCode(context, "test2").get());
-                pkg.setName("ffmpeg");
 
                 PkgVersion pkgVersion = context.newObject(PkgVersion.class);
                 pkgVersion.setPkg(pkg);

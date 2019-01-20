@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -62,7 +63,7 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
                 "download",
                 MediaType.CSV_UTF_8.toString());
 
-        try(
+        try (
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
                 CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
@@ -87,13 +88,15 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
                     context,
                     false,
                     pkg -> {
+                        PkgSupplement pkgSupplement = pkg.getPkgSupplement();
+
                         cells[0] = pkg.getName();
                         cells[1] = repositoryService.getRepositoriesForPkg(context, pkg)
                                 .stream()
                                 .map(Repository::getCode)
                                 .collect(Collectors.joining(";"));
-                        cells[2] = Integer.toString(pkg.getPkgScreenshots().size());
-                        cells[3] = Integer.toString(pkg.getPkgScreenshots()
+                        cells[2] = Integer.toString(pkgSupplement.getPkgScreenshots().size());
+                        cells[3] = Integer.toString(pkgSupplement.getPkgScreenshots()
                                 .stream()
                                 .mapToInt(_PkgScreenshot::getLength)
                                 .sum());

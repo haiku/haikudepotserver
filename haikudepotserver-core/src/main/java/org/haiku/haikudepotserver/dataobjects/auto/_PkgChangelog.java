@@ -3,7 +3,7 @@ package org.haiku.haikudepotserver.dataobjects.auto;
 import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -21,7 +21,7 @@ public abstract class _PkgChangelog extends AbstractDataObject {
     public static final Property<String> CONTENT = Property.create("content", String.class);
     public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
     public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
 
     public void setContent(String content) {
         writeProperty("content", content);
@@ -44,12 +44,12 @@ public abstract class _PkgChangelog extends AbstractDataObject {
         return (Timestamp)readProperty("modifyTimestamp");
     }
 
-    public void setPkg(Pkg pkg) {
-        setToOneTarget("pkg", pkg, true);
+    public void setPkgSupplement(PkgSupplement pkgSupplement) {
+        setToOneTarget("pkgSupplement", pkgSupplement, true);
     }
 
-    public Pkg getPkg() {
-        return (Pkg)readProperty("pkg");
+    public PkgSupplement getPkgSupplement() {
+        return (PkgSupplement)readProperty("pkgSupplement");
     }
 
 

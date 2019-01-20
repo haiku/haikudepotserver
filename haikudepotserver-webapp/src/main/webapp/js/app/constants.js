@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,7 +35,9 @@ angular.module('haikudepotserver')
         PATTERN_USER_NICKNAME : /^[a-z0-9]{4,16}$/,
         PATTERN_PKG_NAME : /^[^\s/=!<>-]+$/,
 
-        KEY_NATURALLANGUAGECODE : 'natlangcode'
+        KEY_NATURALLANGUAGECODE : 'natlangcode',
+
+        SUFFIXES_SUBORDINATE_PKG_NAMES : [ '_devel', '_sources' ]
 
 })
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,8 +8,6 @@ package org.haiku.haikudepotserver;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
-import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.DataNode;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.DataMap;
@@ -38,7 +36,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * <p>This superclass of all of the tests has a hook to run before each integration test.  The hook will
@@ -130,15 +127,15 @@ public abstract class AbstractIntegrationTest {
     @Before
     public void beforeEachTest() {
 
-        LOGGER.info("will prepare for the next test");
+        LOGGER.debug("will prepare for the next test");
 
         serverRuntime.getDataDomain().getQueryCache().clear();
         serverRuntime.getDataDomain().getSharedSnapshotCache().clear();
-        LOGGER.info("prep; have cleared out caches");
+        LOGGER.debug("prep; have cleared out caches");
 
         for(DataNode dataNode : serverRuntime.getDataDomain().getDataNodes()) {
 
-            LOGGER.info("prep; will clear out data for data node; {}", dataNode.getName());
+            LOGGER.debug("prep; will clear out data for data node; {}", dataNode.getName());
 
             try ( Connection connection = dataNode.getDataSource().getConnection() ) {
 
@@ -200,13 +197,13 @@ public abstract class AbstractIntegrationTest {
                 throw new RuntimeException("unable to clear the data for the data node; " + dataNode.getName(), se);
             }
 
-            LOGGER.info("prep; did clear out data for data node; {}", dataNode.getName());
+            LOGGER.debug("prep; did clear out data for data node; {}", dataNode.getName());
         }
 
         setUnauthenticated();
         mailSender.clear();
 
-        LOGGER.info("did prepare for the next test");
+        LOGGER.debug("did prepare for the next test");
     }
 
     protected void setAuthenticatedUser(String nickname) {

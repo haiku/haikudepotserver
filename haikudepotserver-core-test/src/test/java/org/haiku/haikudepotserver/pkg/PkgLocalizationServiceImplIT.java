@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,19 +41,20 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel = context.newObject(org.haiku.haikudepotserver.dataobjects.Pkg.class);
             pkg1Devel.setActive(true);
             pkg1Devel.setName("pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
+            pkg1Devel.setPkgSupplement(PkgSupplement.getByBasePkgName(context, "pkg1"));
             context.commitChanges();
         }
 
         {
             ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(context, "pkg1").get();
-            NaturalLanguage naturalLanguageGerman = NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_GERMAN).get();
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkg1");
+            NaturalLanguage naturalLanguageGerman = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN);
 
             // ---------------------------------
             pkgLocalizationService.updatePkgLocalization(
                     context,
-                    pkg1,
+                    pkg1.getPkgSupplement(),
                     naturalLanguageGerman,
                     "title_kokako",
                     "summary_kokako",
@@ -65,14 +67,13 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel =
-                    org.haiku.haikudepotserver.dataobjects.Pkg.tryGetByName(
-                            context,
-                            "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT).get();
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(
+                            context, "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
 
-            PkgLocalization pkgLocalization = pkg1Devel.getPkgLocalization(NaturalLanguage.CODE_GERMAN).get();
+            PkgLocalization pkgLocalization = pkg1Devel.getPkgSupplement().getPkgLocalization(NaturalLanguage.CODE_GERMAN).get();
 
             Assertions.assertThat(pkgLocalization.getTitle()).isEqualTo("title_kokako");
-            Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kokako (development files)");
+            Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kokako");
             Assertions.assertThat(pkgLocalization.getDescription()).isEqualTo("description_kokako");
         }
 

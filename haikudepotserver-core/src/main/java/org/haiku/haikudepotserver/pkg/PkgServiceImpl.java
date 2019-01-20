@@ -20,7 +20,6 @@ import org.apache.cayenne.query.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.dataobjects.auto._PkgPkgCategory;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
@@ -48,6 +47,11 @@ import java.util.stream.Collectors;
 public class PkgServiceImpl implements PkgService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgServiceImpl.class);
+
+    private static List<String> SUFFIXES_SUBORDINATE_PKG_NAMES = ImmutableList.of(
+            SUFFIX_PKG_DEVELOPMENT,
+            SUFFIX_PKG_X86,
+            SUFFIX_PKG_X86 + SUFFIX_PKG_DEVELOPMENT);
 
     // TODO; should be injected as a pattern because this should not know about paths for the controller.
     public final static String URL_SEGMENT_PKGDOWNLOAD = "__pkgdownload";
@@ -382,36 +386,34 @@ public class PkgServiceImpl implements PkgService {
     @Override
     public void updatePkgChangelog(
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             String newContent) {
 
-        Preconditions.checkArgument(null!=context, "the context is not supplied");
-        Preconditions.checkArgument(null!=pkg, "the pkg is not supplied");
+        Preconditions.checkArgument(null != context, "the context is not supplied");
+        Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement is not supplied");
 
-        Optional<PkgChangelog> pkgChangelogOptional = pkg.getPkgChangelog();
+        Optional<PkgChangelog> pkgChangelogOptional = pkgSupplement.getPkgChangelog();
+        newContent = StringUtils.trimToNull(newContent);
 
-        if(null!=newContent) {
-            newContent = newContent.trim().replace("\r\n", "\n"); // windows to unix newline.
-        }
-
-        if(pkgChangelogOptional.isPresent()) {
-            if(null==newContent) {
+        if (null == newContent) {
+            pkgChangelogOptional.ifPresent(pcl -> {
                 context.deleteObject(pkgChangelogOptional.get());
-                LOGGER.info("did remove the changelog for; {}", pkg);
-            }
-            else {
-                pkgChangelogOptional.get().setContent(newContent);
-                LOGGER.info("did update the changelog for; {}",pkg);
-            }
+                LOGGER.info("did remove the changelog for; {}", pkgSupplement.getBasePkgName());
+            });
+        } else {
+            newContent = newContent.replace("\r\n", "\n"); // windows to unix newline.
+
+            PkgChangelog pkgChangelog = pkgChangelogOptional.orElseGet(() -> {
+                PkgChangelog created = context.newObject(PkgChangelog.class);
+                created.setPkgSupplement(pkgSupplement);
+                return created;
+            });
+
+            pkgChangelog.setContent(newContent);
+            LOGGER.info("did update the changelog for; {}", pkgSupplement.getBasePkgName());
         }
-        else {
-            if(null!=newContent) {
-                PkgChangelog pkgChangelog = context.newObject(PkgChangelog.class);
-                pkgChangelog.setPkg(pkg);
-                pkgChangelog.setContent(newContent);
-                LOGGER.info("did add a new changelog for; {}", pkg);
-            }
-        }
+
+        pkgSupplement.setModifyTimestamp();
     }
 
     /**
@@ -433,9 +435,9 @@ public class PkgServiceImpl implements PkgService {
 
         int count = 0;
 
-        for(PkgVersion pkgVersion : PkgVersion.getForPkg(context, pkg, repositorySource, false)) { // active only
-            if(pkgVersion.getRepositorySource().equals(repositorySource)) {
-                if(pkgVersion.getActive()) {
+        for (PkgVersion pkgVersion : PkgVersion.getForPkg(context, pkg, repositorySource, false)) { // active only
+            if (pkgVersion.getRepositorySource().equals(repositorySource)) {
+                if (pkgVersion.getActive()) {
                     pkgVersion.setActive(false);
                     count++;
                 }
@@ -511,7 +513,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != pkg, "the pkg must be provided");
         Optional<PkgProminence> pkgProminenceOptional = pkg.getPkgProminence(repository);
 
-        if(!pkgProminenceOptional.isPresent()) {
+        if (!pkgProminenceOptional.isPresent()) {
             PkgProminence pkgProminence = objectContext.newObject(PkgProminence.class);
             pkg.addToManyTarget(Pkg.PKG_PROMINENCES.getName(), pkgProminence, true);
             pkgProminence.setRepository(repository);
@@ -523,35 +525,17 @@ public class PkgServiceImpl implements PkgService {
     }
 
     @Override
-    public Optional<Pkg> tryGetMainPkgForSubordinatePkg(
+    public Optional<String> tryGetMainPkgNameForSubordinatePkg(
             ObjectContext objectContext,
             final String subordinatePkgName) {
         Preconditions.checkArgument(null != objectContext, "the object context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(subordinatePkgName), "the pkg must be provided");
 
-        return ImmutableList.of(SUFFIX_PKG_DEVELOPMENT, SUFFIX_PKG_X86)
+        return SUFFIXES_SUBORDINATE_PKG_NAMES
                 .stream()
                 .filter(subordinatePkgName::endsWith)
                 .map(suffix -> StringUtils.removeEnd(subordinatePkgName, suffix))
-                .findFirst()
-                .map(mainPackageName -> Pkg.tryGetByName(objectContext, mainPackageName).orElse(null));
-    }
-
-    /**
-     * <p>If there exists a development package for this package then return it.</p>
-     */
-
-    @Override
-    public List<Pkg> findSubordinatePkgsForMainPkg(ObjectContext objectContext, String mainPkgName) {
-        Preconditions.checkArgument(null != objectContext, "the object context must be provided");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(mainPkgName), "the pkg must be provided");
-
-        return Pkg.findByNames(
-                objectContext,
-                ImmutableList.of(SUFFIX_PKG_DEVELOPMENT, SUFFIX_PKG_X86)
-                        .stream()
-                        .map(n -> mainPkgName + n)
-                        .collect(Collectors.toSet()));
+                .findFirst();
     }
 
     @Override
@@ -582,15 +566,16 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != pkg, "the pkg must be provided");
         Preconditions.checkArgument(null != pkgCategories, "the pkg categories must be provided");
 
+        PkgSupplement pkgSupplement = pkg.getPkgSupplement();
         pkgCategories = new ArrayList<>(pkgCategories);
         boolean didChange = false;
 
         // now go through and delete any of those pkg relationships to packages that are already present
         // and which are no longer required.  Also remove those that we already have from the list.
 
-        for(PkgPkgCategory pkgPkgCategory : ImmutableList.copyOf(pkg.getPkgPkgCategories())) {
-            if(!pkgCategories.contains(pkgPkgCategory.getPkgCategory())) {
-                pkg.removeToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
+        for (PkgPkgCategory pkgPkgCategory : ImmutableList.copyOf(pkgSupplement.getPkgPkgCategories())) {
+            if (!pkgCategories.contains(pkgPkgCategory.getPkgCategory())) {
+                pkgSupplement.removeToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
                 context.deleteObjects(pkgPkgCategory);
                 didChange = true;
             }
@@ -601,42 +586,20 @@ public class PkgServiceImpl implements PkgService {
 
         // now any remaining in the pkgCategories will need to be added to the pkg.
 
-        for(PkgCategory pkgCategory : pkgCategories) {
+        for (PkgCategory pkgCategory : pkgCategories) {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
             pkgPkgCategory.setPkgCategory(pkgCategory);
-            pkg.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
+            pkgSupplement.addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             didChange = true;
         }
 
         // now save and finish.
 
-        if(didChange) {
+        if (didChange) {
             pkg.setModifyTimestamp();
         }
 
-        // there may be subordinate packages to this one.  If this is the case, then find them and update
-        // their categories as well.
-
-        for (Pkg subordinatePkg : findSubordinatePkgsForMainPkg(context, pkg.getName())) {
-            if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
-                updatePkgCategories(context, subordinatePkg, pkgCategories);
-            }
-        }
-
         return didChange;
-    }
-
-    @Override
-    public void replicatePkgCategories(ObjectContext context, Pkg sourcePkg, Pkg targetPkg) {
-        updatePkgCategories(
-                context,
-                targetPkg,
-                sourcePkg
-                        .getPkgPkgCategories()
-                        .stream()
-                        .map(_PkgPkgCategory::getPkgCategory)
-                        .collect(Collectors.toList())
-        );
     }
 
     /**
@@ -654,7 +617,7 @@ public class PkgServiceImpl implements PkgService {
 
         int attempts = 3;
 
-        while(true) {
+        while (true) {
             ObjectContext contextEdit = serverRuntime.newContext();
             PkgVersion pkgVersionEdit = ((List<PkgVersion>) contextEdit.performQuery(new ObjectIdQuery(pkgVersionOid)))
                     .stream()
@@ -702,13 +665,28 @@ public class PkgServiceImpl implements PkgService {
                         .where(PkgVersion.ACTIVE.isTrue())
                         .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
                         .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
-                        .max(Pkg.MODIFY_TIMESTAMP)
+                        .max(PkgVersion.PKG.dot(Pkg.MODIFY_TIMESTAMP))
                         .sharedCache()
                         .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
                         .selectFirst(context),
                 new Date(0L));
 
-        return DateTimeHelper.secondAccuracyDate(new Date(Math.max(pkgVersionMax.getTime(), pkgMax.getTime())));
+        Date pkgSupplementMax = ObjectUtils.firstNonNull(
+                ObjectSelect
+                        .query(PkgVersion.class)
+                        .where(PkgVersion.ACTIVE.isTrue())
+                        .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                        .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                        .max(PkgVersion.PKG.dot(Pkg.PKG_SUPPLEMENT).dot(PkgSupplement.MODIFY_TIMESTAMP))
+                        .sharedCache()
+                        .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
+                        .selectFirst(context),
+                new Date(0L));
+
+        return DateTimeHelper.secondAccuracyDate(new Date(
+                Math.max(
+                        Math.max(pkgVersionMax.getTime(), pkgMax.getTime()),
+                        pkgSupplementMax.getTime())));
     }
 
     @Override

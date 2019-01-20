@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -129,7 +129,7 @@ angular.module('haikudepotserver').factory('miscService',
 
                     var semicolonI = u.indexOf(';',offset);
 
-                    if(-1==semicolonI) {
+                    if(-1 === semicolonI) {
 
                         var uTrimmed = u;
 

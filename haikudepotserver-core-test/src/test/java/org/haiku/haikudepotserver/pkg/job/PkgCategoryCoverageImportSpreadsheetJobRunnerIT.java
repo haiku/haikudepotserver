@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -83,8 +83,8 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, "pkg1");
-            Set<String> pkg1PkgCategoryCodes = pkgOptional.get().getPkgPkgCategories()
+            Pkg pkg = Pkg.getByName(context, "pkg1");
+            Set<String> pkg1PkgCategoryCodes = pkg.getPkgSupplement().getPkgPkgCategories()
                     .stream()
                     .map(c -> c.getPkgCategory().getCode())
                     .collect(Collectors.toSet());

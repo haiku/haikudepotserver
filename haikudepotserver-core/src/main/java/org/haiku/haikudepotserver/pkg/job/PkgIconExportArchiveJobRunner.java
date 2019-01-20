@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
@@ -96,11 +97,13 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
 
     private String createEjbqlRawRowsExpression() {
         return String.join("\n",
-                "SELECT pii.pkgIcon.pkg.name, pii.pkgIcon.size,",
-                "pii.pkgIcon.mediaType.code, pii.data, pii.pkgIcon.pkg.iconModifyTimestamp",
+                "SELECT pii.pkgIcon.pkgSupplement.basePkgName, pii.pkgIcon.size,",
+                "pii.pkgIcon.mediaType.code, pii.data, pii.pkgIcon.pkgSupplement.iconModifyTimestamp",
                 "FROM " + PkgIconImage.class.getSimpleName() + " pii",
-                "WHERE pii.pkgIcon.pkg.active = true",
-                "ORDER BY pii.pkgIcon.pkg.name ASC,",
+                "WHERE EXISTS",
+                "(SELECT p2.name FROM " + Pkg.class.getSimpleName() + " p2 WHERE",
+                "p2.pkgSupplement = pii.pkgIcon.pkgSupplement AND p2.active = true)",
+                "ORDER BY pii.pkgIcon.pkgSupplement.basePkgName ASC,",
                 "pii.pkgIcon.mediaType.code ASC,",
                 "pii.pkgIcon.size ASC"
         );

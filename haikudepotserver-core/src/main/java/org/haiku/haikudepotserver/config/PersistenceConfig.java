@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,6 @@ import org.haiku.haikudepotserver.support.cayenne.ServerRuntimeFactory;
 import org.haiku.haikudepotserver.support.db.migration.ManagedDatabase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 import java.util.Collections;
@@ -116,12 +115,19 @@ public class PersistenceConfig {
 
     @Bean
     public LifecycleListener pkgQueryCacheRemoveGroupListener(ServerRuntime serverRuntime) {
-        return new QueryCacheRemoveGroupListener(serverRuntime, Pkg.class, HaikuDepot.CacheGroup.PKG.name());
+        return new QueryCacheRemoveGroupListener(
+                serverRuntime,
+                ImmutableList.of(
+                        Pkg.class,
+                        PkgVersion.class,
+                        PkgSupplement.class),
+                Collections.singletonList(HaikuDepot.CacheGroup.PKG.name()));
     }
 
     @Bean
     public LifecycleListener repositoryQueryCacheRemoveGroupListener(ServerRuntime serverRuntime) {
-        return new QueryCacheRemoveGroupListener(serverRuntime,
+        return new QueryCacheRemoveGroupListener(
+                serverRuntime,
                 ImmutableList.of(
                         Repository.class,
                         RepositorySource.class,

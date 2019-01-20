@@ -5,12 +5,8 @@ import java.util.List;
 
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
-import org.haiku.haikudepotserver.dataobjects.PkgChangelog;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
-import org.haiku.haikudepotserver.dataobjects.PkgPkgCategory;
 import org.haiku.haikudepotserver.dataobjects.PkgProminence;
-import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.dataobjects.Publisher;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -29,16 +25,11 @@ public abstract class _Pkg extends AbstractDataObject {
 
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<Timestamp> ICON_MODIFY_TIMESTAMP = Property.create("iconModifyTimestamp", Timestamp.class);
     public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NAME = Property.create("name", String.class);
     public static final Property<List<PermissionUserPkg>> PERMISSION_USER_PKGS = Property.create("permissionUserPkgs", List.class);
-    public static final Property<List<PkgChangelog>> PKG_CHANGELOGS = Property.create("pkgChangelogs", List.class);
-    public static final Property<List<PkgIcon>> PKG_ICONS = Property.create("pkgIcons", List.class);
-    public static final Property<List<PkgLocalization>> PKG_LOCALIZATIONS = Property.create("pkgLocalizations", List.class);
-    public static final Property<List<PkgPkgCategory>> PKG_PKG_CATEGORIES = Property.create("pkgPkgCategories", List.class);
     public static final Property<List<PkgProminence>> PKG_PROMINENCES = Property.create("pkgProminences", List.class);
-    public static final Property<List<PkgScreenshot>> PKG_SCREENSHOTS = Property.create("pkgScreenshots", List.class);
+    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
     public static final Property<List<PkgUserRatingAggregate>> PKG_USER_RATING_AGGREGATES = Property.create("pkgUserRatingAggregates", List.class);
     public static final Property<Publisher> PUBLISHER = Property.create("publisher", Publisher.class);
 
@@ -54,13 +45,6 @@ public abstract class _Pkg extends AbstractDataObject {
     }
     public Timestamp getCreateTimestamp() {
         return (Timestamp)readProperty("createTimestamp");
-    }
-
-    public void setIconModifyTimestamp(Timestamp iconModifyTimestamp) {
-        writeProperty("iconModifyTimestamp", iconModifyTimestamp);
-    }
-    public Timestamp getIconModifyTimestamp() {
-        return (Timestamp)readProperty("iconModifyTimestamp");
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
@@ -89,54 +73,6 @@ public abstract class _Pkg extends AbstractDataObject {
     }
 
 
-    public void addToPkgChangelogs(PkgChangelog obj) {
-        addToManyTarget("pkgChangelogs", obj, true);
-    }
-    public void removeFromPkgChangelogs(PkgChangelog obj) {
-        removeToManyTarget("pkgChangelogs", obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PkgChangelog> getPkgChangelogs() {
-        return (List<PkgChangelog>)readProperty("pkgChangelogs");
-    }
-
-
-    public void addToPkgIcons(PkgIcon obj) {
-        addToManyTarget("pkgIcons", obj, true);
-    }
-    public void removeFromPkgIcons(PkgIcon obj) {
-        removeToManyTarget("pkgIcons", obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PkgIcon> getPkgIcons() {
-        return (List<PkgIcon>)readProperty("pkgIcons");
-    }
-
-
-    public void addToPkgLocalizations(PkgLocalization obj) {
-        addToManyTarget("pkgLocalizations", obj, true);
-    }
-    public void removeFromPkgLocalizations(PkgLocalization obj) {
-        removeToManyTarget("pkgLocalizations", obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PkgLocalization> getPkgLocalizations() {
-        return (List<PkgLocalization>)readProperty("pkgLocalizations");
-    }
-
-
-    public void addToPkgPkgCategories(PkgPkgCategory obj) {
-        addToManyTarget("pkgPkgCategories", obj, true);
-    }
-    public void removeFromPkgPkgCategories(PkgPkgCategory obj) {
-        removeToManyTarget("pkgPkgCategories", obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PkgPkgCategory> getPkgPkgCategories() {
-        return (List<PkgPkgCategory>)readProperty("pkgPkgCategories");
-    }
-
-
     public void addToPkgProminences(PkgProminence obj) {
         addToManyTarget("pkgProminences", obj, true);
     }
@@ -149,15 +85,12 @@ public abstract class _Pkg extends AbstractDataObject {
     }
 
 
-    public void addToPkgScreenshots(PkgScreenshot obj) {
-        addToManyTarget("pkgScreenshots", obj, true);
+    public void setPkgSupplement(PkgSupplement pkgSupplement) {
+        setToOneTarget("pkgSupplement", pkgSupplement, true);
     }
-    public void removeFromPkgScreenshots(PkgScreenshot obj) {
-        removeToManyTarget("pkgScreenshots", obj, true);
-    }
-    @SuppressWarnings("unchecked")
-    public List<PkgScreenshot> getPkgScreenshots() {
-        return (List<PkgScreenshot>)readProperty("pkgScreenshots");
+
+    public PkgSupplement getPkgSupplement() {
+        return (PkgSupplement)readProperty("pkgSupplement");
     }
 
 

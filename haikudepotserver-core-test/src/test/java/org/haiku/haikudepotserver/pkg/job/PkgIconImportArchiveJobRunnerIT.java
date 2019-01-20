@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,7 +55,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Assert.assertEquals(Pkg.tryGetByName(context, "pkg2").get().getPkgIcons().size(), 0);
+            Assert.assertEquals(Pkg.getByName(context, "pkg2").getPkgSupplement().getPkgIcons().size(), 0);
         }
 
         // load in an icon for pkg2 in order to check that the removal phase does happen.
@@ -68,7 +68,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG).get(),
                     16, // expected size along both axiis
                     context,
-                    Pkg.tryGetByName(context, "pkg2").get());
+                    Pkg.getByName(context, "pkg2").getPkgSupplement());
         }
 
         // now load in the data to the job's storage system.
@@ -93,22 +93,22 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Pkg pkg2 = Pkg.tryGetByName(context, "pkg2").get();
+            Pkg pkg2 = Pkg.getByName(context, "pkg2");
 
-            Assert.assertEquals(Pkg.tryGetByName(context, "pkg2").get().getPkgIcons().size(), 2);
+            Assert.assertEquals(pkg2.getPkgSupplement().getPkgIcons().size(), 2);
 
-            Assert.assertTrue(pkg2.getPkgIcon(
-                    org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
+            Assert.assertTrue(pkg2.getPkgSupplement().getPkgIcon(
+                    org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE
-                    ).get(),
+                    ),
                     null).isPresent());
 
-            Assert.assertTrue(pkg2.getPkgIcon(
-                    org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByCode(
+            Assert.assertTrue(pkg2.getPkgSupplement().getPkgIcon(
+                    org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG
-                    ).get(),
+                    ),
                     32).isPresent());
         }
 
@@ -130,7 +130,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
             // compare actual generated with expected.
 
-            try(
+            try (
                     BufferedReader jobReader = jobSource.getByteSource().asCharSource(Charsets.UTF_8).openBufferedStream();
                     BufferedReader sampleReader = expectedByteSource.asCharSource(Charsets.UTF_8).openBufferedStream()
             ) {

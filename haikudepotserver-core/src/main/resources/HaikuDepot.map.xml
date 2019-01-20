@@ -83,10 +83,10 @@
 	<db-entity name="pkg" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
-		<db-attribute name="icon_modify_timestamp" type="TIMESTAMP"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="publisher_id" type="BIGINT"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
@@ -111,7 +111,7 @@
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
-		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_changelog_seq</db-generator-name>
@@ -121,7 +121,7 @@
 	<db-entity name="pkg_icon" schema="haikudepot">
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="media_type_id" type="BIGINT" isMandatory="true"/>
-		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="size" type="INTEGER"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
@@ -145,7 +145,7 @@
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="natural_language_id" type="BIGINT" isMandatory="true"/>
-		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="summary" type="VARCHAR" length="8192"/>
 		<db-attribute name="title" type="VARCHAR" length="1024"/>
 		<db-key-generator>
@@ -157,7 +157,7 @@
 	<db-entity name="pkg_pkg_category" schema="haikudepot">
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="pkg_category_id" type="BIGINT" isMandatory="true"/>
-		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_pkg_category_seq</db-generator-name>
@@ -184,7 +184,7 @@
 		<db-attribute name="length" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="ordering" type="INTEGER" isMandatory="true"/>
-		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="width" type="INTEGER" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
@@ -201,6 +201,18 @@
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_screenshot_image_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="pkg_supplement" schema="haikudepot">
+		<db-attribute name="base_pkg_name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="icon_modify_timestamp" type="TIMESTAMP"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.pkg_supplement_seq</db-generator-name>
+			<db-key-cache-size>10</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_url_type" schema="haikudepot">
@@ -457,7 +469,6 @@
 	<obj-entity name="Pkg" className="org.haiku.haikudepotserver.dataobjects.Pkg" lock-type="optimistic" dbEntityName="pkg" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
-		<obj-attribute name="iconModifyTimestamp" type="java.sql.Timestamp" db-attribute-path="icon_modify_timestamp"/>
 		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
 	</obj-entity>
@@ -501,6 +512,12 @@
 	</obj-entity>
 	<obj-entity name="PkgScreenshotImage" className="org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage" dbEntityName="pkg_screenshot_image" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="data" type="byte[]" db-attribute-path="data"/>
+	</obj-entity>
+	<obj-entity name="PkgSupplement" className="org.haiku.haikudepotserver.dataobjects.PkgSupplement" lock-type="optimistic" dbEntityName="pkg_supplement" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="basePkgName" type="java.lang.String" lock="true" db-attribute-path="base_pkg_name"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="iconModifyTimestamp" type="java.sql.Timestamp" db-attribute-path="icon_modify_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 	</obj-entity>
 	<obj-entity name="PkgUrlType" className="org.haiku.haikudepotserver.dataobjects.PkgUrlType" readOnly="true" dbEntityName="pkg_url_type" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
@@ -643,23 +660,11 @@
 	<db-relationship name="permission_user_pkgs" source="pkg" target="permission_user_pkg" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
-	<db-relationship name="pkg_changelogs" source="pkg" target="pkg_changelog" toMany="true">
-		<db-attribute-pair source="id" target="pkg_id"/>
-	</db-relationship>
-	<db-relationship name="pkg_icons" source="pkg" target="pkg_icon" toMany="true">
-		<db-attribute-pair source="id" target="pkg_id"/>
-	</db-relationship>
-	<db-relationship name="pkg_localizations" source="pkg" target="pkg_localization" toMany="true">
-		<db-attribute-pair source="id" target="pkg_id"/>
-	</db-relationship>
-	<db-relationship name="pkg_pkg_categories" source="pkg" target="pkg_pkg_category" toMany="true">
-		<db-attribute-pair source="id" target="pkg_id"/>
-	</db-relationship>
 	<db-relationship name="pkg_prominences" source="pkg" target="pkg_prominence" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
-	<db-relationship name="pkg_screenshots" source="pkg" target="pkg_screenshot" toMany="true">
-		<db-attribute-pair source="id" target="pkg_id"/>
+	<db-relationship name="pkg_supplement" source="pkg" target="pkg_supplement" toMany="false">
+		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_user_rating_aggregates" source="pkg" target="pkg_user_rating_aggregate" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
@@ -670,17 +675,17 @@
 	<db-relationship name="pkg_pkg_categories" source="pkg_category" target="pkg_pkg_category" toMany="true">
 		<db-attribute-pair source="id" target="pkg_category_id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="pkg_changelog" target="pkg" toMany="false">
-		<db-attribute-pair source="pkg_id" target="id"/>
+	<db-relationship name="pkg_supplement" source="pkg_changelog" target="pkg_supplement" toMany="false">
+		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="media_type" source="pkg_icon" target="media_type" toMany="false">
 		<db-attribute-pair source="media_type_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="pkg_icon" target="pkg" toMany="false">
-		<db-attribute-pair source="pkg_id" target="id"/>
-	</db-relationship>
 	<db-relationship name="pkg_icon_images" source="pkg_icon" target="pkg_icon_image" toMany="true">
 		<db-attribute-pair source="id" target="pkg_icon_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_supplement" source="pkg_icon" target="pkg_supplement" toMany="false">
+		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_icon" source="pkg_icon_image" target="pkg_icon" toMany="false">
 		<db-attribute-pair source="pkg_icon_id" target="id"/>
@@ -688,14 +693,14 @@
 	<db-relationship name="natural_language" source="pkg_localization" target="natural_language" toMany="false">
 		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="pkg_localization" target="pkg" toMany="false">
-		<db-attribute-pair source="pkg_id" target="id"/>
-	</db-relationship>
-	<db-relationship name="pkg" source="pkg_pkg_category" target="pkg" toMany="false">
-		<db-attribute-pair source="pkg_id" target="id"/>
+	<db-relationship name="pkg_supplement" source="pkg_localization" target="pkg_supplement" toMany="false">
+		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_category" source="pkg_pkg_category" target="pkg_category" toMany="false">
 		<db-attribute-pair source="pkg_category_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg_supplement" source="pkg_pkg_category" target="pkg_supplement" toMany="false">
+		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg" source="pkg_prominence" target="pkg" toMany="false">
 		<db-attribute-pair source="pkg_id" target="id"/>
@@ -706,17 +711,35 @@
 	<db-relationship name="repository" source="pkg_prominence" target="repository" toMany="false">
 		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="pkg_screenshot" target="pkg" toMany="false">
-		<db-attribute-pair source="pkg_id" target="id"/>
-	</db-relationship>
 	<db-relationship name="pkg_screenshot_images" source="pkg_screenshot" target="pkg_screenshot_image" toMany="true">
 		<db-attribute-pair source="id" target="pkg_screenshot_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_supplement" source="pkg_screenshot" target="pkg_supplement" toMany="false">
+		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="media_type" source="pkg_screenshot_image" target="media_type" toMany="false">
 		<db-attribute-pair source="media_type_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_screenshot" source="pkg_screenshot_image" target="pkg_screenshot" toMany="false">
 		<db-attribute-pair source="pkg_screenshot_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="pkg_changelogs" source="pkg_supplement" target="pkg_changelog" toMany="true">
+		<db-attribute-pair source="id" target="pkg_supplement_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_icons" source="pkg_supplement" target="pkg_icon" toMany="true">
+		<db-attribute-pair source="id" target="pkg_supplement_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_localizations" source="pkg_supplement" target="pkg_localization" toMany="true">
+		<db-attribute-pair source="id" target="pkg_supplement_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_pkg_categories" source="pkg_supplement" target="pkg_pkg_category" toMany="true">
+		<db-attribute-pair source="id" target="pkg_supplement_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_screenshots" source="pkg_supplement" target="pkg_screenshot" toMany="true">
+		<db-attribute-pair source="id" target="pkg_supplement_id"/>
+	</db-relationship>
+	<db-relationship name="pkgs" source="pkg_supplement" target="pkg" toMany="true">
+		<db-attribute-pair source="id" target="pkg_supplement_id"/>
 	</db-relationship>
 	<db-relationship name="pkg" source="pkg_user_rating_aggregate" target="pkg" toMany="false">
 		<db-attribute-pair source="pkg_id" target="id"/>
@@ -839,30 +862,32 @@
 	<obj-relationship name="pkg" source="PermissionUserPkg" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="user" source="PermissionUserPkg" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="permissionUserPkgs" source="Pkg" target="PermissionUserPkg" deleteRule="Cascade" db-relationship-path="permission_user_pkgs"/>
-	<obj-relationship name="pkgChangelogs" source="Pkg" target="PkgChangelog" deleteRule="Cascade" db-relationship-path="pkg_changelogs"/>
-	<obj-relationship name="pkgIcons" source="Pkg" target="PkgIcon" deleteRule="Cascade" db-relationship-path="pkg_icons"/>
-	<obj-relationship name="pkgLocalizations" source="Pkg" target="PkgLocalization" deleteRule="Cascade" db-relationship-path="pkg_localizations"/>
-	<obj-relationship name="pkgPkgCategories" source="Pkg" target="PkgPkgCategory" deleteRule="Cascade" db-relationship-path="pkg_pkg_categories"/>
 	<obj-relationship name="pkgProminences" source="Pkg" target="PkgProminence" deleteRule="Cascade" db-relationship-path="pkg_prominences"/>
-	<obj-relationship name="pkgScreenshots" source="Pkg" target="PkgScreenshot" deleteRule="Cascade" db-relationship-path="pkg_screenshots"/>
+	<obj-relationship name="pkgSupplement" source="Pkg" target="PkgSupplement" deleteRule="Nullify" db-relationship-path="pkg_supplement"/>
 	<obj-relationship name="pkgUserRatingAggregates" source="Pkg" target="PkgUserRatingAggregate" deleteRule="Cascade" db-relationship-path="pkg_user_rating_aggregates"/>
 	<obj-relationship name="publisher" source="Pkg" target="Publisher" deleteRule="Nullify" db-relationship-path="publisher"/>
-	<obj-relationship name="pkg" source="PkgChangelog" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
+	<obj-relationship name="pkgSupplement" source="PkgChangelog" target="PkgSupplement" deleteRule="Nullify" db-relationship-path="pkg_supplement"/>
 	<obj-relationship name="mediaType" source="PkgIcon" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
-	<obj-relationship name="pkg" source="PkgIcon" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgIconImages" source="PkgIcon" target="PkgIconImage" deleteRule="Deny" db-relationship-path="pkg_icon_images"/>
+	<obj-relationship name="pkgSupplement" source="PkgIcon" target="PkgSupplement" deleteRule="Nullify" db-relationship-path="pkg_supplement"/>
 	<obj-relationship name="pkgIcon" source="PkgIconImage" target="PkgIcon" deleteRule="Nullify" db-relationship-path="pkg_icon"/>
 	<obj-relationship name="naturalLanguage" source="PkgLocalization" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
-	<obj-relationship name="pkg" source="PkgLocalization" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
-	<obj-relationship name="pkg" source="PkgPkgCategory" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
+	<obj-relationship name="pkgSupplement" source="PkgLocalization" target="PkgSupplement" deleteRule="Nullify" db-relationship-path="pkg_supplement"/>
 	<obj-relationship name="pkgCategory" source="PkgPkgCategory" target="PkgCategory" deleteRule="Nullify" db-relationship-path="pkg_category"/>
+	<obj-relationship name="pkgSupplement" source="PkgPkgCategory" target="PkgSupplement" deleteRule="Nullify" db-relationship-path="pkg_supplement"/>
 	<obj-relationship name="pkg" source="PkgProminence" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="prominence" source="PkgProminence" target="Prominence" deleteRule="Nullify" db-relationship-path="prominence"/>
 	<obj-relationship name="repository" source="PkgProminence" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
-	<obj-relationship name="pkg" source="PkgScreenshot" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgScreenshotImages" source="PkgScreenshot" target="PkgScreenshotImage" deleteRule="Deny" db-relationship-path="pkg_screenshot_images"/>
+	<obj-relationship name="pkgSupplement" source="PkgScreenshot" target="PkgSupplement" deleteRule="Nullify" db-relationship-path="pkg_supplement"/>
 	<obj-relationship name="mediaType" source="PkgScreenshotImage" target="MediaType" deleteRule="Nullify" db-relationship-path="media_type"/>
 	<obj-relationship name="pkgScreenshot" source="PkgScreenshotImage" target="PkgScreenshot" deleteRule="Nullify" db-relationship-path="pkg_screenshot"/>
+	<obj-relationship name="pkgChangelogs" source="PkgSupplement" target="PkgChangelog" deleteRule="Deny" db-relationship-path="pkg_changelogs"/>
+	<obj-relationship name="pkgIcons" source="PkgSupplement" target="PkgIcon" deleteRule="Deny" db-relationship-path="pkg_icons"/>
+	<obj-relationship name="pkgLocalizations" source="PkgSupplement" target="PkgLocalization" deleteRule="Deny" db-relationship-path="pkg_localizations"/>
+	<obj-relationship name="pkgPkgCategories" source="PkgSupplement" target="PkgPkgCategory" deleteRule="Deny" db-relationship-path="pkg_pkg_categories"/>
+	<obj-relationship name="pkgScreenshots" source="PkgSupplement" target="PkgScreenshot" deleteRule="Deny" db-relationship-path="pkg_screenshots"/>
+	<obj-relationship name="pkgs" source="PkgSupplement" target="Pkg" deleteRule="Deny" db-relationship-path="pkgs"/>
 	<obj-relationship name="pkg" source="PkgUserRatingAggregate" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="repository" source="PkgUserRatingAggregate" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="architecture" source="PkgVersion" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>
@@ -970,7 +995,8 @@ t_loc_p_l AS (
   FROM
     haikudepot.pkg_version pv
     JOIN haikudepot.pkg p ON p.id = pv.pkg_id
-    LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_id = p.id
+    JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
+    LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_supplement_id = ps.id
     LEFT JOIN haikudepot.natural_language nl ON nl.id = pl.natural_language_id
   WHERE
     pv.id IN (#bind($pkgVersionIds))
@@ -985,7 +1011,8 @@ t_loc_p_e AS (
   FROM
     haikudepot.pkg_version pv
     JOIN haikudepot.pkg p ON p.id = pv.pkg_id
-    LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_id = p.id
+    JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
+    LEFT JOIN haikudepot.pkg_localization pl ON pl.pkg_supplement_id = ps.id
     LEFT JOIN haikudepot.natural_language nl ON nl.id = pl.natural_language_id
   WHERE
     pv.id IN (#bind($pkgVersionIds))
@@ -1049,6 +1076,7 @@ COUNT(DISTINCT pv.id) AS "total"
 FROM
 haikudepot.pkg_version pv
 JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
 #if($search.repositories || $search.sortOrdering.name() == "PROMINENCE")
   JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
   JOIN haikudepot.repository r ON rs.repository_id = r.id
@@ -1056,13 +1084,13 @@ JOIN haikudepot.pkg p ON p.id = pv.pkg_id
 #if($search.architectures)
 JOIN haikudepot.architecture a ON a.id = pv.architecture_id
 #end
-LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_id = p.id AND
+LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_supplement_id = ps.id AND
     #if($search.naturalLanguage)
         #bindObjectEqual($search.naturalLanguage,'pl_nl.natural_language_id','id')
     #else
         #bindObjectEqual($englishNaturalLanguage,'pl_nl.natural_language_id','id')
     #end
-LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_id = p.id AND
+LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_supplement_id = ps.id AND
     #bindObjectEqual($englishNaturalLanguage,'pl_en.natural_language_id','id')
 LEFT JOIN haikudepot.pkg_version_localization pvl_nl ON pvl_nl.pkg_version_id = pv.id AND
 #if($search.naturalLanguage)
@@ -1077,7 +1105,7 @@ LEFT JOIN haikudepot.pkg_version_localization pvl_en ON pvl_en.pkg_version_id = 
 LEFT JOIN haikudepot.localization_content pvl_en_summary_lc ON pvl_en_summary_lc.id = pvl_en.summary_localization_content_id
 LEFT JOIN haikudepot.localization_content pvl_en_title_lc ON pvl_en_title_lc.id = pvl_en.title_localization_content_id
 #if($search.pkgCategory)
-JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_id = p.id
+JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_supplement_id = ps.id
 #end
 #if($search.sortOrdering.name() == "PROMINENCE")
 LEFT JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
@@ -1180,6 +1208,7 @@ COUNT(DISTINCT pv.id) AS "total"
 FROM
 haikudepot.pkg_version pv
 JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
 #if($search.repositories || $search.sortOrdering.name() == "PROMINENCE")
   JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
   JOIN haikudepot.repository r ON rs.repository_id = r.id
@@ -1187,13 +1216,13 @@ JOIN haikudepot.pkg p ON p.id = pv.pkg_id
 #if($search.architectures)
 JOIN haikudepot.architecture a ON a.id = pv.architecture_id
 #end
-LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_id = p.id AND
+LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_supplement_id = ps.id AND
     #if($search.naturalLanguage)
         #bindObjectEqual($search.naturalLanguage,'pl_nl.natural_language_id','id')
     #else
         #bindObjectEqual($englishNaturalLanguage,'pl_nl.natural_language_id','id')
     #end
-LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_id = p.id AND
+LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_supplement_id = ps.id AND
     #bindObjectEqual($englishNaturalLanguage,'pl_en.natural_language_id','id')
 LEFT JOIN haikudepot.pkg_version_localization pvl_nl ON pvl_nl.pkg_version_id = pv.id AND
 #if($search.naturalLanguage)

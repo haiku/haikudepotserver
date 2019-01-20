@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
@@ -124,11 +125,12 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
                     false, // allow source only.
                     pkg -> {
 
+                        PkgSupplement pkgSupplement = pkg.getPkgSupplement();
                         int c = 0;
                         cells[c++] = pkg.getName();
 
                         for(NaturalLanguage naturalLanguage : naturalLanguages) {
-                            cells[c++] = pkg.getPkgLocalization(naturalLanguage).isPresent() ? MARKER : "";
+                            cells[c++] = pkgSupplement.getPkgLocalization(naturalLanguage).map(pl -> MARKER).orElse("");
                         }
 
                         writer.writeNext(cells);

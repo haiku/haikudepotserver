@@ -33,7 +33,7 @@ angular.module('haikudepotserver').directive('pkgLabel',[
                     if(pkg) {
                         if(!showName &&
                             pkg.versions &&
-                            1==pkg.versions.length &&
+                            1 === pkg.versions.length &&
                             pkg.versions[0].title &&
                             pkg.versions[0].title.length) {
                             return pkg.versions[0].title;

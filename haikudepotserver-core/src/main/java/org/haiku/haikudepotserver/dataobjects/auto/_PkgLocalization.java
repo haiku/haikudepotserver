@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -25,7 +25,7 @@ public abstract class _PkgLocalization extends AbstractDataObject {
     public static final Property<String> SUMMARY = Property.create("summary", String.class);
     public static final Property<String> TITLE = Property.create("title", String.class);
     public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
-    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
+    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
         writeProperty("createTimestamp", createTimestamp);
@@ -71,12 +71,12 @@ public abstract class _PkgLocalization extends AbstractDataObject {
     }
 
 
-    public void setPkg(Pkg pkg) {
-        setToOneTarget("pkg", pkg, true);
+    public void setPkgSupplement(PkgSupplement pkgSupplement) {
+        setToOneTarget("pkgSupplement", pkgSupplement, true);
     }
 
-    public Pkg getPkg() {
-        return (Pkg)readProperty("pkg");
+    public PkgSupplement getPkgSupplement() {
+        return (PkgSupplement)readProperty("pkgSupplement");
     }
 
 

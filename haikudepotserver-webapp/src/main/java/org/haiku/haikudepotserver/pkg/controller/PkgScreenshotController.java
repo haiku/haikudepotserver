@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -56,7 +56,7 @@ public class PkgScreenshotController extends AbstractController {
     private final static String KEY_TARGETWIDTH = "tw";
     private final static String KEY_TARGETHEIGHT = "th";
 
-    private static int SCREENSHOT_SIDE_LIMIT = 1500;
+    private final static int SCREENSHOT_SIDE_LIMIT = 1500;
 
     private ServerRuntime serverRuntime;
     private PkgScreenshotService pkgScreenshotService;
@@ -107,14 +107,13 @@ public class PkgScreenshotController extends AbstractController {
 
         response.setDateHeader(
                 HttpHeaders.LAST_MODIFIED,
-                screenshot.getPkg().getModifyTimestampSecondAccuracy().getTime());
+                screenshot.getPkgSupplement().getLatestPkgModifyTimestampSecondAccuracy().getTime());
 
-        switch(requestMethod) {
+        switch (requestMethod) {
             case HEAD:
                 ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(ByteStreams.nullOutputStream());
                 pkgScreenshotService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
                 response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
-
                 break;
 
             case GET:
@@ -175,7 +174,7 @@ public class PkgScreenshotController extends AbstractController {
             @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
             throws IOException {
 
-        if(Strings.isNullOrEmpty(screenshotCode)) {
+        if (Strings.isNullOrEmpty(screenshotCode)) {
             throw new MissingScreenshotCode();
         }
 
@@ -187,11 +186,11 @@ public class PkgScreenshotController extends AbstractController {
         // TODO - find a better way to do this.
         String extension = null;
 
-        if(mediaType.getCode().equals(MediaType.PNG.toString())) {
+        if (mediaType.getCode().equals(MediaType.PNG.toString())) {
             extension = "png";
         }
 
-        if(null==extension) {
+        if (null == extension) {
             throw new IllegalStateException("the media type for the screenshot is not able to be converted into a file extension");
         }
 
@@ -201,7 +200,7 @@ public class PkgScreenshotController extends AbstractController {
                 HttpHeaders.CONTENT_DISPOSITION,
                 String.format(
                         "attachment; filename=\"%s__%s.%s\"",
-                        screenshot.getPkg().getName(),
+                        screenshot.getPkgSupplement().getBasePkgName(),
                         screenshot.getCode(),
                         extension));
 
@@ -219,11 +218,11 @@ public class PkgScreenshotController extends AbstractController {
             @RequestParam(value = KEY_FORMAT, required = true) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName) throws IOException {
 
-        if(Strings.isNullOrEmpty(pkgName) || !Pkg.PATTERN_NAME.matcher(pkgName).matches()) {
+        if (Strings.isNullOrEmpty(pkgName) || !Pkg.PATTERN_NAME.matcher(pkgName).matches()) {
             throw new MissingPkgName();
         }
 
-        if(Strings.isNullOrEmpty(format) || !"png".equals(format)) {
+        if (Strings.isNullOrEmpty(format) || !"png".equals(format)) {
             throw new MissingOrBadFormat();
         }
 
@@ -234,7 +233,7 @@ public class PkgScreenshotController extends AbstractController {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user.orElse(null), pkg, Permission.PKG_EDITSCREENSHOT)) {
+        if (!authorizationService.check(context, user.orElse(null), pkg, Permission.PKG_EDITSCREENSHOT)) {
             LOGGER.warn("attempt to add a pkg screenshot, but there is no user present or that user is not able to edit the pkg");
             throw new PkgAuthorizationFailure();
         }
@@ -243,7 +242,7 @@ public class PkgScreenshotController extends AbstractController {
 
         try {
             screenshotCode = pkgScreenshotService.storePkgScreenshotImage(
-                    request.getInputStream(), context, pkg, null).getCode();
+                    request.getInputStream(), context, pkg.getPkgSupplement(), null).getCode();
         }
         catch(SizeLimitReachedException sizeLimit) {
             LOGGER.warn("attempt to load in a screenshot larger than the size limit");

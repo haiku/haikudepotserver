@@ -85,18 +85,30 @@ angular.module('haikudepotserver').controller(
             };
 
             // if the search criteria has hit the name, but the name is not being displayed because
-            // there is a title shown then it makes sense to show the name.
+            // there is a title shown then it makes sense to show the name.  Also show the pkg name
+            // in the case that the package is subordinate to another package as this may be the
+            // only way to differentiate them because they may have the same title.
 
             $scope.shouldExplicitlyShowName = function(pkg) {
-                return $scope.lastRefetchPkgsSearchExpression &&
-                    $scope.lastRefetchPkgsSearchExpression.length &&
-                    pkg.versions[0].title && pkg.versions[0].title.length &&
-                    -1 === searchMixins.nextMatchSearchExpression(
-                        pkg.versions[0].title.toLowerCase(),0,
-                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset &&
-                    -1 !== searchMixins.nextMatchSearchExpression(
-                        pkg.name,0,
-                        $scope.lastRefetchPkgsSearchExpression,'CONTAINS').offset;
+                function nameAndNotTitleContainSearchExpression() {
+                    return $scope.lastRefetchPkgsSearchExpression &&
+                        $scope.lastRefetchPkgsSearchExpression.length &&
+                        pkg.versions[0].title && pkg.versions[0].title.length &&
+                        (-1 === searchMixins.nextMatchSearchExpression(
+                            pkg.versions[0].title.toLowerCase(), 0,
+                            $scope.lastRefetchPkgsSearchExpression, 'CONTAINS').offset) &&
+                        (-1 !== searchMixins.nextMatchSearchExpression(
+                            pkg.name, 0,
+                            $scope.lastRefetchPkgsSearchExpression, 'CONTAINS').offset);
+                }
+
+                function pkgIsSubordinate() {
+                    return 0 !== _.filter(constants.SUFFIXES_SUBORDINATE_PKG_NAMES, function(s) {
+                        return pkg.name.substr(-s.length) === s; // ends with
+                    }).length;
+                }
+
+                return nameAndNotTitleContainSearchExpression() || pkgIsSubordinate();
             };
 
             $scope.shouldShowDerivedRating = function(pkg) {

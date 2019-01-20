@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,10 @@ public class PkgIconImage extends _PkgIconImage {
         Preconditions.checkArgument(null != pkg, "the package must be provided");
 
         return ObjectSelect.query(PkgIconImage.class)
-                .where(PKG_ICON.dot(PkgIcon.PKG).eq(pkg))
+                .where(PKG_ICON
+                        .dot(PkgIcon.PKG_SUPPLEMENT)
+                        .dot(PkgSupplement.PKGS)
+                        .dot(Pkg.NAME).eq(pkg.getName()))
                 .sharedCache()
                 .cacheGroup(HaikuDepot.CacheGroup.PKG_ICON.name())
                 .select(context);

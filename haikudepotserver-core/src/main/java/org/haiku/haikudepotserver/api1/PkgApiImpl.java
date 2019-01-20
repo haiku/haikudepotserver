@@ -102,7 +102,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
-        if(!pkgOptional.isPresent()) {
+        if (!pkgOptional.isPresent()) {
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), pkgName);
         }
 
@@ -143,7 +143,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgCategoriesRequest.pkgName));
         Preconditions.checkNotNull(updatePkgCategoriesRequest.pkgCategoryCodes);
 
-        if(updatePkgCategoriesRequest.pkgCategoryCodes.size() > PKGPKGCATEGORIES_MAX) {
+        if (updatePkgCategoriesRequest.pkgCategoryCodes.size() > PKGPKGCATEGORIES_MAX) {
             throw new IllegalStateException("a package is not able to be configured with more than " + PKGPKGCATEGORIES_MAX + " categories");
         }
 
@@ -153,14 +153,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User user = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITCATEGORIES)) {
+        if (!authorizationService.check(context, user, pkg, Permission.PKG_EDITCATEGORIES)) {
             LOGGER.warn("attempt to configure the categories for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 
         List<PkgCategory> pkgCategories = new ArrayList<>(PkgCategory.getByCodes(context, updatePkgCategoriesRequest.pkgCategoryCodes));
 
-        if(pkgCategories.size() != updatePkgCategoriesRequest.pkgCategoryCodes.size()) {
+        if (pkgCategories.size() != updatePkgCategoriesRequest.pkgCategoryCodes.size()) {
             LOGGER.warn(
                     "request for {} categories yielded only {}; must be a code mismatch",
                     updatePkgCategoriesRequest.pkgCategoryCodes.size(),
@@ -193,7 +193,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkNotNull(request.limit);
         Preconditions.checkState(request.limit > 0);
 
-        if(null==request.sortOrdering) {
+        if (null == request.sortOrdering) {
             request.sortOrdering = SearchPkgsRequest.SortOrdering.NAME;
         }
 
@@ -204,17 +204,17 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         String exp = request.expression;
 
-        if(null!=exp) {
+        if (null != exp) {
             exp = Strings.emptyToNull(exp.trim().toLowerCase());
         }
 
         specification.setExpression(exp);
 
-        if(null!=request.pkgCategoryCode) {
+        if (null != request.pkgCategoryCode) {
             specification.setPkgCategory(PkgCategory.getByCode(context, request.pkgCategoryCode).get());
         }
 
-        if(null!=request.expressionType) {
+        if (null != request.expressionType) {
             specification.setExpressionType(
                     PkgSearchSpecification.ExpressionType.valueOf(request.expressionType.name()));
         }
@@ -234,7 +234,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.total = pkgService.total(context, specification);
         result.items = Collections.emptyList();
 
-        if(result.total > 0) {
+        if (result.total > 0) {
 
             List<PkgVersion> searchedPkgVersions = pkgService.search(context, specification);
 
@@ -349,15 +349,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         String remoteIdentifier = clientIdentifierSupplier.get().orElse("???");
         boolean shouldIncrement;
 
-        if(shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient && !Strings.isNullOrEmpty(remoteIdentifier)) {
+        if (shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient && !Strings.isNullOrEmpty(remoteIdentifier)) {
             Long pkgVersionId = (Long) pkgVersion.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
-            cacheKey = Long.toString(pkgVersionId) + "@" + remoteIdentifier;
+            cacheKey = pkgVersionId + "@" + remoteIdentifier;
         }
 
-        if(null==cacheKey) {
+        if (null==cacheKey) {
             shouldIncrement = true;
-        }
-        else {
+        } else {
             Boolean previouslyIncremented = remoteIdentifierToPkgView.getIfPresent(cacheKey);
             shouldIncrement = null==previouslyIncremented;
 
@@ -369,11 +368,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             }
         }
 
-        if(shouldIncrement) {
+        if (shouldIncrement) {
             pkgService.incrementViewCounter(serverRuntime, pkgVersion.getObjectId());
         }
 
-        if(null!=cacheKey) {
+        if (null!=cacheKey) {
             remoteIdentifierToPkgView.put(cacheKey, Boolean.TRUE);
         }
     }
@@ -394,14 +393,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         Optional<Architecture> architectureOptional = Optional.empty();
 
-        if(!Strings.isNullOrEmpty(request.architectureCode)) {
+        if (!Strings.isNullOrEmpty(request.architectureCode)) {
             architectureOptional = Architecture.tryGetByCode(context, request.architectureCode);
         }
 
         Pkg pkg = getPkg(context, request.name);
         Repository repository = null;
 
-        if(!Strings.isNullOrEmpty(request.repositoryCode)) {
+        if (!Strings.isNullOrEmpty(request.repositoryCode)) {
             repository = getRepository(context, request.repositoryCode);
         }
 
@@ -412,12 +411,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.name = pkg.getName();
         result.modifyTimestamp = pkg.getModifyTimestamp().getTime();
         result.vanityLinkUrl = pkgService.createVanityLinkUrl(pkg);
-        result.pkgCategoryCodes = pkg.getPkgPkgCategories()
+        result.pkgCategoryCodes = pkg.getPkgSupplement().getPkgPkgCategories()
                 .stream()
                 .map(ppc -> ppc.getPkgCategory().getCode())
                 .collect(Collectors.toList());
 
-        if(null != repository) {
+        if (null != repository) {
             Optional<PkgUserRatingAggregate> userRatingAggregate = pkg.getPkgUserRatingAggregate(repository);
 
             if (userRatingAggregate.isPresent()) {
@@ -426,13 +425,13 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             }
         }
 
-        if(null != repository) {
+        if (null != repository) {
             result.prominenceOrdering = pkg.getPkgProminence(repository)
                     .map(pp -> pp.getProminence().getOrdering())
                     .orElse(null);
         }
 
-        switch(request.versionType) {
+        switch (request.versionType) {
 
             // might be used to show a history of the versions.  If an architecture is present then it will
             // only return versions for that architecture.  If no architecture is present then it will return
@@ -541,9 +540,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         return pkgIconApis
                 .stream()
-                .filter(pi -> pi.mediaTypeCode.equals(mediaTypeCode) && (null!=pi.size) && pi.size.equals(size))
-                .findFirst()
-                .isPresent();
+                .anyMatch(pi -> pi.mediaTypeCode.equals(mediaTypeCode) && (null!=pi.size) && pi.size.equals(size));
     }
 
     @Override
@@ -555,7 +552,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Pkg pkg = getPkg(context, request.pkgName);
 
         GetPkgIconsResult result = new GetPkgIconsResult();
-        result.pkgIcons = pkg.getPkgIcons()
+        result.pkgIcons = pkg.getPkgSupplement().getPkgIcons()
                 .stream()
                 .map(pi -> new PkgIcon(pi.getMediaType().getCode(), pi.getSize()))
                 .collect(Collectors.toList());
@@ -573,7 +570,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User user = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
+        if (!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
             LOGGER.warn("attempt to configure the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
@@ -585,12 +582,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         Set<org.haiku.haikudepotserver.dataobjects.PkgIcon> createdOrUpdatedPkgIcons = new HashSet<>();
 
-        if(null!=request.pkgIcons && !request.pkgIcons.isEmpty()) {
+        if (null != request.pkgIcons && !request.pkgIcons.isEmpty()) {
 
             // either we have an HVIF icon or we have bitmaps.  If there if an HVIF one then we should
             // not have any other variants.  If there are bitmaps then we need 16, 32 and 64 sizes.
 
-            if(request.pkgIcons
+            if (request.pkgIcons
                     .stream()
                     .filter(pi -> pi.mediaTypeCode.equals(MediaType.MEDIATYPE_HAIKUVECTORICONFILE))
                     .collect(SingleCollector.optional()).isPresent()) {
@@ -599,24 +596,24 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 }
             }
             else {
-                if(!contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 16)
+                if (!contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 16)
                     || !contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 32)
                     || !contains(request.pkgIcons, com.google.common.net.MediaType.PNG.toString(), 64) ) {
                     throw new IllegalStateException("there should be three bitmap icons supplied in sizes 16, 32 and 64");
                 }
             }
 
-            for(ConfigurePkgIconRequest.PkgIcon pkgIconApi : request.pkgIcons) {
+            for (ConfigurePkgIconRequest.PkgIcon pkgIconApi : request.pkgIcons) {
 
                 MediaType mediaType = MediaType.tryGetByCode(context, pkgIconApi.mediaTypeCode).orElseThrow(
                         () -> new IllegalStateException("unknown media type; "+pkgIconApi.mediaTypeCode)
                 );
 
-                if(Strings.isNullOrEmpty(pkgIconApi.dataBase64)) {
+                if (Strings.isNullOrEmpty(pkgIconApi.dataBase64)) {
                     throw new IllegalStateException("the base64 data must be supplied with the request to configure a pkg icon");
                 }
 
-                if(Strings.isNullOrEmpty(pkgIconApi.mediaTypeCode)) {
+                if (Strings.isNullOrEmpty(pkgIconApi.mediaTypeCode)) {
                     throw new IllegalStateException("the mediaTypeCode must be supplied to configure a pkg icon");
                 }
 
@@ -625,16 +622,16 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
                     ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data);
 
-                    createdOrUpdatedPkgIcons.add(
-                            pkgIconService.storePkgIconImage(dataInputStream, mediaType, pkgIconApi.size, context, pkg)
+                    createdOrUpdatedPkgIcons.add(pkgIconService.storePkgIconImage(
+                            dataInputStream, mediaType, pkgIconApi.size, context, pkg.getPkgSupplement())
                     );
 
                     updated++;
                 }
-                catch(IOException ioe) {
+                catch (IOException ioe) {
                     throw new RuntimeException("a problem has arisen storing the data for an icon",ioe);
                 }
-                catch(org.haiku.haikudepotserver.pkg.model.BadPkgIconException bpie) {
+                catch (org.haiku.haikudepotserver.pkg.model.BadPkgIconException bpie) {
                     throw new BadPkgIconException(pkgIconApi.mediaTypeCode, pkgIconApi.size, bpie);
                 }
 
@@ -644,8 +641,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         // now we have some icons stored which may not be in the replacement data; we should remove those ones.
 
-        for(org.haiku.haikudepotserver.dataobjects.PkgIcon pkgIcon : ImmutableList.copyOf(pkg.getPkgIcons())) {
-            if(!createdOrUpdatedPkgIcons.contains(pkgIcon)) {
+        for (org.haiku.haikudepotserver.dataobjects.PkgIcon pkgIcon : ImmutableList.copyOf(pkg.getPkgSupplement().getPkgIcons())) {
+            if (!createdOrUpdatedPkgIcons.contains(pkgIcon)) {
                 context.deleteObjects(
                         pkgIcon.getPkgIconImage(),
                         pkgIcon);
@@ -679,12 +676,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User user = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
+        if (!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
             LOGGER.warn("attempt to remove the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
             throw new AuthorizationFailureException();
         }
 
-        pkgIconService.removePkgIcon(context, pkg);
+        pkgIconService.removePkgIcon(context, pkg.getPkgSupplement());
 
         context.commitChanges();
 
@@ -701,7 +698,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.tryGetByCode(context, request.code);
 
-        if(!pkgScreenshotOptional.isPresent()) {
+        if (!pkgScreenshotOptional.isPresent()) {
             throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), request.code);
         }
 
@@ -732,7 +729,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final Pkg pkg = getPkg(context, getPkgScreenshotsRequest.pkgName);
 
         GetPkgScreenshotsResult result = new GetPkgScreenshotsResult();
-        result.items = pkg.getSortedPkgScreenshots()
+        result.items = pkg.getPkgSupplement().getSortedPkgScreenshots()
                 .stream()
                 .map(this::createPkgScreenshot)
                 .collect(Collectors.toList());
@@ -748,21 +745,26 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, removePkgScreenshotRequest.code);
 
-        if(!screenshotOptional.isPresent()) {
+        if (!screenshotOptional.isPresent()) {
             throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), removePkgScreenshotRequest.code);
         }
 
         User authUser = obtainAuthenticatedUser(context);
-        Pkg pkg = screenshotOptional.get().getPkg();
 
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITSCREENSHOT)) {
+        // check to see if the user has any permission for any of the associated
+        // packages.
+
+        if (screenshotOptional.get().getPkgSupplement().getPkgs()
+                .stream()
+                .noneMatch(p -> authorizationService.check(
+                        context, authUser, p, Permission.PKG_EDITSCREENSHOT))) {
             throw new AuthorizationFailureException();
         }
 
         pkgScreenshotService.deleteScreenshot(context, screenshotOptional.get());
         context.commitChanges();
 
-        LOGGER.info("did remove the screenshot {} on package {}", removePkgScreenshotRequest.code, pkg.getName());
+        LOGGER.info("did remove the screenshot {}", removePkgScreenshotRequest.code);
 
         return new RemovePkgScreenshotResult();
     }
@@ -778,11 +780,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITSCREENSHOT)) {
+        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITSCREENSHOT)) {
             throw new AuthorizationFailureException();
         }
 
-        pkgScreenshotService.reorderPkgScreenshots(context, pkg, reorderPkgScreenshotsRequest.codes);
+        pkgScreenshotService.reorderPkgScreenshots(context, pkg.getPkgSupplement(), reorderPkgScreenshotsRequest.codes);
         context.commitChanges();
 
         LOGGER.info("did reorder the screenshots on package [{}]", pkg.getName());
@@ -801,17 +803,17 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITLOCALIZATION)) {
+        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITLOCALIZATION)) {
             throw new AuthorizationFailureException();
         }
 
-        for(org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization requestPkgVersionLocalization : updatePkgLocalizationRequest.pkgLocalizations) {
+        for (org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization requestPkgVersionLocalization : updatePkgLocalizationRequest.pkgLocalizations) {
 
             NaturalLanguage naturalLanguage = getNaturalLanguage(context, requestPkgVersionLocalization.naturalLanguageCode);
 
             pkgLocalizationService.updatePkgLocalization(
                     context,
-                    pkg,
+                    pkg.getPkgSupplement(),
                     naturalLanguage,
                     requestPkgVersionLocalization.title,
                     requestPkgVersionLocalization.summary,
@@ -842,8 +844,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.pkgLocalizations = new ArrayList<>();
         List<PkgLocalization> pkgLocalizations = PkgLocalization.findForPkg(context, pkg);
 
-        for(PkgLocalization pkgLocalization : pkgLocalizations) {
-            if(getPkgLocalizationsRequest.naturalLanguageCodes.contains(pkgLocalization.getNaturalLanguage().getCode())) {
+        for (PkgLocalization pkgLocalization : pkgLocalizations) {
+            if (getPkgLocalizationsRequest.naturalLanguageCodes.contains(pkgLocalization.getNaturalLanguage().getCode())) {
                 org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization resultPkgVersionLocalization = new org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization();
                 resultPkgVersionLocalization.naturalLanguageCode = pkgLocalization.getNaturalLanguage().getCode();
                 resultPkgVersionLocalization.title = pkgLocalization.getTitle();
@@ -870,7 +872,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Repository repository = getRepository(context, getPkgVersionLocalizationsRequest.repositoryCode);
         Optional<PkgVersion> pkgVersionOptional;
 
-        if(null==getPkgVersionLocalizationsRequest.major) {
+        if (null==getPkgVersionLocalizationsRequest.major) {
             pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                     context, pkg, repository,
                     Collections.singletonList(architecture));
@@ -886,17 +888,17 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                             getPkgVersionLocalizationsRequest.revision));
         }
 
-        if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
+        if (!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());
         }
 
         GetPkgVersionLocalizationsResult result = new GetPkgVersionLocalizationsResult();
         result.pkgVersionLocalizations = new ArrayList<>();
 
-        for(String naturalLanguageCode : getPkgVersionLocalizationsRequest.naturalLanguageCodes) {
+        for (String naturalLanguageCode : getPkgVersionLocalizationsRequest.naturalLanguageCodes) {
             Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguageCode);
 
-            if(pkgVersionLocalizationOptional.isPresent()) {
+            if (pkgVersionLocalizationOptional.isPresent()) {
                 org.haiku.haikudepotserver.api1.model.pkg.PkgVersionLocalization resultPkgVersionLocalization = new org.haiku.haikudepotserver.api1.model.pkg.PkgVersionLocalization();
                 resultPkgVersionLocalization.naturalLanguageCode = naturalLanguageCode;
                 resultPkgVersionLocalization.description = pkgVersionLocalizationOptional.get().getDescription().orElse(null);
@@ -967,7 +969,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 .map(_PkgUserRatingAggregate::getDerivedRating)
                 .orElse(null);
 
-        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
+        if (getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGICONS)) {
             resultPkg.pkgIcons = PkgIconImage.findForPkg(context, pkg)
                     .stream()
                     .map(pii -> new PkgIcon(
@@ -976,28 +978,28 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     .collect(Collectors.toList());
         }
 
-        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGSCREENSHOTS)) {
-            resultPkg.pkgScreenshots = pkgVersion.getPkg().getSortedPkgScreenshots()
+        if (getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGSCREENSHOTS)) {
+            resultPkg.pkgScreenshots = pkgVersion.getPkg().getPkgSupplement().getSortedPkgScreenshots()
                     .stream()
                     .map(this::createPkgScreenshot)
                     .collect(Collectors.toList());
         }
 
-        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCATEGORIES)) {
-            resultPkg.pkgCategoryCodes = pkgVersion.getPkg().getPkgPkgCategories()
+        if (getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCATEGORIES)) {
+            resultPkg.pkgCategoryCodes = pkgVersion.getPkg().getPkgSupplement().getPkgPkgCategories()
                     .stream()
                     .map(pcc -> pcc.getPkgCategory().getCode())
                     .collect(Collectors.toList());
         }
 
-        if(getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCHANGELOG)) {
-            pkg.getPkgChangelog().ifPresent(cl -> {
+        if (getBulkPkgRequest.filter.contains(GetBulkPkgRequest.Filter.PKGCHANGELOG)) {
+            pkg.getPkgSupplement().getPkgChangelog().ifPresent(cl -> {
                 resultPkg.pkgChangelogContent = Strings.emptyToNull(cl.getContent());
 
             });
         }
 
-        switch(getBulkPkgRequest.versionType) {
+        switch (getBulkPkgRequest.versionType) {
             case LATEST:
             {
                 GetBulkPkgResult.PkgVersion resultPkgVersion = createGetBulkPkgResultPkgVersion(
@@ -1040,11 +1042,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         Set<Repository> repositories = new HashSet<>();
 
-        if(null != getBulkPkgRequest.repositoryCodes) {
+        if (null != getBulkPkgRequest.repositoryCodes) {
             repositories.addAll(transformCodesToRepositories(context,getBulkPkgRequest.repositoryCodes));
         }
 
-        if(!getBulkPkgRequest.pkgNames.isEmpty() &&
+        if (!getBulkPkgRequest.pkgNames.isEmpty() &&
                 !getBulkPkgRequest.architectureCodes.isEmpty() &&
                 !repositories.isEmpty()) {
 
@@ -1106,13 +1108,13 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITPROMINENCE)) {
+        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITPROMINENCE)) {
             throw new AuthorizationFailureException();
         }
 
         Optional<Prominence> prominenceOptional = Prominence.getByOrdering(context, request.prominenceOrdering);
 
-        if(!prominenceOptional.isPresent()) {
+        if (!prominenceOptional.isPresent()) {
             throw new ObjectNotFoundException(Prominence.class.getSimpleName(), request.prominenceOrdering);
         }
 
@@ -1136,10 +1138,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<PkgChangelog> pkgChangelogOptional = getPkg(context, request.pkgName).getPkgChangelog();
+        Optional<PkgChangelog> pkgChangelogOptional = getPkg(context, request.pkgName)
+                .getPkgSupplement().getPkgChangelog();
         GetPkgChangelogResult result = new GetPkgChangelogResult();
 
-        if(pkgChangelogOptional.isPresent()) {
+        if (pkgChangelogOptional.isPresent()) {
             result.content = pkgChangelogOptional.get().getContent();
         }
 
@@ -1155,17 +1158,17 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         User authUser = obtainAuthenticatedUser(context);
         Pkg pkg = getPkg(context, request.pkgName);
 
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITCHANGELOG)) {
+        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITCHANGELOG)) {
             throw new AuthorizationFailureException();
         }
 
         String newContent = request.content;
 
-        if(null!=newContent) {
+        if (null!=newContent) {
             newContent = Strings.emptyToNull(newContent.trim());
         }
 
-        pkgService.updatePkgChangelog(context, pkg, newContent);
+        pkgService.updatePkgChangelog(context, pkg.getPkgSupplement(), newContent);
         context.commitChanges();
 
         return new UpdatePkgChangelogResult();
@@ -1183,7 +1186,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         User authUser = obtainAuthenticatedUser(context);
         Pkg pkg = getPkg(context, request.pkgName);
 
-        if(!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITVERSION)) {
+        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITVERSION)) {
             throw new AuthorizationFailureException();
         }
 
@@ -1195,7 +1198,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         for(UpdatePkgVersionRequest.Filter filter : request.filter) {
 
-            switch(filter) {
+            switch (filter) {
 
                 case ACTIVE:
                     LOGGER.info("will update the package version active flag to {} for {}", request.active, pkgVersion.toString());

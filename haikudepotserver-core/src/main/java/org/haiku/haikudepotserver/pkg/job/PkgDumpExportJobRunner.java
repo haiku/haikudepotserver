@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,13 +17,9 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SQLTemplate;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgDumpExportJobSpecification;
@@ -76,7 +72,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
 
     @Override
     public void run(JobService jobService, PkgDumpExportJobSpecification specification)
-            throws IOException, JobRunnerException {
+            throws IOException {
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
@@ -84,7 +80,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
                 "download",
                 MediaType.JSON_UTF_8.toString());
 
-        try(
+        try (
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
                 final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(gzipOutputStream)
@@ -99,9 +95,10 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
     private PrefetchTreeNode createPkgVersionPrefetchTree() {
         PrefetchTreeNode node = PkgVersion.PKG.disjoint();
         node.merge(PkgVersion.PKG.dot(Pkg.PKG_PROMINENCES).disjoint());
-        node.merge(PkgVersion.PKG.dot(Pkg.PKG_SCREENSHOTS).disjoint());
-        node.merge(PkgVersion.PKG.dot(Pkg.PKG_PKG_CATEGORIES).disjoint());
-        node.merge(PkgVersion.PKG.dot(Pkg.PKG_CHANGELOGS).disjoint());
+        node.merge(PkgVersion.PKG.dot(Pkg.PKG_SUPPLEMENT).disjoint());
+        node.merge(PkgVersion.PKG.dot(Pkg.PKG_SUPPLEMENT).dot(PkgSupplement.PKG_SCREENSHOTS).disjoint());
+        node.merge(PkgVersion.PKG.dot(Pkg.PKG_SUPPLEMENT).dot(PkgSupplement.PKG_PKG_CATEGORIES).disjoint());
+        node.merge(PkgVersion.PKG.dot(Pkg.PKG_SUPPLEMENT).dot(PkgSupplement.PKG_CHANGELOGS).disjoint());
         node.merge(PkgVersion.PKG.dot(Pkg.PKG_USER_RATING_AGGREGATES).disjoint());
         return node;
     }
@@ -222,14 +219,14 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
                         .map((v) -> v.getDerivedRating().doubleValue()).orElse(null));
 
         dumpExportPkg.setPkgCategories(
-                pkg.getPkgPkgCategories().stream().map((ppc) -> {
+                pkg.getPkgSupplement().getPkgPkgCategories().stream().map((ppc) -> {
                     DumpExportPkgCategory dumpExportPkgCategory = new DumpExportPkgCategory();
                     dumpExportPkgCategory.setCode(ppc.getPkgCategory().getCode());
                     return dumpExportPkgCategory;
                 }).collect(Collectors.toList()));
 
         dumpExportPkg.setPkgScreenshots(
-                pkg.getPkgScreenshots().stream().sorted().map((ps) -> {
+                pkg.getPkgSupplement().getPkgScreenshots().stream().sorted().map((ps) -> {
                     DumpExportPkgScreenshot dumpExportPkgScreenshot = new DumpExportPkgScreenshot();
                     dumpExportPkgScreenshot.setCode(ps.getCode());
                     dumpExportPkgScreenshot.setHeight(ps.getHeight().longValue());

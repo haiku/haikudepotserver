@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
@@ -114,6 +115,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                     context,
                     false,
                     pkg -> {
+                        PkgSupplement pkgSupplement = pkg.getPkgSupplement();
 
                         List<String> cells = new ArrayList<>();
                         cells.add(pkg.getName());
@@ -121,16 +123,14 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                                 .stream()
                                 .map(Repository::getCode)
                                 .collect(Collectors.joining(";")));
-                        cells.add(pkg.getPkgIcons().isEmpty() ? MARKER : "");
+                        cells.add(pkg.getPkgSupplement().getPkgIcons().isEmpty() ? MARKER : "");
 
                         for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
                             cells.add(
-                                    pkg.getPkgIcon(
+                                    pkgSupplement.getPkgIcon(
                                             pkgIconConfiguration.getMediaType(),
                                             pkgIconConfiguration.getSize()
-                                    ).isPresent()
-                                            ? MARKER
-                                            : "");
+                                    ).map(pi -> MARKER).orElse(""));
                         }
 
                         writer.writeNext(cells.toArray(new String[cells.size()]));

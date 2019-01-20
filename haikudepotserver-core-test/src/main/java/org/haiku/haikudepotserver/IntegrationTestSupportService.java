@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,7 +63,7 @@ public class IntegrationTestSupportService {
 
     private PkgScreenshot addPkgScreenshot(ObjectContext objectContext, Pkg pkg, String sourceLeafname) {
         try (InputStream inputStream = IntegrationTestSupportService.class.getResourceAsStream(sourceLeafname)) {
-            return pkgScreenshotService.storePkgScreenshotImage(inputStream, objectContext, pkg, null);
+            return pkgScreenshotService.storePkgScreenshotImage(inputStream, objectContext, pkg.getPkgSupplement(), null);
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading a sample screenshot into a test package",e);
@@ -75,10 +75,10 @@ public class IntegrationTestSupportService {
         try (InputStream inputStream = this.getClass().getResourceAsStream(String.format("/sample-%dx%d.png", size, size))) {
             pkgIconService.storePkgIconImage(
                     inputStream,
-                    MediaType.tryGetByCode(objectContext, com.google.common.net.MediaType.PNG.toString()).get(),
+                    MediaType.getByCode(objectContext, com.google.common.net.MediaType.PNG.toString()),
                     size,
                     objectContext,
-                    pkg);
+                    pkg.getPkgSupplement());
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading an icon",e);
@@ -91,10 +91,10 @@ public class IntegrationTestSupportService {
 
             pkgIconService.storePkgIconImage(
                     inputStream,
-                    MediaType.tryGetByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE).get(),
+                    MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE),
                     null,
                     objectContext,
-                    pkg);
+                    pkg.getPkgSupplement());
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading an icon",e);
@@ -117,6 +117,19 @@ public class IntegrationTestSupportService {
                 "sample description " + pkgVersion.getPkg().getName());
     }
 
+    public Pkg createPkg(ObjectContext context, String name) {
+        Pkg pkg = context.newObject(Pkg.class);
+        pkg.setActive(true);
+        pkg.setName(name);
+
+        PkgSupplement pkgSupplement1 = context.newObject(PkgSupplement.class);
+        pkgSupplement1.setBasePkgName(name);
+        pkgSupplement1.addToPkgs(pkg);
+        pkg.setPkgSupplement(pkgSupplement1);
+
+        return pkg;
+    }
+
     public StandardTestData createStandardTestData() {
 
         LOGGER.info("will create standard test data");
@@ -134,9 +147,9 @@ public class IntegrationTestSupportService {
 
         Prominence prominence = Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get();
 
-        Architecture x86_64 = Architecture.tryGetByCode(context, "x86_64").get();
-        Architecture x86_gcc2 = Architecture.tryGetByCode(context, "x86_gcc2").get();
-        Architecture any = Architecture.tryGetByCode(context, "any").get();
+        Architecture x86_64 = Architecture.getByCode(context, "x86_64");
+        Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2");
+        Architecture any = Architecture.getByCode(context, "any");
 
         result.repository = context.newObject(Repository.class);
         result.repository.setCode("testrepo");
@@ -162,39 +175,38 @@ public class IntegrationTestSupportService {
         nonPrimaryMirror.setRepositorySource(result.repositorySource);
         nonPrimaryMirror.setCode("testreposrc_xyz_m_notpri");
 
-        result.pkg1 = context.newObject(Pkg.class);
-        result.pkg1.setActive(true);
-        result.pkg1.setName("pkg1");
+        result.pkg1 = createPkg(context, "pkg1");
+
         pkgService.ensurePkgProminence(context, result.pkg1, result.repository, prominence.getOrdering());
-        pkgService.updatePkgChangelog(context, result.pkg1, "Stadt\r\nKarlsruhe\r\n");
+        pkgService.updatePkgChangelog(context, result.pkg1.getPkgSupplement(), "Stadt\r\nKarlsruhe\r\n");
 
         ensureUserRatingAggregate(context, result.pkg1, result.repository, 3.5f, 4);
 
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
-            result.pkg1.addToManyTarget(Pkg.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
+            result.pkg1.getPkgSupplement().addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "graphics").get());
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH));
             pkgLocalization.setTitle("Package 1");
-            pkgLocalization.setPkg(result.pkg1);
+            pkgLocalization.setPkgSupplement(result.pkg1.getPkgSupplement());
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_GERMAN).get());
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN));
             pkgLocalization.setTitle("Packet 1");
-            pkgLocalization.setPkg(result.pkg1);
+            pkgLocalization.setPkgSupplement(result.pkg1.getPkgSupplement());
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get());
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH));
             pkgLocalization.setTitle("Ping 1");
-            pkgLocalization.setPkg(result.pkg1);
+            pkgLocalization.setPkgSupplement(result.pkg1.getPkgSupplement());
         }
 
         addPkgScreenshot(context,result.pkg1, "/sample-320x240-a.png");
@@ -234,7 +246,7 @@ public class IntegrationTestSupportService {
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86_64,
-                NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get(),
+                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH),
                 null,
                 "pkg1Version2SummarySpanish_feijoa",
                 "pkg1Version2DescriptionSpanish_mango");
@@ -254,14 +266,13 @@ public class IntegrationTestSupportService {
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86_gcc2,
-                NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get(),
+                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH),
                 null,
                 "pkg1Version2SummarySpanish_apple",
                 "pkg1Version2DescriptionSpanish_guava");
 
-        result.pkg2 = context.newObject(Pkg.class);
-        result.pkg2.setActive(true);
-        result.pkg2.setName("pkg2");
+        result.pkg2 = createPkg(context, "pkg2");
+
         pkgService.ensurePkgProminence(context, result.pkg2, result.repository, prominence);
 
         result.pkg2Version1 = context.newObject(PkgVersion.class);
@@ -276,9 +287,8 @@ public class IntegrationTestSupportService {
         result.pkg2Version1.setRepositorySource(result.repositorySource);
         addDummyLocalization(context, result.pkg2Version1);
 
-        result.pkg3 = context.newObject(Pkg.class);
-        result.pkg3.setActive(true);
-        result.pkg3.setName("pkg3");
+        result.pkg3 = createPkg(context, "pkg3");
+
         pkgService.ensurePkgProminence(context, result.pkg3, result.repository, prominence);
 
         result.pkg3Version1 = context.newObject(PkgVersion.class);
@@ -293,9 +303,8 @@ public class IntegrationTestSupportService {
         result.pkg3Version1.setRepositorySource(result.repositorySource);
         addDummyLocalization(context, result.pkg3Version1);
 
-        result.pkgAny = context.newObject(Pkg.class);
-        result.pkgAny.setActive(true);
-        result.pkgAny.setName("pkgany");
+        result.pkgAny = createPkg(context, "pkgany");
+
         pkgService.ensurePkgProminence(context, result.pkgAny, result.repository, prominence);
 
         result.pkgAnyVersion1 = context.newObject(PkgVersion.class);
@@ -338,7 +347,7 @@ public class IntegrationTestSupportService {
         user.setNickname(nickname);
         user.setPasswordSalt(); // random
         user.setPasswordHash(authenticationService.hashPassword(user, password));
-        user.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get());
+        user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH));
         context.commitChanges();
         return user;
     }
@@ -352,15 +361,15 @@ public class IntegrationTestSupportService {
     public void createUserRatings() {
 
         ObjectContext context = serverRuntime.newContext();
-        Pkg pkg = Pkg.tryGetByName(context, "pkg3").get();
-        Architecture x86_64 = Architecture.tryGetByCode(context, "x86_64").get();
+        Pkg pkg = Pkg.getByName(context, "pkg3");
+        Architecture x86_64 = Architecture.getByCode(context, "x86_64");
         PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                 context,
                 pkg,
-                Repository.tryGetByCode(context, "testrepo").get(),
+                Repository.getByCode(context, "testrepo"),
                 Collections.singletonList(x86_64)).get();
 
-        NaturalLanguage english = NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get();
+        NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH);
 
         {
             User user = createBasicUser(context, "urtest1", "password");

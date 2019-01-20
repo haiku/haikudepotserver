@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -74,8 +74,8 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         Architecture x86_64 = Architecture.tryGetByCode(context, "x86_64").get();
         Architecture x86_gcc2 = Architecture.tryGetByCode(context, "x86_gcc2").get();
 
-        userRatingTestData.pkg = context.newObject(Pkg.class);
-        userRatingTestData.pkg.setName("urtestpkg");
+        userRatingTestData.pkg = integrationTestSupportService.createPkg(context, "urtestpkg");
+
         pkgService.ensurePkgProminence(context, userRatingTestData.pkg, repository, Prominence.ORDERING_LAST);
 
         userRatingTestData.user1 = integrationTestSupportService.createBasicUser(context,"urtestuser1","password");

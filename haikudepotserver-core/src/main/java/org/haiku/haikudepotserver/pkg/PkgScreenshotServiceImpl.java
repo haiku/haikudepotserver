@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,15 +12,14 @@ import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.commons.compress.utils.BoundedInputStream;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +39,12 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconServiceImpl.class);
 
-    public static final HashFunction HASH_FUNCTION = Hashing.sha256();
+    private static final HashFunction HASH_FUNCTION = Hashing.sha256();
 
     private final ImageHelper imageHelper;
-    private final PkgService pkgService;
     private final PngOptimizationService pngOptimizationService;
 
-    public PkgScreenshotServiceImpl(PkgService pkgService, PngOptimizationService pngOptimizationService) {
-        this.pkgService = Preconditions.checkNotNull(pkgService);
+    public PkgScreenshotServiceImpl(PngOptimizationService pngOptimizationService) {
         this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
         imageHelper = new ImageHelper();
     }
@@ -63,7 +60,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
     @Override
     public boolean optimizeScreenshot(ObjectContext context, PkgScreenshot screenshot)
-            throws IOException, BadPkgScreenshotException {
+            throws IOException {
         if (!pngOptimizationService.identityOptimization()) {
             PkgScreenshotImage pkgScreenshotImage = screenshot.tryGetPkgScreenshotImage().get();
 
@@ -79,8 +76,6 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
                     screenshot.setHashSha256(HASH_FUNCTION.hashBytes(optimizedData).toString());
 
                     LOGGER.debug("did store optimized image for pkg screenshot [{}]", screenshot.getCode());
-
-                    relayScreenshotStorageToSubordinatePkgs(context, screenshot, screenshot.getOrdering());
 
                     return true;
                 } else {
@@ -122,11 +117,11 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
         Optional<PkgScreenshotImage> pkgScreenshotImageOptional = screenshot.tryGetPkgScreenshotImage();
 
-        if(!pkgScreenshotImageOptional.isPresent()) {
-            throw new IllegalStateException("the screenshot "+screenshot.getCode()+" is missing a screenshot image");
+        if (!pkgScreenshotImageOptional.isPresent()) {
+            throw new IllegalStateException("the screenshot " + screenshot.getCode() + " is missing a screenshot image");
         }
 
-        if(!pkgScreenshotImageOptional.get().getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.toString())) {
+        if (!pkgScreenshotImageOptional.get().getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.toString())) {
             throw new IllegalStateException("the screenshot system only supports png images at the present time");
         }
 
@@ -134,19 +129,19 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         ImageHelper.Size size = imageHelper.derivePngSize(data);
 
         // check to see if the screenshot needs to be resized to fit.
-        if(size.width > targetWidth || size.height > targetHeight) {
+        if (size.width > targetWidth || size.height > targetHeight) {
             ByteArrayInputStream imageInputStream = new ByteArrayInputStream(data);
             BufferedImage bufferedImage = ImageIO.read(imageInputStream);
             BufferedImage scaledBufferedImage = Scalr.resize(bufferedImage, targetWidth, targetHeight);
             ImageIO.write(scaledBufferedImage, "png", output);
-        }
-        else {
+        } else {
             output.write(data);
         }
     }
 
     /**
      * <p>Note that if the screenshot is already stored then this method will simply return that screenshot.</p>
+     *
      * @param ordering can be NULL; in which case the screenshot will come at the end.
      */
 
@@ -154,18 +149,18 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
     public PkgScreenshot storePkgScreenshotImage(
             InputStream input,
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             Integer ordering) throws IOException, BadPkgScreenshotException {
 
         Preconditions.checkArgument(null != input, "the input must be provided");
         Preconditions.checkArgument(null != context, "the context must be provided");
-        Preconditions.checkArgument(null != pkg, "the package must be provided");
+        Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement must be provided");
 
         byte[] pngData = ByteStreams.toByteArray(new BoundedInputStream(input, SCREENSHOT_SIZE_LIMIT));
-        ImageHelper.Size size =  imageHelper.derivePngSize(pngData);
+        ImageHelper.Size size = imageHelper.derivePngSize(pngData);
         String hashSha256 = HASH_FUNCTION.hashBytes(pngData).toString();
 
-        if(null==size) {
+        if (null == size) {
             LOGGER.warn("attempt to store a screenshot image that is not a png");
             throw new BadPkgScreenshotException();
         }
@@ -173,14 +168,14 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         // check that the file roughly looks like PNG and the size is something
         // reasonable.
 
-        if(size.height > SCREENSHOT_SIDE_LIMIT || size.width > SCREENSHOT_SIDE_LIMIT) {
+        if (size.height > SCREENSHOT_SIDE_LIMIT || size.width > SCREENSHOT_SIDE_LIMIT) {
             LOGGER.warn("attempt to store a screenshot image that is too large; " + size.toString());
             throw new BadPkgScreenshotException();
         }
 
         // check that we do not already have this screenshot persisted for this package.
 
-        for (PkgScreenshot pkgScreenshot : pkg.getPkgScreenshots()) {
+        for (PkgScreenshot pkgScreenshot : pkgSupplement.getPkgScreenshots()) {
             if (pkgScreenshot.getHashSha256().equals(hashSha256)) {
                 LOGGER.warn("attempt to store a screenshot image that is already stored for this package");
                 return pkgScreenshot;
@@ -192,7 +187,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         // now we need to know the largest ordering so we can add this one at the end of the orderings
         // such that it is the next one in the list.
 
-        int actualOrdering = null == ordering ? pkg.getHighestPkgScreenshotOrdering().orElse(0) + 1 : ordering;
+        int actualOrdering = null == ordering ? pkgSupplement.getHighestPkgScreenshotOrdering().orElse(0) + 1 : ordering;
 
         PkgScreenshot screenshot = context.newObject(PkgScreenshot.class);
         screenshot.setCode(UUID.randomUUID().toString());
@@ -201,19 +196,17 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         screenshot.setWidth(size.width);
         screenshot.setLength(pngData.length);
         screenshot.setHashSha256(hashSha256);
-        pkg.addToManyTarget(Pkg.PKG_SCREENSHOTS.getName(), screenshot, true);
+        pkgSupplement.addToManyTarget(PkgSupplement.PKG_SCREENSHOTS.getName(), screenshot, true);
 
         PkgScreenshotImage screenshotImage = context.newObject(PkgScreenshotImage.class);
         screenshotImage.setMediaType(png);
         screenshotImage.setData(pngData);
         screenshot.addToManyTarget(PkgScreenshot.PKG_SCREENSHOT_IMAGES.getName(), screenshotImage, true);
 
-        pkg.setModifyTimestamp();
+        pkgSupplement.setModifyTimestamp();
 
         LOGGER.info("a screenshot #{} has been added to package [{}] ({})",
-                actualOrdering, pkg.getName(), screenshot.getCode());
-
-        relayScreenshotStorageToSubordinatePkgs(context, screenshot, actualOrdering);
+                actualOrdering, pkgSupplement.getBasePkgName(), screenshot.getCode());
 
         return screenshot;
     }
@@ -222,106 +215,22 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
     public void deleteScreenshot(
             ObjectContext context,
             PkgScreenshot screenshot) {
-
-        Pkg pkg = screenshot.getPkg();
-        String screenshotHashSha256 = screenshot.getHashSha256();
-
-        screenshot.setPkg(null);
-
+        screenshot.setPkgSupplement(null);
         Optional<PkgScreenshotImage> image = screenshot.tryGetPkgScreenshotImage();
         image.ifPresent(context::deleteObjects);
         context.deleteObjects(screenshot);
-
-        for(Pkg subordinatePkg : pkgService.findSubordinatePkgsForMainPkg(context, pkg.getName())) {
-            if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
-                List<PkgScreenshot> pkgScreenshotsToDelete = subordinatePkg.getPkgScreenshots()
-                        .stream()
-                        .filter(ps -> ps.getHashSha256().equals(screenshotHashSha256))
-                        .collect(Collectors.toList());
-
-                for (PkgScreenshot pkgScreenshotToDelete : pkgScreenshotsToDelete) {
-                    deleteScreenshot(context, pkgScreenshotToDelete);
-                }
-
-                LOGGER.info("delete of screenshot was extended [{}] -> [{}]", pkg.getName(),
-                        subordinatePkg.getName());
-            }
-        }
-    }
-
-    @Override
-    public void replicatePkgScreenshots(
-            ObjectContext context,
-            Pkg sourcePkg,
-            Pkg targetPkg) throws IOException, BadPkgScreenshotException {
-
-        // remove any target screenshots which do not exist in the source.
-
-        Set<String> existingSourceHashSha256s = sourcePkg
-                .getPkgScreenshots()
-                .stream()
-                .map(_PkgScreenshot::getHashSha256)
-                .collect(Collectors.toSet());
-
-        targetPkg.getPkgScreenshots()
-                .stream()
-                .filter(ps -> !existingSourceHashSha256s.contains(ps.getHashSha256()))
-                .forEach(ps -> deleteScreenshot(context, ps));
-
-        // now add any screenshots that are not already in the target package.
-
-        Set<String> existingTargetHashSha256s = targetPkg
-                .getPkgScreenshots()
-                .stream()
-                .map(_PkgScreenshot::getHashSha256)
-                .collect(Collectors.toSet());
-
-        List<PkgScreenshot> sourcePkgScreenshotsToAddToTarget = sourcePkg.getPkgScreenshots()
-                .stream()
-                .filter(ps -> !existingTargetHashSha256s.contains(ps.getHashSha256()))
-                .collect(Collectors.toList());
-
-        for (PkgScreenshot ps : sourcePkgScreenshotsToAddToTarget) {
-            storePkgScreenshotImage(
-                    new ByteArrayInputStream(ps.getPkgScreenshotImage().getData()),
-                    context,
-                    targetPkg,
-                    null);
-        }
-
-        // put the target screenshots into a correct ordering.
-
-        Map<String, Integer> sourceOrderings = sourcePkg
-                .getPkgScreenshots()
-                .stream()
-                .collect(Collectors.toMap(
-                        _PkgScreenshot::getHashSha256,
-                        _PkgScreenshot::getOrdering
-                ));
-
-        targetPkg.getPkgScreenshots().forEach(
-                ps -> {
-                    if (!sourceOrderings.containsKey(ps.getHashSha256())) {
-                        throw new IllegalStateException("the target package is missing the screenshot with hash ["
-                                + ps.getHashSha256() + "] for ordering.");
-                    }
-
-                    ps.setOrdering(sourceOrderings.get(ps.getHashSha256()));
-                }
-        );
-
     }
 
     @Override
     public void reorderPkgScreenshots(
             ObjectContext context,
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             List<String> codes) {
         Preconditions.checkNotNull(codes);
 
         // first check that there are no duplicates.
 
-        if(new HashSet<>(codes).size() != codes.size()) {
+        if (new HashSet<>(codes).size() != codes.size()) {
             throw new IllegalArgumentException("the codes supplied contain duplicates which would interfere with the ordering");
         }
 
@@ -329,47 +238,20 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         // subordinate packages more easily.  This is because the hashes will be
         // the same, but the codes will differ.
 
-        Map<String, String> codeToHashSha256Map = pkg.getPkgScreenshots()
+        Map<String, String> codeToHashSha256Map = pkgSupplement.getPkgScreenshots()
                 .stream()
                 .collect(Collectors.toMap(_PkgScreenshot::getCode, _PkgScreenshot::getHashSha256));
 
         List<String> hashSha256s = codes.stream().map(codeToHashSha256Map::get).collect(Collectors.toList());
 
-        reorderPkgScreenshotsByHashSha256s(pkg, hashSha256s);
-
-        for(Pkg subordinatePkg : pkgService.findSubordinatePkgsForMainPkg(context, pkg.getName())) {
-            if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
-                reorderPkgScreenshotsByHashSha256s(subordinatePkg, hashSha256s);
-                LOGGER.info("reordering of screenshots was extended [{}] -> [{}]", pkg.getName(),
-                        subordinatePkg.getName());
-            }
-        }
-    }
-
-    private void relayScreenshotStorageToSubordinatePkgs(
-            ObjectContext context,
-            PkgScreenshot screenshot,
-            Integer actualOrdering) throws IOException, BadPkgScreenshotException {
-        for(Pkg subordinatePkg : pkgService.findSubordinatePkgsForMainPkg(context, screenshot.getPkg().getName())) {
-            if (subordinatePkg.getName().endsWith(PkgService.SUFFIX_PKG_X86)) {
-                storePkgScreenshotImage(
-                        new ByteArrayInputStream(screenshot.getPkgScreenshotImage().getData()),
-                        context,
-                        subordinatePkg,
-                        actualOrdering);
-
-                LOGGER.info("store of screenshot was extended [{}] -> [{}]",
-                        screenshot.getPkg().getName(),
-                        subordinatePkg.getName());
-            }
-        }
+        reorderPkgScreenshotsByHashSha256s(pkgSupplement, hashSha256s);
     }
 
     private void reorderPkgScreenshotsByHashSha256s(
-            Pkg pkg,
+            PkgSupplement pkgSupplement,
             List<String> hashSha256s) {
 
-        List<PkgScreenshot> screenshots = new ArrayList<>(pkg.getPkgScreenshots());
+        List<PkgScreenshot> screenshots = new ArrayList<>(pkgSupplement.getPkgScreenshots());
 
         screenshots.sort((o1, o2) -> {
             int o1i = hashSha256s.indexOf(o1.getHashSha256());
@@ -390,11 +272,10 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
             return Integer.compare(o1i, o2i);
         });
 
-        for(int i=0;i<screenshots.size();i++) {
+        for (int i = 0; i < screenshots.size(); i++) {
             PkgScreenshot pkgScreenshot = screenshots.get(i);
-            pkgScreenshot.setOrdering(i+1);
+            pkgScreenshot.setOrdering(i + 1);
         }
     }
-
 
 }

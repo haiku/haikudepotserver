@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -69,7 +69,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, code);
         Assertions.assertThat(screenshotOptional.isPresent()).isTrue();
-        Assertions.assertThat(screenshotOptional.get().getPkg().getName()).isEqualTo("pkg1");
+        Assertions.assertThat(screenshotOptional.get().getPkgSupplement().getBasePkgName()).isEqualTo("pkg1");
         Assertions.assertThat(screenshotOptional.get().tryGetPkgScreenshotImage().get().getData()).isEqualTo(imageData);
 
     }
@@ -87,7 +87,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
                 response,
                 640, 480,
                 "png",
-                data.pkg1.getSortedPkgScreenshots().get(0).getCode());
+                data.pkg1.getPkgSupplement().getSortedPkgScreenshots().get(0).getCode());
         // -----------------------------------
 
         Assertions.assertThat(response.getContentType()).isEqualTo(MediaType.PNG.toString());
@@ -107,7 +107,7 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
                 response,
                 160, 120,
                 "png",
-                data.pkg1.getSortedPkgScreenshots().get(0).getCode());
+                data.pkg1.getPkgSupplement().getSortedPkgScreenshots().get(0).getCode());
         // -----------------------------------
 
         Assertions.assertThat(response.getContentType()).isEqualTo(MediaType.PNG.toString());

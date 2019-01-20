@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.job.controller.JobController;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.RenderedPkgIconRepository;
@@ -226,24 +227,19 @@ public class PkgIconController extends AbstractController {
             throw new PkgNotFound();
         }
 
+        PkgSupplement pkgSupplement = pkg.get().getPkgSupplement();
+
         switch (format) {
 
             case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_HAIKUVECTORICONFILE:
-                Optional<PkgIcon> hvifPkgIcon = pkg.get().getPkgIcon(
+                Optional<PkgIcon> hvifPkgIcon = pkg.get().getPkgSupplement().getPkgIcon(
                         org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, format).get(),
                         null);
 
                 if (hvifPkgIcon.isPresent()) {
                     byte[] data = hvifPkgIcon.get().getPkgIconImage().getData();
-                    response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
                     response.setContentType(org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
-                    response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
-
-                    if (requestMethod == RequestMethod.GET) {
-                        OutputStream outputStream = response.getOutputStream();
-                        outputStream.write(data);
-                        outputStream.flush();
-                    }
+                    outputToResponse(response, pkgSupplement, data, requestMethod == RequestMethod.GET);
                 }
                 else {
                     throw new PkgIconNotFound();
@@ -252,15 +248,16 @@ public class PkgIconController extends AbstractController {
 
             case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_PNG:
 
-                if(null==size) {
+                if (null == size) {
                     throw new IllegalArgumentException("the size must be provided when requesting a PNG");
                 }
 
                 size = normalizeSize(size);
-                Optional<byte[]> pngImageData = renderedPkgIconRepository.render(size, context, pkg.get());
+                Optional<byte[]> pngImageData = renderedPkgIconRepository.render(
+                        size, context, pkg.get().getPkgSupplement());
 
-                if(!pngImageData.isPresent()) {
-                    if((null==fallback) || !fallback) {
+                if (!pngImageData.isPresent()) {
+                    if ((null == fallback) || !fallback) {
                         throw new PkgIconNotFound();
                     }
 
@@ -268,15 +265,8 @@ public class PkgIconController extends AbstractController {
                 }
                 else {
                     byte[] data = pngImageData.get();
-                    response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
                     response.setContentType(MediaType.PNG.toString());
-                    response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkg.get().getModifyTimestampSecondAccuracy().getTime());
-
-                    if(requestMethod == RequestMethod.GET) {
-                        OutputStream outputStream = response.getOutputStream();
-                        outputStream.write(data);
-                        outputStream.flush();
-                    }
+                    outputToResponse(response, pkgSupplement, data, requestMethod == RequestMethod.GET);
                 }
                 break;
 
@@ -286,6 +276,22 @@ public class PkgIconController extends AbstractController {
         }
 
     }
+
+    private void outputToResponse(
+            HttpServletResponse response,
+            PkgSupplement pkgSupplement,
+            byte[] data,
+            boolean streamData) throws IOException {
+        response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
+        response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkgSupplement.getIconModifyTimestamp().getTime());
+
+        if (streamData) {
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(data);
+            outputStream.flush();
+        }
+    }
+
 
     // these are the various errors that can arise in supplying or providing a package icon.
 

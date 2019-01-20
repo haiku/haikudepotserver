@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,7 +14,6 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._Pkg;
-import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -23,7 +22,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
 
@@ -47,7 +45,6 @@ public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
                 .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
                 .selectOne(context));
     }
-
 
     public static List<Pkg> findByNames(ObjectContext context, Collection<String> names) {
         Preconditions.checkArgument(null!=context, "a context must be provided to lookup a package");
@@ -94,44 +91,6 @@ public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
                 .collect(SingleCollector.optional());
     }
 
-    public Optional<PkgPkgCategory> getPkgPkgCategory(String pkgCategoryCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(pkgCategoryCode));
-
-        for(PkgPkgCategory pkgPkgCategory : getPkgPkgCategories()) {
-            if(pkgPkgCategory.getPkgCategory().getCode().equals(pkgCategoryCode)) {
-                return Optional.of(pkgPkgCategory);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final Integer size) {
-        Preconditions.checkNotNull(mediaType);
-
-        List<PkgIcon> icons = getPkgIcons(mediaType,size);
-
-        switch(icons.size()) {
-            case 0:
-                return Optional.empty();
-
-            case 1:
-                return Optional.of(icons.get(0));
-
-            default:
-                throw new IllegalStateException("more than one pkg icon of media type "+mediaType.getCode()+" of size "+size+" on pkg "+getName());
-        }
-    }
-
-    private List<PkgIcon> getPkgIcons(final MediaType mediaType, final Integer size) {
-        Preconditions.checkNotNull(mediaType);
-        return getPkgIcons().stream().filter(pi ->
-                pi.getMediaType().equals(mediaType)
-                && (null == size) == (null == pi.getSize())
-                && ((null == size) || size.equals(pi.getSize()))
-        ).collect(Collectors.toList());
-    }
-
     /**
      * <p>The regular {$link #getModifyTimestamp} is at millisecond accuracy.  When dealing with second-accuracy
      * dates, this can cause anomalies.  For this reason, this method will provide the modify timestamp at
@@ -140,49 +99,6 @@ public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
 
     public Date getModifyTimestampSecondAccuracy() {
         return DateTimeHelper.secondAccuracyDate(getModifyTimestamp());
-    }
-
-    public List<PkgScreenshot> getSortedPkgScreenshots() {
-        List<PkgScreenshot> screenshots = new ArrayList<>(getPkgScreenshots());
-        Collections.sort(screenshots);
-        return screenshots;
-    }
-
-    public OptionalInt getHighestPkgScreenshotOrdering() {
-        return getPkgScreenshots()
-                .stream()
-                .mapToInt(_PkgScreenshot::getOrdering)
-                .max();
-    }
-
-    /**
-     * <p>If there is a change-log then this will return it, otherwise it will return an empty optional.</p>
-     */
-
-    public Optional<PkgChangelog> getPkgChangelog() {
-        return getPkgChangelogs().stream().collect(SingleCollector.optional());
-    }
-
-    /**
-     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
-     * English language data is hard-coded into the package payload, english will always be available.</p>
-     */
-
-    public Optional<PkgLocalization> getPkgLocalization(final NaturalLanguage naturalLanguage) {
-        return getPkgLocalization(naturalLanguage.getCode());
-    }
-
-    /**
-     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
-     * English language data is hard-coded into the package payload, english will always be available.</p>
-     */
-
-    public Optional<PkgLocalization> getPkgLocalization(final String naturalLanguageCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-        return getPkgLocalizations()
-                .stream()
-                .filter(pl -> pl.getNaturalLanguage().getCode().equals(naturalLanguageCode))
-                .collect(SingleCollector.optional());
     }
 
     public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
