@@ -41,6 +41,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     private final Boolean isProduction;
     private final String architectureDefaultCode;
     private final String repositoryDefaultCode;
+    private final String dataHandlingInformationUrl;
 
     @Autowired
     public MiscellaneousApiImpl(
@@ -49,6 +50,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             FeedService feedService,
             MessageSource messageSource,
             NaturalLanguageService naturalLanguageService,
+            @Value("${information.datahandling.url}") String dataHandlingInformationUrl,
             @Value("${deployment.isproduction:false}") Boolean isProduction,
             @Value("${architecture.default.code}") String architectureDefaultCode,
             @Value("${repository.default.code}") String repositoryDefaultCode) {
@@ -60,6 +62,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         this.isProduction = Preconditions.checkNotNull(isProduction);
         this.architectureDefaultCode = Preconditions.checkNotNull(architectureDefaultCode);
         this.repositoryDefaultCode = Preconditions.checkNotNull(repositoryDefaultCode);
+        this.dataHandlingInformationUrl = Preconditions.checkNotNull(dataHandlingInformationUrl);
     }
 
     @Override
@@ -163,6 +166,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         defaults.architectureCode = architectureDefaultCode;
         defaults.repositoryCode = repositoryDefaultCode;
         result.defaults = defaults;
+        result.dataHandlingInformationUrl = dataHandlingInformationUrl;
 
         return result;
     }

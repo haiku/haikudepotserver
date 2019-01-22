@@ -1,9 +1,18 @@
 <div ng-show="shouldShowQuery()" id="local-storage-query">
-    Would you like application settings and login
-    data to be stored in your browser?
+    <message key="allowLocalStorage.message"></message>
     <ul>
-        <li><a href="" ng-click="goAllow()">Yes store data in my browser</a></li>
-        <li><a target="_blank" href="/__docs/datahandling.html">More information...</a></li>
-        <li><a href="" ng-click="goDisallow()">No do not store data in my browser</a></li>
+        <li>
+            <a href="" ng-click="goAllow()">
+                <message key="allowLocalStorage.question.allow"></message>
+            </a>
+        </li>
+        <li>
+            <handling-data-info/>
+        </li>
+        <li>
+            <a href="" ng-click="goDisallow()">
+                <message key="allowLocalStorage.question.disallow"></message>
+            </a>
+        </li>
     </ul>
 </div>

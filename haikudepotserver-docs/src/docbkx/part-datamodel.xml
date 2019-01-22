@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2017, Andrew Lindesay
+Copyright 2015-2019, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -62,44 +62,16 @@ Distributed under the terms of the MIT License.
     </section>
 
     <section>
-        <title>Subordinate Packages</title>
+        <title>Package Supplement</title>
         <para>
             Some packages are loosely in a relationship with a main package.  For example, the package
             &quot;aspell_devel&quot; is subordinate to &quot;aspell&quot; and &quot;qupzilla_x86&quot; is subordinate
             to &quot;qupzilla&quot;.  In such cases, a relationship exists, by naming convention, wherein the
-            subordinate package should take on some of the meta-data of the main package.  The system achieves this by
-            copying the meta-data when it is mutated in the main over into the subordinate package.  This copy process
-            is chosen because it maintains the independence of the packages and reduces overhead in querying data.
-            The following table shows for each package suffix which meta-data is copied over to the subordinate package.
+            subordinate package should take on some of the meta-data of the main package.  The system
+            achieves this through the PkgSupplement entity.  A PkgSupplement entity instance holds
+            the relationship to icons, screenshots, changelogs and categories and then any related
+            Pkg entity instances relate to that PkgSupplement.
         </para>
-
-        <informaltable>
-            <tgroup cols="4">
-                <thead>
-                    <row>
-                        <entry>Suffix</entry>
-                        <entry>Localizations</entry>
-                        <entry>Icons</entry>
-                        <entry>Screenshots</entry>
-                    </row>
-                </thead>
-                <tbody>
-                    <row>
-                        <entry>_x86</entry>
-                        <entry>Y</entry>
-                        <entry>Y</entry>
-                        <entry>Y</entry>
-                    </row>
-                    <row>
-                        <entry>_devel</entry>
-                        <entry>Y</entry>
-                        <entry>Y</entry>
-                        <entry>N</entry>
-                    </row>
-                </tbody>
-            </tgroup>
-        </informaltable>
-
     </section>
 
 </chapter>

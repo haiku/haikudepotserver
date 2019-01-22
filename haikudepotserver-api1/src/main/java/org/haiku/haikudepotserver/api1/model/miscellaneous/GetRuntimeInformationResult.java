@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,6 +22,12 @@ public class GetRuntimeInformationResult {
      */
 
     public Defaults defaults;
+
+    /**
+     * @since 2019-01-22
+     */
+
+    public String dataHandlingInformationUrl;
 
     public static class Defaults {
 

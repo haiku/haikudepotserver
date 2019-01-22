@@ -12,20 +12,20 @@ Distributed under the terms of the MIT License.
 
     <para>
         This section covers how data is handled in Haiku Depot Server (HDS) in
-        terms of its use and persistence from a user perspective.
+        terms of its use, persistence and distribution from a user perspective.
     </para>
 
     <section>
         <title>Browser</title>
         <para>
             A Browser is a piece of software that can be run on a computing
-            device in order to view web sites and web applications.  HDS is such
+            device in order to view web sites and web applications.  HDS is
             a web application.  Browsers such as
             <ulink url="https://www.mozilla.org/firefox/">Firefox</ulink>
             and
             <ulink url="https://www.google.com/chrome/">Google Chrome</ulink>
             can be used to access HDS and as it does so, there is the
-            possibility that some data may be stored in the Browser.
+            opportunity for some data to be stored in the Browser.
         </para>
 
         <section>
@@ -39,7 +39,7 @@ Distributed under the terms of the MIT License.
         <section>
             <title>Cookies</title>
             <para>
-                HDS does not use Cookie technology.
+                HDS does not use Browser Cookie technology.
             </para>
         </section>
 
@@ -47,21 +47,23 @@ Distributed under the terms of the MIT License.
             <title>Local Storage</title>
             <para>
                 Local Storage is a mechanism that is available in some Browsers
-                for maintaining data in the Browser.  HDS can optionally use
-                local storage for conveniently storing some data for the user.
+                for programmatically storing and later retrieving data in the
+                Browser.  HDS can optionally use
+                Local Storage for conveniently storing some data for the user.
                 Using the Browser's Local Storage is optional and the user is
                 given the choice to allow or disallow HDS to use Local Storage.
-                The HDS system is entirely functional without using Local
-                Storage, but some aspects may not be as convenient.
-                The data stored by HDS using Local Storage includes the
-                following at the time of writing;
+                The HDS system is functional without using Local
+                Storage, but some aspects may not be as convenient; for example
+                some user-preferences may not be stored across sessions.
+                The data that may be stored by HDS using Local Storage
+                includes the following at the time of writing;
             </para>
 
             <para>
                 <itemizedlist>
                     <listitem>
-                        The user of the Browser's preferred natural language
-                        such as English or Russian.
+                        The user's preferred natural language
+                        such as English, French or Russian.
                     </listitem>
                     <listitem>
                         If applicable, the user's current authentication.  This
@@ -79,6 +81,68 @@ Distributed under the terms of the MIT License.
                 </itemizedlist>
             </para>
         </section>
+    </section>
+
+    <section>
+        <title>User Identifiers</title>
+        <para>
+            The user is identified in the system by short piece of text
+            called a nickname.  The nickname is intended to be used to
+            identify a user publicly.  For example, the nickname may be presented
+            together with user-generated content to identify the author
+            of the content.  HDS will publicly display and redistribute users'
+            nicknames.  The user nickname is public information.
+        </para>
+        <para>
+            The HDS system has no means of storing or working with real
+            names.
+        </para>
+        <para>
+            The user may choose to store an email address with their account.
+            Some functions of the system such as being able to reset a
+            user's password after a user has forgotten their password will
+            not be possible without the user having supplied their email
+            address.  Communication between the administrators of
+            HDS and users is not possible without the user having opted to
+            supply an email address.  Users' email addresses are
+            intended to be private to the user and the administrators of the
+            HDS system.
+        </para>
+    </section>
+
+    <section>
+        <title>User Ratings</title>
+        <para>
+            A user may provide ratings of their own creation in relation
+            to packages within the HDS system.  Such ratings may be created
+            using the web interface or through use of a provided API.  The
+            information provided with a rating including any commentary is
+            intended to be distributed publicly; either directly or in
+            aggregate form.
+        </para>
+    </section>
+
+    <section>
+        <title>Supplied Content</title>
+
+        <para>
+            Selected users are able to provide content for
+            the HDS system.  This includes, but is not limited to;
+        </para>
+        <para>
+            <itemizedlist>
+                <listitem>Icons</listitem>
+                <listitem>Screenshots</listitem>
+                <listitem>Categorizations</listitem>
+                <listitem>Change-logs</listitem>
+                <listitem>Prominences</listitem>
+                <listitem>Localizations</listitem>
+            </itemizedlist>
+        </para>
+        <para>
+            Such provided content data is assumed to be distributed as
+            public domain and will be redistributed.
+        </para>
     </section>
 
 </chapter>
