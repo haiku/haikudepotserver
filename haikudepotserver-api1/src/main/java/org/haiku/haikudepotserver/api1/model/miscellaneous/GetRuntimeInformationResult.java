@@ -21,12 +21,6 @@ public class GetRuntimeInformationResult {
 
     public Defaults defaults;
 
-    /**
-     * @since 2019-01-22
-     */
-
-    public String dataHandlingInformationUrl;
-
     public static class Defaults {
 
         public String architectureCode;

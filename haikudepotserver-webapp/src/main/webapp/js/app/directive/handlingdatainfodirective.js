@@ -11,13 +11,11 @@
 
 angular.module('haikudepotserver').directive('handlingDataInfo',
     [
-        '$q', 'runtimeInformation', 'messageSource', 'userState',
-        function ($q, runtimeInformation, messageSource, userState) {
+        '$q', 'messageSource', 'userState',
+        function ($q, messageSource, userState) {
             return {
                 restrict: 'E',
                 link: function ($scope, element, attributes) {
-
-                    console.log('*U*');
                     var hyperlinkEl = angular.element('<a target="_blank" href="#">...</a>');
                     element.replaceWith(hyperlinkEl);
 
@@ -27,14 +25,11 @@ angular.module('haikudepotserver').directive('handlingDataInfo',
                             hyperlinkEl.text(text);
                         }
 
-                        $q.all([
-                            runtimeInformation.getRuntimeInformation(),
-                            messageSource.get(
+                        messageSource.get(
                                 userState.naturalLanguageCode(),
-                                'dataHandlingInfo.link.title')
-                        ]).then(
+                                'dataHandlingInfo.link.title').then(
                             function (result) {
-                                setupElement(result[0].dataHandlingInformationUrl, result[1]);
+                                setupElement('/__docs/datahandling.html', result);
                             }
                         )
                     }
