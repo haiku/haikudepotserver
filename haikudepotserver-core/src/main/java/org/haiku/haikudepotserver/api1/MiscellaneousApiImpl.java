@@ -154,7 +154,6 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         GetRuntimeInformationResult result = new GetRuntimeInformationResult();
         result.projectVersion = runtimeInformationService.getProjectVersion();
-        result.getBulkPkgRequestLimit = PkgApi.GETBULKPKG_LIMIT;
         result.isProduction = isProduction;
 
         if(authUserOptional.isPresent() && authUserOptional.get().getIsRoot()) {

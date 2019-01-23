@@ -68,7 +68,7 @@ Distributed under the terms of the MIT License.
                     <listitem>
                         If applicable, the user's current authentication.  This
                         is convenient because the authentication is then able,
-                        for a short time, survive a Browser restart and is also
+                        for a short time, to survive a Browser restart and is also
                         able to be shared between tabs of the same Browser.
                     </listitem>
                     <listitem>

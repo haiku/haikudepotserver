@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,9 +18,6 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 
 @JsonRpcService("/__api/v1/pkg")
 public interface PkgApi {
-
-    @Deprecated
-    Integer GETBULKPKG_LIMIT = 50;
 
     /**
      * <p>This method will ensure that the categories configured on the nominated package are as per the list of
@@ -115,34 +112,6 @@ public interface PkgApi {
      */
 
     GetPkgVersionLocalizationsResult getPkgVersionLocalizations(GetPkgVersionLocalizationsRequest getPkgVersionLocalizationsRequest) throws ObjectNotFoundException;
-
-    /**
-     * <p>This method will obtain data about some named packages.  Note that the quantity of packages requested should
-     * not exceed {@link #GETBULKPKG_LIMIT}; if it does exceed this limit then an instance of
-     * {@link LimitExceededException} will be thrown.</p>
-     *
-     * <p>This limit can be obtained from the
-     * {@link MiscellaneousApi#getRuntimeInformation(GetRuntimeInformationRequest)}
-     * method.
-     * </p>
-     *
-     * <p>If a package was not able to be found then it will simply not appear in the results.  If reference data
-     * objects such as the architecture was unable to be found then this method will throw an instance of
-     * {@link ObjectNotFoundException}.</p>
-     *
-     * <p>The definition of architecture on this method is strict; will only return data for which there is
-     * a version on that architecture.</p>
-     *
-     * <p>Various elements of the response can be filtered in or out by using the filter attribute on the request
-     * object.</p>
-     *
-     * <p>The client should supply, in the request, a list of repositories of interest.  These can either be
-     * supplied with a list of repository codes or it is also possible to supply a list of repository source
-     * URLs that can then be mapped back to repository sources and from there to the repositories.</p>
-     */
-
-    @Deprecated // use the bulk download approach instead.
-    GetBulkPkgResult getBulkPkg(GetBulkPkgRequest getBulkPkgRequest) throws LimitExceededException, ObjectNotFoundException;
 
     /**
      * <p>This method will update the prominence of the nominated package.  The prominence is identified by the

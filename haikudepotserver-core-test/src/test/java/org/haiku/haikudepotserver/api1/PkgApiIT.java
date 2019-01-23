@@ -17,7 +17,6 @@ import org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgScreenshot;
 import org.haiku.haikudepotserver.api1.model.pkg.*;
 import org.haiku.haikudepotserver.api1.support.BadPkgIconException;
-import org.haiku.haikudepotserver.api1.support.LimitExceededException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
@@ -29,7 +28,10 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -657,106 +659,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.pkgVersionLocalizations.size()).isEqualTo(1);
         Assertions.assertThat(result.pkgVersionLocalizations.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
         Assertions.assertThat(result.pkgVersionLocalizations.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
-    }
-
-    /**
-     * <p>This test is just checking that if too many packages are requested that it throws the right
-     * sort of exception.</p>
-     */
-
-    @Test
-    public void testGetBulkPkg__limitExceeded() throws Exception {
-
-        GetBulkPkgRequest request = new GetBulkPkgRequest();
-        request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
-        request.versionType = PkgVersionType.LATEST;
-        request.architectureCodes = Collections.singletonList("x86_64");
-        request.naturalLanguageCode = "en";
-        request.pkgNames = new ArrayList<>();
-        request.repositoryCodes = Collections.singletonList(Repository.CODE_DEFAULT);
-
-        while(request.pkgNames.size() < PkgApi.GETBULKPKG_LIMIT + 1) {
-            request.pkgNames.add("pkg");
-        }
-
-        try {
-            // ------------------------------------
-            pkgApi.getBulkPkg(request);
-            // ------------------------------------
-            Assert.fail("expected an instance of "+ LimitExceededException.class.getSimpleName()+" to be thrown");
-        }
-        catch(LimitExceededException lee) {
-            // expected
-        }
-    }
-
-    @Test
-    public void testGetBulkPkg__ok() throws Exception {
-        integrationTestSupportService.createStandardTestData();
-
-        GetBulkPkgRequest request = new GetBulkPkgRequest();
-        request.filter = ImmutableList.copyOf(GetBulkPkgRequest.Filter.values());
-        request.versionType = PkgVersionType.LATEST;
-        request.repositoryCodes = Collections.singletonList("testrepo");
-        request.architectureCodes = ImmutableList.of("any","x86_64");
-        request.naturalLanguageCode = "en";
-        request.pkgNames = ImmutableList.of("pkg1","pkg2","pkg3","pkg4","pkgany"); // pkg4 does not exist
-
-        // ------------------------------------
-        GetBulkPkgResult result = pkgApi.getBulkPkg(request);
-        // ------------------------------------
-
-        Assertions.assertThat(result.pkgs.size()).isEqualTo(4); // includes the any package
-
-        // check they are all there.
-
-        Set<String> packageNames = result.pkgs
-                .stream()
-                .map(p -> p.name)
-                .collect(Collectors.toSet());
-
-        Assertions.assertThat(packageNames).containsOnly("pkg1","pkg2","pkg3","pkgany");
-
-        // now check pkg1 because it has some in-depth data on it.
-
-        GetBulkPkgResult.Pkg pkg1 = result.pkgs.stream().filter(p -> p.name.equals("pkg1")).findFirst().get();
-
-        Assertions.assertThat(pkg1.name).isEqualTo("pkg1");
-        Assertions.assertThat(pkg1.modifyTimestamp).isNotNull();
-
-        Assertions.assertThat(pkg1.pkgChangelogContent).isEqualTo("Stadt\nKarlsruhe");
-
-        Assertions.assertThat(pkg1.pkgCategoryCodes.size()).isEqualTo(1);
-        Assertions.assertThat(pkg1.pkgCategoryCodes.get(0)).isEqualTo("graphics");
-
-        Assertions.assertThat(pkg1.derivedRating).isNotNull();
-        Assertions.assertThat(pkg1.derivedRating).isGreaterThanOrEqualTo(0.0f);
-        Assertions.assertThat(pkg1.derivedRating).isLessThanOrEqualTo(5.0f);
-
-        // there are three screen-shots loaded, but they are all the same so we can just check that the first
-        // one is correct.
-        Assertions.assertThat(pkg1.pkgScreenshots.size()).isEqualTo(3);
-        Assertions.assertThat(pkg1.pkgScreenshots.get(0).code).isNotNull();
-        Assertions.assertThat(pkg1.pkgScreenshots.get(0).width).isEqualTo(320);
-        Assertions.assertThat(pkg1.pkgScreenshots.get(0).height).isEqualTo(240);
-
-        // basic check here to make sure that the HPKR data is able to be flagged as being there.
-        Assertions.assertThat(pkg1.pkgIcons.size()).isEqualTo(3);
-        Assertions.assertThat(pkg1.pkgIcons
-                        .stream()
-                        .filter(pi -> pi.mediaTypeCode.equals(MediaType.PNG.toString()))
-                        .findFirst().isPresent()).isTrue();
-
-        Assertions.assertThat(pkg1.versions.size()).isEqualTo(1);
-        Assertions.assertThat(pkg1.versions.get(0).title).isEqualTo("Package 1");
-        Assertions.assertThat(pkg1.versions.get(0).description).isEqualTo("pkg1Version2DescriptionEnglish_rockmelon");
-        Assertions.assertThat(pkg1.versions.get(0).summary).isEqualTo("pkg1Version2SummaryEnglish_persimon");
-        Assertions.assertThat(pkg1.versions.get(0).major).isEqualTo("1");
-        Assertions.assertThat(pkg1.versions.get(0).micro).isEqualTo("2");
-        Assertions.assertThat(pkg1.versions.get(0).revision).isEqualTo(4);
-        Assertions.assertThat(pkg1.versions.get(0).preRelease).isNull();
-        Assertions.assertThat(pkg1.versions.get(0).minor).isNull();
-
     }
 
     @Test
