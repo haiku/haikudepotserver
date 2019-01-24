@@ -86,7 +86,7 @@ Distributed under the terms of the MIT License.
     <section>
         <title>User Identifiers</title>
         <para>
-            The user is identified in the system by short piece of text
+            The user is identified in the system by a short piece of text
             called a nickname.  The nickname is intended to be used to
             identify a user publicly.  For example, the nickname may be presented
             together with user-generated content to identify the author
@@ -99,8 +99,8 @@ Distributed under the terms of the MIT License.
         </para>
         <para>
             The user may choose to store an email address with their account.
-            Some functions of the system such as being able to reset a
-            user's password after a user has forgotten their password will
+            Some functions of the system  - such as being able to reset a
+            user's password after a user has forgotten their password - will
             not be possible without the user having supplied their email
             address.  Communication between the administrators of
             HDS and users is not possible without the user having opted to
@@ -111,7 +111,7 @@ Distributed under the terms of the MIT License.
     </section>
 
     <section>
-        <title>User Ratings</title>
+        <title>User Ratings and Comments</title>
         <para>
             A user may provide ratings of their own creation in relation
             to packages within the HDS system.  Such ratings may be created
