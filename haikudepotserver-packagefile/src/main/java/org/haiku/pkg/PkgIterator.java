@@ -45,10 +45,10 @@ public class PkgIterator {
      * @throws HpkException when there is a problem obtaining the next attributes.
      */
 
-    public Pkg next() throws PkgException, HpkException {
+    public Pkg next() {
         Attribute attribute = attributeIterator.next();
 
-        if(null!=attribute) {
+        if (null != attribute) {
             return pkgFactory.createPackage(attributeIterator.getContext(), attribute);
         }
 

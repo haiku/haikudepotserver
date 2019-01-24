@@ -51,15 +51,17 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
     private IntegrationTestSupportService integrationTestSupportService;
 
     private Pkg createPkg(String minor) {
-        Pkg pkg = new Pkg();
-        pkg.setArchitecture(PkgArchitecture.X86_64);
-        pkg.setDescription("test-description-en");
-        pkg.setSummary("test-summary-en");
-        pkg.setName("testpkg");
-        pkg.setVersion(new PkgVersion("1", minor, "3", "4", 5));
-        return pkg;
+        return new Pkg(
+                "testpkg",
+                new PkgVersion("1", minor, "3", "4", 5),
+                PkgArchitecture.X86_64,
+                null,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                "test-summary-en",
+                "test-description-en",
+                null);
     }
-
 
     /**
      * <p>When a "_devel" package is imported there is a special behaviour that the localization and the
@@ -122,8 +124,16 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         // setup the devel package.
 
-        Pkg importDevelPkg = createPkg("2");
-        importDevelPkg.setName(importDevelPkg.getName() + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
+        Pkg importDevelPkg = new Pkg(
+                "testpkg" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT,
+                new PkgVersion("1", "2", "3", "4", 5),
+                PkgArchitecture.X86_64,
+                null,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                "test-summary-en",
+                "test-description-en",
+                null);
 
         // ---------------------------------
         {
@@ -264,10 +274,16 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         // now there are a string of pkg versions in place, import an older one.
 
-        Pkg inputPackage = new Pkg();
-        inputPackage.setArchitecture(PkgArchitecture.X86_64);
-        inputPackage.setName("pkgx");
-        inputPackage.setVersion(new PkgVersion("1", "4", null, null, null)); // <-- version in middle of pkg versions
+        Pkg inputPackage = new Pkg(
+                "pkgx",
+                new PkgVersion("1", "4", null, null, null), // <-- version in middle of pkg versions
+                PkgArchitecture.X86_64,
+                null,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                "test-summary-en",
+                "test-description-en",
+                null);
 
         {
             ObjectContext context = serverRuntime.newContext();

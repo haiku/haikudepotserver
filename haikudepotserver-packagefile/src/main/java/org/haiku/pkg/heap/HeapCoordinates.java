@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,8 +15,8 @@ import com.google.common.base.Preconditions;
 
 public class HeapCoordinates {
 
-    private long offset;
-    private long length;
+    private final long offset;
+    private final long length;
 
     public HeapCoordinates(long offset, long length) {
         super();

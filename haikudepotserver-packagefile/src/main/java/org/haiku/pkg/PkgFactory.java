@@ -6,11 +6,12 @@
 package org.haiku.pkg;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import org.haiku.pkg.model.*;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>This object is algorithm that is able to convert a top level package attribute into a modelled package object
@@ -20,67 +21,72 @@ import java.util.Optional;
 
 class PkgFactory {
 
-    private String getOptionalStringAttributeValue(
+    Pkg createPackage(
             AttributeContext attributeContext,
-            Attribute attribute,
-            AttributeId attributeId) throws PkgException, HpkException {
+            Attribute attribute)  {
 
         Preconditions.checkNotNull(attribute);
         Preconditions.checkNotNull(attributeContext);
+        Preconditions.checkState(attribute.getAttributeId() == AttributeId.PACKAGE);
 
-        Optional<Attribute> nameAttributeOptional = attribute.tryGetChildAttribute(attributeId);
-
-        if (!nameAttributeOptional.isPresent()) {
-            return null;
+        try {
+            return new Pkg(
+                    getStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_NAME),
+                    createVersion(attributeContext, attribute.getChildAttribute(AttributeId.PACKAGE_VERSION_MAJOR)),
+                    createArchitecture(attributeContext, attribute.getChildAttribute(AttributeId.PACKAGE_ARCHITECTURE)),
+                    getStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_VENDOR),
+                    getChildAttributesAsStrings(attributeContext, attribute.getChildAttributes(AttributeId.PACKAGE_COPYRIGHT)),
+                    getChildAttributesAsStrings(attributeContext, attribute.getChildAttributes(AttributeId.PACKAGE_LICENSE)),
+                    getStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_SUMMARY),
+                    getStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_DESCRIPTION),
+                    tryCreateHomePagePkgUrl(attributeContext, attribute).orElse(null));
+        } catch(HpkException he) {
+            throw new PkgException("unable to create a package owing to a problem with the hpk packaging",he);
         }
-
-        return (String) nameAttributeOptional.get().getValue(attributeContext);
     }
 
-    private String getRequiredStringAttributeValue(
+    private Optional<String> tryGetStringAttributeValue(
             AttributeContext attributeContext,
             Attribute attribute,
-            AttributeId attributeId) throws PkgException, HpkException {
+            AttributeId attributeId) {
+        return attribute.tryGetChildAttribute(attributeId)
+                .map(a -> a.getValue(attributeContext))
+                .map(a -> (String) a);
+    }
 
-        Preconditions.checkNotNull(attribute);
-        Preconditions.checkNotNull(attributeContext);
-
-        Optional<Attribute> nameAttributeOptional = attribute.tryGetChildAttribute(attributeId);
-
-        if (!nameAttributeOptional.isPresent()) {
-            throw new PkgException(String.format("the %s attribute must be present",attributeId.getName()));
-        }
-
-        return (String) nameAttributeOptional.get().getValue(attributeContext);
+    private String getStringAttributeValue(
+            AttributeContext attributeContext,
+            Attribute attribute,
+            AttributeId attributeId) {
+        return tryGetStringAttributeValue(attributeContext, attribute, attributeId)
+                .orElseThrow(() -> new PkgException(
+                        String.format("the %s attribute must be present",attributeId.getName())));
     }
 
     private PkgVersion createVersion(
             AttributeContext attributeContext,
-            Attribute attribute) throws PkgException, HpkException {
+            Attribute attribute) {
 
         Preconditions.checkNotNull(attribute);
         Preconditions.checkNotNull(attributeContext);
         Preconditions.checkState(AttributeId.PACKAGE_VERSION_MAJOR == attribute.getAttributeId());
 
-        Optional<Attribute> revisionAttribute = attribute.tryGetChildAttribute(AttributeId.PACKAGE_VERSION_REVISION);
-        Integer revision = null;
-
-        if (revisionAttribute.isPresent()) {
-            revision = ((IntAttribute) revisionAttribute.get()).getValue(attributeContext).intValue();
-        }
-
         return new PkgVersion(
                 (String) attribute.getValue(attributeContext),
-                getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_VERSION_MINOR),
-                getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_VERSION_MICRO),
-                getOptionalStringAttributeValue(attributeContext,attribute, AttributeId.PACKAGE_VERSION_PRE_RELEASE),
-                revision);
-
+                tryGetStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_VERSION_MINOR).orElse(null),
+                tryGetStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_VERSION_MICRO).orElse(null),
+                tryGetStringAttributeValue(attributeContext,attribute, AttributeId.PACKAGE_VERSION_PRE_RELEASE).orElse(null),
+                attribute.tryGetChildAttribute(AttributeId.PACKAGE_VERSION_REVISION)
+                        .map(a -> (IntAttribute) a)
+                        .map(a -> a.getValue(attributeContext))
+                        .map(BigInteger::intValue)
+                        .orElse(null)
+        );
     }
 
     private PkgArchitecture createArchitecture(
             AttributeContext attributeContext,
-            Attribute attribute) throws HpkException {
+            Attribute attribute) {
 
         Preconditions.checkNotNull(attribute);
         Preconditions.checkNotNull(attributeContext);
@@ -90,71 +96,17 @@ class PkgFactory {
         return PkgArchitecture.values()[value];
     }
 
-    Pkg createPackage(
+    private List<String> getChildAttributesAsStrings(
             AttributeContext attributeContext,
-            Attribute attribute) throws PkgException {
+            List<Attribute> attributes) {
+        return attributes.stream().map(a -> a.getValue(attributeContext).toString()).collect(Collectors.toList());
+    }
 
-        Preconditions.checkNotNull(attribute);
-        Preconditions.checkNotNull(attributeContext);
-        Preconditions.checkState(attribute.getAttributeId() == AttributeId.PACKAGE);
-
-        Pkg result = new Pkg();
-
-        try {
-
-            result.setName(getRequiredStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_NAME));
-            result.setVendor(getRequiredStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_VENDOR));
-            result.setSummary(getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_SUMMARY));
-            result.setDescription(getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_DESCRIPTION));
-
-            String packageUrl = getOptionalStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_URL);
-
-            if (!Strings.isNullOrEmpty(packageUrl)) {
-                result.setHomePageUrl(new PkgUrl(packageUrl, PkgUrlType.HOMEPAGE));
-            }
-
-            // get the architecture.
-
-            Optional<Attribute> architectureAttributeOptional = attribute.tryGetChildAttribute(AttributeId.PACKAGE_ARCHITECTURE);
-
-            if(!architectureAttributeOptional.isPresent()) {
-                throw new PkgException(String.format("the attribute %s is required", AttributeId.PACKAGE_ARCHITECTURE));
-            }
-
-            result.setArchitecture(createArchitecture(attributeContext,architectureAttributeOptional.get()));
-
-            // get the version.
-
-            Optional<Attribute> majorVersionAttributeOptional = attribute.tryGetChildAttribute(AttributeId.PACKAGE_VERSION_MAJOR);
-
-            if (!majorVersionAttributeOptional.isPresent()) {
-                throw new PkgException(String.format("the attribute %s is required", AttributeId.PACKAGE_VERSION_MAJOR));
-            }
-
-            result.setVersion(createVersion(attributeContext, majorVersionAttributeOptional.get()));
-
-            // get the copyrights.
-
-            for (Attribute copyrightAttribute : attribute.getChildAttributes(AttributeId.PACKAGE_COPYRIGHT)) {
-                if (copyrightAttribute.getAttributeType() == AttributeType.STRING) { // illegal not to be, but be lenient
-                    result.addCopyright(copyrightAttribute.getValue(attributeContext).toString());
-                }
-            }
-
-            // get the licenses.
-
-            for (Attribute licenseAttribute : attribute.getChildAttributes(AttributeId.PACKAGE_LICENSE)) {
-                if (licenseAttribute.getAttributeType() == AttributeType.STRING) { // illegal not to be, but be lenient
-                    result.addLicense(licenseAttribute.getValue(attributeContext).toString());
-                }
-            }
-
-
-        } catch(HpkException he) {
-            throw new PkgException("unable to create a package owing to a problem with the hpk packaging",he);
-        }
-
-        return result;
+    private Optional<PkgUrl> tryCreateHomePagePkgUrl(
+            AttributeContext attributeContext,
+            Attribute attribute) {
+        return tryGetStringAttributeValue(attributeContext, attribute, AttributeId.PACKAGE_URL)
+                .map(v -> new PkgUrl(v, PkgUrlType.HOMEPAGE));
     }
 
 }

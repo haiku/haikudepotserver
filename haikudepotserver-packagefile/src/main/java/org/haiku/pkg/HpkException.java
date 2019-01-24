@@ -10,7 +10,7 @@ package org.haiku.pkg;
  * with processing the Hpk data in some way.</p>
  */
 
-public class HpkException extends Exception {
+public class HpkException extends Error {
 
     public HpkException(String message) {
         super(message);

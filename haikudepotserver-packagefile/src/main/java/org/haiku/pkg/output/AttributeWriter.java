@@ -32,7 +32,7 @@ public class AttributeWriter extends FilterWriter {
         Preconditions.checkNotNull(attribute);
         Preconditions.checkState(indent >= 0);
 
-        for(int i = 0; i < indent; i++) {
+        for (int i = 0; i < indent; i++) {
             write(' ');
         }
 
@@ -64,14 +64,14 @@ public class AttributeWriter extends FilterWriter {
             }
         }
         catch (HpkException e) {
-            throw new IOException("unable to process an attribute '"+attribute.toString()+"'",e);
+            throw new IOException("unable to process an attribute '" + attribute.toString() + "'",e);
         }
 
         write("\n");
 
         if (attribute.hasChildAttributes()) {
             for (Attribute childAttribute : attribute.getChildAttributes()) {
-                write(indent+2, context, childAttribute);
+                write(indent + 2, context, childAttribute);
             }
         }
     }
@@ -79,7 +79,7 @@ public class AttributeWriter extends FilterWriter {
     public void write(AttributeContext context, Attribute attribute) throws IOException {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(attribute);
-        write(0,context,attribute);
+        write(0, context, attribute);
     }
 
     public void write(AttributeIterator attributeIterator) throws IOException {
@@ -90,7 +90,7 @@ public class AttributeWriter extends FilterWriter {
                 write(attributeIterator.getContext(), attributeIterator.next());
             }
             catch (HpkException e) {
-                throw new IOException("unable to get the next attribute on the interator",e);
+                throw new IOException("unable to get the next attribute on the interator", e);
             }
         }
     }

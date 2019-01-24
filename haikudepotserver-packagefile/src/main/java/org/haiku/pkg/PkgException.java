@@ -5,7 +5,7 @@
 
 package org.haiku.pkg;
 
-public class PkgException extends Exception {
+public class PkgException extends Error {
 
     public PkgException(String message) {
         super(message);

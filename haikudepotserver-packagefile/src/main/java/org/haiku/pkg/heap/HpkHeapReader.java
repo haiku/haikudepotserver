@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,19 +27,19 @@ import java.util.zip.Inflater;
 
 public class HpkHeapReader implements Closeable, HeapReader {
 
-    private HeapCompression compression;
+    private final HeapCompression compression;
 
-    private long heapOffset;
+    private final long heapOffset;
 
-    private long chunkSize;
+    private final long chunkSize;
 
-    private long compressedSize; // including the shorts for the chunks' compressed sizes
+    private final long compressedSize; // including the shorts for the chunks' compressed sizes
 
-    private long uncompressedSize; // excluding the shorts for the chunks' compressed sizes
+    private final long uncompressedSize; // excluding the shorts for the chunks' compressed sizes
 
     private LoadingCache<Integer,byte[]> heapChunkUncompressedCache;
 
-    private int[] heapChunkCompressedLengths = null;
+    private int[] heapChunkCompressedLengths;
 
     private RandomAccessFile randomAccessFile;
 
@@ -51,7 +51,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
             final long heapOffset,
             final long chunkSize,
             final long compressedSize,
-            final long uncompressedSize) throws HpkException {
+            final long uncompressedSize) {
 
         super();
 
@@ -60,7 +60,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
         Preconditions.checkState(heapOffset > 0 &&heapOffset < Integer.MAX_VALUE);
         Preconditions.checkState(chunkSize > 0 && chunkSize < Integer.MAX_VALUE);
         Preconditions.checkState(compressedSize >= 0 && compressedSize < Integer.MAX_VALUE);
-        Preconditions.checkState(uncompressedSize >= 0 && compressedSize < Integer.MAX_VALUE);
+        Preconditions.checkState(uncompressedSize >= 0 && uncompressedSize < Integer.MAX_VALUE);
 
         this.compression = compression;
         this.heapOffset = heapOffset;
@@ -89,11 +89,11 @@ public class HpkHeapReader implements Closeable, HeapReader {
                         }
                     });
         }
-        catch(Exception e) {
+        catch (Exception e) {
             close();
             throw new HpkException("unable to configure the hpk heap reader",e);
         }
-        catch(Throwable th) {
+        catch (Throwable th) {
             close();
             throw new RuntimeException("unable to configure the hkp heap reader",th);
         }
@@ -102,7 +102,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
     @Override
     public void close() {
-        if(null!=randomAccessFile) {
+        if (null != randomAccessFile) {
             try {
                 randomAccessFile.close();
             }
@@ -119,7 +119,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
     private int getHeapChunkCount() {
         int count = (int) (uncompressedSize / chunkSize);
 
-        if(0 != uncompressedSize % chunkSize) {
+        if (0 != uncompressedSize % chunkSize) {
             count++;
         }
 
@@ -127,7 +127,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
     }
 
     private int getHeapChunkUncompressedLength(int index) {
-        if(index < getHeapChunkCount()-1) {
+        if (index < getHeapChunkCount() - 1) {
             return (int) chunkSize;
         }
 
@@ -144,19 +144,19 @@ public class HpkHeapReader implements Closeable, HeapReader {
      * start of those shorts and read them in.</p>
      */
 
-    private void populateChunkCompressedLengths(int lengths[]) throws IOException, HpkException {
+    private void populateChunkCompressedLengths(int[] lengths) throws IOException {
         Preconditions.checkNotNull(lengths);
 
         int count = getHeapChunkCount();
         long totalCompressedLength = 0;
         randomAccessFile.seek(heapOffset + compressedSize - (2 * (count - 1)));
 
-        for(int i = 0; i < count - 1; i++) {
+        for (int i = 0; i < count - 1; i++) {
 
             // C++ code says that the stored size is length of chunk -1.
             lengths[i] = fileHelper.readUnsignedShortToInt(randomAccessFile) + 1;
 
-            if(lengths[i] > uncompressedSize) {
+            if (lengths[i] > uncompressedSize) {
                 throw new HpkException(
                         String.format("the chunk at %d is of size %d, but the uncompressed length of the chunks is %d",
                                 i,
@@ -170,7 +170,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
         // the last one will be missing will need to be derived
         lengths[count - 1] = (int) (compressedSize - ((2 * (count - 1)) + totalCompressedLength));
 
-        if(lengths[count - 1] < 0 || lengths[count - 1] > uncompressedSize) {
+        if (lengths[count - 1] < 0 || lengths[count - 1] > uncompressedSize) {
             throw new HpkException(
                     String.format(
                             "the derivation of the last chunk size of %d is out of bounds",
@@ -185,7 +185,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
     private long getHeapChunkAbsoluteFileOffset(int index) {
         long result = heapOffset; // heap comes after the header.
 
-        for(int i = 0; i < index; i++) {
+        for (int i = 0; i < index; i++) {
             result += getHeapChunkCompressedLength(i);
         }
 
@@ -197,14 +197,14 @@ public class HpkHeapReader implements Closeable, HeapReader {
      * filledup.</p>
      */
 
-    private void readFully(byte[] buffer) throws IOException, HpkException {
+    private void readFully(byte[] buffer) throws IOException {
         Preconditions.checkNotNull(buffer);
         int total = 0;
 
-        while(total < buffer.length) {
+        while (total < buffer.length) {
             int read = randomAccessFile.read(buffer,total,buffer.length - total);
 
-            if(-1 == read) {
+            if (-1 == read) {
                 throw new HpkException("unexpected end of file when reading a chunk");
             }
 
@@ -217,12 +217,12 @@ public class HpkHeapReader implements Closeable, HeapReader {
      * of the correct length for the uncompressed heap chunk size.</p>
      */
 
-    private void readHeapChunk(int index, byte[] buffer) throws IOException, HpkException {
+    private void readHeapChunk(int index, byte[] buffer) throws IOException {
 
         randomAccessFile.seek(getHeapChunkAbsoluteFileOffset(index));
         int chunkUncompressedLength = getHeapChunkUncompressedLength(index);
 
-        if(isHeapChunkCompressed(index) || HeapCompression.NONE == compression) {
+        if (isHeapChunkCompressed(index) || HeapCompression.NONE == compression) {
 
             switch(compression) {
                 case NONE:
@@ -239,19 +239,19 @@ public class HpkHeapReader implements Closeable, HeapReader {
                     try {
                         int read;
 
-                        if(chunkUncompressedLength != (read = inflater.inflate(buffer))) {
+                        if (chunkUncompressedLength != (read = inflater.inflate(buffer))) {
 
                             // the last chunk size uncompressed may be smaller than the chunk size,
                             // so don't throw an exception if this happens.
 
-                            if(index < getHeapChunkCount() - 1) {
+                            if (index < getHeapChunkCount() - 1) {
                                 String message = String.format("a compressed heap chunk inflated to %d bytes; was expecting %d",read,chunkUncompressedLength);
 
-                                if(inflater.needsInput()) {
+                                if (inflater.needsInput()) {
                                     message += "; needs input";
                                 }
 
-                                if(inflater.needsDictionary()) {
+                                if (inflater.needsDictionary()) {
                                     message += "; needs dictionary";
                                 }
 
@@ -259,11 +259,11 @@ public class HpkHeapReader implements Closeable, HeapReader {
                             }
                         }
 
-                        if(!inflater.finished()) {
+                        if (!inflater.finished()) {
                             throw new HpkException(String.format("incomplete inflation of input data while reading chunk %d",index));
                         }
                     }
-                    catch(DataFormatException dfe) {
+                    catch (DataFormatException dfe) {
                         throw new HpkException("unable to inflate (decompress) heap chunk "+index,dfe);
                     }
                 }
@@ -276,7 +276,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
         else {
             int read;
 
-            if(chunkUncompressedLength != (read = randomAccessFile.read(buffer, 0, chunkUncompressedLength))) {
+            if (chunkUncompressedLength != (read = randomAccessFile.read(buffer, 0, chunkUncompressedLength))) {
                 throw new HpkException(String.format("problem reading chunk %d of heap; only read %d of %d bytes",index,read,buffer.length));
             }
         }
@@ -311,7 +311,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
         int chunkLength;
         int chunkUncompressedLength = getHeapChunkUncompressedLength(chunkIndex);
 
-        if(chunkOffset + coordinates.getLength() > chunkUncompressedLength) {
+        if (chunkOffset + coordinates.getLength() > chunkUncompressedLength) {
             chunkLength = (chunkUncompressedLength - chunkOffset);
         }
         else {
@@ -327,7 +327,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
         // if we need to get some more data from the next chunk then call again.
         // TODO - recursive approach may not be too good when more data is involved; probably ok for hpkr though.
 
-        if(chunkLength < coordinates.getLength()) {
+        if (chunkLength < coordinates.getLength()) {
             readHeap(
                     buffer,
                     bufferOffset + chunkLength,
