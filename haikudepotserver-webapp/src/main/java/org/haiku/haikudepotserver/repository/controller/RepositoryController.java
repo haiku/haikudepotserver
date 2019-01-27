@@ -77,7 +77,6 @@ public class RepositoryController extends AbstractController {
     // TODO; observe the natural language code
 
     @RequestMapping(value = {
-            "/all_{naturalLanguageCode}.json.gz", // deprecated
             "/all-{naturalLanguageCode}.json.gz"
     }, method = RequestMethod.GET)
     public void getAllAsJson(
@@ -119,7 +118,7 @@ public class RepositoryController extends AbstractController {
         ObjectContext context = serverRuntime.newContext();
         Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, repositoryCode);
 
-        if(!repositoryOptional.isPresent()) {
+        if (!repositoryOptional.isPresent()) {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
         }
 
@@ -162,7 +161,7 @@ public class RepositoryController extends AbstractController {
         ObjectContext context = serverRuntime.newContext();
         Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, repositoryCode);
 
-        if(!repositoryOptional.isPresent()) {
+        if (!repositoryOptional.isPresent()) {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
         }
 

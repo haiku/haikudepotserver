@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.model.Pagination;
@@ -97,11 +98,11 @@ public class HomeController {
 
         ObjectContext context = serverRuntime.newContext();
 
-        if(Strings.isNullOrEmpty(architectureCode)) {
+        if (Strings.isNullOrEmpty(architectureCode)) {
             architectureCode = defaultArchitectureCode;
         }
 
-        if(null==repositoryCodes) {
+        if (null == repositoryCodes) {
             repositoryCodes = Repository.CODE_DEFAULT;
         }
 
@@ -115,46 +116,28 @@ public class HomeController {
         searchSpecification.setExpression(searchExpression);
         searchSpecification.setExpressionType(AbstractSearchSpecification.ExpressionType.CONTAINS);
 
-        Optional<Repository> repositoryOptional = Optional.empty();
+        Repository repository = StringUtils.isBlank(repositoryCodes) ? null : Repository.getByCode(context, repositoryCodes);
+        searchSpecification.setRepositories(null == repository ? Repository.getAllActive(context) : Collections.singletonList(repository));
 
-        if(0!=repositoryCodes.length()) {
-            repositoryOptional = Repository.tryGetByCode(context, repositoryCodes);
-
-            if (!repositoryOptional.isPresent()) {
-                throw new IllegalStateException("unable to obtain the repository; " + repositoryCodes);
-            }
-        }
-
-        if(repositoryOptional.isPresent()) {
-            searchSpecification.setRepositories(Collections.singletonList(repositoryOptional.get()));
-        }
-        else {
-            searchSpecification.setRepositories(Repository.getAllActive(context));
-        }
-
-        Optional<Architecture> architectureOptional = Architecture.tryGetByCode(context, architectureCode);
-
-        if(!architectureOptional.isPresent()) {
-            throw new IllegalStateException("unable to obtain the architecture; " + architectureCode);
-        }
+        Architecture architecture = Architecture.getByCode(context, architectureCode);
 
         searchSpecification.setArchitectures(
                 ImmutableList.of(
-                        architectureOptional.get(),
+                        architecture,
                         Architecture.getByCode(context, Architecture.CODE_ANY)
                 )
         );
 
         Optional<PkgCategory> pkgCategoryOptional = Optional.empty();
 
-        if(null!=pkgCategoryCode) {
+        if (null != pkgCategoryCode) {
             pkgCategoryOptional = PkgCategory.getByCode(context, pkgCategoryCode);
         }
 
         NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest);
         searchSpecification.setNaturalLanguage(naturalLanguage);
 
-        switch(null==viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {
+        switch (null == viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {
 
             case FEATURED:
                 searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.PROMINENCE);
@@ -162,13 +145,9 @@ public class HomeController {
 
             case CATEGORIES:
                 searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.NAME);
-
-                if(!pkgCategoryOptional.isPresent()) {
-                    throw new IllegalStateException("the pkg category code was unable to be found; " + pkgCategoryCode);
-                }
-
-                searchSpecification.setPkgCategory(pkgCategoryOptional.get());
-
+                searchSpecification.setPkgCategory(pkgCategoryOptional.orElseThrow(() ->
+                        new IllegalStateException(
+                                "the pkg category code was unable to be found; " + pkgCategoryCode)));
                 break;
 
             case ALL:
@@ -214,12 +193,12 @@ public class HomeController {
                         .filter(a -> !excludedArchitectureCode.contains(a.getCode()))
                         .collect(Collectors.toList()));
 
-        data.setArchitecture(architectureOptional.get());
-        data.setRepository(repositoryOptional.orElse(null));
+        data.setArchitecture(architecture);
+        data.setRepository(repository);
 
         data.setAllRepositories(Repository.getAllActive(context));
         data.setAllPkgCategories(PkgCategory.getAll(context));
-        data.setPkgCategory(pkgCategoryOptional.isPresent() ? pkgCategoryOptional.get() : PkgCategory.getAll(context).get(0));
+        data.setPkgCategory(pkgCategoryOptional.orElseGet(() -> PkgCategory.getAll(context).get(0)));
 
         data.setAllViewCriteriaTypes(ImmutableList.copyOf(ViewCriteriaType.values()));
         data.setViewCriteriaType(viewCriteriaType);
@@ -227,7 +206,7 @@ public class HomeController {
         data.setSearchExpression(searchExpression);
         data.setPkgVersions(pkgVersions);
 
-        if(0!=totalPkgVersions.intValue()) {
+        if (0 != totalPkgVersions.intValue()) {
             data.setPagination(new Pagination(totalPkgVersions.intValue(), offset, PAGESIZE));
         }
 

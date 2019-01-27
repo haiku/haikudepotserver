@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,7 +35,7 @@ public class PkgVersionLinkTag extends RequestContextAwareTag {
     }
 
     private String emptyToHyphen(String part) {
-        if(Strings.isNullOrEmpty(part)) {
+        if (Strings.isNullOrEmpty(part)) {
             return "-";
         }
 
@@ -63,7 +63,7 @@ public class PkgVersionLinkTag extends RequestContextAwareTag {
 
         String naturalLanguageCode = pageContext.getRequest().getParameter(WebConstants.KEY_NATURALLANGUAGECODE);
 
-        if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
+        if (!Strings.isNullOrEmpty(naturalLanguageCode)) {
             builder.queryParam(
                     WebConstants.KEY_NATURALLANGUAGECODE,
                     naturalLanguageCode);
@@ -83,7 +83,7 @@ public class PkgVersionLinkTag extends RequestContextAwareTag {
         try {
             jspWriter.print("</a>");
         }
-        catch(IOException ioe) {
+        catch (IOException ioe) {
             throw new JspException("unable to write the end of the pkg version link", ioe);
         }
 

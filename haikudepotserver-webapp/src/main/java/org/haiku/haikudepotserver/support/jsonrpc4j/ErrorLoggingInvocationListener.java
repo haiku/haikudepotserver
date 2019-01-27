@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ public class ErrorLoggingInvocationListener implements InvocationListener {
     public void didInvoke(Method method, List<JsonNode> arguments, Object result, Throwable t, long duration) {
         Preconditions.checkArgument(null!=method, "a method is required to report an invocation");
 
-        if(null!=t) {
+        if (null != t) {
             if (InvocationTargetException.class.isInstance(t)) {
                 //noinspection ThrowableResultOfMethodCallIgnored
                 t = InvocationTargetException.class.cast(t).getTargetException();
@@ -64,7 +64,7 @@ public class ErrorLoggingInvocationListener implements InvocationListener {
                 msg.append("; ");
                 msg.append(t.getClass().getSimpleName());
 
-                if(!Strings.isNullOrEmpty(tMessage)) {
+                if (!Strings.isNullOrEmpty(tMessage)) {
                     msg.append(" -- ");
                     msg.append(tMessage);
                 }

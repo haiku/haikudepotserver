@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -65,7 +65,7 @@ public class PkgDownloadController {
     }
 
     private String hyphenToNull(String part) {
-        if(null!=part && !part.equals("-")) {
+        if (null!=part && !part.equals("-")) {
             return part;
         }
 

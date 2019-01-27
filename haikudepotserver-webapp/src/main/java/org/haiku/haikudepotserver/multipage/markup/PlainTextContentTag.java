@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,12 +34,9 @@ public class PlainTextContentTag extends RequestContextAwareTag {
         if (!Strings.isNullOrEmpty(value)) {
 
             pageContext.getOut().print(
-                    String.join(
-                            "<br/>\n",
-                            Arrays.stream(value.split("[\n\r]"))
-                                    .map(s -> HtmlEscapers.htmlEscaper().escape(s))
-                                    .collect(Collectors.toList())
-                    )
+                    Arrays.stream(value.split("[\n\r]"))
+                            .map(s -> HtmlEscapers.htmlEscaper().escape(s))
+                            .collect(Collectors.joining("<br/>\n"))
             );
 
         }

@@ -53,7 +53,7 @@ public class JobDataWriteListener implements WriteListener {
     public void onWritePossible() throws IOException {
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(jobDataGuid);
 
-        if(!jobDataWithByteSourceOptional.isPresent()) {
+        if (!jobDataWithByteSourceOptional.isPresent()) {
             LOGGER.error("unable to find the job data for; " + jobDataGuid);
             async.complete();
         } else {

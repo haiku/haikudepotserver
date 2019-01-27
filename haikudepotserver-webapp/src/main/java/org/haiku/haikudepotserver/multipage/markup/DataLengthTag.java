@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -37,15 +37,15 @@ public class DataLengthTag extends RequestContextAwareTag {
     @Override
     protected int doStartTagInternal() throws Exception {
 
-        if(null!=length) {
+        if (null != length) {
 
             JspWriter writer = pageContext.getOut();
 
-            if(length < 0) {
+            if (length < 0) {
                 writer.write("0");
             }
             else {
-                if(length < 1024) {
+                if (length < 1024) {
                     outputValueAndUnit(writer, length, "bytes");
                 }
                 else {

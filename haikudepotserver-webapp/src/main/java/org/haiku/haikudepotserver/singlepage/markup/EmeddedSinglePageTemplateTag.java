@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -41,7 +41,7 @@ public class EmeddedSinglePageTemplateTag extends RequestContextAwareTag {
 
         ServletContext servletContext = getRequestContext().getWebApplicationContext().getServletContext();
 
-        try(InputStream inputStream = servletContext.getResourceAsStream(template)) {
+        try (InputStream inputStream = servletContext.getResourceAsStream(template)) {
             String templateString = CharStreams.toString(new InputStreamReader(inputStream,Charsets.UTF_8));
             tagWriter.appendValue(templateString);
         }

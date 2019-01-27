@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,13 +32,13 @@ public class RemoteLogCaptureServlet extends HttpServlet {
 
     private String extractString(Reader reader, int limit) throws IOException {
         StringWriter writer = new StringWriter();
-        char buffer[] = new char[256];
+        char[] buffer = new char[256];
         int len;
 
-        while(-1 != (len = reader.read(buffer))) {
+        while (-1 != (len = reader.read(buffer))) {
             int lenRemaining = limit - writer.getBuffer().length();
 
-            if(lenRemaining > 0) {
+            if (lenRemaining > 0) {
                 writer.write(buffer,0,Math.min(len, lenRemaining));
             }
         }

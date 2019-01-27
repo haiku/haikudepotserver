@@ -40,7 +40,7 @@ public class ViewPkgController {
     }
 
     private String hyphenToNull(String part) {
-        if(null!=part && !part.equals("-")) {
+        if (null != part && !part.equals("-")) {
             return part;
         }
 

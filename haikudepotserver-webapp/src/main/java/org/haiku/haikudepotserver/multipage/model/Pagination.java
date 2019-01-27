@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -84,7 +84,9 @@ public class Pagination {
 
     private int[] linearSeries(int count) {
         int[] result = new int[count];
-        for(int i=0;i<count;i++) { result[i] = i; }
+        for (int i = 0; i < count; i++) {
+            result[i] = i;
+        }
         return result;
     }
 
@@ -131,13 +133,13 @@ public class Pagination {
 
         int pages = getPages();
 
-        if(1==pages) {
+        if (1 == pages) {
             return new int[] { 0 };
         }
 
         int page = getPage(); // current page.
 
-        if(pages <= count) {
+        if (pages <= count) {
             return linearSeries(pages);
         }
 
@@ -147,9 +149,9 @@ public class Pagination {
         // a debugging aid to see any bad values easily.
         Arrays.fill(result,-10);
 
-        if(page < middleI) {
+        if (page < middleI) {
 
-            for(int i=0;i<=page;i++) {
+            for(int i = 0; i <= page; i++) {
                 result[i] = i;
             }
 
@@ -160,9 +162,9 @@ public class Pagination {
 
             int remainder = pages - page;
 
-            if(remainder <= (result.length - middleI) - 1) {
+            if (remainder <= (result.length - middleI) - 1) {
 
-                for(int i=0;i<remainder;i++) {
+                for (int i = 0; i < remainder; i++) {
                     result[result.length - (i + 1)] = (pages - 1) - i;
                 }
 

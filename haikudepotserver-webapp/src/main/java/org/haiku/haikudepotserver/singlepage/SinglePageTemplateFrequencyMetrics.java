@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,7 +32,7 @@ public class SinglePageTemplateFrequencyMetrics {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(template), "a template name must be provided");
         AtomicLong atomicLong = templateCounter.get(template);
 
-        if(null==atomicLong) {
+        if (null == atomicLong) {
             atomicLong = new AtomicLong();
             templateCounter.put(template, atomicLong);
         }
@@ -42,7 +42,7 @@ public class SinglePageTemplateFrequencyMetrics {
     }
 
     private List<String> getSortedTemplates() {
-        if(null==sortedTemplates) {
+        if (null == sortedTemplates) {
             sortedTemplates = templateCounter
                     .keySet()
                     .stream()
@@ -71,7 +71,7 @@ public class SinglePageTemplateFrequencyMetrics {
         Preconditions.checkArgument(limit > 0, "the limit must be supplied");
         List<String> templates = getSortedTemplates();
 
-        if(templates.size() > limit) {
+        if (templates.size() > limit) {
             return templates.subList(0, limit);
         }
 

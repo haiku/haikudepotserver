@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -75,7 +75,7 @@ public class FallbackController {
     }
 
     private String termDebug(String term) {
-        if(term.length() > 64) {
+        if (term.length() > 64) {
             return term.substring(0,64) + "...";
         }
 
@@ -116,11 +116,11 @@ public class FallbackController {
         response.setContentType(com.google.common.net.MediaType.ICO.toString());
 
         try (InputStream inputStream = servletContext.getResourceAsStream("/img/favicon.ico")) {
-            if(null==inputStream) {
+            if (null == inputStream) {
                 throw new IllegalStateException("unable to find the favicon resource");
             }
 
-            if(method != RequestMethod.HEAD) {
+            if (method != RequestMethod.HEAD) {
                 ByteStreams.copy(inputStream, response.getOutputStream());
             }
         }
@@ -139,13 +139,13 @@ public class FallbackController {
     }
 
     private Optional<PkgVersion> tryGetPkgVersion(ObjectContext context, String term) {
-        if(!Strings.isNullOrEmpty(term)) {
+        if (!Strings.isNullOrEmpty(term)) {
             Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, term);
 
-            if(pkgOptional.isPresent()) {
+            if (pkgOptional.isPresent()) {
                 List<Repository> repositories = repositoryService.getRepositoriesForPkg(context, pkgOptional.get());
 
-                if(!repositories.isEmpty()) {
+                if (!repositories.isEmpty()) {
                     return pkgService.getLatestPkgVersionForPkg(
                             context,
                             pkgOptional.get(),
@@ -165,7 +165,7 @@ public class FallbackController {
             @PathVariable(value = KEY_TERM) String term)
             throws IOException {
 
-        switch(getFallbackType(term)) {
+        switch (getFallbackType(term)) {
 
             case APPLETOUCH:
                 LOGGER.debug("unhandled apple touch icon -> 404; {}", term);

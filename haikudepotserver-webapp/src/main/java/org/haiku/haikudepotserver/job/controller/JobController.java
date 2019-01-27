@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -178,7 +178,7 @@ public class JobController extends AbstractController {
 
         int length = request.getContentLength();
 
-        if(-1 != length && length > MAX_SUPPLY_DATA_LENGTH) {
+        if(-1 == length || length > MAX_SUPPLY_DATA_LENGTH) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
 

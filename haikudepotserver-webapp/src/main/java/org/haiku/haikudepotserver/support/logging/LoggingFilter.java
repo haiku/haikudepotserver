@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,7 +16,6 @@ import org.haiku.haikudepotserver.security.AuthenticationHelper;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -73,27 +72,27 @@ public class LoggingFilter implements Filter {
 
     private Optional<Agent> browserDetect(String userAgent) {
 
-        if(!Strings.isNullOrEmpty(userAgent)) {
+        if (!Strings.isNullOrEmpty(userAgent)) {
 
-            if(userAgent.startsWith("HaikuDepot/")) {
+            if (userAgent.startsWith("HaikuDepot/")) {
                 return Optional.of(Agent.HAIKUDEPOT);
             }
 
-            if(userAgent.contains("Firefox/")) {
+            if (userAgent.contains("Firefox/")) {
                 return Optional.of(Agent.FIREFOX);
             }
 
-            if(userAgent.contains("WebPositive/")) {
+            if (userAgent.contains("WebPositive/")) {
                 return Optional.of(Agent.WEBPOSITIVE);
             }
 
-            if(userAgent.contains("Trident/")) {
+            if (userAgent.contains("Trident/")) {
                 return Optional.of(Agent.MSIE);
             }
 
-            if(userAgent.contains("Safari/")) {
-                if(userAgent.contains("Chrome/")) {
-                    if(userAgent.contains("OPR/")) {
+            if (userAgent.contains("Safari/")) {
+                if (userAgent.contains("Chrome/")) {
+                    if (userAgent.contains("OPR/")) {
                         return Optional.of(Agent.OPERA);
                     }
 
@@ -103,7 +102,7 @@ public class LoggingFilter implements Filter {
                 return Optional.of(Agent.SAFARI);
             }
 
-            if(userAgent.equals(USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT)) {
+            if (userAgent.equals(USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT)) {
                 return Optional.of(Agent.HAIKUDEPOT);
             }
 
@@ -133,16 +132,16 @@ public class LoggingFilter implements Filter {
                 MDC.put(KEY_AUTHENTICATEDUSERNICKNAME, user.getNickname());
             }
 
-            if(HttpServletRequest.class.isAssignableFrom(request.getClass())) {
+            if (HttpServletRequest.class.isAssignableFrom(request.getClass())) {
                 HttpServletRequest hRequest = (HttpServletRequest) request;
                 String userAgent = hRequest.getHeader(HttpHeaders.USER_AGENT);
 
-                if(!Strings.isNullOrEmpty(userAgent)) {
+                if (!Strings.isNullOrEmpty(userAgent)) {
                     MDC.put(KEY_USERAGENT, userAgent);
 
                     Optional<Agent> agentOptional = browserDetect(userAgent);
 
-                    if(agentOptional.isPresent()) {
+                    if (agentOptional.isPresent()) {
                         MDC.put(KEY_USERAGENTCODE, agentOptional.get().getCode());
                     }
                 }
