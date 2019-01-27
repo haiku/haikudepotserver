@@ -20,11 +20,11 @@ angular.module('haikudepotserver').controller(
             $scope.canEdit = undefined;
             $scope.toRemoveUserRating = false;
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return undefined === $scope.userRating || amUpdating;
             };
 
-            $scope.hasRating = function() {
+            $scope.hasRating = function () {
                 return $scope.userRating &&
                     angular.isNumber($scope.userRating.rating);
             };
@@ -53,10 +53,10 @@ angular.module('haikudepotserver').controller(
                         permissionCode: 'USERRATING_EDIT'
                     }
                 ]).then(
-                    function(flag) {
+                    function (flag) {
                         $scope.canEdit = flag;
                     },
-                    function() {
+                    function () {
                         throw Error('unable to establish if the user is able to edit the user rating');
                     }
                 );
@@ -68,13 +68,13 @@ angular.module('haikudepotserver').controller(
                     "getUserRating",
                     [{ code : $routeParams.code }]
                 ).then(
-                    function(userRatingData) {
+                    function (userRatingData) {
                         $scope.userRating = userRatingData;
                         refreshBreadcrumbItems();
                         refreshAuthorization();
                         $log.info('fetched user rating; '+userRatingData.code);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -85,31 +85,31 @@ angular.module('haikudepotserver').controller(
             // --------------------------------
             // ACTIONS
 
-            $scope.canDeactivate = function() {
+            $scope.canDeactivate = function () {
                 return $scope.userRating && $scope.userRating.active;
             };
 
-            $scope.canReactivate = function() {
+            $scope.canReactivate = function () {
                 return $scope.userRating && !$scope.userRating.active;
             };
 
-            $scope.goReactivate = function() {
+            $scope.goReactivate = function () {
                 setActive(true);
             };
 
-            $scope.goDeactivate = function() {
+            $scope.goDeactivate = function () {
                 setActive(false);
             };
 
-            $scope.goRemove = function() {
+            $scope.goRemove = function () {
                 $scope.toRemoveUserRating = true;
             };
 
-            $scope.goCancelRemove = function() {
+            $scope.goCancelRemove = function () {
                 $scope.toRemoveUserRating = false;
             };
 
-            $scope.goConfirmRemove = function() {
+            $scope.goConfirmRemove = function () {
 
                 amUpdating = true;
 
@@ -118,13 +118,13 @@ angular.module('haikudepotserver').controller(
                     "removeUserRating",
                     [{code : $scope.userRating.code}]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('did remove the user rating');
                         amUpdating = false;
                         $scope.toRemoveUserRating = false;
                         breadcrumbs.popAndNavigate();
                     },
-                    function(err) {
+                    function (err) {
                         $log.info('an error arose removing the user rating');
                         errorHandling.handleJsonRpcError(err);
                     }
@@ -148,12 +148,12 @@ angular.module('haikudepotserver').controller(
                         active : !!flag
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('did update the active flag on the user rating to; ' + flag);
                         $scope.userRating.active = flag;
                         amUpdating = false;
                     },
-                    function(err) {
+                    function (err) {
                         $log.info('an error arose updating the active flag on the user rating');
                         errorHandling.handleJsonRpcError(err);
                     }

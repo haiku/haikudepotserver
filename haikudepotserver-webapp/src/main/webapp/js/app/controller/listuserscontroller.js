@@ -39,18 +39,18 @@ angular.module('haikudepotserver').controller(
 
             refetchUsersAtFirstPage();
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return amFetchingUsers;
             };
 
-            $scope.goShowInactive = function() {
+            $scope.goShowInactive = function () {
                 $scope.amShowingInactive = true;
                 refetchUsersAtFirstPage();
             };
 
             // ---- LIST MANAGEMENT
 
-            $scope.goSearch = function() {
+            $scope.goSearch = function () {
                 clearUsers();
                 refetchUsersAtFirstPage();
             };
@@ -75,13 +75,13 @@ angular.module('haikudepotserver').controller(
                         limit : $scope.users.max
                     }]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.users.items = result.items;
                         $scope.users.total = result.total;
                         $log.info('found '+result.items.length+' users');
                         amFetchingUsers = false;
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );

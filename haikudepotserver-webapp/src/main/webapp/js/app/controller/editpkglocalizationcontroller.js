@@ -19,7 +19,7 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location','$routeParams',
         'jsonRpc','constants','pkgIcon','errorHandling',
         'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg','messageSource',
-        function(
+        function (
             $scope,$log,$location,$routeParams,
             jsonRpc,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,userState,referenceData,pkg,messageSource) {
@@ -34,22 +34,22 @@ angular.module('haikudepotserver').controller(
             $scope.selectedAddableNaturalLanguage = undefined;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.pkg || $scope.amSaving || undefined == $scope.translations;
+                return undefined === $scope.pkg || $scope.amSaving || undefined === $scope.translations;
             };
 
             $scope.isTranslationSelected = function(translation) {
-                return $scope.selectedTranslation.naturalLanguage.code == translation.naturalLanguage.code;
+                return $scope.selectedTranslation.naturalLanguage.code === translation.naturalLanguage.code;
             };
 
             function findOriginalTranslation(naturalLanguageCode) {
                 var result = _.find(
                     $scope.originalTranslations,
-                    function(t) {
-                        return t.naturalLanguage.code == naturalLanguageCode;
+                    function (t) {
+                        return t.naturalLanguage.code === naturalLanguageCode;
                     }
                 );
 
-                if(!result) {
+                if (!result) {
                     throw Error('was not able to find the original translation');
                 }
 
@@ -78,16 +78,16 @@ angular.module('haikudepotserver').controller(
                 return classes;
             };
 
-            $scope.goShowHelp = function() {
+            $scope.goShowHelp = function () {
                 $scope.showHelp = true;
             };
 
-            $scope.isSubordinate = function() {
+            $scope.isSubordinate = function () {
                 return $scope.pkg && pkg.isSubordinate($scope.pkg.name);
             };
 
-            $scope.goChooseTranslation = function(translation) {
-                if(!translation) {
+            $scope.goChooseTranslation = function (translation) {
+                if (!translation) {
                     throw Error('the translation must be provided to select');
                 }
 
@@ -108,17 +108,17 @@ angular.module('haikudepotserver').controller(
 
             function setupTranslations() {
                 referenceData.naturalLanguages().then(
-                    function(naturalLanguageData) {
+                    function (naturalLanguageData) {
 
                         // bring in titles for the natural languages.
 
                         function updateNaturalLanguageOptionsTitles() {
-                            _.each(naturalLanguageData, function(nl) {
+                            _.each(naturalLanguageData, function (nl) {
                                 messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
-                                    function(value) {
+                                    function (value) {
                                         nl.title = value;
                                     },
-                                    function() {
+                                    function () {
                                         $log.error('unable to get the localized name for the natural language \''+nl.code+'\'');
                                     }
                                 );
@@ -136,14 +136,14 @@ angular.module('haikudepotserver').controller(
                                 pkgName: $routeParams.name,
                                 naturalLanguageCodes : _.map(
                                     naturalLanguageData,
-                                    function(d) {
+                                    function (d) {
                                         return d.code;
                                     }
                                 )
                             }]
                         )
                             .then(
-                            function(pkgLocalizationsData) {
+                            function (pkgLocalizationsData) {
 
                                 function hasData(translation) {
                                     return (translation.title && translation.title.length) ||
@@ -174,7 +174,7 @@ angular.module('haikudepotserver').controller(
                                             };
                                         }
                                     ),
-                                    function(translation) {
+                                    function (translation) {
                                         return translation.naturalLanguage.hasData ||
                                             translation.naturalLanguage.hasLocalizationMessages ||
                                             hasData(translation);
@@ -187,22 +187,22 @@ angular.module('haikudepotserver').controller(
                                 // is a stored value for the current language.
 
                                 $scope.selectedTranslation = _.find($scope.translations, function(t) {
-                                   return hasData(t) && t.naturalLanguage.code == userState.naturalLanguageCode();
+                                   return hasData(t) && t.naturalLanguage.code === userState.naturalLanguageCode();
                                 });
 
-                                if(!$scope.selectedTranslation) {
+                                if (!$scope.selectedTranslation) {
                                     $scope.selectedTranslation = _.find($scope.translations, function(t) {
                                         return hasData(t);
                                     });
                                 }
 
-                                if(!$scope.selectedTranslation) {
+                                if (!$scope.selectedTranslation) {
                                     $scope.selectedTranslation = _.find($scope.translations, function(t) {
-                                        return t.naturalLanguage.code == userState.naturalLanguageCode();
+                                        return t.naturalLanguage.code === userState.naturalLanguageCode();
                                     });
                                 }
 
-                                if(!$scope.selectedTranslation) {
+                                if (!$scope.selectedTranslation) {
                                     $scope.selectedTranslation = $scope.translations[0];
                                 }
 
@@ -214,16 +214,16 @@ angular.module('haikudepotserver').controller(
                                 $scope.addableNaturalLanguages = _.filter(
                                     naturalLanguageData,
                                     function (d) {
-                                        return d.code != constants.NATURALLANGUAGECODE_ENGLISH && !_.find(
+                                        return d.code !== constants.NATURALLANGUAGECODE_ENGLISH && !_.find(
                                                 $scope.translations,
                                                 function (t) {
-                                                    return d.code == t.naturalLanguage.code;
+                                                    return d.code === t.naturalLanguage.code;
                                                 }
                                             );
                                     }
                                 );
 
-                                if (0 != $scope.addableNaturalLanguages.length) {
+                                if (0 !== $scope.addableNaturalLanguages.length) {
                                     $scope.selectedAddableNaturalLanguage = $scope.addableNaturalLanguages[0];
                                 }
 
@@ -244,12 +244,12 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkg() {
                 pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
-                    function(result) {
+                    function (result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -299,7 +299,7 @@ angular.module('haikudepotserver').controller(
              * </p>
              */
 
-            $scope.goAddSelectedAddableNaturalLanguage = function() {
+            $scope.goAddSelectedAddableNaturalLanguage = function () {
 
                 var translation = {
                     naturalLanguage: $scope.selectedAddableNaturalLanguage,
@@ -327,7 +327,7 @@ angular.module('haikudepotserver').controller(
              * problems with the translations.</p>
              */
 
-            $scope.canSave = function() {
+            $scope.canSave = function () {
                 return !!_.findWhere(
                         $scope.translations,
                         { wasEdited : true }
@@ -340,7 +340,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.saveEditedLocalizations = function() {
 
-                if(!$scope.canSave()) {
+                if (!$scope.canSave()) {
                     throw Error('not possible to save edited localizations');
                 }
 
@@ -354,9 +354,9 @@ angular.module('haikudepotserver').controller(
                         pkgLocalizations: _.map(
                             _.filter(
                                 $scope.translations,
-                                function(t) { return t.wasEdited; }
+                                function (t) { return t.wasEdited; }
                             ),
-                            function(t) {
+                            function (t) {
                                 return {
                                     naturalLanguageCode : t.naturalLanguage.code,
                                     title : t.title,
@@ -367,11 +367,11 @@ angular.module('haikudepotserver').controller(
                         )
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('updated localization on '+$routeParams.name+' pkg');
                         breadcrumbs.popAndNavigate();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -392,8 +392,8 @@ angular.module('haikudepotserver').controller(
 
             $scope.$watch(
                 'selectedTranslation',
-                function(newValue, oldValue) {
-                    if(null!=oldValue) {
+                function (newValue, oldValue) {
+                    if (null !== oldValue) {
 
                         function compareLocalizationElements(o1,o2) {
 
@@ -401,12 +401,12 @@ angular.module('haikudepotserver').controller(
                                 return !s ? '' : s;
                             }
 
-                            return  norm(o1.title) == norm(o2.title) &&
-                                norm(o1.summary) == norm(o2.summary) &&
-                                norm(o1.description) == norm(o2.description);
+                            return  norm(o1.title) === norm(o2.title) &&
+                                norm(o1.summary) === norm(o2.summary) &&
+                                norm(o1.description) === norm(o2.description);
                         }
 
-                        if(oldValue.naturalLanguage.code == newValue.naturalLanguage.code &&
+                        if (oldValue.naturalLanguage.code === newValue.naturalLanguage.code &&
                             !compareLocalizationElements(oldValue,newValue)) {
 
                             // quick check to see if the new values equal the original values.

@@ -19,7 +19,7 @@ angular.module('haikudepotserver').controller(
 
             breadcrumbs.mergeCompleteStack([
                 breadcrumbFactory.createHome(),
-                breadcrumbFactory.createReports(),
+                breadcrumbFactory.createReports()
             ]);
 
             /**
@@ -34,17 +34,17 @@ angular.module('haikudepotserver').controller(
                 function notifyRejection() {
                     $scope.didReject = true;
 
-                    if($scope.didRejectTimeout) {
+                    if ($scope.didRejectTimeout) {
                         $timeout.cancel($scope.didRejectTimeout);
                     }
 
-                    $scope.didRejectTimeout = $timeout(function() {
+                    $scope.didRejectTimeout = $timeout(function () {
                         $scope.didReject = false;
                         $scope.didRejectTimeout = undefined;
                     }, 3000);
                 }
 
-                if(!guid || !guid.length) {
+                if (!guid || !guid.length) {
                     notifyRejection();
                 }
                 else {
@@ -64,72 +64,72 @@ angular.module('haikudepotserver').controller(
                     methodName,
                     [{}]
                 ).then(
-                    function(data) {
+                    function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
 
-            $scope.goPkgVersionLocalizationCoverageExportSpreadsheet = function() {
+            $scope.goPkgVersionLocalizationCoverageExportSpreadsheet = function () {
                 goBasicPkgReport('queuePkgVersionLocalizationCoverageExportSpreadsheetJob');
             };
 
-            $scope.goPkgLocalizationCoverageExportSpreadsheet = function() {
+            $scope.goPkgLocalizationCoverageExportSpreadsheet = function () {
                 goBasicPkgReport('queuePkgLocalizationCoverageExportSpreadsheetJob');
             };
 
-            $scope.goPkgCategoryCoverageExportSpreadsheet = function() {
+            $scope.goPkgCategoryCoverageExportSpreadsheet = function () {
                 goBasicPkgReport('queuePkgCategoryCoverageExportSpreadsheetJob');
             };
 
-            $scope.goPkgProminenceAndUserRatingSpreadsheetReport = function() {
+            $scope.goPkgProminenceAndUserRatingSpreadsheetReport = function () {
                 goBasicPkgReport('queuePkgProminenceAndUserRatingSpreadsheetJob');
             };
 
-            $scope.goPkgIconSpreadsheetReport = function() {
+            $scope.goPkgIconSpreadsheetReport = function () {
                 goBasicPkgReport('queuePkgIconSpreadsheetJob');
             };
 
-            $scope.goPkgScreenshotSpreadsheetReport = function() {
+            $scope.goPkgScreenshotSpreadsheetReport = function () {
                 goBasicPkgReport('queuePkgScreenshotSpreadsheetJob');
             };
 
-            $scope.goPkgIconExportArchive = function() {
+            $scope.goPkgIconExportArchive = function () {
                 goBasicPkgReport('queuePkgIconExportArchiveJob');
             };
 
-            $scope.goPkgScreenshotExportArchive = function() {
+            $scope.goPkgScreenshotExportArchive = function () {
                 goBasicPkgReport('queuePkgScreenshotExportArchiveJob');
             };
 
-            $scope.goAuthorizationRulesSpreadsheet= function() {
+            $scope.goAuthorizationRulesSpreadsheet= function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_AUTHORIZATION_JOB,
                     'queueAuthorizationRulesSpreadsheet',
                     [{}]
                 ).then(
-                    function(data) {
+                    function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
             };
 
-            $scope.goUserRatingSpreadsheetReportAll = function() {
+            $scope.goUserRatingSpreadsheetReportAll = function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_USERRATING_JOB,
                     'queueUserRatingSpreadsheetJob',
                     [{}] // no spec; get everything!
                 ).then(
-                    function(data) {
+                    function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );

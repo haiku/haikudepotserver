@@ -20,7 +20,7 @@ angular.module('haikudepotserver').controller(
             var amSaving = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.workingUser || amSaving;
+                return undefined === $scope.workingUser || amSaving;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
@@ -43,7 +43,7 @@ angular.module('haikudepotserver').controller(
                         nickname : $routeParams.nickname
                     }]
                 ).then(
-                    function(fetchedUser) {
+                    function (fetchedUser) {
 
                         $log.info('fetched user; '+fetchedUser.nickname);
 
@@ -58,7 +58,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
 
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -68,7 +68,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goSave = function() {
 
-                if($scope.editUserForm.$invalid) {
+                if ($scope.editUserForm.$invalid) {
                     throw Error('expected the save of a user to only to be possible if the form is valid');
                 }
 
@@ -84,21 +84,21 @@ angular.module('haikudepotserver').controller(
                         naturalLanguageCode : $scope.workingUser.naturalLanguageCode
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('did update user; '+$scope.workingUser.nickname);
 
                         // if the currently authenticated user is the one that has just been edited then we should
                         // also update the current language.
 
-                        if(userState.user().nickname == $scope.workingUser.nickname) {
+                        if (userState.user().nickname === $scope.workingUser.nickname) {
                             userState.naturalLanguageCode($scope.workingUser.naturalLanguageCode);
                         }
 
                         breadcrumbs.popAndNavigate();
                     },
-                    function(err) {
+                    function (err) {
 
-                        switch(err.code) {
+                        switch (err.code) {
                             case jsonRpc.errorCodes.VALIDATION:
                                 errorHandling.relayValidationFailuresIntoForm(
                                     err.data.validationfailures,

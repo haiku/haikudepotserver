@@ -22,7 +22,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.actualValues = angular.copy($scope.editingValues);
 
-            $scope.goSetValues = function() {
+            $scope.goSetValues = function () {
                 $scope.actualValues = angular.copy($scope.editingValues);
             }
 

@@ -80,11 +80,11 @@ angular.module('haikudepotserver').controller(
                         limit : $scope.rules.max
                     }]
                 ).then(
-                    function(result) {
+                    function (result) {
 
                         $scope.rules.items = _.map(
                             result.items,
-                            function(item) {
+                            function (item) {
                                 return {
                                     user : { nickname : item.userNickname },
                                     permission : { code : item.permissionCode, title : '...' },
@@ -95,12 +95,12 @@ angular.module('haikudepotserver').controller(
 
                         _.each(
                             $scope.rules.items,
-                            function(item) {
+                            function (item) {
                                 messageSource.get(userState.naturalLanguageCode(),'permission.' + item.permission.code + '.title').then(
-                                    function(value) {
+                                    function (value) {
                                         item.permission.title = value;
                                     },
-                                    function() {
+                                    function () {
                                         result.title = '???';
                                     }
                                 );
@@ -112,16 +112,16 @@ angular.module('haikudepotserver').controller(
                         amFetchingRules = false;
 
                     },
-                    function(err) {
+                    function (err) {
 
                         $scope.rules.items = [];
                         $scope.rules.total = 0;
 
-                        switch(err.code) {
+                        switch (err.code) {
 
                             case jsonRpc.errorCodes.OBJECTNOTFOUND:
 
-                                switch(err.data.entityName) {
+                                switch (err.data.entityName) {
 
                                     case 'User':
                                         $scope.criteria.userNicknameNotFound = true;
@@ -152,16 +152,16 @@ angular.module('haikudepotserver').controller(
 
             }
 
-            $scope.goSearch = function() {
+            $scope.goSearch = function () {
                 $scope.rules.offset = 0;
                 refetchRules();
             };
 
-            $scope.goCancelDeleteRule = function() {
+            $scope.goCancelDeleteRule = function () {
                 $scope.ruleToDelete = undefined;
             };
 
-            $scope.goConfirmDeleteRule = function() {
+            $scope.goConfirmDeleteRule = function () {
 
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_AUTHORIZATION,
@@ -172,12 +172,12 @@ angular.module('haikudepotserver').controller(
                         permissionCode : $scope.ruleToDelete.permission.code
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $scope.ruleToDelete = undefined;
                         $log.info('did delete an authorization pkg rule');
                         $scope.goSearch();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -188,14 +188,14 @@ angular.module('haikudepotserver').controller(
              * <p>Hit when somebody clicks on the cross at the end of the row relating to a rule.</p>
              */
 
-            $scope.goDeleteRule = function(rule) {
+            $scope.goDeleteRule = function (rule) {
                 $scope.ruleToDelete = rule;
             };
 
             // --------------------
             // WATCHES + EVENTS
 
-            $scope.$watch('rules.offset', function() {
+            $scope.$watch('rules.offset', function () {
                 refetchRules();
             });
 

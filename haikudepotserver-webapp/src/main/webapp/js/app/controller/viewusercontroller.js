@@ -17,7 +17,7 @@ angular.module('haikudepotserver').controller(
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return undefined === $scope.user;
             };
 
@@ -38,18 +38,18 @@ angular.module('haikudepotserver').controller(
                             nickname : $routeParams.nickname
                         }]
                     ).then(
-                    function(result) {
+                    function (result) {
                         $scope.user = result;
                         refreshBreadcrumbItems();
                         $log.info('fetched user; '+result.nickname);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
 
-            $scope.canLogout = function() {
+            $scope.canLogout = function () {
                 return userState.user() &&
                     $scope.user &&
                     userState.user().nickname === $scope.user.nickname;
@@ -60,19 +60,19 @@ angular.module('haikudepotserver').controller(
              * and in doing so the page will be re-loaded and so their state will be removed.</p>
              */
 
-            $scope.goLogout = function() {
+            $scope.goLogout = function () {
                 userState.token(null);
                 breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
             };
 
-            $scope.canDeactivate = function() {
+            $scope.canDeactivate = function () {
                 return userState.user() &&
                     $scope.user &&
                     $scope.user.active &&
                     $scope.user.nickname !== userState.user().nickname;
             };
 
-            $scope.canReactivate = function() {
+            $scope.canReactivate = function () {
                 return userState.user() &&
                     $scope.user &&
                     !$scope.user.active &&
@@ -91,21 +91,21 @@ angular.module('haikudepotserver').controller(
                         active : flag
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $scope.user.active = flag;
                         $log.info('did update user active flag; '+flag);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
 
-            $scope.goDeactivate = function() {
+            $scope.goDeactivate = function () {
                 setActive(false);
             };
 
-            $scope.goReactivate = function() {
+            $scope.goReactivate = function () {
                 setActive(true);
             };
 
@@ -114,14 +114,14 @@ angular.module('haikudepotserver').controller(
              * package.</p>
              */
 
-            $scope.goDownloadUserRatings = function() {
+            $scope.goDownloadUserRatings = function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_USERRATING_JOB,
                     'queueUserRatingSpreadsheetJob',
                     [{ userNickname: $routeParams.nickname }]
                 ).then(
-                    function(data) {
-                        if(data.guid && data.guid.length) {
+                    function (data) {
+                        if (data.guid && data.guid.length) {
                             breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:data.guid }));
                         }
                         else {
@@ -129,7 +129,7 @@ angular.module('haikudepotserver').controller(
                             // TODO; some sort of user-facing indication of this?
                         }
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );

@@ -22,7 +22,7 @@ angular.module('haikudepotserver').controller(
 
             refetchRepository();
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return !$scope.repository || amUpdatingActive || amDeletingPassword;
             };
 
@@ -39,11 +39,11 @@ angular.module('haikudepotserver').controller(
                         filter : [ 'ACTIVE' ]
                     }]
                 ).then(
-                    function() {
+                    function () {
                         amUpdatingActive = false;
                         $scope.repository.active = flag;
 
-                        if(!flag) {
+                        if (!flag) {
                             _.each($scope.repository.repositorySources, function(rs) {
                                rs.active = false;
                             });
@@ -51,21 +51,21 @@ angular.module('haikudepotserver').controller(
 
                         $log.info('did set the active flag on '+$scope.repository.code+' to '+flag);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
 
-            $scope.canReactivate = function() {
+            $scope.canReactivate = function () {
                 return $scope.repository && !$scope.repository.active && !amUpdatingActive;
             };
 
-            $scope.canDeactivate = function() {
+            $scope.canDeactivate = function () {
                 return $scope.repository && $scope.repository.active && !amUpdatingActive;
             };
 
-            $scope.goReactivate = function() {
+            $scope.goReactivate = function () {
                 updateActive(true);
             };
 
@@ -73,16 +73,16 @@ angular.module('haikudepotserver').controller(
                 updateActive(false);
             };
 
-            $scope.goEdit = function() {
+            $scope.goEdit = function () {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepository($scope.repository));
             };
 
-            $scope.goShowInactiveRepositorySources = function() {
+            $scope.goShowInactiveRepositorySources = function () {
                 $scope.amShowingInactiveRepositorySources = true;
                 refetchRepository();
             };
 
-            $scope.goAddRepositorySource = function() {
+            $scope.goAddRepositorySource = function () {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createAddRepositorySource($scope.repository));
             };
 
@@ -91,18 +91,18 @@ angular.module('haikudepotserver').controller(
              * re-fetch from the database, but will instead filter in-memory.
              */
 
-            $scope.goHideInactiveRepositorySources = function() {
+            $scope.goHideInactiveRepositorySources = function () {
                 $scope.amShowingInactiveRepositorySources = false;
 
                 $scope.repository.repositorySources = _.filter(
                     $scope.repository.repositorySources,
-                    function(rs) {
+                    function (rs) {
                         return rs.active;
                     }
                 );
             };
 
-            $scope.goDeletePassword = function() {
+            $scope.goDeletePassword = function () {
                 amDeletingPassword = true;
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_REPOSITORY,
@@ -113,14 +113,14 @@ angular.module('haikudepotserver').controller(
                         passwordClear: null
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('did delete password for repository [' + $scope.repository.code + ']');
                         $scope.repository.hasPassword = false;
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
-                ).finally(function() {
+                ).finally(function () {
                     amDeletingPassword = false;
                 });
             };
@@ -139,10 +139,10 @@ angular.module('haikudepotserver').controller(
                         repositorySourceCode : null
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('triggered import for repository; '+$scope.repository.code);
                         $scope.didTriggerImportRepository = true;
-                        $timeout(function() {
+                        $timeout(function () {
                             $scope.didTriggerImportRepository = false;
                         }, 3000)
 
@@ -173,19 +173,19 @@ angular.module('haikudepotserver').controller(
                         includeInactiveRepositorySources : $scope.amShowingInactiveRepositorySources
                     }]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.repository = result;
 
                         // This is required for the repository source to be used with various directives etc...
 
-                        _.each($scope.repository.repositorySources, function(rs) {
+                        _.each($scope.repository.repositorySources, function (rs) {
                            rs.repositoryCode = result.code;
                         });
 
                         $log.info('found '+$scope.repository.code+' repository');
                         refreshBreadcrumbItems();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );

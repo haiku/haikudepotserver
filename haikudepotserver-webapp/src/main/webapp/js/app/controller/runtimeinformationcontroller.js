@@ -31,7 +31,7 @@ angular.module('haikudepotserver').controller(
 
             function refreshRuntimeInformation() {
                 runtimeInformation.getRuntimeInformation().then(
-                    function(result) {
+                    function (result) {
                         $scope.versions.serverProject = result.projectVersion;
                         $scope.versions.serverJava = result.javaVersion;
                         $scope.serverStartTimestamp = result.startTimestamp;

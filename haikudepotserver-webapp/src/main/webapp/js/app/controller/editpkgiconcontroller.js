@@ -30,7 +30,7 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.pkg || $scope.amSaving;
+                return undefined === $scope.pkg || $scope.amSaving;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
@@ -42,12 +42,12 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkg() {
                 pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
-                    function(result) {
+                    function (result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
                     },
-                    function() {
+                    function () {
                         errorHandling.navigateToError();
                     }
                 );
@@ -91,35 +91,35 @@ angular.module('haikudepotserver').controller(
                 validateBitmapIconFile($scope.editPkgIcon.iconBitmap16File, $scope.editPkgIconForm['iconBitmap16File']);
             }
 
-            $scope.$watch('editPkgIcon.iconBitmap64File', function() {
+            $scope.$watch('editPkgIcon.iconBitmap64File', function () {
                 iconBitmap64FileDidChange();
             });
 
-            $scope.$watch('editPkgIcon.iconBitmap32File', function() {
+            $scope.$watch('editPkgIcon.iconBitmap32File', function () {
                 iconBitmap32FileDidChange();
             });
 
-            $scope.$watch('editPkgIcon.iconBitmap16File', function() {
+            $scope.$watch('editPkgIcon.iconBitmap16File', function () {
                 iconBitmap16FileDidChange();
             });
 
-            $scope.$watch('editPkgIcon.iconHvifFile', function() {
+            $scope.$watch('editPkgIcon.iconHvifFile', function () {
                 validateHvifIconFile($scope.editPkgIcon.iconHvifFile, $scope.editPkgIconForm['iconHvifFile']);
             });
 
-            $scope.isSubordinate = function() {
+            $scope.isSubordinate = function () {
                 return $scope.pkg && pkg.isSubordinate($scope.pkg.name);
             };
 
-            $scope.goHelp = function() {
+            $scope.goHelp = function () {
                 $scope.showHelp =true;
             };
 
             // This function will take the data from the form and load in the new pkg icons
 
-            $scope.goStorePkgIcons = function() {
+            $scope.goStorePkgIcons = function () {
 
-                if($scope.editPkgIconForm.$invalid) {
+                if ($scope.editPkgIconForm.$invalid) {
                     throw Error('expected the editing of package icons only to be possible if the form is valid');
                 }
 
@@ -135,22 +135,22 @@ angular.module('haikudepotserver').controller(
                                 pkgIcons: preparedIconInputs
                             }]
                         ).then(
-                        function() {
+                        function () {
                             $log.info('have updated the pkg icons for pkg '+$scope.pkg.name);
                             breadcrumbs.popAndNavigate();
                             $scope.amSaving = false;
                         },
-                        function(err) {
+                        function (err) {
 
-                            switch(err.code) {
+                            switch (err.code) {
 
                                 // the inbound error may involve reporting on bad data.  If this is the case then the error
                                 // should be reverse mapped to the input field.
 
                                 case jsonRpc.errorCodes.BADPKGICON:
 
-                                    if(err.data) {
-                                        switch(err.data.mediaTypeCode) {
+                                    if (err.data) {
+                                        switch (err.data.mediaTypeCode) {
 
                                             case constants.MEDIATYPE_PNG:
                                                 switch(err.data.size) {
@@ -204,7 +204,7 @@ angular.module('haikudepotserver').controller(
                 function checkHasCompletedFileReaderProcessing() {
 
                     _.each(iconInputs, function(iconInput) {
-                       if(iconInput.reader && 2 == iconInput.reader.readyState) {
+                       if (iconInput.reader && 2 === iconInput.reader.readyState) {
                            iconInput.dataBase64 = miscService.stripBase64FromDataUrl(iconInput.reader.result);
                            iconInput.reader = undefined;
                        }
@@ -218,7 +218,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 function fileReaderSetup(reader, file) {
-                    reader.onloadend = function() { checkHasCompletedFileReaderProcessing(); };
+                    reader.onloadend = function () { checkHasCompletedFileReaderProcessing(); };
                     reader.readAsDataURL(file);
                     return reader;
                 }

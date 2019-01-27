@@ -30,15 +30,15 @@ angular.module('haikudepotserver').controller(
                 file : undefined
             };
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return !$scope.pkg || !$scope.pkgScreenshots || $scope.amCommunicating;
             };
 
-            $scope.isSubordinate = function() {
+            $scope.isSubordinate = function () {
                 return $scope.pkg && pkg.isSubordinate($scope.pkg.name);
             };
 
-            $scope.deriveFormControlsContainerClasses = function(name) {
+            $scope.deriveFormControlsContainerClasses = function (name) {
                 return $scope.addPkgScreenshotForm[name].$invalid ? ['form-control-group-error'] : [];
             };
 
@@ -51,8 +51,8 @@ angular.module('haikudepotserver').controller(
                         "getPkgScreenshots",
                         [{ pkgName: $routeParams.name }]
                     ).then(
-                    function(result) {
-                        $scope.pkgScreenshots = _.map(result.items, function(item) {
+                    function (result) {
+                        $scope.pkgScreenshots = _.map(result.items, function (item) {
                             return {
                                 code : item.code,
                                 width : item.width,
@@ -65,7 +65,7 @@ angular.module('haikudepotserver').controller(
 
                         $log.info('found '+result.items.length+' screenshots for pkg '+result.name);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -76,13 +76,13 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkg() {
                 pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
-                    function(result) {
+                    function (result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
                         refetchPkgScreenshots();
                     },
-                    function() {
+                    function () {
                         errorHandling.navigateToError();
                     }
                 );
@@ -111,14 +111,14 @@ angular.module('haikudepotserver').controller(
                 var file = $scope.addPkgScreenshot.file;
                 var model = $scope.addPkgScreenshotForm['file'];
                 model.$setValidity('badformatorsize',true);
-                model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < SCREENSHOT_SIZE_LIMIT));
+                model.$setValidity('badsize',undefined === file || (file.size > 24 && file.size < SCREENSHOT_SIZE_LIMIT));
             });
 
             // This function will take the data from the form and will create the user from this data.
 
             $scope.goAddPkgScreenshot = function() {
 
-                if($scope.addPkgScreenshotForm.$invalid) {
+                if ($scope.addPkgScreenshotForm.$invalid) {
                     throw Error('expected the editing of package screenshots only to be possible if the form is valid');
                 }
 
@@ -137,7 +137,7 @@ angular.module('haikudepotserver').controller(
                                 "getPkgScreenshot",
                                 [{ code : code }]
                             ).then(
-                            function(result) {
+                            function (result) {
                                 $scope.pkgScreenshots.push({
                                     code : code,
                                     height : result.height,
@@ -149,13 +149,13 @@ angular.module('haikudepotserver').controller(
 
                                 $scope.amCommunicating = false;
                             },
-                            function(err) {
+                            function (err) {
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );
                     },
-                    function(e) {
-                        if(e==pkgScreenshot.errorCodes.BADFORMATORSIZEERROR) {
+                    function (e) {
+                        if (e === pkgScreenshot.errorCodes.BADFORMATORSIZEERROR) {
                             $scope.addPkgScreenshotForm['file'].$setValidity('badformatorsize',false);
                         }
                         else {
@@ -178,13 +178,13 @@ angular.module('haikudepotserver').controller(
                         "removePkgScreenshot",
                         [{ code: pkgScreenshot.code }]
                     ).then(
-                    function() {
+                    function () {
                         $log.info('did remove screenshot '+pkgScreenshot.code);
                         $scope.pkgScreenshots = _.reject($scope.pkgScreenshots, function(item) {
-                            return item.code == pkgScreenshot.code;
+                            return item.code === pkgScreenshot.code;
                         })
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -205,20 +205,20 @@ angular.module('haikudepotserver').controller(
                             codes: _.map($scope.pkgScreenshots, function(s) { return s.code; })
                         }]
                     ).then(
-                    function() {
+                    function () {
                         $log.info('did re-order screenshots for package '+$scope.pkg.name);
                         $scope.amCommunicating = false;
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
 
-            $scope.goOrderUp = function(pkgScreenshot) {
+            $scope.goOrderUp = function (pkgScreenshot) {
                 var i = _.indexOf($scope.pkgScreenshots, pkgScreenshot);
 
-                switch(i) {
+                switch (i) {
 
                     case -1:
                         throw Error('unable to find the screenshot to re-order in the list of screenshots');
@@ -239,7 +239,7 @@ angular.module('haikudepotserver').controller(
             $scope.goOrderDown = function(pkgScreenshot) {
                 var i = _.indexOf($scope.pkgScreenshots, pkgScreenshot);
 
-                switch(i) {
+                switch (i) {
 
                     case -1:
                         throw Error('unable to find the screenshot to re-order in the list of screenshots');
@@ -257,8 +257,8 @@ angular.module('haikudepotserver').controller(
                 }
             };
 
-            $scope.goHelp = function() {
-                $scope.showHelp =true;
+            $scope.goHelp = function () {
+                $scope.showHelp = true;
             };
 
         }

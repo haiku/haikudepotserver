@@ -25,11 +25,11 @@ angular.module('haikudepotserver').controller(
             $scope.userRatingPickerPossibleValues = [ 0,1,2,3,4,5 ];
             var amSaving = false;
 
-            $scope.shouldSpin = function() {
-                return undefined == $scope.workingUserRating || amSaving;
+            $scope.shouldSpin = function () {
+                return undefined === $scope.workingUserRating || amSaving;
             };
 
-            $scope.deriveFormControlsContainerClasses = function(name) {
+            $scope.deriveFormControlsContainerClasses = function (name) {
                 return $scope.addEditUserRatingForm[name].$invalid ? ['form-control-group-error'] : [];
             };
 
@@ -74,13 +74,13 @@ angular.module('haikudepotserver').controller(
                 // user rating stabilities reference data.
                 // TODO; generalize this code and factor out
 
-                function(chain) {
+                function (chain) {
                     referenceData.userRatingStabilities().then(
-                        function(data) {
+                        function (data) {
 
                             $scope.userRatingStabilityOptions = _.map(
                                 data,
-                                function(userRatingStability) {
+                                function (userRatingStability) {
                                     return {
                                         code : userRatingStability.code,
                                         title : userRatingStability.code
@@ -96,7 +96,7 @@ angular.module('haikudepotserver').controller(
                             updateUserRatingStabilityOptionsTitles();
                             fnChain(chain);
                         },
-                        function() { // logging done already
+                        function () { // logging done already
                             errorHandling.navigateToError();
                         }
 
@@ -106,14 +106,14 @@ angular.module('haikudepotserver').controller(
                 // working rating data; either this is an add rating or it is an edit rating and in the latter
                 // case we actually have to get the data for the rating downloaded.
 
-                function(chain) {
+                function (chain) {
 
                     function findUserRatingStabilityOptionByCode(code) {
                         var userRatingStabilityOption = _.findWhere(
                             $scope.userRatingStabilityOptions,
                             { code : code });
 
-                        if(!userRatingStabilityOption) {
+                        if (!userRatingStabilityOption) {
                             throw Error('unable to find the user rating stability option for; ' + code);
                         }
 
@@ -144,11 +144,11 @@ angular.module('haikudepotserver').controller(
                             'getUserRating',
                             [{ code: $routeParams.code }]
                         ).then(
-                            function(result) {
+                            function (result) {
                                 $scope.workingUserRating = assembleWorkingUserRatingFromApiResult(result);
                                 fnChain(chain);
                             },
-                            function(err) {
+                            function (err) {
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );
@@ -161,7 +161,7 @@ angular.module('haikudepotserver').controller(
                             // the package must be been supplied in the path so we will fetch the package and then
                             // fabricate a working user rating around that.
 
-                            function(pkg) {
+                            function (pkg) {
 
                                 // there is a possibility that this user has already made a user rating on this package
                                 // version.  If this is the case then they should not be allowed to add another -- they
@@ -185,18 +185,18 @@ angular.module('haikudepotserver').controller(
                                     ]
                                 )
                                     .then(
-                                    function(existingUserRatingData) {
+                                    function (existingUserRatingData) {
                                         $log.info('user was adding user rating, but one already existed; will edit that instead');
                                         $scope.workingUserRating = assembleWorkingUserRatingFromApiResult(existingUserRatingData);
                                         fnChain(chain);
                                     },
-                                    function(jsonRpcErrorEnvelope) {
-                                        if(jsonRpcErrorEnvelope.code == jsonRpc.errorCodes.OBJECTNOTFOUND) {
+                                    function (jsonRpcErrorEnvelope) {
+                                        if (jsonRpcErrorEnvelope.code === jsonRpc.errorCodes.OBJECTNOTFOUND) {
 
                                             // no existing user rating for this package version -> will make a new
                                             // one.
 
-                                            if(!pkg.versions[0].isLatest) {
+                                            if (!pkg.versions[0].isLatest) {
                                                 throw Error('it is only possible to add a user rating to the latest version of a package.');
                                             }
 
@@ -238,7 +238,7 @@ angular.module('haikudepotserver').controller(
                         breadcrumbFactory.createViewPkgWithSpecificVersionFromPkgVersion($scope.workingUserRating.pkgVersion)
                     ];
 
-                    if($scope.workingUserRating.code) {
+                    if ($scope.workingUserRating.code) {
                         b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditUserRating($scope.workingUserRating)));
                     }
                     else {
@@ -272,18 +272,18 @@ angular.module('haikudepotserver').controller(
 
             $scope.goSave = function() {
 
-                if($scope.workingUserRating.comment) {
+                if ($scope.workingUserRating.comment) {
                     $scope.workingUserRating.comment = $scope.workingUserRating.comment.trim();
                 }
 
-                if($scope.addEditUserRatingForm.$invalid) {
+                if ($scope.addEditUserRatingForm.$invalid) {
                     throw Error('expected the save of a user rating to only to be possible if the form is valid');
                 }
 
                 // there is the possibility that the user has attempted to create a user rating with no data!  This
                 // should be stopped!
 
-                if(isEmptyWorkingUserRating()) {
+                if (isEmptyWorkingUserRating()) {
                     $scope.didAttemptToSaveWithEmptyWorkingUserRating = true; // shows-up in UI
                 }
                 else {

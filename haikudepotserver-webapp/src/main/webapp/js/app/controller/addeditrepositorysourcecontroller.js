@@ -47,7 +47,7 @@ angular.module('haikudepotserver').controller(
                     breadcrumbFactory.createViewRepository(repository)
                 ];
 
-                if($scope.amEditing) {
+                if ($scope.amEditing) {
                     b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditRepositorySource($scope.workingRepositorySource)));
                 }
                 else {
@@ -58,7 +58,7 @@ angular.module('haikudepotserver').controller(
             }
 
             function refreshRepositorySource() {
-                if($routeParams.repositorySourceCode) {
+                if ($routeParams.repositorySourceCode) {
                     jsonRpc.call(
                         constants.ENDPOINT_API_V1_REPOSITORY,
                         "getRepositorySource",
@@ -90,13 +90,13 @@ angular.module('haikudepotserver').controller(
 
             $scope.goSave = function() {
 
-                if($scope.addEditRepositorySourceForm.$invalid) {
+                if ($scope.addEditRepositorySourceForm.$invalid) {
                     throw Error('expected the save of a repository source to only to be possible if the form is valid');
                 }
 
                 amSaving = true;
 
-                if($scope.amEditing) {
+                if ($scope.amEditing) {
                     jsonRpc.call(
                         constants.ENDPOINT_API_V1_REPOSITORY,
                         "updateRepositorySource",
@@ -106,13 +106,13 @@ angular.module('haikudepotserver').controller(
                             code : $routeParams.repositorySourceCode
                         }]
                     ).then(
-                        function() {
+                        function () {
                             $log.info('did update repository source; '+$routeParams.repositorySourceCode);
                             breadcrumbs.popAndNavigate();
                         },
-                        function(err) {
+                        function (err) {
 
-                            switch(err.code) {
+                            switch (err.code) {
                                 case jsonRpc.errorCodes.VALIDATION:
                                     errorHandling.relayValidationFailuresIntoForm(
                                         err.data.validationfailures,
@@ -137,14 +137,14 @@ angular.module('haikudepotserver').controller(
                             code : $scope.workingRepositorySource.code
                         }]
                     ).then(
-                        function() {
+                        function () {
                             $log.info('did create repository source; '+$scope.workingRepositorySource.code);
                             breadcrumbs.pop();
                             breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepositorySource($scope.workingRepositorySource));
                         },
                         function(err) {
 
-                            switch(err.code) {
+                            switch (err.code) {
                                 case jsonRpc.errorCodes.VALIDATION:
                                     errorHandling.relayValidationFailuresIntoForm(
                                         err.data.validationfailures,

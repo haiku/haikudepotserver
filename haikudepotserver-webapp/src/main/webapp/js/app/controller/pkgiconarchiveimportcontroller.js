@@ -27,7 +27,7 @@ angular.module('haikudepotserver').controller(
                 return $scope.amQueueing;
             };
 
-            $scope.deriveFormControlsContainerClasses = function(name) {
+            $scope.deriveFormControlsContainerClasses = function (name) {
                 return $scope.specificationForm[name].$invalid ? ['form-control-group-error'] : [];
             };
 
@@ -45,24 +45,24 @@ angular.module('haikudepotserver').controller(
             // input for this importation process.
 
             function validateImportDataFile(file, model) {
-                model.$setValidity('badsize',undefined==file || (file.size > 8 && file.size < IMPORT_SIZE_LIMIT));
+                model.$setValidity('badsize', undefined === file || (file.size > 8 && file.size < IMPORT_SIZE_LIMIT));
             }
 
             function importDataFileDidChange() {
                 validateImportDataFile($scope.specification.importDataFile, $scope.specificationForm['importDataFile']);
             }
 
-            $scope.$watch('specification.importDataFile', function() {
+            $scope.$watch('specification.importDataFile', function () {
                 importDataFileDidChange();
             });
 
-            $scope.goShowHelp = function() {
+            $scope.goShowHelp = function () {
                 $scope.showHelp = !$scope.showHelp;
             };
 
             // This function will take the data from the form and load in the new pkg icons
 
-            $scope.goQueue = function() {
+            $scope.goQueue = function () {
 
                 if($scope.specificationForm.$invalid) {
                     throw Error('expected the import of pkg icon archive only to be possible if the form is valid');
@@ -73,7 +73,7 @@ angular.module('haikudepotserver').controller(
                 // uploads the import data to the server so it can be used later.
 
                 jobs.supplyData($scope.specification.importDataFile).then(
-                    function(guid) {
+                    function (guid) {
                         $log.info('did upload import data to the server; ' + guid);
 
                         jsonRpc.call(
@@ -81,19 +81,19 @@ angular.module('haikudepotserver').controller(
                             "queuePkgIconArchiveImportJob",
                             [{ inputDataGuid: guid }]
                         ).then(
-                            function(result) {
+                            function (result) {
                                 $log.info('did queue pkg icon archive import job; ' + result.guid);
                                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:result.guid }));
                                 $scope.amQueueing = false;
                             },
-                            function(err) {
+                            function (err) {
                                 $scope.amQueueing = false;
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );
 
                     },
-                    function() {
+                    function () {
                         $log.error('failed to upload import data to the server');
                         errorHandling.navigateToError();
                         $scope.amQueueing = false;

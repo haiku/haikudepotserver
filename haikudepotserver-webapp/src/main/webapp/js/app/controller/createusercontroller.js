@@ -28,7 +28,7 @@ angular.module('haikudepotserver').controller(
             regenerateCaptcha();
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.captchaToken ||
+                return undefined === $scope.captchaToken ||
                     $scope.amSaving;
             };
 
@@ -54,12 +54,12 @@ angular.module('haikudepotserver').controller(
                     "generateCaptcha",
                     [{}]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
                         refreshBreadcrumbItems();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -70,27 +70,27 @@ angular.module('haikudepotserver').controller(
             // this reason, any change to the response text field will be taken to trigger this error state to be
             // removed.
 
-            $scope.captchaResponseDidChange = function() {
+            $scope.captchaResponseDidChange = function () {
                 $scope.createUserForm.captchaResponse.$setValidity('badresponse',true);
             };
 
-            $scope.nicknameDidChange = function() {
+            $scope.nicknameDidChange = function () {
                 $scope.createUserForm.nickname.$setValidity('notunique',true);
             };
 
-            $scope.passwordsChanged = function() {
+            $scope.passwordsChanged = function () {
                 $scope.createUserForm.passwordClearRepeated.$setValidity(
                     'repeat',
                         !$scope.newUser.passwordClear
                         || !$scope.newUser.passwordClearRepeated
-                        || $scope.newUser.passwordClear == $scope.newUser.passwordClearRepeated);
+                        || $scope.newUser.passwordClear === $scope.newUser.passwordClearRepeated);
             };
 
             // This function will take the data from the form and will create the user from this data.
 
-            $scope.goCreateUser = function() {
+            $scope.goCreateUser = function () {
 
-                if($scope.createUserForm.$invalid) {
+                if ($scope.createUserForm.$invalid) {
                     throw Error('expected the creation of a user only to be possible if the form is valid');
                 }
 
@@ -108,10 +108,10 @@ angular.module('haikudepotserver').controller(
                         naturalLanguageCode : $scope.newUser.naturalLanguageCode
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('created new user; '+$scope.newUser.nickname);
 
-                        if(userState.user()) {
+                        if (userState.user()) {
                             breadcrumbs.pop();
                             breadcrumbs.pushAndNavigate(
                                 breadcrumbFactory.createViewUser({ nickname : $scope.newUser.nickname })
@@ -135,12 +135,12 @@ angular.module('haikudepotserver').controller(
                             ]);
                         }
                     },
-                    function(err) {
+                    function (err) {
 
                         regenerateCaptcha();
                         $scope.amSaving = false;
 
-                        switch(err.code) {
+                        switch (err.code) {
 
                             case jsonRpc.errorCodes.VALIDATION:
 
@@ -149,7 +149,7 @@ angular.module('haikudepotserver').controller(
                                 // default handler.
 
                                 if(err.data && err.data) {
-                                    _.each(err.data, function(vf) {
+                                    _.each(err.data, function (vf) {
                                         var model = $scope.createUserForm[vf.property];
 
                                         if(model) {

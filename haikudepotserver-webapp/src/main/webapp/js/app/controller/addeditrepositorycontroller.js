@@ -43,7 +43,7 @@ angular.module('haikudepotserver').controller(
                     breadcrumbFactory.createListRepositories()
                 ];
 
-                if($scope.amEditing) {
+                if ($scope.amEditing) {
                     b.push(breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createEditRepository($scope.workingRepository)));
                 }
                 else {
@@ -54,19 +54,19 @@ angular.module('haikudepotserver').controller(
             }
 
             function refreshRepository() {
-                if($routeParams.code) {
+                if ($routeParams.code) {
                     jsonRpc.call(
                         constants.ENDPOINT_API_V1_REPOSITORY,
                         "getRepository",
                         [{ code : $routeParams.code }]
                     ).then(
-                        function(result) {
+                        function (result) {
                             $scope.workingRepository = _.extend(
                                 _.clone(result), { 'changePassword': false });
                             refreshBreadcrumbItems();
                             $log.info('fetched repository; '+result.code);
                         },
-                        function(err) {
+                        function (err) {
                             errorHandling.handleJsonRpcError(err);
                         }
                     );
@@ -85,13 +85,13 @@ angular.module('haikudepotserver').controller(
 
             $scope.goSave = function() {
 
-                if($scope.addEditRepositoryForm.$invalid) {
+                if ($scope.addEditRepositoryForm.$invalid) {
                     throw Error('expected the save of a repository to only to be possible if the form is valid');
                 }
 
                 amSaving = true;
 
-                if($scope.amEditing) {
+                if ($scope.amEditing) {
 
                     var filter = [ 'INFORMATIONURL', 'NAME' ];
 
@@ -110,13 +110,13 @@ angular.module('haikudepotserver').controller(
                                 passwordClear : $scope.workingRepository.passwordClear
                             }]
                         ).then(
-                        function() {
+                        function () {
                             $log.info('did update repository; '+$scope.workingRepository.code);
                             breadcrumbs.popAndNavigate();
                         },
-                        function(err) {
+                        function (err) {
 
-                            switch(err.code) {
+                            switch (err.code) {
                                 case jsonRpc.errorCodes.VALIDATION:
                                     errorHandling.relayValidationFailuresIntoForm(
                                         err.data.validationfailures,
@@ -142,12 +142,12 @@ angular.module('haikudepotserver').controller(
                                 code : $scope.workingRepository.code
                             }]
                         ).then(
-                        function() {
+                        function () {
                             $log.info('did create repository; '+$scope.workingRepository.code);
                             breadcrumbs.pop();
                             breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepository($scope.workingRepository));
                         },
-                        function(err) {
+                        function (err) {
 
                             switch(err.code) {
                                 case jsonRpc.errorCodes.VALIDATION:

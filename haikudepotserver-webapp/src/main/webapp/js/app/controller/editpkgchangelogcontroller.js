@@ -23,7 +23,7 @@ angular.module('haikudepotserver').controller(
                 content: undefined
             };
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return undefined === $scope.pkg ||
                     undefined === $scope.changelog.content ||
                         amSaving;
@@ -46,14 +46,14 @@ angular.module('haikudepotserver').controller(
 
             fnChain([
 
-                function(chain) {
+                function (chain) {
                     pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
-                        function(result) {
+                        function (result) {
                             $scope.pkg = result;
                             $log.info('found '+result.name+' pkg');
                             fnChain(chain);
                         },
-                        function(err) {
+                        function (err) {
                             errorHandling.handleJsonRpcError(err);
                         }
                     );
@@ -65,11 +65,11 @@ angular.module('haikudepotserver').controller(
                         "getPkgChangelog",
                         [{ pkgName : $scope.pkg.name }]
                     ).then(
-                        function(data) {
+                        function (data) {
                             $scope.changelog.content = data.content;
                             fnChain(chain);
                         },
-                        function(err) {
+                        function (err) {
                             errorHandling.handleJsonRpcError(err);
                         }
                     );
@@ -82,7 +82,7 @@ angular.module('haikudepotserver').controller(
 
             ]);
 
-            $scope.goSave = function() {
+            $scope.goSave = function () {
 
                 amSaving = true;
 
@@ -94,13 +94,13 @@ angular.module('haikudepotserver').controller(
                         content : $scope.changelog.content
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('did save changelog content for; ' + $scope.pkg.name);
                         breadcrumbs.popAndNavigate();
                     },
-                    function(err) {
+                    function (err) {
 
-                        switch(err.code) {
+                        switch (err.code) {
                             case jsonRpc.errorCodes.VALIDATION:
                                 errorHandling.relayValidationFailuresIntoForm(
                                     err.data.validationfailures,
@@ -114,7 +114,7 @@ angular.module('haikudepotserver').controller(
 
                     }
                 ).finally(
-                    function() {
+                    function () {
                         amSaving = false;
                     }
                 );

@@ -12,7 +12,7 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$location,
             jsonRpc,constants,userState,errorHandling,breadcrumbs,breadcrumbFactory) {
 
-            if(userState.user()) {
+            if (userState.user()) {
                 throw Error('it is not possible to enter the authenticate user controller with a currently authenticated user');
             }
 
@@ -30,7 +30,7 @@ angular.module('haikudepotserver').controller(
                 breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createAuthenticate())
             ]);
 
-            if($location.search()['nickname']) {
+            if ($location.search()['nickname']) {
                 $scope.authenticationDetails.nickname = $location.search()['nickname'];
             }
 
@@ -54,7 +54,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goAuthenticate = function() {
 
-                if($scope.authenticateUserForm.$invalid) {
+                if ($scope.authenticateUserForm.$invalid) {
                     throw Error('expected the authentication of a user only to be possible if the form is valid');
                 }
 
@@ -69,8 +69,8 @@ angular.module('haikudepotserver').controller(
                         passwordClear : $scope.authenticationDetails.passwordClear
                     }]
                 ).then(
-                    function(result) {
-                        if(result.token && result.token.length) {
+                    function (result) {
+                        if (result.token && result.token.length) {
 
                             userState.token(result.token);
 
@@ -87,11 +87,11 @@ angular.module('haikudepotserver').controller(
                                 [ {
                                     nickname : $scope.authenticationDetails.nickname
                                 }]).then(
-                                function(userData) {
+                                function (userData) {
                                     userState.naturalLanguageCode(userData.naturalLanguageCode);
                                     breadcrumbs.popAndNavigate();
                                 },
-                                function(e) {
+                                function (e) {
                                     $log.error('unable to get the natural language of the newly authenticated user');
                                     errorHandling.handleJsonRpcError(e);
                                 }
@@ -105,7 +105,7 @@ angular.module('haikudepotserver').controller(
 
                         $scope.amAuthenticating = false;
                     },
-                    function(err) {
+                    function (err) {
                         $scope.amAuthenticating = false;
                         errorHandling.handleJsonRpcError(err);
                     }
