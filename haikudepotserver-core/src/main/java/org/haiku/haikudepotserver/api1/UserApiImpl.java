@@ -73,23 +73,6 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     }
 
     @Override
-    public SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest) {
-       Preconditions.checkNotNull(synchronizeUsersRequest);
-
-        final ObjectContext context = serverRuntime.newContext();
-
-        if(!authorizationService.check(
-                context,
-                tryObtainAuthenticatedUser(context).orElse(null),
-                null,
-                Permission.USER_SYNCHRONIZE)) {
-            throw new AuthorizationFailureException();
-        }
-
-        return new SynchronizeUsersResult();
-    }
-
-    @Override
     public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException {
 
         Preconditions.checkNotNull(updateUserRequest);

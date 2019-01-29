@@ -145,4 +145,15 @@ Distributed under the terms of the MIT License.
         </para>
     </section>
 
+    <section>
+        <title>Contact Channels</title>
+
+        <para>
+            The Haiku Depot Server mailing list and any forums that may be used
+            by users to communicate about Haiku Depot Server are considered out
+            of scope in relation to this document.  These communication channels
+            are external to the project software and deployment.
+        </para>
+    </section>
+
 </chapter>

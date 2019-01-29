@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ angular.module('haikudepotserver').directive('modalContainer',[
                     // model is open, the model can be closed.
 
                     elem.on('keyup', function(event) {
-                        if(27 == event.keyCode) { // 27 = escape
+                        if(27 === event.keyCode) { // 27 = escape
                             $scope.$apply(function() {
                                 $scope.goClose(event);
                             });
@@ -66,16 +66,16 @@ angular.module('haikudepotserver').directive('modalContainer',[
                             });
 
                             $scope.$watch('height', function(newValue) {
-                                var height = parseInt(''+newValue,10);
+                                var height = parseInt('' + newValue,10);
                                 $scope.style['height'] = height + 'px';
-                                $scope.style['margin-top'] = '' + (height/-2.0) + 'px'; // centres it
+                                $scope.style['margin-top'] = '' + (height / -2.0) + 'px'; // centres it
                                 updateShowModal();
                             });
 
                             $scope.$watch('width', function(newValue) {
                                 var width = parseInt(''+newValue,10);
                                 $scope.style['width'] = width + 'px';
-                                $scope.style['margin-left'] = '' + (width/-2.0) + 'px'; // centres it
+                                $scope.style['margin-left'] = '' + (width / -2.0) + 'px'; // centres it
                                 updateShowModal();
                             });
 

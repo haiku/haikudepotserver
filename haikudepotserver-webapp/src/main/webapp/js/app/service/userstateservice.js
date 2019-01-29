@@ -262,15 +262,15 @@ angular.module('haikudepotserver').factory('userState',
 
             function validateTargetAndPermissions(targetAndPermissions) {
                 _.each(targetAndPermissions, function(targetAndPermission) {
-                    if(undefined === targetAndPermission.targetType || !_.contains(['PKG','USER','REPOSITORY','USERRATING',null],targetAndPermission.targetType)) {
+                    if (undefined === targetAndPermission.targetType || !_.contains(['PKG','USER','REPOSITORY','USERRATING',null],targetAndPermission.targetType)) {
                         throw Error('illegal argument; bad targetType supplied');
                     }
 
-                    if(undefined === targetAndPermission.targetIdentifier) {
+                    if (undefined === targetAndPermission.targetIdentifier) {
                         throw Error('illegal argument; bad targetIdentifier supplied');
                     }
 
-                    if(!targetAndPermission.permissionCode) {
+                    if (!targetAndPermission.permissionCode) {
                         throw Error('illegal argument; bad permission code');
                     }
                 })
@@ -280,7 +280,8 @@ angular.module('haikudepotserver').factory('userState',
                 $log.info('reset authorization');
                 authorizationData = {
                     checkedPermissionCache: new LRUCache(CHECKED_PERMISSION_CACHE_SIZE),
-                    checkQueue: []
+                    checkQueue: [],
+                    isRootPromise: false
                 };
             }
 
@@ -379,7 +380,6 @@ angular.module('haikudepotserver').factory('userState',
                                 checkQueueItem.deferred.resolve(checkQueueItem);
                                 putToCache(checkQueueItem);
                             } else {
-                                debugger;
                                 $log.warn('inbound authorization data [' +
                                     toCacheKey(inboundDataItem) +
                                     '] does not match to items in the queue');
@@ -446,6 +446,36 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             // ------------------------------
+            // ROOT
+
+            function isRoot() {
+                if (!authorizationData.isRootPromise) {
+                    var u = user();
+
+                    if (u) {
+                        authorizationData.isRootPromise = jsonRpc.call(
+                            constants.ENDPOINT_API_V1_USER,
+                            'getUser',
+                            [{nickname: u.nickname}]
+                        ).then(
+                            function (result) {
+                                return !!result.isRoot;
+                            },
+                            function (err) {
+                                errorHandling.handleJsonRpcError(err);
+                            }
+                        );
+                    } else {
+                        authorizationData.isRootPromise = $q.resolve(false);
+
+                    }
+                }
+
+                return authorizationData.isRootPromise;
+            }
+
+
+            // ------------------------------
             // NATURAL LANGUAGE HANDLING
 
             /**
@@ -487,7 +517,7 @@ angular.module('haikudepotserver').factory('userState',
                 // if there is an existing natural language code on the local storage then use that
                 // and there is actually no need to initialize the natural language.
 
-                if(!localStorageProxy.getItem(HDS_NATURALLANGUAGECODE_KEY)) {
+                if (!localStorageProxy.getItem(HDS_NATURALLANGUAGECODE_KEY)) {
                     naturalLanguageCode(constants.NATURALLANGUAGECODE_ENGLISH);
                     referenceData.naturalLanguages().then(
                         function (naturalLanguages) {
@@ -546,7 +576,14 @@ angular.module('haikudepotserver').factory('userState',
                  * <p>Returned is a promise which resolves to a true if all of the queries are true.</p>
                  */
 
-                areAuthorized : checkAllAuthorizationsAreAuthorized
+                areAuthorized : checkAllAuthorizationsAreAuthorized,
+
+                /**
+                 * <p>Returns a boolean that resolves to true if the user is a
+                 * root user.</p>
+                 */
+
+                isRoot: isRoot
 
             };
 

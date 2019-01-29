@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -65,22 +65,6 @@ angular.module('haikudepotserver').controller(
                     },
                     function(err) {
                         $log.error('unable to derive and store user ratings for all pkgs');
-                        errorHandling.handleJsonRpcError(err);
-                    }
-                );
-            };
-
-            $scope.goSynchronizeUsers = function() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "synchronizeUsers",
-                    [{}]
-                ).then(
-                    function() {
-                        showDidAction('synchronizeUsers');
-                    },
-                    function(err) {
-                        $log.error('unable to synchronize users');
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
