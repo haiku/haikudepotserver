@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018, Andrew Lindesay
+ * Copyright 2016-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,8 @@ import java.util.Optional;
  */
 
 public interface AuthenticationService {
+
+    String CLAIM_REQUIRES_AGREE_USER_USAGE_CONDITIONS = "ucnd";
 
     Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,85 @@ angular.module('haikudepotserver').factory('jsonRpc',
     [
         '$log','$http','$q',
         function($log,$http,$q) {
+
+            /**
+             * <p>This counter is used to generate an id which can be used to identify a request-response method
+             * invocation in the json-rpc potocol.</p>
+             */
+
+            var generatedIdCounter = 1000;
+
+            var headers = {};
+
+            function nextGeneratedId() {
+                generatedIdCounter += 1;
+                return generatedIdCounter;
+            }
+
+            function callWithAdditionalHeaders(endpoint, method, params, id, additionalHttpHeaders) {
+
+                if (!endpoint) {
+                    throw Error('the endpoint is required to invoke a json-rpc method');
+                }
+
+                if (!method) {
+                    throw Error('the method is required to invoke a json-rpc method');
+                }
+
+                if (!params) {
+                    params = [];
+                }
+
+                if (!id) {
+                    id = nextGeneratedId();
+                }
+
+                function mkTransportErr(httpStatus) {
+                    return mkErr(httpStatus, JsonRpcService.errorCodes.TRANSPORTFAILURE, 'transport-failure');
+                }
+
+                function mkErr(httpStatus, code, message) {
+                    return {
+                        code: code,
+                        message: message,
+                        data: httpStatus
+                    };
+                }
+
+                return $http({
+                    cache: false,
+                    method: 'POST',
+                    url: endpoint,
+                    headers: _.extend(
+                        {'Content-Type': 'application/json'},
+                        additionalHttpHeaders || {}),
+                    data: {
+                        jsonrpc: "2.0",
+                        method: method,
+                        params: params,
+                        id: id
+                    }
+                }).then(
+                    function successCallback(response) {
+                        if (200 !== response.status) {
+                            return $q.reject(mkTransportErr(response.status));
+                        }
+
+                        if (!response.data.result) {
+                            if (!response.data.error) {
+                                return $q.reject(mkErr(response.status, JsonRpcService.errorCodes.INVALIDRESPONSE, 'invalid-response'));
+                            }
+
+                            return $q.reject(response.data.error);
+                        }
+
+                        return response.data.result;
+                    },
+                    function errorCallback(response) {
+                        return $q.reject(mkTransportErr(response.status));
+                    }
+                );
+            }
 
             var JsonRpcService = {
 
@@ -34,36 +113,23 @@ angular.module('haikudepotserver').factory('jsonRpc',
                 },
 
                 /**
-                 * <p>This is a map of HTTP headers that is sent on each JSON-RPC request into the server.</p>
-                 */
-
-                headers : {},
-
-                /**
                  * <p>This method will set the HTTP header that is sent on each JSON-RPC request.  This is handy,
                  * for example for authentication.</p>
                  */
 
                 setHeader : function(name, value) {
 
-                    if (!name || 0==''+name.length) {
+                    if (!name || 0 === '' + name.length) {
                         throw Error('the name of the http header is required');
                     }
 
-                    if (!value || 0==''+value.length) {
-                        delete JsonRpcService.headers[name];
+                    if (!value || 0 === '' + value.length) {
+                        delete headers[name];
                     } else {
-                        JsonRpcService.headers[name] = value;
+                        headers[name] = value;
                     }
 
                 },
-
-                /**
-                 * <p>This counter is used to generate an id which can be used to identify a request-response method
-                 * invocation in the json-rpc potocol.</p>
-                 */
-
-                counter : 1000,
 
                 /**
                  * <p>This function will call a json-rpc method on a remote system identified by the supplied endpoint.
@@ -73,70 +139,10 @@ angular.module('haikudepotserver').factory('jsonRpc',
                  */
 
                 call : function(endpoint, method, params, id) {
+                    return callWithAdditionalHeaders(endpoint, method, params, id, headers);
+                },
 
-                    if (!endpoint) {
-                        throw Error('the endpoint is required to invoke a json-rpc method');
-                    }
-
-                    if (!method) {
-                        throw Error('the method is required to invoke a json-rpc method');
-                    }
-
-                    if (!params) {
-                        params = [];
-                    }
-
-                    if (!id) {
-                        id = JsonRpcService.counter;
-                        JsonRpcService.counter += 1;
-                    }
-
-                    function mkTransportErr(httpStatus) {
-                       return mkErr(httpStatus, JsonRpcService.errorCodes.TRANSPORTFAILURE, 'transport-failure');
-                    }
-
-                    function mkErr(httpStatus, code, message) {
-                        return {
-                            code : code,
-                            message : message,
-                            data : httpStatus
-                        };
-                    }
-
-                    return $http({
-                        cache: false,
-                        method: 'POST',
-                        url: endpoint,
-                        headers: _.extend(
-                            { 'Content-Type' : 'application/json' },
-                            JsonRpcService.headers),
-                        data: {
-                            jsonrpc : "2.0",
-                            method : method,
-                            params : params,
-                            id : id
-                        }
-                    }).then(
-                        function successCallback(response) {
-                            if (200 != response.status) {
-                                return $q.reject(mkTransportErr(response.status));
-                            }
-
-                            if (!response.data.result) {
-                                if (!response.data.error) {
-                                    return $q.reject(mkErr(response.status, JsonRpcService.errorCodes.INVALIDRESPONSE, 'invalid-response'));
-                                }
-
-                                return $q.reject(response.data.error);
-                            }
-
-                            return response.data.result;
-                        },
-                        function errorCallback(response) {
-                            return $q.reject(mkTransportErr(response.status));
-                        }
-                    );
-                }
+                callWithAdditionalHeaders : callWithAdditionalHeaders
 
             };
 

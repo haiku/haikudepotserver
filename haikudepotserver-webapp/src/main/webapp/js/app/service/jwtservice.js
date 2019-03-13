@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,17 +24,29 @@ angular.module('haikudepotserver').factory('jwt',
             }
 
             function tokenClaimSet(token) {
-                if(!token||!token.length) {
+                if (!token || !token.length) {
                     throw Error('missing json web token');
                 }
 
                 var parts = token.split('.');
 
-                if(3 != parts.length) {
+                if (3 !== parts.length) {
                     throw Error('json web token should contain three dot-separated parts');
                 }
 
                 return angular.fromJson(window.atob(parts[1]));
+            }
+
+            /**
+             * <p>If the user should agree to the user usage conditions then the
+             * JWT token will contain a special value to indicate this.</p>
+             */
+
+            function requiresAgreeUserUsageConditions(token) {
+                var claimSet = tokenClaimSet(token);
+                return claimSet &&
+                    undefined !== claimSet.ucnd &&
+                    (true === claimSet.ucnd || 'true' === claimSet.ucnd)
             }
 
             /**
@@ -45,7 +57,7 @@ angular.module('haikudepotserver').factory('jwt',
             function tokenExpirationDate(token) {
                 var claimSet = tokenClaimSet(token);
 
-                if(!claimSet || !claimSet.exp || !angular.isNumber(claimSet.exp)) {
+                if (!claimSet || !claimSet.exp || !angular.isNumber(claimSet.exp)) {
                     throw Error('malformed claim set; unable to get the \'exp\' data');
                 }
 
@@ -60,14 +72,14 @@ angular.module('haikudepotserver').factory('jwt',
             function tokenNickname(token) {
                 var claimSet = tokenClaimSet(token);
 
-                if(!claimSet || !claimSet.sub) {
+                if (!claimSet || !claimSet.sub) {
                     throw Error('malformed claim set; unable to get the \'sub\' data');
                 }
 
                 var sub = '' + claimSet.sub;
                 var suffixIndex = sub.indexOf('@hds');
 
-                if(-1==suffixIndex) {
+                if (-1 === suffixIndex) {
                     throw Error('malformed nickname in token; missing suffix');
                 }
 
@@ -75,15 +87,9 @@ angular.module('haikudepotserver').factory('jwt',
             }
 
             return {
-
-                millisUntilExpirationForToken : function(token) {
-                    return millisUntilExpirationForToken(token);
-                },
-
-                tokenNickname : function(token) {
-                    return tokenNickname(token);
-                }
-
+                millisUntilExpirationForToken: millisUntilExpirationForToken,
+                tokenNickname: tokenNickname,
+                requiresAgreeUserUsageConditions: requiresAgreeUserUsageConditions
             };
         }
     ]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,5 +14,5 @@ public interface Constants {
     int ERROR_CODE_BADPKGICON = -32804;
     int ERROR_CODE_LIMITEXCEEDED = -32805;
     int ERROR_CODE_AUTHORIZATIONRULECONFLICT = -32806;
-
+    int ERROR_CODE_USER_USAGE_CONDITIONS_AGREE = -32810;
 }

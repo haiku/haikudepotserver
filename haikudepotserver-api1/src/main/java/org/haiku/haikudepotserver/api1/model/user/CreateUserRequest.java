@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -36,5 +36,11 @@ public class CreateUserRequest {
      */
 
     public String naturalLanguageCode;
+
+    /**
+     * @since 2019-03-10
+     */
+
+    public String userUsageConditionsCode;
 
 }

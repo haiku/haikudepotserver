@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -71,12 +71,12 @@ angular.module('haikudepotserver').controller(
 
             function validateBitmapIconFile(file, model) {
                 model.$setValidity('badformatorsize',true);
-                model.$setValidity('badsize',undefined==file || (file.size > 24 && file.size < ICON_SIZE_LIMIT));
+                model.$setValidity('badsize', !file || (file.size > 24 && file.size < ICON_SIZE_LIMIT));
             }
 
             function validateHvifIconFile(file, model) {
                 model.$setValidity('badformatorsize',true);
-                model.$setValidity('badsize',undefined==file || (file.size > 4 && file.size < ICON_SIZE_LIMIT));
+                model.$setValidity('badsize', !file || (file.size > 4 && file.size < ICON_SIZE_LIMIT));
             }
 
             function iconBitmap64FileDidChange() {
@@ -233,7 +233,7 @@ angular.module('haikudepotserver').controller(
 
                 // pull in all of the data as base64-ized data URLs
 
-                switch($scope.editPkgIcon.vectorOrBitmap) {
+                switch ($scope.editPkgIcon.vectorOrBitmap) {
 
                     case 'vector':
                         iconInputs.push({

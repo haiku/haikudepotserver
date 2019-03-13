@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.user.model.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +52,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final ServerRuntime serverRuntime;
 
+    private final UserService userService;
+
     /**
      * <p>This secret is used to sign a token containing username / password / time for token-based authentication.
      * </p>
@@ -65,9 +68,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public AuthenticationServiceImpl(
             ServerRuntime serverRuntime,
+            UserService userService,
             @Value("${authentication.jws.sharedkey:}") String jsonWebTokenSharedKey,
             @Value("${authentication.jws.expiryseconds:300}") Integer jsonWebTokenExpirySeconds,
             @Value("${authentication.jws.issuer}") String jsonWebTokenIssuer) {
+        this.userService = userService;
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.jsonWebTokenExpirySeconds = Preconditions.checkNotNull(jsonWebTokenExpirySeconds);
         this.jsonWebTokenIssuer = Preconditions.checkNotNull(jsonWebTokenIssuer);
@@ -171,18 +176,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Preconditions.checkArgument(StringUtils.isNotBlank(passwordClear));
         byte[] saltBytes = BaseEncoding.base16().decode(salt.toUpperCase());
 
-        MessageDigest sha;
         try {
-            sha = MessageDigest.getInstance("SHA-256");
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
             sha.update(passwordClear.getBytes(Charsets.UTF_8));
+            sha.update(saltBytes);
+            return BaseEncoding.base16().encode(sha.digest()).toLowerCase();
         }
         catch (java.security.NoSuchAlgorithmException e) {
             throw new IllegalStateException("no SHA-256 crypt algorithm available",e);
         }
-
-        sha.update(saltBytes);
-
-        return BaseEncoding.base16().encode(sha.digest()).toLowerCase();
     }
 
     @Override
@@ -352,13 +354,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Instant instant = Instant.now();
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet
+        JWTClaimsSet.Builder builder = new JWTClaimsSet
                 .Builder()
                 .subject(user.getNickname() + SUFFIX_JSONWEBTOKEN_SUBJECT)
                 .issueTime(new java.util.Date(instant.toEpochMilli()))
                 .expirationTime(new java.util.Date(instant.plus(jsonWebTokenExpirySeconds, ChronoUnit.SECONDS).toEpochMilli()))
-                .issuer(jsonWebTokenIssuer)
-                .build();
+                .issuer(jsonWebTokenIssuer);
+
+        if (!user.getIsRoot() && !userService.isUserCurrentlyAgreeingToCurrentUserUsageConditions(user)) {
+            builder.claim(CLAIM_REQUIRES_AGREE_USER_USAGE_CONDITIONS, true);
+        }
+
+        JWTClaimsSet claimsSet = builder.build();
 
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
 

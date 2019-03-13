@@ -85,4 +85,19 @@ public interface UserApi {
 
     CompletePasswordResetResult completePasswordReset(CompletePasswordResetRequest completePasswordResetRequest);
 
+    /**
+     * <p>This method will allow the user to, at any time, agree to the terms
+     * and conditions.  This may be required for example when the terms change
+     * and the user has agreed to some older terms and conditions.</p>
+     */
+
+    AgreeUserUsageConditionsResult agreeUserUsageConditions(AgreeUserUsageConditionsRequest request);
+
+    /**
+     * <p>This method will return details for the user usage agreement that is
+     * identifier in the request.</p>
+     */
+
+    GetUserUsageConditionsResult getUserUsageConditions(GetUserUsageConditionsRequest request);
+
 }

@@ -73,7 +73,7 @@ angular.module('haikudepotserver').factory('userState',
             function user() {
                 var tokenValue = token();
 
-                if(tokenValue) {
+                if (tokenValue) {
                     var nickname = jwt.tokenNickname(tokenValue);
                     return { nickname : nickname };
                 }
@@ -82,17 +82,21 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             function token(value) {
-                if(undefined !== value) {
+
+                function setAuthorizationHeader(value) {
+                    _.each(
+                        [jsonRpc, pkgScreenshot, jobs],
+                        function(svc) { svc.setHeader('Authorization', value); }
+                    );
+                }
+
+                if (undefined !== value) {
                     if (null == value) {
                         if (token()) {
                             localStorageProxy.removeItem(HDS_TOKEN_KEY);
                             $rootScope.$broadcast('userChangeStart', null);
 
-                            // remove the Authorization header for HTTP transport
-                            jsonRpc.setHeader('Authorization');
-                            pkgScreenshot.setHeader('Authorization');
-                            jobs.setHeader('Authorization');
-
+                            setAuthorizationHeader();
                             cancelTokenRenewalTimeout();
                             resetAuthorization();
 
@@ -114,12 +118,7 @@ angular.module('haikudepotserver').factory('userState',
                         }
 
                         localStorageProxy.setItem(HDS_TOKEN_KEY, value);
-                        var authenticationContent = 'Bearer ' + value;
-
-                        jsonRpc.setHeader('Authorization', authenticationContent);
-                        pkgScreenshot.setHeader('Authorization', authenticationContent);
-                        jobs.setHeader('Authorization', authenticationContent);
-
+                        setAuthorizationHeader('Bearer ' + value);
                         configureTokenRenewal();
 
                         if (userChanging) {
@@ -540,9 +539,11 @@ angular.module('haikudepotserver').factory('userState',
             return {
 
                 /**
-                 * <p>This is the natural language code for the user.  If there is an authenticated user then this
-                 * value will be derived from the user details.  If there is no user presently authenticated then
-                 * this function will maintain state of the natural language choice itself.</p>
+                 * <p>This is the natural language code for the user.  If there
+                 * is an authenticated user then this value will be derived
+                 * from the user details.  If there is no user presently
+                 * authenticated then this function will maintain state of the
+                 * natural language choice itself.</p>
                  * @param value
                  */
 
@@ -555,17 +556,19 @@ angular.module('haikudepotserver').factory('userState',
                 user : user,
 
                 /**
-                 * <p>This function will either set or get the token.  Invoked with no token value, the function
-                 * will return the current token value.  Invoked with a value will set the value and will
-                 * return it.</p>
+                 * <p>This function will either set or get the token.  Invoked
+                 * with no token value, the function will return the current
+                 * token value.  Invoked with a value will set the value and
+                 * will return it.</p>
                  */
 
                 token : token,
 
                 /**
-                 * <p>This function will check to make sure that the target and permissions supplied are authorized.
-                 * The single argument should be an array of objects.  Each object should have the following
-                 * elements;</p>
+                 * <p>This function will check to make sure that the target and
+                 * permissions supplied are authorized. The single argument
+                 * should be an array of objects.  Each object should have the
+                 * following elements;</p>
                  *
                  * <ul>
                  *     <li>targetType</li>
@@ -573,7 +576,8 @@ angular.module('haikudepotserver').factory('userState',
                  *     <li>permissionCode</li>
                  * </ul>
                  *
-                 * <p>Returned is a promise which resolves to a true if all of the queries are true.</p>
+                 * <p>Returned is a promise which resolves to a true if all of
+                 * the queries are true.</p>
                  */
 
                 areAuthorized : checkAllAuthorizationsAreAuthorized,

@@ -27,6 +27,30 @@
         </dd>
     </dl>
 
+    <h2><message key="viewUser.userUsageConditionsAgreement.title"></message></h2>
+
+    <p class="text-warning" ng-show="!user.userUsageConditionsAgreement.userUsageConditionsCode">
+        <message key="viewUser.userUsageConditionsAgreement.none"></message>
+    </p>
+
+    <dl ng-show="user.userUsageConditionsAgreement.userUsageConditionsCode">
+        <dt><message key="viewUser.userUsageConditionsAgreement.timestampAgreed.title"></message></dt>
+        <dd>{{user.userUsageConditionsAgreement.timestampAgreed|timestamp}}</dd>
+        <dt></dt>
+        <dd>
+            <span ng-show="user.userUsageConditionsAgreement.isLatest">
+                <message key="viewUser.userUsageConditionsAgreement.isLatest.true"></message>
+            </span>
+            <span ng-show="!user.userUsageConditionsAgreement.isLatest" class="text-error">
+                <message key="viewUser.userUsageConditionsAgreement.isLatest.false"></message>
+            </span>
+            (<user-usage-conditions-link code="user.userUsageConditionsAgreement.userUsageConditionsCode"><message key="viewUser.userUsageConditionsAgreement.document.read"></message></user-usage-conditions-link>)
+        <dt></dt>
+        <dd><message
+                key="viewUser.userUsageConditionsAgreement.age.statement"
+                parameters="userUsageConditions.minimumAge"></message></dd>
+    </dl>
+
     <h2><message key="gen.actions.title"></message></h2>
 
     <ul>

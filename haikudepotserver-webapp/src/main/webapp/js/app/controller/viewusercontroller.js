@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,9 +16,12 @@ angular.module('haikudepotserver').controller(
 
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
+            $scope.userUsageConditions = undefined;
 
             $scope.shouldSpin = function () {
-                return undefined === $scope.user;
+                return undefined === $scope.user ||
+                    ($scope.user.userUsageConditionsCode &&
+                        undefined === $scope.userUsageConditions);
             };
 
             refreshUser();
@@ -28,6 +31,19 @@ angular.module('haikudepotserver').controller(
                     breadcrumbFactory.createHome(),
                     breadcrumbFactory.applyCurrentLocation(breadcrumbFactory.createViewUser($scope.user))
                 ]);
+            }
+
+            function fetchUserUsageConditions() {
+                return jsonRpc.call(
+                    constants.ENDPOINT_API_V1_USER,
+                    "getUserUsageConditions",
+                    [{code: $scope.user.userUsageConditionsAgreement.userUsageConditionsCode}])
+                    .then(
+                        function (userUsageConditionsData) {
+                            $scope.userUsageConditions = userUsageConditionsData;
+                        },
+                        errorHandling.handleJsonRpcError
+                    );
             }
 
             function refreshUser() {
@@ -41,6 +57,12 @@ angular.module('haikudepotserver').controller(
                     function (result) {
                         $scope.user = result;
                         refreshBreadcrumbItems();
+
+                        if ($scope.user.userUsageConditionsAgreement &&
+                            $scope.user.userUsageConditionsAgreement.userUsageConditionsCode) {
+                            fetchUserUsageConditions();
+                        }
+
                         $log.info('fetched user; '+result.nickname);
                     },
                     function (err) {

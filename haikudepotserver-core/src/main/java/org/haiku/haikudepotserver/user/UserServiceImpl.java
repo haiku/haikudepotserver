@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,8 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
+import org.haiku.haikudepotserver.dataobjects.auto._UserUsageConditionsAgreement;
 import org.haiku.haikudepotserver.support.LikeHelper;
 import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
 import org.haiku.haikudepotserver.user.model.UserService;
@@ -81,6 +83,16 @@ public class UserServiceImpl implements UserService {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(searchSpecification);
         return prepareObjectSelect(searchSpecification).count().selectFirst(context);
+    }
+
+    @Override
+    public boolean isUserCurrentlyAgreeingToCurrentUserUsageConditions(User user) {
+        ObjectContext context = user.getObjectContext();
+        String code = UserUsageConditions.getLatest(context).getCode();
+        return user.tryGetUserUsageConditionsAgreement()
+                .filter(_UserUsageConditionsAgreement::getActive)
+                .filter(uuca -> uuca.getUserUsageConditions().getCode().equals(code))
+                .isPresent();
     }
 
 }

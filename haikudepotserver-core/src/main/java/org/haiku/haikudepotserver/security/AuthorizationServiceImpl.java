@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -167,32 +167,35 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
             case REPOSITORY_EDIT:
             case REPOSITORY_IMPORT:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
 
             case REPOSITORY_VIEW:
                 Repository repository = (Repository) target;
-                return repository.getActive() || (null!=authenticatedUser && authenticatedUser.getIsRoot());
+                return repository.getActive() || (null != authenticatedUser && authenticatedUser.getIsRoot());
 
             case REPOSITORY_LIST:
                 return true;
 
             case REPOSITORY_LIST_INACTIVE:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
 
             case REPOSITORY_ADD:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
+
+            case USER_AGREE_USAGE_CONDITIONS:
+                User user = (User) target;
+                return null != authenticatedUser && authenticatedUser.getNickname().equals(user.getNickname());
 
             case USER_VIEWJOBS:
             case USER_VIEW:
             case USER_EDIT:
             case USER_CHANGEPASSWORD:
                 return
-                        null!=authenticatedUser
+                        null != authenticatedUser
                                 && (authenticatedUser.getIsRoot() || authenticatedUser.equals(target));
 
-            case USER_SYNCHRONIZE:
             case USER_LIST:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
 
             case PKG_CREATEUSERRATING:
                 return true;
@@ -204,14 +207,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             case PKG_EDITCHANGELOG:
             case PKG_EDITPROMINENCE:
             case PKG_EDITVERSION:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
 
             case USERRATING_EDIT:
                 UserRating userRating = (UserRating) target;
-                return null!=authenticatedUser && (userRating.getUser().equals(authenticatedUser) || authenticatedUser.getIsRoot());
+                return null != authenticatedUser && (userRating.getUser().equals(authenticatedUser) || authenticatedUser.getIsRoot());
 
             case USERRATING_DERIVEANDSTOREFORPKG:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
 
             case BULK_PKGLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
@@ -221,28 +224,28 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             case BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET:
             case BULK_PKGICONEXPORTARCHIVE:
             case BULK_PKGSCREENSHOTEXPORTARCHIVE:
-                return null!=authenticatedUser;
+                return null != authenticatedUser;
 
             case BULK_PKGSCREENSHOTIMPORTARCHIVE:
             case BULK_PKGICONIMPORTARCHIVE:
             case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:
             case BULK_USERRATINGSPREADSHEETREPORT_ALL:
             case BULK_PKGVERSIONPAYLOADLENGTHPOPULATION:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
 
             case BULK_USERRATINGSPREADSHEETREPORT_PKG:
-                return null!=authenticatedUser;
+                return null != authenticatedUser;
 
             case BULK_USERRATINGSPREADSHEETREPORT_USER:
-                return null!=authenticatedUser &&
+                return null != authenticatedUser &&
                         (authenticatedUser.getIsRoot() ||
                                 authenticatedUser.getNickname().equals(((User) target).getNickname()));
 
             case JOBS_VIEW:
-                return null!=authenticatedUser && authenticatedUser.getIsRoot();
+                return null != authenticatedUser && authenticatedUser.getIsRoot();
 
             default:
-                throw new IllegalStateException("unhandled permission; "+permission.name());
+                throw new IllegalStateException("unhandled permission; " + permission.name());
         }
 
     }

@@ -1,74 +1,131 @@
 <div class="content-container">
 
-    <div class="form-info-container" ng-show="didChangePassword">
-        <message key="authenticateUser.info.changePassword"></message>
-    </div>
+    <!--
+    This section is shown when the user is yet to authenticate.
+    -->
 
-    <div class="form-info-container" ng-show="didCreate">
-        <message key="authenticateUser.info.createdAccount"></message>
-    </div>
+    <div ng-show="!tokenPendingAgreeUserUsageConditions">
 
-    <div class="form-alert-container" ng-show="didFailAuthentication">
-        <message key="authenticateUser.info.failedAuthentication"></message>
-    </div>
-
-    <form name="authenticateUserForm" novalidate="novalidate">
-
-        <label for="nickname"><message key="authenticateUser.nickname.title"></message></label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('nickname')">
-                <input
-                        autofill-fix=""
-                        initial-focus=""
-                        type="text"
-                        id="nickname"
-                        name="nickname"
-                        placeholder="erik"
-                        ng-model="authenticationDetails.nickname"
-                        ng-required="true"></input>
-                <error-messages key-prefix="authenticateUser.nickname" error="authenticateUserForm.nickname.$error"></error-messages>
+        <div class="form-info-container" ng-show="didChangePassword">
+            <message key="authenticateUser.info.changePassword"></message>
         </div>
 
-        <label for="password-clear"><message key="authenticateUser.passwordClear.title"></message></label>
-        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('passwordClear')">
-                <input
-                        autofill-fix=""
-                        type="password"
-                        id="password-clear"
-                        name="passwordClear"
-                        ng-required="true"
-                        ng-model="authenticationDetails.passwordClear"></input>
-                <error-messages
-                        key-prefix="authenticateUser.passwordClear"
-                        error="authenticateUserForm.passwordClear.$error"></error-messages>
+        <div class="form-info-container" ng-show="didCreate">
+            <message key="authenticateUser.info.createdAccount"></message>
         </div>
 
-        <div class="form-action-container">
+        <div class="form-alert-container" ng-show="didFailAuthentication">
+            <message key="authenticateUser.info.failedAuthentication"></message>
+        </div>
+
+        <form name="authenticateUserForm" novalidate="novalidate">
+
+            <label for="nickname"><message key="authenticateUser.nickname.title"></message></label>
+            <div class="form-control-group" ng-class="deriveAuthenticateUserFormControlsContainerClasses('nickname')">
+                    <input
+                            autofill-fix=""
+                            initial-focus=""
+                            type="text"
+                            id="nickname"
+                            name="nickname"
+                            placeholder="erik"
+                            ng-model="authenticationDetails.nickname"
+                            ng-required="true"/>
+                    <error-messages key-prefix="authenticateUser.nickname" error="authenticateUserForm.nickname.$error"></error-messages>
+            </div>
+
+            <label for="password-clear"><message key="authenticateUser.passwordClear.title"></message></label>
+            <div class="form-control-group" ng-class="deriveAuthenticateUserFormControlsContainerClasses('passwordClear')">
+                    <input
+                            autofill-fix=""
+                            type="password"
+                            id="password-clear"
+                            name="passwordClear"
+                            ng-required="true"
+                            ng-model="authenticationDetails.passwordClear"/>
+                    <error-messages
+                            key-prefix="authenticateUser.passwordClear"
+                            error="authenticateUserForm.passwordClear.$error"></error-messages>
+            </div>
+
+            <div class="form-action-container">
+                    <button
+                            ng-disabled="authenticateUserForm.$invalid"
+                            ng-click="goAuthenticate()"
+                            type="submit"
+                            class="main-action">
+                        <message key="authenticateUser.loginAction.title"></message>
+                    </button>
+            </div>
+
+        </form>
+
+        <ul>
+            <li>
+                <user-usage-conditions-link>
+                    <message key="userUsageConditions.link.title"></message>
+                </user-usage-conditions-link>
+            </li>
+            <li>
+                <a href="" ng-click="goCreateUser()">
+                    <message key="authenticateUser.createUserAction.title"></message>
+                </a>
+            </li>
+            <li>
+                <a
+                        breadcrumb-link="initiatePasswordReset"
+                        breadcrumb-link-parameters="[]">
+                    <message key="authenticateUser.initiatePasswordResetAction.title"></message>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+
+    <!--
+    This section is shown when the user has authenticated, but they need to
+    agree to updated terms and conditions.
+    -->
+
+    <div ng-show="tokenPendingAgreeUserUsageConditions">
+        <p><message key="authenticateUser.agreeUserUsageConditions.message"></message></p>
+
+        <form name="agreeUserUsageConditionsForm" novalidate="novalidate">
+
+            <label for="user-usage-conditions-minimum-age-exceeded"></label>
+            <div class="form-control-group">
+                <input
+                        id="user-usage-conditions-minimum-age-exceeded"
+                        type="checkbox"
+                        ng-model="agreeUserUsageConditions.userUsageConditionsIsMinimumAgeExceeded"/>
+                <message
+                        key="authenticateUser.userUsageConditionsAge.statement"
+                        parameters="userUsageConditions.minimumAge"/>
+            </div>
+
+            <label for="user-usage-conditions-document-agreed"></label>
+            <div class="form-control-group">
+                <input
+                        id="user-usage-conditions-document-agreed"
+                        type="checkbox"
+                        ng-model="agreeUserUsageConditions.userUsageConditionsDocumentAgreed"/>
+                <message key="authenticateUser.userUsageConditionsDocument.statement"></message>
+                (<user-usage-conditions-link code="userUsageConditions.code"><message key="authenticateUser.userUsageConditionsDocument.read"></message></user-usage-conditions-link>)
+            </div>
+
+            <div class="form-action-container">
                 <button
-                        ng-disabled="authenticateUserForm.$invalid"
-                        ng-click="goAuthenticate()"
+                        ng-disabled="!canAgreeUserUsageConditions()"
+                        ng-click="goAgreeUserUsageConditions()"
                         type="submit"
                         class="main-action">
-                    <message key="authenticateUser.action.title"></message>
+                    <message key="authenticateUser.agreeUserUsageConditionsAction.title"></message>
                 </button>
-        </div>
+            </div>
 
-    </form>
+        </form>
 
-    <ul>
-        <li><handling-data-info></handling-data-info></li>
-        <li>
-            <a href="" ng-click="goCreateUser()">
-                <message key="authenticateUser.createUserAction.title"></message>
-            </a>
-        </li>
-        <li>
-            <a
-                    breadcrumb-link="initiatePasswordReset"
-                    breadcrumb-link-parameters="[]">
-                <message key="authenticateUser.initiatePasswordResetAction.title"></message>
-            </a>
-        </li>
-    </ul>
+    </div>
 
 </div>
 

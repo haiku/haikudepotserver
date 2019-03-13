@@ -34,8 +34,7 @@ angular.module('haikudepotserver')
                 var result = referenceDataCache.get(what);
 
                 if(!result) {
-                    result = jsonRpc
-                        .call(
+                    result = jsonRpc.call(
                         constants.ENDPOINT_API_V1_MISCELLANEOUS,
                         'getAll' + what.charAt(0).toUpperCase() + what.substring(1),
                         [{}]

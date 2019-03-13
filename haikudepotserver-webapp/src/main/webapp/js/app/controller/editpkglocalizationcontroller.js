@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -393,7 +393,7 @@ angular.module('haikudepotserver').controller(
             $scope.$watch(
                 'selectedTranslation',
                 function (newValue, oldValue) {
-                    if (null !== oldValue) {
+                    if (oldValue) {
 
                         function compareLocalizationElements(o1,o2) {
 

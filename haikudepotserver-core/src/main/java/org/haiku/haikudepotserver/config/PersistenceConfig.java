@@ -5,6 +5,7 @@
 
 package org.haiku.haikudepotserver.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.cayenne.DataChannelFilter;
@@ -14,9 +15,11 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener;
 import org.haiku.haikudepotserver.support.cayenne.ServerRuntimeFactory;
+import org.haiku.haikudepotserver.support.db.UserUsageConditionsInitializer;
 import org.haiku.haikudepotserver.support.db.migration.ManagedDatabase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
 
 import javax.sql.DataSource;
 import java.util.Collections;
@@ -58,6 +61,15 @@ public class PersistenceConfig {
             @Value("${flyway.validateOnMigrate:true}") Boolean validateOnMigrate
     ) {
         return createManagedDatabase(dataSource, "captcha", flywayMigrate, validateOnMigrate);
+    }
+
+    @Bean(initMethod = "init")
+    @DependsOn({"haikuDepotManagedDatabase"})
+    public UserUsageConditionsInitializer userUsageConditionsInitializer(
+            ServerRuntime serverRuntime,
+            ObjectMapper objectMapper
+    ) {
+        return new UserUsageConditionsInitializer(serverRuntime, objectMapper);
     }
 
     private ManagedDatabase createManagedDatabase(
