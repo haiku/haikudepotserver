@@ -22,7 +22,7 @@ angular.module('haikudepotserver').directive('userUsageConditionsLink',
                     function generateUrl(code) {
                         return '/__user/usageconditions/' +
                             ((!code || !code.length) ? 'latest' : code) +
-                            '/document.md';
+                            '/document.html'; // '.md' also possible
                     }
 
                     function updateUrlInHyperlinkEl(code) {

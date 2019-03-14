@@ -58,6 +58,8 @@
         <jetty.version>9.4.11.v20180605</jetty.version>
 
         <metrics.version>4.0.2</metrics.version>
+
+        <flexmark.version>0.40.22</flexmark.version>
     </properties>
 
     <dependencyManagement>

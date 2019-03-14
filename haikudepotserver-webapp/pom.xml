@@ -25,6 +25,18 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- used to render markdown to html -->
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark</artifactId>
+            <version>${flexmark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-ext-tables</artifactId>
+            <version>${flexmark.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-servlets</artifactId>
