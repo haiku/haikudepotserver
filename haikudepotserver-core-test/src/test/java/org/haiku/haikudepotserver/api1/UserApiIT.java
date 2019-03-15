@@ -5,6 +5,7 @@
 
 package org.haiku.haikudepotserver.api1;
 
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
@@ -27,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -137,10 +139,10 @@ public class UserApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testAuthenticateUser_succcess() {
+    public void testAuthenticateUser_succcessNoAgreement() throws Exception {
 
         ObjectContext context = serverRuntime.newContext();
-        User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
+        integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
@@ -150,11 +152,45 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.token).isNotNull();
         Assertions.assertThat(authenticationService.authenticateByToken(result.token).isPresent()).isTrue();
 
+        SignedJWT signedJWT = SignedJWT.parse(result.token);
+        Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
+
+        Assertions.assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("testuser@hds");
+
+        // because the user has not agreed to the usage conditions they will get
+        // this flag come up in their token.
+        Assertions.assertThat(claims.get("ucnd")).isEqualTo(Boolean.TRUE);
+
         {
             User userAfter = User.getByNickname(context, "testuser");
             Assertions.assertThat(userAfter.getLastAuthenticationTimestamp()).isNotNull();
         }
 
+    }
+
+    @Test
+    public void testAuthenticateUser_succcessWithAgreement() throws Exception {
+
+        ObjectContext context = serverRuntime.newContext();
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
+        integrationTestSupportService.agreeToUserUsageConditions(context, user);
+        setAuthenticatedUser("testuser");
+
+        // ------------------------------------
+        AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser", "U7vqpsu6BB"));
+        // ------------------------------------
+
+        Assertions.assertThat(result.token).isNotNull();
+        Assertions.assertThat(authenticationService.authenticateByToken(result.token).isPresent()).isTrue();
+
+        SignedJWT signedJWT = SignedJWT.parse(result.token);
+        Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
+
+        Assertions.assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("testuser@hds");
+
+        // because the user has agreed to the usage conditions they will not get
+        // this flag in the response JWT token.
+        Assertions.assertThat(claims.get("ucnd")).isNull();
     }
 
     @Test
