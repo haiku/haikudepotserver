@@ -89,6 +89,7 @@ public interface UserApi {
      * <p>This method will allow the user to, at any time, agree to the terms
      * and conditions.  This may be required for example when the terms change
      * and the user has agreed to some older terms and conditions.</p>
+     * @since 2019-03-15
      */
 
     AgreeUserUsageConditionsResult agreeUserUsageConditions(AgreeUserUsageConditionsRequest request);
@@ -96,6 +97,7 @@ public interface UserApi {
     /**
      * <p>This method will return details for the user usage agreement that is
      * identifier in the request.</p>
+     * @since 2019-03-15
      */
 
     GetUserUsageConditionsResult getUserUsageConditions(GetUserUsageConditionsRequest request);

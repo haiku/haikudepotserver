@@ -14,6 +14,7 @@ import org.apache.cayenne.map.DataMap;
 import org.apache.cayenne.map.DbEntity;
 import org.apache.cayenne.map.ObjEntity;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.security.AuthenticationHelper;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
@@ -36,6 +37,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>This superclass of all of the tests has a hook to run before each integration test.  The hook will
@@ -50,6 +54,11 @@ import java.util.Objects;
 public abstract class AbstractIntegrationTest {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+
+    private final static Set<String> CDO_NAMES_RETAINED =
+            Stream.of(User.class, UserUsageConditions.class)
+                    .map(Class::getSimpleName)
+                    .collect(Collectors.toSet());
 
     private final static String DATABASEPRODUCTNAME_POSTGRES = "PostgreSQL";
 
@@ -161,7 +170,7 @@ public abstract class AbstractIntegrationTest {
 
                     for (ObjEntity objEntity : dataMap.getObjEntities()) {
 
-                        if(!objEntity.isReadOnly() && !objEntity.getName().equals(User.class.getSimpleName())) {
+                        if(!objEntity.isReadOnly() && !CDO_NAMES_RETAINED.contains(objEntity.getName())) {
                             truncationNames.add(objEntity.getDbEntity().getSchema() + "." + objEntity.getDbEntity().getName());
                         }
 
