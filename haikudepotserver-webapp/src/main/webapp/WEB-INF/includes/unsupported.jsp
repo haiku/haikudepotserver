@@ -37,6 +37,18 @@ environment is working.
         </div>
 
         <div class="unsupported-message-container">
+            このアプリケーションはいまお使いのブラウザーでは正しく動作しません。
+            もしかしてブラウザーでJavaScriptが無効になっているか，ブラウザーがサポートされていないかもしれません。
+            最新バージョンのブラウザー
+            <a href="https://www.haiku-os.org/docs/userguide/en/applications/webpositive.html">WebPositive</a>,
+            <a href="https://www.mozilla.org/firefox">Firefox</a>
+            および
+            <a href="https://www.google.com/chrome/browser/">Google Chrome</a>
+            で動作することが知られています。簡易版のユーザーインターフェースも同様に
+            <a href="/__multipage">利用できます</a>。
+        </div>
+
+        <div class="unsupported-message-container">
             T&#xE1;to aplik&#xE1;cia nefunguje spr&#xE1;vne v prehliada&#x10D;i, ktor&#xFD; pr&#xE1;ve pou&#x17E;&#xED;vate.
             M&#xF4;&#x17E;e to by&#x165; bu&#x10F; preto, &#x17E;e ste si v prehliada&#x10D;i vypli JavaScript alebo preto, &#x17E;e v&#xE1;&#x161; prehliada&#x10D; nie je podporovan&#xFD;.
             Je zn&#xE1;me, &#x17E;e funguj&#xFA; najnov&#x161;ie verzie prehliada&#x10D;ov:
