@@ -1,1 +1,1 @@
-Haiku Depot Server; Password Reset Procedure
+Haiku Depot Server; パスワードリセットの手続き

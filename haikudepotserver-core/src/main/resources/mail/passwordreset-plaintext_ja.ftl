@@ -1,18 +1,17 @@
-Hello;
+こんにちわ
 
-This is an automated email; do not reply.
+これは自動的に送信されたメールです。返信しないでください。
 
-You have recently requested that a password reset procedure be initiated on
-your user...
+あなたは，Haiku Depot Server webサービスで，以下のユーザー名に対して
+パスワードリセット手続きの起動を要求しました。
 
     ${userNickname}
 
-...at the Haiku Depot Server web service.  To proceed with this process,
-click on the hyperlink;
+パスワードリセットを開始するには，以下のリンクをクリックしてください。
 
     ${passwordResetBaseUrl}${userPasswordResetTokenCode}
 
-This will allow you to nominate a new password for your user.
+これにより，新しいパスワードを指定できます。
 
-Regards;
+以上よろしくお願いいたします
 Haiku Depot Server
