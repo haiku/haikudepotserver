@@ -39,7 +39,7 @@ environment is working.
         <div class="unsupported-message-container">
             このアプリケーションはいまお使いのブラウザーでは正しく動作しません。
             もしかしてブラウザーでJavaScriptが無効になっているか，ブラウザーがサポートされていないかもしれません。
-            最新バージョンのブラウザー
+            以下のブラウザーの最新バージョン
             <a href="https://www.haiku-os.org/docs/userguide/en/applications/webpositive.html">WebPositive</a>,
             <a href="https://www.mozilla.org/firefox">Firefox</a>
             および
