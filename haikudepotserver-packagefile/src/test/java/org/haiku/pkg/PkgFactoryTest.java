@@ -5,6 +5,7 @@
 
 package org.haiku.pkg;
 
+import com.google.common.collect.ImmutableList;
 import org.haiku.pkg.model.*;
 import org.junit.Test;
 
@@ -21,31 +22,35 @@ public class PkgFactoryTest {
 
     private Attribute createTestPackageAttributes() {
 
-        StringInlineAttribute topA = new StringInlineAttribute(AttributeId.PACKAGE, "testpkg");
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_NAME, "testpkg"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VENDOR, "Test Vendor"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_SUMMARY, "This is a test package summary"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_DESCRIPTION, "This is a test package description"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_URL, "http://www.haiku-os.org"));
-        topA.addChildAttribute(new IntAttribute(AttributeId.PACKAGE_ARCHITECTURE, new BigInteger("1"))); // X86
-
         StringInlineAttribute majorVersionA = new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MAJOR, "6");
-        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MINOR, "32"));
-        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MICRO, "9"));
-        majorVersionA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_VERSION_PRE_RELEASE, "beta"));
-        majorVersionA.addChildAttribute(new IntAttribute(AttributeId.PACKAGE_VERSION_REVISION, new BigInteger("8")));
-        topA.addChildAttribute(majorVersionA);
+        majorVersionA.setChildAttributes(ImmutableList.of(
+                new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MINOR, "32"),
+                new StringInlineAttribute(AttributeId.PACKAGE_VERSION_MICRO, "9"),
+                new StringInlineAttribute(AttributeId.PACKAGE_VERSION_PRE_RELEASE, "beta"),
+                new IntAttribute(AttributeId.PACKAGE_VERSION_REVISION, new BigInteger("8"))
+        ));
 
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT, "Some copyright A"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT, "Some copyright B"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_LICENSE, "Some license A"));
-        topA.addChildAttribute(new StringInlineAttribute(AttributeId.PACKAGE_LICENSE, "Some license B"));
+        StringInlineAttribute topA = new StringInlineAttribute(AttributeId.PACKAGE, "testpkg");
+
+        topA.setChildAttributes(ImmutableList.of(
+                new StringInlineAttribute(AttributeId.PACKAGE_NAME, "testpkg"),
+                new StringInlineAttribute(AttributeId.PACKAGE_VENDOR, "Test Vendor"),
+                new StringInlineAttribute(AttributeId.PACKAGE_SUMMARY, "This is a test package summary"),
+                new StringInlineAttribute(AttributeId.PACKAGE_DESCRIPTION, "This is a test package description"),
+                new StringInlineAttribute(AttributeId.PACKAGE_URL, "http://www.haiku-os.org"),
+                new IntAttribute(AttributeId.PACKAGE_ARCHITECTURE, new BigInteger("1")), // X86
+                majorVersionA,
+                new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT, "Some copyright A"),
+                new StringInlineAttribute(AttributeId.PACKAGE_COPYRIGHT, "Some copyright B"),
+                new StringInlineAttribute(AttributeId.PACKAGE_LICENSE, "Some license A"),
+                new StringInlineAttribute(AttributeId.PACKAGE_LICENSE, "Some license B")
+        ));
 
         return topA;
     }
 
     @Test
-    public void testCreatePackage() throws PkgException {
+    public void testCreatePackage() {
 
         Attribute attribute = createTestPackageAttributes();
         PkgFactory pkgFactory = new PkgFactory();

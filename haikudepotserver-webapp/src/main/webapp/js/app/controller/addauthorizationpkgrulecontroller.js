@@ -104,7 +104,7 @@ angular.module('haikudepotserver').controller(
                 amSaving = true;
                 $scope.wasConflicting = false;
 
-                if($scope.addRuleForm.$invalid) {
+                if ($scope.addRuleForm.$invalid) {
                     throw Error('it is not possible to add a rule if the form is invalid.');
                 }
 
@@ -114,7 +114,7 @@ angular.module('haikudepotserver').controller(
                     pkgName : undefined
                 };
 
-                if('APKG' == $scope.workingRule.authorizationTargetScopeType) {
+                if ('APKG' === $scope.workingRule.authorizationTargetScopeType) {
                     request.pkgName = $scope.workingRule.pkgName;
                 }
 
@@ -139,7 +139,7 @@ angular.module('haikudepotserver').controller(
                                 _.each(
                                     err.data,
                                     function(item) {
-                                        if('user'==item.property) {
+                                        if ('user' === item.property) {
                                             $scope.addRuleForm.userNickname.$setValidity(item.message,false);
                                         }
                                         else {

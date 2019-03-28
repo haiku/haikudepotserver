@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.multipage.markup;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -19,6 +20,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -41,21 +43,20 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
                 context,
                 (HttpServletRequest) pageContext.getRequest());
 
-        Collections.sort(naturalLanguages, (o1, o2) -> o1.getCode().compareTo(o2.getCode())
-        );
+        Collections.sort(naturalLanguages, Comparator.comparing(_NaturalLanguage::getCode));
 
         tagWriter.startTag("span");
         tagWriter.writeAttribute("class","multipage-natural-language-chooser");
 
-        for(int i=0;i<naturalLanguages.size();i++) {
+        for (int i = 0;i < naturalLanguages.size();i++) {
 
             NaturalLanguage naturalLanguage = naturalLanguages.get(i);
 
-            if(0 != i) {
+            if (0 != i) {
                 tagWriter.appendValue(" ");
             }
 
-            if(currentNaturalLanguage != naturalLanguage) {
+            if (currentNaturalLanguage != naturalLanguage) {
 
                 String path = (String) pageContext.getRequest().getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
                 UriComponentsBuilder builder = ServletUriComponentsBuilder.newInstance().path(path);
@@ -66,8 +67,7 @@ public class NaturalLanguageChooserTag extends RequestContextAwareTag {
                 tagWriter.appendValue(naturalLanguage.getCode());
                 tagWriter.endTag(); // a
 
-            }
-            else {
+            } else {
                 tagWriter.startTag("strong");
                 tagWriter.writeAttribute("class", "banner-actions-text");
                 tagWriter.appendValue(naturalLanguage.getCode());

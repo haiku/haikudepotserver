@@ -1,10 +1,11 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1;
 
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
@@ -27,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -77,19 +79,26 @@ public class UserApiIT extends AbstractIntegrationTest {
         request.nickname = "testuser";
         request.passwordClear = "Ue4nI92Rw";
         request.naturalLanguageCode = "en";
+        request.userUsageConditionsCode = "UUC2019V01";
 
         // ------------------------------------
         CreateUserResult result = userApi.createUser(request);
         // ------------------------------------
 
+        Assertions.assertThat(result).isNotNull();
+
         ObjectContext context = serverRuntime.newContext();
         Optional<User> userOptional = User.tryGetByNickname(context, "testuser");
-
         Assertions.assertThat(userOptional.isPresent()).isTrue();
-        Assertions.assertThat(userOptional.get().getActive()).isTrue();
-        Assertions.assertThat(userOptional.get().getIsRoot()).isFalse();
-        Assertions.assertThat(userOptional.get().getNickname()).isEqualTo("testuser");
-        Assertions.assertThat(userOptional.get().getNaturalLanguage().getCode()).isEqualTo("en");
+        User user = userOptional.get();
+
+        Assertions.assertThat(user.getActive()).isTrue();
+        Assertions.assertThat(user.getIsRoot()).isFalse();
+        Assertions.assertThat(user.getNickname()).isEqualTo("testuser");
+        Assertions.assertThat(user.getNaturalLanguage().getCode()).isEqualTo("en");
+        Assertions.assertThat(user.getLastAuthenticationTimestamp()).isNull();
+        Assertions.assertThat(user.tryGetUserUsageConditionsAgreement().get().getUserUsageConditions().getCode())
+                .isEqualTo("UUC2019V01");
 
         Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "Ue4nI92Rw").get()).isEqualTo(userOptional.get().getObjectId());
     }
@@ -98,7 +107,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     public void testGetUser_found() throws ObjectNotFoundException {
 
         ObjectContext context = serverRuntime.newContext();
-        User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
+        integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
@@ -106,15 +115,34 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.nickname).isEqualTo("testuser");
+        Assertions.assertThat(result.lastAuthenticationTimestamp).isNull();
+        Assertions.assertThat(result.createTimestamp).isNotNull();
+        Assertions.assertThat(result.userUsageConditionsAgreement).isNull();
         // more to come here in time
-
     }
 
     @Test
-    public void testAuthenticateUser_succcess() {
+    public void testGetUser_foundWithUserUsageConditionsAgreement() throws ObjectNotFoundException {
 
         ObjectContext context = serverRuntime.newContext();
-        User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
+        integrationTestSupportService.agreeToUserUsageConditions(context, user);
+        setAuthenticatedUser("testuser");
+
+        // ------------------------------------
+        GetUserResult result = userApi.getUser(new GetUserRequest("testuser"));
+        // ------------------------------------
+
+        // just check the few things that come with the additional user usage agreement
+        Assertions.assertThat(result.userUsageConditionsAgreement.timestampAgreed).isNotNull();
+        Assertions.assertThat(result.userUsageConditionsAgreement.userUsageConditionsCode).isEqualTo("UUC2019V01");
+    }
+
+    @Test
+    public void testAuthenticateUser_succcessNoAgreement() throws Exception {
+
+        ObjectContext context = serverRuntime.newContext();
+        integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
         setAuthenticatedUser("testuser");
 
         // ------------------------------------
@@ -124,6 +152,45 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.token).isNotNull();
         Assertions.assertThat(authenticationService.authenticateByToken(result.token).isPresent()).isTrue();
 
+        SignedJWT signedJWT = SignedJWT.parse(result.token);
+        Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
+
+        Assertions.assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("testuser@hds");
+
+        // because the user has not agreed to the usage conditions they will get
+        // this flag come up in their token.
+        Assertions.assertThat(claims.get("ucnd")).isEqualTo(Boolean.TRUE);
+
+        {
+            User userAfter = User.getByNickname(context, "testuser");
+            Assertions.assertThat(userAfter.getLastAuthenticationTimestamp()).isNotNull();
+        }
+
+    }
+
+    @Test
+    public void testAuthenticateUser_succcessWithAgreement() throws Exception {
+
+        ObjectContext context = serverRuntime.newContext();
+        User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
+        integrationTestSupportService.agreeToUserUsageConditions(context, user);
+        setAuthenticatedUser("testuser");
+
+        // ------------------------------------
+        AuthenticateUserResult result = userApi.authenticateUser(new AuthenticateUserRequest("testuser", "U7vqpsu6BB"));
+        // ------------------------------------
+
+        Assertions.assertThat(result.token).isNotNull();
+        Assertions.assertThat(authenticationService.authenticateByToken(result.token).isPresent()).isTrue();
+
+        SignedJWT signedJWT = SignedJWT.parse(result.token);
+        Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
+
+        Assertions.assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("testuser@hds");
+
+        // because the user has agreed to the usage conditions they will not get
+        // this flag in the response JWT token.
+        Assertions.assertThat(claims.get("ucnd")).isNull();
     }
 
     @Test
@@ -342,5 +409,41 @@ public class UserApiIT extends AbstractIntegrationTest {
         }
 
     }
+
+    @Test
+    public void testGetUserUsageConditions() {
+        GetUserUsageConditionsRequest request = new GetUserUsageConditionsRequest();
+        request.code = "UUC2019V01";
+
+        // ------------------------------------
+        GetUserUsageConditionsResult result = userApi.getUserUsageConditions(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result.code).isEqualTo("UUC2019V01");
+        Assertions.assertThat(result.minimumAge).isEqualTo(16);
+    }
+
+    public void testAgreeUserUsageConditions() {
+        ObjectContext context = serverRuntime.newContext();
+        integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
+        setAuthenticatedUser("testuser");
+
+        AgreeUserUsageConditionsRequest request = new AgreeUserUsageConditionsRequest();
+        request.userUsageConditionsCode = "UUC2019V01";
+        request.nickname = "testuser";
+
+        // ------------------------------------
+        AgreeUserUsageConditionsResult result = userApi.agreeUserUsageConditions(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result).isNotNull();
+
+        {
+            User userAfter = User.getByNickname(context, "testuser");
+            Assertions.assertThat(userAfter.tryGetUserUsageConditionsAgreement().get().getUserUsageConditions().getCode())
+                    .isEqualTo("UUC2019V01");
+        }
+    }
+
 
 }

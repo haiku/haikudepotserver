@@ -22,7 +22,7 @@ angular.module('haikudepotserver').controller(
             $scope.prominences = undefined;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.pkgVersion || undefined == $scope.prominences || $scope.amSaving;
+                return undefined === $scope.pkgVersion || undefined === $scope.prominences || $scope.amSaving;
             };
 
             // pulls the pkg data back from the server so that it can be used to
@@ -40,7 +40,7 @@ angular.module('haikudepotserver').controller(
                         // pre-select those categories which are presently configured on the pkg.
 
                         referenceData.prominences().then(
-                            function(data) {
+                            function (data) {
 
                                 $scope.prominences = _.clone(data);
 
@@ -49,7 +49,7 @@ angular.module('haikudepotserver').controller(
 
                                 _.each(
                                     $scope.prominences,
-                                    function(item) {
+                                    function (item) {
                                         item.title = item.name + ' (' + item.ordering + ')';
                                     }
                                 );
@@ -63,13 +63,13 @@ angular.module('haikudepotserver').controller(
                                 );
 
                             },
-                            function() {
+                            function () {
                                 // logging happens inside
                                 errorHandling.navigateToError();
                             }
                         )
                     },
-                    function() {
+                    function () {
                         errorHandling.navigateToError();
                     }
                 );
@@ -88,7 +88,7 @@ angular.module('haikudepotserver').controller(
             // stores the categories back to the server for this package.  When it has done this, it will return to
             // view the pkg again.
 
-            $scope.goStoreProminence = function() {
+            $scope.goStoreProminence = function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_PKG,
                     'updatePkgProminence',
@@ -98,11 +98,11 @@ angular.module('haikudepotserver').controller(
                         prominenceOrdering : $scope.selectedProminence.ordering
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('have updated the prominence for pkg '+$scope.pkgVersion.pkg.name);
                         breadcrumbs.popAndNavigate();
                     },
-                    function(err) {
+                    function (err) {
                         $log.error('unable to update pkg prominence');
                         errorHandling.handleJsonRpcError(err);
                     }

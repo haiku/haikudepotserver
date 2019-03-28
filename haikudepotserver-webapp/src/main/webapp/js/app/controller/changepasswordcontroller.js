@@ -25,7 +25,7 @@ angular.module('haikudepotserver').controller(
             var amChangingPassword = false;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.user || amChangingPassword;
+                return undefined === $scope.user || amChangingPassword;
             };
 
             $scope.requiresOldPassword = function() {
@@ -53,12 +53,12 @@ angular.module('haikudepotserver').controller(
                     "getUser",
                     [{ nickname : $routeParams.nickname }]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.user = result;
                         refreshBreadcrumbItems();
                         $log.info('fetched user; '+result.nickname);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -75,12 +75,12 @@ angular.module('haikudepotserver').controller(
                     "generateCaptcha",
                     [{}]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
                         refreshBreadcrumbItems();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -100,7 +100,7 @@ angular.module('haikudepotserver').controller(
                     'repeat',
                         !$scope.changePasswordData.newPasswordClear
                         || !$scope.changePasswordData.newPasswordClearRepeated
-                        || $scope.changePasswordData.newPasswordClear == $scope.changePasswordData.newPasswordClearRepeated);
+                        || $scope.changePasswordData.newPasswordClear === $scope.changePasswordData.newPasswordClearRepeated);
             };
 
             $scope.oldPasswordChanged = function() {
@@ -126,12 +126,12 @@ angular.module('haikudepotserver').controller(
                         captchaResponse : $scope.changePasswordData.captchaResponse
                     }]
                 ).then(
-                    function() {
+                    function () {
 
                         $log.info('did change password for user; '+$scope.user.nickname);
 
-                        if(userState.user().nickname == $scope.user.nickname) {
-                            userState.user(null); // logout
+                        if(userState.user().nickname === $scope.user.nickname) {
+                            userState.token(null); // logout
                             breadcrumbs.resetAndNavigate([
                                 breadcrumbFactory.createHome(),
                                 breadcrumbFactory.applySearch(
@@ -147,11 +147,11 @@ angular.module('haikudepotserver').controller(
                             breadcrumbs.popAndNavigate();
                         }
                     },
-                    function(err) {
+                    function (err) {
                         regenerateCaptcha();
                         $scope.amSaving = false;
 
-                        switch(err.code) {
+                        switch (err.code) {
 
                             // should not be any validation failures that we need to deal with here.
 
@@ -161,11 +161,11 @@ angular.module('haikudepotserver').controller(
                                 // actually there shouldn't really be any validation problems except that the oldPasswordClear
                                 // not match to the user for which the change password operation is being performed.
 
-                                if(err.data && err.data) {
+                                if (err.data && err.data) {
                                     _.each(err.data, function(vf) {
                                         var model = $scope.changePasswordForm[vf.property];
 
-                                        if(model) {
+                                        if (model) {
                                             model.$setValidity(vf.message, false);
                                         }
                                         else {

@@ -22,7 +22,6 @@ Distributed under the terms of the MIT License.
 
     <xi:include href="part-overview.xml"/>
     <xi:include href="part-datamodel.xml"/>
-    <xi:include href="part-datahandling.xml"/>
     <xi:include href="part-architecture.xml"/>
     <xi:include href="part-userrating.xml"/>
     <xi:include href="part-repositories.xml"/>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,7 +49,6 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             FeedService feedService,
             MessageSource messageSource,
             NaturalLanguageService naturalLanguageService,
-            @Value("${information.datahandling.url}") String dataHandlingInformationUrl,
             @Value("${deployment.isproduction:false}") Boolean isProduction,
             @Value("${architecture.default.code}") String architectureDefaultCode,
             @Value("${repository.default.code}") String repositoryDefaultCode) {

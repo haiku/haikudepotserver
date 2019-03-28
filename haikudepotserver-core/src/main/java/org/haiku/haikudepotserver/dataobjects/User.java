@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,6 +19,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
+import org.haiku.haikudepotserver.support.SingleCollector;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -133,6 +134,13 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
             }
         }
 
+    }
+
+    public Optional<UserUsageConditionsAgreement> tryGetUserUsageConditionsAgreement() {
+        return getUserUsageConditionsAgreements()
+                .stream()
+                .filter(UserUsageConditionsAgreement::getActive)
+                .collect(SingleCollector.optional());
     }
 
     /**

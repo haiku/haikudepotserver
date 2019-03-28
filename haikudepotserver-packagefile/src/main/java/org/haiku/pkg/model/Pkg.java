@@ -5,70 +5,66 @@
 
 package org.haiku.pkg.model;
 
-import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Pkg {
 
-    private String name;
-    private PkgVersion version;
-    private PkgArchitecture architecture;
-    private String vendor;
-    private List<String> copyrights;
-    private List<String> licenses;
-    private String summary;
-    private String description;
-    private PkgUrl homePageUrl;
+    private final String name;
+    private final PkgVersion version;
+    private final PkgArchitecture architecture;
+    private final String vendor;
+    private final List<String> copyrights;
+    private final List<String> licenses;
+    private final String summary;
+    private final String description;
+    private final PkgUrl homePageUrl;
+
+    public Pkg(
+            String name,
+            PkgVersion version,
+            PkgArchitecture architecture,
+            String vendor,
+            List<String> copyrights,
+            List<String> licenses,
+            String summary,
+            String description,
+            PkgUrl homePageUrl) {
+        this.name = name;
+        this.version = version;
+        this.architecture = architecture;
+        this.vendor = vendor;
+        this.copyrights = copyrights;
+        this.licenses = licenses;
+        this.summary = summary;
+        this.description = description;
+        this.homePageUrl = homePageUrl;
+    }
 
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getSummary() {
         return summary;
     }
 
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
-
     public String getVendor() {
         return vendor;
-    }
-
-    public void setVendor(String vendor) {
-        this.vendor = vendor;
     }
 
     public PkgVersion getVersion() {
         return version;
     }
 
-    public void setVersion(PkgVersion version) {
-        this.version = version;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public PkgArchitecture getArchitecture() {
         return architecture;
-    }
-
-    public void setArchitecture(PkgArchitecture architecture) {
-        this.architecture = architecture;
     }
 
     public List<String> getCopyrights() {
@@ -78,16 +74,6 @@ public class Pkg {
         return copyrights;
     }
 
-    public void addCopyright(String copyright) {
-        Preconditions.checkNotNull(copyright);
-
-        if(null == copyrights) {
-            copyrights = new ArrayList<>();
-        }
-
-        copyrights.add(copyright);
-    }
-
     public List<String> getLicenses() {
         if(null == licenses) {
             return Collections.emptyList();
@@ -95,22 +81,8 @@ public class Pkg {
         return licenses;
     }
 
-    public void addLicense(String license) {
-        Preconditions.checkNotNull(license);
-
-        if(null == licenses) {
-            licenses = new ArrayList<>();
-        }
-
-        licenses.add(license);
-    }
-
     public PkgUrl getHomePageUrl() {
         return homePageUrl;
-    }
-
-    public void setHomePageUrl(PkgUrl homePageUrl) {
-        this.homePageUrl = homePageUrl;
     }
 
     @SuppressWarnings("StringBufferReplaceableByString")

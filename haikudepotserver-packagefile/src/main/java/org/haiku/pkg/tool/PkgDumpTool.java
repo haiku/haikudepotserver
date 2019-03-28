@@ -45,15 +45,15 @@ public class PkgDumpTool {
     public void run() {
         new CmdLineParser(this);
 
-        try (HpkrFileExtractor hpkrFileExtractor = new HpkrFileExtractor(hpkrFile)) {
-            OutputStreamWriter streamWriter = new OutputStreamWriter(System.out);
-            PkgWriter pkgWriter = new PkgWriter(streamWriter);
+        try (
+                HpkrFileExtractor hpkrFileExtractor = new HpkrFileExtractor(hpkrFile);
+                OutputStreamWriter streamWriter = new OutputStreamWriter(System.out);
+                PkgWriter pkgWriter = new PkgWriter(streamWriter) ) {
             pkgWriter.write(new PkgIterator(hpkrFileExtractor.getPackageAttributesIterator()));
             pkgWriter.flush();
         } catch (Throwable th) {
             LOGGER.error("unable to dump packages", th);
         }
-
     }
 
 

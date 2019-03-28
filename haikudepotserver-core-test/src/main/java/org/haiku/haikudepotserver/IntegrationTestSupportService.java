@@ -352,6 +352,14 @@ public class IntegrationTestSupportService {
         return user;
     }
 
+    public void agreeToUserUsageConditions(ObjectContext context, User user) {
+        UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
+        agreement.setUser(user);
+        agreement.setTimestampAgreed();
+        agreement.setUserUsageConditions(UserUsageConditions.getByCode(context, "UUC2019V01"));
+        context.commitChanges();
+    }
+
     /**
      * <p>This will create a known user and a known set of user ratings that can be tested against.
      * This method expected that the standard test data has already been introduced into the

@@ -30,7 +30,7 @@ public class PkgWriter extends FilterWriter {
         write(pkg.toString());
     }
 
-    public void write(PkgIterator pkgIterator) throws IOException, HpkException {
+    public void write(PkgIterator pkgIterator) throws IOException {
         Preconditions.checkNotNull(pkgIterator);
 
         try {
@@ -39,7 +39,7 @@ public class PkgWriter extends FilterWriter {
                 write('\n');
             }
         }
-        catch(PkgException pe) {
+        catch (PkgException pe) {
             throw new IOException("unable to write a package owing to an exception obtaining the package",pe);
         }
     }

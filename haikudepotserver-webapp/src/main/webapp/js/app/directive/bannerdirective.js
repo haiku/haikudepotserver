@@ -114,22 +114,11 @@ angular.module('haikudepotserver').directive('banner',function() {
 
                     function updateCanShowRootOperations() {
                         $scope.canShowRootOperations = false;
-                        var u = userState.user();
-
-                        if(u) {
-                            jsonRpc.call(
-                                constants.ENDPOINT_API_V1_USER,
-                                'getUser',
-                                [{ nickname : u.nickname }]
-                            ).then(
-                                function(result) {
-                                    $scope.canShowRootOperations = !!result.isRoot;
-                                },
-                                function(err) {
-                                    errorHandling.handleJsonRpcError(err);
-                                }
-                            );
-                        }
+                        userState.isRoot().then(
+                            function(flag) {
+                                $scope.canShowRootOperations = flag;
+                            }
+                        );
                     }
 
                     updateCanShowRootOperations();
@@ -138,6 +127,15 @@ angular.module('haikudepotserver').directive('banner',function() {
                         breadcrumbs.resetAndNavigate([
                             breadcrumbFactory.createHome(),
                             breadcrumbFactory.createRootOperations()
+                        ]);
+
+                        $scope.showActions = false;
+                    };
+
+                    $scope.goRuntimeInformation = function() {
+                        breadcrumbs.resetAndNavigate([
+                            breadcrumbFactory.createHome(),
+                            breadcrumbFactory.createRuntimeInformation()
                         ]);
 
                         $scope.showActions = false;

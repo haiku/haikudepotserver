@@ -10,7 +10,6 @@ import org.haiku.pkg.AttributeContext;
 
 import java.util.Arrays;
 
-
 public class RawInlineAttribute extends RawAttribute {
 
     private byte[] rawValue;

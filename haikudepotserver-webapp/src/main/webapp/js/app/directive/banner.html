@@ -5,7 +5,7 @@
         <div>Haiku Depot Server</div>
     </span>
 
-    <span id="banner-actions" ng-show="canShowBannerActions()">
+        <span id="banner-actions" ng-show="canShowBannerActions()">
 
         <div class="banner-actions-state-container">
             <svg width="15" height="16">
@@ -56,82 +56,133 @@
     hand side of the banner.
     -->
 
-    <modal-container show="showActions" width="420" close="goHideActions()">
+    <modal-container show="showActions" width="640" height="480" close="goHideActions()">
 
-        <ul class="context-menu-container">
-            <li ng-show="canGoMore()">
-                <a href="" ng-click="goMore()">
-                    <message key="banner.action.more"></message>
-                </a>
-            </li>
+        <div class="context-menu-container-cols">
 
-            <li ng-show="canAuthenticateOrCreate()">
-                <a href="" ng-click="goAuthenticate()">
-                    <message key="banner.action.authenticate"></message>
-                </a>
-            </li>
+            <div class="context-menu-container">
+                <h1><message key="banner.actionSection.infoAndContact.title"></message></h1>
+                <div ng-show="canGoMore()">
+                    <a href="" ng-click="goMore()">
+                        <message key="banner.action.more"></message>
+                    </a>
+                </div>
+                <div>
+                    <a href="http://www.haiku-os.org" target="_blank">
+                        <message key="banner.actions.haiku.title"></message>
+                    </a>
+                </div>
+                <div>
+                    <a href="/__docs/index.html" target="_blank">
+                        <message key="banner.actions.documentation.title"></message>
+                    </a>
+                </div>
+            </div>
 
-            <li ng-show="canAuthenticateOrCreate()">
-                <a href="" ng-click="goCreateUser()">
-                    <message key="banner.action.createUser"></message>
-                </a>
-            </li>
+            <div class="context-menu-container">
+                <h1><message key="banner.actionSection.userAndPrivacy.title"></message></h1>
+                <div ng-show="canAuthenticateOrCreate()">
+                    <a href="" ng-click="goAuthenticate()">
+                        <message key="banner.action.authenticate"></message>
+                    </a>
+                </div>
+                <div ng-show="canAuthenticateOrCreate()">
+                    <a href="" ng-click="goCreateUser()">
+                        <message key="banner.action.createUser"></message>
+                    </a>
+                </div>
+                <div ng-show="canShowAuthenticatedUser()">
+                    <a href="" ng-click="goViewUser()">
+                        <message key="banner.action.user" parameters="[userNickname]"></message>
+                    </a>
+                </div>
+                <div ng-show="canShowAuthenticatedUser()">
+                    <a href="" ng-click="goLogout()">
+                        <message key="banner.action.logout" parameters="[userNickname]"></message>
+                    </a>
+                </div>
+                <div ng-show="canDisallowLocalStorage()">
+                    <a href="" ng-click="goDisallowLocalStorage()">
+                        <message key="banner.action.disallowLocalStorage"></message>
+                    </a>
+                </div>
+                <div>
+                    <user-usage-conditions-link>
+                        <message key="userUsageConditions.link.title"></message>
+                    </user-usage-conditions-link>
+                </div>
+            </div>
 
-            <li ng-show="canShowAuthenticatedUser()">
-                <a href="" ng-click="goViewUser()">
-                    <message key="banner.action.user" parameters="[userNickname]"></message>
-                </a>
-            </li>
+            <div class="context-menu-container">
+                <h1><message key="banner.actionSection.navigation.title"></message></h1>
+                <div>
+                    <a href="/__multipage"><message key="banner.actions.multipage.title"></message></a>
+                </div>
+            </div>
 
-            <li ng-show="canShowAuthenticatedUser()">
-                <a href="" ng-click="goLogout()">
-                    <message key="banner.action.logout" parameters="[userNickname]"></message>
-                </a>
-            </li>
+            <div class="context-menu-container">
+                <h1><message key="banner.actionSection.data.title"></message></h1>
+                <div ng-show="canShowRepository()" show-if-permission="'REPOSITORY_LIST'">
+                    <a href="" ng-click="goListRepositories()">
+                        <message key="banner.action.repositories"></message>
+                    </a>
+                </div>
+                <div>
+                    <a href="" ng-click="goPkgFeedBuilder()">
+                        <message key="banner.action.pkgFeedBuilder"></message>
+                    </a>
+                </div>
+                <div ng-show="canGoReports()">
+                    <a href="" ng-click="goReports()">
+                        <message key="banner.action.reports"></message>
+                    </a>
+                </div>
+                <div ng-show="canGoListUsers()" show-if-permission="'USER_LIST'">
+                    <a href="" ng-click="goListUsers()">
+                        <message key="banner.action.users"></message>
+                    </a>
+                </div>
+                <div show-if-permission="'AUTHORIZATION_CONFIGURE'">
+                    <a href="" ng-click="goListAuthorizationPkgRules()">
+                        <message key="banner.action.authorizationPkgRules"></message>
+                    </a>
+                </div>
+            </div>
 
-            <li ng-show="canDisallowLocalStorage()">
-                <a href="" ng-click="goDisallowLocalStorage()">
-                    <message key="banner.action.disallowLocalStorage"></message>
-                </a>
-            </li>
+            <div class="context-menu-container">
+                <h1><message key="banner.actionSection.monitoringAndMetrics.title"></message></h1>
+                <div>
+                    <a href="/__metric/ping" target="_blank">
+                        <message key="banner.actions.ping.title"></message>
+                    </a>
+                </div>
+                <div>
+                    <a href="/__metric/healthcheck" target="_blank">
+                        <message key="banner.actions.healthcheck.title"></message>
+                    </a>
+                </div>
+                <div>
+                    <a href="/__metric/metrics?pretty=true" target="_blank">
+                        <message key="banner.actions.metric.title"></message>
+                    </a>
+                </div>
+            </div>
 
-            <li ng-show="canShowRepository()" show-if-permission="'REPOSITORY_LIST'">
-                <a href="" ng-click="goListRepositories()">
-                    <message key="banner.action.repositories"></message>
-                </a>
-            </li>
+            <div class="context-menu-container" ng-show="canShowRootOperations">
+                <h1><message key="banner.actionSection.root.title"></message></h1>
+                <div>
+                    <a href="" ng-click="goRootOperations()">
+                        <message key="banner.action.rootOperations"></message>
+                    </a>
+                </div>
+                <div>
+                    <a href="" ng-click="goRuntimeInformation()">
+                        <message key="banner.actions.runtimeInformation.title"></message>
+                    </a>
+                </div>
+            </div>
 
-            <li>
-                <a href="" ng-click="goPkgFeedBuilder()">
-                    <message key="banner.action.pkgFeedBuilder"></message>
-                </a>
-            </li>
-
-            <li ng-show="canGoReports()">
-                <a href="" ng-click="goReports()">
-                    <message key="banner.action.reports"></message>
-                </a>
-            </li>
-
-            <li ng-show="canGoListUsers()" show-if-permission="'USER_LIST'">
-                <a href="" ng-click="goListUsers()">
-                    <message key="banner.action.users"></message>
-                </a>
-            </li>
-
-            <li show-if-permission="'AUTHORIZATION_CONFIGURE'">
-                <a href="" ng-click="goListAuthorizationPkgRules()">
-                    <message key="banner.action.authorizationPkgRules"></message>
-                </a>
-            </li>
-
-            <li ng-show="canShowRootOperations">
-                <a href="" ng-click="goRootOperations()">
-                    <message key="banner.action.rootOperations"></message>
-                </a>
-            </li>
-
-        </ul>
+        </div>
 
     </modal-container>
 

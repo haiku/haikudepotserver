@@ -15,10 +15,10 @@ angular.module('haikudepotserver').controller(
             breadcrumbs,breadcrumbFactory,errorHandling) {
 
             function refreshBreadcrumbItems() {
-                if($routeParams.nickname) {
+                if ($routeParams.nickname) {
                     var user = { nickname: $routeParams.nickname };
 
-                    if(userState.user().nickname == $routeParams.nickname) {
+                    if (userState.user().nickname == $routeParams.nickname) {
                         breadcrumbs.mergeCompleteStack([
                             breadcrumbFactory.createHome(),
                             breadcrumbFactory.createViewUser(user),
@@ -68,7 +68,7 @@ angular.module('haikudepotserver').controller(
                 refetchJobsAtFirstPage();
             };
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return amFetchingJobs;
             };
 
@@ -122,7 +122,7 @@ angular.module('haikudepotserver').controller(
 
             // ---- EVENTS
 
-            $scope.$watch('jobs.offset', function() {
+            $scope.$watch('jobs.offset', function () {
                 refetchJobs();
             });
 

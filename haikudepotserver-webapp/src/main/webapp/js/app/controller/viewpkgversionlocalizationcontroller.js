@@ -24,8 +24,8 @@ angular.module('haikudepotserver').controller(
             $scope.pkgVersion = undefined;
             $scope.translations = undefined;
 
-            $scope.shouldSpin = function() {
-                return undefined == $scope.pkg || undefined == $scope.translations;
+            $scope.shouldSpin = function () {
+                return undefined === $scope.pkg || undefined === $scope.translations;
             };
 
             function refreshBreadcrumbItems() {
@@ -38,17 +38,17 @@ angular.module('haikudepotserver').controller(
 
             function setupTranslations() {
                 referenceData.naturalLanguages().then(
-                    function(naturalLanguages) {
+                    function (naturalLanguages) {
 
                         // bring in titles for the natural languages.
 
                         function updateNaturalLanguageTitles() {
-                            _.each(naturalLanguages, function(nl) {
+                            _.each(naturalLanguages, function (nl) {
                                 messageSource.get(userState.naturalLanguageCode(), 'naturalLanguage.' + nl.code).then(
-                                    function(value) {
+                                    function (value) {
                                         nl.title = value;
                                     },
-                                    function() {
+                                    function () {
                                         $log.error('unable to get the localized name for the natural language \''+nl.code+'\'');
                                     }
                                 );
@@ -60,7 +60,7 @@ angular.module('haikudepotserver').controller(
                         // now we need to get the _existing_ translations for the package.
 
                         pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
-                            function(pkg) {
+                            function (pkg) {
 
                                 $scope.pkg = pkg;
                                 var version = $scope.pkg.versions[0];
@@ -82,14 +82,14 @@ angular.module('haikudepotserver').controller(
                                         revision : version.revision,
                                         naturalLanguageCodes : _.map(
                                             naturalLanguages,
-                                            function(d) {
+                                            function (d) {
                                                 return d.code;
                                             }
                                         ),
                                         architectureCode : $routeParams.architectureCode
                                     }]
                                 ).then(
-                                    function(naturalLanguageData) {
+                                    function (naturalLanguageData) {
                                         $scope.translations = _.sortBy(
                                             _.filter(
                                                 _.map(
@@ -102,33 +102,33 @@ angular.module('haikudepotserver').controller(
                                                         };
                                                     }
                                                 ),
-                                                function(translation) {
+                                                function (translation) {
                                                     return translation.summary && !!translation.summary.length &&
                                                         translation.description && !!translation.description.length;
                                                 }
                                             ),
-                                            function(translation) {
+                                            function (translation) {
                                                 return translation.naturalLanguage.code;
                                             }
                                         );
 
                                         refreshBreadcrumbItems();
                                     },
-                                    function(jsonRpcErrorEnvelope) {
+                                    function (jsonRpcErrorEnvelope) {
                                         $log.error('unable to get the package localizations');
                                         errorHandling.handleJsonRpcError(jsonRpcErrorEnvelope);
                                     }
 
                                 )
                             },
-                            function() {
+                            function () {
                                 $log.error('unable to get the package with specific route parameters');
                                 errorHandling.navigateToError();
                             }
                         );
 
                     },
-                    function() {
+                    function () {
                         $log.error('unable to get the natural languages');
                         errorHandling.navigateToError();
                     }

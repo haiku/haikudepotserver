@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,12 +17,6 @@ import org.haiku.haikudepotserver.api1.support.ValidationException;
 
 @JsonRpcService("/__api/v1/user")
 public interface UserApi {
-
-    /**
-     * <P>This method will synchronize user data with external systems; such as LDAP servers.</P>
-     */
-
-    SynchronizeUsersResult synchronizeUsers(SynchronizeUsersRequest synchronizeUsersRequest);
 
     /**
      * <p>This method will update the user based on the data in the request.  Only the data which is included
@@ -90,5 +84,22 @@ public interface UserApi {
      */
 
     CompletePasswordResetResult completePasswordReset(CompletePasswordResetRequest completePasswordResetRequest);
+
+    /**
+     * <p>This method will allow the user to, at any time, agree to the terms
+     * and conditions.  This may be required for example when the terms change
+     * and the user has agreed to some older terms and conditions.</p>
+     * @since 2019-03-15
+     */
+
+    AgreeUserUsageConditionsResult agreeUserUsageConditions(AgreeUserUsageConditionsRequest request);
+
+    /**
+     * <p>This method will return details for the user usage agreement that is
+     * identifier in the request.</p>
+     * @since 2019-03-15
+     */
+
+    GetUserUsageConditionsResult getUserUsageConditions(GetUserUsageConditionsRequest request);
 
 }

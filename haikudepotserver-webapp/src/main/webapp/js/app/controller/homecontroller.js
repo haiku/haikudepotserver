@@ -57,7 +57,7 @@ angular.module('haikudepotserver').controller(
                     ViewCriteriaTypes.MOSTRECENT,
                     ViewCriteriaTypes.MOSTVIEWED
                 ],
-                function(k) {
+                function (k) {
                     return {
                         code : k,
                         titleKey : 'home.viewCriteriaType.' + k.toLowerCase(),
@@ -71,7 +71,7 @@ angular.module('haikudepotserver').controller(
             // utility function to help sequentialize operations.
 
             function fnChain(chain) {
-                if(chain && chain.length) {
+                if (chain && chain.length) {
                     chain.shift()(chain);
                 }
             }
@@ -79,7 +79,7 @@ angular.module('haikudepotserver').controller(
             // This was only showing the summary when the search hit was in the summary, but will now
             // show the summary if there is one.
 
-            $scope.shouldShowSummary = function(pkg) {
+            $scope.shouldShowSummary = function (pkg) {
                 return pkg.versions[0].summary &&
                     pkg.versions[0].summary.length;
             };
@@ -111,11 +111,11 @@ angular.module('haikudepotserver').controller(
                 return nameAndNotTitleContainSearchExpression() || pkgIsSubordinate();
             };
 
-            $scope.shouldShowDerivedRating = function(pkg) {
+            $scope.shouldShowDerivedRating = function (pkg) {
                 return angular.isNumber(pkg.derivedRating);
             };
 
-            $scope.shouldShowRepositoryTableColumn = function() {
+            $scope.shouldShowRepositoryTableColumn = function () {
                 return $scope.selectedRepositories && $scope.selectedRepositories.length > 1;
             };
 
@@ -133,11 +133,11 @@ angular.module('haikudepotserver').controller(
 
             function calculateSelectedRepositories() {
 
-                if(!$scope.repositories) {
+                if (!$scope.repositories) {
                     throw Error('the repositories should have been populated');
                 }
 
-                if($scope.repositories.length) {
+                if ($scope.repositories.length) {
                     var repositoryCodesStr = $location.search()[KEY_REPOSITORYCODES];
 
                     if (repositoryCodesStr && repositoryCodesStr.length) {
@@ -169,14 +169,14 @@ angular.module('haikudepotserver').controller(
 
                     if (!$scope.selectedRepositories || !$scope.selectedRepositories.length) {
                         return repositoryService.preferentialSearchRepositories().then(
-                            function(data) {
+                            function (data) {
                                 if(!data || !data.length) {
                                     throw Error('unable to establish the preferential search repositories');
                                 }
 
                                 return data;
                             },
-                            function() {
+                            function () {
                                 throw Error('unable to ascertain the preferential search repositories');
                             }
                         );
@@ -211,7 +211,7 @@ angular.module('haikudepotserver').controller(
                 }
 
                 return runtimeInformation.getRuntimeInformation().then(
-                    function(runtimeInformationData) {
+                    function (runtimeInformationData) {
                         var result = findArchitectureWithCode(runtimeInformationData.defaults.architectureCode);
 
                         if (null != result) {
@@ -220,7 +220,7 @@ angular.module('haikudepotserver').controller(
 
                         return $scope.architectures[0];
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -231,11 +231,11 @@ angular.module('haikudepotserver').controller(
                     throw Error('the categories should have been downloaded');
                 }
 
-                if($location.search()[KEY_PKGCATEGORYCODE]) {
+                if ($location.search()[KEY_PKGCATEGORYCODE]) {
                     $scope.selectedPkgCategory = _.findWhere($scope.pkgCategories, { code : $location.search()[KEY_PKGCATEGORYCODE] });
                 }
 
-                if(!$scope.selectedPkgCategory) {
+                if (!$scope.selectedPkgCategory) {
                     $scope.selectedPkgCategory = $scope.pkgCategories[0];
                 }
             }
@@ -258,7 +258,7 @@ angular.module('haikudepotserver').controller(
             function reset() {
                 fnChain([
 
-                    function(chain) {
+                    function (chain) {
                         $scope.searchExpression = '';
                         $scope.lastRefetchPkgsSearchExpression = '';
                         fnChain(chain);
@@ -268,22 +268,22 @@ angular.module('haikudepotserver').controller(
                     // the selected repositories is done using a promise.
                     function(chain) {
                         calculateSelectedRepositories().then(
-                            function(result) {
+                            function (result) {
                                 $scope.selectedRepositories = result;
                                 fnChain(chain);
                             },
-                            function() {
+                            function () {
                                 errorHandling.navigateToError();
                             });
                     },
 
                     function(chain) {
                         calculateSelectedArchitecture.then(
-                            function(result) {
+                            function (result) {
                                 $scope.selectedArchitecture = result;
                                 fnChain(chain);
                             },
-                            function() {
+                            function () {
                                 errorHandling.navigateToError();
                             })
                     },
@@ -344,16 +344,16 @@ angular.module('haikudepotserver').controller(
             function updatePkgCategoryTitles() {
                 _.each(
                     $scope.pkgCategories,
-                    function(c) {
+                    function (c) {
                         messageSource.get(
                             userState.naturalLanguageCode(),
                             c.titleKey
                         )
                             .then(
-                            function(value) {
+                            function (value) {
                                 c.title = value;
                             },
-                            function() { // error already logged
+                            function () { // error already logged
                                 c.title = '???';
                             }
                         );
@@ -368,11 +368,11 @@ angular.module('haikudepotserver').controller(
                 // fetch the repositories
                 function(chain) {
                     repositoryService.getRepositories().then(
-                        function(data) {
+                        function (data) {
                             $scope.repositories = data;
                             fnChain(chain); // carry on...
                         },
-                        function() { // error logged already
+                        function () { // error logged already
                             errorHandling.navigateToError();
                         }
                     );
@@ -394,11 +394,11 @@ angular.module('haikudepotserver').controller(
                 // fetch the architectures
                 function(chain) {
                     referenceData.architectures().then(
-                        function(data) {
+                        function (data) {
                             $scope.architectures = data;
                             fnChain(chain); // carry on...
                         },
-                        function() { // error logged already
+                        function () { // error logged already
                             errorHandling.navigateToError();
                         }
                     );
@@ -410,7 +410,7 @@ angular.module('haikudepotserver').controller(
                             $scope.selectedArchitecture = result;
                             fnChain(chain); // carry on...
                         },
-                        function() {
+                        function () {
                             errorHandling.navigateToError();
                         })
                 },
@@ -419,11 +419,11 @@ angular.module('haikudepotserver').controller(
                 function(chain) {
 
                     referenceData.pkgCategories().then(
-                        function(data) {
+                        function (data) {
 
                             $scope.pkgCategories = _.map(
                                 data,
-                                function(c) {
+                                function (c) {
                                     return {
                                         code : c.code,
                                         titleKey : 'pkgCategory.' + c.code.toLowerCase() + '.title',
@@ -436,7 +436,7 @@ angular.module('haikudepotserver').controller(
                             updatePkgCategoryTitles();
                             fnChain(chain); // carry on...
                         },
-                        function() {
+                        function () {
                             $log.error('unable to obtain the list of pkg categories');
                             errorHandling.navigateToError();
                         }
@@ -444,7 +444,7 @@ angular.module('haikudepotserver').controller(
                 },
 
                 // make an initial fetch of packages
-                function(chain) {
+                function (chain) {
                     refetchPkgs();
                     fnChain(chain); // carry on...
                 },
@@ -478,7 +478,7 @@ angular.module('haikudepotserver').controller(
                     });
 
                     $scope.$watch('selectedPkgCategory', function(newValue, oldValue) {
-                        if(!!oldValue && oldValue.code !== newValue.code) { // already initialized elsewhere
+                        if (!!oldValue && oldValue.code !== newValue.code) { // already initialized elsewhere
                             var option = $scope.selectedViewCriteriaTypeOption;
 
                             if (option && option.code === ViewCriteriaTypes.CATEGORIES) {
@@ -490,7 +490,7 @@ angular.module('haikudepotserver').controller(
 
                     // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
 
-                    $scope.$watch('selectedArchitecture', function(newValue, oldValue) {
+                    $scope.$watch('selectedArchitecture', function (newValue, oldValue) {
                         if(!!oldValue && newValue !== oldValue) { // already initialized elsewhere
                             $log.debug('selectedArchitecture -> refetching pkgs');
                             refetchPkgsAtFirstPage();
@@ -502,9 +502,9 @@ angular.module('haikudepotserver').controller(
                     $scope.$watch('selectedViewCriteriaTypeOption', function(newValue, oldValue) {
                         clearPkgs();
 
-                        if(newValue && (!oldValue || oldValue.code !== newValue.code)) { // will initially be undefined.
+                        if (newValue && (!oldValue || oldValue.code !== newValue.code)) { // will initially be undefined.
 
-                            switch(newValue.code) {
+                            switch (newValue.code) {
 
                                 case ViewCriteriaTypes.MOSTRECENT:
                                 case ViewCriteriaTypes.MOSTVIEWED:
@@ -515,7 +515,7 @@ angular.module('haikudepotserver').controller(
                                     break;
 
                                 case ViewCriteriaTypes.CATEGORIES:
-                                    if(!$scope.pkgCategories) {
+                                    if (!$scope.pkgCategories) {
                                         refetchPkgCategories();
                                     }
                                     $log.debug('selectedViewCriteriaTypeOption -> refetching pkgs');
@@ -540,13 +540,13 @@ angular.module('haikudepotserver').controller(
              * <p>This is used to provide an 'open in tab' link.</p>
              */
 
-            $scope.viewPkgPath = function(pkg) {
+            $scope.viewPkgPath = function (pkg) {
                 return breadcrumbFactory.toFullPath(
                     breadcrumbFactory.createViewPkgWithSpecificVersionFromPkg(pkg)
                 );
             };
 
-            $scope.goViewPkg = function(pkg,event) {
+            $scope.goViewPkg = function (pkg,event) {
                 if (0 === event.button) { // left button only.
                     event.preventDefault();
 
@@ -579,7 +579,7 @@ angular.module('haikudepotserver').controller(
                 // stop via a conditional because when the architecture is selected (fetched itself) then it will
                 // automatically attempt this re-fetch again.
 
-                if($scope.selectedArchitecture &&
+                if ($scope.selectedArchitecture &&
                     $scope.selectedRepositories &&
                     $scope.selectedRepositories.length) {
 
@@ -596,7 +596,7 @@ angular.module('haikudepotserver').controller(
                         KEY_REPOSITORYCODES,
                         _.map(
                             $scope.selectedRepositories,
-                            function(r) {
+                            function (r) {
                                 return r.code;
                             }
                         ).join(',')
@@ -607,15 +607,13 @@ angular.module('haikudepotserver').controller(
 
                     if (ViewCriteriaTypes.CATEGORIES === $scope.selectedViewCriteriaTypeOption.code) {
                         $location.search(KEY_PKGCATEGORYCODE, $scope.selectedPkgCategory.code);
-                    }
-                    else {
+                    } else {
                         $location.search(KEY_PKGCATEGORYCODE, null);
                     }
 
                     if($scope.searchExpression && $scope.searchExpression.length) {
                         $location.search(KEY_SEARCHEXPRESSION,$scope.searchExpression);
-                    }
-                    else {
+                    } else {
                         $location.search(KEY_SEARCHEXPRESSION,null);
                     }
 
@@ -645,7 +643,7 @@ angular.module('haikudepotserver').controller(
 
                     var preparedSearchExpression = $scope.searchExpression ? $scope.searchExpression.trim() : null;
 
-                    if(preparedSearchExpression && preparedSearchExpression.length) {
+                    if (preparedSearchExpression && preparedSearchExpression.length) {
                         req.expression = preparedSearchExpression;
                         req.expressionType = 'CONTAINS';
                     }
@@ -706,13 +704,13 @@ angular.module('haikudepotserver').controller(
                             $scope.pkgs.items = result.items;
                             $scope.pkgs.total = result.total;
 
-                            _.each($scope.pkgs.items, function(p) {
+                            _.each($scope.pkgs.items, function (p) {
                                 p.derivedTitle = derivedTitle(p);
                             });
 
                             repositoryService.getRepositories().then(function(repositories) {
-                                _.each($scope.pkgs.items, function(p) {
-                                    _.each(p.versions, function(pv) {
+                                _.each($scope.pkgs.items, function (p) {
+                                    _.each(p.versions, function (pv) {
                                        pv.repository = _.findWhere(repositories, { code : pv.repositoryCode });
                                     });
                                 })
@@ -737,8 +735,8 @@ angular.module('haikudepotserver').controller(
 
             $scope.$on(
                 "naturalLanguageChange",
-                function(event, newValue, oldValue) {
-                    if(!!oldValue) {
+                function (event, newValue, oldValue) {
+                    if (!!oldValue) {
                         updateViewCriteriaTypeOptionsTitles();
                         updatePkgCategoryTitles();
                         refetchPkgs(); // title may change
@@ -751,7 +749,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.$on(
                 'didResetToHome',
-                function() {
+                function () {
                     reset();
                 }
             );

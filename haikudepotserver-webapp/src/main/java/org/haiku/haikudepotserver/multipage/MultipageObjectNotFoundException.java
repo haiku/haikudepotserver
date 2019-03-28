@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,11 +21,11 @@ public class MultipageObjectNotFoundException extends Exception {
     public MultipageObjectNotFoundException(String entityName, Object identifier) {
         super();
 
-        if(null==entityName || 0==entityName.length()) {
+        if (null == entityName || 0 == entityName.length()) {
             throw new IllegalStateException("the entity name is required");
         }
 
-        if(null==identifier) {
+        if (null == identifier) {
             throw new IllegalStateException("the identifier is required");
         }
 

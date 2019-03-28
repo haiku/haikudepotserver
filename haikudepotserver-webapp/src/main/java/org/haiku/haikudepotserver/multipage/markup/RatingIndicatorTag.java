@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,9 +30,9 @@ public class RatingIndicatorTag extends RequestContextAwareTag {
 
         TagWriter tagWriter = new TagWriter(pageContext.getOut());
 
-        if(null!=getValue()) {
+        if (null != getValue()) {
 
-            if(getValue() < 0f || getValue() > 5f) {
+            if (getValue() < 0f || getValue() > 5f) {
                 throw new IllegalStateException("the value for the rating indicator must be [0..5]");
             }
 
@@ -41,7 +41,7 @@ public class RatingIndicatorTag extends RequestContextAwareTag {
 
             int value = (int) (getValue() * 2f);
 
-            for(int i=0;i<5;i++) {
+            for (int i = 0; i < 5; i++) {
                 tagWriter.startTag("img");
 
                 tagWriter.writeAttribute("height", "16");

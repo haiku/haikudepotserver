@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ public enum Permission {
     USER_EDIT(TargetType.USER),
     USER_CHANGEPASSWORD(TargetType.USER),
     USER_LIST(null),
-    USER_SYNCHRONIZE(null),
+    USER_AGREE_USAGE_CONDITIONS(TargetType.USER),
 
     AUTHORIZATION_CONFIGURE(null),
 

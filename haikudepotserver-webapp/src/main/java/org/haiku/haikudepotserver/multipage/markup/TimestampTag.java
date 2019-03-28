@@ -37,7 +37,7 @@ public class TimestampTag extends RequestContextAwareTag {
 
         TagWriter tagWriter = new TagWriter(pageContext.getOut());
 
-        if(null!=getValue()) {
+        if (null != getValue()) {
             tagWriter.startTag("span");
             tagWriter.appendValue(HtmlEscapers.htmlEscaper().escape(FORMATTER.format(
                     Instant.ofEpochMilli(getValue().getTime()))));

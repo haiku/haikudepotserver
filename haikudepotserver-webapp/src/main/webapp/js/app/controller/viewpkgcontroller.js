@@ -43,34 +43,34 @@ angular.module('haikudepotserver').controller(
 
             refetchPkg();
 
-            $scope.isAuthenticated = function() {
+            $scope.isAuthenticated = function () {
                 return !!userState.user();
             };
 
-            $scope.shouldSpin = function() {
-                return undefined == $scope.pkg;
+            $scope.shouldSpin = function () {
+                return undefined === $scope.pkg;
             };
 
-            $scope.canRemoveIcon = function() {
+            $scope.canRemoveIcon = function () {
                 return $scope.pkg && hasPkgIcons;
             };
 
-            $scope.canShowDerivedRating = function() {
+            $scope.canShowDerivedRating = function () {
                 return $scope.pkg &&
                     angular.isNumber($scope.pkg.derivedRating) &&
                     $scope.pkg.versions[0].isLatest;
             };
 
-            $scope.homePageLink = function() {
+            $scope.homePageLink = function () {
                 var u = undefined;
 
-                if($scope.pkg) {
+                if ($scope.pkg) {
                     //noinspection JSUnresolvedVariable
                     u = _.find(
                         $scope.pkg.versions[0].urls,
-                        function(url) {
+                        function (url) {
                             //noinspection JSUnresolvedVariable
-                            return url.urlTypeCode == 'homepage';
+                            return url.urlTypeCode === 'homepage';
                         });
                 }
 
@@ -87,7 +87,7 @@ angular.module('haikudepotserver').controller(
             function refreshHpkgUrl() {
 
                 function nullToHyphen(s) {
-                    if(!s) {
+                    if (!s) {
                         return '-';
                     }
 
@@ -113,7 +113,7 @@ angular.module('haikudepotserver').controller(
                 $scope.pkg = undefined;
 
                 pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, true).then(
-                    function(result) {
+                    function (result) {
 
                         $scope.pkg = result;
 
@@ -129,7 +129,7 @@ angular.module('haikudepotserver').controller(
                         refetchProminence();
 
                     },
-                    function() {
+                    function () {
                         errorHandling.navigateToError(); // already logged
                     }
                 );
@@ -144,7 +144,7 @@ angular.module('haikudepotserver').controller(
                             { code : $scope.pkg.versions[0].repositoryCode }
                         );
 
-                        if(!repository) {
+                        if (!repository) {
                             throw Error('unknown repository; ' + $scope.pkg.versions[0].repositoryCode);
                         }
 
@@ -155,7 +155,7 @@ angular.module('haikudepotserver').controller(
                         };
 
                     },
-                    function() {
+                    function () {
                         throw Error('unable to get all of the repositories');
                     }
                 );
@@ -163,13 +163,13 @@ angular.module('haikudepotserver').controller(
 
             function refetchProminence() {
                 referenceData.prominences().then(
-                    function(prominences) {
+                    function (prominences) {
                         $scope.pkg.prominence = _.findWhere(
                             prominences,
                             { ordering : $scope.pkg.prominenceOrdering }
                         );
                     },
-                    function() {
+                    function () {
                         $log.error('unable to obtain the list of prominences');
                         errorHandling.navigateToError();
                     }
@@ -179,13 +179,13 @@ angular.module('haikudepotserver').controller(
             function refetchPkgCategories() {
 
                 referenceData.pkgCategories().then(
-                    function(pkgCategories) {
+                    function (pkgCategories) {
                         $scope.pkgCategories = _.filter(
                             pkgCategories,
                             function(c) { return _.contains($scope.pkg.pkgCategoryCodes, c.code); }
                         );
                     },
-                    function() {
+                    function () {
                         $log.error('unable to obtain the list of categories');
                         errorHandling.navigateToError();
                     }
@@ -208,7 +208,7 @@ angular.module('haikudepotserver').controller(
                     "getPkgIcons",
                     [{ pkgName: pkgName }]
                 ).then(
-                    function(result) {
+                    function (result) {
 
                         var has = !!_.findWhere(
                             result.pkgIcons,
@@ -220,7 +220,7 @@ angular.module('haikudepotserver').controller(
 
                         hasPkgIcons = !!result.pkgIcons.length;
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -234,7 +234,7 @@ angular.module('haikudepotserver').controller(
 
             function refetchUserRatings() {
 
-                if($scope.pkg) {
+                if ($scope.pkg) {
                     jsonRpc.call(
                         constants.ENDPOINT_API_V1_USERRATING,
                         "searchUserRatings",
@@ -257,9 +257,9 @@ angular.module('haikudepotserver').controller(
 
                             // trim the comments down a bit if necessary.
 
-                            _.each($scope.userRatings.items, function(ur) {
-                                if(ur.comment) {
-                                    if(ur.comment.length > MAXCHARS_USERRATING_COMMENT) {
+                            _.each($scope.userRatings.items, function (ur) {
+                                if (ur.comment) {
+                                    if (ur.comment.length > MAXCHARS_USERRATING_COMMENT) {
                                         ur.comment = ur.comment.substring(0,MAXCHARS_USERRATING_COMMENT) + '...';
                                     }
                                 }
@@ -268,10 +268,10 @@ angular.module('haikudepotserver').controller(
                             // trim down the number of lines in the comment if necessary.
 
                             _.each($scope.userRatings.items, function(ur) {
-                                if(ur.comment) {
+                                if (ur.comment) {
                                     var lines = ur.comment.split(/\r\n|\n/);
 
-                                    if(lines.length > MAXLINES_USERRATING_COMMENT) {
+                                    if (lines.length > MAXLINES_USERRATING_COMMENT) {
                                         lines = lines.slice(0,MAXLINES_USERRATING_COMMENT);
                                         lines[lines.length-1] += '...';
                                         ur.comment = lines.join('\n');
@@ -284,16 +284,16 @@ angular.module('haikudepotserver').controller(
                             _.each($scope.userRatings.items, function(ur) {
                                 var v0 = $scope.pkg.versions[0];
 
-                                if(ur.pkgVersion.pkg.name != $scope.pkg.name) {
+                                if (ur.pkgVersion.pkg.name !== $scope.pkg.name) {
                                     throw Error('illegal; a user rating is being shown for another package');
                                 }
 
-                                ur.isOtherVersion = ur.pkgVersion.major != v0.major ||
-                                    ur.pkgVersion.minor != v0.minor ||
-                                    ur.pkgVersion.micro != v0.micro ||
-                                    ur.pkgVersion.preRelease != v0.preRelease ||
-                                    ur.pkgVersion.revision != v0.revision ||
-                                    ur.pkgVersion.architectureCode != v0.architectureCode;
+                                ur.isOtherVersion = ur.pkgVersion.major !== v0.major ||
+                                    ur.pkgVersion.minor !== v0.minor ||
+                                    ur.pkgVersion.micro !== v0.micro ||
+                                    ur.pkgVersion.preRelease !== v0.preRelease ||
+                                    ur.pkgVersion.revision !== v0.revision ||
+                                    ur.pkgVersion.architectureCode !== v0.architectureCode;
                             });
 
                         },
@@ -317,7 +317,7 @@ angular.module('haikudepotserver').controller(
                     "getPkgScreenshots",
                     [{ pkgName: $scope.pkg.name }]
                 ).then(
-                    function(result) {
+                    function (result) {
 
                         var factor = window.devicePixelRatio ? window.devicePixelRatio : 1.0;
 
@@ -354,7 +354,7 @@ angular.module('haikudepotserver').controller(
 
                         $log.info('found '+result.items.length+' screenshots for pkg '+$routeParams.name);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -364,14 +364,14 @@ angular.module('haikudepotserver').controller(
             // ---------------------
             // ACTIONS FOR PACKAGE
 
-            $scope.goPkgFeedBuilder = function() {
+            $scope.goPkgFeedBuilder = function () {
                 var item = breadcrumbFactory.createPkgFeedBuilder();
                 breadcrumbFactory.applySearch(item, { pkgNames : $scope.pkg.name });
                 breadcrumbs.pushAndNavigate(item);
             };
 
             // this is used to cause an authentication in relation to adding a user rating
-            $scope.goAuthenticate = function() {
+            $scope.goAuthenticate = function () {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createAuthenticate());
             };
 
@@ -379,7 +379,7 @@ angular.module('haikudepotserver').controller(
             // need to make the argument to the function look as if we are only looking at
             // one version.
 
-            $scope.goViewLocalization = function() {
+            $scope.goViewLocalization = function () {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewPkgVersionLocalization($scope.pkg));
             };
 
@@ -389,17 +389,17 @@ angular.module('haikudepotserver').controller(
              * little message will vanish after a few moments.</p>
              */
 
-            $scope.goDeriveAndStoreUserRating = function() {
+            $scope.goDeriveAndStoreUserRating = function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_USERRATING,
                     "deriveAndStoreUserRatingForPkg",
                     [{ pkgName: $routeParams.name }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('requested derive and store user rating for '+$routeParams.name+' pkg');
                         $scope.didDeriveAndStoreUserRating = true;
 
-                        if($scope.didDeriveAndStoreUserRatingTimeout) {
+                        if ($scope.didDeriveAndStoreUserRatingTimeout) {
                             $timeout.cancel($scope.didDeriveAndStoreUserRatingTimeout);
                         }
 
@@ -421,12 +421,12 @@ angular.module('haikudepotserver').controller(
                     "removePkgIcon",
                     [{ pkgName: $routeParams.name }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('removed icons for '+$routeParams.name+' pkg');
                         refetchPkgIconMetaData();
                         $scope.pkg.modifyTimestamp = new Date().getTime();
                     },
-                    function(err) {
+                    function (err) {
                         $log.error('unable to remove the icons for '+$routeParams.name+' pkg');
                         errorHandling.handleJsonRpcError(err);
                     }
@@ -434,7 +434,7 @@ angular.module('haikudepotserver').controller(
 
             };
 
-            $scope.goDeactivate = function() {
+            $scope.goDeactivate = function () {
                 var pv = $scope.pkg.versions[0];
 
                 jsonRpc.call(
@@ -453,13 +453,13 @@ angular.module('haikudepotserver').controller(
                         revision : pv.revision
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('deactivated '+$routeParams.name+' pkg version');
                         refetchPkgIconMetaData();
                         $scope.pkg.modifyTimestamp = new Date().getTime();
                         $scope.pkg.versions[0].active = false;
                     },
-                    function(err) {
+                    function (err) {
                         $log.error('unable to deactivate '+$routeParams.name);
                         errorHandling.handleJsonRpcError(err);
                     }
@@ -471,7 +471,7 @@ angular.module('haikudepotserver').controller(
              * package.</p>
              */
 
-            $scope.goDownloadUserRatings = function() {
+            $scope.goDownloadUserRatings = function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_USERRATING_JOB,
                     'queueUserRatingSpreadsheetJob',
@@ -480,8 +480,8 @@ angular.module('haikudepotserver').controller(
                         repositoryCode : $scope.pkg.versions[0].repositoryCode
                     }]
                 ).then(
-                    function(data) {
-                        if(data.guid && data.guid.length) {
+                    function (data) {
+                        if (data.guid && data.guid.length) {
                             breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:data.guid }));
                         }
                         else {
@@ -489,7 +489,7 @@ angular.module('haikudepotserver').controller(
                             // TODO; some sort of user-facing indication of this?
                         }
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -500,8 +500,8 @@ angular.module('haikudepotserver').controller(
 
             $scope.$on(
                 "naturalLanguageChange",
-                function(event, newValue, oldValue) {
-                    if(!!oldValue) {
+                function (event, newValue, oldValue) {
+                    if (!!oldValue) {
                         refetchPkg();
                     }
                 }
@@ -510,7 +510,7 @@ angular.module('haikudepotserver').controller(
             // the pagination for the user ratings will cause the 'offset' value here to be changed.  This logic will
             // pick this up and will pull an updated page of user ratings back down from the server.
 
-            $scope.$watch('userRatings.offset', function() {
+            $scope.$watch('userRatings.offset', function () {
                 refetchUserRatings();
             });
 

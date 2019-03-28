@@ -79,19 +79,36 @@
             <error-messages key-prefix="createUser.captchaResponse" error="createUserForm.captchaResponse.$error"></error-messages>
         </div>
 
+        <label for="user-usage-conditions-minimum-age-exceeded"></label>
+        <div class="form-control-group">
+            <input
+                    id="user-usage-conditions-minimum-age-exceeded"
+                    type="checkbox"
+                    ng-model="newUser.userUsageConditionsIsMinimumAgeExceeded"/>
+            <message
+                    key="createUser.userUsageConditionsAge.statement"
+                    parameters="userUsageConditions.minimumAge"/>
+        </div>
+
+        <label for="user-usage-conditions-document-agreed"></label>
+        <div class="form-control-group">
+            <input
+                    id="user-usage-conditions-document-agreed"
+                    type="checkbox"
+                    ng-model="newUser.userUsageConditionsDocumentAgreed"/>
+            <message key="createUser.userUsageConditionsDocument.statement"></message>
+            (<user-usage-conditions-link code="userUsageConditions.code"><message key="createUser.userUsageConditionsDocument.read"></message></user-usage-conditions-link>)
+        </div>
+
         <div class="form-action-container">
             <button
-                    ng-disabled="createUserForm.$invalid"
+                    ng-disabled="!canCreateUser()"
                     ng-click="goCreateUser()"
                     type="submit"
                     class="main-action"><message key="createUser.action.title"></message></button>
         </div>
 
     </form>
-
-    <ul>
-        <li><handling-data-info></handling-data-info></li>
-    </ul>
 </div>
 
 <spinner spin="shouldSpin()"></spinner>

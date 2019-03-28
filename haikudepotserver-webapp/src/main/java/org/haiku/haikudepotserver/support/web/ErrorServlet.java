@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -73,7 +73,7 @@ public class ErrorServlet extends HttpServlet {
             return BODY_AUTHORIZATIONFAILURE;
         }
 
-        if(null != httpStatusCode && 404 == httpStatusCode) {
+        if (null != httpStatusCode && 404 == httpStatusCode) {
             return BODY_NOTFOUND;
         }
 
@@ -127,7 +127,7 @@ public class ErrorServlet extends HttpServlet {
         out.append("<div id=\"error-image\"><img src=\"/__img/haikudepot-error.svg\"></div>\n");
         out.append("<h1>Haiku Depot Server</h1>\n");
 
-        for(String naturalLanguageCode : new String[] {
+        for (String naturalLanguageCode : new String[] {
                 NaturalLanguage.CODE_ENGLISH,
                 NaturalLanguage.CODE_GERMAN,
                 NaturalLanguage.CODE_RUSSIAN,
@@ -169,7 +169,7 @@ public class ErrorServlet extends HttpServlet {
             // special handling for JSON-RPC errors
 
 
-            if(null!=jsonRpcErrorCode || 404 == resp.getStatus()) {
+            if (null != jsonRpcErrorCode || 404 == resp.getStatus()) {
 
                 try {
                     StringBuilder out = new StringBuilder();

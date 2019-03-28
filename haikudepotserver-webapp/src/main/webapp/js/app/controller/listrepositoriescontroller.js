@@ -39,7 +39,7 @@ angular.module('haikudepotserver').controller(
 
             refetchRepositoriesAtFirstPage();
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return amFetchingRepositories;
             };
 

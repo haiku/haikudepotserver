@@ -83,19 +83,19 @@ public class PkgScreenshotController extends AbstractController {
             String screenshotCode)
             throws IOException {
 
-        if(targetWidth <= 0 || targetWidth > SCREENSHOT_SIDE_LIMIT) {
+        if (targetWidth <= 0 || targetWidth > SCREENSHOT_SIDE_LIMIT) {
             throw new BadSize();
         }
 
-        if(targetHeight <= 0 || targetHeight > SCREENSHOT_SIDE_LIMIT) {
+        if (targetHeight <= 0 || targetHeight > SCREENSHOT_SIDE_LIMIT) {
             throw new BadSize();
         }
 
-        if(Strings.isNullOrEmpty(screenshotCode)) {
+        if (Strings.isNullOrEmpty(screenshotCode)) {
             throw new MissingScreenshotCode();
         }
 
-        if(Strings.isNullOrEmpty(format) || !"png".equals(format)) {
+        if (Strings.isNullOrEmpty(format) || !"png".equals(format)) {
             throw new MissingOrBadFormat();
         }
 
@@ -243,12 +243,10 @@ public class PkgScreenshotController extends AbstractController {
         try {
             screenshotCode = pkgScreenshotService.storePkgScreenshotImage(
                     request.getInputStream(), context, pkg.getPkgSupplement(), null).getCode();
-        }
-        catch(SizeLimitReachedException sizeLimit) {
+        } catch (SizeLimitReachedException sizeLimit) {
             LOGGER.warn("attempt to load in a screenshot larger than the size limit");
             throw new MissingOrBadFormat();
-        }
-        catch(BadPkgScreenshotException badIcon) {
+        } catch(BadPkgScreenshotException badIcon) {
             throw new MissingOrBadFormat();
         }
 

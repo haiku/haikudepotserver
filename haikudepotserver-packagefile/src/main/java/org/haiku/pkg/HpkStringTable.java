@@ -48,7 +48,7 @@ public class HpkStringTable implements StringTable {
     }
 
     // TODO; could avoid the big read into a buffer by reading the heap byte by byte or with a buffer.
-    private String[] readStrings() throws HpkException {
+    private String[] readStrings() {
         String[] result = new String[(int) expectedCount];
         byte[] stringsDataBuffer = new byte[(int) heapLength];
 
@@ -91,7 +91,7 @@ public class HpkStringTable implements StringTable {
         throw new HpkException("expected to find the null-terminator for the list of strings, but was not able to find one; did read "+stringIndex+" of "+expectedCount);
     }
 
-    private String[] getStrings() throws HpkException {
+    private String[] getStrings() {
         if (null == values) {
             if (0 == heapLength) {
                 values = new String[] {};
@@ -104,7 +104,7 @@ public class HpkStringTable implements StringTable {
     }
 
     @Override
-    public String getString(int index) throws HpkException {
+    public String getString(int index) {
         return getStrings()[index];
     }
 

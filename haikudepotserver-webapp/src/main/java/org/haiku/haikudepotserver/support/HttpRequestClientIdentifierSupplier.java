@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,13 +22,13 @@ public class HttpRequestClientIdentifierSupplier implements ClientIdentifierSupp
         if(null!=request) {
             String result = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
 
-            if(!Strings.isNullOrEmpty(result)) {
+            if (!Strings.isNullOrEmpty(result)) {
                 return Optional.of(result);
             }
 
             result = request.getRemoteAddr();
 
-            if(!Strings.isNullOrEmpty(result)) {
+            if (!Strings.isNullOrEmpty(result)) {
                 return Optional.of(result);
             }
         }

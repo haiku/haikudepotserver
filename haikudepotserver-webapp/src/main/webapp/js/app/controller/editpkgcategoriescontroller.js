@@ -26,7 +26,7 @@ angular.module('haikudepotserver').controller(
             $scope.pkgCategories = undefined;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.pkg || undefined == $scope.pkgCategories || $scope.amSaving;
+                return undefined === $scope.pkg || undefined === $scope.pkgCategories || $scope.amSaving;
             };
 
             // pulls the pkg data back from the server so that it can be used to
@@ -34,7 +34,7 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkg() {
                 pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
-                    function(result) {
+                    function (result) {
                         $scope.pkg = result;
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
@@ -43,10 +43,10 @@ angular.module('haikudepotserver').controller(
                         // pre-select those categories which are presently configured on the pkg.
 
                         referenceData.pkgCategories().then(
-                            function(data) {
+                            function (data) {
                                 $scope.pkgCategories = _.clone(data);
 
-                                _.each($scope.pkgCategories, function(c) {
+                                _.each($scope.pkgCategories, function (c) {
                                     c.selected = _.contains(
                                         $scope.pkg.pkgCategoryCodes,
                                         c.code);
@@ -54,13 +54,13 @@ angular.module('haikudepotserver').controller(
 
                                 updateDisablementOnPkgCategories();
                             },
-                            function() {
+                            function () {
                                 // logging happens inside
                                 errorHandling.navigateToError();
                             }
                         )
                     },
-                    function() {
+                    function () {
                         errorHandling.navigateToError();
                     }
                 );
@@ -80,9 +80,9 @@ angular.module('haikudepotserver').controller(
             // as being UI-disabled in order that it is not possible for the user to choose too many categories.
 
             function updateDisablementOnPkgCategories() {
-                var full = _.filter($scope.pkgCategories, function(c) { return c.selected; }).length >= CATEGORIES_LIMIT;
+                var full = _.filter($scope.pkgCategories, function (c) { return c.selected; }).length >= CATEGORIES_LIMIT;
 
-                _.each($scope.pkgCategories, function(c) {
+                _.each($scope.pkgCategories, function (c) {
                     c.disabled = full && !c.selected;
                 });
             }
@@ -96,7 +96,7 @@ angular.module('haikudepotserver').controller(
             // stores the categories back to the server for this package.  When it has done this, it will return to
             // view the pkg again.
 
-            $scope.goStorePkgCategories = function() {
+            $scope.goStorePkgCategories = function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_PKG,
                     'updatePkgCategories',
@@ -105,19 +105,19 @@ angular.module('haikudepotserver').controller(
                         pkgCategoryCodes : _.map(
                             _.filter(
                                 $scope.pkgCategories,
-                                function(c) { return c.selected; }
+                                function (c) { return c.selected; }
                             ),
-                            function(c) {
+                            function (c) {
                                 return c.code;
                             }
                         )
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('have updated the pkg categories for pkg '+$scope.pkg.name);
                         breadcrumbs.popAndNavigate();
                     },
-                    function(err) {
+                    function (err) {
                         $log.error('unable to update pkg categories');
                         errorHandling.handleJsonRpcError(err);
                     }

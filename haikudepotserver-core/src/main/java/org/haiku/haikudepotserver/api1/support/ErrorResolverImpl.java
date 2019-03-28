@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import com.googlecode.jsonrpc4j.ErrorResolver;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.SimpleValidationFailure;
 import org.haiku.haikudepotserver.api1.model.authorization.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.user.model.UserUsageConditionsAgreementException;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -29,6 +30,13 @@ public class ErrorResolverImpl implements ErrorResolver {
 
     @Override
     public JsonError resolveError(Throwable t, Method method, List<JsonNode> arguments) {
+
+        if (t instanceof UserUsageConditionsAgreementException) {
+            return new JsonError(
+                    Constants.ERROR_CODE_USER_USAGE_CONDITIONS_AGREE,
+                    "userusageconditionsagree",
+                    null);
+        }
 
         if (AuthorizationRuleConflictException.class.isAssignableFrom(t.getClass())) {
             return new JsonError(

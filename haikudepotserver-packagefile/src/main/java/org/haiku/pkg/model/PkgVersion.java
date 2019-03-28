@@ -10,11 +10,11 @@ import com.google.common.base.Strings;
 
 public class PkgVersion {
 
-    private String major;
-    private String minor;
-    private String micro;
-    private String preRelease;
-    private Integer revision;
+    private final String major;
+    private final String minor;
+    private final String micro;
+    private final String preRelease;
+    private final Integer revision;
 
     public PkgVersion(String major, String minor, String micro, String preRelease, Integer revision) {
         Preconditions.checkState(!Strings.isNullOrEmpty(major));

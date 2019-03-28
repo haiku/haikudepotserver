@@ -26,7 +26,7 @@ public class StringTableRefAttribute extends StringAttribute {
     }
 
     @Override
-    public String getValue(AttributeContext context) throws HpkException {
+    public String getValue(AttributeContext context) {
         return context.getStringTable().getString(index);
     }
 

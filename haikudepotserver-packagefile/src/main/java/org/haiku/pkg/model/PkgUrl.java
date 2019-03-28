@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,11 +24,11 @@ public class PkgUrl {
 
     private static Pattern PATTERN_NAMEANDURL = Pattern.compile("^([^<>]*)(\\s+)?<([^<> ]+)>$");
 
-    private String url;
+    private final String url;
 
-    private String name = null;
+    private final String name;
 
-    private PkgUrlType urlType;
+    private final PkgUrlType urlType;
 
     public PkgUrl(String input, PkgUrlType urlType) {
         super();
@@ -49,6 +49,7 @@ public class PkgUrl {
         }
         else {
             this.url = input;
+            this.name = null;
         }
 
         this.urlType = urlType;

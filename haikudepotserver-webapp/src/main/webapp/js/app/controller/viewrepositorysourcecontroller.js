@@ -21,7 +21,7 @@ angular.module('haikudepotserver').controller(
 
             refetchRepositorySource();
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return !$scope.repositorySource;
             };
 
@@ -38,53 +38,53 @@ angular.module('haikudepotserver').controller(
                         filter : [ 'ACTIVE' ]
                     }]
                 ).then(
-                    function() {
+                    function () {
                         amUpdatingActive = false;
                         $scope.repositorySource.active = flag;
                         $log.info('did set the active flag on '+$scope.repositorySource.code+' to '+flag);
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
             }
 
-            $scope.canTriggerImport = function() {
+            $scope.canTriggerImport = function () {
                 return $scope.repositorySource &&
                     $scope.repositorySource.active &&
                     $scope.repositorySource.repository.active;
             };
 
-            $scope.canReactivate = function() {
+            $scope.canReactivate = function () {
                 return $scope.repositorySource && !$scope.repositorySource.active && !amUpdatingActive;
             };
 
-            $scope.canDeactivate = function() {
+            $scope.canDeactivate = function () {
                 return $scope.repositorySource && $scope.repositorySource.active && !amUpdatingActive;
             };
 
-            $scope.goReactivate = function() {
+            $scope.goReactivate = function () {
                 updateActive(true);
             };
 
-            $scope.goDeactivate = function() {
+            $scope.goDeactivate = function () {
                 updateActive(false);
             };
 
-            $scope.goEdit = function() {
+            $scope.goEdit = function () {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createEditRepositorySource($scope.repositorySource));
             };
 
-            $scope.goViewRepositorySourceMirror = function(repositorySourceMirror) {
+            $scope.goViewRepositorySourceMirror = function (repositorySourceMirror) {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewRepositorySourceMirror(repositorySourceMirror));
             };
 
-            $scope.goIncludeInactiveRepositorySourceMirrors = function() {
+            $scope.goIncludeInactiveRepositorySourceMirrors = function () {
                 $scope.amShowingInactiveRepositorySourceMirrors = true;
                 refetchRepositorySource();
             };
 
-            $scope.goAddRepositorySourceMirror = function() {
+            $scope.goAddRepositorySourceMirror = function () {
                 breadcrumbs.pushAndNavigate(breadcrumbFactory
                     .createAddRepositorySourceMirror($scope.repositorySource));
             };
@@ -94,7 +94,7 @@ angular.module('haikudepotserver').controller(
              * immediately; it may be queued to go later.</p>
              */
 
-            $scope.goTriggerImport = function() {
+            $scope.goTriggerImport = function () {
                 jsonRpc.call(
                     constants.ENDPOINT_API_V1_REPOSITORY,
                     "triggerImportRepository",
@@ -103,7 +103,7 @@ angular.module('haikudepotserver').controller(
                         repositorySourceCodes : [ $scope.repositorySource.code ]
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('triggered import for repository source; '+$scope.repositorySource.code);
                         $scope.didTriggerImportRepositorySource = true;
                         $timeout(function() {
@@ -111,7 +111,7 @@ angular.module('haikudepotserver').controller(
                         }, 3000)
 
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -138,14 +138,14 @@ angular.module('haikudepotserver').controller(
                         includeInactiveRepositorySourceMirrors: $scope.amShowingInactiveRepositorySourceMirrors
                     }]
                 ).then(
-                    function(repositorySourceResult) {
+                    function (repositorySourceResult) {
 
                         // each of the mirrors that are related in the result need to link
                         // back to the repository source.
 
                         _.each(
                             repositorySourceResult.repositorySourceMirrors,
-                            function(m) { m.repositorySource = repositorySourceResult; }
+                            function (m) { m.repositorySource = repositorySourceResult; }
                         );
 
                         jsonRpc.call(
@@ -153,12 +153,12 @@ angular.module('haikudepotserver').controller(
                             "getRepository",
                             [{ code: $routeParams.repositoryCode }]
                         ).then(
-                            function(repositoryResult) {
+                            function (repositoryResult) {
                                 repositorySourceResult.repository = repositoryResult;
                                 $scope.repositorySource = repositorySourceResult;
                                 refreshBreadcrumbItems();
                             },
-                            function(err) {
+                            function (err) {
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );

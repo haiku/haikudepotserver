@@ -31,7 +31,7 @@ public class HpkrFileExtractor implements Closeable {
 
     private HpkStringTable attributesStringTable;
 
-    public HpkrFileExtractor(File file) throws IOException, HpkException {
+    public HpkrFileExtractor(File file) throws IOException {
 
         super();
         Preconditions.checkNotNull(file);
@@ -86,7 +86,7 @@ public class HpkrFileExtractor implements Closeable {
         return new AttributeIterator(getAttributeContext(),offset);
     }
 
-    private HpkrHeader readHeader() throws IOException, HpkException {
+    private HpkrHeader readHeader() throws IOException {
         Preconditions.checkNotNull(file);
 
         RandomAccessFile randomAccessFile = null;
@@ -137,7 +137,7 @@ public class HpkrFileExtractor implements Closeable {
 
             return result;
         } finally {
-            if (null!=randomAccessFile) {
+            if (null != randomAccessFile) {
                 try {
                     randomAccessFile.close();
                 }

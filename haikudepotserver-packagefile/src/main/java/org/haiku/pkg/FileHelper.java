@@ -20,9 +20,9 @@ public class FileHelper {
 
     private byte[] buffer8 = new byte[8];
 
-    public int readUnsignedShortToInt(RandomAccessFile randomAccessFile) throws IOException, HpkException {
+    public int readUnsignedShortToInt(RandomAccessFile randomAccessFile) throws IOException {
 
-        if (2!=randomAccessFile.read(buffer8, 0, 2)) {
+        if (2 != randomAccessFile.read(buffer8, 0, 2)) {
             throw new HpkException("not enough bytes read for an unsigned short");
         }
 
@@ -32,7 +32,7 @@ public class FileHelper {
         return i0 << 8 | i1;
     }
 
-    public long readUnsignedIntToLong(RandomAccessFile randomAccessFile) throws IOException, HpkException {
+    public long readUnsignedIntToLong(RandomAccessFile randomAccessFile) throws IOException {
 
         if (4 != randomAccessFile.read(buffer8, 0, 4)) {
             throw new HpkException("not enough bytes read for an unsigned int");
@@ -46,7 +46,7 @@ public class FileHelper {
         return l0 << 24 | l1 << 16 | l2 << 8 | l3;
     }
 
-    public BigInteger readUnsignedLong(RandomAccessFile randomAccessFile) throws IOException, HpkException {
+    public BigInteger readUnsignedLong(RandomAccessFile randomAccessFile) throws IOException {
 
         if (8 != randomAccessFile.read(buffer8)) {
             throw new HpkException("not enough bytes read for an unsigned long");
@@ -55,18 +55,18 @@ public class FileHelper {
         return new BigInteger(1, buffer8);
     }
 
-    public long readUnsignedLongToLong(RandomAccessFile randomAccessFile) throws IOException, HpkException {
+    public long readUnsignedLongToLong(RandomAccessFile randomAccessFile) throws IOException {
 
         BigInteger result = readUnsignedLong(randomAccessFile);
 
-        if(result.compareTo(MAX_BIGINTEGER_FILE) > 0) {
+        if (result.compareTo(MAX_BIGINTEGER_FILE) > 0) {
             throw new HpkException("the hpkr file contains an unsigned long which is larger than can be represented in a java long");
         }
 
         return result.longValue();
     }
 
-    public char[] readMagic(RandomAccessFile randomAccessFile) throws IOException, HpkException {
+    public char[] readMagic(RandomAccessFile randomAccessFile) throws IOException {
 
         if (4 != randomAccessFile.read(buffer8, 0, 4)) {
             throw new HpkException("not enough bytes read for a 4-byte magic");

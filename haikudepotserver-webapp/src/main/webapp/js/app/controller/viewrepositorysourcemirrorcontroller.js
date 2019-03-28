@@ -20,7 +20,7 @@ angular.module('haikudepotserver').controller(
 
             refetchRepositorySourceMirror();
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return !$scope.repositorySourceMirror;
             };
 
@@ -32,11 +32,11 @@ angular.module('haikudepotserver').controller(
                     "updateRepositorySourceMirror",
                     [_.extend({code : $scope.repositorySourceMirror.code}, requestPayload)]
                 ).then(
-                    function(data) {
+                    function (data) {
                         amUpdatingActive = false;
                         return data;
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -46,72 +46,72 @@ angular.module('haikudepotserver').controller(
                 return runUpdate({
                     active : flag,
                     filter : [ 'ACTIVE' ]
-                }).then(function() {
+                }).then(function () {
                     $scope.repositorySourceMirror.active = flag;
                     $log.info('did set the active flag on ' + $scope.repositorySourceMirror.code+' to ' + flag);
                 });
             }
 
-            $scope.canReactivate = function() {
+            $scope.canReactivate = function () {
                 return $scope.repositorySourceMirror &&
                     !$scope.repositorySourceMirror.active &&
                     !amUpdatingActive;
             };
 
-            $scope.canDeactivate = function() {
+            $scope.canDeactivate = function () {
                 return $scope.repositorySourceMirror &&
                     $scope.repositorySourceMirror.active &&
                     !$scope.repositorySourceMirror.isPrimary &&
                     !amUpdatingActive;
             };
 
-            $scope.goReactivate = function() {
+            $scope.goReactivate = function () {
                 updateActive(true);
             };
 
-            $scope.goDeactivate = function() {
+            $scope.goDeactivate = function () {
                 updateActive(false);
             };
 
-            $scope.canSetPrimary = function() {
+            $scope.canSetPrimary = function () {
                 return $scope.repositorySourceMirror &&
                 $scope.repositorySourceMirror.active &&
                 !$scope.repositorySourceMirror.isPrimary &&
                 !amUpdatingActive;
             };
 
-            $scope.canRemove = function() {
+            $scope.canRemove = function () {
                 return $scope.repositorySourceMirror &&
                     !$scope.repositorySourceMirror.isPrimary &&
                     !amUpdatingActive;
             };
 
-            $scope.goSetPrimary = function() {
+            $scope.goSetPrimary = function () {
                 runUpdate({
                     isPrimary : true,
                     filter : ['IS_PRIMARY']
                 }).then(
-                    function() {
+                    function () {
                         $scope.repositorySourceMirror.isPrimary = true;
                         $log.info('did configure [' + $scope.repositorySourceMirror.code + '] to primary');
                     }
                 )
             };
 
-            $scope.goEdit = function() {
+            $scope.goEdit = function () {
                 breadcrumbs.pushAndNavigate(
                     breadcrumbFactory.createEditRepositorySourceMirror($scope.repositorySourceMirror));
             };
 
-            $scope.goRemove = function() {
+            $scope.goRemove = function () {
                 $scope.amDeleting = true;
             };
 
-            $scope.goCancelRemove = function() {
+            $scope.goCancelRemove = function () {
                 $scope.amDeleting = false;
             };
 
-            $scope.goConfirmRemove = function() {
+            $scope.goConfirmRemove = function () {
                 if (!$scope.amDeleting) {
                     throw Error('cannot delete the mirror when not in delete mode');
                 }
@@ -121,13 +121,13 @@ angular.module('haikudepotserver').controller(
                     "removeRepositorySourceMirror",
                     [{ code: $routeParams.repositorySourceMirrorCode }]
                 ).then(
-                    function() {
+                    function () {
                         $scope.amDeleting = false;
                         $log.info('did remove the mirror [' +
                             $routeParams.repositorySourceMirrorCode + ']');
                         breadcrumbs.popAndNavigate();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -145,7 +145,7 @@ angular.module('haikudepotserver').controller(
             }
 
             function fnChain(chain) {
-                if(chain && chain.length) {
+                if (chain && chain.length) {
                     chain.shift()(chain);
                 }
             }
@@ -156,55 +156,55 @@ angular.module('haikudepotserver').controller(
                 var repositorySourceMirror = undefined;
 
                 fnChain([
-                    function(chain) {
+                    function (chain) {
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_REPOSITORY,
                             "getRepositorySourceMirror",
                             [{ code: $routeParams.repositorySourceMirrorCode }]
                         ).then(
-                            function(result) {
+                            function (result) {
                                 repositorySourceMirror = result;
                                 fnChain(chain);
                             },
-                            function(err) {
+                            function (err) {
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );
                     },
 
-                    function(chain) {
+                    function (chain) {
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_REPOSITORY,
                             "getRepositorySource",
                             [{ code: repositorySourceMirror.repositorySourceCode }]
                         ).then(
-                            function(result) {
+                            function (result) {
                                 repositorySourceMirror.repositorySource = result;
                                 fnChain(chain);
                             },
-                            function(err) {
+                            function (err) {
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );
                     },
 
-                    function(chain) {
+                    function (chain) {
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_REPOSITORY,
                             "getRepository",
                             [{ code: repositorySourceMirror.repositorySource.repositoryCode }]
                         ).then(
-                            function(result) {
+                            function (result) {
                                 repositorySourceMirror.repositorySource.repository = result;
                                 fnChain(chain);
                             },
-                            function(err) {
+                            function (err) {
                                 errorHandling.handleJsonRpcError(err);
                             }
                         );
                     },
 
-                    function(chain) {
+                    function (chain) {
                         referenceData.countries().then(function(countries) {
                             var country = _.findWhere(
                                 countries,
@@ -219,7 +219,7 @@ angular.module('haikudepotserver').controller(
                         })
                     },
 
-                    function(chain) {
+                    function (chain) {
                         $scope.repositorySourceMirror = repositorySourceMirror;
                         refreshBreadcrumbItems();
                         fnChain(chain);

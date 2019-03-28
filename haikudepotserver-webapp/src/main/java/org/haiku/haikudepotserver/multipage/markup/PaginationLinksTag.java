@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -82,11 +82,11 @@ public class PaginationLinksTag extends RequestContextAwareTag {
         List<String> ulClasses = new ArrayList<>();
         ulClasses.add("pagination-control-container");
 
-        if(0==p.getPage()) {
+        if (0 == p.getPage()) {
             ulClasses.add("pagination-control-on-first");
         }
 
-        if(p.getPage() == p.getPages()-1) {
+        if (p.getPage() == p.getPages()-1) {
             ulClasses.add("pagination-control-on-last");
         }
 
@@ -102,7 +102,7 @@ public class PaginationLinksTag extends RequestContextAwareTag {
 
         int[] pageNumbers = p.generateSuggestedPages(null == getLinkCount() ? LINK_COUNT_DEFAULT : getLinkCount());
 
-        for(int pageNumber : pageNumbers) {
+        for (int pageNumber : pageNumbers) {
             tagWriter.startTag("li");
 
             if (pageNumber == p.getPage()) {

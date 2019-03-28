@@ -12,7 +12,7 @@ angular.module('haikudepotserver').controller(
             $scope,$log,
             jsonRpc,constants,errorHandling,userState,breadcrumbs,breadcrumbFactory) {
 
-            if(userState.user()) {
+            if (userState.user()) {
                 throw Error('it is not possible to reset the password if a user is presently authenticated.');
             }
 
@@ -33,8 +33,8 @@ angular.module('haikudepotserver').controller(
             regenerateCaptcha();
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.captchaToken ||
-                    $scope.status == Status.UNDERTAKING;
+                return undefined === $scope.captchaToken ||
+                    $scope.status === Status.UNDERTAKING;
             };
 
             $scope.deriveFormControlsContainerClasses = function(name) {
@@ -59,12 +59,12 @@ angular.module('haikudepotserver').controller(
                     "generateCaptcha",
                     [{}]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
                         refreshBreadcrumbItems();
                     },
-                    function(err) {
+                    function (err) {
                         errorHandling.handleJsonRpcError(err);
                     }
                 );
@@ -83,7 +83,7 @@ angular.module('haikudepotserver').controller(
 
             $scope.goInitiatePasswordReset = function() {
 
-                if($scope.initiatePasswordResetForm.$invalid) {
+                if ($scope.initiatePasswordResetForm.$invalid) {
                     throw Error('expected the initiation of password reset only to be possible if the form is valid');
                 }
 
@@ -99,15 +99,15 @@ angular.module('haikudepotserver').controller(
                         captchaResponse : $scope.workingInitiatePasswordReset.captchaResponse
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('initiated password reset');
                         $scope.status = Status.DONE;
                     },
-                    function(err) {
+                    function (err) {
 
                         regenerateCaptcha();
 
-                        switch(err.code) {
+                        switch (err.code) {
 
                             case jsonRpc.errorCodes.CAPTCHABADRESPONSE:
                                 $log.error('the user has mis-interpreted the captcha; will lodge an error into the form and then populate a new one for them');

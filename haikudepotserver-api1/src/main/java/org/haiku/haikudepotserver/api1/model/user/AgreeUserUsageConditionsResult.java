@@ -1,9 +1,9 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1.model.user;
 
-public class SynchronizeUsersResult {
+public class AgreeUserUsageConditionsResult {
 }

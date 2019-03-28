@@ -179,7 +179,7 @@ public class PkgIconController extends AbstractController {
             boolean isAsFallback)
             throws IOException {
 
-        if(null==size) {
+        if (null==size) {
             size = 64; // largest natural size
         }
 
@@ -188,7 +188,7 @@ public class PkgIconController extends AbstractController {
         response.setHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(data.length));
         response.setContentType(MediaType.PNG.toString());
 
-        if(isAsFallback) {
+        if (isAsFallback) {
             response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
             response.setHeader(HttpHeaders.PRAGMA, "no-cache");
             response.setHeader(HttpHeaders.EXPIRES, "0");

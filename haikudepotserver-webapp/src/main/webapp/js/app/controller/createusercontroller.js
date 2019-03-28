@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,15 +7,18 @@ angular.module('haikudepotserver').controller(
     'CreateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','errorHandling','referenceData','userState','messageSource','breadcrumbs','breadcrumbFactory',
+        'jsonRpc','constants','errorHandling','referenceData','userState',
+        'messageSource','breadcrumbs','breadcrumbFactory',
         function(
-            $scope,$log,$location,
-            jsonRpc,constants,errorHandling,referenceData,userState,messageSource,breadcrumbs,breadcrumbFactory) {
+            $scope, $log, $location,
+            jsonRpc, constants, errorHandling, referenceData, userState,
+            messageSource, breadcrumbs, breadcrumbFactory) {
 
             $scope.userNicknamePattern = ('' + constants.PATTERN_USER_NICKNAME).replace(/^\//,'').replace(/\/$/,'');
             $scope.captchaToken = undefined;
             $scope.captchaImageUrl = undefined;
             $scope.amSaving = false;
+            $scope.userUsageConditions = undefined;
             $scope.newUser = {
                 nickname : undefined,
                 email : undefined,
@@ -28,7 +31,8 @@ angular.module('haikudepotserver').controller(
             regenerateCaptcha();
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.captchaToken ||
+                return undefined === $scope.userUsageConditions ||
+                    undefined === $scope.captchaToken ||
                     $scope.amSaving;
             };
 
@@ -43,6 +47,18 @@ angular.module('haikudepotserver').controller(
                 ]);
             }
 
+            function fetchUserUsageConditions() {
+                return jsonRpc.call(constants.ENDPOINT_API_V1_USER, "getUserUsageConditions", [{}])
+                    .then(
+                        function (userUsageConditionsData) {
+                            $scope.userUsageConditions = userUsageConditionsData;
+                        },
+                        errorHandling.handleJsonRpcError
+                    );
+            }
+
+            fetchUserUsageConditions();
+
             function regenerateCaptcha() {
 
                 $scope.captchaToken = undefined;
@@ -54,14 +70,12 @@ angular.module('haikudepotserver').controller(
                     "generateCaptcha",
                     [{}]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
                         refreshBreadcrumbItems();
                     },
-                    function(err) {
-                        errorHandling.handleJsonRpcError(err);
-                    }
+                    errorHandling.handleJsonRpcError
                 );
             }
 
@@ -70,27 +84,39 @@ angular.module('haikudepotserver').controller(
             // this reason, any change to the response text field will be taken to trigger this error state to be
             // removed.
 
-            $scope.captchaResponseDidChange = function() {
+            $scope.captchaResponseDidChange = function () {
                 $scope.createUserForm.captchaResponse.$setValidity('badresponse',true);
             };
 
-            $scope.nicknameDidChange = function() {
+            $scope.nicknameDidChange = function () {
                 $scope.createUserForm.nickname.$setValidity('notunique',true);
             };
 
-            $scope.passwordsChanged = function() {
+            $scope.passwordsChanged = function () {
                 $scope.createUserForm.passwordClearRepeated.$setValidity(
                     'repeat',
                         !$scope.newUser.passwordClear
                         || !$scope.newUser.passwordClearRepeated
-                        || $scope.newUser.passwordClear == $scope.newUser.passwordClearRepeated);
+                        || $scope.newUser.passwordClear === $scope.newUser.passwordClearRepeated);
+            };
+
+            /**
+             * This function will return true if the state of the form and data
+             * is such that the user is able to proceed with saving the new
+             * user.
+             */
+
+            $scope.canCreateUser = function() {
+                return !($scope.createUserForm.$invalid) &&
+                    $scope.newUser.userUsageConditionsIsMinimumAgeExceeded &&
+                    $scope.newUser.userUsageConditionsDocumentAgreed;
             };
 
             // This function will take the data from the form and will create the user from this data.
 
-            $scope.goCreateUser = function() {
+            $scope.goCreateUser = function () {
 
-                if($scope.createUserForm.$invalid) {
+                if ($scope.createUserForm.$invalid) {
                     throw Error('expected the creation of a user only to be possible if the form is valid');
                 }
 
@@ -105,13 +131,14 @@ angular.module('haikudepotserver').controller(
                         passwordClear : $scope.newUser.passwordClear,
                         captchaToken : $scope.captchaToken,
                         captchaResponse : $scope.newUser.captchaResponse,
-                        naturalLanguageCode : $scope.newUser.naturalLanguageCode
+                        naturalLanguageCode : $scope.newUser.naturalLanguageCode,
+                        userUsageConditionsCode: $scope.userUsageConditions.code
                     }]
                 ).then(
-                    function() {
+                    function () {
                         $log.info('created new user; '+$scope.newUser.nickname);
 
-                        if(userState.user()) {
+                        if (userState.user()) {
                             breadcrumbs.pop();
                             breadcrumbs.pushAndNavigate(
                                 breadcrumbFactory.createViewUser({ nickname : $scope.newUser.nickname })
@@ -135,12 +162,12 @@ angular.module('haikudepotserver').controller(
                             ]);
                         }
                     },
-                    function(err) {
+                    function (err) {
 
                         regenerateCaptcha();
                         $scope.amSaving = false;
 
-                        switch(err.code) {
+                        switch (err.code) {
 
                             case jsonRpc.errorCodes.VALIDATION:
 
@@ -149,7 +176,7 @@ angular.module('haikudepotserver').controller(
                                 // default handler.
 
                                 if(err.data && err.data) {
-                                    _.each(err.data, function(vf) {
+                                    _.each(err.data.validationfailures, function (vf) {
                                         var model = $scope.createUserForm[vf.property];
 
                                         if(model) {

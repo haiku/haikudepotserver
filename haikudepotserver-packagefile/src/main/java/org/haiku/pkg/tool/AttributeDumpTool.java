@@ -44,9 +44,10 @@ public class AttributeDumpTool implements Runnable {
     public void run() {
         new CmdLineParser(this);
 
-        try (HpkrFileExtractor hpkrFileExtractor = new HpkrFileExtractor(hpkrFile)) {
-            OutputStreamWriter streamWriter = new OutputStreamWriter(System.out);
-            AttributeWriter attributeWriter = new AttributeWriter(streamWriter);
+        try (
+                HpkrFileExtractor hpkrFileExtractor = new HpkrFileExtractor(hpkrFile);
+                OutputStreamWriter streamWriter = new OutputStreamWriter(System.out);
+                AttributeWriter attributeWriter = new AttributeWriter(streamWriter) ) {
             attributeWriter.write(hpkrFileExtractor.getPackageAttributesIterator());
             attributeWriter.flush();
         } catch (Throwable th) {

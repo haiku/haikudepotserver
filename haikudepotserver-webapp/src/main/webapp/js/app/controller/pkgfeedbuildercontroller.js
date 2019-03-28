@@ -14,7 +14,7 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location',
         'jsonRpc','constants','messageSource','referenceData',
         'breadcrumbs','breadcrumbFactory','errorHandling','userState',
-        function(
+        function (
             $scope,$log,$location,
             jsonRpc,constants,messageSource,referenceData,
             breadcrumbs,breadcrumbFactory,errorHandling,userState) {
@@ -37,7 +37,7 @@ angular.module('haikudepotserver').controller(
 
             var amBuilding = false;
 
-            $scope.shouldSpin = function() {
+            $scope.shouldSpin = function () {
                 return !$scope.feedSettings.supplierTypes || amBuilding;
             };
 
@@ -45,12 +45,12 @@ angular.module('haikudepotserver').controller(
                 userState.naturalLanguageCode(),
                 'pkgFeedBuilder.pkgChooserName.placeholder')
                 .then(
-                function(text) { $scope.pkgNamePlaceholder = text; }
+                function (text) { $scope.pkgNamePlaceholder = text; }
             );
 
             function refreshFeedSupplierTypes() {
                 referenceData.feedSupplierTypes().then(
-                    function(items) {
+                    function (items) {
 
                         $scope.feedSettings.supplierTypes = _.map(items, function(item) {
                             return {
@@ -62,15 +62,15 @@ angular.module('haikudepotserver').controller(
 
                         _.each(
                             $scope.feedSettings.supplierTypes,
-                            function(item) {
+                            function (item) {
                                 messageSource.get(
                                     userState.naturalLanguageCode(),
                                         'feed.source.'+item.code.toLowerCase()+'.title'
                                 ).then(
-                                    function(title) {
+                                    function (title) {
                                         item.title = title;
                                     },
-                                    function() {
+                                    function () {
                                         item.title = '???';
                                     }
                                 );
@@ -78,7 +78,7 @@ angular.module('haikudepotserver').controller(
                         );
 
                     },
-                    function() {
+                    function () {
                         errorHandling.navigateToError();
                     }
                 )
@@ -115,11 +115,11 @@ angular.module('haikudepotserver').controller(
                         supplierTypes : supplierTypeCodes
                     }]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.feedUrl = result.url;
                         amBuilding = false;
                     },
-                    function(err) {
+                    function (err) {
                         $log.error('unable to generate feed url');
                         errorHandling.handleJsonRpcError(err);
                     }
@@ -136,11 +136,11 @@ angular.module('haikudepotserver').controller(
 
                 var initialPkgNamesString = $location.search()['pkgNames'];
 
-                if(initialPkgNamesString && initialPkgNamesString.length) {
+                if (initialPkgNamesString && initialPkgNamesString.length) {
 
                     // split on hyphen because it is not allowed in a package name.
 
-                    _.each(initialPkgNamesString.split('-'),function(initialPkgNames) {
+                    _.each(initialPkgNamesString.split('-'),function (initialPkgNames) {
                         jsonRpc.call(
                             constants.ENDPOINT_API_V1_PKG,
                             'getPkg',
@@ -168,15 +168,15 @@ angular.module('haikudepotserver').controller(
             // ------------------
             // ACTIONS
 
-            $scope.goBuild = function() {
+            $scope.goBuild = function () {
                 build();
             };
 
-            $scope.goEdit = function() {
+            $scope.goEdit = function () {
                 $scope.feedUrl = undefined;
             };
 
-            $scope.goRemovePkg = function(pkg) {
+            $scope.goRemovePkg = function (pkg) {
                 $scope.feedSettings.pkgs = _.without($scope.feedSettings.pkgs,pkg);
             };
 
@@ -185,12 +185,12 @@ angular.module('haikudepotserver').controller(
              * changed then the invalidity no longer holds.</P>
              */
 
-            $scope.$watch('pkgChooserName', function() {
+            $scope.$watch('pkgChooserName', function () {
                 $scope.feedForm.pkgChooserName.$setValidity('notfound',true);
                 $scope.feedForm.pkgChooserName.$setValidity('included',true);
             });
 
-            $scope.goAddPkg = function() {
+            $scope.goAddPkg = function () {
 
                 // if the package is already in the list then the situation should be
                 // avoided where the same package is added twice.

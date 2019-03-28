@@ -19,7 +19,7 @@ angular.module('haikudepotserver').controller(
             $scope.pkg = undefined;
 
             $scope.shouldSpin = function() {
-                return undefined == $scope.pkg;
+                return undefined === $scope.pkg;
             };
 
             // When the breadcrumbs are re-created, assume that we must have come through the main version first.
@@ -44,7 +44,7 @@ angular.module('haikudepotserver').controller(
                         naturalLanguageCode: userState.naturalLanguageCode()
                     }]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $log.info('fetched '+result.name+' pkg with ' + result.versions.length + ' versions');
                         $scope.pkg = result;
 
@@ -64,7 +64,7 @@ angular.module('haikudepotserver').controller(
                                 _.each($scope.pkg.versions, function(pv) {
                                     pv.repository = _.findWhere(repositories, {code : pv.repositoryCode });
 
-                                    if(!pv.repository) {
+                                    if (!pv.repository) {
                                         throw Error('the repository was not able to be found for the code "' + pv.repositoryCode + '"');
                                     }
                                 });

@@ -40,20 +40,20 @@ angular.module('haikudepotserver').controller(
 
             fnChain([
 
-                function(chain) {
+                function (chain) {
                     pkg.getPkgWithSpecificVersionFromRouteParams($routeParams, false).then(
-                        function(result) {
+                        function (result) {
                             $scope.pkg = result;
                             $log.info('found '+result.name+' pkg');
                             fnChain(chain);
                         },
-                        function(err) {
+                        function (err) {
                             errorHandling.handleJsonRpcError(err);
                         }
                     );
                 },
 
-                function(chain) {
+                function (chain) {
                     jsonRpc.call(
                         constants.ENDPOINT_API_V1_PKG,
                         "getPkgChangelog",
@@ -61,19 +61,19 @@ angular.module('haikudepotserver').controller(
                             pkgName : $scope.pkg.name
                         }]
                     ).then(
-                        function(data) {
+                        function (data) {
                             $scope.pkg.changelog = {
                                 content : data.content
                             };
                             fnChain(chain);
                         },
-                        function(err) {
+                        function (err) {
                             errorHandling.handleJsonRpcError(err);
                         }
                     );
                 },
 
-                function(chain) {
+                function (chain) {
                     refreshBreadcrumbItems();
                     fnChain(chain);
                 }

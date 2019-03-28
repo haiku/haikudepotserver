@@ -30,7 +30,6 @@ public class RobotController {
         writer.print("allow: ");
         writer.print(MultipageConstants.PATH_MULTIPAGE);
         writer.print("\n");
-
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -113,10 +112,10 @@ public class AuthenticationFilter implements Filter {
         // if the user was not authenticated on the header, under certain circumstances, it may be possible for
         // the authentication to occur based on a parameter of the GET request (in the query).
 
-        if(!authenticatedUserObjectId.isPresent() && httpRequest.getMethod().equals("GET")) {
+        if (!authenticatedUserObjectId.isPresent() && httpRequest.getMethod().equals("GET")) {
             String filterPathInfo = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
 
-            if(filterPathInfo.startsWith("/" + SEGMENT_SECURED + "/")) {
+            if (filterPathInfo.startsWith("/" + SEGMENT_SECURED + "/")) {
                 String param = httpRequest.getParameter(PARAM_BEARER_TOKEN);
 
                 if (!Strings.isNullOrEmpty(param)) {

@@ -17,13 +17,13 @@ angular.module('haikudepotserver').controller(
             $scope.breadcrumbItems = undefined;
             $scope.job = undefined;
 
-            $scope.shouldSpin = function() {
-                return undefined == $scope.job;
+            $scope.shouldSpin = function () {
+                return undefined === $scope.job;
             };
 
             function refreshBreadcrumbItems() {
 
-                if($scope.job.ownerUserNickname) {
+                if ($scope.job.ownerUserNickname) {
                     breadcrumbs.mergeCompleteStack([
                         breadcrumbFactory.createHome(),
                         breadcrumbFactory.createListUsers(),
@@ -49,7 +49,7 @@ angular.module('haikudepotserver').controller(
                     "getJob",
                     [{ guid : $routeParams.guid }]
                 ).then(
-                    function(result) {
+                    function (result) {
                         $scope.job = result;
                         $scope.job.ownerUser = {
                             nickname : $scope.job.ownerUserNickname
@@ -57,11 +57,11 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                         $log.info('fetched job; '+result.guid);
                     },
-                    function(err) {
-                        switch(err.code) {
+                    function (err) {
+                        switch (err.code) {
 
                             case jsonRpc.errorCodes.OBJECTNOTFOUND:
-                                if(err.data.entityName == 'Job') {
+                                if (err.data.entityName === 'Job') {
                                     $scope.job = {};
                                 }
                                 else {
@@ -81,7 +81,7 @@ angular.module('haikudepotserver').controller(
 
             refreshJob();
 
-            $scope.goRefresh = function() {
+            $scope.goRefresh = function () {
                 refreshJob();
             };
 
@@ -98,7 +98,7 @@ angular.module('haikudepotserver').controller(
 
                 var iframeEl = document.getElementById("download-iframe");
 
-                if(!iframeEl) {
+                if (!iframeEl) {
                     throw Error('am not able to find the \'download-iframe\'');
                 }
 

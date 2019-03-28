@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,7 +9,6 @@ import com.google.common.base.Preconditions;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,15 +50,15 @@ public class SinglePageTemplateFrequencyMetricsFilter implements Filter {
 
         HttpServletResponse servletResponse = (HttpServletResponse) response;
 
-        if(HttpServletResponse.SC_OK == servletResponse.getStatus()) {
+        if (HttpServletResponse.SC_OK == servletResponse.getStatus()) {
 
             HttpServletRequest servletRequest = (HttpServletRequest) request;
 
-            if(servletRequest.getMethod().equals(HttpMethod.GET.name())) {
+            if (servletRequest.getMethod().equals(HttpMethod.GET.name())) {
 
                 String path = servletRequest.getServletPath();
 
-                if(PATTERN_PATH.matcher(path).matches()) {
+                if (PATTERN_PATH.matcher(path).matches()) {
                     metrics.increment(path);
                 }
 

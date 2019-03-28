@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,6 +39,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>This controller produces an ATOM feed of the latest happenings </p>
@@ -184,11 +185,9 @@ public class FeedController {
 
     private Optional<FeedSpecification.FeedType> tryDeriveFeedTypeByExtension(String extension) {
         if (!Strings.isNullOrEmpty(extension)) {
-            for (FeedSpecification.FeedType feedType : FeedSpecification.FeedType.values()) {
-                if (extension.equals(feedType.getExtension())) {
-                    return Optional.of(feedType);
-                }
-            }
+            return Stream.of(FeedSpecification.FeedType.values())
+                    .filter(ft -> extension.equals(ft.getExtension()))
+                    .findFirst();
         }
 
         return Optional.empty();

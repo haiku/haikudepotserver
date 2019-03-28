@@ -35,13 +35,13 @@ public class NaturalLanguageWebHelper {
     public static NaturalLanguage deriveNaturalLanguage(ObjectContext context, HttpServletRequest request) {
         Preconditions.checkNotNull(context);
 
-        if(null!=request) {
+        if (null != request) {
             String naturalLanguageCode = request.getParameter(WebConstants.KEY_NATURALLANGUAGECODE);
 
-            if(!Strings.isNullOrEmpty(naturalLanguageCode)) {
+            if (!Strings.isNullOrEmpty(naturalLanguageCode)) {
                 Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.tryGetByCode(context, naturalLanguageCode);
 
-                if(naturalLanguageOptional.isPresent()) {
+                if (naturalLanguageOptional.isPresent()) {
                     return naturalLanguageOptional.get();
                 }
                 else {
@@ -53,13 +53,13 @@ public class NaturalLanguageWebHelper {
 
             Locale locale = request.getLocale();
 
-            if(null != locale) {
+            if (null != locale) {
                 Iterator<String> langI = Splitter.on(Pattern.compile("[-_]")).split(locale.toLanguageTag()).iterator();
 
-                if(langI.hasNext()) {
+                if (langI.hasNext()) {
                     Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.tryGetByCode(context, langI.next());
 
-                    if(naturalLanguageOptional.isPresent() && naturalLanguageOptional.get().getIsPopular()) {
+                    if (naturalLanguageOptional.isPresent() && naturalLanguageOptional.get().getIsPopular()) {
                         return naturalLanguageOptional.get();
                     }
                 }

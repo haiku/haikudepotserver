@@ -7,6 +7,7 @@ import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haiku.haikudepotserver.dataobjects.UserUsageConditionsAgreement;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -34,6 +35,7 @@ public abstract class _User extends AbstractDataObject {
     public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
     public static final Property<List<PermissionUserPkg>> PERMISSION_USER_PKGS = Property.create("permissionUserPkgs", List.class);
     public static final Property<List<UserPasswordResetToken>> USER_PASSWORD_RESET_TOKENS = Property.create("userPasswordResetTokens", List.class);
+    public static final Property<List<UserUsageConditionsAgreement>> USER_USAGE_CONDITIONS_AGREEMENTS = Property.create("userUsageConditionsAgreements", List.class);
 
     public void setActive(Boolean active) {
         writeProperty("active", active);
@@ -135,6 +137,18 @@ public abstract class _User extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<UserPasswordResetToken> getUserPasswordResetTokens() {
         return (List<UserPasswordResetToken>)readProperty("userPasswordResetTokens");
+    }
+
+
+    public void addToUserUsageConditionsAgreements(UserUsageConditionsAgreement obj) {
+        addToManyTarget("userUsageConditionsAgreements", obj, true);
+    }
+    public void removeFromUserUsageConditionsAgreements(UserUsageConditionsAgreement obj) {
+        removeToManyTarget("userUsageConditionsAgreements", obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<UserUsageConditionsAgreement> getUserUsageConditionsAgreements() {
+        return (List<UserUsageConditionsAgreement>)readProperty("userUsageConditionsAgreements");
     }
 
 

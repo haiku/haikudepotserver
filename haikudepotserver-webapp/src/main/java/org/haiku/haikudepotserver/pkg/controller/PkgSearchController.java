@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -114,7 +114,7 @@ public class PkgSearchController {
             Template template = freemarkerConfiguration.getTemplate("opensearchdescription-body_" + naturalLanguage.getCode());
             template.process(wrapper.wrap(model), response.getWriter());
         }
-        catch(TemplateException e) {
+        catch (TemplateException e) {
             throw new IllegalStateException("unable to generate the open search description", e);
         }
 
@@ -130,18 +130,18 @@ public class PkgSearchController {
             HttpServletResponse response,
             @RequestParam(value = KEY_QUERY, required = false) String query) throws IOException {
 
-        if(null!=query) {
+        if (null != query) {
             query = query.trim().toLowerCase();
         }
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl);
         Optional<PkgVersion> pkgVersionOptional = Optional.empty();
 
-        if(!Strings.isNullOrEmpty(query) && Pkg.PATTERN_NAME.matcher(query).matches()) {
+        if (!Strings.isNullOrEmpty(query) && Pkg.PATTERN_NAME.matcher(query).matches()) {
             ObjectContext context = serverRuntime.newContext();
             Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, query);
 
-            if(pkgOptional.isPresent()) {
+            if (pkgOptional.isPresent()) {
                 pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
@@ -157,8 +157,7 @@ public class PkgSearchController {
             builder.pathSegment("#!", "pkg", pv.getPkg().getName());
             pv.toVersionCoordinates().appendPathSegments(builder);
             builder.pathSegment(pv.getArchitecture().getCode());
-        }
-        else {
+        } else {
             builder.path("#!/");
             builder.queryParam(KEY_QUERY, query);
         }

@@ -72,6 +72,7 @@ public class PkgIconServiceImpl implements PkgIconService {
         context.deleteObjects(deriveDataObjectsToDelete(pkgSupplement.getPkgIcons()));
         pkgSupplement.setModifyTimestamp();
         pkgSupplement.setIconModifyTimestamp();
+        renderedPkgIconRepository.evict(context, pkgSupplement);
     }
 
     @Override

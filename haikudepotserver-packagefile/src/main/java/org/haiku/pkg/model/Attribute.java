@@ -1,11 +1,12 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import org.haiku.pkg.AttributeContext;
 import org.haiku.pkg.HpkException;
 
@@ -23,7 +24,7 @@ public abstract class Attribute {
 
     private AttributeId attributeId;
 
-    private List<Attribute> childAttributes = null;
+    private List<Attribute> childAttributes = Collections.emptyList();
 
     public Attribute(AttributeId attributeId) {
         super();
@@ -36,26 +37,19 @@ public abstract class Attribute {
 
     public abstract AttributeType getAttributeType();
 
-    public abstract Object getValue(AttributeContext context)  throws HpkException;
+    public abstract Object getValue(AttributeContext context);
 
-    public void addChildAttribute(Attribute attribute) {
-        Preconditions.checkNotNull(attribute);
-
-        if(null==childAttributes) {
-            childAttributes = new ArrayList<>();
-        }
-
-        childAttributes.add(attribute);
+    public void setChildAttributes(List<Attribute> value) {
+        childAttributes = (null == value)
+                ? Collections.emptyList()
+                : ImmutableList.copyOf(value);
     }
 
     public boolean hasChildAttributes() {
-        return null!=childAttributes && !childAttributes.isEmpty();
+        return !childAttributes.isEmpty();
     }
 
     public List<Attribute> getChildAttributes() {
-        if(null==childAttributes) {
-            return Collections.emptyList();
-        }
         return childAttributes;
     }
 
