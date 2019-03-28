@@ -131,7 +131,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('did change password for user; '+$scope.user.nickname);
 
                         if(userState.user().nickname === $scope.user.nickname) {
-                            userState.user(null); // logout
+                            userState.token(null); // logout
                             breadcrumbs.resetAndNavigate([
                                 breadcrumbFactory.createHome(),
                                 breadcrumbFactory.applySearch(

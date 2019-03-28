@@ -97,12 +97,12 @@
                 <dd><spring:message code="gen.${data.isSourceAvailable ? 'yes' : 'no'}"/></dd>
                 <dt><spring:message code="viewPkg.categories.title"></spring:message></dt>
                 <dd>
-                    <c:if test="${empty data.pkgVersion.pkg.pkgPkgCategories}">
+                    <c:if test="${empty data.pkgVersion.pkg.pkgSupplement.pkgPkgCategories}">
                         <spring:message code="viewPkg.categories.none"></spring:message>
                     </c:if>
-                    <c:if test="${not empty data.pkgVersion.pkg.pkgPkgCategories}">
+                    <c:if test="${not empty data.pkgVersion.pkg.pkgSupplement.pkgPkgCategories}">
                          <c:forEach
-                                 items="${data.pkgVersion.pkg.pkgPkgCategories}"
+                                 items="${data.pkgVersion.pkg.pkgSupplement.pkgPkgCategories}"
                                  varStatus="pkgPkgCategoryStatus"
                                  var="pkgPkgCategory"><c:if test="${not pkgPkgCategoryStatus.first}">,</c:if>
                              <spring:message code="pkgCategory.${pkgPkgCategory.pkgCategory.code.toLowerCase()}.title"/>
