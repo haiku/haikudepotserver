@@ -74,4 +74,15 @@ Distributed under the terms of the MIT License.
         </para>
     </section>
 
+    <section>
+        <title>User Usage Conditions</title>
+        <para>
+            User usage conditions are the terms by which a user is able to use the HDS system.  These
+            should be agreed to before the user is able to make use of the system.  These are loaded
+            into the database from compile-time resources in the HDS source code and are loaded into
+            the "UserUsageConditions" table.  In this way, the compile-time resources act like a
+            migration.
+        </para>
+    </section>
+
 </chapter>
