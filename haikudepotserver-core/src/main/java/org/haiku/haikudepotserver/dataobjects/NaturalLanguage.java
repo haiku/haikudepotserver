@@ -30,6 +30,7 @@ public class NaturalLanguage extends _NaturalLanguage implements Coded, CreateAn
 
     public final static String CODE_ENGLISH = "en";
     public final static String CODE_GERMAN = "de";
+    public final static String CODE_JAPANESE = "jp";
     public final static String CODE_SPANISH = "es";
     public final static String CODE_FRENCH = "fr";
     public final static String CODE_RUSSIAN = "ru";
