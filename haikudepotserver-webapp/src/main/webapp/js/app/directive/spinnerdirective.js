@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,25 +10,25 @@
  * operation is being undertaken.</p>
  */
 
-angular.module('haikudepotserver').directive('spinner',[
-        '$timeout','constants',
-        function($timeout,constants) {
+angular.module('haikudepotserver').directive('spinner', [
+        '$timeout', 'constants',
+        function($timeout, constants) {
             return {
                 restrict: 'E',
-                link : function($scope,element,attributes) {
+                link : function($scope, element, attributes) {
 
                     var spinExpr = attributes['spin'];
                     var timeoutHandle = undefined;
 
-                    var containerEl = angular.element('<div id="spinner-container" class="modal-backdrop-container"></div>');
+                    var containerEl = angular.element('<div id="spinner-container" class="modal-backdrop-container app-hide"></div>');
                     var innerContainerEl = angular.element('<div></div>');
                     containerEl.append(innerContainerEl);
                     element.replaceWith(containerEl);
 
                     function setupSpin(flag) {
-                        if(flag) {
+                        if (flag) {
 
-                            if(Modernizr.svg) {
+                            if (Modernizr.svg) {
                                 // blend in the SVG
 
                                 var ns = "http://www.w3.org/2000/svg";
@@ -60,14 +60,14 @@ angular.module('haikudepotserver').directive('spinner',[
                     // this will setup a timer so that there is a slight delay before the spinner appears.  This
                     // will prevent the spinner from flashing on the screen.
 
-                    $scope.$watch(spinExpr, function(newValue) {
+                    $scope.$watch(spinExpr, function (newValue) {
 
-                        if(timeoutHandle) {
+                        if (timeoutHandle) {
                             $timeout.cancel(timeoutHandle);
                             timeoutHandle = undefined;
                         }
 
-                        if(newValue) {
+                        if (newValue) {
                             timeoutHandle = $timeout(
                                 function() {
                                     timeoutHandle = undefined;
