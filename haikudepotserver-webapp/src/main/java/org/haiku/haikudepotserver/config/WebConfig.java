@@ -53,7 +53,6 @@ public class WebConfig implements WebMvcConfigurer {
         // not -- it is not entirely systematic.
 
         Stream.of(
-                "/__maintence/**",
                 "/__feed/**",
                 "/__secured/jobdata/*/download",
                 "/__multipage/**",

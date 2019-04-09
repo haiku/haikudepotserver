@@ -88,21 +88,6 @@ Distributed under the terms of the MIT License.
     </section>
 
     <section>
-        <title>Maintenance Tasks</title>
-
-        <para>
-            Some maintenance tasks are scheduled.  These tasks are scheduled from outside the application server
-            in order to simplify a multi-instance deployment topology.  A simple approach to this is to schedule
-            using the cron tool.  This would require a &quot;crontab&quot; entry such as;
-            &quot;14 * * * * curl "http://localhost:8080/maintenance/mediumterm&quot;
-        </para>
-
-        <para>
-            The host and port should be adjusted to suit your deployment environment.
-        </para>
-    </section>
-
-    <section>
         <title>Accessing the Web Environment</title>
 
         <para>
