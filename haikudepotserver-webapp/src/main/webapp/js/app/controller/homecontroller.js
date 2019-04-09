@@ -182,6 +182,7 @@ angular.module('haikudepotserver').controller(
                         );
                     }
 
+                    return $q.resolve($scope.selectedRepositories);
                 }
                 else {
                     return $q.resolve([]);
@@ -278,7 +279,7 @@ angular.module('haikudepotserver').controller(
                     },
 
                     function(chain) {
-                        calculateSelectedArchitecture.then(
+                        calculateSelectedArchitecture().then(
                             function (result) {
                                 $scope.selectedArchitecture = result;
                                 fnChain(chain);
