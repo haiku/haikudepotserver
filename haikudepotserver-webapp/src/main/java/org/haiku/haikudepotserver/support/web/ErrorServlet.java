@@ -130,6 +130,7 @@ public class ErrorServlet extends HttpServlet {
         for (String naturalLanguageCode : new String[] {
                 NaturalLanguage.CODE_ENGLISH,
                 NaturalLanguage.CODE_GERMAN,
+                NaturalLanguage.CODE_JAPANESE,
                 NaturalLanguage.CODE_RUSSIAN,
                 NaturalLanguage.CODE_SLOVAK
         }) {
