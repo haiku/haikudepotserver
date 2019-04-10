@@ -130,6 +130,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                         .stream()
                         .map(nl -> {
                             DumpExportReferenceNaturalLanguage dnl = new DumpExportReferenceNaturalLanguage();
+                            dnl.setIsPopular(nl.getIsPopular());
                             dnl.setCode(nl.getCode());
                             dnl.setName(
                                     messageSource.getMessage(
