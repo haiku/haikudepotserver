@@ -166,7 +166,52 @@ Distributed under the terms of the MIT License.
                 to create the image.  This will use the files in the HDS source
                 as well as resources from the internet to assemble a Docker
                 image that can be run in Docker on a suitable virtual
-                environment.
+                environment.  From the support/deployment directory;
+            </para>
+
+            <para>
+                <programlisting>docker build --tag haikudepotserver:x.y.z .</programlisting>
+            </para>
+        </section>
+
+        <section>
+            <title>Testing the Docker Image</title>
+            <para>
+                To test the local Docker image before using it requires that
+                a suitable database server is configured.  A shared volume is
+                used to convey runtime secrets to the Docker container.  This
+                contains a well-known file called &quot;hds_secrets&quot; and
+                HDS reads this as it starts up.  First create the secrets
+                volume;
+            </para>
+
+            <para>
+                <programlisting>docker volume create secrets</programlisting>
+            </para>
+
+            <para>
+                Either you can edit the &quot;hds_secrets&quot; file on the
+                host machine or you can edit from a container that is running a
+                shell.  An example of the file can be found in the deployment
+                sources of the HDS project.  To edit it using a shell on a
+                running container;
+            </para>
+
+            <para>
+                <programlisting>docker run -it -v secrets:/secrets &lt;image-id&gt; /bin/bash</programlisting>
+            </para>
+
+            <para>
+                Now run the container;
+            </para>
+
+            <para>
+                <programlisting>docker run -v secrets:/secrets -it &lt;image-id&gt; /bin/bash</programlisting>
+            </para>
+
+            <para>
+                It should now be possible to access the running HDS system from a
+                browser on the host system using "http://localhost:8080".
             </para>
         </section>
 

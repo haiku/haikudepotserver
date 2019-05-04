@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2018, Andrew Lindesay
+# Copyright 2018-2019, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -9,7 +9,7 @@
 # correct versions inserted into it.  See the documentation for further
 # details on how this deployment mechanism works.
 
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # These environment variables will be set using the release script.  It will
 # copy the correct values from the poms into these variables so that the right
@@ -22,7 +22,7 @@ ENV PG_VERSION "???"
 ENV JAVA_BIN "java"
 
 ENV INSTALL_ROOT "/opt/haikudepotserver"
-ENV INSTALL_HVIF2PNG_PATH "${INSTALL_ROOT}/hvif2png-hrev51165/bin/hvif2png.sh"
+ENV INSTALL_HVIF2PNG_PATH "${INSTALL_ROOT}/hvif2png-hrev53013+1/bin/hvif2png.sh"
 
 ENV HDS_WAR "haikudepotserver-webapp-${HDS_VERSION}.war"
 ENV HDS_WAR_DOWNLOAD_URL "https://github.com/haiku/haikudepotserver/releases/download/haikudepotserver-${HDS_VERSION}/${HDS_WAR}"
@@ -34,10 +34,10 @@ ENV JETTY_DOWNLOAD_URL "http://central.maven.org/maven2/org/eclipse/jetty/jetty-
 ENV PG_JAR "postgresql-${PG_VERSION}.jar"
 ENV PG_DOWNLOAD_URL "http://central.maven.org/maven2/org/postgresql/postgresql/${PG_VERSION}/${PG_JAR}"
 
-ENV HVIF2PNG_VERSION "hvif2png-hrev51165-linux-x86_64"
+ENV HVIF2PNG_VERSION "hvif2png-hrev53013-linux-x86_64"
 
 RUN mkdir -p "${INSTALL_ROOT}"
-RUN apt-get update && apt-get -y install optipng libpng12-0 curl openjdk-8-jdk fontconfig ttf-dejavu
+RUN apt-get update && apt-get -y install optipng libpng16-16 curl openjdk-11-jdk fontconfig ttf-dejavu
 
 COPY config.properties ${INSTALL_ROOT}
 COPY logback.xml ${INSTALL_ROOT}

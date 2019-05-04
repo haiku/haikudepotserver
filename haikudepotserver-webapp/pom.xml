@@ -56,6 +56,16 @@
             <artifactId>jsp-api</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- required because jee apis are not included by default now and this
+        seems to be required by jsonrpc4j. -->
+
+        <dependency>
+            <groupId>javax.jws</groupId>
+            <artifactId>jsr181-api</artifactId>
+            <version>1.0-MR1</version>
+        </dependency>
+
         <dependency>
             <groupId>net.jawr</groupId>
             <artifactId>jawr-core</artifactId>
