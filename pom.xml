@@ -10,7 +10,7 @@
     <groupId>org.haiku</groupId>
     <artifactId>haikudepotserver</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.112-SNAPSHOT</version>
+    <version>1.0.112</version>
 
     <modules>
         <module>haikudepotserver-api1</module>
