@@ -47,7 +47,7 @@
             <td><repository-source-label repository-source="repositorySource"></repository-source-label></td>
             <td>
                 <span ng-show="repositorySource.lastImportTimestamp">
-                    {{repository.lastImportTimestamp|timestamp}}
+                    {{repositorySource.lastImportTimestamp|timestamp}}
                 </span>
                 <span ng-show="!repositorySource.lastImportTimestamp" class="text-warning">
                     <message key="viewRepository.repositorySources.lastImportTimestamp.missing"></message>
