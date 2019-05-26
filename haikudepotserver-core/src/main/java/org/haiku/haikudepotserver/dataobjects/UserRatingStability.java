@@ -32,7 +32,7 @@ public class UserRatingStability extends _UserRatingStability implements Coded {
     public static List<UserRatingStability> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         return ObjectSelect.query(UserRatingStability.class)
-                .orderBy(NAME.asc())
+                .orderBy(ORDERING.asc())
                 .sharedCache()
                 .select(context);
     }

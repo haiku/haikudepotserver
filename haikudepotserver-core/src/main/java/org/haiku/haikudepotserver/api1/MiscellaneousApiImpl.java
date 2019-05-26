@@ -226,12 +226,14 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
                                         messageSource.getMessage(
                                                 urs.getTitleKey(),
                                                 null, // params
-                                                naturalLanguageOptional.get().toLocale()));
+                                                naturalLanguageOptional.get().toLocale()),
+                                        urs.getOrdering());
                             }
 
                             return new GetAllUserRatingStabilitiesResult.UserRatingStability(
                                     urs.getCode(),
-                                    urs.getName());
+                                    urs.getName(),
+                                    urs.getOrdering());
                         })
                         .collect(Collectors.toList())
         );

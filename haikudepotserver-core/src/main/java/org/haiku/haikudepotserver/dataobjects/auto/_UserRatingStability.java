@@ -17,6 +17,7 @@ public abstract class _UserRatingStability extends AbstractDataObject {
 
     public static final Property<String> CODE = Property.create("code", String.class);
     public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<Integer> ORDERING = Property.create("ordering", Integer.class);
 
     public String getCode() {
         return (String)readProperty("code");
@@ -24,6 +25,10 @@ public abstract class _UserRatingStability extends AbstractDataObject {
 
     public String getName() {
         return (String)readProperty("name");
+    }
+
+    public Integer getOrdering() {
+        return (Integer)readProperty("ordering");
     }
 
 }

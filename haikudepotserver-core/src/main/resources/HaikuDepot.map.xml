@@ -430,6 +430,7 @@
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="32"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="ordering" type="INTEGER" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.user_rating_stability_seq</db-generator-name>
@@ -647,6 +648,7 @@
 	<obj-entity name="UserRatingStability" className="org.haiku.haikudepotserver.dataobjects.UserRatingStability" readOnly="true" dbEntityName="user_rating_stability" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+		<obj-attribute name="ordering" type="java.lang.Integer" db-attribute-path="ordering"/>
 	</obj-entity>
 	<obj-entity name="UserUsageConditions" className="org.haiku.haikudepotserver.dataobjects.UserUsageConditions" lock-type="optimistic" dbEntityName="user_usage_conditions" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
@@ -893,7 +895,7 @@
 	<db-relationship name="user_rating_stability" source="user_rating" target="user_rating_stability" toMany="false">
 		<db-attribute-pair source="user_rating_stability_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="untitledRel" source="user_rating_stability" target="user_rating" toMany="true">
+	<db-relationship name="user_ratings" source="user_rating_stability" target="user_rating" toMany="true">
 		<db-attribute-pair source="id" target="user_rating_stability_id"/>
 	</db-relationship>
 	<db-relationship name="user_usage_conditions_agreements" source="user_usage_conditions" target="user_usage_conditions_agreement" toMany="true">

@@ -22,13 +22,18 @@ public class GetAllUserRatingStabilitiesResult {
 
         public String code;
         public String name;
+        public Integer ordering;
 
         public UserRatingStability() {
         }
 
-        public UserRatingStability(String code, String name) {
+        public UserRatingStability(
+                String code,
+                String name,
+                Integer ordering) {
             this.code = code;
             this.name = name;
+            this.ordering = ordering;
         }
     }
 
