@@ -1289,7 +1289,7 @@ LEFT JOIN haikudepot.pkg_version_localization pvl_en ON pvl_en.pkg_version_id = 
 LEFT JOIN haikudepot.localization_content pvl_en_summary_lc ON pvl_en_summary_lc.id = pvl_en.summary_localization_content_id
 LEFT JOIN haikudepot.localization_content pvl_en_title_lc ON pvl_en_title_lc.id = pvl_en.title_localization_content_id
 #if($search.pkgCategory)
-JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_id = p.id
+JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_supplement_id = ps.id
 #end
 #if($search.sortOrdering.name() == "PROMINENCE")
 LEFT JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
