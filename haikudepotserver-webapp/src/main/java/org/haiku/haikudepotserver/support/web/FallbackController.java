@@ -6,14 +6,13 @@
 package org.haiku.haikudepotserver.support.web;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -139,22 +137,14 @@ public class FallbackController {
     }
 
     private Optional<PkgVersion> tryGetPkgVersion(ObjectContext context, String term) {
-        if (!Strings.isNullOrEmpty(term)) {
-            Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, term);
-
-            if (pkgOptional.isPresent()) {
-                List<Repository> repositories = repositoryService.getRepositoriesForPkg(context, pkgOptional.get());
-
-                if (!repositories.isEmpty()) {
-                    return pkgService.getLatestPkgVersionForPkg(
-                            context,
-                            pkgOptional.get(),
-                            repositories.get(0));
-                }
-            }
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(StringUtils.trimToNull(term))
+                .flatMap(t -> Pkg.tryGetByName(context, t))
+                .flatMap(pkg -> repositoryService.getRepositoriesForPkg(context, pkg)
+                        .stream()
+                        .map(r -> pkgService.getLatestPkgVersionForPkg(context, pkg, r))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst());
     }
 
 
