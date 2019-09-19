@@ -27,6 +27,8 @@ public class UserUsageConditions extends _UserUsageConditions {
 
     private static Optional<UserUsageConditions> tryGetLatest(ObjectContext context) {
         return Optional.ofNullable(ObjectSelect.query(UserUsageConditions.class)
+                .sharedCache()
+                .cacheGroup(HaikuDepot.CacheGroup.USER_USAGE_CONDITIONS.name())
                 .orderBy(UserUsageConditions.ORDERING.getName(), SortOrder.DESCENDING)
                 .limit(1)
                 .selectOne(context));
@@ -45,6 +47,8 @@ public class UserUsageConditions extends _UserUsageConditions {
 
     public static List<UserUsageConditions> getAll(ObjectContext context) {
         return ObjectSelect.query(UserUsageConditions.class)
+                .sharedCache()
+                .cacheGroup(HaikuDepot.CacheGroup.USER_USAGE_CONDITIONS.name())
                 .orderBy(UserUsageConditions.ORDERING.getName(), SortOrder.DESCENDING)
                 .select(context);
     }

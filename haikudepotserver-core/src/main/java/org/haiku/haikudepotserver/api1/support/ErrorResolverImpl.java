@@ -13,7 +13,6 @@ import com.googlecode.jsonrpc4j.ErrorResolver;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.SimpleValidationFailure;
 import org.haiku.haikudepotserver.api1.model.authorization.AuthorizationRuleConflictException;
-import org.haiku.haikudepotserver.user.model.UserUsageConditionsAgreementException;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -31,10 +30,10 @@ public class ErrorResolverImpl implements ErrorResolver {
     @Override
     public JsonError resolveError(Throwable t, Method method, List<JsonNode> arguments) {
 
-        if (t instanceof UserUsageConditionsAgreementException) {
+        if (t instanceof InvalidUserUsageConditionsException) {
             return new JsonError(
-                    Constants.ERROR_CODE_USER_USAGE_CONDITIONS_AGREE,
-                    "userusageconditionsagree",
+                    Constants.ERROR_CODE_INVALID_USER_USAGE_CONDITIONS,
+                    "invaliduserusageconditions",
                     null);
         }
 
@@ -42,13 +41,6 @@ public class ErrorResolverImpl implements ErrorResolver {
             return new JsonError(
                     Constants.ERROR_CODE_AUTHORIZATIONRULECONFLICT,
                     "authorizationruleconflict",
-                    null);
-        }
-
-        if (LimitExceededException.class.isAssignableFrom(t.getClass())) {
-            return new JsonError(
-                    Constants.ERROR_CODE_LIMITEXCEEDED,
-                    "limitexceeded",
                     null);
         }
 

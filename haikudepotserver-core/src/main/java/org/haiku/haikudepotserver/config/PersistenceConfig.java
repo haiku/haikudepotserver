@@ -115,8 +115,15 @@ public class PersistenceConfig {
     }
 
     @Bean
+    public LifecycleListener userUsageConditionsQueryCacheRemoveGroupListener(ServerRuntime serverRuntime) {
+        return new QueryCacheRemoveGroupListener(
+                serverRuntime, UserUsageConditions.class, HaikuDepot.CacheGroup.USER_USAGE_CONDITIONS.name());
+    }
+
+    @Bean
     public LifecycleListener userQueryCacheRemoveGroupListener(ServerRuntime serverRuntime) {
-        return new QueryCacheRemoveGroupListener(serverRuntime, User.class, HaikuDepot.CacheGroup.USER.name());
+        return new QueryCacheRemoveGroupListener(
+                serverRuntime, User.class, HaikuDepot.CacheGroup.USER.name());
     }
 
     @Bean

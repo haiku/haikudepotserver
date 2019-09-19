@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.api1;
 import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haiku.haikudepotserver.api1.model.user.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
+import org.haiku.haikudepotserver.api1.support.InvalidUserUsageConditionsException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 
@@ -32,7 +33,7 @@ public interface UserApi {
      * in the case that the referenced 'natural language' is not able to be found.</p>
      */
 
-    CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException;
+    CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException, InvalidUserUsageConditionsException;
 
     /**
      * <p>This method will get the user identified by the nickname in the request object.

@@ -133,6 +133,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             User user1 = integrationTestSupportService.createBasicUser(context, "testuser1", "fakepassword");
+            integrationTestSupportService.agreeToUserUsageConditions(context, user1);
             Pkg pkg1 = Pkg.tryGetByName(context, "pkg1").get();
 
             org.haiku.haikudepotserver.dataobjects.Permission permission =

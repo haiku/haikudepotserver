@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -36,6 +36,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     private String createTestUserAndSampleUserRating() {
         ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "password");
+        integrationTestSupportService.agreeToUserUsageConditions(context, user);
 
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get());
@@ -148,7 +149,8 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            integrationTestSupportService.createBasicUser(context, "testuser", "password");
+            User user = integrationTestSupportService.createBasicUser(context, "testuser", "password");
+            integrationTestSupportService.agreeToUserUsageConditions(context, user);
         }
 
         setAuthenticatedUser("testuser");
@@ -251,6 +253,9 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
 
         integrationTestSupportService.createStandardTestData();
         integrationTestSupportService.createUserRatings();
+        // note that the user here has not agreed to the user usage conditions,
+        // but this is OK because the user is still able to delete a user
+        // rating.
 
         setAuthenticatedUser("urtest2");
 

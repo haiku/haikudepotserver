@@ -6,10 +6,8 @@
 package org.haiku.haikudepotserver.api1;
 
 import com.googlecode.jsonrpc4j.JsonRpcService;
-import org.haiku.haikudepotserver.api1.model.miscellaneous.GetRuntimeInformationRequest;
 import org.haiku.haikudepotserver.api1.model.pkg.*;
 import org.haiku.haikudepotserver.api1.support.BadPkgIconException;
-import org.haiku.haikudepotserver.api1.support.LimitExceededException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 
 /**

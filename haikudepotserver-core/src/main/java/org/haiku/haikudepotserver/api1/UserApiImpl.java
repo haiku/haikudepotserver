@@ -161,7 +161,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     }
 
     @Override
-    public CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException {
+    public CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException, InvalidUserUsageConditionsException {
 
         Preconditions.checkNotNull(createUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.nickname));
@@ -185,12 +185,23 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         if (Strings.isNullOrEmpty(createUserRequest.nickname)) {
             throw new ValidationException(
-                    new ValidationFailure(
-                            User.NICKNAME.getName(), "required")
+                    new ValidationFailure(User.NICKNAME.getName(), "required")
             );
         }
 
+        if (StringUtils.isBlank(createUserRequest.userUsageConditionsCode)) {
+            throw new InvalidUserUsageConditionsException();
+        }
+
         final ObjectContext context = serverRuntime.newContext();
+        String latestUserUsageConditionsCode = UserUsageConditions.getLatest(context).getCode();
+
+        if (!latestUserUsageConditionsCode.equals(createUserRequest.userUsageConditionsCode)) {
+            throw new InvalidUserUsageConditionsException();
+        }
+
+        UserUsageConditions userUsageConditions = UserUsageConditions.getByCode(
+                context, createUserRequest.userUsageConditionsCode);
 
         //need to check that the nickname is not already in use.
 
@@ -207,18 +218,10 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         user.setEmail(createUserRequest.email);
         user.setPasswordHash(authenticationService.hashPassword(user, createUserRequest.passwordClear));
 
-        // temporarily; newer clients will be able to agree to the user usage
-        // conditions and this will be recorded.  Some older clients won't be
-        // up to date (HD) but in time they will be updated and then this will
-        // be enforced for all user creation.
-
-        if (StringUtils.isNotBlank(createUserRequest.userUsageConditionsCode)) {
-            UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
-            agreement.setUser(user);
-            agreement.setTimestampAgreed();
-            agreement.setUserUsageConditions(UserUsageConditions.getByCode(
-                    context, createUserRequest.userUsageConditionsCode));
-        }
+        UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
+        agreement.setUser(user);
+        agreement.setTimestampAgreed();
+        agreement.setUserUsageConditions(userUsageConditions);
 
         context.commitChanges();
 
@@ -492,7 +495,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     @Override
     public GetUserUsageConditionsResult getUserUsageConditions(GetUserUsageConditionsRequest request) {
-        Preconditions.checkNotNull(request);
+                    Preconditions.checkNotNull(request);
 
         final ObjectContext context = serverRuntime.newContext();
         UserUsageConditions userUsageConditions = StringUtils.isNotBlank(request.code)

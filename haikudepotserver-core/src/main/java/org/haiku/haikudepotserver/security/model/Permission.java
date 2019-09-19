@@ -24,6 +24,7 @@ public enum Permission {
     AUTHORIZATION_CONFIGURE(null),
 
     USERRATING_EDIT(TargetType.USERRATING),
+    USERRATING_REMOVE(TargetType.USERRATING),
     USERRATING_DERIVEANDSTOREFORPKG(null), // not on a package because it applies across all packages
 
     PKG_CREATEUSERRATING(TargetType.PKG),

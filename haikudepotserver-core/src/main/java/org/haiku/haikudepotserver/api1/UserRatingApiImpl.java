@@ -572,7 +572,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         User authenticatedUser = obtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(context, authenticatedUser, userRating, Permission.USERRATING_EDIT)) {
+        if(!authorizationService.check(context, authenticatedUser, userRating, Permission.USERRATING_REMOVE)) {
             LOGGER.error("unable to delete the userrating as {}", authenticatedUser.toString());
             throw new AuthorizationFailureException();
         }

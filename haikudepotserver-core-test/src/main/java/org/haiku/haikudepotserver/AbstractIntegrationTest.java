@@ -62,6 +62,8 @@ public abstract class AbstractIntegrationTest {
 
     private final static String DATABASEPRODUCTNAME_POSTGRES = "PostgreSQL";
 
+    private final static String SQL_DELETE_TEST_UUC = "DELETE FROM haikudepot.user_usage_conditions WHERE code LIKE 'TEST%'";
+
     @Resource
     protected ApplicationContext applicationContext;
 
@@ -135,13 +137,40 @@ public abstract class AbstractIntegrationTest {
 
     @Before
     public void beforeEachTest() {
-
         LOGGER.debug("will prepare for the next test");
+        clearCaches();
+        clearDatabaseTables();
+        clearTestUserUsageConditions();
+        setUnauthenticated();
+        mailSender.clear();
+        LOGGER.debug("did prepare for the next test");
+    }
 
+    protected void clearCaches() {
         serverRuntime.getDataDomain().getQueryCache().clear();
         serverRuntime.getDataDomain().getSharedSnapshotCache().clear();
         LOGGER.debug("prep; have cleared out caches");
+    }
 
+    private void clearTestUserUsageConditions() {
+        DataNode dataNode = serverRuntime.getDataDomain().getDataNode("HaikuDepotServer");
+        try (
+                Connection connection = dataNode.getDataSource().getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE_TEST_UUC)) {
+            int deleted = preparedStatement.executeUpdate();
+
+            if (0 != deleted) {
+                LOGGER.info("did delete [{}] test user usage conditions", deleted);
+            }
+
+        } catch (SQLException se) {
+            throw new IllegalStateException(
+                    "unable to clear the [" + UserUsageConditions.class.getSimpleName() + "] from test",
+                    se);
+        }
+    }
+
+    private void clearDatabaseTables() {
         for(DataNode dataNode : serverRuntime.getDataDomain().getDataNodes()) {
 
             LOGGER.debug("prep; will clear out data for data node; {}", dataNode.getName());
@@ -208,11 +237,6 @@ public abstract class AbstractIntegrationTest {
 
             LOGGER.debug("prep; did clear out data for data node; {}", dataNode.getName());
         }
-
-        setUnauthenticated();
-        mailSender.clear();
-
-        LOGGER.debug("did prepare for the next test");
     }
 
     protected void setAuthenticatedUser(String nickname) {

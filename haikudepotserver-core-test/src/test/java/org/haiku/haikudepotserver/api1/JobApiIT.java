@@ -11,6 +11,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.job.*;
 import org.haiku.haikudepotserver.config.BasicConfig;
 import org.haiku.haikudepotserver.config.TestBasicConfig;
+import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.junit.Test;
@@ -66,7 +67,8 @@ public class JobApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
+            User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
+            integrationTestSupportService.agreeToUserUsageConditions(context, user);
             setAuthenticatedUser("testuser");
         }
 
