@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,6 +35,7 @@ public class PkgIconTag extends RequestContextAwareTag {
     }
 
     public void setSize(int size) {
+        Preconditions.checkState(size == 16 || size == 32);
         this.size = size;
     }
 
@@ -43,23 +44,32 @@ public class PkgIconTag extends RequestContextAwareTag {
                 UriComponentsBuilder.newInstance()
                         .pathSegment(PkgIconController.SEGMENT_PKGICON, getPkgVersion().getPkg().getName() + ".png")
                         .queryParam(PkgIconController.KEY_FALLBACK,"true")
-                        .queryParam(PkgIconController.KEY_SIZE, Integer.toString(getSize()))
+                        .queryParam(PkgIconController.KEY_SIZE, getImageUrlSizeParameter())
                         .queryParam("m", Long.toString(getPkgVersion().getPkg().getModifyTimestamp().getTime()))
                         .build()
                         .toString();
+    }
+
+    private String getImageUrlSizeParameter() {
+        if (size == 16 || size == 32)
+            return Integer.toString(size * 2);
+        return Integer.toString(size);
     }
 
     @Override
     protected int doStartTagInternal() throws Exception {
 
         Preconditions.checkNotNull(pkgVersion);
-        Preconditions.checkState(getSize()==16 || getSize()==32);
 
         TagWriter tagWriter = new TagWriter(pageContext.getOut());
 
         tagWriter.startTag("img");
         tagWriter.writeAttribute("src", getUrl());
         tagWriter.writeAttribute("alt", "icon");
+        tagWriter.writeAttribute("width", Integer.toString(size));
+        tagWriter.writeAttribute("height", Integer.toString(size));
+        tagWriter.writeAttribute("alt", "icon");
+
         tagWriter.endTag();
 
         return SKIP_BODY;
