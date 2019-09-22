@@ -33,7 +33,7 @@ public class ErrorServlet extends HttpServlet {
 
     private final static Map<String,String> PREFIX = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Oh darn!",
-            NaturalLanguage.CODE_GERMAN, "Oh mei!",
+            NaturalLanguage.CODE_GERMAN, "Herrje!",
             NaturalLanguage.CODE_JAPANESE, "もう!",
             NaturalLanguage.CODE_RUSSIAN, "Вот незадача!",
             NaturalLanguage.CODE_SLOVAK, "Sakra!");
