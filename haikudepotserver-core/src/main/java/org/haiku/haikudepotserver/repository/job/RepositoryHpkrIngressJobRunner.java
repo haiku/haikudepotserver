@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -51,7 +51,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryHpkrIngressJobRunner.class);
 
-    private final static long TIMEOUT_REPOSITORY_SOURCE_FETCH = TimeUnit.SECONDS.convert(30, TimeUnit.MILLISECONDS);
+    private final static long TIMEOUT_REPOSITORY_SOURCE_FETCH = TimeUnit.SECONDS.toMillis(30);
 
     private final static String PARAMETER_NAME_URL = "url";
 

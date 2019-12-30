@@ -1,7 +1,5 @@
 package org.haiku.haikudepotserver.maintenance;
 
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;

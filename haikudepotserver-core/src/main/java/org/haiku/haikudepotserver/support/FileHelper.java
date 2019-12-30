@@ -1,74 +1,74 @@
 /*
- * Copyright 2015-2016, Andrew Lindesay
+ * Copyright 2015-2019, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 
-import java.io.*;
-import java.net.HttpURLConnection;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
 public class FileHelper {
 
     /**
      * <p>This method will stream the data from the supplied URL into the file.  If it is a suitable
      * URL (http / https) then it is possible to provide a timeout and that will be observed when
-     * connecting and retreiving data.</p>
+     * connecting and retrieving data.</p>
      */
 
     public static void streamUrlDataToFile(URL url, File file, long timeoutMillis) throws IOException {
-        switch(url.getProtocol()) {
-
+        switch (url.getProtocol()) {
             case "http":
             case "https":
-                HttpURLConnection connection = null;
-
                 try {
-                    connection = (HttpURLConnection) url.openConnection();
-
-                    connection.setConnectTimeout((int) timeoutMillis);
-                    connection.setReadTimeout((int) timeoutMillis);
-                    connection.setRequestMethod(HttpMethod.GET.name());
-                    connection.connect();
-
-                    int responseCode = connection.getResponseCode();
-
-                    if (responseCode == HttpStatus.OK.value()) {
-                        try (
-                                InputStream inputStream = connection.getInputStream();
-                                OutputStream outputStream = new FileOutputStream(file)) {
-                            ByteStreams.copy(inputStream, outputStream);
-                        }
-                    }
-                    else {
-                        throw new IOException("url request returned " + responseCode);
-                    }
-
-                }
-                finally {
-                    if (null != connection) {
-                        connection.disconnect();
-                    }
+                    streamHttpUriDataToFile(url.toURI(), file, timeoutMillis);
+                } catch (URISyntaxException use) {
+                    throw new IllegalStateException("unable to convert url [" + url + "] to uri", use);
                 }
                 break;
-
-
             case "file":
                 Files.copy(new File(url.getFile()), file);
                 break;
 
             default:
                 throw new IllegalStateException("the url scheme of " + url.getProtocol() + " is unsupported.");
-
         }
+    }
 
+    private static void streamHttpUriDataToFile(URI uri, File file, long timeoutMillis) throws IOException {
+        try {
+            HttpResponse<InputStream> response = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofMillis(timeoutMillis))
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build()
+                    .send(HttpRequest.newBuilder(uri)
+                            .timeout(Duration.ofMillis(timeoutMillis))
+                            .GET()
+                            .build(), HttpResponse.BodyHandlers.ofInputStream());
+
+            if (200 == response.statusCode()) {
+                try (InputStream inputStream = response.body()) {
+                    Files.asByteSink(file).writeFrom(inputStream);
+                }
+            } else {
+                throw new IOException("url request returned " + response.statusCode());
+            }
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new IOException("interrupted when downloading url to file", ie);
+        }
     }
 
     /**
