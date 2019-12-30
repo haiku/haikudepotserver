@@ -201,7 +201,6 @@ angular.module('haikudepotserver').controller(
                 $scope.amAuthenticating = true;
                 var nickname = $scope.authenticationDetails.nickname;
                 var passwordClear = $scope.authenticationDetails.passwordClear;
-                $scope.authenticationDetails.passwordClear = undefined;
 
                 authenticate(nickname, passwordClear)
                     .then(
@@ -230,6 +229,7 @@ angular.module('haikudepotserver').controller(
                         }
                     ).finally(
                     function() {
+                        $scope.authenticationDetails.passwordClear = undefined;
                         $scope.amAuthenticating = false;
                     }
                 );
