@@ -13,6 +13,7 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SelectById;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
@@ -72,6 +73,11 @@ public class RepositorySource extends _RepositorySource {
         super.validateForInsert(validationResult);
     }
 
+    /**
+     * <p>Note here that "url" is not actually validated as a URL because it is
+     * actually an identifier.</p>
+     */
+
     @Override
     protected void validateForSave(ValidationResult validationResult) {
         super.validateForSave(validationResult);
@@ -82,7 +88,10 @@ public class RepositorySource extends _RepositorySource {
             }
         }
 
-        validateUrl(validationResult, getUrl(), URL.getName());
+        if (null != getUrl() && StringUtils.isBlank(getUrl())) {
+            validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "notempty"));
+        }
+
         validateUrl(validationResult, getForcedInternalBaseUrl(), FORCED_INTERNAL_BASE_URL.getName());
     }
 
