@@ -103,7 +103,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                                                 pv.toVersionCoordinates().toString())).toString());
 
                         {
-                            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#", "pkg");
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#!", "pkg");
                             pv.appendPathSegments(builder);
                             entry.setLink(builder.build().toUriString());
                         }
