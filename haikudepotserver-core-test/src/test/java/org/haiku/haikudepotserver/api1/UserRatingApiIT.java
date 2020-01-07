@@ -39,7 +39,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.agreeToUserUsageConditions(context, user);
 
         UserRating userRating = context.newObject(UserRating.class);
-        userRating.setNaturalLanguage(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_SPANISH).get());
+        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH));
         userRating.setComment("How now brown cow");
         userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,

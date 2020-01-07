@@ -133,8 +133,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             pkgLocalizationService.updatePkgVersionLocalization(
                     objectContext,
                     persistedPkgVersion,
-                    NaturalLanguage.tryGetByCode(objectContext, NaturalLanguage.CODE_ENGLISH)
-                            .orElseThrow(IllegalStateException::new),
+                    NaturalLanguage.getEnglish(objectContext),
                     null, // not supported quite yet
                     pkg.getSummary(),
                     pkg.getDescription());

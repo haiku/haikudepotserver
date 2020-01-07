@@ -263,7 +263,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                             true).size())
                             .isEqualTo(1); // include inactive
 
-                    PkgVersionLocalization localization = pkgVersion.getPkgVersionLocalization(NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get()).get();
+                    PkgVersionLocalization localization = pkgVersion.getPkgVersionLocalization(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH)).get();
                     Assertions.assertThat(localization.getDescription().get()).startsWith("FFmpeg is a complete, cro");
                     Assertions.assertThat(localization.getSummary().get()).startsWith("Audio and video rec");
 

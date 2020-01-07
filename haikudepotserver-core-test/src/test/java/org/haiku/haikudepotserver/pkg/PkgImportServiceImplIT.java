@@ -103,7 +103,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 pkgLocalizationService.updatePkgLocalization(
                         setupObjectContext,
                         persistedPkg.getPkgSupplement(),
-                        NaturalLanguage.tryGetByCode(setupObjectContext, NaturalLanguage.CODE_GERMAN).get(),
+                        NaturalLanguage.getByCode(setupObjectContext, NaturalLanguage.CODE_GERMAN),
                         "title_kingston_black",
                         "summary_kingston_black",
                         "description_kingston_black");

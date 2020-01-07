@@ -12,10 +12,10 @@ import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndContentImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
-import com.rometools.utils.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -23,6 +23,8 @@ import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
+
+    protected static Logger LOGGER = LoggerFactory.getLogger(CreatedPkgVersionSyndEntrySupplier.class);
 
     private ServerRuntime serverRuntime;
     private String baseUrl;
@@ -78,13 +82,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
             }
 
             ObjectContext context = serverRuntime.newContext();
-
-            NaturalLanguage naturalLanguage = Strings.isBlank(specification.getNaturalLanguageCode())
-                ? NaturalLanguage.getEnglish(context)
-                    : NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode())
-                    .orElseThrow(() -> new IllegalStateException("unable to find natural language; "
-                            + specification.getNaturalLanguageCode()));
-
+            NaturalLanguage naturalLanguage = deriveNaturalLanguage(context, specification);
             List<PkgVersion> pkgVersions = objectSelect.select(context);
 
             return pkgVersions
@@ -131,6 +129,20 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
         }
 
         return Collections.emptyList();
+    }
+
+    private NaturalLanguage deriveNaturalLanguage(ObjectContext context, final FeedSpecification specification) {
+        NaturalLanguage naturalLanguage = null;
+
+        if (StringUtils.isNotBlank(specification.getNaturalLanguageCode())) {
+            return NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode())
+                    .orElseGet(() -> {
+                        LOGGER.warn("unable to find the natural language [{}] - will use english", specification.getNaturalLanguageCode());
+                        return NaturalLanguage.getEnglish(context);
+                    });
+        }
+
+        return NaturalLanguage.getEnglish(context);
     }
 
 }

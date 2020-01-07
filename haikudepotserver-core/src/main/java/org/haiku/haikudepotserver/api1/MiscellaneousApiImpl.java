@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.miscellaneous.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -67,10 +68,10 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllPkgCategoriesRequest);
         final ObjectContext context = serverRuntime.newContext();
 
-        final Optional<NaturalLanguage> naturalLanguageOptional =
-                Strings.isNullOrEmpty(getAllPkgCategoriesRequest.naturalLanguageCode)
-                ? Optional.empty()
-                        : NaturalLanguage.tryGetByCode(context, getAllPkgCategoriesRequest.naturalLanguageCode);
+        final Optional<NaturalLanguage> naturalLanguageOptional = Optional
+                .ofNullable(getAllPkgCategoriesRequest.naturalLanguageCode)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(c -> NaturalLanguage.tryGetByCode(context, c));
 
         return new GetAllPkgCategoriesResult(
                 PkgCategory.getAll(context).stream().map(pc -> {
@@ -96,10 +97,10 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllNaturalLanguagesRequest);
         final ObjectContext context = serverRuntime.newContext();
 
-        final Optional<NaturalLanguage> naturalLanguageOptional =
-                Strings.isNullOrEmpty(getAllNaturalLanguagesRequest.naturalLanguageCode)
-                        ? Optional.empty()
-                        : NaturalLanguage.tryGetByCode(context, getAllNaturalLanguagesRequest.naturalLanguageCode);
+        final Optional<NaturalLanguage> naturalLanguageOptional = Optional
+                .ofNullable(getAllNaturalLanguagesRequest.naturalLanguageCode)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(c -> NaturalLanguage.tryGetByCode(context, c));
 
         return new GetAllNaturalLanguagesResult(
                 NaturalLanguage.getAll(context).stream().map(nl -> {
@@ -187,14 +188,15 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
 
         ObjectContext context = serverRuntime.newContext();
 
-        Optional<NaturalLanguage> naturalLanguageOptional = NaturalLanguage.tryGetByCode(context, getAllMessagesRequest.naturalLanguageCode);
+        NaturalLanguage naturalLanguage = Optional
+                .ofNullable(getAllMessagesRequest.naturalLanguageCode)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(c -> NaturalLanguage.tryGetByCode(context, c))
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        NaturalLanguage.class.getSimpleName(),
+                        getAllMessagesRequest.naturalLanguageCode));
 
-        if(!naturalLanguageOptional.isPresent()) {
-            throw new ObjectNotFoundException(NaturalLanguage.class.getSimpleName(), getAllMessagesRequest.naturalLanguageCode);
-        }
-
-        Properties allLocalizationMessages = naturalLanguageService.getAllLocalizationMessages(
-                naturalLanguageOptional.get().getCode());
+        Properties allLocalizationMessages = naturalLanguageService.getAllLocalizationMessages(naturalLanguage.getCode());
 
         GetAllMessagesResult getAllMessagesResult = new GetAllMessagesResult();
         getAllMessagesResult.messages = new HashMap<>();
@@ -211,10 +213,10 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         Preconditions.checkNotNull(getAllUserRatingStabilitiesRequest);
         final ObjectContext context = serverRuntime.newContext();
 
-        final Optional<NaturalLanguage> naturalLanguageOptional =
-                Strings.isNullOrEmpty(getAllUserRatingStabilitiesRequest.naturalLanguageCode)
-                        ? Optional.empty()
-                        : NaturalLanguage.tryGetByCode(context, getAllUserRatingStabilitiesRequest.naturalLanguageCode);
+        final Optional<NaturalLanguage> naturalLanguageOptional = Optional
+                .ofNullable(getAllUserRatingStabilitiesRequest.naturalLanguageCode)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(c -> NaturalLanguage.tryGetByCode(context, c));
 
         return new GetAllUserRatingStabilitiesResult(
                 UserRatingStability.getAll(context)

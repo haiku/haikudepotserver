@@ -17,6 +17,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SQLTemplate;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
@@ -108,10 +109,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         jsonGenerator.writeStartArray();
 
         final ObjectContext context = serverRuntime.newContext();
-
-        NaturalLanguage naturalLanguage = NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode()).orElseThrow(
-                () -> new IllegalStateException("unable to find the natural language [" + specification.getNaturalLanguageCode() + "]")
-        );
+        NaturalLanguage naturalLanguage = deriveNaturalLanguage(context, specification);
 
         RepositorySource repositorySource = RepositorySource.tryGetByCode(
                 context,
@@ -136,6 +134,17 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         jsonGenerator.writeEndArray();
     }
 
+    private NaturalLanguage deriveNaturalLanguage(ObjectContext context, PkgDumpExportJobSpecification specification) {
+        if (StringUtils.isNotBlank(specification.getNaturalLanguageCode())) {
+            return NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode())
+                    .orElseGet(() -> {
+                        LOGGER.warn("unknown language [{}] - will use english", specification.getNaturalLanguageCode());
+                        return NaturalLanguage.getEnglish(context);
+                    });
+        }
+
+        return NaturalLanguage.getEnglish(context);
+    }
 
     private ObjectSelect<PkgVersion> createPkgVersionSelect(
             RepositorySource repositorySource,
