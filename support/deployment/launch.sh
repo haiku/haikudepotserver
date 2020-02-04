@@ -7,8 +7,8 @@
 "-Dfile.encoding=UTF-8" \
 "-Dlogback.configurationFile=${DS_ROOT}/logback.xml" \
 "-Duser.timezone=GMT0" \
-"-Xms256m" \
-"-Xmx320m" \
+"-Xms320m" \
+"-Xmx512m" \
 "-Djava.net.preferIPv4Stack=true" \
 "-Djava.awt.headless=true" \
 "-Dconfig.properties=file://${HDS_ROOT}/config.properties" \
