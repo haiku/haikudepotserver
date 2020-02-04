@@ -3,14 +3,14 @@
 ## Requirements
 
 * Release must be tagged + compiled at https://github.com/haiku/haikudepotserver/releases
-* Check out tagged release via "git checkout haikudepotserver-VERSION"
 
 ## Build and push container
 
+* Check out tagged release via "git checkout haikudepotserver-VERSION"
 * cd haikudepotserver/support/deployment
-* VERSION="haikudepotserver-VERSION" make
-* VERSION="haikudepotserver-VERSION" make push
+* make
+* make push
 
 ## Deploy container
 
-Follow the standard deployment steps. (docker-compose pull/stop/rm/(up -d) haikudepotserver
+Follow the standard deployment steps.

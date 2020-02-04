@@ -29,10 +29,10 @@ ENV HDS_WAR_DOWNLOAD_URL "https://github.com/haiku/haikudepotserver/releases/dow
 ENV HDS_PORT 8080
 
 ENV JETTY_JAR "jetty-runner-${JETTY_VERSION}.jar"
-ENV JETTY_DOWNLOAD_URL "http://central.maven.org/maven2/org/eclipse/jetty/jetty-runner/${JETTY_VERSION}/${JETTY_JAR}"
+ENV JETTY_DOWNLOAD_URL "https://search.maven.org/remotecontent?filepath=org/eclipse/jetty/jetty-runner/${JETTY_VERSION}/${JETTY_JAR}"
 
 ENV PG_JAR "postgresql-${PG_VERSION}.jar"
-ENV PG_DOWNLOAD_URL "http://central.maven.org/maven2/org/postgresql/postgresql/${PG_VERSION}/${PG_JAR}"
+ENV PG_DOWNLOAD_URL "https://search.maven.org/remotecontent?filepath=org/postgresql/postgresql/${PG_VERSION}/${PG_JAR}"
 
 ENV HVIF2PNG_VERSION "hvif2png-hrev53013-linux-x86_64"
 
