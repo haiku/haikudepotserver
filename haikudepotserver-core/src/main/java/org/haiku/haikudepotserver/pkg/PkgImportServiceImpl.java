@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.URLHelper;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -252,7 +253,7 @@ public class PkgImportServiceImpl implements PkgImportService {
 
     private void populatePayloadLength(PkgVersion persistedPkgVersion) {
         long length = -1;
-        Optional<URL> pkgVersionHpkgURLOptional = persistedPkgVersion.tryGetHpkgURL();
+        Optional<URL> pkgVersionHpkgURLOptional = persistedPkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING);
 
         if (pkgVersionHpkgURLOptional.isPresent()) {
 

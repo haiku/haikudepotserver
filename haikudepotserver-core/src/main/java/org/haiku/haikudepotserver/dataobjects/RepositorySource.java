@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018, Andrew Lindesay
+ * Copyright 2015-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -116,8 +116,8 @@ public class RepositorySource extends _RepositorySource {
      * <p>This is the URL at which one might find the packages for this repository.</p>
      */
 
-    public Optional<URL> tryGetExternalFacingPackagesBaseURL() {
-        return tryGetBaseURL(ExposureType.EXTERNAL_FACING)
+    public Optional<URL> tryGetPackagesBaseURL(ExposureType exposureType) {
+        return tryGetBaseURL(exposureType)
                 .map(bu -> {
                     try {
                         return UriComponentsBuilder.fromUriString(bu.toString())

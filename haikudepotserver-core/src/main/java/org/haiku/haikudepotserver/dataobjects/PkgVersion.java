@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,6 +18,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -133,7 +134,7 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
         }
 
         if (null == getViewCounter()) {
-            setViewCounter(0l);
+            setViewCounter(0L);
         }
 
         if (null == getIsLatest()) {
@@ -222,11 +223,11 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
             pkgVersionLocalizationOptional = getPkgVersionLocalization(naturalLanguageCode);
         }
 
-        if (!pkgVersionLocalizationOptional.isPresent()) {
+        if (pkgVersionLocalizationOptional.isEmpty()) {
             pkgVersionLocalizationOptional = getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
         }
 
-        if (!pkgVersionLocalizationOptional.isPresent()) {
+        if (pkgVersionLocalizationOptional.isEmpty()) {
             throw new IllegalStateException("unable to find the fallback localization for " + toString());
         }
 
@@ -282,8 +283,8 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
      * <p>This method will provide a URL to the actual data of the package.</p>
      */
 
-    public Optional<URL> tryGetHpkgURL() {
-        return getRepositorySource().tryGetExternalFacingPackagesBaseURL()
+    public Optional<URL> tryGetHpkgURL(ExposureType exposureType) {
+        return getRepositorySource().tryGetPackagesBaseURL(exposureType)
                 .map(u -> {
                     try {
                         return new URL(

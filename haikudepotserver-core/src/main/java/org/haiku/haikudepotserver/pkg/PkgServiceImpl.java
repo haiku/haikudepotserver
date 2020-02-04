@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,10 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.support.DateTimeHelper;
-import org.haiku.haikudepotserver.support.SingleCollector;
-import org.haiku.haikudepotserver.support.StoppableConsumer;
-import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.support.*;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,7 +160,7 @@ public class PkgServiceImpl implements PkgService {
 
             for (PkgVersion pkgVersion : pkgVersions) {
                 if (pkgVersion.getIsLatest() &&
-                        (!pkgVersionOptional.isPresent() ||
+                        (pkgVersionOptional.isEmpty() ||
                                 !pkgVersion.equals(pkgVersionOptional.get())
                         )
                         ) {
@@ -540,7 +537,7 @@ public class PkgServiceImpl implements PkgService {
 
     @Override
     public String createHpkgDownloadUrl(PkgVersion pkgVersion) {
-        return pkgVersion.tryGetHpkgURL()
+        return pkgVersion.tryGetHpkgURL(ExposureType.EXTERNAL_FACING)
                 .filter(u -> ImmutableSet.of("http", "https").contains(u.getProtocol()))
                 .map(URL::toString)
                 .orElseGet(() -> {

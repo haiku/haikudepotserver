@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionPayloadLengthPopulationJobSpecification;
+import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.URLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
         for(int i=0;i<pkgVersions.size();i++) {
             PkgVersion pkgVersion = pkgVersions.get(i);
-            Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL();
+            Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING);
 
             if (urlOptional.isPresent()) {
                 long len;
@@ -86,7 +87,7 @@ public class PkgVersionPayloadLengthPopulationJobRunner
                 }
             } else {
                 LOGGER.info("unable to get the length of [{}] because no url" +
-                        "hpkg url was able to be obtained");
+                        "hpkg url was able to be obtained", pkgVersion);
             }
 
             jobService.setJobProgressPercent(

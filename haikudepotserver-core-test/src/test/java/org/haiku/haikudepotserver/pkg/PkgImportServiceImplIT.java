@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.pkg.model.Pkg;
 import org.haiku.pkg.model.PkgArchitecture;
@@ -186,7 +187,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
                 RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
-                repositoryDirectory = new File(repositorySource.tryGetExternalFacingPackagesBaseURL().get().getPath());
+                repositoryDirectory = new File(repositorySource.tryGetPackagesBaseURL(ExposureType.INTERNAL_FACING).get().getPath());
 
                 if (!repositoryDirectory.mkdirs()) {
                     throw new IllegalStateException("unable to create the on-disk repository");

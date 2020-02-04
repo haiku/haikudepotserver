@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
+import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,9 +123,9 @@ public class PkgDownloadController {
                     return new RequestObjectNotFound();
                 });
 
-        Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL();
+        Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL(ExposureType.EXTERNAL_FACING);
 
-        if (!urlOptional.isPresent()) {
+        if (urlOptional.isEmpty()) {
             LOGGER.info("unable to allow download of the hpkg data as no url was able to be generated");
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } else {
@@ -163,6 +164,6 @@ public class PkgDownloadController {
     }
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
-    private class RequestObjectNotFound extends RuntimeException {}
+    private static class RequestObjectNotFound extends RuntimeException {}
 
 }
