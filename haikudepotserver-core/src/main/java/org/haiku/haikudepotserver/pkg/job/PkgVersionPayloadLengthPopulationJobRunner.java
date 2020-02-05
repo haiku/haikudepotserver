@@ -15,7 +15,7 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionPayloadLengthPopulationJobSpecification;
 import org.haiku.haikudepotserver.support.ExposureType;
-import org.haiku.haikudepotserver.support.URLHelper;
+import org.haiku.haikudepotserver.support.URLHelperService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,11 +37,14 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
     private static Logger LOGGER = LoggerFactory.getLogger(PkgVersionPayloadLengthPopulationJobRunner.class);
 
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+    private final URLHelperService urlHelperService;
 
     public PkgVersionPayloadLengthPopulationJobRunner(
-            ServerRuntime serverRuntime) {
+            ServerRuntime serverRuntime,
+            URLHelperService urlHelperService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.urlHelperService = Preconditions.checkNotNull(urlHelperService);
     }
 
     @Override
@@ -72,15 +75,13 @@ public class PkgVersionPayloadLengthPopulationJobRunner
             Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING);
 
             if (urlOptional.isPresent()) {
-                long len;
-
                 try {
-                    len = URLHelper.payloadLength(urlOptional.get());
-
-                    if(len > 0) {
-                        pkgVersion.setPayloadLength(len);
-                        context.commitChanges();
-                    }
+                    urlHelperService.tryGetPayloadLength(urlOptional.get())
+                            .filter(l -> l > 0L)
+                            .ifPresent(l -> {
+                                pkgVersion.setPayloadLength(l);
+                                context.commitChanges();
+                            });
                 }
                 catch(IOException ioe) {
                     LOGGER.error("unable to get the payload length for " + pkgVersion.toString(), ioe);

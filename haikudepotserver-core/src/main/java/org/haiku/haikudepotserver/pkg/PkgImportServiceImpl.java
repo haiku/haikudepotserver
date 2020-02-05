@@ -15,7 +15,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.support.ExposureType;
-import org.haiku.haikudepotserver.support.URLHelper;
+import org.haiku.haikudepotserver.support.URLHelperService;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.slf4j.Logger;
@@ -36,12 +36,15 @@ public class PkgImportServiceImpl implements PkgImportService {
 
     private final PkgServiceImpl pkgServiceImpl;
     private final PkgLocalizationService pkgLocalizationService;
+    private final URLHelperService urlHelperService;
 
     public PkgImportServiceImpl(
             PkgServiceImpl pkgServiceImpl,
-            PkgLocalizationService pkgLocalizationService) {
+            PkgLocalizationService pkgLocalizationService,
+            URLHelperService urlHelperService) {
         this.pkgServiceImpl = Preconditions.checkNotNull(pkgServiceImpl);
         this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
+        this.urlHelperService = Preconditions.checkNotNull(urlHelperService);
     }
 
     @Override
@@ -252,19 +255,15 @@ public class PkgImportServiceImpl implements PkgImportService {
     }
 
     private void populatePayloadLength(PkgVersion persistedPkgVersion) {
-        long length = -1;
         Optional<URL> pkgVersionHpkgURLOptional = persistedPkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING);
 
         if (pkgVersionHpkgURLOptional.isPresent()) {
-
             try {
-                length = URLHelper.payloadLength(pkgVersionHpkgURLOptional.get());
+                urlHelperService.tryGetPayloadLength(pkgVersionHpkgURLOptional.get())
+                        .filter(l -> l > 0L)
+                        .ifPresent(persistedPkgVersion::setPayloadLength);
             } catch (IOException ioe) {
                 LOGGER.error("unable to get the payload length for; " + persistedPkgVersion, ioe);
-            }
-
-            if (length > 0) {
-                persistedPkgVersion.setPayloadLength(length);
             }
         } else {
             LOGGER.info("no package length recorded because there is no "
