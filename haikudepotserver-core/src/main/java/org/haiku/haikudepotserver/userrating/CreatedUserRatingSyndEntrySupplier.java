@@ -12,13 +12,18 @@ import com.google.common.net.MediaType;
 import com.rometools.rome.feed.synd.SyndContentImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
+import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
+import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
@@ -26,6 +31,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -43,15 +49,18 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
     private final ServerRuntime serverRuntime;
     private final String baseUrl;
     private final MessageSource messageSource;
+    private final PkgLocalizationService pkgLocalizationService;
 
     public CreatedUserRatingSyndEntrySupplier(
             ServerRuntime serverRuntime,
             @Value("${baseurl}") String baseUrl,
-            MessageSource messageSource
+            MessageSource messageSource,
+            PkgLocalizationService pkgLocalizationService
     ) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.baseUrl = Preconditions.checkNotNull(baseUrl);
         this.messageSource = Preconditions.checkNotNull(messageSource);
+        this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
     }
 
     /**
@@ -112,7 +121,9 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
                         UserRating.PKG_VERSION.dot(PkgVersion.PKG).dot(Pkg.NAME).in(specification.getPkgNames()));
             }
 
+            ObjectContext context = serverRuntime.newContext();
             List<UserRating> userRatings = objectSelect.select(serverRuntime.newContext());
+            NaturalLanguage naturalLanguage = deriveNaturalLanguage(context, specification);
 
             return userRatings
                     .stream()
@@ -134,10 +145,14 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
                                 baseUrl,
                                 ur.getCode()));
 
+                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
+                                pkgLocalizationService.resolvePkgVersionLocalization(context, ur.getPkgVersion(), null, naturalLanguage);
+
                         entry.setTitle(messageSource.getMessage(
                                 "feed.createdUserRating.atom.title",
                                 new Object[]{
-                                        ur.getPkgVersion().toStringWithPkgAndArchitecture(),
+                                        Optional.ofNullable(resolvedPkgVersionLocalization.getTitle())
+                                                .orElse(ur.getPkgVersion().getPkg().getName()),
                                         ur.getUser().getNickname()
                                 },
                                 new Locale(specification.getNaturalLanguageCode())
@@ -170,4 +185,12 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
 
         return Collections.emptyList();
     }
+
+    private NaturalLanguage deriveNaturalLanguage(ObjectContext context, final FeedSpecification specification) {
+        return Optional.ofNullable(specification.getNaturalLanguageCode())
+                .map(StringUtils::trimToNull)
+                .map(c -> NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode()))
+                .orElse(NaturalLanguage.getEnglish(context));
+    }
+
 }

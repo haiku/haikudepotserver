@@ -33,6 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -44,10 +45,10 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(CreatedPkgVersionSyndEntrySupplier.class);
 
-    private ServerRuntime serverRuntime;
-    private String baseUrl;
-    private MessageSource messageSource;
-    private PkgLocalizationService pkgLocalizationService;
+    private final ServerRuntime serverRuntime;
+    private final String baseUrl;
+    private final MessageSource messageSource;
+    private final PkgLocalizationService pkgLocalizationService;
 
     public CreatedPkgVersionSyndEntrySupplier(
             ServerRuntime serverRuntime,
@@ -106,16 +107,19 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                             entry.setLink(builder.build().toUriString());
                         }
 
+                        ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
+                                pkgLocalizationService.resolvePkgVersionLocalization(context, pv, null, naturalLanguage);
+
                         entry.setTitle(messageSource.getMessage(
                                 "feed.createdPkgVersion.atom.title",
-                                new Object[]{pv.toStringWithPkgAndArchitecture()},
-                                new Locale(specification.getNaturalLanguageCode())
+                                new Object[] {
+                                        Optional.ofNullable(resolvedPkgVersionLocalization.getTitle()).orElse(pv.getPkg().getName()),
+                                        pv.toVersionCoordinates().toString()
+                                },
+                                new Locale(naturalLanguage.getCode())
                         ));
 
                         {
-                            ResolvedPkgVersionLocalization resolvedPkgVersionLocalization = pkgLocalizationService
-                                    .resolvePkgVersionLocalization(context, pv, null, naturalLanguage);
-
                             SyndContent content = new SyndContentImpl();
                             content.setType(MediaType.PLAIN_TEXT_UTF_8.type());
                             content.setValue(resolvedPkgVersionLocalization.getSummary());
@@ -132,17 +136,10 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
     }
 
     private NaturalLanguage deriveNaturalLanguage(ObjectContext context, final FeedSpecification specification) {
-        NaturalLanguage naturalLanguage = null;
-
-        if (StringUtils.isNotBlank(specification.getNaturalLanguageCode())) {
-            return NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode())
-                    .orElseGet(() -> {
-                        LOGGER.warn("unable to find the natural language [{}] - will use english", specification.getNaturalLanguageCode());
-                        return NaturalLanguage.getEnglish(context);
-                    });
-        }
-
-        return NaturalLanguage.getEnglish(context);
+        return Optional.ofNullable(specification.getNaturalLanguageCode())
+                .map(StringUtils::trimToNull)
+                .map(c -> NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode()))
+                .orElse(NaturalLanguage.getEnglish(context));
     }
 
 }
