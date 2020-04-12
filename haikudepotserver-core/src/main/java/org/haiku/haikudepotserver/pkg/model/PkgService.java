@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,20 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface PkgService {
+
+    /**
+     * <p>This appears at the end of a package name to signify that it is a
+     * set of debug info.</p>
+     */
+
+    String SUFFIX_PKG_DEBUGINFO = "_debuginfo";
+
+    /**
+     * <p>This appears at the end of the package name to signify that it is a
+     * set of sources.</p>
+     */
+
+    String SUFFIX_PKG_SOURCE = "_source";
 
     /**
      * <p>This appears at the end of the package name to signify that it is a development package

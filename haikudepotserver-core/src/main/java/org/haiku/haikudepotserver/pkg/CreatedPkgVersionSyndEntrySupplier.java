@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,7 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
@@ -22,6 +23,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +77,11 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                     .query(PkgVersion.class)
                     .where(PkgVersion.ACTIVE.isTrue())
                     .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                    .and(ExpressionFactory.or(
+                         PkgVersion.PKG.dot(Pkg.NAME).endsWith(PkgService.SUFFIX_PKG_DEBUGINFO),
+                         PkgVersion.PKG.dot(Pkg.NAME).endsWith(PkgService.SUFFIX_PKG_DEVELOPMENT),
+                         PkgVersion.PKG.dot(Pkg.NAME).endsWith(PkgService.SUFFIX_PKG_SOURCE)
+                    ).notExp())
                     .orderBy(PkgVersion.CREATE_TIMESTAMP.desc())
                     .limit(specification.getLimit());
 

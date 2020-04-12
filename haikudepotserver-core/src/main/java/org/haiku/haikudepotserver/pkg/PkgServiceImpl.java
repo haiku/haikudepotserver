@@ -186,7 +186,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != context, "a context is required");
         Preconditions.checkArgument(null != pkgVersion, "a pkg version is required");
 
-        Optional<Pkg> pkgSourceOptional = Pkg.tryGetByName(context, pkgVersion.getPkg().getName() + "_source");
+        Optional<Pkg> pkgSourceOptional = Pkg.tryGetByName(context, pkgVersion.getPkg().getName() + SUFFIX_PKG_SOURCE);
 
         if(pkgSourceOptional.isPresent()) {
             return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)

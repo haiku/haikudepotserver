@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,9 +29,9 @@ public class FeedSpecification {
         ATOM("atom_1.0", "atom", MediaType.ATOM_UTF_8.toString()),
         RSS("rss_2.0", "rss", "application/rss+xml");
 
-        private String feedType;
-        private String extension;
-        private String contentType;
+        private final String feedType;
+        private final String extension;
+        private final String contentType;
 
         FeedType(String feedType, String extension, String contentType) {
             this.feedType = feedType;
