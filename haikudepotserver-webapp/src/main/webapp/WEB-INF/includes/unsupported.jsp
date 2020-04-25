@@ -71,6 +71,17 @@ environment is working.
             devem funcionar normalmente.  Tamb&#xE9;m est&#xE1; <a href="/__multipage">dispon&#xED;vel</a> uma interface de utilizador simplificada.
         </div>
 
+        <div class="unsupported-message-container">
+            Esta aplicación no funciona adecuadamente en su navegador actual.
+            Esto puede deberse a que su navegador tiene JavaScript deshabilitado o porque este navegador no está soportado.
+            Se sabe que las últimas versiones de los navegadores
+            <a href="https://www.haiku-os.org/docs/userguide/en/applications/webpositive.html">WebPositive</a>,
+            <a href="https://www.mozilla.org/firefox">Firefox</a>
+            y
+            <a href="https://www.google.com/chrome/browser/">Google Chrome</a>
+            funcionan. También está <a href="/__multipage">disponible</a> una interfaz de usuario simplificada.
+        </div>
+
     </div>
 </div>
 
