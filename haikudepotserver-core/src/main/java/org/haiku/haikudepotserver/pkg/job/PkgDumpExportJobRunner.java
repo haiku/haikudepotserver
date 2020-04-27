@@ -221,6 +221,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         DumpExportPkg dumpExportPkg = new DumpExportPkg();
         dumpExportPkg.setModifyTimestamp(pkg.getModifyTimestamp().getTime());
         dumpExportPkg.setName(pkg.getName());
+        dumpExportPkg.setHasChangelog(pkg.getPkgSupplement().getPkgChangelog().isPresent());
         dumpExportPkg.setProminenceOrdering(pkg.getPkgProminence(repositorySource.getRepository())
                 .map((p) -> p.getProminence().getOrdering()).map(Long::new).orElse(null));
         dumpExportPkg.setDerivedRating(

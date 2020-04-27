@@ -320,7 +320,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         version.hpkgDownloadURL = pkgService.createHpkgDownloadUrl(pkgVersion);
 
         ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
-                pkgLocalizationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
+        pkgLocalizationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
 
         version.title = resolvedPkgVersionLocalization.getTitle();
         version.description = resolvedPkgVersionLocalization.getDescription();
@@ -409,6 +409,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         result.name = pkg.getName();
         result.modifyTimestamp = pkg.getModifyTimestamp().getTime();
         result.vanityLinkUrl = pkgService.createVanityLinkUrl(pkg);
+        result.hasChangelog = pkg.getPkgSupplement().getPkgChangelog().isPresent();
         result.pkgCategoryCodes = pkg.getPkgSupplement().getPkgPkgCategories()
                 .stream()
                 .map(ppc -> ppc.getPkgCategory().getCode())

@@ -42,6 +42,12 @@ public class GetPkgResult {
 
     public String vanityLinkUrl;
 
+    /**
+     * @since 2020-04-27
+     */
+
+    public Boolean hasChangelog;
+
     public static class PkgVersion {
 
         public String major;
