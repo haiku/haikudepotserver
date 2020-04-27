@@ -57,8 +57,8 @@ Distributed under the terms of the MIT License.
         </para>
 
         <itemizedlist>
-            <listitem>haikudepotserver-webapp/src/main/resources/messages*.properties</listitem>
-            <listitem>haikudepotserver-core/src/main/resources/messages_en.properties</listitem>
+            <listitem><code>haikudepotserver-webapp/src/main/resources/webmessages_*.properties</code></listitem>
+            <listitem><code>haikudepotserver-core/src/main/resources/messages_*.properties</code></listitem>
         </itemizedlist>
 
         <para>
@@ -80,7 +80,7 @@ Distributed under the terms of the MIT License.
             Sometimes it is impractical to take plain-text strings and re-format them into complex layouts.  In this
             case, segments of HTML can be used to insert pre-formatted content that is specific to a given natural
             language.  These segments are located at
-            &quot;haikudepotserver-webapp/src/main/webapp/js/app/passivecontent/*.html&quot;
+            &quot;<code>haikudepotserver-webapp/src/main/webapp/js/app/passivecontent/*.html</code>&quot;
         </para>
 
         <para>
@@ -98,7 +98,7 @@ Distributed under the terms of the MIT License.
             <ulink url="http://freemarker.org/">Freemarker</ulink> library.
             For each email there is a default which is the English natural language and then there may be variants
             for various natural languages.  The Freemarker templates for email generation are located at
-            &quot;haikudepotserver-webapp/src/main/resources/email/*.ftl&quot;.
+            &quot;<code>haikudepotserver-core/src/main/resources/mail/*.ftl</code>&quot;.
         </para>
     </section>
 
@@ -109,7 +109,8 @@ Distributed under the terms of the MIT License.
             The &quot;error page&quot; is a page that renders a message to indicate that, for some reason, the
             user's usage of the application cannot continue.  The localization of this page is in-code logic because
             this approach yields a low probability that the rendering of the error page will result in further error.
-            The text for this page can be found in the file &quot;ErrorServlet.java&quot;.
+            The text for this page can be found in the file
+            &quot;<code>haikudepotserver-webapp/src/main/java/org/haiku/haikudepotserver/support/web/ErrorServlet.java</code>&quot;.
         </para>
     </section>
 
@@ -120,7 +121,8 @@ Distributed under the terms of the MIT License.
             An &quot;unsupported page&quot; is designed to appear when a browser does not support the technology
             required to drive the user interface of the application.  This unsupported page has localization messages
             directly in the JSP template because any detection of natural language or mechanisms to select a natural
-            language may not function.  The text for this page can be found in the file &quot;unsupported.jsp&quot;.
+            language may not function.  The text for this page can be found in the file
+            &quot;<code>haikudepotserver-webapp/src/main/webapp/WEB-INF/includes/unsupported.jsp</code>&quot;.
         </para>
     </section>
 

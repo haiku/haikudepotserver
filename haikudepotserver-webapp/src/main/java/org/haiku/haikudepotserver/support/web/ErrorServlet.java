@@ -36,35 +36,40 @@ public class ErrorServlet extends HttpServlet {
             NaturalLanguage.CODE_GERMAN, "Herrje!",
             NaturalLanguage.CODE_JAPANESE, "もう!",
             NaturalLanguage.CODE_RUSSIAN, "Вот незадача!",
-            NaturalLanguage.CODE_SLOVAK, "Sakra!");
+            NaturalLanguage.CODE_SLOVAK, "Sakra!",
+            NaturalLanguage.CODE_SPANISH, "¡Oh rayos!");
 
     private final static Map<String,String> BODY_GENERAL = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Something has gone wrong with your use of this web application.",
             NaturalLanguage.CODE_GERMAN, "Mit dieser Web-Anwendung ist was schief gegangen.",
             NaturalLanguage.CODE_JAPANESE, "このWebアプリケーションの使い方が何かおかしい。",
             NaturalLanguage.CODE_RUSSIAN, "Что-то пошло не так во время использования вами данного веб-сайта.",
-            NaturalLanguage.CODE_SLOVAK, "Niečo sa pokazilo počas vašej práce s touto webovou aplikáciou.");
+            NaturalLanguage.CODE_SLOVAK, "Niečo sa pokazilo počas vašej práce s touto webovou aplikáciou.",
+            NaturalLanguage.CODE_SPANISH, "Algo ha salido mal mientras usaba esta aplicación web.");
 
     private final static Map<String,String> BODY_NOTFOUND = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "The requested resource was not found.",
             NaturalLanguage.CODE_GERMAN, "Die angefragte Ressource wurde nicht gefunden.",
             NaturalLanguage.CODE_JAPANESE, "要求されたリソースが見つかりません。",
             NaturalLanguage.CODE_RUSSIAN, "Запрашиваемый ресурс не найден.",
-            NaturalLanguage.CODE_SLOVAK, "Požadovaný zdroj nebol nájdený.");
+            NaturalLanguage.CODE_SLOVAK, "Požadovaný zdroj nebol nájdený.",
+            NaturalLanguage.CODE_SPANISH, "El recurso solicitado no se ha encontrado.");
 
     private final static Map<String,String> BODY_AUTHORIZATIONFAILURE = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Your authentication with the service is expired or you have reached a page that is not accessible with the level of your permissions.",
             NaturalLanguage.CODE_GERMAN, "Die Berechtigungen für diesen Dienst sind abgelaufen, oder der Zugang zur angeforderten Seite erfordert zusätzliche Zugriffsrechte.",
             NaturalLanguage.CODE_JAPANESE, "サービスの認証が期限切れか，またはユーザーの権限では入れないページに触れた。",
             NaturalLanguage.CODE_RUSSIAN, "Действие вашей авторизации в системе истекло, или же вы пытаетесь попасть на страницу, права доступа к которой у вас отсутствуют.",
-            NaturalLanguage.CODE_SLOVAK, "Vaša autentifikácia u tejto služby buď vypršala alebo ste narazili na stránku, ktorá nie je prístupná pri vašej úrovni oprávnení.");
+            NaturalLanguage.CODE_SLOVAK, "Vaša autentifikácia u tejto služby buď vypršala alebo ste narazili na stránku, ktorá nie je prístupná pri vašej úrovni oprávnení.",
+            NaturalLanguage.CODE_SPANISH, "La autenticación con el servicio ha expirado o ha llegado a una página que no puede acceder con su nivel de permisos.");
 
     private final static Map<String,String> ACTION = ImmutableMap.of(
             NaturalLanguage.CODE_ENGLISH, "Start again",
             NaturalLanguage.CODE_GERMAN, "Neu starten",
             NaturalLanguage.CODE_JAPANESE, "再開",
             NaturalLanguage.CODE_RUSSIAN, "Начать сначала",
-            NaturalLanguage.CODE_SLOVAK, "Začať znova");
+            NaturalLanguage.CODE_SLOVAK, "Začať znova",
+            NaturalLanguage.CODE_SPANISH, "Empezar de nuevo");
 
     private byte[] pageGeneralBytes = null;
 
