@@ -96,18 +96,12 @@ public class RepositorySource extends _RepositorySource {
     }
 
     private void validateUrl(ValidationResult validationResult, String url, String propertyName) {
-        if(null != url) {
-            try {
-                new URL(url);
+        if (null != url) {
+            if (StringUtils.isBlank(url)) {
+                validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "notempty"));
             }
-            catch(MalformedURLException mue) {
-                validationResult.addFailure(new BeanValidationFailure(this, propertyName, "malformed"));
-            }
-        }
-
-        if(null != url) {
-            if(url.endsWith("/")) {
-                validationResult.addFailure(new BeanValidationFailure(this, propertyName, "trailingslash"));
+            if (!StringUtils.isAsciiPrintable(url) || StringUtils.containsWhitespace(url)) {
+                validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "malformed"));
             }
         }
     }
