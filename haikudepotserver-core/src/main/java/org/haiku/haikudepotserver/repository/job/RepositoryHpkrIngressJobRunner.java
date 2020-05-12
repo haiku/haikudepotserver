@@ -11,9 +11,11 @@ import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.driversettings.DriverSettings;
 import org.haiku.driversettings.DriverSettingsException;
+import org.haiku.driversettings.Parameter;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -33,9 +35,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * <p>This object is responsible for migrating a HPKR file from a remote repository into the Haiku Depot Server
@@ -53,7 +58,9 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
     private final static long TIMEOUT_REPOSITORY_SOURCE_FETCH = TimeUnit.SECONDS.toMillis(30);
 
+    @Deprecated // replaced with "identifier"
     private final static String PARAMETER_NAME_URL = "url";
+    private final static String PARAMETER_NAME_IDENTIFIER = "identifier";
 
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
@@ -142,24 +149,23 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                     InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charsets.UTF_8);
                     BufferedReader reader = new BufferedReader(inputStreamReader)
                     ) {
-                    String urlParameterValue = DriverSettings.parse(reader)
-                            .stream()
-                            .filter(p -> p.getName().equals(PARAMETER_NAME_URL))
-                            .filter(p -> CollectionUtils.isNotEmpty(p.getValues()))
-                            .findAny()
-                            .map(v -> StringUtils.trimToNull(v.getValues().get(0)))
-                            .orElseThrow(() -> new DriverSettingsException("the 'repo.info' file is expected to have "
-                                    + "a ["  + PARAMETER_NAME_URL + "] entry as identifier, but this appears to be "
-                                    + "missing"));
+                List<Parameter> parameters = DriverSettings.parse(reader);
+                String urlParameterValue = ObjectUtils.firstNonNull(
+                        tryGetParameterValue(parameters, PARAMETER_NAME_IDENTIFIER).orElse(null),
+                        tryGetParameterValue(parameters, PARAMETER_NAME_URL).orElse(null) );
 
-                    if (!Objects.equals(urlParameterValue, repositorySource.getUrl())) {
-                        LOGGER.info("updated the repo info url to [{}] for repository source [{}]",
-                                urlParameterValue, repositorySource.getCode());
-                        repositorySource.setUrl(urlParameterValue);
-                        repositorySource.getRepository().setModifyTimestamp();
-                        mainContext.commitChanges();
-                    }
+                if (StringUtils.isEmpty(urlParameterValue)) {
+                    throw new DriverSettingsException("expected to find the parameter [" + PARAMETER_NAME_IDENTIFIER
+                            + "] or [" + PARAMETER_NAME_URL + "]");
+                }
 
+                if (!Objects.equals(urlParameterValue, repositorySource.getUrl())) {
+                    LOGGER.info("updated the repo info url to [{}] for repository source [{}]",
+                            urlParameterValue, repositorySource.getCode());
+                    repositorySource.setUrl(urlParameterValue);
+                    repositorySource.getRepository().setModifyTimestamp();
+                    mainContext.commitChanges();
+                }
             }
         } catch (IOException | DriverSettingsException e) {
             throw new RepositoryHpkrIngressException(
@@ -170,9 +176,22 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                     LOGGER.error("unable to delete the file; {}" + temporaryFile.getAbsolutePath());
                 }
             }
-
         }
+    }
 
+    private Optional<String> tryGetParameterValue(List<Parameter> parameters, String parameterName) {
+        return tryGetParameter(parameters, parameterName)
+                .map(Parameter::getValues)
+                .filter(org.apache.commons.collections4.CollectionUtils::isNotEmpty).flatMap(vs -> vs.stream()
+                        .filter(StringUtils::isNotBlank)
+                        .findFirst());
+    }
+
+    private Optional<Parameter> tryGetParameter(List<Parameter> parameters, String parameterName) {
+        return org.apache.commons.collections4.CollectionUtils.emptyIfNull(parameters)
+                .stream()
+                .filter(p -> p.getName().equals(parameterName))
+                .findFirst();
     }
 
     private void runImportHpkrForRepositorySource(
