@@ -327,7 +327,7 @@ jsonschema2cppparser.py \
                 <variablelist>
                     <varlistentry>
                         <term>HTTP Method</term>
-                        <listitem>POST</listitem>
+                        <listitem>GET</listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>Path</term>
