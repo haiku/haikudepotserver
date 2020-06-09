@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,9 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.net.MediaType;
+import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -74,13 +75,13 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
 
             State state = new State();
             state.tarArchiveOutputStream = tarOutputStream;
-            EJBQLQuery query = createEjbqlQuery(specification);
+            SQLTemplate query = createQuery(specification);
             query.setFetchLimit(getBatchSize());
             int countLastQuery;
 
             do {
                 query.setFetchOffset(offset);
-                List<Object[]> queryResults = context.performQuery(query);
+                List<DataRow> queryResults = context.performQuery(query);
                 countLastQuery = queryResults.size();
                 appendFromRawRows(state, queryResults);
                 offset += countLastQuery;
@@ -100,18 +101,18 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
 
     abstract int getBatchSize();
 
-    abstract EJBQLQuery createEjbqlQuery(T specification);
+    abstract SQLTemplate createQuery(T specification);
 
     abstract String getPathComponentTop();
 
-    private void appendFromRawRows(State state, List<Object[]> rows)
+    private void appendFromRawRows(State state, List<DataRow> rows)
             throws IOException {
-        for(Object[] row : rows) {
+        for(DataRow row : rows) {
             appendFromRawRow(state, row);
         }
     }
 
-    abstract void appendFromRawRow(State state, Object[] row) throws IOException;
+    abstract void appendFromRawRow(State state, DataRow row) throws IOException;
 
     /**
      * <p>Adds a little informational file into the tar-ball.</p>

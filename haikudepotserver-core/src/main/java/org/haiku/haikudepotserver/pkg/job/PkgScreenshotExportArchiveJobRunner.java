@@ -1,23 +1,25 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import org.apache.cayenne.DataRow;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * <P>Produces a dump of the screenshots; either for one specific package or for all of the packages.</P>
@@ -29,10 +31,10 @@ public class PkgScreenshotExportArchiveJobRunner
 
     private static final int BATCH_SIZE = 4; // small because don't want to use too much memory!
 
-    private static final int ROW_PKG_NAME = 0;
-    private static final int ROW_PAYLOAD = 1;
-    private static final int ROW_PKG_MODIFY_TIMESTAMP = 2;
-    private static final int ROW_ORDERING = 3;
+    private static final String COLUMN_PKG_NAME = "pkg_name";
+    private static final String COLUMN_PAYLOAD = "payload";
+    private static final String COLUMN_PKG_MODIFY_TIMESTAMP = "modify_timestamp";
+    private static final String COLUMN_ORDERING = "ordering";
 
     public static final String PATH_COMPONENT_TOP = "hscr";
 
@@ -53,14 +55,14 @@ public class PkgScreenshotExportArchiveJobRunner
     }
 
     @Override
-    void appendFromRawRow(State state, Object[] row)
+    void appendFromRawRow(State state, DataRow row)
             throws IOException {
         append(
                 state,
-                String.class.cast(row[ROW_PKG_NAME]),
-                byte[].class.cast(row[ROW_PAYLOAD]),
-                Date.class.cast(row[ROW_PKG_MODIFY_TIMESTAMP]),
-                Integer.class.cast(row[ROW_ORDERING])
+                String.class.cast(row.get(COLUMN_PKG_NAME)),
+                byte[].class.cast(row.get(COLUMN_PAYLOAD)),
+                Date.class.cast(row.get(COLUMN_PKG_MODIFY_TIMESTAMP)),
+                Integer.class.cast(row.get(COLUMN_ORDERING))
         );
     }
 
@@ -70,6 +72,11 @@ public class PkgScreenshotExportArchiveJobRunner
             byte[] payload,
             Date modifyTimestamp,
             Integer ordering) throws IOException {
+
+        Preconditions.checkArgument(StringUtils.isNotBlank(pkgName));
+        Preconditions.checkArgument(null != payload && payload.length > 0);
+        Preconditions.checkArgument(null != modifyTimestamp);
+        Preconditions.checkArgument(null != ordering);
 
         String filename = String.join("/", PATH_COMPONENT_TOP, pkgName, ordering.toString() + ".png");
 
@@ -86,35 +93,13 @@ public class PkgScreenshotExportArchiveJobRunner
     }
 
     @Override
-    EJBQLQuery createEjbqlQuery(PkgScreenshotExportArchiveJobSpecification specification) {
-        EJBQLQuery query = new EJBQLQuery(createEjbqlRawRowsExpression(specification));
-
+    SQLTemplate createQuery(PkgScreenshotExportArchiveJobSpecification specification) {
+        SQLTemplate query = (SQLTemplate) serverRuntime.newContext().getEntityResolver()
+                .getQueryDescriptor("AllPkgScreenshots").buildQuery();
         if (!Strings.isNullOrEmpty(specification.getPkgName())) {
-            query.setParameter("pkgName", specification.getPkgName());
+            query.setParams(Map.of("pkgName", specification.getPkgName()));
         }
-
         return query;
-    }
-
-    private String createEjbqlRawRowsExpression(PkgScreenshotExportArchiveJobSpecification specification) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("SELECT psi.pkgScreenshot.pkgSupplement.basePkgName,\n");
-        builder.append("psi.data, psi.pkgScreenshot.pkgSupplement.modifyTimestamp,\n");
-        builder.append("psi.pkgScreenshot.ordering\n");
-        builder.append("FROM " + PkgScreenshotImage.class.getSimpleName() + " psi\n");
-        builder.append("WHERE EXISTS\n");
-        builder.append("(SELECT p2.name FROM " + Pkg.class.getSimpleName() + " p2 WHERE\n");
-        builder.append("p2.pkgSupplement = psi.pkgScreenshot.pkgSupplement AND p2.active = true)\n");
-
-        if (!Strings.isNullOrEmpty(specification.getPkgName())) {
-            builder.append("AND psi.pkgScreenshot.pkg.name = :pkgName\n");
-        }
-
-        builder.append("ORDER BY psi.pkgScreenshot.pkgSupplement.basePkgName ASC,\n");
-        builder.append("psi.pkgScreenshot.ordering ASC\n");
-
-        return builder.toString();
     }
 
 }

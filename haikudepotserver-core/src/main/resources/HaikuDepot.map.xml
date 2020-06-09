@@ -972,6 +972,45 @@
 	<obj-relationship name="userRatingStability" source="UserRating" target="UserRatingStability" deleteRule="Nullify" db-relationship-path="user_rating_stability"/>
 	<obj-relationship name="user" source="UserUsageConditionsAgreement" target="User" lock="true" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="userUsageConditions" source="UserUsageConditionsAgreement" target="UserUsageConditions" deleteRule="Nullify" db-relationship-path="user_usage_conditions"/>
+	<query name="AllPkgIcons" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+  #result('p.name' 'String' 'pkg_name'),
+  #result('pi.size' 'Integer' 'size'),
+  #result('mt.code' 'String' 'media_type_code'),
+  #result('pii.data' 'byte[]' 'payload'),
+  #result('ps.icon_modify_timestamp' 'java.sql.Timestamp' 'modify_timestamp')
+FROM
+  haikudepot.pkg_supplement ps
+  JOIN haikudepot.pkg p ON p.pkg_supplement_id = ps.id
+  JOIN haikudepot.pkg_icon pi ON pi.pkg_supplement_id = ps.id
+  JOIN haikudepot.pkg_icon_image pii ON pii.pkg_icon_id = pi.id
+  JOIN haikudepot.media_type mt ON mt.id = pi.media_type_id
+ORDER BY
+  p.name ASC,
+  mt.code ASC,
+  pi.size ASC]]></sql>
+	</query>
+	<query name="AllPkgScreenshots" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+  #result('p.name' 'String' 'pkg_name'),
+  #result('psi.data' 'byte[]' 'payload'),
+  #result('psup.modify_timestamp' 'java.sql.Timestamp' 'modify_timestamp'),
+  #result('ps.ordering' 'Integer' 'ordering')
+FROM
+  haikudepot.pkg_supplement psup
+  JOIN haikudepot.pkg p ON p.pkg_supplement_id = psup.id
+  JOIN haikudepot.pkg_screenshot ps ON ps.pkg_supplement_id = psup.id
+  JOIN haikudepot.pkg_screenshot_image psi ON psi.pkg_screenshot_id = ps.id
+WHERE 1=1
+#if($pkgName)
+  AND p.name = #bind($pkgName)
+#end
+ORDER BY
+  p.name ASC,
+  ps.ordering ASC]]></sql>
+	</query>
 	<query name="PkgNamesForRepositorySource" type="SQLTemplate" root="obj-entity" root-name="PkgVersion">
 		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="false"/>
 		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
