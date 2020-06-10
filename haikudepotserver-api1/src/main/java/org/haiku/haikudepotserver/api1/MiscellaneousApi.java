@@ -83,4 +83,12 @@ public interface MiscellaneousApi {
 
     GenerateFeedUrlResult generateFeedUrl(GenerateFeedUrlRequest request) throws ObjectNotFoundException;
 
+    /**
+     * <p>Returns a list of all of the people who have contributed to this application server in
+     * some way.</p>
+     * @since 2020-06-10
+     */
+
+    GetAllContributorsResult getAllContributors(GetAllContributorsRequest request);
+
 }

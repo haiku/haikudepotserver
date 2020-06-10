@@ -7,4 +7,24 @@
         <li><message key="about.info.version" parameters="[serverProjectVersion]"></message></li>
     </ul>
 
+    <h1><message key="about.contributors.title"></message></h1>
+
+    <table class="table-general" ng-show="contributors">
+        <thead>
+        <th><message key="about.contributors.table.type.title"></message></th>
+        <th><message key="about.contributors.table.name.title"></message></th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="contributor in contributors">
+            <td>
+                <message key="{{contributor.typeKey}}"></message>
+                <span ng-if="contributor.naturalLanguageTitle">
+                    &mdash; {{contributor.naturalLanguageTitle}}
+                </span>
+            </td>
+            <td>{{contributor.name}}</td>
+        </tr>
+        </tbody>
+    </table>
+
 </div>

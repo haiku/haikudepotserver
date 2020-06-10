@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
+import org.haiku.haikudepotserver.support.ContributorsService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     private final ServerRuntime serverRuntime;
     private final RuntimeInformationService runtimeInformationService;
     private final FeedService feedService;
+    private final ContributorsService contributorsService;
     private final MessageSource messageSource;
     private final NaturalLanguageService naturalLanguageService;
     private final Boolean isProduction;
@@ -48,6 +50,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             ServerRuntime serverRuntime,
             RuntimeInformationService runtimeInformationService,
             FeedService feedService,
+            ContributorsService contributorsService,
             MessageSource messageSource,
             NaturalLanguageService naturalLanguageService,
             @Value("${deployment.isproduction:false}") Boolean isProduction,
@@ -56,6 +59,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
         this.feedService = Preconditions.checkNotNull(feedService);
+        this.contributorsService = Preconditions.checkNotNull(contributorsService);
         this.messageSource = Preconditions.checkNotNull(messageSource);
         this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
         this.isProduction = Preconditions.checkNotNull(isProduction);
@@ -307,6 +311,18 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         GenerateFeedUrlResult result = new GenerateFeedUrlResult();
         result.url = feedService.generateUrl(specification);
         return result;
+    }
+
+    @Override
+    public GetAllContributorsResult getAllContributors(GetAllContributorsRequest request) {
+        Preconditions.checkArgument(null != request);
+        return new GetAllContributorsResult(
+                contributorsService.getConstributors().stream()
+                .map(c -> new GetAllContributorsResult.Contributor(
+                        GetAllContributorsResult.Contributor.Type.valueOf(c.getType().name()),
+                        c.getName(),
+                        c.getNaturalLanguageCode()))
+                .collect(Collectors.toUnmodifiableList()));
     }
 
 }

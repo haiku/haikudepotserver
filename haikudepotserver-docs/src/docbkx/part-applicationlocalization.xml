@@ -126,4 +126,14 @@ Distributed under the terms of the MIT License.
         </para>
     </section>
 
+    <section>
+        <title>Contributors</title>
+
+        <para>
+            The file <code>.../haikudepotserver-core/src/main/resources/contributors.properties</code> contains a
+            list of the people who have contributed to the application (not the data).  People who have
+            contributed to the localization should also include their names in this file.
+        </para>
+    </section>
+
 </chapter>
