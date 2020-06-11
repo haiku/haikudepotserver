@@ -206,7 +206,7 @@ Distributed under the terms of the MIT License.
             </para>
 
             <para>
-                <programlisting>docker run -v secrets:/secrets -it &lt;image-id&gt; /bin/bash</programlisting>
+                <programlisting>docker run -v secrets:/secrets -p 8080:8080 &lt;image-id&gt;</programlisting>
             </para>
 
             <para>

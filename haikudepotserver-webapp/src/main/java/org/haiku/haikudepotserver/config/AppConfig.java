@@ -29,7 +29,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.context.support.ServletContextAttributeExporter;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
+import javax.servlet.Filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -146,6 +148,11 @@ public class AppConfig {
                 s -> s.startsWith("/" + RepositoryController.SEGMENT_REPOSITORY)
                         && s.endsWith("/" + RepositoryController.SEGMENT_IMPORT)
         );
+    }
+
+    @Bean
+    public Filter forwardedHeaderFilter() {
+        return new ForwardedHeaderFilter();
     }
 
 }

@@ -20,9 +20,11 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
 
+import javax.servlet.Filter;
 import java.util.stream.Stream;
 
 @EnableWebMvc
