@@ -15,9 +15,9 @@ FROM ubuntu:18.04
 # copy the correct values from the poms into these variables so that the right
 # versions of the artefacts are used in the Docker container.
 
-ENV HDS_VERSION "1.0.120"
-ENV JETTY_VERSION "9.4.27.v20200227"
-ENV PG_VERSION "42.2.12"
+ENV HDS_VERSION "???"
+ENV JETTY_VERSION "???"
+ENV PG_VERSION "???"
 
 ENV JAVA_BIN "java"
 
