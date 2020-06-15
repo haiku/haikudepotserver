@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.driversettings.DriverSettings;
@@ -40,7 +39,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 /**
  * <p>This object is responsible for migrating a HPKR file from a remote repository into the Haiku Depot Server
@@ -150,19 +148,19 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                     BufferedReader reader = new BufferedReader(inputStreamReader)
                     ) {
                 List<Parameter> parameters = DriverSettings.parse(reader);
-                String urlParameterValue = ObjectUtils.firstNonNull(
+                String identifierParameterValue = ObjectUtils.firstNonNull(
                         tryGetParameterValue(parameters, PARAMETER_NAME_IDENTIFIER).orElse(null),
                         tryGetParameterValue(parameters, PARAMETER_NAME_URL).orElse(null) );
 
-                if (StringUtils.isEmpty(urlParameterValue)) {
+                if (StringUtils.isEmpty(identifierParameterValue)) {
                     throw new DriverSettingsException("expected to find the parameter [" + PARAMETER_NAME_IDENTIFIER
                             + "] or [" + PARAMETER_NAME_URL + "]");
                 }
 
-                if (!Objects.equals(urlParameterValue, repositorySource.getUrl())) {
-                    LOGGER.info("updated the repo info url to [{}] for repository source [{}]",
-                            urlParameterValue, repositorySource.getCode());
-                    repositorySource.setUrl(urlParameterValue);
+                if (!Objects.equals(identifierParameterValue, repositorySource.getIdentifier())) {
+                    LOGGER.info("updated the repo info identifier to [{}] for repository source [{}]",
+                            identifierParameterValue, repositorySource.getCode());
+                    repositorySource.setIdentifier(identifierParameterValue);
                     repositorySource.getRepository().setModifyTimestamp();
                     mainContext.commitChanges();
                 }

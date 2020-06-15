@@ -114,8 +114,10 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                 .map((rs) -> {
                     DumpExportRepositorySource dumpRepositorySource = new DumpExportRepositorySource();
                     dumpRepositorySource.setCode(rs.getCode());
-                    dumpRepositorySource.setUrl(rs.getPrimaryMirror().getBaseUrl());
-                    dumpRepositorySource.setRepoInfoUrl(rs.getUrl());
+                    dumpRepositorySource.setIdentifier(rs.getIdentifier());
+                    dumpRepositorySource.setRepoInfoUrl(rs.getIdentifier());
+                    // ^^ deprecated; repoInfoUrl is replaced with identifier
+
                     dumpRepositorySource.setRepositorySourceMirrors(
                             rs.getRepositorySourceMirrors()
                                     .stream()

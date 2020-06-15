@@ -45,7 +45,12 @@ public class GetRepositoryResult {
 
         public String url;
 
-        public String repoInfoUrl;
+        /**
+         * <p>This was previously (confusingly) called the <code>url</code>.</p>
+         * @since 2020-06-15
+         */
+
+        public String identifier;
 
         /**
          * @since 2018-12-26

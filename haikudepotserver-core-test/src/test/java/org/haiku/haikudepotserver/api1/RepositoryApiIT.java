@@ -125,44 +125,9 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         RepositorySource repositorySource = context.newObject(RepositorySource.class);
         repositorySource.setCode("zigzag_x86_64");
-        repositorySource.setUrl("http://example.com/zigzag");
+        repositorySource.setIdentifier("http://example.com/zigzag");
         repositorySource.setRepository(Repository.tryGetByCode(context, "testrepo").get());
         context.commitChanges();
-    }
-
-    @Test
-    public void searchRepositoriesTest_sourceBaseUrlHit() {
-        setupSourceBasedUrlTest();
-
-        SearchRepositoriesRequest request = new SearchRepositoriesRequest();
-        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
-        request.repositorySourceSearchUrls = Collections.singletonList("https://example.com/zigzag");
-        request.limit = 2;
-        request.offset = 0;
-
-        // ------------------------------------
-        SearchRepositoriesResult result = repositoryApi.searchRepositories(request);
-        // ------------------------------------
-
-        assertFoundRepository(result);
-    }
-
-    @Test
-    public void searchRepositoriesTest_sourceBaseUrlMiss() {
-        setupSourceBasedUrlTest();
-
-        SearchRepositoriesRequest request = new SearchRepositoriesRequest();
-        request.expressionType = SearchPkgsRequest.ExpressionType.CONTAINS;
-        request.repositorySourceSearchUrls = Collections.singletonList("http://www.nowhere.org/notfound");
-        request.limit = 2;
-        request.offset = 0;
-
-        // ------------------------------------
-        SearchRepositoriesResult result = repositoryApi.searchRepositories(request);
-        // ------------------------------------
-
-        Assertions.assertThat(result.items.size()).isEqualTo(0);
-        Assertions.assertThat(result.total).isEqualTo(0);
     }
 
     @Test
@@ -245,7 +210,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.active).isTrue();
         Assertions.assertThat(result.code).isEqualTo("testreposrc_xyz");
         Assertions.assertThat(result.repositoryCode).isEqualTo("testrepo");
-        Assertions.assertThat(result.url).isEqualTo("http://www.example.com/test/identifier/url");
+        Assertions.assertThat(result.identifier).isEqualTo("http://www.example.com/test/identifier/url");
         Assertions.assertThat(result.repositorySourceMirrors.size()).isEqualTo(2);
 
         GetRepositorySourceResult.RepositorySourceMirror mirror0 = result.repositorySourceMirrors.get(0);
@@ -277,7 +242,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             RepositorySource repositorySourceAfter = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
             // this url was set before and is retained after the update.
-            Assertions.assertThat(repositorySourceAfter.getUrl()).isEqualTo("http://www.example.com/test/identifier/url");
+            Assertions.assertThat(repositorySourceAfter.getIdentifier()).isEqualTo("http://www.example.com/test/identifier/url");
             Assertions.assertThat(repositorySourceAfter.getActive()).isFalse();
         }
 
@@ -300,7 +265,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, "testreposrcxx_xyz");
             Assertions.assertThat(repositorySourceOptional.get().getActive()).isTrue();
-            Assertions.assertThat(repositorySourceOptional.get().getUrl()).isNull();
+            Assertions.assertThat(repositorySourceOptional.get().getIdentifier()).isNull();
             Assertions.assertThat(repositorySourceOptional.get().getRepository().getCode()).isEqualTo("testrepo");
             Assertions.assertThat(repositorySourceOptional.get().getCode()).isEqualTo("testreposrcxx_xyz");
         }

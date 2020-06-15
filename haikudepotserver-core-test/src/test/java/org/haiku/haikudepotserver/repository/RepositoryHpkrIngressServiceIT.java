@@ -81,7 +81,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
 
                 RepositorySource repositorySource = context.newObject(RepositorySource.class);
                 repositorySource.setCode("testsrc_xyz");
-                repositorySource.setUrl("file://" + temporaryDir.getAbsolutePath());
+                repositorySource.setIdentifier("file://" + temporaryDir.getAbsolutePath());
                 repository.addToManyTarget(Repository.REPOSITORY_SOURCES.getName(), repositorySource, true);
 
                 RepositorySourceMirror repositorySourceMirror = context.newObject(RepositorySourceMirror.class);
@@ -223,7 +223,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
                 RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testsrc_xyz").get();
-                Assertions.assertThat(repositorySource.getUrl())
+                Assertions.assertThat(repositorySource.getIdentifier())
                         .isEqualTo("https://example.com/haikuports/master/repository/x86_gcc2");
             }
 

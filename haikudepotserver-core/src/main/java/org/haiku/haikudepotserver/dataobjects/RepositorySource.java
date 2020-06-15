@@ -88,8 +88,8 @@ public class RepositorySource extends _RepositorySource {
             }
         }
 
-        if (null != getUrl() && StringUtils.isBlank(getUrl())) {
-            validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "notempty"));
+        if (null != getIdentifier() && StringUtils.isBlank(getIdentifier())) {
+            validationResult.addFailure(new BeanValidationFailure(this, IDENTIFIER.getName(), "notempty"));
         }
 
         validateUrl(validationResult, getForcedInternalBaseUrl(), FORCED_INTERNAL_BASE_URL.getName());
@@ -98,10 +98,10 @@ public class RepositorySource extends _RepositorySource {
     private void validateUrl(ValidationResult validationResult, String url, String propertyName) {
         if (null != url) {
             if (StringUtils.isBlank(url)) {
-                validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "notempty"));
+                validationResult.addFailure(new BeanValidationFailure(this, propertyName, "notempty"));
             }
             if (!StringUtils.isAsciiPrintable(url) || StringUtils.containsWhitespace(url)) {
-                validationResult.addFailure(new BeanValidationFailure(this, URL.getName(), "malformed"));
+                validationResult.addFailure(new BeanValidationFailure(this, propertyName, "malformed"));
             }
         }
     }

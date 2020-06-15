@@ -20,13 +20,12 @@ public class GetRepositorySourceResult {
     public Boolean active;
 
     /**
-     * <p>Previous releases of this API used this field as the base-url for the
-     * repository.  Now this field, as with the C/C++ equivalent is the
-     * identifier URL for the repository itself.  This URL will be the same
-     * across mirrors.</p>
+     * <p>Historically this was called the <code>url</code>, but the name was
+     * changed in 2020.</p>
+     * @since 2020-06-15
      */
 
-    public String url;
+    public String identifier;
 
     /**
      * <p>This URL is only shown to some users.  If it is not able to be

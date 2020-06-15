@@ -10,8 +10,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
@@ -24,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>This service provides non-trivial operations and processes around repositories.</p>
@@ -131,33 +132,6 @@ public class RepositoryServiceImpl implements RepositoryService {
             whereExpressions.add("r." + Repository.ACTIVE.getName() + " = true");
         }
 
-        if(null!=search.getRepositorySourceSearchUrls()) {
-            List<String> urls = search.getRepositorySourceSearchUrls()
-                    .stream()
-                    .map((u) -> StringUtils.stripEnd(u.trim(), "/"))
-                    .filter((u) -> u.length() > 0)
-                    .flatMap((u) -> toRepositorySourceUrlVariants(u).stream())
-                    .distinct()
-                    .sorted()
-                    .collect(Collectors.toList());
-
-            StringBuilder whereExpressionBuilder = new StringBuilder();
-
-            whereExpressionBuilder.append(" EXISTS(SELECT rs FROM ");
-            whereExpressionBuilder.append(RepositorySource.class.getSimpleName());
-            whereExpressionBuilder.append(" rs WHERE rs." + RepositorySource.REPOSITORY.getName() + "=r ");
-            whereExpressionBuilder.append(" AND rs.url IN (");
-
-            for(int i=0;i<urls.size();i++) {
-                parameterAccumulator.add(urls.get(i));
-                whereExpressionBuilder.append((0 == i ? "" : ",") + "?" + parameterAccumulator.size());
-            }
-
-            whereExpressionBuilder.append("))");
-
-            whereExpressions.add(whereExpressionBuilder.toString());
-        }
-
         return String.join(" AND ", whereExpressions);
     }
 
@@ -167,10 +141,6 @@ public class RepositoryServiceImpl implements RepositoryService {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
-
-        if(null!=search.getRepositorySourceSearchUrls() && search.getRepositorySourceSearchUrls().isEmpty()) {
-            return Collections.emptyList();
-        }
 
         List<Object> parameterAccumulator = new ArrayList<>();
 

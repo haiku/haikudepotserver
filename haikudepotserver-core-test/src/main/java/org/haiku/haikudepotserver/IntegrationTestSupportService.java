@@ -159,7 +159,7 @@ public class IntegrationTestSupportService {
         result.repositorySource = context.newObject(RepositorySource.class);
         result.repositorySource.setCode("testreposrc_xyz");
         result.repositorySource.setRepository(result.repository);
-        result.repositorySource.setUrl("http://www.example.com/test/identifier/url");
+        result.repositorySource.setIdentifier("http://www.example.com/test/identifier/url");
 
         RepositorySourceMirror primaryMirror = context.newObject(RepositorySourceMirror.class);
         primaryMirror.setCountry(Country.getByCode(context, "NZ"));

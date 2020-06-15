@@ -23,8 +23,8 @@ public abstract class _RepositorySource extends AbstractDataObject {
     public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
     public static final Property<String> CODE = Property.create("code", String.class);
     public static final Property<String> FORCED_INTERNAL_BASE_URL = Property.create("forcedInternalBaseUrl", String.class);
+    public static final Property<String> IDENTIFIER = Property.create("identifier", String.class);
     public static final Property<Timestamp> LAST_IMPORT_TIMESTAMP = Property.create("lastImportTimestamp", Timestamp.class);
-    public static final Property<String> URL = Property.create("url", String.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
     public static final Property<List<RepositorySourceMirror>> REPOSITORY_SOURCE_MIRRORS = Property.create("repositorySourceMirrors", List.class);
 
@@ -49,18 +49,18 @@ public abstract class _RepositorySource extends AbstractDataObject {
         return (String)readProperty("forcedInternalBaseUrl");
     }
 
+    public void setIdentifier(String identifier) {
+        writeProperty("identifier", identifier);
+    }
+    public String getIdentifier() {
+        return (String)readProperty("identifier");
+    }
+
     public void setLastImportTimestamp(Timestamp lastImportTimestamp) {
         writeProperty("lastImportTimestamp", lastImportTimestamp);
     }
     public Timestamp getLastImportTimestamp() {
         return (Timestamp)readProperty("lastImportTimestamp");
-    }
-
-    public void setUrl(String url) {
-        writeProperty("url", url);
-    }
-    public String getUrl() {
-        return (String)readProperty("url");
     }
 
     public void setRepository(Repository repository) {

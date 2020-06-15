@@ -180,15 +180,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         specification.setLimit(request.limit);
         specification.setOffset(request.offset);
         specification.setIncludeInactive(null!=request.includeInactive && request.includeInactive);
-        specification.setRepositorySourceSearchUrls(request.repositorySourceSearchUrls);
 
         SearchRepositoriesResult result = new SearchRepositoriesResult();
 
-        result.total = repositoryService.total(context,specification);
+        result.total = repositoryService.total(context, specification);
         result.items = Collections.emptyList();
 
         if(result.total > 0) {
-            List<Repository> searchedRepositories = repositoryService.search(context,specification);
+            List<Repository> searchedRepositories = repositoryService.search(context, specification);
 
             result.items = searchedRepositories.stream().map(sr -> {
                 SearchRepositoriesResult.Repository resultRepository = new SearchRepositoriesResult.Repository();
@@ -245,7 +244,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     resultRs.active = rs.getActive();
                     resultRs.code = rs.getCode();
                     resultRs.url = rs.tryGetPrimaryMirror().map(_RepositorySourceMirror::getBaseUrl).orElse(null);
-                    resultRs.repoInfoUrl = rs.getUrl();
+                    resultRs.identifier = rs.getIdentifier();
 
                     if (null != rs.getLastImportTimestamp()) {
                         resultRs.lastImportTimestamp = rs.getLastImportTimestamp().getTime();
@@ -403,7 +402,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.active = repositorySource.getActive();
         result.code = repositorySource.getCode();
         result.repositoryCode = repositorySource.getRepository().getCode();
-        result.url = repositorySource.getUrl();
+        result.identifier = repositorySource.getIdentifier();
 
         if (null != repositorySource.getLastImportTimestamp()) {
             result.lastImportTimestamp = repositorySource.getLastImportTimestamp().getTime();
@@ -503,7 +502,6 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(null!=request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "the code for the new repository source must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository for the new repository source must be identified");
-
 
         final ObjectContext context = serverRuntime.newContext();
         Repository repository = getRepositoryOrThrow(context, request.repositoryCode);

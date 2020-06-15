@@ -9,14 +9,11 @@ import org.haiku.haikudepotserver.api1.support.AbstractSearchRequest;
 
 import java.util.List;
 
+/**
+ * <p>A field <code>repositorySourceSearchUrls</code> was removed 2020-06-15.</p>
+ */
+
 public class SearchRepositoriesRequest extends AbstractSearchRequest {
-
-    /**
-     * <p>If supplied, only those repositories that have a source with the appropriate base URL will be returned.</p>
-     * @since 2016-08-22
-     */
-
-    public List<String> repositorySourceSearchUrls;
 
     public Boolean includeInactive;
 

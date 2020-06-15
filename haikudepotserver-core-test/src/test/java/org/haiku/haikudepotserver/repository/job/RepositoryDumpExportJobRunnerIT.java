@@ -82,6 +82,9 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
             JsonNode repositorySourceCode = rootNode.at("/items/0/repositorySources/0/code");
             Assert.assertThat(repositorySourceCode.asText(), CoreMatchers.is("testreposrc_xyz"));
 
+            JsonNode repositorySourceIdentifier = rootNode.at("/items/0/repositorySources/0/identifier");
+            Assert.assertThat(repositorySourceIdentifier.asText(), CoreMatchers.is("http://www.example.com/test/identifier/url"));
+
             JsonNode mirror0CountryCode = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/0/countryCode");
             Assert.assertThat(mirror0CountryCode.asText(), CoreMatchers.is("ZA"));
             JsonNode mirror0BaseUrl = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/0/baseUrl");
