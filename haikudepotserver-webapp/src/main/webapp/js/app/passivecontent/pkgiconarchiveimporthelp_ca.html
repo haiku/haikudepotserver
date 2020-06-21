@@ -1,0 +1,33 @@
+<p>
+    Aquest procés acceptarà un fitxer d'arxiu tar comprimit amb gzip. L'extensió de
+    fitxer típica per a aquest format d'arxiu és "<code>.tgz</code>", però una extensió
+    de "<code>.tar.gz</code>" també s'usa sovint. Els fitxers de l'arxiu haurien de tenir
+    la nomenclatura següent: &quot;<code>hicn/beshare/icon.hvif</code>&quot;. En
+    aquest exemple, es proporciona una icona vectorial d'HVIF per al paquet beshare.
+</p>
+
+<p>
+    De vegades, les dades d'icones vectorials no estan disponibles. En aquest cas es pot
+    proporcionar una combinació d'imatges PNG de 16, 32 i 64 píxels quadrats. En aquest
+    cas, s'usaria la nomenclatura d'entrada d'arxiu següent: 
+    &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+    Per a cada paquet que tingui icones modificades per aquest procés, les dades anteriors
+    de la icona se suprimiran.
+</p>
+
+<p>
+    La importació d'un fitxer tar d'icones és &quot;atòmica&quot;, fet que significa que
+    o bé processarà l'arxiu completament o bé no modificarà les dades del servidor. 
+    Això té relació amb errors de la versió d'execució com ara dades d'entrada incorrectes
+    que eviten que el procés ni tan sols s'executi.
+</p>
+
+<p>
+    Problemes com ara paquets que falten així com la càrrega correcta d'una icona
+    es comuniquen a l'operador a través d'un fitxer CSV generat.
+</p>
+
+
