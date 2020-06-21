@@ -13,6 +13,5 @@ fortzufahren, bitte auf diesen Link klicken:
 
 Dort lässt sich ein neues Kennwort vergeben.
 
-
 Freundlich grüßt
 Der Haiku Depot Server

@@ -1,0 +1,32 @@
+<p>
+    Acest proces va accepta un fișier de arhivă tar care a fost comprimată gzip.  Extensia
+    de fișier tipică pentru acest format de arhivă este „<code>.tgz</code>”, dar o extensie de fișier de
+    „<code>.tar.gz</code>” este, de asemenea, utilizată.  Fișierele în arhivă ar trebui să aibă
+    următoarea nomenclatură; &quot;<code>hicn/beshare/icon.hvif</code>&quot;.  În acest exemplu, o iconiță
+    vector HVIF este furnizată pentru pachetul „beshare”.
+</p>
+
+<p>
+    Câteodată datele de iconiță vector nu sunt disponibile.  În acest caz, o combinație de imagini PNG
+    pătrat de pixeli de 16, 32 și 64 poate fi furnizată.  În acest caz, următoarea nomenclatură
+    de intrare de arhivă ar fi utilizată; &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+    Pentru fiecare pachet care are iconițele modificae de acest proces, datele iconiței precendete vor fi
+    eliminate.
+</p>
+
+<p>
+    Importarea unui fișier tar de iconițe este &quot;atomic&quot; ceea ce înseamnă că ori va
+    procesa arhiva în întregul acesteia ori nu va modifica datele de pe partea serverului.  Acest lucru este în
+    relație cu erorile la executare cum ar fi datele de intrare nevalide care previn procesul
+    să ruleze cu totul.
+</p>
+
+<p>
+    Probleme cum ar fi pachete care lipsesc precum și încărcarea cu succes a unei iconițe este raportată
+    înapoi la operator via unui fișier CSV generat.
+</p>
+
+
