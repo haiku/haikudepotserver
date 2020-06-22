@@ -18,4 +18,17 @@
         </attribute>
     </tag>
 
+    <tag>
+        <name>includepassivecontent</name>
+        <tag-class>org.haiku.haikudepotserver.support.web.markup.IncludePassiveContentTag</tag-class>
+        <description>
+            Renders a slug of HTML that might be localized.
+        </description>
+        <attribute>
+            <name>leafname</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue> <!-- can use SPEL expressions -->
+        </attribute>
+    </tag>
+
 </taglib>

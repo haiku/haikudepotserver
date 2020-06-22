@@ -1,8 +1,8 @@
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="jwr" uri="http://jawr.net/tags" %>
 <%@ taglib prefix="singlepage" uri="/WEB-INF/singlepage.tld"%>
-
 <%--
 This is a single page application and this is essentially the 'single page'.  It boots-up some libraries and other
 web-resources and then this starts the java-script single page environment driven by the AngularJS library.
@@ -29,7 +29,20 @@ web-resources and then this starts the java-script single page environment drive
 
 </head>
 
-<%@include file="/WEB-INF/includes/unsupported.jsp"%>
+<body>
+
+<div id="unsupported">
+    <div id="unsupported-container">
+        <div class="unsupported-image"><img src="/__img/haikudepot-error.png" alt="Haiku Depot Server"></div>
+        <h1>Haiku Depot Server</h1>
+
+        <div class="unsupported-message-container">
+            <singlepage:includepassivecontent leafname="unsupported.html"></singlepage:includepassivecontent>
+        </div>
+    </div>
+</div>
+
+<supported></supported>
 
 <c:if test="${param['banner']==null || param['banner']=='true'}">
     <banner></banner>
