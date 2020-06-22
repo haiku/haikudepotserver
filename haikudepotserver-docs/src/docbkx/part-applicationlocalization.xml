@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2017, Andrew Lindesay
+Copyright 2015-2020, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -33,7 +33,8 @@ Distributed under the terms of the MIT License.
         <para>
             The user interface of the application is implemented in the browser using
             <ulink url="http://www.angularjs.org/">AngularJS</ulink>.
-            This is a &quot;single page&quot; architecture.  A service &quot;messageSource&quot; is provided that
+            This is a &quot;single page&quot; architecture.  A service &quot;messageSource&quot; is provided
+            within the AngularJS environment that
             provides a key-to-text mapping system.  Example keys are;
         </para>
 
@@ -49,6 +50,10 @@ Distributed under the terms of the MIT License.
             The rest of the application uses the messageSource service, together with these known keys, to localize
             the text that is used to build the user interface.  A directive, &quot;message&quot; is useful in that
             it is able to render language-specific text based on the current natural language and a key.
+        </para>
+
+        <para>
+            The system does not presently support pluralization.
         </para>
 
         <para>
@@ -79,9 +84,13 @@ Distributed under the terms of the MIT License.
         <para>
             Sometimes it is impractical to take plain-text strings and re-format them into complex layouts.  In this
             case, segments of HTML can be used to insert pre-formatted content that is specific to a given natural
-            language.  These segments are located at
-            &quot;<code>haikudepotserver-webapp/src/main/webapp/js/app/passivecontent/*.html</code>&quot;
+            language.  These segments are located at;
         </para>
+
+        <itemizedlist>
+            <listitem><code>haikudepotserver-webapp/src/main/webapp/js/app/passivecontent/*.html</code></listitem>
+            <listitem><code>haikudepotserver-webapp/src/main/webapp/WEB-INF/passivecontent/*.html</code></listitem>
+        </itemizedlist>
 
         <para>
             This is used, for example, in the &quot;about page&quot;.  These segments should use a containing element
@@ -99,30 +108,6 @@ Distributed under the terms of the MIT License.
             For each email there is a default which is the English natural language and then there may be variants
             for various natural languages.  The Freemarker templates for email generation are located at
             &quot;<code>haikudepotserver-core/src/main/resources/mail/*.ftl</code>&quot;.
-        </para>
-    </section>
-
-    <section>
-        <title>Error Pages</title>
-
-        <para>
-            The &quot;error page&quot; is a page that renders a message to indicate that, for some reason, the
-            user's usage of the application cannot continue.  The localization of this page is in-code logic because
-            this approach yields a low probability that the rendering of the error page will result in further error.
-            The text for this page can be found in the file
-            &quot;<code>haikudepotserver-webapp/src/main/java/org/haiku/haikudepotserver/support/web/ErrorServlet.java</code>&quot;.
-        </para>
-    </section>
-
-    <section>
-        <title>Unsupported</title>
-
-        <para>
-            An &quot;unsupported page&quot; is designed to appear when a browser does not support the technology
-            required to drive the user interface of the application.  This unsupported page has localization messages
-            directly in the JSP template because any detection of natural language or mechanisms to select a natural
-            language may not function.  The text for this page can be found in the file
-            &quot;<code>haikudepotserver-webapp/src/main/webapp/WEB-INF/includes/unsupported.jsp</code>&quot;.
         </para>
     </section>
 
