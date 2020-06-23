@@ -32,6 +32,12 @@
           "repoInfoUrl": {
             "type": "string"
           },
+          "extraIdentifiers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "repositorySourceMirrors": {
             "type": "array",
             "items": {

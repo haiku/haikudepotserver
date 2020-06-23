@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceExtraIdentifier;
 import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -26,6 +27,7 @@ public abstract class _RepositorySource extends AbstractDataObject {
     public static final Property<String> IDENTIFIER = Property.create("identifier", String.class);
     public static final Property<Timestamp> LAST_IMPORT_TIMESTAMP = Property.create("lastImportTimestamp", Timestamp.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
+    public static final Property<List<RepositorySourceExtraIdentifier>> REPOSITORY_SOURCE_EXTRA_IDENTIFIERS = Property.create("repositorySourceExtraIdentifiers", List.class);
     public static final Property<List<RepositorySourceMirror>> REPOSITORY_SOURCE_MIRRORS = Property.create("repositorySourceMirrors", List.class);
 
     public void setActive(Boolean active) {
@@ -69,6 +71,18 @@ public abstract class _RepositorySource extends AbstractDataObject {
 
     public Repository getRepository() {
         return (Repository)readProperty("repository");
+    }
+
+
+    public void addToRepositorySourceExtraIdentifiers(RepositorySourceExtraIdentifier obj) {
+        addToManyTarget("repositorySourceExtraIdentifiers", obj, true);
+    }
+    public void removeFromRepositorySourceExtraIdentifiers(RepositorySourceExtraIdentifier obj) {
+        removeToManyTarget("repositorySourceExtraIdentifiers", obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<RepositorySourceExtraIdentifier> getRepositorySourceExtraIdentifiers() {
+        return (List<RepositorySourceExtraIdentifier>)readProperty("repositorySourceExtraIdentifiers");
     }
 
 

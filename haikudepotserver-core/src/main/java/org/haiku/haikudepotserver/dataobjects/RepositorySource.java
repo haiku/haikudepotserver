@@ -13,6 +13,7 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SelectById;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -28,6 +29,7 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class RepositorySource extends _RepositorySource {
 
@@ -201,6 +203,21 @@ public class RepositorySource extends _RepositorySource {
     public void setLastImportTimestamp() {
         setLastImportTimestamp(
                 new java.sql.Timestamp(Clock.systemUTC().millis()));
+    }
+
+    public List<String> getExtraIdentifiers() {
+        return CollectionUtils.emptyIfNull(getRepositorySourceExtraIdentifiers())
+                .stream()
+                .map(RepositorySourceExtraIdentifier::getIdentifier)
+                .sorted()
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public Optional<RepositorySourceExtraIdentifier> tryGetRepositorySourceExtraIdentifierForIdentifier(String identifier) {
+        return CollectionUtils.emptyIfNull(getRepositorySourceExtraIdentifiers())
+                .stream()
+                .filter(rsei -> rsei.getIdentifier().equals(identifier))
+                .findFirst();
     }
 
     @Override

@@ -45,6 +45,24 @@
         <dd><repository-label repository="repositorySource.repository"></repository-label></dd>
     </dl>
 
+    <h2><message key="viewRepositorySource.extraIdentifiers.title"></message></h2>
+
+    <div ng-show="!repositorySource.extraIdentifiers || !repositorySource.extraIdentifiers.length">
+        <message key="viewRepositorySource.extraIdentifiers.none.description"></message>
+    </div>
+
+    <table class="table-general"
+           ng-show="repositorySource.extraIdentifiers && repositorySource.extraIdentifiers.length">
+        <thead>
+        <th><message key="viewRepositorySource.extraIdentifiers.table.identifier.title"></message></th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="extraIdentifier in repositorySource.extraIdentifiers">
+            <td>{{extraIdentifier}}</td>
+        </tr>
+        </tbody>
+    </table>
+
     <h2><message key="viewRepositorySource.mirrors.title"></message></h2>
 
     <div class="info-container"

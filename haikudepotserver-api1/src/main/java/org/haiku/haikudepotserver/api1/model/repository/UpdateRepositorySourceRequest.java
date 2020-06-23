@@ -15,7 +15,8 @@ public class UpdateRepositorySourceRequest {
 
     public enum Filter {
         ACTIVE,
-        FORCED_INTERNAL_BASE_URL
+        FORCED_INTERNAL_BASE_URL,
+        EXTRA_IDENTIFIERS
     }
 
     /**
@@ -37,5 +38,11 @@ public class UpdateRepositorySourceRequest {
      */
 
     public List<Filter> filter;
+
+    /**
+     * @since 2020-06-23
+     */
+
+    public List<String> extraIdentifiers;
 
 }

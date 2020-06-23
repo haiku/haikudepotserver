@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018, Andrew Lindesay
+ * Copyright 2015-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -40,6 +40,12 @@ public class GetRepositorySourceResult {
      */
 
     public Long lastImportTimestamp;
+
+    /**
+     * @since 2020-06-23
+     */
+
+    public List<String> extraIdentifiers;
 
     /**
      * @since 2018-07-28

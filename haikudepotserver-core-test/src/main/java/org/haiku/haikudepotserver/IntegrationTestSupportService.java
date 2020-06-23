@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -160,6 +160,10 @@ public class IntegrationTestSupportService {
         result.repositorySource.setCode("testreposrc_xyz");
         result.repositorySource.setRepository(result.repository);
         result.repositorySource.setIdentifier("http://www.example.com/test/identifier/url");
+
+        RepositorySourceExtraIdentifier repositorySourceExtraIdentifier = context.newObject(RepositorySourceExtraIdentifier.class);
+        repositorySourceExtraIdentifier.setIdentifier("example:haiku:identifier");
+        repositorySourceExtraIdentifier.setRepositorySource(result.repositorySource);
 
         RepositorySourceMirror primaryMirror = context.newObject(RepositorySourceMirror.class);
         primaryMirror.setCountry(Country.getByCode(context, "NZ"));

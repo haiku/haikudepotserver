@@ -61,6 +61,12 @@ BEGIN
         JOIN haikudepot.repository r ON r.id = rs.repository_id
     WHERE r.code = repository_code);
 
+  DELETE FROM haikudepot.repository_source_extra_identifier
+  WHERE repository_source_id IN (
+      SELECT rs.id FROM haikudepot.repository_source rs
+        JOIN haikudepot.repository r ON r.id = rs.repository_id
+      WHERE r.code = repository_code);
+
   DELETE FROM haikudepot.repository_source
   WHERE repository_id = (
       SELECT r.id from haikudepot.repository r WHERE r.code = repository_code);

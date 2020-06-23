@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.PersistentObject;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.repository.*;
@@ -96,11 +97,11 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, triggerImportRepositoryRequest.repositoryCode);
 
-        if(!repositoryOptional.isPresent()) {
+        if (!repositoryOptional.isPresent()) {
             throw new ObjectNotFoundException(Repository.class.getSimpleName(), triggerImportRepositoryRequest.repositoryCode);
         }
 
-        if(!authorizationService.check(
+        if (!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
                 repositoryOptional.get(),
@@ -110,11 +111,11 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         Set<RepositorySource> repositorySources = null;
 
-        if(null!=triggerImportRepositoryRequest.repositorySourceCodes) {
+        if (null != triggerImportRepositoryRequest.repositorySourceCodes) {
 
             repositorySources = new HashSet<>();
 
-            for(String repositorySourceCode : triggerImportRepositoryRequest.repositorySourceCodes) {
+            for (String repositorySourceCode : triggerImportRepositoryRequest.repositorySourceCodes) {
                 repositorySources.add(
                         repositoryOptional.get()
                                 .getRepositorySources()
@@ -145,7 +146,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        if(!authorizationService.check(
+        if (!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
                 null,
@@ -153,8 +154,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new AuthorizationFailureException();
         }
 
-        if(null!=request.includeInactive && request.includeInactive) {
-            if(!authorizationService.check(
+        if (null != request.includeInactive && request.includeInactive) {
+            if (!authorizationService.check(
                     context,
                     tryObtainAuthenticatedUser(context).orElse(null),
                     null,
@@ -166,13 +167,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         RepositorySearchSpecification specification = new RepositorySearchSpecification();
         String exp = request.expression;
 
-        if(null!=exp) {
+        if (null != exp) {
             exp = Strings.emptyToNull(exp.trim().toLowerCase());
         }
 
         specification.setExpression(exp);
 
-        if(null!=request.expressionType) {
+        if (null != request.expressionType) {
             specification.setExpressionType(
                     PkgSearchSpecification.ExpressionType.valueOf(request.expressionType.name()));
         }
@@ -186,7 +187,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.total = repositoryService.total(context, specification);
         result.items = Collections.emptyList();
 
-        if(result.total > 0) {
+        if (result.total > 0) {
             List<Repository> searchedRepositories = repositoryService.search(context, specification);
 
             result.items = searchedRepositories.stream().map(sr -> {
@@ -210,11 +211,11 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, getRepositoryRequest.code);
 
-        if(!repositoryOptional.isPresent()) {
+        if (!repositoryOptional.isPresent()) {
             throw new ObjectNotFoundException(Repository.class.getSimpleName(), getRepositoryRequest.code);
         }
 
-        if(!authorizationService.check(
+        if (!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
                 repositoryOptional.get(),
@@ -270,22 +271,22 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                 repository,
                 Permission.REPOSITORY_EDIT);
 
-        for(UpdateRepositoryRequest.Filter filter : updateRepositoryRequest.filter) {
-            switch(filter) {
+        for (UpdateRepositoryRequest.Filter filter : updateRepositoryRequest.filter) {
+            switch (filter) {
 
                 case ACTIVE:
-                    if(null==updateRepositoryRequest.active) {
+                    if (null==updateRepositoryRequest.active) {
                         throw new IllegalStateException("the active flag must be supplied");
                     }
 
-                    if(repository.getActive() != updateRepositoryRequest.active) {
+                    if (repository.getActive() != updateRepositoryRequest.active) {
                         repository.setActive(updateRepositoryRequest.active);
                         LOGGER.info("did set the active flag on repository {} to {}", updateRepositoryRequest.code, updateRepositoryRequest.active);
                     }
 
-                    if(!updateRepositoryRequest.active) {
-                        for(RepositorySource repositorySource : repository.getRepositorySources()) {
-                            if(repositorySource.getActive()) {
+                    if (!updateRepositoryRequest.active) {
+                        for (RepositorySource repositorySource : repository.getRepositorySources()) {
+                            if (repositorySource.getActive()) {
                                 repositorySource.setActive(false);
                                 LOGGER.info("did set the active flag on the repository source {} to false", repositorySource.getCode());
                             }
@@ -295,13 +296,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     break;
 
                 case NAME:
-                    if(null==updateRepositoryRequest.name) {
+                    if (null == updateRepositoryRequest.name) {
                         throw new IllegalStateException("the name must be supplied to update the repository");
                     }
 
                     String name = updateRepositoryRequest.name.trim();
 
-                    if(0==name.length()) {
+                    if (0 == name.length()) {
                         throw new ValidationException(new ValidationFailure(Repository.NAME.getName(), "invalid"));
                     }
 
@@ -329,7 +330,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             }
         }
 
-        if(context.hasChanges()) {
+        if (context.hasChanges()) {
             context.commitChanges();
         }
         else {
@@ -347,7 +348,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        if(!authorizationService.check(
+        if (!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
                 null,
@@ -357,7 +358,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         // the code must be supplied.
 
-        if(Strings.isNullOrEmpty(createRepositoryRequest.code)) {
+        if (Strings.isNullOrEmpty(createRepositoryRequest.code)) {
             throw new ValidationException(new ValidationFailure(Repository.CODE.getName(), "required"));
         }
 
@@ -366,7 +367,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         {
             Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, createRepositoryRequest.code);
 
-            if(repositoryOptional.isPresent()) {
+            if (repositoryOptional.isPresent()) {
                 throw new ValidationException(new ValidationFailure(Repository.CODE.getName(), "unique"));
             }
         }
@@ -388,11 +389,10 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code));
 
         final ObjectContext context = serverRuntime.newContext();
-        User authenticatedUser = tryObtainAuthenticatedUser(context).orElse(null);
 
         Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, request.code);
 
-        if(!repositorySourceOptional.isPresent()) {
+        if (!repositorySourceOptional.isPresent()) {
             throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
         }
 
@@ -407,6 +407,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         if (null != repositorySource.getLastImportTimestamp()) {
             result.lastImportTimestamp = repositorySource.getLastImportTimestamp().getTime();
         }
+
+        result.extraIdentifiers = repositorySource.getExtraIdentifiers();
 
         result.repositorySourceMirrors = repositorySource.getRepositorySourceMirrors()
                 .stream()
@@ -424,7 +426,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                 })
                 .collect(Collectors.toList());
 
-        if(authorizationService.check(
+        if (authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
                 repositorySource.getRepository(),
@@ -445,13 +447,13 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, request.code);
 
-        if(!repositorySourceOptional.isPresent()) {
+        if (!repositorySourceOptional.isPresent()) {
             throw new ObjectNotFoundException(RepositorySource.class.getSimpleName(), request.code);
         }
 
         RepositorySource repositorySource = repositorySourceOptional.get();
 
-        if(!authorizationService.check(
+        if (!authorizationService.check(
                 context,
                 tryObtainAuthenticatedUser(context).orElse(null),
                 repositorySourceOptional.get().getRepository(),
@@ -459,12 +461,12 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
             throw new AuthorizationFailureException();
         }
 
-        for(UpdateRepositorySourceRequest.Filter filter : request.filter) {
+        for (UpdateRepositorySourceRequest.Filter filter : request.filter) {
 
-            switch(filter) {
+            switch (filter) {
 
                 case ACTIVE:
-                    if(null==request.active) {
+                    if (null == request.active) {
                         throw new IllegalArgumentException("the active field must be provided if the request requires it to be updated");
                     }
                     repositorySource.setActive(request.active);
@@ -476,6 +478,25 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                             StringUtils.trimToNull(request.forcedInternalBaseUrl));
                     LOGGER.info("did set the repository source forced internal base url");
                     break;
+
+                case EXTRA_IDENTIFIERS: {
+                    Set<String> existing = Set.copyOf(repositorySource.getExtraIdentifiers());
+                    Set<String> desired = Set.copyOf(CollectionUtils.emptyIfNull(request.extraIdentifiers));
+                    SetUtils.difference(existing, desired).stream()
+                            .map(repositorySource::tryGetRepositorySourceExtraIdentifierForIdentifier)
+                            .map(Optional::orElseThrow)
+                            .forEach(rsei -> {
+                                repositorySource.removeFromRepositorySourceExtraIdentifiers(rsei);
+                                context.deleteObject(rsei);
+                            });
+                    SetUtils.difference(desired, existing).forEach(i -> {
+                        RepositorySourceExtraIdentifier rsei = context.newObject(RepositorySourceExtraIdentifier.class);
+                        rsei.setRepositorySource(repositorySource);
+                        rsei.setIdentifier(i);
+                        repositorySource.addToRepositorySourceExtraIdentifiers(rsei);
+                    });
+                    break;
+                }
 
                 default:
                     throw new IllegalStateException("unhandled filter; " + filter.name());

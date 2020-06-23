@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,6 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
@@ -117,6 +116,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                     dumpRepositorySource.setIdentifier(rs.getIdentifier());
                     dumpRepositorySource.setRepoInfoUrl(rs.getIdentifier());
                     // ^^ deprecated; repoInfoUrl is replaced with identifier
+                    dumpRepositorySource.setExtraIdentifiers(rs.getExtraIdentifiers());
 
                     dumpRepositorySource.setRepositorySourceMirrors(
                             rs.getRepositorySourceMirrors()

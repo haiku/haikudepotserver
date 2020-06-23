@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -212,6 +213,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.repositoryCode).isEqualTo("testrepo");
         Assertions.assertThat(result.identifier).isEqualTo("http://www.example.com/test/identifier/url");
         Assertions.assertThat(result.repositorySourceMirrors.size()).isEqualTo(2);
+        Assertions.assertThat(result.extraIdentifiers).containsExactly("example:haiku:identifier");
 
         GetRepositorySourceResult.RepositorySourceMirror mirror0 = result.repositorySourceMirrors.get(0);
         GetRepositorySourceResult.RepositorySourceMirror mirror1 = result.repositorySourceMirrors.get(1);
@@ -231,7 +233,9 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         UpdateRepositorySourceRequest request = new UpdateRepositorySourceRequest();
         request.code = "testreposrc_xyz";
         request.active = false;
-        request.filter = Collections.singletonList(
+        request.extraIdentifiers = List.of("birds:of:a:feather");
+        request.filter = List.of(
+                UpdateRepositorySourceRequest.Filter.EXTRA_IDENTIFIERS,
                 UpdateRepositorySourceRequest.Filter.ACTIVE);
 
         // ------------------------------------
@@ -244,6 +248,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
             // this url was set before and is retained after the update.
             Assertions.assertThat(repositorySourceAfter.getIdentifier()).isEqualTo("http://www.example.com/test/identifier/url");
             Assertions.assertThat(repositorySourceAfter.getActive()).isFalse();
+            Assertions.assertThat(repositorySourceAfter.getExtraIdentifiers()).contains("birds:of:a:feather");
         }
 
     }

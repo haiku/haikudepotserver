@@ -19,7 +19,7 @@
             <error-messages key-prefix="addEditRepositorySource.code" error="addEditRepositorySourceForm.code.$error"></error-messages>
         </div>
 
-        <label for="code"><message key="addEditRepositorySource.forcedInternalBaseUrl.title"></message></label>
+        <label for="forcedInternalBaseUrl"><message key="addEditRepositorySource.forcedInternalBaseUrl.title"></message></label>
         <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('forcedInternalBaseUrl')">
             <input
                     id="forcedInternalBaseUrl"
@@ -30,6 +30,47 @@
                     ng-change="forcedInternalBaseUrlChanged()"
                     ng-model="workingRepositorySource.forcedInternalBaseUrl"/>
             <error-messages key-prefix="addEditRepositorySource.forcedInternalBaseUrl" error="addEditRepositorySourceForm.forcedInternalBaseUrl.$error"></error-messages>
+        </div>
+
+        <label ng-show="amEditing"><message key="addEditRepositorySource.extraIdentifiers.title"></message></label>
+        <div class="form-control-group" ng-show="amEditing">
+
+            <div ng-show="!workingRepositorySource.extraIdentifiers || !workingRepositorySource.extraIdentifiers.length">
+                <message key="addEditRepositorySource.extraIdentifiers.none.description"></message>
+            </div>
+            <table class="table-general"
+                   ng-show="workingRepositorySource.extraIdentifiers && workingRepositorySource.extraIdentifiers.length">
+                <thead>
+                <th><message key="addEditRepositorySource.extraIdentifiers.table.identifier.title"></message></th>
+                <th></th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="extraIdentifier in workingRepositorySource.extraIdentifiers">
+                    <td>{{extraIdentifier}}</td>
+                    <td>
+                        <a href="" ng-click="goDeleteExtraIdentifier(extraIdentifier)">
+                            <img src="/__img/rowdelete.svg" img-downgrade="">
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div id="edit-repository-source-extra-identifier-add-widgets-container">
+                <input
+                        id="newExtraIdentifier"
+                        type="text"
+                        size="48"
+                        name="newExtraIdentifier"
+                        autocomplete="off"
+                        ng-model="newExtraIdentifier"/>
+                <button
+                        ng-disabled="!newExtraIdentifier.length"
+                        ng-click="goAddExtraIdentifier()"
+                        type="submit">
+                    <message key="addEditRepositorySource.extraIdentifiers.addAction.title"></message>
+                </button>
+            </div>
         </div>
 
         <div class="form-action-container">

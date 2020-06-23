@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018, Andrew Lindesay
+ * Copyright 2015-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ angular.module('haikudepotserver').controller(
             $scope,$log,$routeParams,
             jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
+            $scope.newExtraIdentifier = '';
             $scope.workingRepositorySource = undefined;
             $scope.amEditing = !!$routeParams.repositorySourceCode;
             var amSaving = false;
@@ -88,6 +89,22 @@ angular.module('haikudepotserver').controller(
 
             refreshData();
 
+            $scope.goAddExtraIdentifier = function() {
+                if ($scope.newExtraIdentifier &&
+                    -1 === $scope.workingRepositorySource.extraIdentifiers.indexOf($scope.newExtraIdentifier)) {
+                    $scope.workingRepositorySource.extraIdentifiers.push($scope.newExtraIdentifier);
+                }
+                $scope.newExtraIdentifier = '';
+            };
+
+            $scope.goDeleteExtraIdentifier = function(extraIdentifier) {
+                if (extraIdentifier) {
+                    $scope.workingRepositorySource.extraIdentifiers = _.without(
+                        $scope.workingRepositorySource.extraIdentifiers,
+                        extraIdentifier);
+                }
+            };
+
             $scope.goSave = function() {
 
                 if ($scope.addEditRepositorySourceForm.$invalid) {
@@ -101,8 +118,9 @@ angular.module('haikudepotserver').controller(
                         constants.ENDPOINT_API_V1_REPOSITORY,
                         "updateRepositorySource",
                         [{
-                            filter : [ 'FORCED_INTERNAL_BASE_URL' ],
+                            filter : [ 'FORCED_INTERNAL_BASE_URL', 'EXTRA_IDENTIFIERS' ],
                             forcedInternalBaseUrl : $scope.workingRepositorySource.forcedInternalBaseUrl,
+                            extraIdentifiers: $scope.workingRepositorySource.extraIdentifiers,
                             code : $routeParams.repositorySourceCode
                         }]
                     ).then(

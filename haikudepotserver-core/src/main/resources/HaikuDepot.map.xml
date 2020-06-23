@@ -352,12 +352,22 @@
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="forced_internal_base_url" type="VARCHAR" length="1024"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="identifier" type="VARCHAR" length="1024"/>
+		<db-attribute name="identifier" type="VARCHAR" length="4096"/>
 		<db-attribute name="last_import_timestamp" type="TIMESTAMP"/>
 		<db-attribute name="repository_id" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.repository_source_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="repository_source_extra_identifier" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="identifier" type="VARCHAR" isMandatory="true" length="4096"/>
+		<db-attribute name="repository_source_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.repository_source_extra_identifier_seq</db-generator-name>
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
@@ -610,6 +620,9 @@
 		<obj-attribute name="identifier" type="java.lang.String" lock="true" db-attribute-path="identifier"/>
 		<obj-attribute name="lastImportTimestamp" type="java.sql.Timestamp" db-attribute-path="last_import_timestamp"/>
 	</obj-entity>
+	<obj-entity name="RepositorySourceExtraIdentifier" className="org.haiku.haikudepotserver.dataobjects.RepositorySourceExtraIdentifier" lock-type="optimistic" dbEntityName="repository_source_extra_identifier" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="identifier" type="java.lang.String" db-attribute-path="identifier"/>
+	</obj-entity>
 	<obj-entity name="RepositorySourceMirror" className="org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror" lock-type="optimistic" dbEntityName="repository_source_mirror" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject" exclude-default-listeners="true">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="baseUrl" type="java.lang.String" lock="true" db-attribute-path="base_url"/>
@@ -856,8 +869,14 @@
 	<db-relationship name="repository" source="repository_source" target="repository" toMany="false">
 		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
+	<db-relationship name="repository_source_extra_identifiers" source="repository_source" target="repository_source_extra_identifier" toMany="true">
+		<db-attribute-pair source="id" target="repository_source_id"/>
+	</db-relationship>
 	<db-relationship name="repository_source_mirrors" source="repository_source" target="repository_source_mirror" toMany="true">
 		<db-attribute-pair source="id" target="repository_source_id"/>
+	</db-relationship>
+	<db-relationship name="repository_source" source="repository_source_extra_identifier" target="repository_source" toMany="false">
+		<db-attribute-pair source="repository_source_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="country" source="repository_source_mirror" target="country" toMany="false">
 		<db-attribute-pair source="country_id" target="id"/>
@@ -958,7 +977,9 @@
 	<obj-relationship name="pkgs" source="Publisher" target="Pkg" deleteRule="Deny" db-relationship-path="pkgs"/>
 	<obj-relationship name="repositorySources" source="Repository" target="RepositorySource" deleteRule="Deny" db-relationship-path="repository_sources"/>
 	<obj-relationship name="repository" source="RepositorySource" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
+	<obj-relationship name="repositorySourceExtraIdentifiers" source="RepositorySource" target="RepositorySourceExtraIdentifier" deleteRule="Cascade" db-relationship-path="repository_source_extra_identifiers"/>
 	<obj-relationship name="repositorySourceMirrors" source="RepositorySource" target="RepositorySourceMirror" deleteRule="Cascade" db-relationship-path="repository_source_mirrors"/>
+	<obj-relationship name="repositorySource" source="RepositorySourceExtraIdentifier" target="RepositorySource" deleteRule="Nullify" db-relationship-path="repository_source"/>
 	<obj-relationship name="country" source="RepositorySourceMirror" target="Country" deleteRule="Nullify" db-relationship-path="country"/>
 	<obj-relationship name="repositorySource" source="RepositorySourceMirror" target="RepositorySource" deleteRule="Nullify" db-relationship-path="repository_source"/>
 	<obj-relationship name="naturalLanguage" source="User" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
