@@ -78,4 +78,4 @@ END; $$;
 
 SELECT hds_purge_repository('somerepocode');
 -- ^^ example repository code
-DROP FUNCTION hds_purge_repository;
+DROP FUNCTION hds_purge_repository(void);
