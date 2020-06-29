@@ -12,6 +12,11 @@
     <artifactId>haikudepotserver-core</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <!-- https://stackoverflow.com/questions/13228472/how-to-access-maven-build-timestamp-for-resource-filtering -->
+        <hds.build.timestamp>${maven.build.timestamp}</hds.build.timestamp>
+    </properties>
+
     <dependencies>
 
         <dependency>

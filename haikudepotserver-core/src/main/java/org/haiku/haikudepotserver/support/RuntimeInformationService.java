@@ -1,14 +1,18 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -47,6 +51,16 @@ public class RuntimeInformationService {
 
     public String getProjectVersion() {
         return versionOrPlaceholder(getBuildProperties().getProperty("project.version"));
+    }
+
+    public Instant getBuildTimestamp() {
+        return Optional.of(getBuildProperties().getProperty("build.timestamp"))
+                .filter(StringUtils::isNotBlank)
+                .filter(s -> !StringUtils.startsWith(s, "${"))
+                // ^^ if the variable is not substituted in the build process
+                .map(DateTimeFormatter.ISO_INSTANT::parse)
+                .map(Instant::from)
+                .orElseGet(() -> Instant.ofEpochMilli(0L));
     }
 
     public String getJavaVersion() {

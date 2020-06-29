@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -101,11 +101,21 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
         objectMapper.writeValue(jsonGenerator, dumpExportReference.getPkgCategories());
     }
 
-    private ArchiveInfo createArchiveInfo(ObjectContext context) {
+    public static Date getModifyTimestamp(ObjectContext context, RuntimeInformationService runtimeInformationService) {
         Date modifyTimestamp = GeneralQueryHelper.getLastModifyTimestampSecondAccuracy(
                 context,
                 Country.class, NaturalLanguage.class, PkgCategory.class);
-        return new ArchiveInfo(modifyTimestamp, runtimeInformationService.getProjectVersion());
+        Date buildTimestamp = new Date(runtimeInformationService.getBuildTimestamp().toEpochMilli());
+        if (buildTimestamp.getTime() > modifyTimestamp.getTime()) {
+            return buildTimestamp;
+        }
+        return modifyTimestamp;
+    }
+
+    private ArchiveInfo createArchiveInfo(ObjectContext context) {
+        return new ArchiveInfo(
+                getModifyTimestamp(context, runtimeInformationService),
+                runtimeInformationService.getProjectVersion());
     }
 
     private DumpExportReference createDumpExportReference(ReferenceDumpExportJobSpecification specification) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,13 +8,11 @@ package org.haiku.haikudepotserver.reference.controller;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.dataobjects.Country;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.job.controller.JobController;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.reference.job.ReferenceDumpExportJobRunner;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
-import org.haiku.haikudepotserver.support.cayenne.GeneralQueryHelper;
+import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +29,15 @@ public class ReferenceController extends AbstractController {
 
     private final static String KEY_NATURALLANGUAGECODE = "naturalLanguageCode";
 
+    private final RuntimeInformationService runtimeInformationService;
     private final ServerRuntime serverRuntime;
     private final JobService jobService;
 
-    public ReferenceController(ServerRuntime serverRuntime, JobService jobService) {
+    public ReferenceController(
+            RuntimeInformationService runtimeInformationService,
+            ServerRuntime serverRuntime,
+            JobService jobService) {
+        this.runtimeInformationService = runtimeInformationService;
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.jobService = Preconditions.checkNotNull(jobService);
     }
@@ -60,9 +63,10 @@ public class ReferenceController extends AbstractController {
                 response,
                 jobService,
                 ifModifiedSinceHeader,
-                GeneralQueryHelper.getLastModifyTimestampSecondAccuracy(
+                ReferenceDumpExportJobRunner.getModifyTimestamp(
                         serverRuntime.newContext(),
-                        Country.class, NaturalLanguage.class, PkgCategory.class),
+                        runtimeInformationService
+                ),
                 specification);
     }
 
