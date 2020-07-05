@@ -35,7 +35,8 @@
           "extraIdentifiers": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "javaType": "java.lang.String"
             }
           },
           "repositorySourceMirrors": {
