@@ -32,4 +32,4 @@ Assuming the application server is deployed, you should be able to see relativel
 
 * [Haiku homepage](http://www.haiku-os.org)
 * [HaikuPorts homepage](https://github.com/haikuports/haikuports/wiki) (for external packages)
-* Haiku [package management documentation](https://github.com/haiku/haiku/blob/master/docs/develop/packages/README.wiki)
+* Haiku [package management documentation](https://github.com/haiku/haiku/blob/master/docs/develop/packages)
