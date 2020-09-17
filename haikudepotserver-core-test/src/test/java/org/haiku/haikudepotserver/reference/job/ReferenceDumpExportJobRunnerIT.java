@@ -15,19 +15,13 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
-import org.haiku.haikudepotserver.support.DateTimeHelper;
+import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
-import javax.sql.DataSource;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
@@ -42,7 +36,7 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Resource
-    private DataSource dataSource;
+    private RuntimeInformationService runtimeInformationService;
 
     /**
      * <p>Uses the sample data and checks that the output from the report matches a captured, sensible-looking
@@ -52,10 +46,9 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
     @Test
     public void testRun() throws Exception {
 
-        long now = DateTimeHelper.secondAccuracyDate(new Date()).getTime();
         ReferenceDumpExportJobSpecification specification = new ReferenceDumpExportJobSpecification();
         specification.setNaturalLanguageCode(NaturalLanguage.CODE_GERMAN);
-        java.util.Date latestModifyTimestamp = getLatestReferenceDataDate();
+        java.util.Date latestModifyTimestamp = new java.util.Date(runtimeInformationService.getBuildTimestamp().toEpochMilli());
 
         // ------------------------------------
         String guid = jobService.submit(
@@ -99,28 +92,12 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
             // the request was in German so the results should be in German too.
             JsonNode pkgCategoriesArrayNode = rootNode.get("pkgCategories");
             assertItemWithCodeAndName(pkgCategoriesArrayNode, "graphics", "Grafik");
+
+            // check a user rating stability
+            JsonNode userRatingStabilitiesArrayNode = rootNode.get("userRatingStabilities");
+            assertItemWithCodeAndName(userRatingStabilitiesArrayNode, "unstablebutusable", "Nicht stabil, aber benutzbar");
         }
 
-    }
-
-    private java.util.Date getLatestReferenceDataDate() throws SQLException {
-
-        String query = "WITH mt AS (SELECT modify_timestamp FROM haikudepot.country\n"
-                + "UNION SELECT modify_timestamp FROM haikudepot.natural_language\n"
-                + "UNION SELECT modify_timestamp FROM haikudepot.pkg_category)\n"
-                + "SELECT MAX(mt.modify_timestamp) FROM mt";
-
-        try (
-                Connection connection = dataSource.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-                ResultSet resultSet = statement.executeQuery()
-                ) {
-            while (resultSet.next()) {
-                return DateTimeHelper.secondAccuracyDate(resultSet.getTimestamp(1));
-            }
-
-            throw new AssertionError("unable to get the latest reference data date");
-        }
     }
 
     private void assertItemWithCodeAndName(JsonNode array, String code, String name) {

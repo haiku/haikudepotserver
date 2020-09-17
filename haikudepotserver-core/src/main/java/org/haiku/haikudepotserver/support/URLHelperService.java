@@ -90,8 +90,6 @@ public class URLHelperService {
     }
 
     private Optional<Long> tryGetPayloadLengthHttp(URI uri) throws IOException {
-//        return Optional.empty();
-//    }
         try {
             HttpResponse<?> response = httpClient.send(HttpRequest.newBuilder(uri)
                     .method("HEAD", HttpRequest.BodyPublishers.noBody())

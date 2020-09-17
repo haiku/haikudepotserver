@@ -14,15 +14,13 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
+import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.job.PkgDumpExportJobRunner;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReference;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceCountry;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceNaturalLanguage;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferencePkgCategory;
+import org.haiku.haikudepotserver.reference.model.dumpexport.*;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.haiku.haikudepotserver.support.cayenne.GeneralQueryHelper;
@@ -99,6 +97,8 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
         objectMapper.writeValue(jsonGenerator, dumpExportReference.getNaturalLanguages());
         jsonGenerator.writeFieldName("pkgCategories");
         objectMapper.writeValue(jsonGenerator, dumpExportReference.getPkgCategories());
+        jsonGenerator.writeFieldName("userRatingStabilities");
+        objectMapper.writeValue(jsonGenerator, dumpExportReference.getUserRatingStabilities());
     }
 
     public static Date getModifyTimestamp(ObjectContext context, RuntimeInformationService runtimeInformationService) {
@@ -163,6 +163,21 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                                             new Object[] {},
                                             naturalLanguage.toLocale()));
                             return dpc;
+                        })
+                        .collect(Collectors.toList()));
+
+        dumpExportReference.setUserRatingStabilities(
+                UserRatingStability.getAll(context)
+                        .stream()
+                        .map(urs -> {
+                            DumpExportReferenceUserRatingStability derurs = new DumpExportReferenceUserRatingStability();
+                            derurs.setCode(urs.getCode());
+                            derurs.setName(
+                                    messageSource.getMessage(
+                                            urs.getTitleKey(),
+                                            new Object[] {},
+                                            naturalLanguage.toLocale()));
+                            return derurs;
                         })
                         .collect(Collectors.toList()));
 
