@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data-map xmlns="http://cayenne.apache.org/schema/9/modelMap"
+<data-map xmlns="http://cayenne.apache.org/schema/10/modelMap"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://cayenne.apache.org/schema/9/modelMap http://cayenne.apache.org/schema/9/modelMap.xsd"
-	 project-version="9">
-	<property name="defaultLockType" value="optimistic"/>
+	 xsi:schemaLocation="http://cayenne.apache.org/schema/10/modelMap https://cayenne.apache.org/schema/10/modelMap.xsd"
+	 project-version="10">
 	<property name="defaultPackage" value="org.haiku.haikudepotserver.dataobjects"/>
 	<property name="defaultSchema" value="haikudepot"/>
 	<property name="defaultSuperclass" value="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject"/>
@@ -531,10 +530,8 @@
 		<obj-attribute name="summary" type="java.lang.String" lock="true" db-attribute-path="summary"/>
 		<obj-attribute name="title" type="java.lang.String" lock="true" db-attribute-path="title"/>
 	</obj-entity>
-	<obj-entity name="PkgPkgCategory" className="org.haiku.haikudepotserver.dataobjects.PkgPkgCategory" dbEntityName="pkg_pkg_category" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
-	</obj-entity>
-	<obj-entity name="PkgProminence" className="org.haiku.haikudepotserver.dataobjects.PkgProminence" lock-type="optimistic" dbEntityName="pkg_prominence" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
-	</obj-entity>
+	<obj-entity name="PkgPkgCategory" className="org.haiku.haikudepotserver.dataobjects.PkgPkgCategory" dbEntityName="pkg_pkg_category" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject"/>
+	<obj-entity name="PkgProminence" className="org.haiku.haikudepotserver.dataobjects.PkgProminence" lock-type="optimistic" dbEntityName="pkg_prominence" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject"/>
 	<obj-entity name="PkgScreenshot" className="org.haiku.haikudepotserver.dataobjects.PkgScreenshot" lock-type="optimistic" dbEntityName="pkg_screenshot" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
@@ -623,7 +620,7 @@
 	<obj-entity name="RepositorySourceExtraIdentifier" className="org.haiku.haikudepotserver.dataobjects.RepositorySourceExtraIdentifier" lock-type="optimistic" dbEntityName="repository_source_extra_identifier" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="identifier" type="java.lang.String" db-attribute-path="identifier"/>
 	</obj-entity>
-	<obj-entity name="RepositorySourceMirror" className="org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror" lock-type="optimistic" dbEntityName="repository_source_mirror" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject" exclude-default-listeners="true">
+	<obj-entity name="RepositorySourceMirror" className="org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror" lock-type="optimistic" dbEntityName="repository_source_mirror" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="baseUrl" type="java.lang.String" lock="true" db-attribute-path="base_url"/>
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
@@ -698,13 +695,13 @@
 	<db-relationship name="untitledRel" source="permission" target="permission_user_pkg" toMany="true">
 		<db-attribute-pair source="id" target="permission_id"/>
 	</db-relationship>
-	<db-relationship name="permission" source="permission_user_pkg" target="permission" toMany="false">
+	<db-relationship name="permission" source="permission_user_pkg" target="permission">
 		<db-attribute-pair source="permission_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="permission_user_pkg" target="pkg" toMany="false">
+	<db-relationship name="pkg" source="permission_user_pkg" target="pkg">
 		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="user" source="permission_user_pkg" target="user" toMany="false">
+	<db-relationship name="user" source="permission_user_pkg" target="user">
 		<db-attribute-pair source="user_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="permission_user_pkgs" source="pkg" target="permission_user_pkg" toMany="true">
@@ -713,64 +710,64 @@
 	<db-relationship name="pkg_prominences" source="pkg" target="pkg_prominence" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
-	<db-relationship name="pkg_supplement" source="pkg" target="pkg_supplement" toMany="false">
+	<db-relationship name="pkg_supplement" source="pkg" target="pkg_supplement">
 		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_user_rating_aggregates" source="pkg" target="pkg_user_rating_aggregate" toMany="true">
 		<db-attribute-pair source="id" target="pkg_id"/>
 	</db-relationship>
-	<db-relationship name="publisher" source="pkg" target="publisher" toMany="false">
+	<db-relationship name="publisher" source="pkg" target="publisher">
 		<db-attribute-pair source="publisher_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_pkg_categories" source="pkg_category" target="pkg_pkg_category" toMany="true">
 		<db-attribute-pair source="id" target="pkg_category_id"/>
 	</db-relationship>
-	<db-relationship name="pkg_supplement" source="pkg_changelog" target="pkg_supplement" toMany="false">
+	<db-relationship name="pkg_supplement" source="pkg_changelog" target="pkg_supplement">
 		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="media_type" source="pkg_icon" target="media_type" toMany="false">
+	<db-relationship name="media_type" source="pkg_icon" target="media_type">
 		<db-attribute-pair source="media_type_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_icon_images" source="pkg_icon" target="pkg_icon_image" toMany="true">
 		<db-attribute-pair source="id" target="pkg_icon_id"/>
 	</db-relationship>
-	<db-relationship name="pkg_supplement" source="pkg_icon" target="pkg_supplement" toMany="false">
+	<db-relationship name="pkg_supplement" source="pkg_icon" target="pkg_supplement">
 		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_icon" source="pkg_icon_image" target="pkg_icon" toMany="false">
+	<db-relationship name="pkg_icon" source="pkg_icon_image" target="pkg_icon">
 		<db-attribute-pair source="pkg_icon_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="natural_language" source="pkg_localization" target="natural_language" toMany="false">
+	<db-relationship name="natural_language" source="pkg_localization" target="natural_language">
 		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_supplement" source="pkg_localization" target="pkg_supplement" toMany="false">
+	<db-relationship name="pkg_supplement" source="pkg_localization" target="pkg_supplement">
 		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_category" source="pkg_pkg_category" target="pkg_category" toMany="false">
+	<db-relationship name="pkg_category" source="pkg_pkg_category" target="pkg_category">
 		<db-attribute-pair source="pkg_category_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_supplement" source="pkg_pkg_category" target="pkg_supplement" toMany="false">
+	<db-relationship name="pkg_supplement" source="pkg_pkg_category" target="pkg_supplement">
 		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="pkg_prominence" target="pkg" toMany="false">
+	<db-relationship name="pkg" source="pkg_prominence" target="pkg">
 		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="prominence" source="pkg_prominence" target="prominence" toMany="false">
+	<db-relationship name="prominence" source="pkg_prominence" target="prominence">
 		<db-attribute-pair source="prominence_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="repository" source="pkg_prominence" target="repository" toMany="false">
+	<db-relationship name="repository" source="pkg_prominence" target="repository">
 		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_screenshot_images" source="pkg_screenshot" target="pkg_screenshot_image" toMany="true">
 		<db-attribute-pair source="id" target="pkg_screenshot_id"/>
 	</db-relationship>
-	<db-relationship name="pkg_supplement" source="pkg_screenshot" target="pkg_supplement" toMany="false">
+	<db-relationship name="pkg_supplement" source="pkg_screenshot" target="pkg_supplement">
 		<db-attribute-pair source="pkg_supplement_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="media_type" source="pkg_screenshot_image" target="media_type" toMany="false">
+	<db-relationship name="media_type" source="pkg_screenshot_image" target="media_type">
 		<db-attribute-pair source="media_type_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_screenshot" source="pkg_screenshot_image" target="pkg_screenshot" toMany="false">
+	<db-relationship name="pkg_screenshot" source="pkg_screenshot_image" target="pkg_screenshot">
 		<db-attribute-pair source="pkg_screenshot_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_changelogs" source="pkg_supplement" target="pkg_changelog" toMany="true">
@@ -791,16 +788,16 @@
 	<db-relationship name="pkgs" source="pkg_supplement" target="pkg" toMany="true">
 		<db-attribute-pair source="id" target="pkg_supplement_id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="pkg_user_rating_aggregate" target="pkg" toMany="false">
+	<db-relationship name="pkg" source="pkg_user_rating_aggregate" target="pkg">
 		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="repository" source="pkg_user_rating_aggregate" target="repository" toMany="false">
+	<db-relationship name="repository" source="pkg_user_rating_aggregate" target="repository">
 		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="architecture" source="pkg_version" target="architecture" toMany="false">
+	<db-relationship name="architecture" source="pkg_version" target="architecture">
 		<db-attribute-pair source="architecture_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg" source="pkg_version" target="pkg" toMany="false">
+	<db-relationship name="pkg" source="pkg_version" target="pkg">
 		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_version_copyrights" source="pkg_version" target="pkg_version_copyright" toMany="true">
@@ -815,37 +812,37 @@
 	<db-relationship name="pkg_version_urls" source="pkg_version" target="pkg_version_url" toMany="true">
 		<db-attribute-pair source="id" target="pkg_version_id"/>
 	</db-relationship>
-	<db-relationship name="repository_source" source="pkg_version" target="repository_source" toMany="false">
+	<db-relationship name="repository_source" source="pkg_version" target="repository_source">
 		<db-attribute-pair source="repository_source_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="user_ratings" source="pkg_version" target="user_rating" toMany="true">
 		<db-attribute-pair source="id" target="pkg_version_id"/>
 	</db-relationship>
-	<db-relationship name="pkg_version" source="pkg_version_copyright" target="pkg_version" toMany="false">
+	<db-relationship name="pkg_version" source="pkg_version_copyright" target="pkg_version">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_version" source="pkg_version_license" target="pkg_version" toMany="false">
+	<db-relationship name="pkg_version" source="pkg_version_license" target="pkg_version">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="description_localization_content" source="pkg_version_localization" target="localization_content" toMany="false">
+	<db-relationship name="description_localization_content" source="pkg_version_localization" target="localization_content">
 		<db-attribute-pair source="description_localization_content_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="natural_language" source="pkg_version_localization" target="natural_language" toMany="false">
+	<db-relationship name="natural_language" source="pkg_version_localization" target="natural_language">
 		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_version" source="pkg_version_localization" target="pkg_version" toMany="false">
+	<db-relationship name="pkg_version" source="pkg_version_localization" target="pkg_version">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="summary_localization_content" source="pkg_version_localization" target="localization_content" toMany="false">
+	<db-relationship name="summary_localization_content" source="pkg_version_localization" target="localization_content">
 		<db-attribute-pair source="summary_localization_content_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="title_localization_content" source="pkg_version_localization" target="localization_content" toMany="false">
+	<db-relationship name="title_localization_content" source="pkg_version_localization" target="localization_content">
 		<db-attribute-pair source="title_localization_content_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_url_type" source="pkg_version_url" target="pkg_url_type" toMany="false">
+	<db-relationship name="pkg_url_type" source="pkg_version_url" target="pkg_url_type">
 		<db-attribute-pair source="pkg_url_type_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_version" source="pkg_version_url" target="pkg_version" toMany="false">
+	<db-relationship name="pkg_version" source="pkg_version_url" target="pkg_version">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="pkg_prominences" source="prominence" target="pkg_prominence" toMany="true">
@@ -866,7 +863,7 @@
 	<db-relationship name="pkg_versions" source="repository_source" target="pkg_version" toMany="true">
 		<db-attribute-pair source="id" target="repository_source_id"/>
 	</db-relationship>
-	<db-relationship name="repository" source="repository_source" target="repository" toMany="false">
+	<db-relationship name="repository" source="repository_source" target="repository">
 		<db-attribute-pair source="repository_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="repository_source_extra_identifiers" source="repository_source" target="repository_source_extra_identifier" toMany="true">
@@ -875,16 +872,16 @@
 	<db-relationship name="repository_source_mirrors" source="repository_source" target="repository_source_mirror" toMany="true">
 		<db-attribute-pair source="id" target="repository_source_id"/>
 	</db-relationship>
-	<db-relationship name="repository_source" source="repository_source_extra_identifier" target="repository_source" toMany="false">
+	<db-relationship name="repository_source" source="repository_source_extra_identifier" target="repository_source">
 		<db-attribute-pair source="repository_source_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="country" source="repository_source_mirror" target="country" toMany="false">
+	<db-relationship name="country" source="repository_source_mirror" target="country">
 		<db-attribute-pair source="country_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="repository_source" source="repository_source_mirror" target="repository_source" toMany="false">
+	<db-relationship name="repository_source" source="repository_source_mirror" target="repository_source">
 		<db-attribute-pair source="repository_source_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="natural_language" source="user" target="natural_language" toMany="false">
+	<db-relationship name="natural_language" source="user" target="natural_language">
 		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="permission_user_pkgs" source="user" target="permission_user_pkg" toMany="true">
@@ -899,19 +896,19 @@
 	<db-relationship name="user_usage_conditions_agreements" source="user" target="user_usage_conditions_agreement" toMany="true">
 		<db-attribute-pair source="id" target="user_id"/>
 	</db-relationship>
-	<db-relationship name="user" source="user_password_reset_token" target="user" toMany="false">
+	<db-relationship name="user" source="user_password_reset_token" target="user">
 		<db-attribute-pair source="user_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="natural_language" source="user_rating" target="natural_language" toMany="false">
+	<db-relationship name="natural_language" source="user_rating" target="natural_language">
 		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="pkg_version" source="user_rating" target="pkg_version" toMany="false">
+	<db-relationship name="pkg_version" source="user_rating" target="pkg_version">
 		<db-attribute-pair source="pkg_version_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="user" source="user_rating" target="user" toMany="false">
+	<db-relationship name="user" source="user_rating" target="user">
 		<db-attribute-pair source="user_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="user_rating_stability" source="user_rating" target="user_rating_stability" toMany="false">
+	<db-relationship name="user_rating_stability" source="user_rating" target="user_rating_stability">
 		<db-attribute-pair source="user_rating_stability_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="user_ratings" source="user_rating_stability" target="user_rating" toMany="true">
@@ -920,10 +917,10 @@
 	<db-relationship name="user_usage_conditions_agreements" source="user_usage_conditions" target="user_usage_conditions_agreement" toMany="true">
 		<db-attribute-pair source="id" target="user_usage_conditions_id"/>
 	</db-relationship>
-	<db-relationship name="user" source="user_usage_conditions_agreement" target="user" toMany="false">
+	<db-relationship name="user" source="user_usage_conditions_agreement" target="user">
 		<db-attribute-pair source="user_id" target="id"/>
 	</db-relationship>
-	<db-relationship name="user_usage_conditions" source="user_usage_conditions_agreement" target="user_usage_conditions" toMany="false">
+	<db-relationship name="user_usage_conditions" source="user_usage_conditions_agreement" target="user_usage_conditions">
 		<db-attribute-pair source="user_usage_conditions_id" target="id"/>
 	</db-relationship>
 	<obj-relationship name="permission" source="PermissionUserPkg" target="Permission" deleteRule="Nullify" db-relationship-path="permission"/>
@@ -1165,138 +1162,7 @@ ORDER BY
 	</query>
 	<query name="SearchPkgVersions" type="SQLTemplate" root="obj-entity" root-name="PkgVersion">
 		<property name="cayenne.GenericSelectQuery.fetchOffset" value="0"/>
-		<sql><![CDATA[SELECT
-#if($isTotal)
-COUNT(DISTINCT pv.id) AS "total"
-#else
-    #result('pv.active', 'boolean', 'active'),
-    #result('pv.architecture_id', 'long', 'architecture_id'),
-    #result('pv.create_timestamp', 'java.sql.Timestamp', 'create_timestamp'),
-    #result('pv.id', 'long', 'id'),
-    #result('pv.major', 'String', 'major'),
-    #result('pv.minor', 'String', 'minor'),
-    #result('pv.micro', 'String', 'micro'),
-    #result('pv.modify_timestamp', 'java.sql.Timestamp', 'modify_timestamp'),
-    #result('pv.pkg_id', 'long', 'pkg_id'),
-    #result('pv.pre_release', 'String', 'pre_release'),
-    #result('pv.repository_source_id', 'long', 'repository_source_id'),
-    #result('pv.revision', 'Integer', 'revision'),
-    #result('pv.view_counter', 'long', 'view_counter'),
-    #result('pv.is_latest', 'boolean', 'is_latest'),
-    #result('pv.payload_length', 'Long', 'payload_length')
-#end
-FROM
-haikudepot.pkg_version pv
-JOIN haikudepot.pkg p ON p.id = pv.pkg_id
-JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
-#if($search.repositories || $search.sortOrdering.name() == "PROMINENCE")
-  JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
-  JOIN haikudepot.repository r ON rs.repository_id = r.id
-#end
-#if($search.architectures)
-JOIN haikudepot.architecture a ON a.id = pv.architecture_id
-#end
-LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_supplement_id = ps.id AND
-    #if($search.naturalLanguage)
-        #bindObjectEqual($search.naturalLanguage,'pl_nl.natural_language_id','id')
-    #else
-        #bindObjectEqual($englishNaturalLanguage,'pl_nl.natural_language_id','id')
-    #end
-LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_supplement_id = ps.id AND
-    #bindObjectEqual($englishNaturalLanguage,'pl_en.natural_language_id','id')
-LEFT JOIN haikudepot.pkg_version_localization pvl_nl ON pvl_nl.pkg_version_id = pv.id AND
-#if($search.naturalLanguage)
-    #bindObjectEqual($search.naturalLanguage,'pvl_nl.natural_language_id','id')
-#else
-    #bindObjectEqual($englishNaturalLanguage,'pvl_nl.natural_language_id','id')
-#end
-LEFT JOIN haikudepot.localization_content pvl_nl_summary_lc ON pvl_nl_summary_lc.id = pvl_nl.summary_localization_content_id
-LEFT JOIN haikudepot.localization_content pvl_nl_title_lc ON pvl_nl_title_lc.id = pvl_nl.title_localization_content_id
-LEFT JOIN haikudepot.pkg_version_localization pvl_en ON pvl_en.pkg_version_id = pv.id AND
-    #bindObjectEqual($englishNaturalLanguage,'pvl_en.natural_language_id','id')
-LEFT JOIN haikudepot.localization_content pvl_en_summary_lc ON pvl_en_summary_lc.id = pvl_en.summary_localization_content_id
-LEFT JOIN haikudepot.localization_content pvl_en_title_lc ON pvl_en_title_lc.id = pvl_en.title_localization_content_id
-#if($search.pkgCategory)
-JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_supplement_id = ps.id
-#end
-#if($search.sortOrdering.name() == "PROMINENCE")
-LEFT JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
-LEFT JOIN haikudepot.prominence pr ON ppr.prominence_id = pr.id
-#end
-WHERE
-pv.is_latest = true
-#if(! $search.includeInactive)
-AND p.active = true
-AND pv.active = true
-#end
-#if($search.repositories)
-AND r.code IN (
-    #foreach( $repository in $search.repositories )
-        #bind($repository.code)
-        #if($velocityHasNext)
-        ,
-        #end
-    #end
-)
-#end
-#if($search.architectures)
-AND a.code IN (
-    #foreach( $architecture in $search.architectures )
-        #bind($architecture.code)
-        #if($velocityHasNext)
-        ,
-        #end
-    #end
-)
-#end
-#if($search.daysSinceLatestVersion)
-AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGER') * INTERVAL '1 DAY'
-#end
-#if($search.expression)
-AND (
-   LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(p.name) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-)
-#end
-#if($search.pkgCategory)
-AND #bindObjectEqual($search.pkgCategory, 'ppc.pkg_category_id', 'id')
-#end
-#if($search.pkgNames)
-    #if($search.pkgNames.isEmpty())
-	AND true = false
-    #else
-    AND p.name IN (#bind($search.pkgNames))
-    #end
-#end
-#if(!$isTotal)
-ORDER BY
-    #if($search.sortOrdering)
-        #if($search.sortOrdering.name() == "PROMINENCE")
-        pr.ordering ASC,
-        #elseif($search.sortOrdering.name() == "VERSIONVIEWCOUNTER")
-        pv.view_counter DESC,
-        #elseif($search.sortOrdering.name() == "VERSIONCREATETIMESTAMP")
-        pv.create_timestamp DESC,
-        #end
-    #end
-#if($search.expression)
-CASE
-	WHEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-		THEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title))
-	WHEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-		THEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name))
-	ELSE LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name))
-END ASC
-#else
-LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC,
-#end
-pv.id ASC
-OFFSET #bind($search.offset)
-LIMIT #bind($search.limit)
-#end]]></sql>
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="false"/>
 		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
 #if($isTotal)
 COUNT(DISTINCT pv.id) AS "total"
@@ -1365,7 +1231,7 @@ AND pv.active = true
 AND r.code IN (
     #foreach( $repository in $search.repositories )
         #bind($repository.code)
-        #if($velocityHasNext)
+        #if($foreach.hasNext)
         ,
         #end
     #end
@@ -1375,7 +1241,7 @@ AND r.code IN (
 AND a.code IN (
     #foreach( $architecture in $search.architectures )
         #bind($architecture.code)
-        #if($velocityHasNext)
+        #if($foreach.hasNext)
         ,
         #end
     #end

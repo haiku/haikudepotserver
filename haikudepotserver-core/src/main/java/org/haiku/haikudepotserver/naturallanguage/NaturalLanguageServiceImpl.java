@@ -173,7 +173,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
 
     private Map<String, Boolean> assembleNaturalLanguageCodeUseMap(String ejbqlCodeQuery) {
         EJBQLQuery query = new EJBQLQuery(ejbqlCodeQuery);
-        query.setCacheGroups(HaikuDepot.CacheGroup.NATURAL_LANGUAGE.name());
+        query.setCacheGroup(HaikuDepot.CacheGroup.NATURAL_LANGUAGE.name());
         query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
         return assembleNaturalLanguageCodeUseMap(query);
     }

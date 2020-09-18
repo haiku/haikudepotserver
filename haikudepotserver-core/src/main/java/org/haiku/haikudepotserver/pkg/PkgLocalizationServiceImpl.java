@@ -8,7 +8,7 @@ package org.haiku.haikudepotserver.pkg;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;

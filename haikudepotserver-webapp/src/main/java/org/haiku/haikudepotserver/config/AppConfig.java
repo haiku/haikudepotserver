@@ -10,7 +10,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.repository.controller.RepositoryController;

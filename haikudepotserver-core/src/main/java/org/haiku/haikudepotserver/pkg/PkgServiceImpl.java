@@ -82,7 +82,7 @@ public class PkgServiceImpl implements PkgService {
                 repository,
                 Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode)));
 
-        if(!pkgVersionOptional.isPresent()) {
+        if(pkgVersionOptional.isEmpty()) {
             List<Architecture> architectures = Architecture.getAllExceptByCode(
                     context,
                     ImmutableList.of(Architecture.CODE_SOURCE, defaultArchitectureCode));
@@ -188,18 +188,15 @@ public class PkgServiceImpl implements PkgService {
 
         Optional<Pkg> pkgSourceOptional = Pkg.tryGetByName(context, pkgVersion.getPkg().getName() + SUFFIX_PKG_SOURCE);
 
-        if(pkgSourceOptional.isPresent()) {
-            return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)
-                    .where(PkgVersion.PKG.eq(pkgSourceOptional.get()))
-                    .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY)
-                            .eq(pkgVersion.getRepositorySource().getRepository()))
-                    .and(PkgVersion.ACTIVE.isTrue())
-                    .and(PkgVersion.ARCHITECTURE.eq(Architecture.getByCode(context, Architecture.CODE_SOURCE)))
-                    .and(ExpressionHelper.toExpression(pkgVersion.toVersionCoordinates(), null))
-                    .selectOne(context));
-        }
+        return pkgSourceOptional.map(pkg -> ObjectSelect.query(PkgVersion.class)
+                .where(PkgVersion.PKG.eq(pkg))
+                .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY)
+                        .eq(pkgVersion.getRepositorySource().getRepository()))
+                .and(PkgVersion.ACTIVE.isTrue())
+                .and(PkgVersion.ARCHITECTURE.eq(Architecture.getByCode(context, Architecture.CODE_SOURCE)))
+                .and(ExpressionHelper.toExpression(pkgVersion.toVersionCoordinates(), null))
+                .selectOne(context));
 
-        return Optional.empty();
     }
 
     // ------------------------------
@@ -510,7 +507,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != pkg, "the pkg must be provided");
         Optional<PkgProminence> pkgProminenceOptional = pkg.getPkgProminence(repository);
 
-        if (!pkgProminenceOptional.isPresent()) {
+        if (pkgProminenceOptional.isEmpty()) {
             PkgProminence pkgProminence = objectContext.newObject(PkgProminence.class);
             pkg.addToManyTarget(Pkg.PKG_PROMINENCES.getName(), pkgProminence, true);
             pkgProminence.setRepository(repository);

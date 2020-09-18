@@ -31,7 +31,7 @@ import java.util.*;
 public class PkgCategoryCoverageImportSpreadsheetJobRunner
         extends AbstractPkgCategorySpreadsheetJobRunner<PkgCategoryCoverageImportSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgCategoryCoverageImportSpreadsheetJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgCategoryCoverageImportSpreadsheetJobRunner.class);
 
     /**
      * <p>For the import process, this enum describes the action that was taken for a given import line.</p>
@@ -71,7 +71,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
 
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 
-        if(!jobDataWithByteSourceOptional.isPresent()) {
+        if(jobDataWithByteSourceOptional.isEmpty()) {
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
@@ -178,7 +178,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                             rowOutput.remove(rowOutput.size() - 1);
                             rowOutput.add(action.name());
 
-                            writer.writeNext(rowOutput.toArray(new String[rowOutput.size()]));
+                            writer.writeNext(rowOutput.toArray(new String[0]));
                         }
 
                     }

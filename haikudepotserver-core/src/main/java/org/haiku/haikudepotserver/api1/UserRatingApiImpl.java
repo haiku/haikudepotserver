@@ -10,7 +10,7 @@ import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.userrating.*;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;

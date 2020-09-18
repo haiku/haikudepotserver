@@ -11,7 +11,7 @@ import org.apache.cayenne.DataRow;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;

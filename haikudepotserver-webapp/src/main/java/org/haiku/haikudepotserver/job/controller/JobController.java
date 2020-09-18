@@ -12,7 +12,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.security.AuthenticationFilter;
@@ -61,7 +61,7 @@ public class JobController extends AbstractController {
 
     private final static String SEGMENT_DOWNLOAD = "download";
 
-    private final static long MAX_SUPPLY_DATA_LENGTH = 1 * 1024 * 1024; // 1MB
+    private final static long MAX_SUPPLY_DATA_LENGTH = 1024 * 1024; // 1MB
 
     private final static long TIMEOUT_DOWNLOAD_MILLIS = TimeUnit.MINUTES.toMillis(2);
 
@@ -282,6 +282,6 @@ public class JobController extends AbstractController {
     }
 
     @ResponseStatus(value= HttpStatus.UNAUTHORIZED, reason="access to job data denied")
-    private class JobDataAuthorizationFailure extends RuntimeException {}
+    private static class JobDataAuthorizationFailure extends RuntimeException {}
 
 }

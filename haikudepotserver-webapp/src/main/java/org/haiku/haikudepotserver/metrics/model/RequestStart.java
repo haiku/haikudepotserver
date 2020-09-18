@@ -6,7 +6,7 @@
 package org.haiku.haikudepotserver.metrics.model;
 
 import com.google.common.base.Preconditions;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 

@@ -71,7 +71,7 @@
         <hikaricp.version>3.4.2</hikaricp.version>
         <opencsv.version>4.6</opencsv.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang3.version>3.10</commons-lang3.version>
+        <commons-lang3.version>3.11</commons-lang3.version>
     </properties>
 
     <dependencyManagement>
@@ -239,14 +239,12 @@
             <dependency>
                 <groupId>org.apache.cayenne</groupId>
                 <artifactId>cayenne-server</artifactId>
-                <version>4.0.2</version>
-                <exclusions>
-                    <!-- also brought in via commons-beanutils -->
-                    <exclusion>
-                        <groupId>commons-collections</groupId>
-                        <artifactId>commons-collections</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cayenne</groupId>
+                <artifactId>cayenne-velocity</artifactId>
+                <version>4.1</version>
             </dependency>
 
             <dependency>

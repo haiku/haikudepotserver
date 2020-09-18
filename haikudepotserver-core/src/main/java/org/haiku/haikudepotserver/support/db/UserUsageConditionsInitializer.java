@@ -13,7 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.Pair;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
@@ -41,9 +41,9 @@ import java.util.stream.Collectors;
 
 public class UserUsageConditionsInitializer {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(UserUsageConditionsInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserUsageConditionsInitializer.class);
 
-    private static String RESOURCE_PREFIX = "classpath:/userusageconditions/";
+    private static final String RESOURCE_PREFIX = "classpath:/userusageconditions/";
 
     private final ServerRuntime serverRuntime;
     private final ObjectMapper objectMapper;
