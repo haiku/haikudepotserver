@@ -171,6 +171,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                         .stream()
                         .map(urs -> {
                             DumpExportReferenceUserRatingStability derurs = new DumpExportReferenceUserRatingStability();
+                            derurs.setOrdering(urs.getOrdering().longValue());
                             derurs.setCode(urs.getCode());
                             derurs.setName(
                                     messageSource.getMessage(
