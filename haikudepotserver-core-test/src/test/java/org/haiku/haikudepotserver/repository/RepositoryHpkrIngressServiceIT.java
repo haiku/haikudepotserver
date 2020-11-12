@@ -223,8 +223,8 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
                 RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testsrc_xyz").get();
-                Assertions.assertThat(repositorySource.getIdentifier())
-                        .isEqualTo("https://example.com/haikuports/master/repository/x86_gcc2");
+                Assertions.assertThat(repositorySource.getIdentifier()).isEqualTo("f0c086e5-e096-429c-b38d-57beabd764e9");
+                // ^^ as defined in the repo info file.
             }
 
             // now pull out some known packages and make sure they are imported correctly.

@@ -24,6 +24,7 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Clock;
 import java.util.List;
@@ -116,13 +117,13 @@ public class RepositorySource extends _RepositorySource {
         return tryGetBaseURL(exposureType)
                 .map(bu -> {
                     try {
-                        return UriComponentsBuilder.fromUriString(bu.toString())
+                        return UriComponentsBuilder.fromUri(bu.toURI())
                                 .pathSegment("packages")
                                 .build()
                                 .toUri()
                                 .toURL();
                     }
-                    catch(MalformedURLException mue) {
+                    catch(URISyntaxException | MalformedURLException mue) {
                         throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
                     }
                 });
@@ -148,13 +149,13 @@ public class RepositorySource extends _RepositorySource {
         return tryGetBaseURL(ExposureType.INTERNAL_FACING)
                 .map(bu -> {
                     try {
-                        return UriComponentsBuilder.fromUriString(bu.toString())
+                        return UriComponentsBuilder.fromUri(bu.toURI())
                                 .pathSegment(leaf)
                                 .build()
                                 .toUri()
                                 .toURL();
                     }
-                    catch(MalformedURLException mue) {
+                    catch(URISyntaxException | MalformedURLException mue) {
                         throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
                     }
                 });

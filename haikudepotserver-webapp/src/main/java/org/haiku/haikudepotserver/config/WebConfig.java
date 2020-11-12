@@ -69,7 +69,8 @@ public class WebConfig implements WebMvcConfigurer {
                 "/opensearch.xml",
                 "/__reference/all*.json.gz",
                 "/__repository/all*.json.gz",
-                "/__repository/**/import")
+                "/__repository/*/repositorysource/*/import",
+                "/__repository/*/import")
                 .forEach(p -> registry.addInterceptor(new MetricsInterceptor(p))
                         .addPathPatterns(p));
     }

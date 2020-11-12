@@ -30,16 +30,16 @@
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
 
-        <spring.version>5.2.5.RELEASE</spring.version>
-        <postgresql.version>42.2.12</postgresql.version>
+        <spring.version>5.3.0</spring.version>
+        <postgresql.version>42.2.18</postgresql.version>
         <slf4j.version>1.7.28</slf4j.version>
         <jackson-databind.version>2.10.3</jackson-databind.version>
-        <guava.version>28.2-jre</guava.version>
+        <guava.version>30.0-jre</guava.version>
 
         <web-lru-cache.versionbase>2.5.0</web-lru-cache.versionbase>
         <web-lru-cache.versionextension />
 
-        <web-angularjs.versionbase>1.7.7</web-angularjs.versionbase>
+        <web-angularjs.versionbase>1.8.0</web-angularjs.versionbase>
         <web-angularjs.versionextension />
 
         <web-underscorejs.versionbase>1.9.0</web-underscorejs.versionbase>
@@ -49,9 +49,9 @@
         <web-momentjs.versionextension />
 
         <web-modernizr.versionbase>2.8.3</web-modernizr.versionbase>
-        <web-modernizr.versionextension />
+        <web-modernizr.versionextension>-1</web-modernizr.versionextension>
 
-        <nimbus-jose-jwt.version>8.14.1</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.1.2</nimbus-jose-jwt.version>
 
         <jasmine.plugin.version>2.2</jasmine.plugin.version>
         <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
@@ -60,7 +60,7 @@
         <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
 
         <selenium-java.version>3.13.0</selenium-java.version>
-        <jetty.version>9.4.27.v20200227</jetty.version>
+        <jetty.version>9.4.34.v20201102</jetty.version>
 
         <metrics.version>4.1.0</metrics.version>
 
@@ -222,7 +222,7 @@
             <dependency>
                 <groupId>com.rometools</groupId>
                 <artifactId>rome</artifactId>
-                <version>1.12.2</version>
+                <version>1.15.0</version>
             </dependency>
 
             <dependency>

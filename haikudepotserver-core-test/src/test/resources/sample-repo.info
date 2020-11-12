@@ -1,4 +1,5 @@
 name HaikuPorts
+identifier f0c086e5-e096-429c-b38d-57beabd764e9
 vendor "Haiku Project"
 summary "The HaikuPorts repository"
 priority 1
