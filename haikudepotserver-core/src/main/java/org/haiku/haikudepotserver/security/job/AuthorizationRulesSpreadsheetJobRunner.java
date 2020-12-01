@@ -1,10 +1,11 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2016-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.security.job;
 
+import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
@@ -33,8 +34,11 @@ import java.time.format.DateTimeFormatter;
 public class AuthorizationRulesSpreadsheetJobRunner
         extends AbstractJobRunner<AuthorizationRulesSpreadsheetJobSpecification> {
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+
+    public AuthorizationRulesSpreadsheetJobRunner(ServerRuntime serverRuntime) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+    }
 
     @Override
     public void run(

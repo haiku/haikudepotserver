@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,18 +16,19 @@ import org.haiku.haikudepotserver.metrics.MetricsInvocationListener;
 import org.haiku.haikudepotserver.multipage.MultipageLocaleResolver;
 import org.haiku.haikudepotserver.support.jsonrpc4j.ErrorLoggingInvocationListener;
 import org.haiku.haikudepotserver.support.jsonrpc4j.HttpStatusCodeProvider;
+import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
 
-import javax.servlet.Filter;
 import java.util.stream.Stream;
 
 @EnableWebMvc
+@EnableWebSecurity
 @ComponentScan(
         basePackages = { "org.haiku.haikudepotserver" },
         useDefaultFilters = false,
@@ -39,11 +40,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/__js/**").addResourceLocations("/js/").setCachePeriod(0);
-        registry.addResourceHandler("/__webjars/**").addResourceLocations("/webjars/");
-        registry.addResourceHandler("/__css/**").addResourceLocations("/css/");
-        registry.addResourceHandler("/__img/**").addResourceLocations("/img/");
-        registry.addResourceHandler("/__docs/**").addResourceLocations("/docs/");
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_JS).addResourceLocations("/js/").setCachePeriod(0);
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_WEBJAR).addResourceLocations("/webjars/");
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_CSS).addResourceLocations("/css/");
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_IMG).addResourceLocations("/img/");
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_DOCS).addResourceLocations("/docs/");
         registry.addResourceHandler("favicon.ico").addResourceLocations("/img/favicon.ico");
     }
 

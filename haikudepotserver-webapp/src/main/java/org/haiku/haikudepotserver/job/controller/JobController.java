@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,11 +15,11 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
-import org.haiku.haikudepotserver.security.AuthenticationFilter;
 import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.haiku.haikudepotserver.support.web.JobDataWriteListener;
+import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  */
 
 @Controller
-@RequestMapping("/" + AuthenticationFilter.SEGMENT_SECURED)
+@RequestMapping("/" + WebConstants.PATH_COMPONENT_SECURED)
 public class JobController extends AbstractController {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
@@ -130,7 +130,7 @@ public class JobController extends AbstractController {
         String lastModifiedValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(
                 lastModifyTimestamp.toInstant(), ZoneOffset.UTC));
         String destinationLocationUrl = UriComponentsBuilder.newInstance()
-                .pathSegment(AuthenticationFilter.SEGMENT_SECURED)
+                .pathSegment(WebConstants.PATH_COMPONENT_SECURED)
                 .pathSegment(JobController.SEGMENT_JOBDATA)
                 .pathSegment(jobDataGuids.iterator().next())
                 .pathSegment(JobController.SEGMENT_DOWNLOAD)

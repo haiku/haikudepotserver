@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,19 +9,15 @@ import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.codahale.metrics.servlets.PingServlet;
 import net.jawr.web.servlet.JawrServlet;
-import org.haiku.haikudepotserver.repository.controller.RepositoryController;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
 import org.haiku.haikudepotserver.support.web.SessionListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.filter.DelegatingFilterProxy;
-import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
@@ -49,10 +45,11 @@ public class WebInitializer implements WebApplicationInitializer {
         registerJawrServlet(servletContext, "css");
         registerJawrServlet(servletContext, "js");
 
+        // note that the spring security filters are not included here.
+
         registerSpringFilter(servletContext, "forwardedHeaderFilter", "/*");
         registerSpringFilter(servletContext, "metricsFilter", "/*");
-        registerSpringFilter(servletContext, "authenticationFilter", "/*");
-        registerSpringFilter(servletContext, "repositoryAuthenticationFilter", "/" + RepositoryController.SEGMENT_REPOSITORY + "/*");
+        registerSpringFilter(servletContext, "springSecurityFilterChain", "/*");
         registerSpringFilter(servletContext, "loggingFilter", "/*");
         registerSpringFilter(servletContext, "singlePageTemplateFrequencyMetricsFilter", "/__js/app/*");
         registerSpringFilter(servletContext, "desktopApplicationMinimumVersionFilter", "/*");

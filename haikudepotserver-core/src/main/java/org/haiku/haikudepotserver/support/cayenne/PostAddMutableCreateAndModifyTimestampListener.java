@@ -1,10 +1,11 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.cayenne;
 
+import com.google.common.base.Preconditions;
 import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
@@ -13,7 +14,6 @@ import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTime
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 /**
  * <p>This automates the configuration of the create and modify timestamps against certain
@@ -23,8 +23,11 @@ import javax.annotation.Resource;
 @Component
 public class PostAddMutableCreateAndModifyTimestampListener implements LifecycleListener {
 
-    @Resource
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
+
+    public PostAddMutableCreateAndModifyTimestampListener(ServerRuntime serverRuntime) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+    }
 
     @PostConstruct
     public void init() {

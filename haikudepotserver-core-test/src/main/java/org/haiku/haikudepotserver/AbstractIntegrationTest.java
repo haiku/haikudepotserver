@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
+import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.DataNode;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.DataMap;
@@ -16,7 +17,7 @@ import org.apache.cayenne.map.ObjEntity;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
-import org.haiku.haikudepotserver.security.AuthenticationHelper;
+import org.haiku.haikudepotserver.security.UserAuthentication;
 import org.haiku.haikudepotserver.security.model.AuthenticationService;
 import org.junit.After;
 import org.junit.Assert;
@@ -25,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
@@ -97,7 +100,7 @@ public abstract class AbstractIntegrationTest {
 
                 line++;
             }
-            while(null!=expectedLine || null!=actualLine);
+            while(null != expectedLine || null != actualLine);
     }
 
     protected ByteSource getResourceByteSource(final String path) {
@@ -240,9 +243,10 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void setAuthenticatedUser(String nickname) {
-        AuthenticationHelper.setAuthenticatedUserObjectId(User.getByNickname(
-                serverRuntime.newContext(),
-                nickname).getObjectId());
+        ObjectId oid = User.getByNickname(serverRuntime.newContext(), nickname).getObjectId();
+        Authentication authentication = new UserAuthentication(oid);
+        authentication.setAuthenticated(true);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     /**
@@ -256,7 +260,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     private void setUnauthenticated() {
-        AuthenticationHelper.setAuthenticatedUserObjectId(null);
+        SecurityContextHolder.clearContext();
     }
 
 }

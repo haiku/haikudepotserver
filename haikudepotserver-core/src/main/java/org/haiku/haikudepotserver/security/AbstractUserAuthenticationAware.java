@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,8 +7,11 @@ package org.haiku.haikudepotserver.security;
 
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.ObjectId;
 import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
@@ -36,9 +39,15 @@ public abstract class AbstractUserAuthenticationAware {
 
     protected Optional<User> tryObtainAuthenticatedUser(ObjectContext objectContext) {
         Preconditions.checkArgument(null != objectContext, "the object context must be provided");
+        return tryGetAuthenticatedUserObjectId().map((oid) -> User.getByObjectId(objectContext, oid));
+    }
 
-        return AuthenticationHelper.getAuthenticatedUserObjectId()
-                .map((oid) -> User.getByObjectId(objectContext, oid));
+    private static Optional<ObjectId> tryGetAuthenticatedUserObjectId() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getPrincipal)
+                .filter(p -> p instanceof ObjectId)
+                .map(p -> (ObjectId) p);
     }
 
 }

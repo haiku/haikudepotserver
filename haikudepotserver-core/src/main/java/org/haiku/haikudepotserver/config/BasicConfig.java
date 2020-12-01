@@ -43,8 +43,6 @@ import java.util.List;
 @Import({PersistenceConfig.class, MetricsConfig.class})
 public class BasicConfig {
 
-//    <context:annotation-config/>
-
     // -------------------------------------
     // SUNDRY
 

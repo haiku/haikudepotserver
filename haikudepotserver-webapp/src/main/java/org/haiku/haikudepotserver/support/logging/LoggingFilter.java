@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,8 +12,9 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.security.AuthenticationHelper;
 import org.slf4j.MDC;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -124,7 +125,7 @@ public class LoggingFilter implements Filter {
             MDC.put(KEY_USERAGENT, VALUE_ABSENT);
             MDC.put(KEY_USERAGENTCODE, VALUE_ABSENT);
 
-            Optional<ObjectId> authenticatedUserOidOptional = AuthenticationHelper.getAuthenticatedUserObjectId();
+            Optional<ObjectId> authenticatedUserOidOptional = tryGetAuthenticatedUserObjectId();
 
             if (authenticatedUserOidOptional.isPresent()) {
                 ObjectContext context = serverRuntime.newContext();
@@ -158,6 +159,14 @@ public class LoggingFilter implements Filter {
 
     @Override
     public void destroy() {
+    }
+
+    private static Optional<ObjectId> tryGetAuthenticatedUserObjectId() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getPrincipal)
+                .filter(p -> p instanceof ObjectId)
+                .map(p -> (ObjectId) p);
     }
 
 }
