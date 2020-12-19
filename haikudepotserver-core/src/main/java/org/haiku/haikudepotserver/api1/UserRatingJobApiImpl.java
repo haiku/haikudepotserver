@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,17 +12,18 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.model.userrating.job.QueueUserRatingSpreadsheetJobRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.job.QueueUserRatingSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSpreadsheetJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -33,16 +34,16 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingJobApiImpl.class);
 
-    private ServerRuntime serverRuntime;
-    private AuthorizationService authorizationService;
-    private JobService jobService;
+    private final ServerRuntime serverRuntime;
+    private final PermissionEvaluator permissionEvaluator;
+    private final JobService jobService;
 
     public UserRatingJobApiImpl(
             ServerRuntime serverRuntime,
-            AuthorizationService authorizationService,
+            PermissionEvaluator permissionEvaluator,
             JobService jobService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.jobService = Preconditions.checkNotNull(jobService);
     }
 
@@ -63,51 +64,49 @@ public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJ
         if(!Strings.isNullOrEmpty(request.userNickname)) {
             Optional<User> requestUserOptional = User.tryGetByNickname(context, request.userNickname);
 
-            if(!requestUserOptional.isPresent()) {
-                LOGGER.warn("attempt to produce user rating report for user {}, but that user does not exist -- not allowed", request.userNickname);
-                throw new AuthorizationFailureException();
+            if(requestUserOptional.isEmpty()) {
+                throw new AccessDeniedException("attempt to produce user rating report for user ["
+                        + request.userNickname + "], but that user does not exist -- not allowed");
             }
 
-            if(!authorizationService.check(
-                    context,
-                    user,
+            if(!permissionEvaluator.hasPermission(
+                    SecurityContextHolder.getContext().getAuthentication(),
                     requestUserOptional.get(),
                     Permission.BULK_USERRATINGSPREADSHEETREPORT_USER)) {
-                LOGGER.warn("attempt to access a user rating report for user {}, but this was disallowed", request.userNickname);
-                throw new AuthorizationFailureException();
+                throw new AccessDeniedException(
+                        "attempt to access a user rating report for user ["
+                                + request.userNickname + "], but this was disallowed");
             }
 
             spec.setUserNickname(request.userNickname);
         }
         else {
-
             if (!Strings.isNullOrEmpty(request.pkgName)) {
                 Optional<Pkg> requestPkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
-                if (!requestPkgOptional.isPresent()) {
-                    LOGGER.warn("attempt to produce user rating report for pkg {}, but that pkg does not exist -- not allowed", request.pkgName);
-                    throw new AuthorizationFailureException();
+                if (requestPkgOptional.isEmpty()) {
+                    throw new AccessDeniedException(
+                            "attempt to produce user rating report for pkg ["
+                                    + request.pkgName + "], but that pkg does not exist -- not allowed");
                 }
 
-                if (!authorizationService.check(
-                        context,
-                        user,
+                if (!permissionEvaluator.hasPermission(
+                        SecurityContextHolder.getContext().getAuthentication(),
                         requestPkgOptional.get(),
                         Permission.BULK_USERRATINGSPREADSHEETREPORT_PKG)) {
-                    LOGGER.warn("attempt to access a user rating report for pkg {}, but this was disallowed", request.pkgName);
-                    throw new AuthorizationFailureException();
+                    throw new AccessDeniedException(
+                            "attempt to access a user rating report for pkg ["
+                                    + request.pkgName + "], but this was disallowed");
                 }
 
                 spec.setPkgName(request.pkgName);
             }
             else {
-                if (!authorizationService.check(
-                        context,
-                        user,
+                if (!permissionEvaluator.hasPermission(
+                        SecurityContextHolder.getContext().getAuthentication(),
                         null,
                         Permission.BULK_USERRATINGSPREADSHEETREPORT_ALL)) {
-                    LOGGER.warn("attempt to access a user rating report, but was unauthorized");
-                    throw new AuthorizationFailureException();
+                    throw new AccessDeniedException("attempt to access a user rating report, but was unauthorized");
                 }
             }
         }

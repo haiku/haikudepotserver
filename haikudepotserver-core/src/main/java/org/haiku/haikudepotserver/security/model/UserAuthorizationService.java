@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,7 +9,7 @@ import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.User;
 
-public interface AuthorizationService {
+public interface UserAuthorizationService {
 
     /**
      * <p>Returns true if the user supplied has the permission over the target object.</p>

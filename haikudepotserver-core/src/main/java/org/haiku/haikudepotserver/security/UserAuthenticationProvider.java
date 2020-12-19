@@ -1,6 +1,11 @@
+/*
+ * Copyright 2020, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.security;
 
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,16 +15,18 @@ import java.util.Optional;
 
 public class UserAuthenticationProvider implements org.springframework.security.authentication.AuthenticationProvider {
 
-    private final AuthenticationService authenticationService;
+    private final UserAuthenticationService userAuthenticationService;
 
-    public UserAuthenticationProvider(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+    public UserAuthenticationProvider(UserAuthenticationService userAuthenticationService) {
+        this.userAuthenticationService = userAuthenticationService;
     }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         if (authentication instanceof UsernamePasswordAuthenticationToken) {
-            return authenticate((UsernamePasswordAuthenticationToken) authentication);
+            Authentication result = authenticate((UsernamePasswordAuthenticationToken) authentication);
+            result.setAuthenticated(true);
+            return result;
         }
 
         return null;
@@ -41,7 +48,7 @@ public class UserAuthenticationProvider implements org.springframework.security.
     }
 
     private Authentication authenticateUsernamePassword(String username, String password) {
-        Authentication authentication = authenticationService.authenticateByNicknameAndPassword(username, password)
+        Authentication authentication = userAuthenticationService.authenticateByNicknameAndPassword(username, password)
                 .map(UserAuthentication::new)
                 .orElseThrow(() -> new BadCredentialsException("bad credentials"));
         authentication.setAuthenticated(true);

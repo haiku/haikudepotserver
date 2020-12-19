@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import com.googlecode.jsonrpc4j.ErrorResolver;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.SimpleValidationFailure;
 import org.haiku.haikudepotserver.api1.model.authorization.AuthorizationRuleConflictException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class ErrorResolverImpl implements ErrorResolver {
 
         // output for authorization failure.
 
-        if(AuthorizationFailureException.class.isAssignableFrom(t.getClass())) {
+        if(AccessDeniedException.class.isAssignableFrom(t.getClass())) {
             return new JsonError(
                     Constants.ERROR_CODE_AUTHORIZATIONFAILURE,
                     "authorizationfailure",

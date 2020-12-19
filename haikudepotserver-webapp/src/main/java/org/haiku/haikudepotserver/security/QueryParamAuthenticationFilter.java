@@ -5,7 +5,7 @@
 package org.haiku.haikudepotserver.security;
 
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
@@ -30,10 +30,10 @@ public class QueryParamAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String PARAM_BEARER_TOKEN = "hdsbtok";
 
-    private final AuthenticationService authenticationService;
+    private final UserAuthenticationService userAuthenticationService;
 
-    public QueryParamAuthenticationFilter(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+    public QueryParamAuthenticationFilter(UserAuthenticationService userAuthenticationService) {
+        this.userAuthenticationService = userAuthenticationService;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class QueryParamAuthenticationFilter extends OncePerRequestFilter {
         }
         return Optional.ofNullable(request.getParameter(PARAM_BEARER_TOKEN))
                 .map(StringUtils::trimToNull)
-                .flatMap(authenticationService::authenticateByToken)
+                .flatMap(userAuthenticationService::authenticateByToken)
                 .map(UserAuthentication::new);
     }
 

@@ -15,7 +15,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.haiku.haikudepotserver.support.web.JobDataWriteListener;
@@ -23,6 +23,7 @@ import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -73,15 +74,15 @@ public class JobController extends AbstractController {
 
     private final JobService jobService;
     private final ServerRuntime serverRuntime;
-    private final AuthorizationService authorizationService;
+    private final PermissionEvaluator permissionEvaluator;
 
     public JobController(
             ServerRuntime serverRuntime,
             JobService jobService,
-            AuthorizationService authorizationService) {
+            PermissionEvaluator permissionEvaluator) {
         this.jobService = Preconditions.checkNotNull(jobService);
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
     }
 
     /**
@@ -239,7 +240,10 @@ public class JobController extends AbstractController {
                 return new JobDataAuthorizationFailure();
             });
 
-            if (!authorizationService.check(context, user, ownerUser, Permission.USER_VIEWJOBS)) {
+            if (!permissionEvaluator.hasPermission(
+                    SecurityContextHolder.getContext().getAuthentication(),
+                    ownerUser,
+                    Permission.USER_VIEWJOBS)) {
                 LOGGER.warn("attempt to access jobs view for; {}", job.toString());
                 throw new JobDataAuthorizationFailure();
             }

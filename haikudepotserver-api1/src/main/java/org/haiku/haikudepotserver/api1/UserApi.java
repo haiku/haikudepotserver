@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.api1;
 
 import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haiku.haikudepotserver.api1.model.user.*;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.InvalidUserUsageConditionsException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
@@ -41,7 +40,7 @@ public interface UserApi {
      * is thrown.</p>
      */
 
-    GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException, AuthorizationFailureException;
+    GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException;
 
     /**
      * <p>This method will allow a client to authenticate against the server.  If this is
@@ -63,7 +62,7 @@ public interface UserApi {
      * <p>This method will allow the client to modify the password of a user.</p>
      */
 
-    ChangePasswordResult changePassword(ChangePasswordRequest changePasswordRequest) throws ObjectNotFoundException, AuthorizationFailureException, ValidationException;
+    ChangePasswordResult changePassword(ChangePasswordRequest changePasswordRequest) throws ObjectNotFoundException, ValidationException;
 
     /**
      * <p>This method will allow a search for users.</p>

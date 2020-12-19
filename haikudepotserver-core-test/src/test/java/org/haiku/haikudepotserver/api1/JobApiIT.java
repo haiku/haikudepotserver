@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,6 +28,10 @@ public class JobApiIT extends AbstractIntegrationTest {
     @Resource
     private JobApi jobApi;
 
+    /**
+     * <p>This test will find some data because it is sourced from {@link TestJobServiceImpl}.</p>
+     */
+
     @Test
     public void testSearchJobs_all() throws Exception {
         setAuthenticatedUserToRoot();
@@ -37,7 +41,6 @@ public class JobApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.items.size()).isEqualTo(3);
-
     }
 
     @Test

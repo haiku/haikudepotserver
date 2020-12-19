@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,11 +17,15 @@ import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
+import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -58,14 +62,17 @@ public class RepositoryController extends AbstractController {
     private final ServerRuntime serverRuntime;
     private final JobService jobService;
     private final RepositoryService repositoryService;
+    private final PermissionEvaluator permissionEvaluator;
 
     public RepositoryController(
             ServerRuntime serverRuntime,
             JobService jobService,
-            RepositoryService repositoryService) {
+            RepositoryService repositoryService,
+            PermissionEvaluator permissionEvaluator) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.jobService = Preconditions.checkNotNull(jobService);
         this.repositoryService = Preconditions.checkNotNull(repositoryService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
     }
 
     /**
@@ -118,8 +125,15 @@ public class RepositoryController extends AbstractController {
         ObjectContext context = serverRuntime.newContext();
         Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, repositoryCode);
 
-        if (!repositoryOptional.isPresent()) {
+        if (repositoryOptional.isEmpty()) {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                repositoryOptional.get(),
+                Permission.REPOSITORY_IMPORT)) {
+            throw new AccessDeniedException("unable to import repository [" + repositoryOptional.get() + "]");
         }
 
         jobService.submit(
@@ -127,7 +141,6 @@ public class RepositoryController extends AbstractController {
                 JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return ResponseEntity.ok("repository import submitted");
-
     }
 
     /**
@@ -161,7 +174,7 @@ public class RepositoryController extends AbstractController {
         ObjectContext context = serverRuntime.newContext();
         Optional<Repository> repositoryOptional = Repository.tryGetByCode(context, repositoryCode);
 
-        if (!repositoryOptional.isPresent()) {
+        if (repositoryOptional.isEmpty()) {
             return new ResponseEntity<>("repository not found", HttpStatus.NOT_FOUND);
         }
 
@@ -169,9 +182,16 @@ public class RepositoryController extends AbstractController {
                 .tryGetByCode(context, repositorySourceCode);
 
         if(
-                !repositorySourceOptional.isPresent()
+                repositorySourceOptional.isEmpty()
                         || !repositoryOptional.get().equals(repositorySourceOptional.get().getRepository())) {
             return new ResponseEntity<>("repository source not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                repositoryOptional.get(),
+                Permission.REPOSITORY_IMPORT)) {
+            throw new AccessDeniedException("unable to import repository [" + repositoryOptional.get() + "]");
         }
 
         jobService.submit(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._UserUsageConditions;
 import org.haiku.haikudepotserver.dataobjects.auto._UserUsageConditionsAgreement;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.UserAuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.security.model.TargetType;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AuthorizationServiceImpl implements AuthorizationService {
+public class UserAuthorizationServiceImpl implements UserAuthorizationService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserAuthorizationServiceImpl.class);
 
     private TargetType deriveTargetType(DataObject dataObject) {
         if(null==dataObject)
@@ -230,9 +230,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             case REPOSITORY_IMPORT:
                 return authenticatedUserIsRoot;
 
-            case REPOSITORY_VIEW:
+            case REPOSITORY_VIEW: {
                 Repository repository = (Repository) target;
                 return repository.getActive() || authenticatedUserIsRoot;
+            }
 
             case REPOSITORY_LIST:
                 return true;
@@ -270,9 +271,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
                 // ^^ see above for case covering the user rating author
                 return authenticatedUserIsRoot;
 
-            case USERRATING_EDIT:
+            case USERRATING_EDIT: {
                 UserRating userRating = (UserRating) target;
-                return null != authenticatedUser && (userRating.getUser().equals(authenticatedUser) || authenticatedUserIsRoot);
+                return null != authenticatedUser && (
+                        userRating.getUser().getNickname().equals(authenticatedUser.getNickname())
+                                || authenticatedUserIsRoot);
+            }
             case USERRATING_DERIVEANDSTOREFORPKG:
                 return authenticatedUserIsRoot;
 
@@ -296,10 +300,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
             case BULK_USERRATINGSPREADSHEETREPORT_PKG:
                 return null != authenticatedUser;
 
-            case BULK_USERRATINGSPREADSHEETREPORT_USER:
+            case BULK_USERRATINGSPREADSHEETREPORT_USER: {
+                User targetUser = (User) target;
                 return null != authenticatedUser &&
-                        (authenticatedUserIsRoot || authenticatedUser.getNickname().equals(((User) target).getNickname()));
-
+                        (authenticatedUserIsRoot
+                                || authenticatedUser.getNickname().equals(targetUser.getNickname()));
+            }
             case JOBS_VIEW:
                 return authenticatedUserIsRoot;
 

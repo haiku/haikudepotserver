@@ -9,11 +9,15 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.haiku.haikudepotserver.security.model.RepositoryAuthenticationDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
 
@@ -24,15 +28,18 @@ import java.util.Optional;
 
 public class RepositoryAuthenticationProvider implements org.springframework.security.authentication.AuthenticationProvider {
 
+    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryAuthenticationProvider.class);
+
     private final ServerRuntime serverRuntime;
 
-    private final AuthenticationService authenticationService;
+    // TODO; this should not be using the *USER* auth service.
+    private final UserAuthenticationService userAuthenticationService;
 
     public RepositoryAuthenticationProvider(
             ServerRuntime serverRuntime,
-            AuthenticationService authenticationService) {
+            UserAuthenticationService userAuthenticationService) {
         this.serverRuntime = serverRuntime;
-        this.authenticationService = authenticationService;
+        this.userAuthenticationService = userAuthenticationService;
     }
 
     @Override
@@ -70,11 +77,29 @@ public class RepositoryAuthenticationProvider implements org.springframework.sec
         }
 
         ObjectContext context = serverRuntime.newContext();
-        return Optional.of(username)
+        Repository repository = Optional.of(username)
                 .flatMap(rc -> Repository.tryGetByCode(context, username))
-                .filter(r -> StringUtils.isNotBlank(r.getPasswordHash()))
-                .filter(r -> StringUtils.isNotBlank(r.getPasswordSalt()))
-                .filter(r -> r.getPasswordHash().equals(authenticationService.hashPassword(r.getPasswordSalt(), password)))
-                .map(r -> new RepositoryAuthentication(r.getCode()));
+                .orElse(null);
+
+        if (null == repository) {
+            String msg = "unable to find the repository [" + username + "]";
+            LOGGER.info(msg);
+            throw new UsernameNotFoundException(msg);
+        }
+
+        if (null == repository.getPasswordHash() || null == repository.getPasswordSalt()) {
+            LOGGER.info("repository [{}] has no password hash / salt", repository);
+            return Optional.empty();
+        }
+
+        String passwordHash = userAuthenticationService.hashPassword(repository.getPasswordSalt(), password);
+
+        if (!repository.getPasswordHash().equals(passwordHash)) {
+            throw new BadCredentialsException("authentication against repository [" + repository + "] failed");
+        }
+
+        RepositoryAuthentication result = new RepositoryAuthentication(repository.getCode());
+        result.setAuthenticated(true);
+        return Optional.of(result);
     }
 }

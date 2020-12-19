@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.haiku.haikudepotserver.user.model.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +42,9 @@ import java.util.regex.Pattern;
 
 
 @Service
-public class AuthenticationServiceImpl implements AuthenticationService {
+public class UserAuthenticationServiceImpl implements UserAuthenticationService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(UserAuthenticationServiceImpl.class);
 
     private final static String SUFFIX_JSONWEBTOKEN_SUBJECT = "@hds";
 
@@ -66,7 +66,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private JWSVerifier jsonWebTokenVerifier = null;
     private String jsonWebTokenSharedKey;
 
-    public AuthenticationServiceImpl(
+    public UserAuthenticationServiceImpl(
             ServerRuntime serverRuntime,
             UserService userService,
             @Value("${authentication.jws.sharedkey:}") String jsonWebTokenSharedKey,

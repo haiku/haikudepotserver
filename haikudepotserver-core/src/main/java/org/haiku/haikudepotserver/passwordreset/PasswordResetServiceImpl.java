@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMail;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,7 +49,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     private final MailSender mailSender;
     private final ServerRuntime serverRuntime;
-    private final AuthenticationService authenticationService;
+    private final UserAuthenticationService userAuthenticationService;
     private final Configuration freemarkerConfiguration;
     private final Integer timeToLiveHours;
     private final String baseUrl;
@@ -58,7 +58,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public PasswordResetServiceImpl(
             ServerRuntime serverRuntime,
             MailSender mailSender,
-            AuthenticationService authenticationService,
+            UserAuthenticationService userAuthenticationService,
             @Qualifier("emailFreemarkerConfiguration") Configuration freemarkerConfiguration,
             @Value("${passwordreset.ttlhours:1}") Integer timeToLiveHours,
             @Value("${baseurl}") String baseUrl,
@@ -66,7 +66,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     ) {
         this.mailSender = Preconditions.checkNotNull(mailSender);
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authenticationService = Preconditions.checkNotNull(authenticationService);
+        this.userAuthenticationService = Preconditions.checkNotNull(userAuthenticationService);
         this.freemarkerConfiguration = Preconditions.checkNotNull(freemarkerConfiguration);
         this.timeToLiveHours = Preconditions.checkNotNull(timeToLiveHours);
         this.baseUrl = Preconditions.checkNotNull(baseUrl);
@@ -188,9 +188,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
                             if (user.getActive()) {
 
-                                if (!Strings.isNullOrEmpty(passwordClear) && authenticationService.validatePassword(passwordClear)) {
+                                if (!Strings.isNullOrEmpty(passwordClear) && userAuthenticationService.validatePassword(passwordClear)) {
                                     user.setPasswordSalt();
-                                    user.setPasswordHash(authenticationService.hashPassword(user, passwordClear));
+                                    user.setPasswordHash(userAuthenticationService.hashPassword(user, passwordClear));
                                     context.deleteObjects(token);
                                     context.commitChanges();
 

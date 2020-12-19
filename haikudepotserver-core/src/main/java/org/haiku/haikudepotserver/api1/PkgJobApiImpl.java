@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,19 +13,22 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.AbstractQueueJobResult;
 import org.haiku.haikudepotserver.api1.model.pkg.job.*;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
-import org.haiku.haikudepotserver.job.model.*;
+import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
+import org.haiku.haikudepotserver.job.model.JobData;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.*;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Optional;
 
 @Component
@@ -35,15 +38,15 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgJobApiImpl.class);
 
     private final ServerRuntime serverRuntime;
-    private final AuthorizationService authorizationService;
+    private final PermissionEvaluator permissionEvaluator;
     private final JobService jobService;
 
     public PkgJobApiImpl(
             ServerRuntime serverRuntime,
-            AuthorizationService authorizationService,
+            PermissionEvaluator permissionEvaluator,
             JobService jobService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.jobService = Preconditions.checkNotNull(jobService);
     }
 
@@ -66,13 +69,11 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(
-                context,
-                user.orElse(null),
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET)) {
-            LOGGER.warn("attempt to import package categories, but was not authorized");
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("attempt to import package categories, but was not authorized");
         }
 
         // now check that the data is present.
@@ -137,13 +138,11 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(
-                context,
-                user.orElse(null),
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.BULK_PKGICONIMPORTARCHIVE)) {
-            LOGGER.warn("attempt to import package icons, but was not authorized");
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("attempt to import package icons, but was not authorized");
         }
 
         // now check that the data is present.
@@ -197,14 +196,15 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if (!user.isPresent()) {
-            LOGGER.warn("attempt to queue {} without a user", jobSpecificationClass.getSimpleName());
-            throw new AuthorizationFailureException();
+        if (user.isEmpty()) {
+            throw new AccessDeniedException("attempt to queue [" + jobSpecificationClass.getSimpleName() + "] without a user");
         }
 
-        if (!authorizationService.check(context, user.get(), null, permission)) {
-            LOGGER.warn("attempt to queue {} without sufficient authorization", jobSpecificationClass.getSimpleName());
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                null,
+                permission)) {
+            throw new AccessDeniedException("attempt to queue [" + jobSpecificationClass.getSimpleName() + "] without sufficient authorization");
         }
 
         AbstractJobSpecification spec;
@@ -239,13 +239,11 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(
-                context,
-                user.orElse(null),
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.BULK_PKGSCREENSHOTEXPORTARCHIVE)) {
-            LOGGER.warn("attempt to export pkg screenshots as an archive, but was not authorized");
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("attempt to export pkg screenshots as an archive, but was not authorized");
         }
 
         PkgScreenshotExportArchiveJobSpecification specification = new PkgScreenshotExportArchiveJobSpecification();
@@ -266,13 +264,11 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if(!authorizationService.check(
-                context,
-                user.orElse(null),
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.BULK_PKGSCREENSHOTIMPORTARCHIVE)) {
-            LOGGER.warn("attempt to import package screenshots, but was not authorized");
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("attempt to import package screenshots, but was not authorized");
         }
 
         // now check that the data is present.

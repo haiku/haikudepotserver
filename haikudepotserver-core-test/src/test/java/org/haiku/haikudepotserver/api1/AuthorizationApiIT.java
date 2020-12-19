@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,10 +9,9 @@ import com.google.common.collect.ImmutableSet;
 import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.api1.model.authorization.*;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
+import org.haiku.haikudepotserver.api1.model.authorization.*;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
@@ -20,6 +19,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.junit.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -171,7 +171,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
      * authorized to do so.</p>
      */
 
-    @Test
+    @Test(expected = AccessDeniedException.class)
     public void testCreateAuthorizationRule_unauthorized() throws ObjectNotFoundException, AuthorizationRuleConflictException {
         integrationTestSupportService.createStandardTestData();
 
@@ -187,25 +187,18 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         request.permissionCode = Permission.PKG_EDITICON.name().toLowerCase();
         request.pkgName = "pkg1";
 
-        try {
+        // ------------------------------------
+        authorizationApi.createAuthorizationPkgRule(request);
+        // ------------------------------------
 
-            // ------------------------------------
-            authorizationApi.createAuthorizationPkgRule(request);
-            // ------------------------------------
-
-            Assert.fail("expected authorization to fail");
-        }
-        catch(AuthorizationFailureException afe) {
-            // expected
-        }
-
+        // expected exception.
     }
 
     /**
      * <p>Checks what happens if you try to create a new rule, but you are not root.</p>
      */
 
-    @Test
+    @Test(expected = AccessDeniedException.class)
     public void testCreateAuthorizationRule_notAuthorized() throws ObjectNotFoundException, AuthorizationRuleConflictException {
         integrationTestSupportService.createStandardTestData();
 
@@ -221,16 +214,11 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
         request.pkgName = "pkg1";
         request.userNickname = "testuser";
 
-        try {
-            // ------------------------------------
-            authorizationApi.createAuthorizationPkgRule(request);
-            // ------------------------------------
+        // ------------------------------------
+        authorizationApi.createAuthorizationPkgRule(request);
+        // ------------------------------------
 
-            Assert.fail("it was expected that an authorization error would arise.");
-        }
-        catch(AuthorizationFailureException afe) {
-            LOGGER.info("authorization failed as expected");
-        }
+        // expected exception
 
     }
 

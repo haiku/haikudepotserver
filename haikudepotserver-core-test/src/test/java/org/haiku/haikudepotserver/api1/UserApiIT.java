@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -100,7 +100,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(user.tryGetUserUsageConditionsAgreement().get().getUserUsageConditions().getCode())
                 .isEqualTo("UUC2019V01");
 
-        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "Ue4nI92Rw").get()).isEqualTo(userOptional.get().getObjectId());
+        Assertions.assertThat(userAuthenticationService.authenticateByNicknameAndPassword("testuser", "Ue4nI92Rw").get()).isEqualTo(userOptional.get().getObjectId());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.token).isNotNull();
-        Assertions.assertThat(authenticationService.authenticateByToken(result.token).isPresent()).isTrue();
+        Assertions.assertThat(userAuthenticationService.authenticateByToken(result.token).isPresent()).isTrue();
 
         SignedJWT signedJWT = SignedJWT.parse(result.token);
         Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
@@ -181,7 +181,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         Assertions.assertThat(result.token).isNotNull();
-        Assertions.assertThat(authenticationService.authenticateByToken(result.token).isPresent()).isTrue();
+        Assertions.assertThat(userAuthenticationService.authenticateByToken(result.token).isPresent()).isTrue();
 
         SignedJWT signedJWT = SignedJWT.parse(result.token);
         Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
@@ -217,7 +217,7 @@ public class UserApiIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             User user = integrationTestSupportService.createBasicUser(context, "testuser", "U7vqpsu6BB");
             userOid = user.getObjectId();
-            token = authenticationService.generateToken(user);
+            token = userAuthenticationService.generateToken(user);
         }
 
         RenewTokenRequest renewTokenRequest = new RenewTokenRequest();
@@ -228,7 +228,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            Optional<ObjectId> afterUserObjectId = authenticationService.authenticateByToken(result.token);
+            Optional<ObjectId> afterUserObjectId = userAuthenticationService.authenticateByToken(result.token);
             Assertions.assertThat(userOid).isEqualTo(afterUserObjectId.get());
         }
 
@@ -243,7 +243,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         setAuthenticatedUser("testuser");
 
         // check that the password is correctly configured.
-        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").get()).isEqualTo(user.getObjectId());
+        Assertions.assertThat(userAuthenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").get()).isEqualTo(user.getObjectId());
 
         // now change it.
         ChangePasswordRequest request = new ChangePasswordRequest();
@@ -259,10 +259,10 @@ public class UserApiIT extends AbstractIntegrationTest {
 
         // now check that the old authentication no longer works and the new one does work
         Assertions.assertThat(
-                authenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").isPresent())
+                userAuthenticationService.authenticateByNicknameAndPassword("testuser", "U7vqpsu6BB").isPresent())
                 .isFalse();
         Assertions.assertThat(
-                authenticationService.authenticateByNicknameAndPassword("testuser", "8R3nlp11gX").get())
+                userAuthenticationService.authenticateByNicknameAndPassword("testuser", "8R3nlp11gX").get())
                 .isEqualTo(user.getObjectId());
 
     }
@@ -400,7 +400,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         // the user should now be able to be authenticated with the new password.
-        Assertions.assertThat(authenticationService.authenticateByNicknameAndPassword("testuser", "kQ83hWi3oWnYY21k").isPresent()).isTrue();
+        Assertions.assertThat(userAuthenticationService.authenticateByNicknameAndPassword("testuser", "kQ83hWi3oWnYY21k").isPresent()).isTrue();
 
         {
             ObjectContext context = serverRuntime.newContext();

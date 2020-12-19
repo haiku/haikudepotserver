@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,15 +23,17 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
 import org.haiku.haikudepotserver.user.model.UserService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -48,9 +50,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
     private final ServerRuntime serverRuntime;
-    private final AuthorizationService authorizationService;
+    private final PermissionEvaluator permissionEvaluator;
     private final CaptchaService captchaService;
-    private final AuthenticationService authenticationService;
+    private final UserAuthenticationService userAuthenticationService;
     private final UserService userService;
     private final UserRatingService userRatingService;
     private final PasswordResetService passwordResetService;
@@ -58,17 +60,17 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     public UserApiImpl(
             ServerRuntime serverRuntime,
-            AuthorizationService authorizationService,
+            PermissionEvaluator permissionEvaluator,
             CaptchaService captchaService,
-            AuthenticationService authenticationService,
+            UserAuthenticationService userAuthenticationService,
             UserService userService,
             UserRatingService userRatingService,
             PasswordResetService passwordResetService,
             JobService jobService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.captchaService = Preconditions.checkNotNull(captchaService);
-        this.authenticationService = Preconditions.checkNotNull(authenticationService);
+        this.userAuthenticationService = Preconditions.checkNotNull(userAuthenticationService);
         this.userService = Preconditions.checkNotNull(userService);
         this.userRatingService = Preconditions.checkNotNull(userRatingService);
         this.passwordResetService = Preconditions.checkNotNull(passwordResetService);
@@ -83,14 +85,15 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkNotNull(updateUserRequest.filter);
 
         final ObjectContext context = serverRuntime.newContext();
-        User authUser = obtainAuthenticatedUser(context);
         boolean activeDidChange = false;
 
         User user = User.tryGetByNickname(context, updateUserRequest.nickname)
                 .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
 
-        if (!authorizationService.check(context, authUser, user, Permission.USER_EDIT)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                user, Permission.USER_EDIT)) {
+            throw new AccessDeniedException("cannot edit [" + user + "]");
         }
 
         for (UpdateUserRequest.Filter filter : updateUserRequest.filter) {
@@ -170,7 +173,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.captchaResponse),"a capture response is required to create a user");
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.naturalLanguageCode));
 
-        if (!authenticationService.validatePassword(createUserRequest.passwordClear)) {
+        if (!userAuthenticationService.validatePassword(createUserRequest.passwordClear)) {
             throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
         }
 
@@ -216,7 +219,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         user.setNaturalLanguage(getNaturalLanguage(context, createUserRequest.naturalLanguageCode));
         user.setNickname(createUserRequest.nickname);
         user.setEmail(createUserRequest.email);
-        user.setPasswordHash(authenticationService.hashPassword(user, createUserRequest.passwordClear));
+        user.setPasswordHash(userAuthenticationService.hashPassword(user, createUserRequest.passwordClear));
 
         UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
         agreement.setUser(user);
@@ -236,13 +239,13 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(getUserRequest.nickname));
 
         final ObjectContext context = serverRuntime.newContext();
-        User authUser = obtainAuthenticatedUser(context);
-
         User user = User.tryGetByNickname(context, getUserRequest.nickname)
                 .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
 
-        if (!authorizationService.check(context, authUser, user, Permission.USER_VIEW)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                user, Permission.USER_VIEW)) {
+            throw new AccessDeniedException("unable to view user [" + user + "]");
         }
 
         GetUserResult result = new GetUserResult();
@@ -286,11 +289,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             authenticateUserRequest.passwordClear = authenticateUserRequest.passwordClear.trim();
         }
 
-        Optional<ObjectId> userOidOptional = authenticationService.authenticateByNicknameAndPassword(
+        Optional<ObjectId> userOidOptional = userAuthenticationService.authenticateByNicknameAndPassword(
                 authenticateUserRequest.nickname,
                 authenticateUserRequest.passwordClear);
 
-        if (!userOidOptional.isPresent()) {
+        if (userOidOptional.isEmpty()) {
 
             // if the authentication has failed then best to sleep for a moment
             // to make brute forcing a bit more tricky.
@@ -301,7 +304,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         else {
             ObjectContext context = serverRuntime.newContext();
             User user = User.getByObjectId(context, userOidOptional.get());
-            authenticateUserResult.token = authenticationService.generateToken(user);
+            authenticateUserResult.token = userAuthenticationService.generateToken(user);
         }
 
         return authenticateUserResult;
@@ -313,12 +316,12 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(renewTokenRequest.token));
         RenewTokenResult result = new RenewTokenResult();
 
-        Optional<ObjectId> userOidOptional = authenticationService.authenticateByToken(renewTokenRequest.token);
+        Optional<ObjectId> userOidOptional = userAuthenticationService.authenticateByToken(renewTokenRequest.token);
 
         if (userOidOptional.isPresent()) {
             ObjectContext context = serverRuntime.newContext();
             User user = User.getByObjectId(context, userOidOptional.get());
-            result.token = authenticationService.generateToken(user);
+            result.token = userAuthenticationService.generateToken(user);
             LOGGER.debug("did renew token for user; {}", user.toString());
         }
         else {
@@ -332,7 +335,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     @Override
     public ChangePasswordResult changePassword(
             ChangePasswordRequest changePasswordRequest)
-            throws ObjectNotFoundException, AuthorizationFailureException, ValidationException {
+            throws ObjectNotFoundException, ValidationException {
 
         Preconditions.checkNotNull(changePasswordRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(changePasswordRequest.nickname));
@@ -348,15 +351,18 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                 () -> new ObjectNotFoundException(User.class.getSimpleName(), changePasswordRequest.nickname)
         );
 
-        if (!authorizationService.check(context, authUser, targetUser, Permission.USER_CHANGEPASSWORD)) {
-            LOGGER.info("the logged in user {} is not allowed to change the password of another user {}", authUser.getNickname(), changePasswordRequest.nickname);
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                targetUser, Permission.USER_CHANGEPASSWORD)) {
+            throw new AccessDeniedException(
+                    "the logged in user is not allowed to change the password of another user ["
+                            + changePasswordRequest.nickname + "]");
         }
 
         // if the user is changing their own password then they need to know their existing password
         // first.
 
-        if (!authenticationService.validatePassword(changePasswordRequest.newPasswordClear)) {
+        if (!userAuthenticationService.validatePassword(changePasswordRequest.newPasswordClear)) {
             throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
         }
 
@@ -381,9 +387,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                 throw new IllegalStateException("the old password clear is required to change the password of a user unless the logged in user is root.");
             }
 
-            if (!authenticationService.authenticateByNicknameAndPassword(
+            if (userAuthenticationService.authenticateByNicknameAndPassword(
                     changePasswordRequest.nickname,
-                    changePasswordRequest.oldPasswordClear).isPresent()) {
+                    changePasswordRequest.oldPasswordClear).isEmpty()) {
 
                 // if the old password does not match to the user then we should present this
                 // as a validation failure rather than an authorization failure.
@@ -394,7 +400,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             }
         }
 
-        targetUser.setPasswordHash(authenticationService.hashPassword(targetUser, changePasswordRequest.newPasswordClear));
+        targetUser.setPasswordHash(userAuthenticationService.hashPassword(targetUser, changePasswordRequest.newPasswordClear));
         context.commitChanges();
         LOGGER.info("did change password for user {}", changePasswordRequest.nickname);
 
@@ -407,12 +413,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         final ObjectContext context = serverRuntime.newContext();
 
-        if (!authorizationService.check(
-                context,
-                tryObtainAuthenticatedUser(context).orElse(null),
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.USER_LIST)) {
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("unable to list users");
         }
 
         UserSearchSpecification specification = new UserSearchSpecification();
@@ -519,12 +524,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
         // only the authenticated user is able to agree to the user compliance.
 
-        if (!authorizationService.check(
-                context,
-                tryObtainAuthenticatedUser(context).orElse(null),
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 user,
                 Permission.USER_AGREE_USAGE_CONDITIONS)) {
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("unable to agree user usage conditions for user [" + user + "]");
         }
 
         // remove any existing agreement

@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class IntegrationTestSupportService {
     private PkgScreenshotService pkgScreenshotService;
 
     @Resource
-    private AuthenticationService authenticationService;
+    private UserAuthenticationService userAuthenticationService;
 
     private ObjectContext objectContext = null;
 
@@ -350,7 +350,7 @@ public class IntegrationTestSupportService {
         User user = context.newObject(User.class);
         user.setNickname(nickname);
         user.setPasswordSalt(); // random
-        user.setPasswordHash(authenticationService.hashPassword(user, password));
+        user.setPasswordHash(userAuthenticationService.hashPassword(user, password));
         user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH));
         context.commitChanges();
         return user;

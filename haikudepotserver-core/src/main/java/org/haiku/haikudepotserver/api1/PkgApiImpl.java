@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,17 +18,17 @@ import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgIcon;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgVersionUrl;
 import org.haiku.haikudepotserver.api1.model.pkg.*;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.BadPkgIconException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.auto._PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.*;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -36,6 +36,8 @@ import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -57,7 +59,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
     private final ServerRuntime serverRuntime;
-    private final AuthorizationService authorizationService;
+    private final PermissionEvaluator permissionEvaluator;
     private final PkgIconService pkgIconService;
     private final PkgScreenshotService pkgScreenshotService;
     private final PkgService pkgService;
@@ -71,7 +73,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
      * viewing of the package counter can be avoided.</p>
      */
 
-    private Cache<String,Boolean> remoteIdentifierToPkgView = CacheBuilder
+    private final Cache<String,Boolean> remoteIdentifierToPkgView = CacheBuilder
             .newBuilder()
             .maximumSize(2048)
             .expireAfterAccess(2, TimeUnit.DAYS)
@@ -79,14 +81,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     public PkgApiImpl(
             ServerRuntime serverRuntime,
-            AuthorizationService authorizationService,
+            PermissionEvaluator permissionEvaluator,
             PkgIconService pkgIconService,
             PkgScreenshotService pkgScreenshotService,
             PkgService pkgService,
             PkgLocalizationService pkgLocalizationService,
             ClientIdentifierSupplier clientIdentifierSupplier) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
         this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
         this.pkgService = Preconditions.checkNotNull(pkgService);
@@ -100,7 +102,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
-        if (!pkgOptional.isPresent()) {
+        if (pkgOptional.isEmpty()) {
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), pkgName);
         }
 
@@ -146,14 +148,14 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         final ObjectContext context = serverRuntime.newContext();
-
         Pkg pkg = getPkg(context, updatePkgCategoriesRequest.pkgName);
 
-        User user = obtainAuthenticatedUser(context);
-
-        if (!authorizationService.check(context, user, pkg, Permission.PKG_EDITCATEGORIES)) {
-            LOGGER.warn("attempt to configure the categories for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg,
+                Permission.PKG_EDITCATEGORIES)) {
+            throw new AccessDeniedException("attempt to configure the categories for package ["
+                    + pkg + "], but the user is not able to");
         }
 
         List<PkgCategory> pkgCategories = new ArrayList<>(PkgCategory.getByCodes(context, updatePkgCategoriesRequest.pkgCategoryCodes));
@@ -173,10 +175,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         LOGGER.info(
                 "did configure {} categories for pkg {}",
-                new Object[]{
-                        updatePkgCategoriesRequest.pkgCategoryCodes.size(),
-                        pkg.getName(),
-                }
+                updatePkgCategoriesRequest.pkgCategoryCodes.size(),
+                pkg.getName()
         );
 
         return new UpdatePkgCategoriesResult();
@@ -256,7 +256,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         SearchPkgsResult.Pkg resultPkg = new SearchPkgsResult.Pkg();
                         resultPkg.name = spv.getPkg().getName();
                         resultPkg.modifyTimestamp = spv.getPkg().getModifyTimestamp().getTime();
-                        resultPkg.derivedRating = pkgUserRatingAggregateOptional.isPresent() ? pkgUserRatingAggregateOptional.get().getDerivedRating() : null;
+                        resultPkg.derivedRating = pkgUserRatingAggregateOptional.map(_PkgUserRatingAggregate::getDerivedRating).orElse(null);
                         resultPkg.hasAnyPkgIcons = !PkgIconImage.findForPkg(context, spv.getPkg()).isEmpty();
 
                         ResolvedPkgVersionLocalization resolvedPkgVersionLocalization =
@@ -471,7 +471,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             break;
 
             case SPECIFIC: {
-                if (!architectureOptional.isPresent()) {
+                if (architectureOptional.isEmpty()) {
                     throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
                 }
 
@@ -497,7 +497,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             break;
 
             case LATEST: {
-                if (!architectureOptional.isPresent()) {
+                if (architectureOptional.isEmpty()) {
                     throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
                 }
 
@@ -569,9 +569,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User user = obtainAuthenticatedUser(context);
 
-        if (!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
-            LOGGER.warn("attempt to configure the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg,
+                Permission.PKG_EDITICON)) {
+            throw new AccessDeniedException("attempt to configure the icon for package ["
+                    + pkg + "], but the user is not able to");
         }
 
         // insert or override the icons
@@ -675,9 +678,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User user = obtainAuthenticatedUser(context);
 
-        if (!authorizationService.check(context, user, pkg, Permission.PKG_EDITICON)) {
-            LOGGER.warn("attempt to remove the icon for package {}, but the user {} is not able to", pkg.getName(), user.getNickname());
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg,
+                Permission.PKG_EDITICON)) {
+            throw new AccessDeniedException("attempt to remove the icon for package ["
+                    + pkg + "], but the user is not able to");
         }
 
         pkgIconService.removePkgIcon(context, pkg.getPkgSupplement());
@@ -697,7 +703,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> pkgScreenshotOptional = PkgScreenshot.tryGetByCode(context, request.code);
 
-        if (!pkgScreenshotOptional.isPresent()) {
+        if (pkgScreenshotOptional.isEmpty()) {
             throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), request.code);
         }
 
@@ -744,20 +750,19 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.newContext();
         Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, removePkgScreenshotRequest.code);
 
-        if (!screenshotOptional.isPresent()) {
+        if (screenshotOptional.isEmpty()) {
             throw new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), removePkgScreenshotRequest.code);
         }
-
-        User authUser = obtainAuthenticatedUser(context);
 
         // check to see if the user has any permission for any of the associated
         // packages.
 
         if (screenshotOptional.get().getPkgSupplement().getPkgs()
                 .stream()
-                .noneMatch(p -> authorizationService.check(
-                        context, authUser, p, Permission.PKG_EDITSCREENSHOT))) {
-            throw new AuthorizationFailureException();
+                .noneMatch(p -> permissionEvaluator.hasPermission(
+                        SecurityContextHolder.getContext().getAuthentication(),
+                        p, Permission.PKG_EDITSCREENSHOT))) {
+            throw new AccessDeniedException("unable to remove the package screenshot for package");
         }
 
         pkgScreenshotService.deleteScreenshot(context, screenshotOptional.get());
@@ -779,8 +784,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITSCREENSHOT)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg,
+                Permission.PKG_EDITSCREENSHOT)) {
+            throw new AccessDeniedException("unable to reorder the package screenshot");
         }
 
         pkgScreenshotService.reorderPkgScreenshots(context, pkg.getPkgSupplement(), reorderPkgScreenshotsRequest.codes);
@@ -802,8 +810,11 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
         User authUser = obtainAuthenticatedUser(context);
 
-        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITLOCALIZATION)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg,
+                Permission.PKG_EDITLOCALIZATION)) {
+            throw new AccessDeniedException("unable to edit the package localization for [" + pkg + "]");
         }
 
         for (org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization requestPkgVersionLocalization : updatePkgLocalizationRequest.pkgLocalizations) {
@@ -887,7 +898,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                             getPkgVersionLocalizationsRequest.revision));
         }
 
-        if (!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
+        if (pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "/" + architecture.getCode());
         }
 
@@ -920,15 +931,15 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Pkg pkg = getPkg(context, request.pkgName);
         Repository repository = getRepository(context, request.repositoryCode);
 
-        User authUser = obtainAuthenticatedUser(context);
-
-        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITPROMINENCE)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg, Permission.PKG_EDITPROMINENCE)) {
+            throw new AccessDeniedException("unable to edit the package prominence for [" + pkg + "]");
         }
 
         Optional<Prominence> prominenceOptional = Prominence.getByOrdering(context, request.prominenceOrdering);
 
-        if (!prominenceOptional.isPresent()) {
+        if (prominenceOptional.isEmpty()) {
             throw new ObjectNotFoundException(Prominence.class.getSimpleName(), request.prominenceOrdering);
         }
 
@@ -956,9 +967,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 .getPkgSupplement().getPkgChangelog();
         GetPkgChangelogResult result = new GetPkgChangelogResult();
 
-        if (pkgChangelogOptional.isPresent()) {
-            result.content = pkgChangelogOptional.get().getContent();
-        }
+        pkgChangelogOptional.ifPresent(pkgChangelog -> result.content = pkgChangelog.getContent());
 
         return result;
     }
@@ -972,8 +981,10 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         User authUser = obtainAuthenticatedUser(context);
         Pkg pkg = getPkg(context, request.pkgName);
 
-        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITCHANGELOG)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg, Permission.PKG_EDITCHANGELOG)) {
+            throw new AccessDeniedException("unable to edit the changelog for [" + pkg + "]");
         }
 
         String newContent = request.content;
@@ -997,11 +1008,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.major), "the version major must be supplied");
 
         ObjectContext context = serverRuntime.newContext();
-        User authUser = obtainAuthenticatedUser(context);
         Pkg pkg = getPkg(context, request.pkgName);
 
-        if (!authorizationService.check(context, authUser, pkg, Permission.PKG_EDITVERSION)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg, Permission.PKG_EDITVERSION)) {
+            throw new AccessDeniedException("unable to update the package version for package [" + pkg + "]");
         }
 
         PkgVersion pkgVersion = PkgVersion.getForPkg(
@@ -1011,17 +1023,13 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         ).orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), null));
 
         for(UpdatePkgVersionRequest.Filter filter : request.filter) {
-
             switch (filter) {
-
                 case ACTIVE:
                     LOGGER.info("will update the package version active flag to {} for {}", request.active, pkgVersion.toString());
                     pkgVersion.setActive(request.active);
                     pkgService.adjustLatest(context, pkgVersion.getPkg(), pkgVersion.getArchitecture());
                     break;
-
             }
-
         }
 
         context.commitChanges();

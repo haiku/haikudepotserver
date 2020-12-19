@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Uninterruptibles;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
@@ -422,7 +423,7 @@ public class LocalJobServiceImpl
 
         clearExpiredInternalJobs();
 
-        if(null!=statuses && statuses.isEmpty()) {
+        if (CollectionUtils.isEmpty(statuses)) {
             return Collections.emptyList();
         }
 
@@ -430,7 +431,7 @@ public class LocalJobServiceImpl
                 .values()
                 .stream()
                 .filter(v -> null == user || user.getNickname().equals(v.getOwnerUserNickname()))
-                .filter(v -> null == statuses || statuses.contains(v.getStatus()))
+                .filter(v -> statuses.contains(v.getStatus()))
                 .collect(Collectors.toList());
 
     }

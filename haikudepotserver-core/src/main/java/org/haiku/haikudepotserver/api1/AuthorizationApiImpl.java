@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,8 +10,8 @@ import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.collections4.CollectionUtils;
 import org.haiku.haikudepotserver.api1.model.authorization.*;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
@@ -19,14 +19,17 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleSearchSpecification;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleService;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
 import org.haiku.haikudepotserver.security.model.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,16 +39,16 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationApiImpl.class);
 
     private final ServerRuntime serverRuntime;
-    private final AuthorizationService authorizationService;
+    private final PermissionEvaluator permissionEvaluator;
     private final AuthorizationPkgRuleService authorizationPkgRulesService;
 
     public AuthorizationApiImpl(
             ServerRuntime serverRuntime,
-            AuthorizationService authorizationService,
+            PermissionEvaluator permissionEvaluator,
             AuthorizationPkgRuleService authorizationPkgRulesService
     ) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.authorizationPkgRulesService = Preconditions.checkNotNull(authorizationPkgRulesService);
     }
 
@@ -75,11 +78,11 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
      */
 
     private void ensureCanAuthorizationManipulate() {
-        ObjectContext context = serverRuntime.newContext();
-        User authUser = obtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(context, authUser, null, org.haiku.haikudepotserver.security.model.Permission.AUTHORIZATION_CONFIGURE)) {
-            throw new AuthorizationFailureException();
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+        null,
+                org.haiku.haikudepotserver.security.model.Permission.AUTHORIZATION_CONFIGURE)) {
+            throw new AccessDeniedException("the user is unable to configure authorization");
         }
     }
 
@@ -92,27 +95,26 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         Preconditions.checkNotNull(deriveAuthorizationRequest);
         Preconditions.checkNotNull(deriveAuthorizationRequest.targetAndPermissions);
 
-        final ObjectContext context = serverRuntime.newContext();
         CheckAuthorizationResult result = new CheckAuthorizationResult();
-        result.targetAndPermissions = new ArrayList<>();
+        result.targetAndPermissions = CollectionUtils.emptyIfNull(deriveAuthorizationRequest.targetAndPermissions).stream()
+                .map(tandp -> {
+                    CheckAuthorizationResult.AuthorizationTargetAndPermission authorizationTargetAndPermission = new CheckAuthorizationResult.AuthorizationTargetAndPermission();
 
-        for(CheckAuthorizationRequest.AuthorizationTargetAndPermission targetAndPermission : deriveAuthorizationRequest.targetAndPermissions) {
+                    authorizationTargetAndPermission.permissionCode = tandp.permissionCode;
+                    authorizationTargetAndPermission.targetIdentifier = tandp.targetIdentifier;
+                    authorizationTargetAndPermission.targetType = tandp.targetType;
 
-            CheckAuthorizationResult.AuthorizationTargetAndPermission authorizationTargetAndPermission = new CheckAuthorizationResult.AuthorizationTargetAndPermission();
-
-            authorizationTargetAndPermission.permissionCode = targetAndPermission.permissionCode;
-            authorizationTargetAndPermission.targetIdentifier = targetAndPermission.targetIdentifier;
-            authorizationTargetAndPermission.targetType = targetAndPermission.targetType;
-
-            authorizationTargetAndPermission.authorized = authorizationService.check(
-                    context,
-                    tryObtainAuthenticatedUser(context).orElse(null),
-                    null!=targetAndPermission.targetType ? TargetType.valueOf(targetAndPermission.targetType.name()) : null,
-                    targetAndPermission.targetIdentifier,
-                    org.haiku.haikudepotserver.security.model.Permission.valueOf(targetAndPermission.permissionCode));
-
-            result.targetAndPermissions.add(authorizationTargetAndPermission);
-        }
+                    authorizationTargetAndPermission.authorized = permissionEvaluator.hasPermission(
+                            SecurityContextHolder.getContext().getAuthentication(),
+                            tandp.targetIdentifier,
+                            Optional.ofNullable(tandp.targetType)
+                                    .map(tt -> TargetType.valueOf(tt.name()))
+                                    .map(Object::toString)
+                                    .orElse(null),
+                            org.haiku.haikudepotserver.security.model.Permission.valueOf(tandp.permissionCode));
+                    return authorizationTargetAndPermission;
+                })
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -130,20 +132,20 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         org.haiku.haikudepotserver.dataobjects.Permission permission = ensurePermission(context, request.permissionCode);
         User user = ensureUser(context, request.userNickname);
 
-        if(user.getIsRoot()) {
+        if (user.getIsRoot()) {
             throw new ValidationException(new ValidationFailure("user", "root"));
         }
 
         Pkg pkg = null;
 
-        if(null!=request.pkgName) {
+        if (null != request.pkgName) {
             pkg = ensurePkg(context, request.pkgName);
         }
 
         // now we need to check to make sure that the newly added rule does not conflict with an existing
         // rule.  If this is the case then exception.
 
-        if(authorizationPkgRulesService.wouldConflict(context,user,permission,pkg)) {
+        if (authorizationPkgRulesService.wouldConflict(context, user, permission, pkg)) {
             throw new AuthorizationRuleConflictException();
         }
 
@@ -169,13 +171,13 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         org.haiku.haikudepotserver.dataobjects.Permission permission = ensurePermission(context, request.permissionCode);
         User user = null;
 
-        if(null!=request.userNickname) {
+        if (null != request.userNickname) {
             user = ensureUser(context, request.userNickname);
         }
 
         Pkg pkg = null;
 
-        if(!Strings.isNullOrEmpty(request.pkgName)) {
+        if (!Strings.isNullOrEmpty(request.pkgName)) {
             pkg = ensurePkg(context, request.pkgName);
         }
 
@@ -194,8 +196,8 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     public SearchAuthorizationPkgRulesResult searchAuthorizationPkgRules(SearchAuthorizationPkgRulesRequest request) throws ObjectNotFoundException {
 
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(null==request.limit || request.limit > 0);
-        Preconditions.checkState(null!=request.offset && request.offset >= 0);
+        Preconditions.checkState(null == request.limit || request.limit > 0);
+        Preconditions.checkState(null != request.offset && request.offset >= 0);
 
         ensureCanAuthorizationManipulate();
 
@@ -207,14 +209,14 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
         specification.setOffset(request.offset);
         specification.setIncludeInactive(false);
 
-        if(!Strings.isNullOrEmpty(request.userNickname)) {
+        if (!Strings.isNullOrEmpty(request.userNickname)) {
             specification.setUser(ensureUser(context, request.userNickname));
         }
 
-        if(null!=request.permissionCodes) {
+        if (null != request.permissionCodes) {
             List<org.haiku.haikudepotserver.dataobjects.Permission> permissions = new ArrayList<>();
 
-            for(int i=0;i<request.permissionCodes.size();i++) {
+            for(int i=  0; i < request.permissionCodes.size(); i++) {
                 permissions.add(ensurePermission(context, request.permissionCodes.get(i)));
             }
 

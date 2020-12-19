@@ -6,7 +6,7 @@ package org.haiku.haikudepotserver.config;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.security.*;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -25,13 +25,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final ServerRuntime serverRuntime;
 
-    private final AuthenticationService authenticationService;
+    private final UserAuthenticationService userAuthenticationService;
 
     public SecurityConfig(
             ServerRuntime serverRuntime,
-            AuthenticationService authenticationService) {
+            UserAuthenticationService userAuthenticationService) {
         this.serverRuntime = serverRuntime;
-        this.authenticationService = authenticationService;
+        this.userAuthenticationService = userAuthenticationService;
     }
 
     @Override
@@ -44,8 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // as well as a special authentication case for the repository security.
 
         http
-                .authenticationProvider(new UserAuthenticationProvider(authenticationService))
-                .authenticationProvider(new RepositoryAuthenticationProvider(serverRuntime, authenticationService))
+                .authenticationProvider(new UserAuthenticationProvider(userAuthenticationService))
+                .authenticationProvider(new RepositoryAuthenticationProvider(serverRuntime, userAuthenticationService))
                 .httpBasic().authenticationDetailsSource(new RepositoryAuthenticationDetailsSource());
 
         // this covers authentication by supplying a JWT bearer token as well as an occasional need
@@ -54,8 +54,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CompositeFilter tokenFilters = new CompositeFilter();
         tokenFilters.setFilters(
                 List.of(
-                        new BearerTokenAuthenticationFilter(authenticationService),
-                        new QueryParamAuthenticationFilter(authenticationService)
+                        new BearerTokenAuthenticationFilter(userAuthenticationService),
+                        new QueryParamAuthenticationFilter(userAuthenticationService)
                 )
         );
         http.addFilterBefore(tokenFilters, BasicAuthenticationFilter.class);

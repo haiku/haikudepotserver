@@ -12,10 +12,13 @@ import com.google.common.net.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.support.Constants;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,6 +29,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * <p>This servlet gets hit whenever anything goes wrong in the application from a user perspective.  It will
@@ -33,6 +37,8 @@ import java.util.Locale;
  */
 
 public class ErrorServlet extends HttpServlet {
+
+    protected static Logger LOGGER = LoggerFactory.getLogger(ErrorServlet.class);
 
     private final static String PARAM_JSONRPCERRORCODE = "jrpcerrorcd";
 
@@ -60,6 +66,13 @@ public class ErrorServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
+
+        try {
+            attemptLogError(req);
+        }
+        catch(Throwable th) {
+            // swallow
+        }
 
         try {
             String jsonRpcErrorCodeString = req.getParameter(PARAM_JSONRPCERRORCODE);
@@ -187,6 +200,22 @@ public class ErrorServlet extends HttpServlet {
         out.append("</div>\n");
         out.append("</body>\n");
         out.append("</html>\n");
+    }
+
+    private void attemptLogError(HttpServletRequest req) {
+        Number statusCode = Optional.ofNullable((Number) req.getAttribute(RequestDispatcher.ERROR_STATUS_CODE)).orElse(0);
+        String requestUri = (String) req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+
+        switch (statusCode.intValue()) {
+            case 404:
+                LOGGER.info("not found [{}]", requestUri);
+                break;
+            default:
+                Throwable throwable = (Throwable) req.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+                String message = (String) req.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+                LOGGER.error("failed request to [{}] ({}); {}", requestUri, statusCode, message, throwable);
+                break;
+        }
     }
 
 }

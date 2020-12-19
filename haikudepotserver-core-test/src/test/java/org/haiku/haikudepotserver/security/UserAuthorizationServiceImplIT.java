@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Andrew Lindesay
+ * Copyright 2019-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.model.UserAuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,10 +22,10 @@ import javax.annotation.Resource;
 import java.util.stream.Stream;
 
 @ContextConfiguration(classes = TestConfig.class)
-public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
+public class UserAuthorizationServiceImplIT extends AbstractIntegrationTest {
 
     @Resource
-    private AuthorizationService authorizationService;
+    private UserAuthorizationService userAuthorizationService;
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
@@ -57,7 +57,7 @@ public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
             User user = User.getByNickname(context, "testuser");
 
             // ---------------------------------
-            authorizationService.check(
+            userAuthorizationService.check(
                     context,
                     user,
                     standardTestData.pkg1, // <--- package
@@ -91,7 +91,7 @@ public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
             User user = User.getByNickname(context, "testuser");
 
             // ---------------------------------
-            result = authorizationService.check(
+            result = userAuthorizationService.check(
                     context,
                     user,
                     user,
@@ -123,7 +123,7 @@ public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
 
             // ---------------------------------
-            result = authorizationService.check(
+            result = userAuthorizationService.check(
                     context,
                     User.getByNickname(context, "testuser"),
                     User.getByNickname(context, "testuser2"),
@@ -154,7 +154,7 @@ public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
 
             // ---------------------------------
-            result = authorizationService.check(
+            result = userAuthorizationService.check(
                     context,
                     User.getByNickname(context, "root"),
                     User.getByNickname(context, "testuser"),
@@ -183,7 +183,7 @@ public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
 
             // ---------------------------------
-            result = authorizationService.check(
+            result = userAuthorizationService.check(
                     context,
                     User.getByNickname(context, "testuser"),
                     Pkg.getByName(context, "pkg2"),
@@ -233,7 +233,7 @@ public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
 
             // ---------------------------------
-            result = authorizationService.check(
+            result = userAuthorizationService.check(
                     context,
                     User.getByNickname(context, "testuser"),
                     Pkg.getByName(context, "pkg2"),
@@ -267,7 +267,7 @@ public class AuthorizationServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
 
             // ---------------------------------
-            result = authorizationService.check(
+            result = userAuthorizationService.check(
                     context,
                     User.getByNickname(context, "testuser"),
                     Pkg.getByName(context, "pkg2"),

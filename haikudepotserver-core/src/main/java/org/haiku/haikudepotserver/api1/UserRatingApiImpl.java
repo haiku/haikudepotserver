@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,14 +12,13 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.userrating.*;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
@@ -27,6 +26,8 @@ import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -42,19 +43,19 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
     private ServerRuntime serverRuntime;
-    private AuthorizationService authorizationService;
+    private PermissionEvaluator permissionEvaluator;
     private JobService jobService;
     private UserRatingService userRatingService;
     private PkgService pkgService;
 
     public UserRatingApiImpl(
             ServerRuntime serverRuntime,
-            AuthorizationService authorizationService,
+            PermissionEvaluator permissionEvaluator,
             JobService jobService,
             UserRatingService userRatingService,
             PkgService pkgService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.jobService = Preconditions.checkNotNull(jobService);
         this.userRatingService = Preconditions.checkNotNull(userRatingService);
         this.pkgService = Preconditions.checkNotNull(pkgService);
@@ -114,12 +115,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         final ObjectContext context = serverRuntime.newContext();
 
-        if(!authorizationService.check(
-                context,
-                tryObtainAuthenticatedUser(context).orElse(null),
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("unable to derive and store user ratings");
         }
 
         Pkg.tryGetByName(context, request.pkgName).
@@ -136,14 +136,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     public DeriveAndStoreUserRatingsForAllPkgsResult deriveAndStoreUserRatingsForAllPkgs(DeriveAndStoreUserRatingsForAllPkgsResult request) {
         Preconditions.checkNotNull(request);
 
-        final ObjectContext context = serverRuntime.newContext();
-
-        if(!authorizationService.check(
-                context,
-                tryObtainAuthenticatedUser(context).orElse(null),
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("unable to derive and store user ratings");
         }
 
         jobService.submit(
@@ -204,7 +201,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
                 context, pkg, repository, architecture, versionCoordinates);
 
-        if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
+        if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
             throw new ObjectNotFoundException(
                     PkgVersion.class.getSimpleName(),
                     request.pkgName + "@" + versionCoordinates.toString());
@@ -212,7 +209,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         Optional<UserRating> userRatingOptional = UserRating.getByUserAndPkgVersion(context, user, pkgVersionOptional.get());
 
-        if(!userRatingOptional.isPresent()) {
+        if(userRatingOptional.isEmpty()) {
             throw new ObjectNotFoundException(UserRating.class.getSimpleName(), "");
         }
 
@@ -253,7 +250,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
-        if(!pkgOptional.isPresent()) {
+        if(pkgOptional.isEmpty()) {
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
         }
 
@@ -268,7 +265,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         if(null!=request.userRatingStabilityCode) {
             userRatingStabilityOptional = UserRatingStability.getByCode(context, request.userRatingStabilityCode);
 
-            if(!userRatingStabilityOptional.isPresent()) {
+            if(userRatingStabilityOptional.isEmpty()) {
                 throw new ObjectNotFoundException(
                         UserRatingStability.class.getSimpleName(),
                         request.userRatingStabilityCode);
@@ -279,22 +276,19 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         Optional<User> authenticatedUserOptional = tryObtainAuthenticatedUser(context);
 
-        if(!authenticatedUserOptional.isPresent()) {
-            LOGGER.warn("only authenticated users are able to add user ratings");
-            throw new AuthorizationFailureException();
+        if(authenticatedUserOptional.isEmpty()) {
+            throw new AccessDeniedException("only authenticated users are able to add user ratings");
         }
 
         if(!authenticatedUserOptional.get().getNickname().equals(user.getNickname())) {
-            LOGGER.warn("it is not allowed to add a user rating for another user");
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("it is not allowed to add a user rating for another user");
         }
 
-        if(!authorizationService.check(
-                context,
-                authenticatedUserOptional.orElse(null),
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
                 pkgOptional.get(),
                 Permission.PKG_CREATEUSERRATING)) {
-            throw new AuthorizationFailureException();
+            throw new AccessDeniedException("unable to create user ratings for [" + pkgOptional.get() + "]");
         }
 
         // check the package version
@@ -325,7 +319,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 throw new IllegalStateException("unsupported pkg version type; " + request.pkgVersionType.name());
         }
 
-        if(!pkgVersionOptional.isPresent()) {
+        if(pkgVersionOptional.isEmpty()) {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkgOptional.get().getName()+"_"+request.pkgVersionType.name());
         }
 
@@ -374,11 +368,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
 
-        User authenticatedUser = obtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(context, authenticatedUser, userRating, Permission.USERRATING_EDIT)) {
-            LOGGER.error("unable to edit the userrating as {}", authenticatedUser.toString());
-            throw new AuthorizationFailureException();
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                userRating,
+                Permission.USERRATING_EDIT)) {
+            throw new AccessDeniedException("unable to edit the userrating");
         }
 
         for(UpdateUserRatingRequest.Filter filter : request.filter) {
@@ -468,7 +462,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         if(null!=request.pkgName) {
             pkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
-            if(!pkgOptional.isPresent()) {
+            if(pkgOptional.isEmpty()) {
                 throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
             }
         }
@@ -484,17 +478,17 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         // if there is a major version specified then we must be requesting a specific package version,
         // otherwise we will constrain based on the architecture and/or the package name.
 
-        if(null!=request.pkgVersionMajor) {
+        if (null != request.pkgVersionMajor) {
 
-            if(!repositoryOptional.isPresent()) {
+            if (repositoryOptional.isEmpty()) {
                 throw new IllegalStateException("the repository is required when a pkg version is specified");
             }
 
-            if(!pkgOptional.isPresent()) {
+            if (pkgOptional.isEmpty()) {
                 throw new IllegalStateException("the pkg is required when a pkg version is specified");
             }
 
-            if(null==architecture) {
+            if (null == architecture) {
                 throw new IllegalStateException("the architecture is required when a pkg version is specified");
             }
 
@@ -525,7 +519,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         if(null!=request.userNickname) {
             Optional<User> userOptional = User.tryGetByNickname(context, request.userNickname);
 
-            if(!userOptional.isPresent()) {
+            if(userOptional.isEmpty()) {
                 throw new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname);
             }
 
@@ -570,11 +564,10 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
 
-        User authenticatedUser = obtainAuthenticatedUser(context);
-
-        if(!authorizationService.check(context, authenticatedUser, userRating, Permission.USERRATING_REMOVE)) {
-            LOGGER.error("unable to delete the userrating as {}", authenticatedUser.toString());
-            throw new AuthorizationFailureException();
+        if(!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                userRating, Permission.USERRATING_REMOVE)) {
+            throw new AccessDeniedException("unable to delete the userrating");
         }
 
         userRatingService.removeUserRatingAtomically(userRating.getCode());

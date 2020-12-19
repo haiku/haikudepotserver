@@ -18,7 +18,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.security.UserAuthentication;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -74,7 +74,7 @@ public abstract class AbstractIntegrationTest {
     protected ServerRuntime serverRuntime;
 
     @Resource
-    protected AuthenticationService authenticationService;
+    protected UserAuthenticationService userAuthenticationService;
 
     @Resource
     protected IntegrationTestSupportService integrationTestSupportService;
@@ -185,14 +185,14 @@ public abstract class AbstractIntegrationTest {
 
                 String databaseProductName = connection.getMetaData().getDatabaseProductName();
 
-                if(!databaseProductName.equals(DATABASEPRODUCTNAME_POSTGRES)) {
+                if (!databaseProductName.equals(DATABASEPRODUCTNAME_POSTGRES)) {
                     throw new IllegalStateException(String.format(
                             "the system is designed to be tested against %s database product, but is '%s'",
                             DATABASEPRODUCTNAME_POSTGRES,
                             databaseProductName));
                 }
 
-                if(!getDatabaseName(connection).endsWith("_integrationtest")) {
+                if (!getDatabaseName(connection).endsWith("_integrationtest")) {
                     throw new IllegalStateException("unable to proceed with integration tests against a database which is not an integration test database");
                 }
 

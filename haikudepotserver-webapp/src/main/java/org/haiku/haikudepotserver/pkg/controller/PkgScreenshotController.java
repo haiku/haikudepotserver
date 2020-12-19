@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,13 +21,15 @@ import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
 import org.haiku.haikudepotserver.pkg.model.SizeLimitReachedException;
-import org.haiku.haikudepotserver.security.model.AuthorizationService;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
+import org.haiku.haikudepotserver.security.model.UserAuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ByteCounterOutputStream;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,17 +63,17 @@ public class PkgScreenshotController extends AbstractController {
     private ServerRuntime serverRuntime;
     private PkgScreenshotService pkgScreenshotService;
     private JobService jobService;
-    private AuthorizationService authorizationService;
+    private PermissionEvaluator permissionEvaluator;
 
     public PkgScreenshotController(
             ServerRuntime serverRuntime,
             PkgScreenshotService pkgScreenshotService,
             JobService jobService,
-            AuthorizationService authorizationService) {
+            PermissionEvaluator permissionEvaluator) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
         this.jobService = Preconditions.checkNotNull(jobService);
-        this.authorizationService = Preconditions.checkNotNull(authorizationService);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
     }
 
     private void handleHeadOrGet(
@@ -148,8 +150,8 @@ public class PkgScreenshotController extends AbstractController {
     @RequestMapping(value = "/{"+KEY_SCREENSHOTCODE+"}.{"+KEY_FORMAT+"}", method = RequestMethod.GET)
     public void handleGet(
             HttpServletResponse response,
-            @RequestParam(value = KEY_TARGETWIDTH, required = true) int targetWidth,
-            @RequestParam(value = KEY_TARGETHEIGHT, required = true) int targetHeight,
+            @RequestParam(value = KEY_TARGETWIDTH) int targetWidth,
+            @RequestParam(value = KEY_TARGETHEIGHT) int targetHeight,
             @PathVariable(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_SCREENSHOTCODE) String screenshotCode)
             throws IOException {
@@ -179,7 +181,8 @@ public class PkgScreenshotController extends AbstractController {
         }
 
         ObjectContext context = serverRuntime.newContext();
-        PkgScreenshot screenshot = PkgScreenshot.tryGetByCode(context, screenshotCode).orElseThrow(ScreenshotNotFound::new);
+        PkgScreenshot screenshot = PkgScreenshot.tryGetByCode(context, screenshotCode)
+                .orElseThrow(ScreenshotNotFound::new);
         byte[] data = screenshot.tryGetPkgScreenshotImage().get().getData();
         org.haiku.haikudepotserver.dataobjects.MediaType mediaType = screenshot.tryGetPkgScreenshotImage().get().getMediaType();
 
@@ -215,7 +218,7 @@ public class PkgScreenshotController extends AbstractController {
     public void handleAdd(
             HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam(value = KEY_FORMAT, required = true) String format,
+            @RequestParam(value = KEY_FORMAT) String format,
             @PathVariable(value = KEY_PKGNAME) String pkgName) throws IOException {
 
         if (Strings.isNullOrEmpty(pkgName) || !Pkg.PATTERN_NAME.matcher(pkgName).matches()) {
@@ -233,7 +236,9 @@ public class PkgScreenshotController extends AbstractController {
 
         Optional<User> user = tryObtainAuthenticatedUser(context);
 
-        if (!authorizationService.check(context, user.orElse(null), pkg, Permission.PKG_EDITSCREENSHOT)) {
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                pkg, Permission.PKG_EDITSCREENSHOT)) {
             LOGGER.warn("attempt to add a pkg screenshot, but there is no user present or that user is not able to edit the pkg");
             throw new PkgAuthorizationFailure();
         }

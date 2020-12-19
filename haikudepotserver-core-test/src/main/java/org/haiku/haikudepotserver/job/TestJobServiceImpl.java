@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,7 +11,6 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
 
 import javax.annotation.PostConstruct;
-import javax.naming.OperationNotSupportedException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -118,8 +117,8 @@ public class TestJobServiceImpl implements JobService {
     }
 
     private boolean matches(JobSnapshot job, User user, Set<JobSnapshot.Status> statuses) {
-        if(null!=user) {
-            if(null==job.getOwnerUserNickname()) {
+        if (null != user) {
+            if (null == job.getOwnerUserNickname()) {
                 return false;
             }
 
@@ -128,8 +127,8 @@ public class TestJobServiceImpl implements JobService {
             }
         }
 
-        if(null!=statuses) {
-            if(!statuses.contains(job.getStatus())) {
+        if (null != statuses) {
+            if (!statuses.contains(job.getStatus())) {
                 return false;
             }
         }
@@ -147,13 +146,13 @@ public class TestJobServiceImpl implements JobService {
     public List<? extends JobSnapshot> findJobs(User user, Set<JobSnapshot.Status> statuses, int offset, int limit) {
         List<Job> result = filteredJobs(user, statuses);
 
-        if(offset >= result.size()) {
+        if (offset >= result.size()) {
             return Collections.emptyList();
         }
 
         Collections.sort(result);
 
-        if(offset + limit > result.size()) {
+        if (offset + limit > result.size()) {
             limit = result.size() - offset;
         }
 

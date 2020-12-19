@@ -1,9 +1,14 @@
+/*
+ * Copyright 2020, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.security;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.security.model.AuthenticationService;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -25,10 +30,10 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String PREFIX_BEARER = "Bearer ";
 
-    private final AuthenticationService authenticationService;
+    private final UserAuthenticationService userAuthenticationService;
 
-    public BearerTokenAuthenticationFilter(AuthenticationService authenticationService) {
-        this.authenticationService = Preconditions.checkNotNull(authenticationService);
+    public BearerTokenAuthenticationFilter(UserAuthenticationService userAuthenticationService) {
+        this.userAuthenticationService = Preconditions.checkNotNull(userAuthenticationService);
     }
 
     @Override
@@ -65,7 +70,7 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Optional<Authentication> maybeCreateAuthentication(String token) {
-        return authenticationService.authenticateByToken(token)
+        return userAuthenticationService.authenticateByToken(token)
                 .map(UserAuthentication::new);
     }
 

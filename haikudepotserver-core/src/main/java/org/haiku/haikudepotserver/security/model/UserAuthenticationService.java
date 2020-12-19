@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019, Andrew Lindesay
+ * Copyright 2016-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ import java.util.Optional;
  * the &quot;AuthenticationFilter&quot;.</p>
  */
 
-public interface AuthenticationService {
+public interface UserAuthenticationService {
 
     String CLAIM_REQUIRES_AGREE_USER_USAGE_CONDITIONS = "ucnd";
 

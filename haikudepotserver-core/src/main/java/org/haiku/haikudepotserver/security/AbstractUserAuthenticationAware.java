@@ -8,8 +8,8 @@ package org.haiku.haikudepotserver.security;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.haiku.haikudepotserver.api1.support.AuthorizationFailureException;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -25,11 +25,12 @@ public abstract class AbstractUserAuthenticationAware {
 
     /**
      * <P>This method will get the currently authenticated user.  If there is no authenticated user then this method
-     * will throw an instance of {@link AuthorizationFailureException}.</P>
+     * will throw an instance of {@link AccessDeniedException}.</P>
      */
 
-    protected User obtainAuthenticatedUser(ObjectContext objectContext) throws AuthorizationFailureException {
-        return tryObtainAuthenticatedUser(objectContext).orElseThrow(AuthorizationFailureException::new);
+    protected User obtainAuthenticatedUser(ObjectContext objectContext) {
+        return tryObtainAuthenticatedUser(objectContext)
+                .orElseThrow(() -> new AccessDeniedException("there is no authenticated user"));
     }
 
     /**
