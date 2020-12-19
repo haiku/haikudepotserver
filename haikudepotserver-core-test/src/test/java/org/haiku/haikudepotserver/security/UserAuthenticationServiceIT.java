@@ -55,17 +55,36 @@ public class UserAuthenticationServiceIT extends AbstractIntegrationTest {
     @Test
     public void testHashPassword() {
         User user = new User();
-        user.setPasswordSalt("cad3422ea02761f8");
-        String passwordHash = userAuthenticationService.hashPassword(user,"p4mphl3t");
-        Assertions.assertThat(passwordHash).isEqualTo("b9c4717bc5c6d16f2be9e967ab0c752f8ac2084f95781989f39cf8736e2edeef");
+
+        // -----------------
+        userAuthenticationService.setPassword(user, "p4mphl3t");
+        // -----------------
+
+        Assertions.assertThat(userAuthenticationService.matchPassword(user, "p4mphl3t")).isTrue();
+        Assertions.assertThat(userAuthenticationService.matchPassword(user, "Other")).isFalse();
     }
 
     @Test
     public void testHashPassword_2() {
         User user = new User();
-        user.setPasswordSalt("66a9b264bf730ac2");
-        String passwordHash = userAuthenticationService.hashPassword(user,"Pa55word0");
-        Assertions.assertThat(passwordHash).isEqualTo("d439da8f2ec8c7aa3d0c9c2a1dd7cd6dcbf8b4435f9e288cc1a6f7b77d47361e");
+
+        // -----------------
+        userAuthenticationService.setPassword(user, "Pa55word0");
+        // -----------------
+
+        Assertions.assertThat(userAuthenticationService.matchPassword(user, "Pa55word0")).isTrue();
+        Assertions.assertThat(userAuthenticationService.matchPassword(user, "Other")).isFalse();
+    }
+
+    @Test(expected = Exception.class)
+    public void testClearPassword() {
+        User user = new User();
+
+        // -----------------
+        userAuthenticationService.setPassword(user, null);
+        // -----------------
+
+        // expecting an exception.
     }
 
 }

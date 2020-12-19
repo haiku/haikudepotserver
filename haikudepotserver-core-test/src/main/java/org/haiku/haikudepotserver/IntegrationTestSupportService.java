@@ -333,7 +333,7 @@ public class IntegrationTestSupportService {
         Optional<PkgUserRatingAggregate> aggregateOptional = pkg.getPkgUserRatingAggregate(repository);
         PkgUserRatingAggregate aggregate;
 
-        if(!aggregateOptional.isPresent()) {
+        if(aggregateOptional.isEmpty()) {
             aggregate = context.newObject(PkgUserRatingAggregate.class);
             pkg.addToManyTarget(Pkg.PKG_USER_RATING_AGGREGATES.getName(), aggregate, true);
             aggregate.setRepository(repository);
@@ -346,11 +346,10 @@ public class IntegrationTestSupportService {
         aggregate.setDerivedRatingSampleSize(sampleSize);
     }
 
-    public User createBasicUser(ObjectContext context, String nickname, String password) {
+    public User createBasicUser(ObjectContext context, String nickname, String passwordClear) {
         User user = context.newObject(User.class);
         user.setNickname(nickname);
-        user.setPasswordSalt(); // random
-        user.setPasswordHash(userAuthenticationService.hashPassword(user, password));
+        userAuthenticationService.setPassword(user, passwordClear);
         user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH));
         context.commitChanges();
         return user;

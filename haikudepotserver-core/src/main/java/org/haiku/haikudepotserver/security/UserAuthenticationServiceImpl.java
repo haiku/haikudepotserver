@@ -7,8 +7,8 @@ package org.haiku.haikudepotserver.security;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.io.BaseEncoding;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -25,16 +25,17 @@ import org.haiku.haikudepotserver.user.model.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.security.MessageDigest;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +63,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     private final Integer jsonWebTokenExpirySeconds;
     private final String jsonWebTokenIssuer;
 
+    private final PasswordEncoder passwordEncoder;
+
     private JWSSigner jsonWebTokenSigner = null;
     private JWSVerifier jsonWebTokenVerifier = null;
     private String jsonWebTokenSharedKey;
@@ -69,10 +72,12 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     public UserAuthenticationServiceImpl(
             ServerRuntime serverRuntime,
             UserService userService,
+            PasswordEncoder passwordEncoder,
             @Value("${authentication.jws.sharedkey:}") String jsonWebTokenSharedKey,
             @Value("${authentication.jws.expiryseconds:300}") Integer jsonWebTokenExpirySeconds,
             @Value("${authentication.jws.issuer}") String jsonWebTokenIssuer) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.jsonWebTokenExpirySeconds = Preconditions.checkNotNull(jsonWebTokenExpirySeconds);
         this.jsonWebTokenIssuer = Preconditions.checkNotNull(jsonWebTokenIssuer);
@@ -117,17 +122,14 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     public Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear) {
         Optional<ObjectId> result = Optional.empty();
 
-        if(!Strings.isNullOrEmpty(nickname) && !Strings.isNullOrEmpty(passwordClear)) {
-
+        if (!Strings.isNullOrEmpty(nickname) && !Strings.isNullOrEmpty(passwordClear)) {
             ObjectContext objectContext = serverRuntime.newContext();
-
             Optional<User> userOptional = User.tryGetByNickname(objectContext, nickname);
 
-            if(userOptional.isPresent()) {
+            if (userOptional.isPresent()) {
                 User user = userOptional.get();
-                String hash = hashPassword(user, passwordClear);
 
-                if(hash.equals(user.getPasswordHash())) {
+                if (matchPassword(user, passwordClear)) {
                     result = Optional.ofNullable(userOptional.get().getObjectId());
                     maybeUpdateLastAuthenticationTimestamp(objectContext, user);
                 }
@@ -169,35 +171,33 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
     }
 
-
     @Override
-    public String hashPassword(String salt, String passwordClear) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(salt));
-        Preconditions.checkArgument(StringUtils.isNotBlank(passwordClear));
-        byte[] saltBytes = BaseEncoding.base16().decode(salt.toUpperCase());
-
-        try {
-            MessageDigest sha = MessageDigest.getInstance("SHA-256");
-            sha.update(passwordClear.getBytes(Charsets.UTF_8));
-            sha.update(saltBytes);
-            return BaseEncoding.base16().encode(sha.digest()).toLowerCase();
+    public void setPassword(User user, String passwordClear) {
+        Preconditions.checkArgument(null != user, "the user is required");
+        Preconditions.checkArgument(null != passwordClear, "the password is required");
+        List<String> parts = Splitter.on(".").splitToList(passwordEncoder.encode(passwordClear));
+        if (2 != parts.size()) {
+            throw new IllegalStateException("expecting a salt and hash separated by a period symbol");
         }
-        catch (java.security.NoSuchAlgorithmException e) {
-            throw new IllegalStateException("no SHA-256 crypt algorithm available",e);
-        }
+        user.setPasswordSalt(parts.get(0));
+        user.setPasswordHash(parts.get(1));
     }
 
     @Override
-    public String hashPassword(User user, String passwordClear) {
-        return hashPassword(user.getPasswordSalt(), passwordClear);
+    public boolean matchPassword(User user, String passwordClear) {
+        return StringUtils.isNotBlank(user.getPasswordSalt())
+                && StringUtils.isNotBlank(user.getPasswordHash())
+                && passwordEncoder.matches(
+                passwordClear,
+                user.getPasswordSalt() + "." + user.getPasswordHash());
     }
 
     private int countMatches(String s, CharToBooleanFunction fn) {
         int length = s.length();
         int count = 0;
-        for(int i=0;i<length;i++) {
+        for (int i = 0; i < length; i++) {
             char c = s.charAt(i);
-            if(fn.test(c)) {
+            if (fn.test(c)) {
                 count++;
             }
         }
@@ -280,8 +280,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
             java.util.Date expirationTime = claimsSet.getExpirationTime();
 
             if (
-                    null==issueTime
-                            || null==expirationTime
+                    null == issueTime
+                            || null == expirationTime
                             || nowMillis < issueTime.getTime()
                             || nowMillis > expirationTime.getTime()) {
                 LOGGER.info("rejected jwt authentication; the issue time or expiration time are invalid or do not contain the current time");
@@ -290,7 +290,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                 String subject = claimsSet.getSubject();
 
                 if (
-                        null==subject
+                        null == subject
                                 || !subject.endsWith(SUFFIX_JSONWEBTOKEN_SUBJECT)
                                 || subject.length() <= SUFFIX_JSONWEBTOKEN_SUBJECT.length()) {
                     LOGGER.info("rejected jwt authentication; bad subject");
@@ -318,7 +318,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
      */
 
     private Optional<SignedJWT> verifyToken(String payload) {
-        if (null!=payload && 0!=payload.length()) {
+        if (null != payload && 0 != payload.length()) {
             try {
                 SignedJWT signedJWT = SignedJWT.parse(payload);
 

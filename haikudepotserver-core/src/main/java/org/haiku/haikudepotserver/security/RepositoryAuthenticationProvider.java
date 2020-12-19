@@ -9,7 +9,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.model.RepositoryAuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +32,13 @@ public class RepositoryAuthenticationProvider implements org.springframework.sec
 
     private final ServerRuntime serverRuntime;
 
-    // TODO; this should not be using the *USER* auth service.
-    private final UserAuthenticationService userAuthenticationService;
+    private final RepositoryService repositoryService;
 
     public RepositoryAuthenticationProvider(
             ServerRuntime serverRuntime,
-            UserAuthenticationService userAuthenticationService) {
+            RepositoryService repositoryService) {
         this.serverRuntime = serverRuntime;
-        this.userAuthenticationService = userAuthenticationService;
+        this.repositoryService = repositoryService;
     }
 
     @Override
@@ -65,14 +64,14 @@ public class RepositoryAuthenticationProvider implements org.springframework.sec
     }
 
     private Optional<String> tryGetRepositoryCodeFromDetails(Authentication authentication) {
-        return Optional.of(authentication.getDetails())
+        return Optional.ofNullable(authentication.getDetails())
                 .filter(d -> d instanceof RepositoryAuthenticationDetails)
                 .map(d -> (RepositoryAuthenticationDetails) d)
                 .map(RepositoryAuthenticationDetails::getRepositoryCode);
     }
 
-    private Optional<Authentication> tryAuthenticateUsernamePassword(String username, String password) {
-        if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
+    private Optional<Authentication> tryAuthenticateUsernamePassword(String username, String passwordClear) {
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(passwordClear)) {
             return Optional.empty();
         }
 
@@ -92,9 +91,7 @@ public class RepositoryAuthenticationProvider implements org.springframework.sec
             return Optional.empty();
         }
 
-        String passwordHash = userAuthenticationService.hashPassword(repository.getPasswordSalt(), password);
-
-        if (!repository.getPasswordHash().equals(passwordHash)) {
+        if (!repositoryService.matchPassword(repository, passwordClear)) {
             throw new BadCredentialsException("authentication against repository [" + repository + "] failed");
         }
 

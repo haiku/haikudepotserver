@@ -5,6 +5,7 @@
 package org.haiku.haikudepotserver.config;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.*;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.springframework.context.annotation.Configuration;
@@ -27,11 +28,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserAuthenticationService userAuthenticationService;
 
+    private final RepositoryService repositoryService;
+
     public SecurityConfig(
             ServerRuntime serverRuntime,
-            UserAuthenticationService userAuthenticationService) {
+            UserAuthenticationService userAuthenticationService,
+            RepositoryService repositoryService) {
         this.serverRuntime = serverRuntime;
         this.userAuthenticationService = userAuthenticationService;
+        this.repositoryService = repositoryService;
     }
 
     @Override
@@ -45,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .authenticationProvider(new UserAuthenticationProvider(userAuthenticationService))
-                .authenticationProvider(new RepositoryAuthenticationProvider(serverRuntime, userAuthenticationService))
+                .authenticationProvider(new RepositoryAuthenticationProvider(serverRuntime, repositoryService))
                 .httpBasic().authenticationDetailsSource(new RepositoryAuthenticationDetailsSource());
 
         // this covers authentication by supplying a JWT bearer token as well as an occasional need

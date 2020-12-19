@@ -608,7 +608,6 @@
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 		<obj-attribute name="passwordHash" type="java.lang.String" lock="true" db-attribute-path="password_hash"/>
 		<obj-attribute name="passwordSalt" type="java.lang.String" lock="true" db-attribute-path="password_salt"/>
-		<post-add method-name="onPostAdd"/>
 	</obj-entity>
 	<obj-entity name="RepositorySource" className="org.haiku.haikudepotserver.dataobjects.RepositorySource" lock-type="optimistic" dbEntityName="repository_source" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>

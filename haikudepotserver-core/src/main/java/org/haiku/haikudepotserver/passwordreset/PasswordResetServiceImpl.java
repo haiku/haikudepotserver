@@ -189,8 +189,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                             if (user.getActive()) {
 
                                 if (!Strings.isNullOrEmpty(passwordClear) && userAuthenticationService.validatePassword(passwordClear)) {
-                                    user.setPasswordSalt();
-                                    user.setPasswordHash(userAuthenticationService.hashPassword(user, passwordClear));
+                                    userAuthenticationService.setPassword(user, passwordClear);
                                     context.deleteObjects(token);
                                     context.commitChanges();
 

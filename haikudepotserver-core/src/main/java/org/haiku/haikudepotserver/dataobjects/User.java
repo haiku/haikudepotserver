@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.hash.Hashing;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectIdQuery;
@@ -25,7 +24,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -91,10 +89,6 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
             setActive(Boolean.TRUE);
         }
 
-        if(null==getPasswordSalt()) {
-            setPasswordSalt();
-        }
-
         // create and modify timestamp handled by listener.
     }
 
@@ -155,15 +149,6 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
                 .stream()
                 .filter(pup -> null == pup.getPkg() || pup.getPkg().equals(pkg))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * <p>This method will configure a random salt value.</p>
-     */
-
-    public void setPasswordSalt() {
-        String randomHash = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString();
-        setPasswordSalt(randomHash.substring(0,16)); // LDAP server doesn't seem to like very long salts
     }
 
     @Override

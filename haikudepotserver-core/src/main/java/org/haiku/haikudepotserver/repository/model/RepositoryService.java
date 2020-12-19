@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.repository.model;
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.User;
 
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,10 @@ import java.util.List;
  */
 
 public interface RepositoryService {
+
+    void setPassword(Repository repository, String passwordClear);
+
+    boolean matchPassword(Repository repository, String passwordClear);
 
     Date getLastRepositoryModifyTimestampSecondAccuracy(ObjectContext context);
 

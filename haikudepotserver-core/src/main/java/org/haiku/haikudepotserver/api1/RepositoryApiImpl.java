@@ -309,11 +309,11 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
                 case PASSWORD:
                     if (StringUtils.isBlank(updateRepositoryRequest.passwordClear)) {
+                        repository.setPasswordSalt(null);
                         repository.setPasswordHash(null);
                         LOGGER.info("cleared the password for repository [{}]", repository);
                     } else {
-                        repository.setPasswordHash(userAuthenticationService.hashPassword(
-                                repository.getPasswordSalt(), updateRepositoryRequest.passwordClear));
+                        repositoryService.setPassword(repository, updateRepositoryRequest.passwordClear);
                         LOGGER.info("did update the repository [{}] password", repository);
                     }
                     break;

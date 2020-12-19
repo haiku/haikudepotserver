@@ -1,15 +1,15 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
-import com.google.common.hash.Hashing;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.query.*;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.SelectById;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -25,7 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Repository extends _Repository implements MutableCreateAndModifyTimestamped, Coded, Comparable<Repository> {
@@ -88,14 +87,6 @@ public class Repository extends _Repository implements MutableCreateAndModifyTim
         super.validateForInsert(validationResult);
     }
 
-    // called from a listener
-    @SuppressWarnings("unused")
-    public void onPostAdd() {
-        if(null==getPasswordSalt()) {
-            setPasswordSalt();
-        }
-    }
-
     @Override
     protected void validateForSave(ValidationResult validationResult) {
         super.validateForSave(validationResult);
@@ -119,11 +110,6 @@ public class Repository extends _Repository implements MutableCreateAndModifyTim
 
     UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
         return builder.pathSegment(getCode());
-    }
-
-    private void setPasswordSalt() {
-        String randomHash = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString();
-        setPasswordSalt(randomHash.substring(0,16));
     }
 
     @Override

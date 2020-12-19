@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationServiceFactory;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingServiceFactory;
+import org.haiku.haikudepotserver.security.PasswordEncoder;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.haiku.haikudepotserver.support.freemarker.LocalizedTemplateLoader;
 import org.haiku.haikudepotserver.support.logging.LoggingSetupOrchestration;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -127,6 +129,11 @@ public class BasicConfig {
         messageSource.setDefaultEncoding(Charsets.UTF_8.name());
         messageSource.setBasenames(basenames.toArray(new String[basenames.size()]));
         return messageSource;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new PasswordEncoder(KeyGenerators.secureRandom(8));
     }
 
 }

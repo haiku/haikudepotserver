@@ -24,17 +24,9 @@ public interface UserAuthenticationService {
 
     Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear);
 
-    /**
-     * <p>This method will hash the password in a consistent manner across the whole system.</p>
-     */
+    void setPassword(User user, String passwordClear);
 
-    String hashPassword(String salt, String passwordClear);
-
-    /**
-     * <p>This method will hash the password in a consistent manner across the whole system.</p>
-     */
-
-    String hashPassword(User user, String passwordClear);
+    boolean matchPassword(User user, String passwordClear);
 
     /**
      * <p>Passwords should be hard to guess and so there needs to be a certain level of complexity to

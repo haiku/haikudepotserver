@@ -219,7 +219,8 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         user.setNaturalLanguage(getNaturalLanguage(context, createUserRequest.naturalLanguageCode));
         user.setNickname(createUserRequest.nickname);
         user.setEmail(createUserRequest.email);
-        user.setPasswordHash(userAuthenticationService.hashPassword(user, createUserRequest.passwordClear));
+
+        userAuthenticationService.setPassword(user, createUserRequest.passwordClear);
 
         UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
         agreement.setUser(user);
@@ -400,7 +401,8 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             }
         }
 
-        targetUser.setPasswordHash(userAuthenticationService.hashPassword(targetUser, changePasswordRequest.newPasswordClear));
+        userAuthenticationService.setPassword(targetUser, changePasswordRequest.newPasswordClear);
+
         context.commitChanges();
         LOGGER.info("did change password for user {}", changePasswordRequest.nickname);
 

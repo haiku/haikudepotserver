@@ -104,7 +104,4 @@ public abstract class _Repository extends AbstractDataObject {
         return (List<RepositorySource>)readProperty("repositorySources");
     }
 
-
-    protected abstract void onPostAdd();
-
 }

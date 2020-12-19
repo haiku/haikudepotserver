@@ -1,15 +1,17 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2020, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.repository;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -20,6 +22,7 @@ import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.LikeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,6 +38,12 @@ import java.util.List;
 public class RepositoryServiceImpl implements RepositoryService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryServiceImpl.class);
+
+    private final PasswordEncoder passwordEncoder;
+
+    public RepositoryServiceImpl(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = Preconditions.checkNotNull(passwordEncoder);
+    }
 
     // ------------------------------
     // HELPERS
@@ -52,7 +61,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         List<Object> result = context.performQuery(query);
 
-        switch(result.size()) {
+        switch (result.size()) {
             case 0: return new Date(0);
             case 1: return DateTimeHelper.secondAccuracyDate((Date) result.get(0));
             default: throw new IllegalStateException("more than one row returned for a max aggregate.");
@@ -90,11 +99,11 @@ public class RepositoryServiceImpl implements RepositoryService {
     private List<String> toRepositorySourceUrlVariants(String url) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "the url must be supplied");
 
-        if(url.startsWith("http:")) {
+        if (url.startsWith("http:")) {
             return ImmutableList.of(url, "https:" + url.substring(5));
         }
 
-        if(url.startsWith("https:")) {
+        if (url.startsWith("https:")) {
             return ImmutableList.of(url, "http:" + url.substring(6));
         }
 
@@ -114,8 +123,8 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         List<String> whereExpressions = new ArrayList<>();
 
-        if(null!=search.getExpression()) {
-            switch(search.getExpressionType()) {
+        if (null != search.getExpression()) {
+            switch (search.getExpressionType()) {
 
                 case CONTAINS:
                     parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
@@ -128,7 +137,7 @@ public class RepositoryServiceImpl implements RepositoryService {
             }
         }
 
-        if(!search.getIncludeInactive()) {
+        if (!search.getIncludeInactive()) {
             whereExpressions.add("r." + Repository.ACTIVE.getName() + " = true");
         }
 
@@ -151,7 +160,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         String whereClause = prepareWhereClause(parameterAccumulator, context, search);
 
-        if(!Strings.isNullOrEmpty(whereClause)) {
+        if (!Strings.isNullOrEmpty(whereClause)) {
             ejbql.append(" WHERE ");
             ejbql.append(whereClause);
         }
@@ -162,7 +171,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         EJBQLQuery ejbqlQuery = new EJBQLQuery(ejbql.toString());
 
-        for(int i=0;i<parameterAccumulator.size();i++) {
+        for (int i = 0; i < parameterAccumulator.size(); i++) {
             ejbqlQuery.setParameter(i+1, parameterAccumulator.get(i));
         }
 
@@ -185,26 +194,50 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         String whereClause = prepareWhereClause(parameters, context, search);
 
-        if(!Strings.isNullOrEmpty(whereClause)) {
+        if (!Strings.isNullOrEmpty(whereClause)) {
             ejbql.append(" WHERE ");
             ejbql.append(whereClause);
         }
 
         EJBQLQuery ejbQuery = new EJBQLQuery(ejbql.toString());
 
-        for(int i=0;i<parameters.size();i++) {
-            ejbQuery.setParameter(i+1, parameters.get(i));
+        for (int i = 0; i < parameters.size(); i++) {
+            ejbQuery.setParameter(i + 1, parameters.get(i));
         }
 
         @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
 
-        switch(result.size()) {
+        switch (result.size()) {
             case 1:
                 return result.get(0).longValue();
 
             default:
                 throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
         }
+    }
+
+    public void setPassword(Repository repository, String passwordClear) {
+        Preconditions.checkArgument(null != repository, "the repository is required");
+        if (StringUtils.isBlank(passwordClear)) {
+            repository.setPasswordSalt(null);
+            repository.setPasswordHash(null);
+        }
+        else {
+            List<String> parts = Splitter.on(".").splitToList(passwordEncoder.encode(passwordClear));
+            if (2 != parts.size()) {
+                throw new IllegalStateException("expecting a salt and hash separated by a period symbol");
+            }
+            repository.setPasswordSalt(parts.get(0));
+            repository.setPasswordHash(parts.get(1));
+        }
+    }
+
+    public boolean matchPassword(Repository repository, String passwordClear) {
+        return StringUtils.isNotBlank(repository.getPasswordSalt())
+                && StringUtils.isNotBlank(repository.getPasswordHash())
+                && passwordEncoder.matches(
+                passwordClear,
+                repository.getPasswordSalt() + "." + repository.getPasswordHash());
     }
 
 }
