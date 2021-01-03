@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -172,7 +172,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
      */
 
     @Test(expected = AccessDeniedException.class)
-    public void testCreateAuthorizationRule_unauthorized() throws ObjectNotFoundException, AuthorizationRuleConflictException {
+    public void testCreateAuthorizationRule_unauthorized() throws AuthorizationRuleConflictException {
         integrationTestSupportService.createStandardTestData();
 
         {
@@ -199,7 +199,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
      */
 
     @Test(expected = AccessDeniedException.class)
-    public void testCreateAuthorizationRule_notAuthorized() throws ObjectNotFoundException, AuthorizationRuleConflictException {
+    public void testCreateAuthorizationRule_notAuthorized() throws AuthorizationRuleConflictException {
         integrationTestSupportService.createStandardTestData();
 
         {
@@ -223,7 +223,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateAuthorizationRule_permissionUserPkg() throws ObjectNotFoundException, AuthorizationRuleConflictException {
+    public void testCreateAuthorizationRule_permissionUserPkg() throws AuthorizationRuleConflictException {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -255,7 +255,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateAuthorizationRule_conflicting() throws ObjectNotFoundException {
+    public void testCreateAuthorizationRule_conflicting() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -300,7 +300,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testCreateAuthorizationRule_badPermission() throws ObjectNotFoundException {
+    public void testCreateAuthorizationRule_badPermission() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -325,7 +325,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testRemoveAuthorizationRule_permissionUserPkg() throws ObjectNotFoundException {
+    public void testRemoveAuthorizationRule_permissionUserPkg() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -397,7 +397,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSearchAuthorizationRule_pkgWithUser() throws ObjectNotFoundException {
+    public void testSearchAuthorizationRule_pkgWithUser() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
         createSearchAuthorizationRuleTestData();
@@ -423,7 +423,7 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSearchAuthorizationRule_pkg() throws ObjectNotFoundException {
+    public void testSearchAuthorizationRule_pkg() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
         createSearchAuthorizationRuleTestData();

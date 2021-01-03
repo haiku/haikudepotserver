@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,14 +21,14 @@ import org.haiku.haikudepotserver.security.AbstractUserAuthenticationAware;
 
 public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
 
-    protected Architecture getArchitecture(ObjectContext context, String architectureCode) throws ObjectNotFoundException {
+    protected Architecture getArchitecture(ObjectContext context, String architectureCode) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(architectureCode), "an architecture code is required to get the architecture");
         return Architecture.tryGetByCode(context,architectureCode)
                 .orElseThrow(() -> new ObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode));
     }
 
-    protected NaturalLanguage getNaturalLanguage(ObjectContext context, String naturalLanguageCode) throws ObjectNotFoundException  {
+    protected NaturalLanguage getNaturalLanguage(ObjectContext context, String naturalLanguageCode) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
         return NaturalLanguage.tryGetByCode(context, naturalLanguageCode)
@@ -40,7 +40,7 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
      * is not supplied or if no repository was able to be found for the code supplied.</p>
      */
 
-    protected Repository getRepository(ObjectContext context, String repositoryCode) throws ObjectNotFoundException {
+    protected Repository getRepository(ObjectContext context, String repositoryCode) {
         Preconditions.checkNotNull(context);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(repositoryCode), "a repository code is required to search for the repository");
         return Repository.tryGetByCode(context, repositoryCode)

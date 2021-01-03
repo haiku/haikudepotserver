@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -87,8 +87,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     // note; no integration test for this one.
     @Override
     public TriggerImportRepositoryResult triggerImportRepository(
-            TriggerImportRepositoryRequest triggerImportRepositoryRequest)
-            throws ObjectNotFoundException {
+            TriggerImportRepositoryRequest triggerImportRepositoryRequest) {
 
         Preconditions.checkNotNull(triggerImportRepositoryRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(triggerImportRepositoryRequest.repositoryCode));
@@ -203,7 +202,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     @Override
-    public GetRepositoryResult getRepository(GetRepositoryRequest getRepositoryRequest) throws ObjectNotFoundException {
+    public GetRepositoryResult getRepository(GetRepositoryRequest getRepositoryRequest) {
         Preconditions.checkNotNull(getRepositoryRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getRepositoryRequest.code));
 
@@ -251,7 +250,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     @Override
-    public UpdateRepositoryResult updateRepository(UpdateRepositoryRequest updateRepositoryRequest) throws ObjectNotFoundException {
+    public UpdateRepositoryResult updateRepository(UpdateRepositoryRequest updateRepositoryRequest) {
         Preconditions.checkNotNull(updateRepositoryRequest);
 
         final ObjectContext context = serverRuntime.newContext();
@@ -376,7 +375,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     @Override
-    public GetRepositorySourceResult getRepositorySource(GetRepositorySourceRequest request) throws ObjectNotFoundException {
+    public GetRepositorySourceResult getRepositorySource(
+            GetRepositorySourceRequest request) {
         Preconditions.checkArgument(null!=request);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code));
 
@@ -428,7 +428,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     @Override
-    public UpdateRepositorySourceResult updateRepositorySource(UpdateRepositorySourceRequest request) throws ObjectNotFoundException {
+    public UpdateRepositorySourceResult updateRepositorySource(UpdateRepositorySourceRequest request) {
         Preconditions.checkArgument(null != request);
         Preconditions.checkArgument(StringUtils.isNotBlank(request.code), "a code is required to identify the repository source to update");
         Preconditions.checkArgument(null != request.filter, "filters must be provided to specify what aspects of the repository source should be updated");
@@ -500,7 +500,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     @Override
-    public CreateRepositorySourceResult createRepositorySource(CreateRepositorySourceRequest request) throws ObjectNotFoundException {
+    public CreateRepositorySourceResult createRepositorySource(CreateRepositorySourceRequest request) {
 
         Preconditions.checkArgument(null!=request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "the code for the new repository source must be supplied");
@@ -535,7 +535,8 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     @Override
-    public CreateRepositorySourceMirrorResult createRepositorySourceMirror(CreateRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+    public CreateRepositorySourceMirrorResult createRepositorySourceMirror(
+            CreateRepositorySourceMirrorRequest request) {
         Preconditions.checkArgument(null!=request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositorySourceCode), "the code for the new repository source mirror");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.countryCode), "the country code should be supplied");
@@ -589,7 +590,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     @Override
-    public UpdateRepositorySourceMirrorResult updateRepositorySourceMirror(UpdateRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+    public UpdateRepositorySourceMirrorResult updateRepositorySourceMirror(UpdateRepositorySourceMirrorRequest request) {
         Preconditions.checkArgument(null!=request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.code), "the code for the mirror to update");
 
@@ -672,7 +673,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
     @Override
     public GetRepositorySourceMirrorResult getRepositorySourceMirror(
-            GetRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+            GetRepositorySourceMirrorRequest request) {
 
         Preconditions.checkArgument(null != request, "the request must be provided");
         Preconditions.checkArgument(StringUtils.isNotBlank(request.code), "a mirror code must be provided");
@@ -698,7 +699,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
     @Override
     public RemoveRepositorySourceMirrorResult removeRepositorySourceMirror(
-            RemoveRepositorySourceMirrorRequest request) throws ObjectNotFoundException {
+            RemoveRepositorySourceMirrorRequest request) {
         Preconditions.checkArgument(null != request, "the request is required");
         Preconditions.checkArgument(StringUtils.isNotBlank(request.code), "the code is required on the request");
 
@@ -744,14 +745,14 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
     }
 
     private Repository getRepositoryOrThrow(
-            ObjectContext context, String code) throws ObjectNotFoundException {
+            ObjectContext context, String code) {
         return Repository.tryGetByCode(context, code)
                 .orElseThrow(() -> new ObjectNotFoundException(
                         Repository.class.getSimpleName(), code));
     }
 
     private RepositorySource getRepositorySourceOrThrow(
-            ObjectContext context, String code) throws ObjectNotFoundException {
+            ObjectContext context, String code) {
         return RepositorySource.tryGetByCode(context, code)
                 .orElseThrow(() -> new ObjectNotFoundException(
                         RepositorySource.class.getSimpleName(), code));

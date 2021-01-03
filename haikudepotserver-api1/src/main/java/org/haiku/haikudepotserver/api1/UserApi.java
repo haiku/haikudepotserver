@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020, Andrew Lindesay
+ * Copyright 2013-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,7 @@ public interface UserApi {
      * in the filter will be updated.</p>
      */
 
-    UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException;
+    UpdateUserResult updateUser(UpdateUserRequest updateUserRequest);
 
     /**
      * <p>This method will create a user in the system.  It is identified by a username
@@ -32,7 +32,7 @@ public interface UserApi {
      * in the case that the referenced 'natural language' is not able to be found.</p>
      */
 
-    CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException, InvalidUserUsageConditionsException;
+    CreateUserResult createUser(CreateUserRequest createUserRequest) throws InvalidUserUsageConditionsException;
 
     /**
      * <p>This method will get the user identified by the nickname in the request object.
@@ -40,7 +40,7 @@ public interface UserApi {
      * is thrown.</p>
      */
 
-    GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException;
+    GetUserResult getUser(GetUserRequest getUserRequest);
 
     /**
      * <p>This method will allow a client to authenticate against the server.  If this is
@@ -62,7 +62,7 @@ public interface UserApi {
      * <p>This method will allow the client to modify the password of a user.</p>
      */
 
-    ChangePasswordResult changePassword(ChangePasswordRequest changePasswordRequest) throws ObjectNotFoundException, ValidationException;
+    ChangePasswordResult changePassword(ChangePasswordRequest changePasswordRequest) throws ValidationException;
 
     /**
      * <p>This method will allow a search for users.</p>

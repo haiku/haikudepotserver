@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,7 +10,7 @@ package org.haiku.haikudepotserver.api1.support;
  * invocation.</p>
  */
 
-public class ObjectNotFoundException extends Exception {
+public class ObjectNotFoundException extends RuntimeException {
 
     public String entityName;
     public Object identifier;

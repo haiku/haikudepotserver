@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -78,7 +78,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     }
 
     @Override
-    public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) throws ObjectNotFoundException {
+    public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) {
 
         Preconditions.checkNotNull(updateUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(updateUserRequest.nickname));
@@ -164,7 +164,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     }
 
     @Override
-    public CreateUserResult createUser(CreateUserRequest createUserRequest) throws ObjectNotFoundException, InvalidUserUsageConditionsException {
+    public CreateUserResult createUser(CreateUserRequest createUserRequest) throws InvalidUserUsageConditionsException {
 
         Preconditions.checkNotNull(createUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.nickname));
@@ -235,7 +235,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     }
 
     @Override
-    public GetUserResult getUser(GetUserRequest getUserRequest) throws ObjectNotFoundException {
+    public GetUserResult getUser(GetUserRequest getUserRequest) {
         Preconditions.checkNotNull(getUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getUserRequest.nickname));
 
@@ -336,7 +336,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     @Override
     public ChangePasswordResult changePassword(
             ChangePasswordRequest changePasswordRequest)
-            throws ObjectNotFoundException, ValidationException {
+            throws ValidationException {
 
         Preconditions.checkNotNull(changePasswordRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(changePasswordRequest.nickname));

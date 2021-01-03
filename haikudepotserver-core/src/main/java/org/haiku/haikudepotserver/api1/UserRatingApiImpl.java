@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -109,7 +109,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     }
 
     @Override
-    public DeriveAndStoreUserRatingForPkgResult deriveAndStoreUserRatingForPkg(DeriveAndStoreUserRatingForPkgRequest request) throws ObjectNotFoundException {
+    public DeriveAndStoreUserRatingForPkgResult deriveAndStoreUserRatingForPkg(DeriveAndStoreUserRatingForPkgRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
 
@@ -154,7 +154,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
 
     @Override
-    public GetUserRatingResult getUserRating(GetUserRatingRequest request) throws ObjectNotFoundException {
+    public GetUserRatingResult getUserRating(GetUserRatingRequest request) {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.code));
@@ -172,8 +172,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     }
 
     @Override
-    public GetUserRatingByUserAndPkgVersionResult getUserRatingByUserAndPkgVersion(GetUserRatingByUserAndPkgVersionRequest request) throws ObjectNotFoundException {
-
+    public GetUserRatingByUserAndPkgVersionResult getUserRatingByUserAndPkgVersion(GetUserRatingByUserAndPkgVersionRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName), "the package name must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.userNickname), "the user nickname must be supplied");
@@ -221,7 +220,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
 
     @Override
-    public CreateUserRatingResult createUserRating(CreateUserRatingRequest request) throws ObjectNotFoundException {
+    public CreateUserRatingResult createUserRating(CreateUserRatingRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
@@ -358,7 +357,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     }
 
     @Override
-    public UpdateUserRatingResult updateUserRating(UpdateUserRatingRequest request) throws ObjectNotFoundException {
+    public UpdateUserRatingResult updateUserRating(UpdateUserRatingRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.code));
         Preconditions.checkNotNull(request.filter);
@@ -368,19 +367,19 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
 
-        if(!permissionEvaluator.hasPermission(
+        if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
                 userRating,
                 Permission.USERRATING_EDIT)) {
             throw new AccessDeniedException("unable to edit the userrating");
         }
 
-        for(UpdateUserRatingRequest.Filter filter : request.filter) {
+        for (UpdateUserRatingRequest.Filter filter : request.filter) {
 
             switch(filter) {
 
                 case ACTIVE:
-                    if(null==request.active) {
+                    if (null == request.active) {
                         throw new IllegalStateException("the active flag must be supplied to configure this field");
                     }
 
@@ -388,7 +387,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                     break;
 
                 case COMMENT:
-                    if(null!=request.comment) {
+                    if (null != request.comment) {
                         userRating.setComment(Strings.emptyToNull(request.comment.trim()));
                     }
                     else {
@@ -406,7 +405,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                     break;
 
                 case USERRATINGSTABILITY:
-                    if(null==request.userRatingStabilityCode) {
+                    if (null == request.userRatingStabilityCode) {
                         userRating.setUserRatingStability(null);
                     }
                     else {
@@ -438,7 +437,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     }
 
     @Override
-    public SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequest request) throws ObjectNotFoundException {
+    public SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(request.limit);
         Preconditions.checkState(request.limit > 0);
@@ -447,29 +446,29 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         UserRatingSearchSpecification searchSpecification = new UserRatingSearchSpecification();
 
-        if(null!=request.daysSinceCreated) {
+        if (null != request.daysSinceCreated) {
             searchSpecification.setDaysSinceCreated(request.daysSinceCreated.intValue());
         }
 
         Architecture architecture = null;
 
-        if(null!=request.pkgVersionArchitectureCode) {
+        if (null != request.pkgVersionArchitectureCode) {
             architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
         }
 
         Optional<Pkg> pkgOptional = Optional.empty();
 
-        if(null!=request.pkgName) {
+        if (null != request.pkgName) {
             pkgOptional = Pkg.tryGetByName(context, request.pkgName);
 
-            if(pkgOptional.isEmpty()) {
+            if (pkgOptional.isEmpty()) {
                 throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
             }
         }
 
         Optional<Repository> repositoryOptional = Optional.empty();
 
-        if(!Strings.isNullOrEmpty(request.repositoryCode)) {
+        if (!Strings.isNullOrEmpty(request.repositoryCode)) {
             searchSpecification.setRepository(getRepository(
                     context,
                     request.repositoryCode));
@@ -511,15 +510,15 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         else {
             searchSpecification.setArchitecture(architecture);
 
-            if(pkgOptional.isPresent()) {
+            if (pkgOptional.isPresent()) {
                 searchSpecification.setPkg(pkgOptional.get());
             }
         }
 
-        if(null!=request.userNickname) {
+        if (null != request.userNickname) {
             Optional<User> userOptional = User.tryGetByNickname(context, request.userNickname);
 
-            if(userOptional.isEmpty()) {
+            if (userOptional.isEmpty()) {
                 throw new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname);
             }
 
@@ -555,7 +554,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     }
 
     @Override
-    public RemoveUserRatingResult removeUserRating(RemoveUserRatingRequest request) throws ObjectNotFoundException {
+    public RemoveUserRatingResult removeUserRating(RemoveUserRatingRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(StringUtils.isNotBlank(request.code));
 
@@ -564,7 +563,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
                 () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
 
-        if(!permissionEvaluator.hasPermission(
+        if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
                 userRating, Permission.USERRATING_REMOVE)) {
             throw new AccessDeniedException("unable to delete the userrating");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,20 +33,20 @@ public interface RepositoryApi {
      * code in the request object.</p>
      */
 
-    GetRepositoryResult getRepository(GetRepositoryRequest getRepositoryRequest) throws ObjectNotFoundException;
+    GetRepositoryResult getRepository(GetRepositoryRequest getRepositoryRequest);
 
     /**
      * <p>This method will update the repository.  As well as the data to update, it also includes a 'filter' that
      * defines the fields that should be updated in this request.</p>
      */
 
-    UpdateRepositoryResult updateRepository(UpdateRepositoryRequest updateRepositoryRequest) throws ObjectNotFoundException;
+    UpdateRepositoryResult updateRepository(UpdateRepositoryRequest updateRepositoryRequest);
 
     /**
      * <p>This method will trigger the import process for a repository.</p>
      */
 
-    TriggerImportRepositoryResult triggerImportRepository(TriggerImportRepositoryRequest triggerImportRepositoryRequest) throws ObjectNotFoundException;
+    TriggerImportRepositoryResult triggerImportRepository(TriggerImportRepositoryRequest triggerImportRepositoryRequest);
 
     /**
      * <p>This method will create a repository.  This method will throw
@@ -54,35 +54,35 @@ public interface RepositoryApi {
      * supplied code is not able to be found as an architecture.</p>
      */
 
-    CreateRepositoryResult createRepository(CreateRepositoryRequest createRepositoryRequest) throws ObjectNotFoundException;
+    CreateRepositoryResult createRepository(CreateRepositoryRequest createRepositoryRequest);
 
     /**
      * <p>Returns details of the repository source.</p>
      * @throws ObjectNotFoundException is the repository source is not available.
      */
 
-    GetRepositorySourceResult getRepositorySource(GetRepositorySourceRequest request) throws ObjectNotFoundException;
+    GetRepositorySourceResult getRepositorySource(GetRepositorySourceRequest request);
 
     /**
      * <p>Allows the repository source to be updated.</p>
      * @throws ObjectNotFoundException if the repository source was not able to be found given the code supplied.
      */
 
-    UpdateRepositorySourceResult updateRepositorySource(UpdateRepositorySourceRequest request) throws ObjectNotFoundException;
+    UpdateRepositorySourceResult updateRepositorySource(UpdateRepositorySourceRequest request);
 
     /**
      * <p>Creates the repository source.</p>
      * @throws ObjectNotFoundException if the repository is not able to be found.
      */
 
-    CreateRepositorySourceResult createRepositorySource(CreateRepositorySourceRequest request) throws ObjectNotFoundException;
+    CreateRepositorySourceResult createRepositorySource(CreateRepositorySourceRequest request);
 
     /**
      * <p>Creates a new mirror for a repository source.</p>
      * @since 2018-07-23
      */
 
-    CreateRepositorySourceMirrorResult createRepositorySourceMirror(CreateRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+    CreateRepositorySourceMirrorResult createRepositorySourceMirror(CreateRepositorySourceMirrorRequest request);
 
     /**
      * <p>Updates an existing mirror.  The mirror should be identified by its code.
@@ -92,18 +92,18 @@ public interface RepositoryApi {
      * @since 2018-07-24
      */
 
-    UpdateRepositorySourceMirrorResult updateRepositorySourceMirror(UpdateRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+    UpdateRepositorySourceMirrorResult updateRepositorySourceMirror(UpdateRepositorySourceMirrorRequest request);
 
     /**
      * @since 2018-07-29
      */
 
-    GetRepositorySourceMirrorResult getRepositorySourceMirror(GetRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+    GetRepositorySourceMirrorResult getRepositorySourceMirror(GetRepositorySourceMirrorRequest request);
 
     /**
      * @since 2018-12-29
      */
 
-    RemoveRepositorySourceMirrorResult removeRepositorySourceMirror(RemoveRepositorySourceMirrorRequest request) throws ObjectNotFoundException;
+    RemoveRepositorySourceMirrorResult removeRepositorySourceMirror(RemoveRepositorySourceMirrorRequest request);
 
 }

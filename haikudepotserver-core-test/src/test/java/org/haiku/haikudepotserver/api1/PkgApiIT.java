@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -93,7 +93,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void searchPkgsTest() throws ObjectNotFoundException {
+    public void searchPkgsTest() {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
@@ -123,7 +123,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void searchPkgsTest_localizationDescriptionNotEnglish_hit() throws ObjectNotFoundException {
+    public void searchPkgsTest_localizationDescriptionNotEnglish_hit() {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
@@ -153,7 +153,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void searchPkgsTest_localizationDescriptionNotEnglishFallBackToEnglish_hit() throws ObjectNotFoundException {
+    public void searchPkgsTest_localizationDescriptionNotEnglishFallBackToEnglish_hit() {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
@@ -176,7 +176,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetPkg_found_specific() throws ObjectNotFoundException {
+    public void testGetPkg_found_specific() {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();
@@ -212,7 +212,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testGetPkg_found_latest() throws ObjectNotFoundException {
+    public void testGetPkg_found_latest() {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgRequest request = new GetPkgRequest();
@@ -458,7 +458,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testGetPkgScreenshots() throws ObjectNotFoundException {
+    public void testGetPkgScreenshots() {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
 
         // ------------------------------------
@@ -495,7 +495,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testGetPkgScreenshot() throws ObjectNotFoundException {
+    public void testGetPkgScreenshot() {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
         String code = data.pkg1.getPkgSupplement().getSortedPkgScreenshots().get(0).getCode();
 
@@ -705,7 +705,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testUpdatePkgChangelog_withContent() throws ObjectNotFoundException {
+    public void testUpdatePkgChangelog_withContent() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -730,7 +730,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testUpdatePkgChangelog_withNoContent() throws ObjectNotFoundException {
+    public void testUpdatePkgChangelog_withNoContent() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -751,7 +751,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void updatePkgVersion_deactivate() throws ObjectNotFoundException {
+    public void updatePkgVersion_deactivate() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -48,7 +48,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdateRepository() throws ObjectNotFoundException {
+    public void testUpdateRepository() {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -71,7 +71,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdateRepository_password() throws ObjectNotFoundException {
+    public void testUpdateRepository_password() {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
         Assertions.assertThat(data.repository.getPasswordHash()).isNull();
         setAuthenticatedUserToRoot();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2016-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,7 +26,7 @@ public interface PkgJobApi {
      * @throws ObjectNotFoundException in the case that the data identified by GUID does not exist.
      */
 
-    QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException;
+    QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(QueuePkgCategoryCoverageImportSpreadsheetJobRequest request);
 
     /**
      * <p>Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have spreadsheets
@@ -62,7 +62,7 @@ public interface PkgJobApi {
      * containing package icons.</p>
      */
 
-    QueuePkgIconArchiveImportJobResult queuePkgIconArchiveImportJob(QueuePkgIconArchiveImportJobRequest request) throws ObjectNotFoundException;
+    QueuePkgIconArchiveImportJobResult queuePkgIconArchiveImportJob(QueuePkgIconArchiveImportJobRequest request);
 
     /**
      * <p>Enqueues a job to cause all PkgVersion objects with no payload length to get those populated if possible.</p>
@@ -93,6 +93,6 @@ public interface PkgJobApi {
      * containing package screenshots.</p>
      */
 
-    QueuePkgScreenshotArchiveImportJobResult queuePkgScreenshotArchiveImportJob(QueuePkgScreenshotArchiveImportJobRequest request) throws ObjectNotFoundException;
+    QueuePkgScreenshotArchiveImportJobResult queuePkgScreenshotArchiveImportJob(QueuePkgScreenshotArchiveImportJobRequest request);
 
 }

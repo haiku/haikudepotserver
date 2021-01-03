@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -96,7 +96,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         this.clientIdentifierSupplier = Preconditions.checkNotNull(clientIdentifierSupplier);
     }
 
-    private Pkg getPkg(ObjectContext context, String pkgName) throws ObjectNotFoundException {
+    private Pkg getPkg(ObjectContext context, String pkgName) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));
 
@@ -109,7 +109,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return pkgOptional.get();
     }
 
-    private List<Repository> transformCodesToRepositories(ObjectContext context, List<String> codes) throws ObjectNotFoundException {
+    private List<Repository> transformCodesToRepositories(ObjectContext context, List<String> codes) {
         Preconditions.checkState(null != codes && !codes.isEmpty(), "the architecture codes must be supplied and at least one architecture is required");
         List<Repository> result = new ArrayList<>();
 
@@ -126,7 +126,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
      * will throw {@link ObjectNotFoundException}.</p>
      */
 
-    private List<Architecture> transformCodesToArchitectures(ObjectContext context, List<String> codes) throws ObjectNotFoundException {
+    private List<Architecture> transformCodesToArchitectures(ObjectContext context, List<String> codes) {
         Preconditions.checkState(null != codes && !codes.isEmpty(), "the architecture codes must be supplied and at least one architecture is required");
         List<Architecture> result = new ArrayList<>();
 
@@ -138,7 +138,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public UpdatePkgCategoriesResult updatePkgCategories(UpdatePkgCategoriesRequest updatePkgCategoriesRequest) throws ObjectNotFoundException {
+    public UpdatePkgCategoriesResult updatePkgCategories(UpdatePkgCategoriesRequest updatePkgCategoriesRequest) {
         Preconditions.checkNotNull(updatePkgCategoriesRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(updatePkgCategoriesRequest.pkgName));
         Preconditions.checkNotNull(updatePkgCategoriesRequest.pkgCategoryCodes);
@@ -183,7 +183,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public SearchPkgsResult searchPkgs(final SearchPkgsRequest request) throws ObjectNotFoundException {
+    public SearchPkgsResult searchPkgs(final SearchPkgsRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(null != request.architectureCodes && !request.architectureCodes.isEmpty(), "architecture codes must be supplied and at least one is required");
         Preconditions.checkState(null!=request.repositoryCodes && !request.repositoryCodes.isEmpty(),"repository codes must be supplied and at least one is required");
@@ -376,7 +376,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public GetPkgResult getPkg(GetPkgRequest request) throws ObjectNotFoundException {
+    public GetPkgResult getPkg(GetPkgRequest request) {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.name), "request pkg name is required");
@@ -543,7 +543,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public GetPkgIconsResult getPkgIcons(GetPkgIconsRequest request) throws ObjectNotFoundException {
+    public GetPkgIconsResult getPkgIcons(GetPkgIconsRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied to get the package's icons");
 
@@ -560,7 +560,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public ConfigurePkgIconResult configurePkgIcon(ConfigurePkgIconRequest request) throws ObjectNotFoundException, BadPkgIconException {
+    public ConfigurePkgIconResult configurePkgIcon(ConfigurePkgIconRequest request) throws BadPkgIconException {
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
 
@@ -668,7 +668,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public RemovePkgIconResult removePkgIcon(RemovePkgIconRequest request) throws ObjectNotFoundException {
+    public RemovePkgIconResult removePkgIcon(RemovePkgIconRequest request) {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
@@ -696,7 +696,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public GetPkgScreenshotResult getPkgScreenshot(GetPkgScreenshotRequest request) throws ObjectNotFoundException {
+    public GetPkgScreenshotResult getPkgScreenshot(GetPkgScreenshotRequest request) {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(request.code);
 
@@ -726,7 +726,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public GetPkgScreenshotsResult getPkgScreenshots(GetPkgScreenshotsRequest getPkgScreenshotsRequest) throws ObjectNotFoundException {
+    public GetPkgScreenshotsResult getPkgScreenshots(GetPkgScreenshotsRequest getPkgScreenshotsRequest) {
         Preconditions.checkNotNull(getPkgScreenshotsRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgScreenshotsRequest.pkgName));
 
@@ -743,7 +743,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public RemovePkgScreenshotResult removePkgScreenshot(RemovePkgScreenshotRequest removePkgScreenshotRequest) throws ObjectNotFoundException {
+    public RemovePkgScreenshotResult removePkgScreenshot(RemovePkgScreenshotRequest removePkgScreenshotRequest) {
         Preconditions.checkNotNull(removePkgScreenshotRequest);
         Preconditions.checkNotNull(removePkgScreenshotRequest.code);
 
@@ -774,7 +774,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public ReorderPkgScreenshotsResult reorderPkgScreenshots(ReorderPkgScreenshotsRequest reorderPkgScreenshotsRequest) throws ObjectNotFoundException {
+    public ReorderPkgScreenshotsResult reorderPkgScreenshots(ReorderPkgScreenshotsRequest reorderPkgScreenshotsRequest) {
         Preconditions.checkNotNull(reorderPkgScreenshotsRequest);
         Preconditions.checkNotNull(reorderPkgScreenshotsRequest.pkgName);
         Preconditions.checkNotNull(reorderPkgScreenshotsRequest.codes);
@@ -800,7 +800,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public UpdatePkgLocalizationResult updatePkgLocalization(UpdatePkgLocalizationRequest updatePkgLocalizationRequest) throws ObjectNotFoundException {
+    public UpdatePkgLocalizationResult updatePkgLocalization(UpdatePkgLocalizationRequest updatePkgLocalizationRequest) {
 
         Preconditions.checkArgument(null != updatePkgLocalizationRequest);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(updatePkgLocalizationRequest.pkgName), "the package name must be supplied");
@@ -842,7 +842,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) throws ObjectNotFoundException {
+    public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequest getPkgLocalizationsRequest) {
         Preconditions.checkArgument(null != getPkgLocalizationsRequest, "a request is required");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgLocalizationsRequest.pkgName), "a package name is required");
         Preconditions.checkArgument(null != getPkgLocalizationsRequest.naturalLanguageCodes, "the natural language codes must be supplied");
@@ -869,7 +869,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public GetPkgVersionLocalizationsResult getPkgVersionLocalizations(GetPkgVersionLocalizationsRequest getPkgVersionLocalizationsRequest) throws ObjectNotFoundException {
+    public GetPkgVersionLocalizationsResult getPkgVersionLocalizations(
+            GetPkgVersionLocalizationsRequest getPkgVersionLocalizationsRequest) {
         Preconditions.checkNotNull(getPkgVersionLocalizationsRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.architectureCode));
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.pkgName));
@@ -921,7 +922,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) throws ObjectNotFoundException {
+    public UpdatePkgProminenceResult updatePkgProminence(UpdatePkgProminenceRequest request) {
         Preconditions.checkArgument(null != request);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "the package name must be supplied on the request");
         Preconditions.checkArgument(null != request.prominenceOrdering, "the presence ordering must be supplied");
@@ -958,7 +959,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
 
     @Override
-    public GetPkgChangelogResult getPkgChangelog(GetPkgChangelogRequest request) throws ObjectNotFoundException {
+    public GetPkgChangelogResult getPkgChangelog(GetPkgChangelogRequest request) {
         Preconditions.checkArgument(null!=request, "a request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
 
@@ -973,7 +974,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public UpdatePkgChangelogResult updatePkgChangelog(UpdatePkgChangelogRequest request) throws ObjectNotFoundException {
+    public UpdatePkgChangelogResult updatePkgChangelog(UpdatePkgChangelogRequest request) {
         Preconditions.checkArgument(null!=request, "a request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
 
@@ -1000,7 +1001,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     }
 
     @Override
-    public UpdatePkgVersionResult updatePkgVersion(UpdatePkgVersionRequest request) throws ObjectNotFoundException {
+    public UpdatePkgVersionResult updatePkgVersion(UpdatePkgVersionRequest request) {
         Preconditions.checkArgument(null!=request, "the request object must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "the package name must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code must be supplied");

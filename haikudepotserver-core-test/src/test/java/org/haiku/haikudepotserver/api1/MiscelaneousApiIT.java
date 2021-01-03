@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -223,7 +223,7 @@ public class MiscelaneousApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGenerateFeedUrl() throws ObjectNotFoundException, MalformedURLException {
+    public void testGenerateFeedUrl() throws MalformedURLException {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
 
         GenerateFeedUrlRequest request = new GenerateFeedUrlRequest();

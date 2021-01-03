@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,7 +46,7 @@ public interface MiscellaneousApi {
      * specified in the request does not exist.</p>
      */
 
-    GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest) throws ObjectNotFoundException;
+    GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest);
 
     /**
      * <P>This method will return a list of all of the possible architectures in the system such as x86 or arm.

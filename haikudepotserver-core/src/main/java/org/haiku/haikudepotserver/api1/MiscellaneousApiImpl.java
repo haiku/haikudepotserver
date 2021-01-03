@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -186,7 +186,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     }
 
     @Override
-    public GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest) throws ObjectNotFoundException {
+    public GetAllMessagesResult getAllMessages(GetAllMessagesRequest getAllMessagesRequest) {
         Preconditions.checkNotNull(getAllMessagesRequest);
         Preconditions.checkNotNull(getAllMessagesRequest.naturalLanguageCode);
 
@@ -271,7 +271,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     }
 
     @Override
-    public GenerateFeedUrlResult generateFeedUrl(final GenerateFeedUrlRequest request) throws ObjectNotFoundException {
+    public GenerateFeedUrlResult generateFeedUrl(final GenerateFeedUrlRequest request) {
         Preconditions.checkNotNull(request);
 
         final ObjectContext context = serverRuntime.newContext();
@@ -298,7 +298,7 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
             for (String pkgName : request.pkgNames) {
                 Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
-                if (!pkgOptional.isPresent()) {
+                if (pkgOptional.isEmpty()) {
                     throw new ObjectNotFoundException(Pkg.class.getSimpleName(), pkgName);
                 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,7 +28,7 @@ public interface AuthorizationApi {
      * the request.</p>
      */
 
-    CreateAuthorizationPkgRuleResult createAuthorizationPkgRule(CreateAuthorizationPkgRuleRequest request) throws ObjectNotFoundException, AuthorizationRuleConflictException;
+    CreateAuthorizationPkgRuleResult createAuthorizationPkgRule(CreateAuthorizationPkgRuleRequest request) throws AuthorizationRuleConflictException;
 
     /**
      * <p>This method will delete an authorization rule identified by the coordinates in the request.  If it
@@ -36,8 +36,8 @@ public interface AuthorizationApi {
      * {@link ObjectNotFoundException}.</p>
      */
 
-    RemoveAuthorizationPkgRuleResult removeAuthorizationPkgRule(RemoveAuthorizationPkgRuleRequest request) throws ObjectNotFoundException;
+    RemoveAuthorizationPkgRuleResult removeAuthorizationPkgRule(RemoveAuthorizationPkgRuleRequest request);
 
-    SearchAuthorizationPkgRulesResult searchAuthorizationPkgRules(SearchAuthorizationPkgRulesRequest request) throws ObjectNotFoundException;
+    SearchAuthorizationPkgRulesResult searchAuthorizationPkgRules(SearchAuthorizationPkgRulesRequest request);
 
 }

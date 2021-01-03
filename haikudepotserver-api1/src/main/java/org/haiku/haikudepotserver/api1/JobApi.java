@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ public interface JobApi {
      * of the jobs.</p>
      */
 
-    SearchJobsResult searchJobs(SearchJobsRequest request) throws ObjectNotFoundException;
+    SearchJobsResult searchJobs(SearchJobsRequest request);
 
     /**
      * <p>This method returns details of the job identified by data in the request.  If there is no such
@@ -35,6 +35,6 @@ public interface JobApi {
      * {@link ObjectNotFoundException}.</p>
      */
 
-    GetJobResult getJob(GetJobRequest request) throws ObjectNotFoundException;
+    GetJobResult getJob(GetJobRequest request);
 
 }

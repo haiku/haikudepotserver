@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -118,7 +118,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetUserRatingByUserAndPkgVersion() throws ObjectNotFoundException {
+    public void testGetUserRatingByUserAndPkgVersion() {
         integrationTestSupportService.createStandardTestData();
 
         String userRatingCode = createTestUserAndSampleUserRating();
@@ -196,7 +196,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testSearchUserRatings() throws ObjectNotFoundException {
+    public void testSearchUserRatings() {
 
         integrationTestSupportService.createStandardTestData();
         integrationTestSupportService.createUserRatings();

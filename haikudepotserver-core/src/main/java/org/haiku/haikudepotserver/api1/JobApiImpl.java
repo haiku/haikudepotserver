@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,7 +49,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
     }
 
     @Override
-    public SearchJobsResult searchJobs(SearchJobsRequest request) throws ObjectNotFoundException {
+    public SearchJobsResult searchJobs(SearchJobsRequest request) {
         Preconditions.checkArgument(null != request);
         final SearchJobsResult result = new SearchJobsResult();
 
@@ -120,7 +120,7 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
     }
 
     @Override
-    public GetJobResult getJob(GetJobRequest request) throws ObjectNotFoundException {
+    public GetJobResult getJob(GetJobRequest request) {
         Preconditions.checkArgument(null!=request);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.guid));
 

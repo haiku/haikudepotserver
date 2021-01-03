@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,19 +55,19 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     // -------------------------------
     // HELPERS
 
-    private org.haiku.haikudepotserver.dataobjects.Permission ensurePermission(ObjectContext context, String code) throws ObjectNotFoundException {
+    private org.haiku.haikudepotserver.dataobjects.Permission ensurePermission(ObjectContext context, String code) {
         return org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, code)
                 .orElseThrow(() -> new ObjectNotFoundException(
                         org.haiku.haikudepotserver.dataobjects.Permission.class.getSimpleName(),
                         code));
     }
 
-    private Pkg ensurePkg(ObjectContext context, String name) throws ObjectNotFoundException {
+    private Pkg ensurePkg(ObjectContext context, String name) {
         return Pkg.tryGetByName(context, name)
                 .orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), name));
     }
 
-    private User ensureUser(ObjectContext context, String nickname) throws ObjectNotFoundException {
+    private User ensureUser(ObjectContext context, String nickname) {
         return User.tryGetByNickname(context, nickname)
                 .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), nickname));
     }
@@ -120,7 +120,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     }
 
     @Override
-    public CreateAuthorizationPkgRuleResult createAuthorizationPkgRule(CreateAuthorizationPkgRuleRequest request) throws ObjectNotFoundException,AuthorizationRuleConflictException {
+    public CreateAuthorizationPkgRuleResult createAuthorizationPkgRule(CreateAuthorizationPkgRuleRequest request) throws AuthorizationRuleConflictException {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.permissionCode), "the permission code is required");
@@ -160,7 +160,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     }
 
     @Override
-    public RemoveAuthorizationPkgRuleResult removeAuthorizationPkgRule(RemoveAuthorizationPkgRuleRequest request) throws ObjectNotFoundException {
+    public RemoveAuthorizationPkgRuleResult removeAuthorizationPkgRule(RemoveAuthorizationPkgRuleRequest request) {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(!Strings.isNullOrEmpty(request.permissionCode), "the permission code is required");
@@ -193,7 +193,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     }
 
     @Override
-    public SearchAuthorizationPkgRulesResult searchAuthorizationPkgRules(SearchAuthorizationPkgRulesRequest request) throws ObjectNotFoundException {
+    public SearchAuthorizationPkgRulesResult searchAuthorizationPkgRules(SearchAuthorizationPkgRulesRequest request) {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkState(null == request.limit || request.limit > 0);

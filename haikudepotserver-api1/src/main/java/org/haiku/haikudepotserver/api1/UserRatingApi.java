@@ -1,5 +1,5 @@
 /*
-* Copyright 2014-2016, Andrew Lindesay
+* Copyright 2014-2021, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
@@ -20,7 +20,7 @@ public interface UserRatingApi {
      * <p>This method will re-calculate and store the user rating for the nominated packaging.</p>
      */
 
-    DeriveAndStoreUserRatingForPkgResult deriveAndStoreUserRatingForPkg(DeriveAndStoreUserRatingForPkgRequest request) throws ObjectNotFoundException;
+    DeriveAndStoreUserRatingForPkgResult deriveAndStoreUserRatingForPkg(DeriveAndStoreUserRatingForPkgRequest request);
 
     /**
      * <p>This method will trigger the re-calculation of user ratings for all of the packages in the system.</p>
@@ -35,7 +35,7 @@ public interface UserRatingApi {
      * has no authorization on it; it is effectively public.</p>
      */
 
-    GetUserRatingResult getUserRating(GetUserRatingRequest request) throws ObjectNotFoundException;
+    GetUserRatingResult getUserRating(GetUserRatingRequest request);
 
     /**
      * <p>This will find the user rating identified by the user and the package version.  If not such user rating
@@ -44,32 +44,32 @@ public interface UserRatingApi {
      * authorization on it; it is effectively public.</p>
      */
 
-    GetUserRatingByUserAndPkgVersionResult getUserRatingByUserAndPkgVersion(GetUserRatingByUserAndPkgVersionRequest request) throws ObjectNotFoundException;
+    GetUserRatingByUserAndPkgVersionResult getUserRatingByUserAndPkgVersion(GetUserRatingByUserAndPkgVersionRequest request);
 
     /**
      * <p>This method will create a user rating based on the data provided.  In the result is a code that
      * identifies this rating.</p>
      */
 
-    CreateUserRatingResult createUserRating(CreateUserRatingRequest request) throws ObjectNotFoundException;
+    CreateUserRatingResult createUserRating(CreateUserRatingRequest request);
 
     /**
      * <p>This method will update the user rating.  The user rating is identified by the supplied code and the
      * supplied filter describes those properties of the user rating that should be updated.</p>
      */
 
-    UpdateUserRatingResult updateUserRating(UpdateUserRatingRequest request) throws ObjectNotFoundException;
+    UpdateUserRatingResult updateUserRating(UpdateUserRatingRequest request);
 
     /**
      * <p>This method will return user rating search results based on the criteria supplied in the request.</p>
      */
 
-    SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequest request) throws ObjectNotFoundException;
+    SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequest request);
 
     /**
      * <p>This method will delete a user rating so that it is no longer stored.</p>
      */
 
-    RemoveUserRatingResult removeUserRating(RemoveUserRatingRequest request) throws ObjectNotFoundException;
+    RemoveUserRatingResult removeUserRating(RemoveUserRatingRequest request);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -61,7 +61,7 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
 
     @Override
     public QueuePkgCategoryCoverageImportSpreadsheetJobResult queuePkgCategoryCoverageImportSpreadsheetJob(
-            QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) throws ObjectNotFoundException {
+            QueuePkgCategoryCoverageImportSpreadsheetJobRequest request) {
         Preconditions.checkArgument(null != request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
 
@@ -128,8 +128,8 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
     }
 
     @Override
-    public QueuePkgIconArchiveImportJobResult queuePkgIconArchiveImportJob(QueuePkgIconArchiveImportJobRequest request)
-        throws ObjectNotFoundException {
+    public QueuePkgIconArchiveImportJobResult queuePkgIconArchiveImportJob(
+            QueuePkgIconArchiveImportJobRequest request) {
 
         Preconditions.checkArgument(null != request, "the request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.inputDataGuid), "the input data must be identified by guid");
@@ -255,7 +255,8 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
     }
 
     @Override
-    public QueuePkgScreenshotArchiveImportJobResult queuePkgScreenshotArchiveImportJob(QueuePkgScreenshotArchiveImportJobRequest request) throws ObjectNotFoundException {
+    public QueuePkgScreenshotArchiveImportJobResult queuePkgScreenshotArchiveImportJob(
+            QueuePkgScreenshotArchiveImportJobRequest request) {
         Preconditions.checkArgument(null != request, "the request must be supplied");
         Preconditions.checkArgument(StringUtils.isNotBlank(request.inputDataGuid), "the data guid must be supplied");
         Preconditions.checkArgument(null != request.importStrategy, "the import strategy must be supplied");

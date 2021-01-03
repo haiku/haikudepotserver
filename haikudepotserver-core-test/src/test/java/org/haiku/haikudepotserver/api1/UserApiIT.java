@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -104,7 +104,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetUser_found() throws ObjectNotFoundException {
+    public void testGetUser_found() {
 
         ObjectContext context = serverRuntime.newContext();
         integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
@@ -122,7 +122,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetUser_foundWithUserUsageConditionsAgreement() throws ObjectNotFoundException {
+    public void testGetUser_foundWithUserUsageConditionsAgreement() {
 
         ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009");
@@ -235,7 +235,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testChangePassword() throws ObjectNotFoundException {
+    public void testChangePassword() {
 
         Captcha captcha = captchaService.generate();
         ObjectContext context = serverRuntime.newContext();
