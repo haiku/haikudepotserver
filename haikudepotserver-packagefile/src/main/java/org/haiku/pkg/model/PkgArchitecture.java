@@ -18,5 +18,6 @@ public enum PkgArchitecture {
     X86_64,     // 4
     PPC,        // 5
     ARM,        // 6
-    M68K        // 7
+    M68K,       // 7
+    SPARC       // 8
 }

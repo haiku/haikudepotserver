@@ -8,6 +8,7 @@ package org.haiku.pkg;
 import com.google.common.base.Preconditions;
 import org.haiku.pkg.heap.HpkHeapReader;
 import org.haiku.pkg.heap.HeapCompression;
+import org.haiku.pkg.model.FileType;
 
 import java.io.Closeable;
 import java.io.File;
@@ -23,13 +24,13 @@ import java.util.Arrays;
 
 public class HpkrFileExtractor implements Closeable {
 
-    private File file;
+    private final File file;
 
-    private HpkrHeader header;
+    private final HpkrHeader header;
 
-    private HpkHeapReader heapReader;
+    private final HpkHeapReader heapReader;
 
-    private HpkStringTable attributesStringTable;
+    private final HpkStringTable attributesStringTable;
 
     public HpkrFileExtractor(File file) throws IOException {
 
@@ -83,19 +84,16 @@ public class HpkrFileExtractor implements Closeable {
 
     public AttributeIterator getPackageAttributesIterator() {
         long offset = header.getInfoLength() + header.getPackagesStringsLength();
-        return new AttributeIterator(getAttributeContext(),offset);
+        return new AttributeIterator(getAttributeContext(), offset);
     }
 
     private HpkrHeader readHeader() throws IOException {
         Preconditions.checkNotNull(file);
-
-        RandomAccessFile randomAccessFile = null;
         FileHelper fileHelper = new FileHelper();
 
-        try {
-            randomAccessFile = new RandomAccessFile(file, "r");
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
 
-            if (!Arrays.equals(new char[] {'h', 'p', 'k', 'r'}, fileHelper.readMagic(randomAccessFile))) {
+            if (fileHelper.getType(randomAccessFile) != FileType.HPKR) {
                 throw new HpkException("magic incorrect at the start of the hpkr file");
             }
 
@@ -106,22 +104,7 @@ public class HpkrFileExtractor implements Closeable {
             result.setTotalSize(fileHelper.readUnsignedLongToLong(randomAccessFile));
             result.setMinorVersion(fileHelper.readUnsignedShortToInt(randomAccessFile));
 
-            int compression = fileHelper.readUnsignedShortToInt(randomAccessFile);
-
-            // heap information
-            switch (compression) {
-                case 0:
-                    result.setHeapCompression(HeapCompression.NONE);
-                    break;
-
-                case 1:
-                    result.setHeapCompression(HeapCompression.ZLIB);
-                    break;
-
-                default:
-                    throw new HpkException("unknown compression setting in header; "+compression);
-            }
-
+            result.setHeapCompression(HeapCompression.getByNumericValue(fileHelper.readUnsignedShortToInt(randomAccessFile)));
             result.setHeapChunkSize(fileHelper.readUnsignedIntToLong(randomAccessFile));
             result.setHeapSizeCompressed(fileHelper.readUnsignedLongToLong(randomAccessFile));
             result.setHeapSizeUncompressed(fileHelper.readUnsignedLongToLong(randomAccessFile));
@@ -136,15 +119,6 @@ public class HpkrFileExtractor implements Closeable {
             result.setPackagesStringsCount(fileHelper.readUnsignedLongToLong(randomAccessFile));
 
             return result;
-        } finally {
-            if (null != randomAccessFile) {
-                try {
-                    randomAccessFile.close();
-                }
-                catch(IOException ioe) {
-                    // ignore
-                }
-            }
         }
     }
 

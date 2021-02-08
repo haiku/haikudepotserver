@@ -103,13 +103,12 @@ public class AttributeIterator {
             int encoding = deriveAttributeTagEncoding(tag);
             int id = deriveAttributeTagId(tag);
 
-            if (id <= 0 || id >= AttributeId.values().length) {
+            if (id < 0 || id >= AttributeId.values().length) {
                 throw new HpkException("illegal id; " + id);
             }
             AttributeId attributeId = AttributeId.values()[id];
             result = readAttributeByTagType(deriveAttributeTagType(tag), encoding, attributeId);
             ensureAttributeType(result);
-
 
             if(result.getAttributeId().getAttributeType() != result.getAttributeType()) {
                 throw new HpkException(String.format(
@@ -179,15 +178,15 @@ public class AttributeIterator {
 
     private byte[] readBufferForInt(int encoding) {
         ensureValidEncodingForInt(encoding);
-        byte[] buffer = new byte[encoding+1];
-        context.getHeapReader().readHeap(buffer, 0, new HeapCoordinates(offset, encoding + 1));
-        offset += encoding + 1;
+        int bytesToRead = 1 << encoding;
+        byte[] buffer = new byte[bytesToRead];
+        context.getHeapReader().readHeap(buffer, 0, new HeapCoordinates(offset, bytesToRead));
+        offset += bytesToRead;
         return buffer;
     }
 
     private Attribute readString(int encoding, AttributeId attributeId) {
         switch (encoding) {
-
             case ATTRIBUTE_ENCODING_STRING_INLINE:
                 return readStringInline(attributeId);
             case ATTRIBUTE_ENCODING_STRING_TABLE:
@@ -285,7 +284,7 @@ public class AttributeIterator {
     }
 
     private boolean deriveAttributeTagHasChildAttributes(BigInteger tag) {
-        return 0!=tag.subtract(BigInteger.valueOf(1L)).shiftRight(10).and(BigInteger.ONE).intValue();
+        return 0 != tag.subtract(BigInteger.valueOf(1L)).shiftRight(10).and(BigInteger.ONE).intValue();
     }
 
     private BigInteger getNextTag() {
@@ -321,7 +320,6 @@ public class AttributeIterator {
             case ATTRIBUTE_ENCODING_INT_32_BIT:
             case ATTRIBUTE_ENCODING_INT_64_BIT:
                 break;
-
             default:
                 throw new IllegalStateException("unknown encoding on a signed integer");
         }

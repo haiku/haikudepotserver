@@ -5,9 +5,16 @@
 
 package org.haiku.pkg;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import org.haiku.pkg.model.FileType;
+
+import java.io.*;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Locale;
+import java.util.Optional;
 
 /**
  * <p>This helps out with typical common reads that might be performed as part of
@@ -18,7 +25,18 @@ public class FileHelper {
 
     private final static BigInteger MAX_BIGINTEGER_FILE = new BigInteger(Long.toString(Long.MAX_VALUE));
 
-    private byte[] buffer8 = new byte[8];
+    private final byte[] buffer8 = new byte[8];
+
+    public FileType getType(RandomAccessFile file) throws IOException {
+        return tryGetType(file).orElseThrow(() -> new HpkException("unable to establish the file type"));
+    }
+
+    public Optional<FileType> tryGetType(RandomAccessFile file) throws IOException {
+        String magicString = new String(readMagic(file));
+        return EnumSet.allOf(FileType.class).stream()
+                .filter(e -> e.name().toLowerCase(Locale.ROOT).equals(magicString))
+                .findFirst();
+    }
 
     public int readUnsignedShortToInt(RandomAccessFile randomAccessFile) throws IOException {
 

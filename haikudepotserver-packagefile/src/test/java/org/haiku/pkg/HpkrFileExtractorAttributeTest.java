@@ -5,12 +5,14 @@
 
 package org.haiku.pkg;
 
+import org.fest.assertions.Assertions;
 import org.haiku.pkg.model.Attribute;
 import org.haiku.pkg.model.AttributeId;
 import org.junit.Test;
 
 import java.io.File;
 import java.math.BigInteger;
+import java.util.Optional;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -20,30 +22,23 @@ import static org.fest.assertions.Assertions.assertThat;
  * a smoke test.</p>
  */
 
-public class HpkrFileExtractorAttributeTest extends AbstractHpkrTest {
+public class HpkrFileExtractorAttributeTest extends AbstractHpkTest {
+
+    private static final String RESOURCE_TEST = "repo.hpkr";
 
     @Test
-    public void testRepo() throws Exception {
+    public void testReadFile() throws Exception {
 
-        File hpkrFile = prepareTestFile();
+        File hpkrFile = prepareTestFile(RESOURCE_TEST);
 
         try (HpkrFileExtractor hpkrFileExtractor = new HpkrFileExtractor(hpkrFile)) {
-            Attribute ncursesSourceAttribute = null;
 
             AttributeIterator attributeIterator = hpkrFileExtractor.getPackageAttributesIterator();
             AttributeContext attributeContext = hpkrFileExtractor.getAttributeContext();
+            Optional<Attribute> ncursesSourceAttributeOptional = tryFindAttributesForPackage(attributeIterator, "ncurses_source");
 
-            while (attributeIterator.hasNext()) {
-                Attribute attribute = attributeIterator.next();
-
-                if (AttributeId.PACKAGE == attribute.getAttributeId()) {
-                    String packageName = attribute.getValue(attributeIterator.getContext()).toString();
-
-                    if (packageName.equals("ncurses_source")) {
-                        ncursesSourceAttribute = attribute;
-                    }
-                }
-            }
+            Assertions.assertThat(ncursesSourceAttributeOptional.isPresent()).isTrue();
+            Attribute ncursesSourceAttribute = ncursesSourceAttributeOptional.get();
 
             // now the analysis phase.
 
@@ -60,9 +55,23 @@ public class HpkrFileExtractorAttributeTest extends AbstractHpkrTest {
             assertThat(majorVersionAttribute.getValue(attributeContext)).isEqualTo("5");
             assertThat(majorVersionAttribute.getChildAttribute(AttributeId.PACKAGE_VERSION_MINOR).getValue(attributeContext)).isEqualTo("9");
             assertThat(majorVersionAttribute.getChildAttribute(AttributeId.PACKAGE_VERSION_REVISION).getValue(attributeContext)).isEqualTo(new BigInteger("10"));
-
         }
 
+    }
+
+    private Optional<Attribute> tryFindAttributesForPackage(AttributeIterator attributeIterator, String packageName) {
+        while (attributeIterator.hasNext()) {
+            Attribute attribute = attributeIterator.next();
+
+            if (AttributeId.PACKAGE == attribute.getAttributeId()) {
+                String attributePackageName = attribute.getValue(attributeIterator.getContext()).toString();
+
+                if (attributePackageName.equals(packageName)) {
+                    return Optional.of(attribute);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
 }

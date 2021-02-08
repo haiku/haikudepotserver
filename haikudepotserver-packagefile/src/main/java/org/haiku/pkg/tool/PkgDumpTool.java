@@ -24,7 +24,7 @@ import java.io.OutputStreamWriter;
 
 public class PkgDumpTool {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AttributeDumpTool.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AttributeDumpTool.class);
 
     @Option(name = "-f", required = true, usage = "the HPKR file is required")
     private File hpkrFile;

@@ -5,7 +5,7 @@
 
 package org.haiku.pkg.model;
 
-abstract class StringAttribute extends Attribute {
+public abstract class StringAttribute extends Attribute {
 
     StringAttribute(AttributeId attributeId) {
         super(attributeId);

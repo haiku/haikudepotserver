@@ -17,11 +17,11 @@ import org.haiku.pkg.HpkStringTable;
 
 public class StringTableRefAttribute extends StringAttribute {
 
-    private int index;
+    private final int index;
 
     public StringTableRefAttribute(AttributeId attributeId, int index) {
         super(attributeId);
-        Preconditions.checkState(index >= 0);
+        Preconditions.checkArgument(index >= 0, "bad index");
         this.index = index;
     }
 
@@ -38,12 +38,18 @@ public class StringTableRefAttribute extends StringAttribute {
     @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         StringTableRefAttribute that = (StringTableRefAttribute) o;
 
-        if (index != that.index) return false;
+        if (index != that.index) {
+            return false;
+        }
 
         return true;
     }

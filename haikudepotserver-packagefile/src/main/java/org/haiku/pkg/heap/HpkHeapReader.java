@@ -302,7 +302,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
         Preconditions.checkState(bufferOffset < buffer.length);
         Preconditions.checkState(coordinates.getOffset() >= 0);
         Preconditions.checkState(coordinates.getOffset() < uncompressedSize);
-        Preconditions.checkState(coordinates.getOffset()+coordinates.getLength() < uncompressedSize);
+        Preconditions.checkState(coordinates.getOffset() + coordinates.getLength() < uncompressedSize);
 
         // first figure out how much to read from this chunk
 
