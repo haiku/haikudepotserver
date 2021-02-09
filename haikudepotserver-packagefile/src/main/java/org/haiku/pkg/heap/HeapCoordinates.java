@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,6 +34,10 @@ public class HeapCoordinates {
 
     public long getLength() {
         return length;
+    }
+
+    public boolean isEmpty() {
+        return 0L == length;
     }
 
     @SuppressWarnings("RedundantIfStatement") // was auto-generated!

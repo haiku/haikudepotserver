@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, Andrew Lindesay
+ * Copyright 2013-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,5 +19,7 @@ public enum PkgArchitecture {
     PPC,        // 5
     ARM,        // 6
     M68K,       // 7
-    SPARC       // 8
+    SPARC,      // 8
+    ARM64,      // 9
+    RISCV64     // 10
 }

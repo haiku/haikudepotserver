@@ -1,18 +1,19 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import org.haiku.pkg.AttributeContext;
 
 import java.util.Arrays;
 
 public class RawInlineAttribute extends RawAttribute {
 
-    private byte[] rawValue;
+    private final byte[] rawValue;
 
     public RawInlineAttribute(AttributeId attributeId, byte[] rawValue) {
         super(attributeId);
@@ -39,8 +40,8 @@ public class RawInlineAttribute extends RawAttribute {
     }
 
     @Override
-    public byte[] getValue(AttributeContext context) {
-        return rawValue;
+    public ByteSource getValue(AttributeContext context) {
+        return ByteSource.wrap(rawValue);
     }
 
     @Override

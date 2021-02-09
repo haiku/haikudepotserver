@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,9 +8,7 @@ package org.haiku.pkg.model;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.haiku.pkg.AttributeContext;
-import org.haiku.pkg.HpkException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +20,7 @@ import java.util.stream.Collectors;
 
 public abstract class Attribute {
 
-    private AttributeId attributeId;
+    private final AttributeId attributeId;
 
     private List<Attribute> childAttributes = Collections.emptyList();
 

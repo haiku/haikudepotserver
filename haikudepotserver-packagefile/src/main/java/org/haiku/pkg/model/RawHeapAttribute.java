@@ -1,14 +1,19 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import org.haiku.pkg.AttributeContext;
-import org.haiku.pkg.HpkException;
 import org.haiku.pkg.heap.HeapCoordinates;
+import org.haiku.pkg.heap.HeapInputStream;
+import org.haiku.pkg.heap.HeapReader;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * <p>This type of attribute refers to raw data.  It uses coordinates into the heap to provide a source for the
@@ -44,10 +49,8 @@ public class RawHeapAttribute extends RawAttribute {
     }
 
     @Override
-    public byte[] getValue(AttributeContext context) {
-        byte[] buffer = new byte[(int) heapCoordinates.getLength()];
-        context.getHeapReader().readHeap(buffer, 0, heapCoordinates);
-        return buffer;
+    public ByteSource getValue(AttributeContext context) {
+        return new HeapByteSource(context.getHeapReader(), heapCoordinates);
     }
 
     @Override
@@ -58,6 +61,28 @@ public class RawHeapAttribute extends RawAttribute {
     @Override
     public String toString() {
         return String.format("%s : @%s",super.toString(),heapCoordinates.toString());
+    }
+
+    private static class HeapByteSource extends ByteSource {
+
+        private final HeapReader heapReader;
+        private final HeapCoordinates heapCoordinates;
+
+        public HeapByteSource(HeapReader heapReader, HeapCoordinates heapCoordinates) {
+            this.heapCoordinates = heapCoordinates;
+            this.heapReader = heapReader;
+        }
+
+        @Override
+        public InputStream openStream() throws IOException {
+            return new HeapInputStream(heapReader, heapCoordinates);
+        }
+
+        @Override
+        public com.google.common.base.Optional<Long> sizeIfKnown() {
+            return com.google.common.base.Optional.of(heapCoordinates.getLength());
+        }
+
     }
 
 }

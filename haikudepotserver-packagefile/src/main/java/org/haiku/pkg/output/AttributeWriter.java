@@ -1,11 +1,12 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.output;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import org.haiku.pkg.AttributeContext;
 import org.haiku.pkg.HpkException;
 import org.haiku.pkg.model.Attribute;
@@ -43,24 +44,19 @@ public class AttributeWriter extends FilterWriter {
 
         try {
             switch (attribute.getAttributeType()) {
-
                 case RAW:
-                    byte[] data = (byte[]) attribute.getValue(context);
-                    write(String.format("%d bytes",data.length));
+                    ByteSource byteSource = (ByteSource) attribute.getValue(context);
+                    write(String.format("%d bytes", byteSource.size()));
                     break;
-
                 case INT:
                     write(attribute.getValue(context).toString());
                     break;
-
                 case STRING:
                     write(attribute.getValue(context).toString());
                     break;
-
                 default:
                     write("???");
                     break;
-
             }
         }
         catch (HpkException e) {
