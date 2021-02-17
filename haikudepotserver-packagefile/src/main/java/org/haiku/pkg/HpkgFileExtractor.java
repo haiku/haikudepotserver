@@ -1,14 +1,22 @@
+/*
+ * Copyright 2021, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 package org.haiku.pkg;
 
 import com.google.common.base.Preconditions;
 import org.haiku.pkg.heap.HeapCompression;
 import org.haiku.pkg.heap.HpkHeapReader;
+import org.haiku.pkg.model.Attribute;
 import org.haiku.pkg.model.FileType;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * <p>This object represents an object that can extract an Hpkg (Haiku Pkg) file.  If you are wanting to
@@ -102,6 +110,15 @@ public class HpkgFileExtractor implements Closeable {
                 - (header.getPackageAttributesLength() + header.getTocLength()));
         long tocAttributeOffset = tocOffset + header.getTocStringsLength();
         return new AttributeIterator(getTocContext(), tocAttributeOffset);
+    }
+
+    public List<Attribute> getToc() {
+        List<Attribute> assembly = new ArrayList<>();
+        AttributeIterator attributeIterator = getTocIterator();
+        while(attributeIterator.hasNext()) {
+            assembly.add(attributeIterator.next());
+        }
+        return Collections.unmodifiableList(assembly);
     }
 
     private HpkgHeader readHeader() throws IOException {

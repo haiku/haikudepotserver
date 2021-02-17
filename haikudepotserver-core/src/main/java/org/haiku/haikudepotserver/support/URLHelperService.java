@@ -1,11 +1,12 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.*;
 import com.google.common.net.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,6 +52,27 @@ public class URLHelperService {
         }
 
         return false;
+    }
+
+    public void transferPayloadToFile(URL url, File targetFile) throws IOException {
+        LOGGER.info("will transfer [{}] --> [{}]", url, targetFile);
+        String protocol = StringUtils.trimToEmpty(url.getProtocol());
+
+        switch(protocol) {
+            case "http":
+            case "https":
+                FileHelper.streamUrlDataToFile(url, targetFile, PAYLOAD_LENGTH_READ_TIMEOUT);
+                LOGGER.info("copied [{}] to [{}]", url, targetFile);
+                break;
+            case "file":
+                File sourceFile = new File(url.getPath());
+                Files.copy(sourceFile, targetFile);
+                LOGGER.info("copied [{}] to [{}]", sourceFile, targetFile);
+                break;
+            default:
+                LOGGER.warn("unable to transfer for URL scheme [{}]", protocol);
+                break;
+        }
     }
 
     public Optional<Long> tryGetPayloadLength(URL url) throws IOException {

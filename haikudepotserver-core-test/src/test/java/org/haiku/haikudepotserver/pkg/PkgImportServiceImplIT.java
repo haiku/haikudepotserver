@@ -1,10 +1,11 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
+import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.apache.cayenne.ObjectContext;
@@ -29,12 +30,15 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 @ContextConfiguration(classes = TestConfig.class)
 public class PkgImportServiceImplIT extends AbstractIntegrationTest {
+
+    private static final String RESOURCE_TEST = "tipster-1.1.1-1-x86_64.hpkg";
 
     @Resource
     private PkgImportService pkgImportService;
@@ -50,19 +54,6 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
-
-    private Pkg createPkg(String minor) {
-        return new Pkg(
-                "testpkg",
-                new PkgVersion("1", minor, "3", "4", 5),
-                PkgArchitecture.X86_64,
-                null,
-                Collections.emptyList(),
-                Collections.emptyList(),
-                "test-summary-en",
-                "test-description-en",
-                null);
-    }
 
     /**
      * <p>When a "_devel" package is imported there is a special behaviour that the localization and the
@@ -171,7 +162,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testImport_payloadLength() throws Exception {
+    public void testImport_payloadData() throws Exception {
 
         File repositoryDirectory = null;
         int expectedPayloadLength;
@@ -193,11 +184,10 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                     throw new IllegalStateException("unable to create the on-disk repository");
                 }
 
-                Random random = new Random(System.currentTimeMillis());
                 File fileF = new File(repositoryDirectory, "testpkg-1.3.3~4-5-x86_64.hpkg");
-                byte[] buffer = new byte[1000 + (Math.abs(random.nextInt()) % 10*1000)];
-                Files.write(buffer,fileF);
-                expectedPayloadLength = buffer.length;
+                byte[] payload = Resources.toByteArray(Resources.getResource(RESOURCE_TEST));
+                Files.write(payload, fileF);
+                expectedPayloadLength = payload.length;
             }
 
             // now load the next package version in
@@ -219,7 +209,8 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 context.commitChanges();
             }
 
-            // check the length on that package is there and is correct.
+            // check the length on that package is there and is correct and that the
+            // package icon is loaded in.
 
             {
                 ObjectContext context = serverRuntime.newContext();
@@ -233,10 +224,16 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                         )).get();
 
                 Assertions.assertThat(pkgVersion.getPayloadLength()).isEqualTo(expectedPayloadLength);
+
+                List<PkgIcon> pkgIcons = pkg.getPkgSupplement().getPkgIcons();
+                Assertions.assertThat(pkgIcons).hasSize(1);
+                PkgIcon pkgIcon = Iterables.getOnlyElement(pkgIcons);
+                byte[] actualIconData = pkgIcon.getPkgIconImage().getData();
+                Assertions.assertThat(actualIconData).hasSize(544);
             }
         }
         finally {
-            if(null!=repositoryDirectory) {
+            if (null != repositoryDirectory) {
                 FileHelper.delete(repositoryDirectory);
             }
         }
@@ -342,6 +339,19 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         }
 
+    }
+
+    private Pkg createPkg(String minor) {
+        return new Pkg(
+                "testpkg",
+                new PkgVersion("1", minor, "3", "4", 5),
+                PkgArchitecture.X86_64,
+                null,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                "test-summary-en",
+                "test-description-en",
+                null);
     }
 
 }

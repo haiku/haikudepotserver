@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -37,13 +37,13 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
     private final long uncompressedSize; // excluding the shorts for the chunks' compressed sizes
 
-    private LoadingCache<Integer,byte[]> heapChunkUncompressedCache;
+    private final LoadingCache<Integer,byte[]> heapChunkUncompressedCache;
 
-    private int[] heapChunkCompressedLengths;
+    private final int[] heapChunkCompressedLengths;
 
-    private RandomAccessFile randomAccessFile;
+    private final RandomAccessFile randomAccessFile;
 
-    private FileHelper fileHelper = new FileHelper();
+    private final FileHelper fileHelper = new FileHelper();
 
     public HpkHeapReader(
             final File file,
@@ -57,7 +57,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
         Preconditions.checkNotNull(file);
         Preconditions.checkNotNull(compression);
-        Preconditions.checkState(heapOffset > 0 &&heapOffset < Integer.MAX_VALUE);
+        Preconditions.checkState(heapOffset > 0 && heapOffset < Integer.MAX_VALUE);
         Preconditions.checkState(chunkSize > 0 && chunkSize < Integer.MAX_VALUE);
         Preconditions.checkState(compressedSize >= 0 && compressedSize < Integer.MAX_VALUE);
         Preconditions.checkState(uncompressedSize >= 0 && uncompressedSize < Integer.MAX_VALUE);

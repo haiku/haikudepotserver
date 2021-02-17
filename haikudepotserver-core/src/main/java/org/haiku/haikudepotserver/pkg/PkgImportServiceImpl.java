@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,41 +8,55 @@ package org.haiku.haikudepotserver.pkg;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.io.ByteSource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.model.PkgImportService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.haiku.haikudepotserver.support.ExposureType;
-import org.haiku.haikudepotserver.support.URLHelperService;
-import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.support.*;
+import org.haiku.pkg.AttributeContext;
+import org.haiku.pkg.HpkgFileExtractor;
+import org.haiku.pkg.model.Attribute;
+import org.haiku.pkg.model.AttributeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class PkgImportServiceImpl implements PkgImportService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgImportServiceImpl.class);
 
+    private final ServerRuntime serverRuntime;
     private final PkgServiceImpl pkgServiceImpl;
+    private final PkgIconService pkgIconService;
     private final PkgLocalizationService pkgLocalizationService;
     private final URLHelperService urlHelperService;
 
     public PkgImportServiceImpl(
+            ServerRuntime serverRuntime,
             PkgServiceImpl pkgServiceImpl,
+            PkgIconService pkgIconService,
             PkgLocalizationService pkgLocalizationService,
             URLHelperService urlHelperService) {
+        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgServiceImpl = Preconditions.checkNotNull(pkgServiceImpl);
+        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
         this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
         this.urlHelperService = Preconditions.checkNotNull(urlHelperService);
     }
@@ -52,7 +66,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             ObjectContext objectContext,
             ObjectId repositorySourceObjectId,
             org.haiku.pkg.model.Pkg pkg,
-            boolean shouldPopulatePayloadLength) {
+            boolean populateFromPayload) {
 
         Preconditions.checkArgument(null != pkg, "the package must be provided");
         Preconditions.checkArgument(null != repositorySourceObjectId, "the repository source is must be provided");
@@ -152,14 +166,14 @@ public class PkgImportServiceImpl implements PkgImportService {
         // [apl]
         // If this fails, we will let it go and it can be tried again a bit later on.  The system can try to back-fill
         // those at some later date if any of the latest versions for packages are missing.  This is better than
-        // failing the import at this stage since this is "just" meta data.
+        // failing the import at this stage since this is "just" meta data.  The length of the payload is being used as
+        // a signal that the payload was downloaded and processed at some point.
 
-        if(shouldPopulatePayloadLength && null==persistedPkgVersion.getPayloadLength()) {
-            populatePayloadLength(persistedPkgVersion);
+        if(populateFromPayload && shouldPopulateFromPayload(persistedPkgVersion)) {
+            populateFromPayload(objectContext, persistedPkgVersion);
         }
 
         LOGGER.debug("have processed package {}", pkg.toString());
-
     }
 
     private Pkg createPkg(ObjectContext objectContext, String name) {
@@ -254,20 +268,146 @@ public class PkgImportServiceImpl implements PkgImportService {
         }
     }
 
-    private void populatePayloadLength(PkgVersion persistedPkgVersion) {
-        Optional<URL> pkgVersionHpkgURLOptional = persistedPkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING);
+    private boolean shouldPopulateFromPayload(PkgVersion persistedPkgVersion) {
+        return null == persistedPkgVersion.getPayloadLength()
+                && Stream.of(
+                PkgService.SUFFIX_PKG_DEBUGINFO,
+                PkgService.SUFFIX_PKG_DEVELOPMENT,
+                PkgService.SUFFIX_PKG_SOURCE).noneMatch(suffix -> persistedPkgVersion.getPkg().getName().endsWith(suffix));
+    }
 
-        if (pkgVersionHpkgURLOptional.isPresent()) {
+    /**
+     * <p>This will read in the payload into a temporary file.  From there it will parse it
+     * and take up any data from it such as the icon and the length of the download in
+     * bytes.</p>
+     */
+
+    private void populateFromPayload(ObjectContext objectContext, PkgVersion persistedPkgVersion) {
+        persistedPkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING)
+                .ifPresentOrElse(
+                        u -> populateFromPayload(objectContext, persistedPkgVersion, u),
+                        () -> LOGGER.info(
+                                "no package payload data recorded because there is no "
+                                        + "hpkg url for pkg [{}] version [{}]",
+                                persistedPkgVersion.getPkg(), persistedPkgVersion));
+    }
+
+    private void populateFromPayload(
+            ObjectContext objectContext,
+            PkgVersion persistedPkgVersion, URL url) {
+        File temporaryFile = null;
+
+        try {
+            String prefix = persistedPkgVersion.getPkg().getName() + "_" + RandomStringUtils.randomAlphabetic(3) + "_";
+            // ^ need to ensure minimum length of the prefix
+            temporaryFile = File.createTempFile(prefix, ".hpkg");
+
             try {
-                urlHelperService.tryGetPayloadLength(pkgVersionHpkgURLOptional.get())
-                        .filter(l -> l > 0L)
-                        .ifPresent(persistedPkgVersion::setPayloadLength);
-            } catch (IOException ioe) {
-                LOGGER.error("unable to get the payload length for; " + persistedPkgVersion, ioe);
+                urlHelperService.transferPayloadToFile(url, temporaryFile);
             }
-        } else {
-            LOGGER.info("no package length recorded because there is no "
-                    + "hpkg url for [" + persistedPkgVersion + "]");
+            catch (IOException ioe) {
+                // if we can't download then don't stop the entire import process - just log and carry on.
+                LOGGER.warn("unable to download from the url [{}] --> [{}]; will ignore", url, temporaryFile);
+                return;
+            }
+
+            // the length of the payload is interesting and trivial to capture from
+            // the data downloaded.
+
+            if (null == persistedPkgVersion.getPayloadLength()
+                || persistedPkgVersion.getPayloadLength() != temporaryFile.length()) {
+                persistedPkgVersion.setPayloadLength(temporaryFile.length());
+                LOGGER.info("recording new length for [{}] version [{}] of {}bytes",
+                        persistedPkgVersion.getPkg(), persistedPkgVersion, temporaryFile.length());
+            }
+
+            // more complex is the capture of the data in the parsed payload data.
+
+            HpkgFileExtractor hpkgFileExtractor;
+
+            try {
+                hpkgFileExtractor = new HpkgFileExtractor(temporaryFile);
+            }
+            catch (Throwable th) {
+                // if it is not possible to parse the HPKG then log and carry on.
+                LOGGER.warn("unable to parse the payload from [{}]", url, th);
+                return;
+            }
+
+            populateIconFromPayload(objectContext, persistedPkgVersion, hpkgFileExtractor);
+        }
+        catch (IOException ioe) {
+            throw new UncheckedIOException(ioe);
+        }
+        finally {
+            if (null != temporaryFile && temporaryFile.exists()) {
+                if (temporaryFile.delete()) {
+                    LOGGER.debug("did delete the temporary file");
+                }
+                else {
+                    LOGGER.error("unable to delete the temporary file [{}]", temporaryFile);
+                }
+            }
+        }
+    }
+
+    private void populateIconFromPayload(
+            ObjectContext objectContext, PkgVersion persistedPkgVersion,
+            HpkgFileExtractor hpkgFileExtractor) {
+        AttributeContext context = hpkgFileExtractor.getTocContext();
+        List<Attribute> iconAttrs = HpkgHelper.findIconAttributesFromExecutableDirEntries(
+                context, hpkgFileExtractor.getToc());
+        switch (iconAttrs.size()) {
+            case 0:
+                LOGGER.info("package [{}] version [{}] has no icons",
+                        persistedPkgVersion.getPkg(), persistedPkgVersion);
+                break;
+            case 1:
+                populateIconFromPayload(
+                        objectContext, persistedPkgVersion, context,
+                        Iterables.getFirst(iconAttrs, null));
+                break;
+            default:
+                LOGGER.info("package [{}] version [{}] has {} icons --> ambiguous so will not load any",
+                        persistedPkgVersion.getPkg(), persistedPkgVersion, iconAttrs.size());
+                break;
+        }
+    }
+
+    private void populateIconFromPayload(
+            ObjectContext objectContext, PkgVersion persistedPkgVersion,
+            AttributeContext context, Attribute attribute) {
+        Attribute dataAttr = attribute.tryGetChildAttribute(AttributeId.DATA).orElse(null);
+
+        if (null == dataAttr) {
+            LOGGER.warn("the icon [{}] found for package [{}] version [{}] does not have a data attribute",
+                    AttributeId.FILE_ATTRIBUTE, persistedPkgVersion.getPkg(), persistedPkgVersion);
+        }
+
+        ByteSource byteSource = (ByteSource) dataAttr.getValue(context);
+
+        try {
+            LOGGER.info("did find {} bytes of icon data for package [{}] version [{}]",
+                    byteSource.size(), persistedPkgVersion.getPkg(), persistedPkgVersion);
+        }
+        catch (IOException ignore) {
+            LOGGER.warn("cannot get the size of the icon payload for package [{}] version [{}]",
+                    persistedPkgVersion.getPkg(), persistedPkgVersion);
+        }
+
+        try (InputStream inputStream = byteSource.openStream()) {
+            pkgIconService.storePkgIconImage(
+                    inputStream,
+                    MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE),
+                    null,
+                    objectContext,
+                    persistedPkgVersion.getPkg().getPkgSupplement());
+        }
+        catch (IOException ioe) {
+            throw new UncheckedIOException(ioe);
+        }
+        catch (BadPkgIconException e) {
+            LOGGER.info("a failure has arisen loading a package icon data", e);
         }
     }
 

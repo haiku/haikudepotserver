@@ -63,7 +63,7 @@ public class FileHelper {
                     Files.asByteSink(file).writeFrom(inputStream);
                 }
             } else {
-                throw new IOException("url request returned " + response.statusCode());
+                throw new IOException("url request returned http status [" + response.statusCode() + "]");
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();

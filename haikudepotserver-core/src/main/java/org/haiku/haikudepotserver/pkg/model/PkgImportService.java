@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,7 +16,7 @@ public interface PkgImportService {
      * either creating it or updating it as necessary.</p>
      * @param pkg imports into the local database from this package model.
      * @param repositorySourceObjectId the {@link ObjectId} of the source of the package data.
-     * @param populatePayloadLength is able to signal to the import process that the length of the package should be
+     * @param populateFromPayload is able to signal to the import process that the length of the package should be
      *                              populated.
      */
 
@@ -24,6 +24,6 @@ public interface PkgImportService {
             ObjectContext objectContext,
             ObjectId repositorySourceObjectId,
             org.haiku.pkg.model.Pkg pkg,
-            boolean populatePayloadLength);
+            boolean populateFromPayload);
 
 }

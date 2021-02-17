@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 @Service
 public class PkgIconServiceImpl implements PkgIconService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconServiceImpl.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(PkgIconServiceImpl.class);
 
     @SuppressWarnings("FieldCanBeLocal")
-    private static int ICON_SIZE_LIMIT = 100 * 1024; // 100k
+    private static final int ICON_SIZE_LIMIT = 100 * 1024; // 100k
 
     private final RenderedPkgIconRepository renderedPkgIconRepository;
     private final PngOptimizationService pngOptimizationService;
@@ -157,16 +157,20 @@ public class PkgIconServiceImpl implements PkgIconService {
             pkgIconOptional = Optional.of(pkgIcon);
         }
 
-        pkgIconImage.setData(imageData);
-        pkgSupplement.setModifyTimestamp();
-        pkgSupplement.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
-        renderedPkgIconRepository.evict(context, pkgSupplement);
+        if (pkgIconImage.getData() == null || !Arrays.equals(pkgIconImage.getData(), imageData)) {
+            pkgIconImage.setData(imageData);
+            pkgSupplement.setModifyTimestamp();
+            pkgSupplement.setIconModifyTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
+            renderedPkgIconRepository.evict(context, pkgSupplement);
 
-        if (null != size) {
-            LOGGER.info("the icon {}px for package {} has been updated", size, pkgSupplement.getBasePkgName());
+            if (null != size) {
+                LOGGER.info("the icon {}px for package [{}] has been updated", size, pkgSupplement.getBasePkgName());
+            } else {
+                LOGGER.info("the icon for package [{}] has been updated", pkgSupplement.getBasePkgName());
+            }
         }
         else {
-            LOGGER.info("the icon for package {} has been updated", pkgSupplement.getBasePkgName());
+            LOGGER.info("no change to package icon for [{}] ", pkgSupplement.getBasePkgName());
         }
 
         return pkgIconOptional.orElseThrow(IllegalStateException::new);
@@ -184,7 +188,7 @@ public class PkgIconServiceImpl implements PkgIconService {
 
         return codes
                 .stream()
-                .map(c -> MediaType.tryGetByCode(context, c).get())
+                .map(c -> MediaType.getByCode(context, c))
                 .collect(Collectors.toList());
 
     }

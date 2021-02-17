@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,17 +63,17 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
     private final PkgImportService pkgImportService;
-    private final boolean shouldPopulatePayloadLength;
+    private final boolean shouldPopulateFromPayload;
 
     public RepositoryHpkrIngressJobRunner(
             ServerRuntime serverRuntime,
             PkgService pkgService,
             PkgImportService pkgImportService,
-            @Value("${repository.import.populatepayloadlength:false}") boolean shouldPopulatePayloadLength) {
+            @Value("${repository.import.populatefrompayload:false}") boolean shouldPopulateFromPayload) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgService = Preconditions.checkNotNull(pkgService);
         this.pkgImportService = Preconditions.checkNotNull(pkgImportService);
-        this.shouldPopulatePayloadLength = shouldPopulatePayloadLength;
+        this.shouldPopulateFromPayload = shouldPopulateFromPayload;
     }
 
     @Override
@@ -232,13 +232,13 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                 Pkg pkg = pkgIterator.next();
                 repositoryImportPkgNames.add(pkg.getName());
 
-                pkgImportService.importFrom(
+                try {
+                    pkgImportService.importFrom(
                         pkgImportContext,
                         repositorySource.getObjectId(),
                         pkg,
-                        shouldPopulatePayloadLength);
+                        shouldPopulateFromPayload);
 
-                try {
                     pkgImportContext.commitChanges();
                 }
                 catch(Throwable th) {

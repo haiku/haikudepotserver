@@ -2,18 +2,15 @@
  * Copyright 2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
-
 package org.haiku.pkg;
 
 import com.google.common.base.Preconditions;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+import junit.framework.AssertionFailedError;
 import org.fest.assertions.Assertions;
-import org.haiku.pkg.model.Attribute;
-import org.haiku.pkg.model.AttributeId;
-import org.haiku.pkg.model.AttributeType;
-import org.haiku.pkg.model.IntAttribute;
+import org.haiku.pkg.model.*;
 import org.junit.Test;
 
 import java.io.File;
@@ -25,6 +22,10 @@ import java.util.Optional;
 public class HpkgFileExtractorAttributeTest extends AbstractHpkTest {
 
     private static final String RESOURCE_TEST = "tipster-1.1.1-1-x86_64.hpkg";
+
+    private static final int[] HVIF_MAGIC = {
+            0x6e, 0x63, 0x69, 0x66
+    };
 
     @Test
     public void testReadFile() throws Exception {
@@ -49,12 +50,24 @@ public class HpkgFileExtractorAttributeTest extends AbstractHpkTest {
 
             // Pull out the actual binary to check.  The expected data results were obtained
             // from a Haiku host with the package installed.
-            Attribute binaryDirectoryEntry = findByDirectoryEntries(tocAttributes, tocContext, List.of("apps", "Tipster"));
-            Attribute binaryData = binaryDirectoryEntry.getChildAttribute(AttributeId.DATA);
+            Attribute tipsterDirectoryEntry = findByDirectoryEntries(tocAttributes, tocContext, List.of("apps", "Tipster"));
+
+            Attribute binaryData = tipsterDirectoryEntry.getChildAttribute(AttributeId.DATA);
             ByteSource binaryDataByteSource = (ByteSource) binaryData.getValue(tocContext);
             Assertions.assertThat(binaryDataByteSource.size()).isEqualTo(153840L);
             HashCode hashCode = binaryDataByteSource.hash(Hashing.md5());
             Assertions.assertThat(hashCode.toString().toLowerCase(Locale.ROOT)).isEqualTo("13b16cd7d035ddda09a744c49a8ebdf2");
+
+            Attribute iconAttribute = tipsterDirectoryEntry.getChildAttributes(AttributeId.FILE_ATTRIBUTE)
+                    .stream()
+                    .map(a -> (StringAttribute) a)
+                    .filter(a -> a.getValue(tocContext).equals("BEOS:ICON"))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionFailedError("could not find icon attribute"));
+            Attribute iconBinaryData = iconAttribute.getChildAttribute(AttributeId.DATA);
+            ByteSource iconDataByteSource = (ByteSource) iconBinaryData.getValue(tocContext);
+            byte[] iconBytes = iconDataByteSource.read();
+            assertIsHvif(iconBytes);
         }
     }
 
@@ -89,5 +102,13 @@ public class HpkgFileExtractorAttributeTest extends AbstractHpkTest {
         return assembly;
     }
 
+    private void assertIsHvif(byte[] payload) {
+        Assertions.assertThat(payload.length).isGreaterThan(HVIF_MAGIC.length);
+        for (int i = 0; i < HVIF_MAGIC.length; i++) {
+            if ((0xff & payload[i]) != HVIF_MAGIC[i]) {
+                throw new AssertionFailedError("mismatch on the magic in the data payload");
+            }
+        }
+    }
 
 }

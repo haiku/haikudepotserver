@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,15 +17,15 @@ public class ImageHelper {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 
-    private int HVIF_MAGIC[] = {
+    private static final int[] HVIF_MAGIC = {
             0x6e, 0x63, 0x69, 0x66
     };
 
-    private int PNG_MAGIC[] = {
+    private static final int[] PNG_MAGIC = {
             0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
     };
 
-    private int PNG_IHDR[] = {
+    private static final int[] PNG_IHDR = {
             0x49, 0x48, 0x44, 0x52
     };
 
