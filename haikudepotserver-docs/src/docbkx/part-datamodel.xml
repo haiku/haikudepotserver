@@ -49,9 +49,10 @@ Distributed under the terms of the MIT License.
             data to use dependent on a user's physical location.
         </para>
         <para>
-            The RepositorySource contains a "url" field and this URL acts as an identifier for the RepositorySource.
+            The RepositorySource contains an "identifier" field and this string acts as an identifier for
+            the RepositorySource.
             The actual URLs where repository data can be fetched are found in the RepositorySourceMirror-s.
-            You can find out more about the URLs and expected resources in the
+            You can find out more about this in the
             <link linkend="repositories">repository</link> section.
         </para>
 

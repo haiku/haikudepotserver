@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Component
 public class SinglePageTemplateFrequencyMetrics {
 
-    private Map<String, AtomicLong> templateCounter = new HashMap<>();
+    private final Map<String, AtomicLong> templateCounter = new HashMap<>();
 
     private List<String> sortedTemplates;
 

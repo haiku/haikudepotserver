@@ -62,18 +62,17 @@ Distributed under the terms of the MIT License.
             <para>
                 <programlisting>name HaikuPorts
 vendor "Haiku Project"
-summary "The HaikuPorts repository (for Haiku hrev50480)"
+summary "The HaikuPorts repository (for Haiku R1 BETA3)"
 priority 1
-url http://packages.haiku-os.org/haikuports/master/repo/x86_gcc2/d03690...921
+identifier tag:haikuports.org,2013:repositories/haikuports/r1beta3/x86_gcc2
 architecture x86_gcc2
                 </programlisting>
             </para>
 
             <para>
-                The 'url' parameter is important because it acts as a unique identifier for
-                the repository.  It is not actually a URL that addresses anything other
-                than a single repository within the space of all possible repositories.  It
-                is important to remember that the 'url parameter here is consistent across
+                The 'identifier' parameter is important because it acts as a unique identifier for
+                the repository.  It
+                is important to remember that the 'identifier' parameter here is consistent across
                 mirrors of the same repository.
             </para>
 

@@ -4,6 +4,7 @@
  */
 package org.haiku.haikudepotserver.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.*;
@@ -30,10 +31,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final RepositoryService repositoryService;
 
+    private final ObjectMapper objectMapper;
+
     public SecurityConfig(
             ServerRuntime serverRuntime,
             UserAuthenticationService userAuthenticationService,
-            RepositoryService repositoryService) {
+            RepositoryService repositoryService,
+            ObjectMapper objectMapper
+    ) {
+        this.objectMapper = objectMapper;
         this.serverRuntime = serverRuntime;
         this.userAuthenticationService = userAuthenticationService;
         this.repositoryService = repositoryService;
@@ -41,6 +47,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        AuthenticationEntryPoint authenticationEntryPoint = new AuthenticationEntryPoint(objectMapper);
+        AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandler(objectMapper);
+
+        http.exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler)
+                .authenticationEntryPoint(authenticationEntryPoint);
 
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -51,7 +63,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authenticationProvider(new UserAuthenticationProvider(userAuthenticationService))
                 .authenticationProvider(new RepositoryAuthenticationProvider(serverRuntime, repositoryService))
-                .httpBasic().authenticationDetailsSource(new RepositoryAuthenticationDetailsSource());
+                .httpBasic()
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .authenticationDetailsSource(new RepositoryAuthenticationDetailsSource());
 
         // this covers authentication by supplying a JWT bearer token as well as an occasional need
         // for the JWT to be supplied as a query parameter (needs to be phased out).
