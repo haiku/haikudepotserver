@@ -10,7 +10,7 @@
 
 <head>
 
-    <title>Haiku Depot Web</title>
+    <title>Haiku Depot Server</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <%@include file="/WEB-INF/includes/searchheadlink.jsp"%>

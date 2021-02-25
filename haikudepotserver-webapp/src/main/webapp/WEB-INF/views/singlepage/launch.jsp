@@ -12,7 +12,7 @@ web-resources and then this starts the java-script single page environment drive
 
 <head>
 
-    <title>Haiku Depot Web</title>
+    <title>Haiku Depot Server</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
