@@ -63,7 +63,7 @@ public class RawHeapAttribute extends RawAttribute {
         return String.format("%s : @%s",super.toString(),heapCoordinates.toString());
     }
 
-    private static class HeapByteSource extends ByteSource {
+    public static class HeapByteSource extends ByteSource {
 
         private final HeapReader heapReader;
         private final HeapCoordinates heapCoordinates;
@@ -81,6 +81,10 @@ public class RawHeapAttribute extends RawAttribute {
         @Override
         public com.google.common.base.Optional<Long> sizeIfKnown() {
             return com.google.common.base.Optional.of(heapCoordinates.getLength());
+        }
+
+        public HeapCoordinates getHeapCoordinates() {
+            return heapCoordinates;
         }
 
     }

@@ -9,8 +9,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import org.haiku.pkg.AttributeContext;
 import org.haiku.pkg.HpkException;
+import org.haiku.pkg.heap.HeapCoordinates;
 import org.haiku.pkg.model.Attribute;
 import org.haiku.pkg.AttributeIterator;
+import org.haiku.pkg.model.RawHeapAttribute;
 
 import java.io.FilterWriter;
 import java.io.IOException;
@@ -47,6 +49,10 @@ public class AttributeWriter extends FilterWriter {
                 case RAW:
                     ByteSource byteSource = (ByteSource) attribute.getValue(context);
                     write(String.format("%d bytes", byteSource.size()));
+                    if (byteSource instanceof RawHeapAttribute.HeapByteSource) {
+                        HeapCoordinates coordinates = ((RawHeapAttribute.HeapByteSource) byteSource).getHeapCoordinates();
+                        write(String.format(" {off:%d, len:%d}", coordinates.getOffset(), coordinates.getLength()));
+                    }
                     break;
                 case INT:
                     write(attribute.getValue(context).toString());
