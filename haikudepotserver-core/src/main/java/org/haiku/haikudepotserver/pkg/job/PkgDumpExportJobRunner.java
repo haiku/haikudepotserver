@@ -219,6 +219,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         Pkg pkg = pkgVersionsUnderCommonPkg.get(0).getPkg(); // any will do to get the pkg.
 
         DumpExportPkg dumpExportPkg = new DumpExportPkg();
+        dumpExportPkg.setCreateTimestamp(pkg.getCreateTimestamp().getTime());
         dumpExportPkg.setModifyTimestamp(pkg.getModifyTimestamp().getTime());
         dumpExportPkg.setName(pkg.getName());
         dumpExportPkg.setHasChangelog(pkg.getPkgSupplement().getPkgChangelog().isPresent());
@@ -263,6 +264,8 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
             PkgLocalizationLookupService pkgLocalizationLookupService) {
         DumpExportPkgVersion result = new DumpExportPkgVersion();
 
+        result.setCreateTimestamp(pkgVersion.getCreateTimestamp().getTime());
+        result.setModifyTimestamp(pkgVersion.getModifyTimestamp().getTime());
         result.setMajor(pkgVersion.getMajor());
         result.setMinor(pkgVersion.getMinor());
         result.setMicro(pkgVersion.getMicro());
