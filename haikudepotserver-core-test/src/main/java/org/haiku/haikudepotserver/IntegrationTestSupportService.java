@@ -359,7 +359,7 @@ public class IntegrationTestSupportService {
         UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
         agreement.setUser(user);
         agreement.setTimestampAgreed();
-        agreement.setUserUsageConditions(UserUsageConditions.getByCode(context, "UUC2019V01"));
+        agreement.setUserUsageConditions(UserUsageConditions.getByCode(context, "UUC2021V01"));
         context.commitChanges();
     }
 
