@@ -35,7 +35,7 @@
 
         <postgresql.version>42.2.18</postgresql.version>
         <slf4j.version>1.7.28</slf4j.version>
-        <jackson-databind.version>2.10.3</jackson-databind.version>
+        <jackson-databind.version>2.10.5.1</jackson-databind.version>
         <guava.version>30.0-jre</guava.version>
 
         <web-lru-cache.versionbase>2.5.0</web-lru-cache.versionbase>
