@@ -16,6 +16,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.Pair;
+import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.dataobjects.auto._UserUsageConditions;
 import org.slf4j.Logger;
@@ -99,6 +100,9 @@ public class UserUsageConditionsInitializer {
             LOGGER.info("did create {} user usage conditions", mutableOrdering.getValue() - initialOrdering);
             context.commitChanges();
         }
+
+        serverRuntime.getDataDomain().getQueryCache()
+                .removeGroup(HaikuDepot.CacheGroup.USER_USAGE_CONDITIONS.name());
     }
 
     private void initUserUsageConditions(ObjectContext context, Pair<Resource, Resource> resources, int ordering) {
