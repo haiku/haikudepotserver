@@ -84,6 +84,11 @@ angular.module('haikudepotserver').controller(
                     pkg.versions[0].summary.length;
             };
 
+            $scope.shouldShowDescriptionSnippet = function (pkg) {
+                return pkg.versions[0].descriptionSnippet &&
+                    pkg.versions[0].descriptionSnippet.length;
+            }
+
             // if the search criteria has hit the name, but the name is not being displayed because
             // there is a title shown then it makes sense to show the name.  Also show the pkg name
             // in the case that the package is subordinate to another package as this may be the

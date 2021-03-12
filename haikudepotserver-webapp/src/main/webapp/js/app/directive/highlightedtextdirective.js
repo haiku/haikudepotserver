@@ -59,8 +59,8 @@ angular.module('haikudepotserver').directive('highlightedText',[
                             valueLowerCase,upto,
                             searchExpression,searchExpressionType);
 
-                        if(-1==found.offset) {
-                            if(0==upto) {
+                        if (-1 === found.offset) {
+                            if (0 === upto) {
                                 containerE.text(value || '');
                             }
                             else {
@@ -68,7 +68,7 @@ angular.module('haikudepotserver').directive('highlightedText',[
                             }
                         }
                         else {
-                            if(0==upto) {
+                            if (0 === upto) {
                                 containerE.text('');
                             }
 
@@ -92,7 +92,7 @@ angular.module('haikudepotserver').directive('highlightedText',[
 
             $scope.$watch(valueExpression, function(newValue) {
                 value = newValue;
-                valueLowerCase = value.toLowerCase();
+                valueLowerCase = (value || '').toLowerCase();
                 updateText();
             });
 

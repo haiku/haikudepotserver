@@ -101,6 +101,14 @@
                                         search-expression-type="'CONTAINS'"></highlighted-text>
                             </small>
                         </div>
+                        <div ng-show="shouldShowDescriptionSnippet(pkg)">
+                            <small class="muted">
+                                <highlighted-text
+                                        value="pkg.versions[0].descriptionSnippet"
+                                        search-expression="lastRefetchPkgsSearchExpression"
+                                        search-expression-type="'CONTAINS'"></highlighted-text>
+                            </small>
+                        </div>
                     </td>
                     <td>
                         <span class="muted">{{pkg.versions[0].payloadLength|dataLength}}</span>

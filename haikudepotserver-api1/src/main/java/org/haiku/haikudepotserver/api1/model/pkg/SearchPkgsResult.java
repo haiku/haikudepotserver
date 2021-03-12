@@ -48,6 +48,12 @@ public class SearchPkgsResult extends AbstractSearchResult<SearchPkgsResult.Pkg>
         public Long payloadLength;
 
         /**
+         * <p>If this is relevant to the search then it may be returned.</p>
+         * @since 2021-03-11
+         */
+        public String descriptionSnippet;
+
+        /**
          * <p>This value is localized.</p>
          * @since 2015-03-26
          */

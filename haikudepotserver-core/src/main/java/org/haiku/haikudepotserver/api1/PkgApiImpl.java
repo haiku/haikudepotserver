@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableList;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgIcon;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgVersionUrl;
@@ -30,10 +31,7 @@ import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
-import org.haiku.haikudepotserver.support.SingleCollector;
-import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.support.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,6 +53,8 @@ import java.util.stream.Collectors;
 public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     private final static int PKGPKGCATEGORIES_MAX = 3;
+
+    private final static int SNIPPET_LENGTH = 64;
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
 
@@ -277,6 +277,22 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         resultVersion.summary = resolvedPkgVersionLocalization.getSummary();
                         resultVersion.repositorySourceCode = spv.getRepositorySource().getCode();
                         resultVersion.repositoryCode = spv.getRepositorySource().getRepository().getCode();
+
+                        // only include a snippet from the description if there is no match on the
+                        // keyword in the summary.
+
+                        if (
+                                null != request.expressionType
+                                        && StringUtils.isNotBlank(request.expression)
+                                        && !StringUtils.containsIgnoreCase(
+                                                StringUtils.trimToEmpty(resolvedPkgVersionLocalization.getSummary()),
+                                                StringUtils.trimToEmpty(request.expression))) {
+                            resultVersion.descriptionSnippet = StringHelper.tryCreateTextSnippetAroundFoundText(
+                                    resolvedPkgVersionLocalization.getDescription(),
+                                    request.expression,
+                                    SNIPPET_LENGTH)
+                                    .orElse(null);
+                        }
 
                         resultPkg.versions = Collections.singletonList(resultVersion);
 
