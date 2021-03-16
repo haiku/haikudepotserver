@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>See {@link PkgApi} for details on the methods this API affords.</p>
@@ -284,9 +285,13 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         if (
                                 null != request.expressionType
                                         && StringUtils.isNotBlank(request.expression)
-                                        && !StringUtils.containsIgnoreCase(
-                                                StringUtils.trimToEmpty(resolvedPkgVersionLocalization.getSummary()),
-                                                StringUtils.trimToEmpty(request.expression))) {
+                                        && Stream.of(
+                                            resolvedPkgVersionLocalization.getTitle(),
+                                            resolvedPkgVersionLocalization.getSummary())
+                                            .noneMatch(s -> StringUtils.containsIgnoreCase(
+                                                StringUtils.trimToEmpty(s),
+                                                StringUtils.trimToEmpty(request.expression)))
+                        ) {
                             resultVersion.descriptionSnippet = StringHelper.tryCreateTextSnippetAroundFoundText(
                                     resolvedPkgVersionLocalization.getDescription(),
                                     request.expression,
