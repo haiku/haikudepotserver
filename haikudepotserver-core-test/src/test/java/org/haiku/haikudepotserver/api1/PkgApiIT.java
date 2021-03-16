@@ -780,4 +780,33 @@ public class PkgApiIT extends AbstractIntegrationTest {
         }
     }
 
+    @Test
+    public void testIncrementViewCounter() {
+        integrationTestSupportService.createStandardTestData();
+
+        IncrementViewCounterRequest request = new IncrementViewCounterRequest();
+        request.major = "1";
+        request.micro = "2";
+        request.revision = 3;
+        request.name = "pkg1";
+        request.architectureCode = "x86_64";
+        request.repositoryCode = "testrepo";
+
+        // ------------------------------------
+        IncrementViewCounterResult result = pkgApi.incrementViewCounter(request);
+        // ------------------------------------
+
+        Assertions.assertThat(result).isNotNull();
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Pkg pkg1 = Pkg.getByName(context, "pkg1");
+            Repository repository = Repository.getByCode(context, "testrepo");
+            Architecture architecture = Architecture.getByCode(context, "x86_64");
+            PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
+            Assertions.assertThat(pkgVersion.getViewCounter()).isEqualTo(1L);
+        }
+
+    }
+
 }

@@ -372,7 +372,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             shouldIncrement = true;
         } else {
             Boolean previouslyIncremented = remoteIdentifierToPkgView.getIfPresent(cacheKey);
-            shouldIncrement = null==previouslyIncremented;
+            shouldIncrement = null == previouslyIncremented;
 
             if(!shouldIncrement) {
                 LOGGER.info(
@@ -1054,5 +1054,36 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return new UpdatePkgVersionResult();
     }
 
+    @Override
+    public IncrementViewCounterResult incrementViewCounter(IncrementViewCounterRequest request) {
+        Preconditions.checkArgument(null!=request, "the request object must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.name), "the package name must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.architectureCode), "the architecture must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.major), "the version major must be supplied");
+
+        ObjectContext context = serverRuntime.newContext();
+
+        VersionCoordinates versionCoordinates = new VersionCoordinates(
+                request.major,
+                request.minor,
+                request.micro,
+                request.preRelease,
+                request.revision
+        );
+        PkgVersion pkgVersion = PkgVersion.getForPkg(
+                context,
+                Pkg.getByName(context, request.name),
+                Repository.getByCode(context, request.repositoryCode),
+                Architecture.getByCode(context, request.architectureCode),
+                versionCoordinates
+        ).orElseThrow(() -> new ObjectNotFoundException(
+                PkgVersion.class.getSimpleName(),
+                versionCoordinates));
+
+        incrementCounter(pkgVersion);
+
+        return new IncrementViewCounterResult();
+    }
 
 }

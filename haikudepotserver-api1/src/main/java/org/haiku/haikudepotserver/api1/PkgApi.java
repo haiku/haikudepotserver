@@ -143,4 +143,10 @@ public interface PkgApi {
 
     UpdatePkgVersionResult updatePkgVersion(UpdatePkgVersionRequest request);
 
+    /**
+     * <p>This API will increment the view counter on a PkgVersion.</p>
+     */
+
+    IncrementViewCounterResult incrementViewCounter(IncrementViewCounterRequest request);
+
 }
