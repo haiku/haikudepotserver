@@ -21,7 +21,7 @@ import java.util.Properties;
 
 public class RuntimeInformationService {
 
-    private long startTimestamp = System.currentTimeMillis();
+    private final long startTimestamp = System.currentTimeMillis();
 
     private Properties buildProperties = null;
 
@@ -58,7 +58,7 @@ public class RuntimeInformationService {
                 .filter(StringUtils::isNotBlank)
                 .filter(s -> !StringUtils.startsWith(s, "${"))
                 // ^^ if the variable is not substituted in the build process
-                .map(DateTimeFormatter.ISO_INSTANT::parse)
+                .map(DateTimeFormatter.ISO_DATE_TIME::parse)
                 .map(Instant::from)
                 .orElseGet(() -> Instant.ofEpochMilli(0L));
     }
