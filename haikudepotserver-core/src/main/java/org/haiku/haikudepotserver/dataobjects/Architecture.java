@@ -26,6 +26,12 @@ public class Architecture extends _Architecture {
     public final static String CODE_SOURCE = "source";
     public final static String CODE_ANY = "any";
     public final static String CODE_X86_64 = "x86_64";
+    public final static String CODE_PPC = "PowerPC";
+    public final static String CODE_ARM = "ARM";
+    public final static String CODE_M68K = "M68K";
+    public final static String CODE_SPARC = "SPARC";
+    public final static String CODE_ARM64 = "ARM64";
+    public final static String CODE_RISCV64 = "RISC-V";
 
     public static List<Architecture> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
