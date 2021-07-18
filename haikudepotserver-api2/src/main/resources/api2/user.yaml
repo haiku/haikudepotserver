@@ -1,0 +1,298 @@
+# Copyright 2021, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS User API
+  version: "2.0"
+  description: >
+    This API defines operations that can be undertaken around users.
+tags:
+  - name: user
+paths:
+
+
+  /__api/v2/user/create-user:
+    description: >
+      This method will create a user in the system.  It is identified by a username
+      and authenticated by a password.  The password is supplied in the clear.  This
+      method will return not found in the case that the referenced 'natural language'
+      is not able to be found.
+    post:
+      tags:
+        - user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createUserRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of having created the user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createUserResponseEnvelope"
+
+
+  /__api/v2/user/get-user-usage-conditions:
+    description: >
+      This method will return details for the user usage agreement that is
+      identifier in the request.
+    post:
+      tags:
+        - user
+      operationId: getUserUsageConditions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getUserUsageConditionsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The data detailing the user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getUserUsageConditionsResponseEnvelope"
+
+
+  /__api/v2/user/get-user:
+    description: >
+      This method will get the user identified by the nickname in the request object.
+      If no user was able to be found then a not-found error is returned.
+    post:
+      tags:
+        - user
+      operationId: getUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getUserRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The data detailing the user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getUserResponseEnvelope"
+
+
+  /__api/v2/user/authenticate-user:
+    description: >
+      This endpoint will allow a client to authenticate against the server.  If this is
+      successful then it will return a json web token that can be used for further API
+      calls for some period of time.  If it is unsuccessful then it will return null.
+    post:
+      tags:
+        - user
+      operationId: authenticateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/authenticateUserRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The authentication result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/authenticateUserResponseEnvelope"
+
+
+  /__api/v2/user/agree-user-usage-conditions:
+    description: >
+      This method will allow the user to, at any time, agree to the terms
+      and conditions.  This may be required for example when the terms change
+      and the user has agreed to some older terms and conditions.
+    post:
+      tags:
+        - user
+      operationId: agreeUserUsageConditions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/agreeUserUsageConditionsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The agree to user usage conditions response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agreeUserUsageConditionsResponseEnvelope"
+
+
+components:
+  schemas:
+
+
+    agreeUserUsageConditionsRequestEnvelope:
+      type: object
+      properties:
+        nickname:
+          type: string
+        userUsageConditionsCode:
+          type: string
+    agreeUserUsageConditionsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/agreeUserUsageConditionsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    agreeUserUsageConditionsResult:
+      type: object
+
+
+    createUserRequestEnvelope:
+      type: object
+      properties:
+        nickname:
+          type: string
+        passwordClear:
+          type: string
+        email:
+          type: string
+        captchaToken:
+          type: string
+          description: >
+            The captcha token is obtained from an earlier invocation to the
+            captcha API to get a captcha.  This identifies the captcha for
+            which the captcha response should correlate.
+        captchaResponse:
+          type: string
+          description: >
+            This is the human-supplied text string that matches the image that would have been
+            provided with the captcha that is identified by the cpatchaToken.
+        naturalLanguageCode:
+          type: string
+          description: >
+            This code comes from the "get all natural languages" endpoint.
+        userUsageConditionsCode:
+          type: string
+    createUserResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/createUserResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    createUserResult:
+      type: object
+
+
+    getUserUsageConditionsRequestEnvelope:
+      type: object
+      properties:
+        code:
+          description: >
+            If this value is NULL then it signifies that the latest
+            user usage conditions should be provided.
+          type: string
+    getUserUsageConditionsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getUserUsageConditionsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getUserUsageConditionsResult:
+      type: object
+      properties:
+        code:
+          type: string
+        minimumAge:
+          type: integer
+          format: int32
+
+    getUserRequestEnvelope:
+      type: object
+      properties:
+        nickname:
+          type: string
+    getUserResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getUserResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getUserResult:
+      type: object
+      properties:
+        nickname:
+          type: string
+        email:
+          type: string
+        active:
+          type: boolean
+        isRoot:
+          type: boolean
+        createTimestamp:
+          type: integer
+          format: int64
+        modifyTimestamp:
+          type: integer
+          format: int64
+        naturalLanguageCode:
+          type: string
+        lastAuthenticationTimestamp:
+          type: integer
+          format: int64
+        userUsageConditionsAgreement:
+          description: >
+            This relates to the user's required understanding of the terms of
+            use.
+          type: object
+          properties:
+            timestampAgreed:
+              type: integer
+              format: int64
+            userUsageConditionsCode:
+              description: >
+                The code of the conditions agreed to.
+              type: string
+            isLatest:
+              description: >
+                Are the terms that the user agreed to current with the most
+                recent wording.
+              type: boolean
+
+
+    authenticateUserRequestEnvelope:
+      type: object
+      properties:
+        nickname:
+          type: string
+        passwordClear:
+          type: string
+    authenticateUserResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/authenticateUserResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    authenticateUserResult:
+      type: object
+      properties:
+        token:
+          type: string
+          description: >
+            In the case of a successful authentication, this field will be non-null and will contain a standard
+            formatted json-web-token.  If the authentication had failed then this token will be null.
+

@@ -1,0 +1,331 @@
+# Copyright 2021, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS User Rating API
+  version: "2.0"
+  description: >
+    This API interface covers all aspects of user ratings of packages.
+tags:
+  - name: user-rating
+paths:
+
+
+  /__api/v2/user-rating/update-user-rating:
+    description: >
+      This method will update the user rating.  The user rating is identified by the supplied code and the
+      supplied filter describes those properties of the user rating that should be updated.
+    post:
+      tags:
+        - user-rating
+      operationId: updateUserRating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateUserRatingRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Result of having update the user rating; essentially empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateUserRatingResponseEnvelope"
+
+
+  /__api/v2/user-rating/create-user-rating:
+    description: >
+      This method will create a user rating based on the data provided.  In the result is a code that
+      identifies this rating.
+    post:
+      tags:
+        - user-rating
+      operationId: createUserRating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createUserRatingRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Result of having created the user rating.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createUserRatingResponseEnvelope"
+
+
+
+  /__api/v2/user-rating/get-user-rating-by-user-and-pkg-version:
+    description: >
+      This will find the user rating identified by the user and the package version.  If
+      not such user rating exists then this method will return a not-found response.
+      Note that there is no authorization on it; it is effectively public.
+    post:
+      tags:
+        - user-rating
+      operationId: getUserRatingByUserAndPkgVersion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The user rating.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionResponseEnvelope"
+
+
+  /__api/v2/user-rating/search-user-ratings:
+    description: >
+      This method will return user rating search results based on the
+      criteria supplied in the request.
+    post:
+      tags:
+        - user-rating
+      operationId: searchUserRatings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/searchUserRatingsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The search results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchUserRatingsResponseEnvelope"
+
+
+components:
+  schemas:
+
+
+    updateUserRatingRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+        active:
+          type: boolean
+        naturalLanguageCode:
+          type: string
+        userRatingStabilityCode:
+          type: string
+        comment:
+          type: string
+        rating:
+          type: integer
+          format: int32
+        filter:
+          type: array
+          items:
+            type: string
+            enum:
+              - ACTIVE
+              - NATURALLANGUAGE
+              - USERRATINGSTABILITY
+              - COMMENT
+              - RATING
+    updateUserRatingResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updateUserRatingResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updateUserRatingResult:
+      type: object
+
+
+    createUserRatingRequestEnvelope:
+      type: object
+      properties:
+        repositoryCode:
+          type: string
+        naturalLanguageCode:
+          type: string
+        userNickname:
+          type: string
+        userRatingStabilityCode:
+          type: string
+        comment:
+          type: string
+        rating:
+          type: integer
+          format: int32
+        pkgName:
+          type: string
+        pkgVersionArchitectureCode:
+          type: string
+        pkgVersionMajor:
+          type: string
+        pkgVersionMinor:
+          type: string
+        pkgVersionMicro:
+          type: string
+        pkgVersionPreRelease:
+          type: string
+        pkgVersionRevision:
+          type: integer
+          format: int32
+        pkgVersionType:
+          $ref: "./common.yaml#/components/schemas/pkgVersionType"
+    createUserRatingResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/createUserRatingResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    createUserRatingResult:
+      type: object
+      properties:
+        code:
+          type: string
+
+
+    getUserRatingByUserAndPkgVersionRequestEnvelope:
+      type: object
+      properties:
+        repositoryCode:
+          type: string
+        userNickname:
+          type: string
+        pkgName:
+          type: string
+        pkgVersionArchitectureCode:
+          type: string
+        pkgVersionMajor:
+          type: string
+        pkgVersionMinor:
+          type: string
+        pkgVersionMicro:
+          type: string
+        pkgVersionPreRelease:
+          type: string
+        pkgVersionRevision:
+          type: integer
+          format: int32
+    getUserRatingByUserAndPkgVersionResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getUserRatingByUserAndPkgVersionResult:
+      type: object
+      properties:
+        code:
+          type: string
+        naturalLanguageCode:
+          type: string
+        user:
+          $ref: "./common.yaml#/components/schemas/user"
+        userRatingStabilityCode:
+          type: string
+        active:
+          type: boolean
+        comment:
+          type: string
+        modifyTimestamp:
+          type: integer
+          format: int64
+        createTimestamp:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+          format: int32
+        pkgVersion:
+          $ref: "./common.yaml#/components/schemas/pkgVersion"
+
+
+    searchUserRatingsRequestEnvelope:
+      allOf:
+        - $ref: "./common.yaml#/components/schemas/abstractSearchRequest"
+        - type: object
+          properties:
+            repositoryCode:
+              type: string
+            userNickname:
+              description: >
+                When supplied, will constrain the search to only show user ratings
+                that belong to this nominated user.
+              type: string
+            pkgName:
+              type: string
+            pkgVersionArchitectureCode:
+              type: string
+            pkgVersionMajor:
+              type: string
+            pkgVersionMinor:
+              type: string
+            pkgVersionMicro:
+              type: string
+            pkgVersionPreRelease:
+              type: string
+            pkgVersionRevision:
+              type: integer
+              format: int32
+            daysSinceCreated:
+              description: >
+                When supplied, will constrain the search to only show user ratings
+                that have been created since these many days.
+              type: integer
+              format: int32
+    searchUserRatingsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/searchUserRatingsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    searchUserRatingsResult:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              naturalLanguageCode:
+                type: string
+              userRatingStabilityCode:
+                type: string
+              active:
+                type: boolean
+              comment:
+                type: string
+              modifyTimestamp:
+                type: integer
+                format: int64
+              createTimestamp:
+                type: integer
+                format: int64
+              rating:
+                type: integer
+                format: int32
+              pkgVersion:
+                $ref: "./common.yaml#/components/schemas/pkgVersion"
+              user:
+                $ref: "./common.yaml#/components/schemas/user"

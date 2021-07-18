@@ -1,11 +1,13 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1.support;
 
 public interface Constants {
+
+    int ERROR_CODE_NOT_HANDLED = -32001;
 
     int ERROR_CODE_VALIDATION = -32800;
     int ERROR_CODE_OBJECTNOTFOUND = -32801;

@@ -49,7 +49,7 @@ import java.util.stream.Stream;
  * <p>See {@link PkgApi} for details on the methods this API affords.</p>
  */
 
-@Component
+@Component("pkgApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/pkg") // TODO - remove old endpoint
 public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 

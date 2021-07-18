@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("miscellaneousApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/miscellaneous") // TODO; legacy path - remove
 public class MiscellaneousApiImpl extends AbstractApiImpl implements MiscellaneousApi {
 

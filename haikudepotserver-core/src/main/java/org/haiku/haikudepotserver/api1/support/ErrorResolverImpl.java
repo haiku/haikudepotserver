@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020, Andrew Lindesay
+ * Copyright 2013-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -47,7 +47,7 @@ public class ErrorResolverImpl implements ErrorResolver {
 
         // output for authorization failure.
 
-        if(AccessDeniedException.class.isAssignableFrom(t.getClass())) {
+        if (AccessDeniedException.class.isAssignableFrom(t.getClass())) {
             return new JsonError(
                     Constants.ERROR_CODE_AUTHORIZATIONFAILURE,
                     "authorizationfailure",
@@ -56,20 +56,20 @@ public class ErrorResolverImpl implements ErrorResolver {
 
         // special output for a bad captcha
 
-        if(CaptchaBadResponseException.class.isAssignableFrom(t.getClass())) {
+        if (CaptchaBadResponseException.class.isAssignableFrom(t.getClass())) {
             return new JsonError(
                     Constants.ERROR_CODE_CAPTCHABADRESPONSE,
                     "captchabadresponse",
                     null);
         }
 
-        if(BadPkgIconException.class.isAssignableFrom(t.getClass())) {
+        if (BadPkgIconException.class.isAssignableFrom(t.getClass())) {
             BadPkgIconException badPkgIconException = (BadPkgIconException) t;
 
             Map<String,Object> errorData = Maps.newHashMap();
             errorData.put("mediaTypeCode", badPkgIconException.getMediaTypeCode());
 
-            if(null!=badPkgIconException.getSize()) {
+            if(null != badPkgIconException.getSize()) {
                 errorData.put("size", badPkgIconException.getSize());
             }
 

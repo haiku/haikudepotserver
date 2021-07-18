@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("repositoryApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/repository") // TODO; legacy path - remove
 public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi {
 
@@ -487,7 +487,7 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
         }
 
-        if(context.hasChanges()) {
+        if (context.hasChanges()) {
             repositorySource.getRepository().setModifyTimestamp();
             context.commitChanges();
         }

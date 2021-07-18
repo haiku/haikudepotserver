@@ -1,0 +1,58 @@
+# Copyright 2021, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+components:
+  schemas:
+    abstractSearchRequest:
+      type: object
+      properties:
+        expression:
+          type: string
+        expressionType:
+          type: string
+          enum:
+            - CONTAINS
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+    pkgVersionType:
+      description: >
+        This type defines the versions that should be sent back in the result.  If the client were
+        only interested in the latest version for example, then it should use the "LATEST" value.
+      type: string
+      enum:
+        - ALL
+        - LATEST
+        - NONE
+        - SPECIFIC
+    user:
+      type: object
+      properties:
+        nickname:
+          type: string
+    pkgVersion:
+      type: object
+      properties:
+        repositoryCode:
+          type: string
+        architectureCode:
+          type: string
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+          format: int32
+        pkg:
+          type: object
+          properties:
+            name:
+              type: string

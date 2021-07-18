@@ -1,0 +1,29 @@
+# Copyright 2021, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+components:
+  schemas:
+    error:
+      type: object
+      properties:
+        code:
+          nullable: false
+          type: integer
+          description: >
+            This code defines the type of error that has occurred.
+        message:
+          type: string
+          description: >
+            A short string that describes the error that has occurred.
+        data:
+          type: array
+          items:
+            type: object
+            description: >
+              A key-value pair that provides some additional information
+              about the error that occurred.
+            properties:
+              key:
+                type: string
+              value:
+                type: string

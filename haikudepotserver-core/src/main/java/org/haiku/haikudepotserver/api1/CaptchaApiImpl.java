@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,13 +10,11 @@ import com.google.common.io.BaseEncoding;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
-import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.captcha.model.Captcha;
+import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
-@Component
+@Component("captchaApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/captcha") // TODO; legacy path - remove
 public class CaptchaApiImpl implements CaptchaApi {
 

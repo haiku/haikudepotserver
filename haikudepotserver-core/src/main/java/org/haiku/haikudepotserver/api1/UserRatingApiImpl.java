@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Component
+@Component("userRatingApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/userrating") // TODO; legacy path - remove
 public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
 

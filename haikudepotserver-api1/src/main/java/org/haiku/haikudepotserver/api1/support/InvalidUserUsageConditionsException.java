@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Andrew Lindesay
+ * Copyright 2019-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,5 +12,5 @@ package org.haiku.haikudepotserver.api1.support;
  * </p>
  */
 
-public class InvalidUserUsageConditionsException extends Exception {
+public class InvalidUserUsageConditionsException extends Error {
 }

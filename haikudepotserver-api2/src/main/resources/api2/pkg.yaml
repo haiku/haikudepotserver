@@ -1,0 +1,114 @@
+# Copyright 2021, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Package API
+  version: "2.0"
+  description: >
+    This API is for access to packages and package versions.
+tags:
+  - name: pkg
+paths:
+
+
+  /__api/v2/pkg/increment-view-counter:
+    description: >
+      This API will increment the view counter on a PkgVersion.
+    post:
+      tags:
+        - pkg
+      operationId: incrementViewCounter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/incrementViewCounterRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of having incrementing the view counter.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/incrementViewCounterResponseEnvelope"
+
+
+  /__api/v2/pkg/get-pkg-change-log:
+    description: >
+      The package might have a change log associated with it.  This is just a long string with notes
+      about what versions were released and what changed in those releases.  If there is no change log
+      stored for this package, a NULL value may be returned in the response.
+    post:
+      tags:
+        - pkg
+      operationId: getPkgChangeLog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgChangeLogRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope containing the change log.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgChangeLogResponseEnvelope"
+
+components:
+  schemas:
+
+
+    incrementViewCounterRequestEnvelope:
+      type: object
+      properties:
+        architectureCode:
+          type: string
+        repositoryCode:
+          type: string
+        name:
+          type: string
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+          format: int32
+    incrementViewCounterResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/incrementViewCounterResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    incrementViewCounterResult:
+      type: object
+
+
+    getPkgChangeLogRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+    getPkgChangeLogResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgChangeLogResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgChangeLogResult:
+      type: object
+      properties:
+        content:
+          type: string
+

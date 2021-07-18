@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Component("jobApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/job") // TODO; legacy path - remove
 public class JobApiImpl extends AbstractApiImpl implements JobApi {
 

@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+@Component("authorizationApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/authorization") // TODO; legacy path - remove
 public class AuthorizationApiImpl extends AbstractApiImpl implements AuthorizationApi {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import com.googlecode.jsonrpc4j.MultipleInvocationListener;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.support.ErrorResolverImpl;
+import org.haiku.haikudepotserver.api1.support.ObjectMapperFactory;
 import org.haiku.haikudepotserver.metrics.MetricsInterceptor;
 import org.haiku.haikudepotserver.metrics.MetricsInvocationListener;
 import org.haiku.haikudepotserver.multipage.MultipageLocaleResolver;
@@ -20,11 +21,14 @@ import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 @EnableWebMvc
@@ -120,4 +124,16 @@ public class WebConfig implements WebMvcConfigurer {
         return exporter;
     }
 
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        ObjectMapper objectMapper = new ObjectMapperFactory().getObject();
+        MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
+        for (int i = 0; i < converters.size(); i++) {
+            if (converters.get(i) instanceof MappingJackson2HttpMessageConverter) {
+                converters.set(i, messageConverter);
+                return;
+            }
+        }
+        converters.add(messageConverter);
+    }
 }

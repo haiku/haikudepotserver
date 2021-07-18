@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
+@Component("userRatingJobApiImplV1")
 @AutoJsonRpcServiceImpl
 public class UserRatingJobApiImpl extends AbstractApiImpl implements UserRatingJobApi {
 

@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <artifactId>haikudepotserver-parent</artifactId>
+        <groupId>org.haiku</groupId>
+        <relativePath>../haikudepotserver-parent</relativePath>
+        <version>1.0.127-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>haikudepotserver-api2</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <inputspec.basedir>${project.basedir}/src/main/resources/api2</inputspec.basedir>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <!-- required to supply annotations such as @PostConstruct > java 11 -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-core</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-maven-plugin.version}</version>
+
+                <configuration>
+                    <generatorName>spring</generatorName>
+                    <apiPackage>org.haiku.haikudepotserver.api2</apiPackage>
+                    <modelPackage>org.haiku.haikudepotserver.api2.model</modelPackage>
+                    <!-- prevents some sort of 'helper' being made which is not very useful -->
+                    <generateSupportingFiles>false</generateSupportingFiles>
+                    <configOptions>
+                        <!-- useTags will use the tags from the spec to drive the generation -->
+                        <useTags>true</useTags>
+                        <interfaceOnly>true</interfaceOnly>
+                        <sourceFolder>src/gen/java/main</sourceFolder>
+                        <dateLibrary>java8</dateLibrary>
+                        <library>spring-mvc</library>
+                        <skipDefaultInterface>true</skipDefaultInterface>
+                        <generateSupportingFiles>false</generateSupportingFiles>
+                        <!-- removes some unused import problem -->
+                        <openApiNullable>false</openApiNullable>
+                    </configOptions>
+                </configuration>
+
+                <executions>
+
+                    <execution>
+                        <id>captcha:generate-captcha</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/captcha.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>captcha:generate-user</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/user.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>captcha:generate-pkg</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/pkg.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>captcha:generate-user-rating</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/user-rating.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

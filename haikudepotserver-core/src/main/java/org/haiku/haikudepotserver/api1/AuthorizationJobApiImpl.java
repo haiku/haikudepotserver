@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2021, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,7 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("authorizationJobApiImplV1")
 @AutoJsonRpcServiceImpl
 public class AuthorizationJobApiImpl extends AbstractApiImpl implements AuthorizationJobApi {
 
