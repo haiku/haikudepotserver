@@ -269,6 +269,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         result.setMajor(pkgVersion.getMajor());
         result.setMinor(pkgVersion.getMinor());
         result.setMicro(pkgVersion.getMicro());
+        result.setPreRelease(pkgVersion.getPreRelease());
         result.setRevision(null == pkgVersion.getRevision() ? null : pkgVersion.getRevision().longValue());
         result.setArchitectureCode(pkgVersion.getArchitecture().getCode());
         result.setPayloadLength(pkgVersion.getPayloadLength());
