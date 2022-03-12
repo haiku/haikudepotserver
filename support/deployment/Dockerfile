@@ -9,7 +9,7 @@
 # correct versions inserted into it.  See the documentation for further
 # details on how this deployment mechanism works.
 
-FROM ubuntu:18.04
+FROM docker.io/ubuntu:20.04
 
 # These environment variables will be set using the release script.  It will
 # copy the correct values from the poms into these variables so that the right
@@ -48,15 +48,16 @@ ADD ${HVIF2PNG_VERSION}.tgz ${INSTALL_ROOT}
 ADD ${PG_DOWNLOAD_URL} ${INSTALL_ROOT}/${PG_JAR}
 ADD ${HDS_WAR_DOWNLOAD_URL} ${INSTALL_ROOT}/${HDS_WAR}
 
-RUN echo "HDS_ROOT=${INSTALL_ROOT}" > ${INSTALL_ROOT}/launchenv.sh
-RUN echo "JAVA_BIN=${JAVA_BIN}" >> ${INSTALL_ROOT}/launchenv.sh
-RUN echo "HDS_HVIF2PNG_PATH=${INSTALL_HVIF2PNG_PATH}" >> ${INSTALL_ROOT}/launchenv.sh
-RUN echo "HDS_PORT=${HDS_PORT}" >> ${INSTALL_ROOT}/launchenv.sh
-RUN echo "HDS_WAR=${HDS_WAR}" >> ${INSTALL_ROOT}/launchenv.sh
-RUN echo "JETTY_JAR=${JETTY_JAR}" >> ${INSTALL_ROOT}/launchenv.sh
-RUN echo "PG_JAR=${PG_JAR}" >> ${INSTALL_ROOT}/launchenv.sh
+RUN chmod 755 ${INSTALL_ROOT}/launch.sh && \
+	echo "HDS_ROOT=${INSTALL_ROOT}" > ${INSTALL_ROOT}/launchenv.sh && \
+	echo "JAVA_BIN=${JAVA_BIN}" >> ${INSTALL_ROOT}/launchenv.sh && \
+	echo "HDS_HVIF2PNG_PATH=${INSTALL_HVIF2PNG_PATH}" >> ${INSTALL_ROOT}/launchenv.sh && \
+	echo "HDS_PORT=${HDS_PORT}" >> ${INSTALL_ROOT}/launchenv.sh && \
+	echo "HDS_WAR=${HDS_WAR}" >> ${INSTALL_ROOT}/launchenv.sh && \
+	echo "JETTY_JAR=${JETTY_JAR}" >> ${INSTALL_ROOT}/launchenv.sh && \
+	echo "PG_JAR=${PG_JAR}" >> ${INSTALL_ROOT}/launchenv.sh
 
-CMD [ "sh", "/opt/haikudepotserver/launch.sh" ]
+CMD [ "/opt/haikudepotserver/launch.sh" ]
 
 HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8080/__metric/healthcheck
 EXPOSE ${HDS_PORT}
