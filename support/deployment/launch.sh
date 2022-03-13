@@ -1,7 +1,13 @@
-# launch file for the haikudepotserver system.
+#!/bin/bash
 
+# launch file for the haikudepotserver system.
 . "$(dirname $0)/launchenv.sh"
-. "/secrets/hds_secrets"
+
+# source secrets file if provided, otherwise from env
+if [ -f "/secrets/hds_secrets" ]; then
+	echo "Sourcing secrets from /secrets/hds_secrets..."
+	. "/secrets/hds_secrets"
+fi
 
 "${JAVA_BIN}" \
 "-Dfile.encoding=UTF-8" \
