@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,7 +14,14 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.MediaType;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
@@ -24,16 +31,14 @@ import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.pkg.model.Pkg;
 import org.haiku.pkg.model.PkgArchitecture;
 import org.haiku.pkg.model.PkgVersion;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 @ContextConfiguration(classes = TestConfig.class)
 public class PkgImportServiceImplIT extends AbstractIntegrationTest {

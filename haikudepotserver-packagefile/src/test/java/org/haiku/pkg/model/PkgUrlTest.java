@@ -1,12 +1,12 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.model;
 
 import org.fest.assertions.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PkgUrlTest {
 
@@ -14,9 +14,11 @@ public class PkgUrlTest {
      * <p>Checks that if there is an empty string put in that it will throw.</p>
      */
 
-    @Test(expected = Throwable.class)
+    @Test
     public void testConstruct_bad() {
-        new PkgUrl("", PkgUrlType.HOMEPAGE);
+        org.junit.jupiter.api.Assertions.assertThrows(Throwable.class, () -> {
+            new PkgUrl("", PkgUrlType.HOMEPAGE);
+        });
     }
 
     @Test

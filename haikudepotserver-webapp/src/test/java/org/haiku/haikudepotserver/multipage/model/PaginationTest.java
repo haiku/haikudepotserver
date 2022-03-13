@@ -1,12 +1,12 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.multipage.model;
 
 import org.fest.assertions.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PaginationTest {
 

@@ -16,9 +16,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -74,22 +72,22 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
             JsonNode rootNode = objectMapper.readTree(gzipInputStream);
 
             JsonNode dataModifiedTimestampNode = rootNode.at("/info/dataModifiedTimestamp");
-            Assert.assertTrue(dataModifiedTimestampNode.asLong() >= now);
+            Assertions.assertThat(dataModifiedTimestampNode.asLong()).isGreaterThanOrEqualTo(now);
 
             JsonNode repositoryCode = rootNode.at("/items/0/code");
-            Assert.assertThat(repositoryCode.asText(), CoreMatchers.is("testrepo"));
+            Assertions.assertThat(repositoryCode.asText()).isEqualTo("testrepo");
 
             JsonNode repositorySourceCode = rootNode.at("/items/0/repositorySources/0/code");
-            Assert.assertThat(repositorySourceCode.asText(), CoreMatchers.is("testreposrc_xyz"));
+            Assertions.assertThat(repositorySourceCode.asText()).isEqualTo("testreposrc_xyz");
 
             JsonNode repositorySourceIdentifier = rootNode.at("/items/0/repositorySources/0/identifier");
-            Assert.assertThat(repositorySourceIdentifier.asText(), CoreMatchers.is("http://www.example.com/test/identifier/url"));
+            Assertions.assertThat(repositorySourceIdentifier.asText()).isEqualTo("http://www.example.com/test/identifier/url");
 
             JsonNode architectureCode = rootNode.at("/items/0/repositorySources/0/architectureCode");
             Assertions.assertThat(architectureCode.asText()).isEqualTo("x86_64");
 
             JsonNode mirror0CountryCode = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/0/countryCode");
-            Assert.assertThat(mirror0CountryCode.asText(), CoreMatchers.is("ZA"));
+            Assertions.assertThat(mirror0CountryCode.asText()).isEqualTo("ZA");
             JsonNode mirror0BaseUrl = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/0/baseUrl");
             Assertions.assertThat(mirror0BaseUrl.asText()).startsWith("file://");
             JsonNode mirror1BaseUrl = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/1/baseUrl");

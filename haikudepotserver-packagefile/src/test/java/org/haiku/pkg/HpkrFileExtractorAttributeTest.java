@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,7 +8,7 @@ package org.haiku.pkg;
 import org.fest.assertions.Assertions;
 import org.haiku.pkg.model.Attribute;
 import org.haiku.pkg.model.AttributeId;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.math.BigInteger;

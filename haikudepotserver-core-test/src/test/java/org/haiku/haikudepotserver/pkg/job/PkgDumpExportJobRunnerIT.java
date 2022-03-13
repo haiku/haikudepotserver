@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
@@ -15,9 +16,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -69,7 +68,7 @@ public class PkgDumpExportJobRunnerIT extends AbstractIntegrationTest {
 
         jobService.awaitJobFinishedUninterruptibly(guid, 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
-        Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         // pull in the ZIP file now and extract the data
 
@@ -83,22 +82,22 @@ public class PkgDumpExportJobRunnerIT extends AbstractIntegrationTest {
             JsonNode rootNode = objectMapper.readTree(gzipInputStream);
 
             JsonNode dataModifiedTimestampNode = rootNode.at("/info/dataModifiedTimestamp");
-            Assert.assertTrue(dataModifiedTimestampNode.asLong() >= now);
+            Assertions.assertThat(dataModifiedTimestampNode.asLong()).isGreaterThanOrEqualTo(now);
 
             JsonNode repositoryCode = rootNode.at("/items/0/name");
-            Assert.assertThat(repositoryCode.asText(), CoreMatchers.is("pkg1"));
+            Assertions.assertThat(repositoryCode.asText()).isEqualTo("pkg1");
 
             JsonNode derivedRating = rootNode.at("/items/0/derivedRating");
-            Assert.assertThat(derivedRating.asText(), CoreMatchers.is("3.5"));
+            Assertions.assertThat(derivedRating.asText()).isEqualTo("3.5");
 
             JsonNode pkgScreenshots = rootNode.at("/items/0/pkgScreenshots/0/length");
-            Assert.assertThat(pkgScreenshots.asLong(), CoreMatchers.is(41296L));
+            Assertions.assertThat(pkgScreenshots.asLong()).isEqualTo(41296L);
 
             JsonNode pkgCategories = rootNode.at("/items/0/pkgCategories/0/code");
-            Assert.assertThat(pkgCategories.asText(), CoreMatchers.is("graphics"));
+            Assertions.assertThat(pkgCategories.asText()).isEqualTo("graphics");
 
             JsonNode pv0Summary = rootNode.at("/items/0/pkgVersions/0/summary");
-            Assert.assertThat(pv0Summary.asText(), CoreMatchers.is("pkg1Version2SummarySpanish_feijoa"));
+            Assertions.assertThat(pv0Summary.asText()).isEqualTo("pkg1Version2SummarySpanish_feijoa");
         }
 
     }

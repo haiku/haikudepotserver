@@ -1,24 +1,29 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1;
 
 import com.google.common.collect.ImmutableSet;
-import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.api1.model.authorization.*;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api1.model.authorization.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.api1.model.authorization.AuthorizationTargetType;
+import org.haiku.haikudepotserver.api1.model.authorization.CheckAuthorizationRequest;
+import org.haiku.haikudepotserver.api1.model.authorization.CheckAuthorizationResult;
+import org.haiku.haikudepotserver.api1.model.authorization.CreateAuthorizationPkgRuleRequest;
+import org.haiku.haikudepotserver.api1.model.authorization.RemoveAuthorizationPkgRuleRequest;
+import org.haiku.haikudepotserver.api1.model.authorization.SearchAuthorizationPkgRulesRequest;
+import org.haiku.haikudepotserver.api1.model.authorization.SearchAuthorizationPkgRulesResult;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -171,55 +176,58 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
      * authorized to do so.</p>
      */
 
-    @Test(expected = AccessDeniedException.class)
-    public void testCreateAuthorizationRule_unauthorized() throws AuthorizationRuleConflictException {
-        integrationTestSupportService.createStandardTestData();
+    @Test
+    public void testCreateAuthorizationRule_unauthorized() {
+        org.junit.jupiter.api.Assertions.assertThrows(AccessDeniedException.class, () -> {
+            integrationTestSupportService.createStandardTestData();
 
-        {
-            ObjectContext context = serverRuntime.newContext();
-            integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
-        }
+            {
+                ObjectContext context = serverRuntime.newContext();
+                integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
+            }
 
-        setAuthenticatedUser("testuser");
+            setAuthenticatedUser("testuser");
 
-        CreateAuthorizationPkgRuleRequest request = new CreateAuthorizationPkgRuleRequest();
-        request.userNickname = "testuser";
-        request.permissionCode = Permission.PKG_EDITICON.name().toLowerCase();
-        request.pkgName = "pkg1";
+            CreateAuthorizationPkgRuleRequest request = new CreateAuthorizationPkgRuleRequest();
+            request.userNickname = "testuser";
+            request.permissionCode = Permission.PKG_EDITICON.name().toLowerCase();
+            request.pkgName = "pkg1";
 
-        // ------------------------------------
-        authorizationApi.createAuthorizationPkgRule(request);
-        // ------------------------------------
+            // ------------------------------------
+            authorizationApi.createAuthorizationPkgRule(request);
+            // ------------------------------------
 
-        // expected exception.
+            // expected exception.
+        });
     }
 
     /**
      * <p>Checks what happens if you try to create a new rule, but you are not root.</p>
      */
 
-    @Test(expected = AccessDeniedException.class)
-    public void testCreateAuthorizationRule_notAuthorized() throws AuthorizationRuleConflictException {
-        integrationTestSupportService.createStandardTestData();
+    @Test
+    public void testCreateAuthorizationRule_notAuthorized() {
+        org.junit.jupiter.api.Assertions.assertThrows(AccessDeniedException.class, () -> {
+            integrationTestSupportService.createStandardTestData();
 
-        {
-            ObjectContext context = serverRuntime.newContext();
-            integrationTestSupportService.createBasicUser(context,"testuser","fakepassword");
-        }
+            {
+                ObjectContext context = serverRuntime.newContext();
+                integrationTestSupportService.createBasicUser(context, "testuser", "fakepassword");
+            }
 
-        setAuthenticatedUser("testuser");
+            setAuthenticatedUser("testuser");
 
-        CreateAuthorizationPkgRuleRequest request = new CreateAuthorizationPkgRuleRequest();
-        request.permissionCode = Permission.PKG_EDITSCREENSHOT.name().toLowerCase();
-        request.pkgName = "pkg1";
-        request.userNickname = "testuser";
+            CreateAuthorizationPkgRuleRequest request = new CreateAuthorizationPkgRuleRequest();
+            request.permissionCode = Permission.PKG_EDITSCREENSHOT.name().toLowerCase();
+            request.pkgName = "pkg1";
+            request.userNickname = "testuser";
 
-        // ------------------------------------
-        authorizationApi.createAuthorizationPkgRule(request);
-        // ------------------------------------
+            // ------------------------------------
+            authorizationApi.createAuthorizationPkgRule(request);
+            // ------------------------------------
 
-        // expected exception
-
+            // expected exception
+        });
     }
 
     @Test
@@ -282,14 +290,14 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
             authorizationApi.createAuthorizationPkgRule(request);
             // ------------------------------------
 
-            Assert.fail("expected an " + AuthorizationRuleConflictException.class.getSimpleName());
+            org.junit.jupiter.api.Assertions.fail("expected an " + AuthorizationRuleConflictException.class.getSimpleName());
 
         }
         catch(AuthorizationRuleConflictException e) {
             // expected
         }
         catch(Throwable th) {
-            Assert.fail("expected an " + AuthorizationRuleConflictException.class.getSimpleName() + ", but got an instance of " + th.getClass().getSimpleName());
+            org.junit.jupiter.api.Assertions.fail("expected an " + AuthorizationRuleConflictException.class.getSimpleName() + ", but got an instance of " + th.getClass().getSimpleName());
         }
 
     }
@@ -314,13 +322,13 @@ public class AuthorizationApiIT extends AbstractIntegrationTest {
             authorizationApi.createAuthorizationPkgRule(request);
             // ------------------------------------
 
-            Assert.fail("expected an "+IllegalStateException.class.getSimpleName()+" to be thrown.");
+            org.junit.jupiter.api.Assertions.fail("expected an "+IllegalStateException.class.getSimpleName()+" to be thrown.");
         }
         catch(IllegalStateException ise) {
             // expected
         }
         catch(Throwable th) {
-            Assert.fail("expected an "+IllegalStateException.class.getSimpleName()+", but got an "+th.getClass().getSimpleName()+" thrown instead");
+            org.junit.jupiter.api.Assertions.fail("expected an "+IllegalStateException.class.getSimpleName()+", but got an "+th.getClass().getSimpleName()+" thrown instead");
         }
     }
 

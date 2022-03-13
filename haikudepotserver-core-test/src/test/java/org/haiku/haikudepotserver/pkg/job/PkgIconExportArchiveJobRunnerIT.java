@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,14 +12,13 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.WrapWithNoCloseInputStream;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.junit.Assert;
-import org.junit.Test;
+import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
@@ -62,7 +61,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         jobService.awaitJobFinishedUninterruptibly(guid, 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
-        Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         // pull in the ZIP file now and extract the icons.
 
@@ -103,7 +102,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
                             foundPkg1Filenames.add(matcher.group(1) + ".png");
                         }
                         else {
-                            Assert.fail("the zip entry has an unknown file; " + tarEntry.getName());
+                            org.junit.jupiter.api.Assertions.fail("the zip entry has an unknown file; " + tarEntry.getName());
                         }
                     }
                 }

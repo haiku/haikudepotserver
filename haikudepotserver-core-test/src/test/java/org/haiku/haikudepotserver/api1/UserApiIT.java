@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,18 +10,34 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.api1.model.user.*;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsRequest;
+import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsResult;
+import org.haiku.haikudepotserver.api1.model.user.AuthenticateUserRequest;
+import org.haiku.haikudepotserver.api1.model.user.AuthenticateUserResult;
+import org.haiku.haikudepotserver.api1.model.user.ChangePasswordRequest;
+import org.haiku.haikudepotserver.api1.model.user.CompletePasswordResetRequest;
+import org.haiku.haikudepotserver.api1.model.user.CreateUserRequest;
+import org.haiku.haikudepotserver.api1.model.user.CreateUserResult;
+import org.haiku.haikudepotserver.api1.model.user.GetUserRequest;
+import org.haiku.haikudepotserver.api1.model.user.GetUserResult;
+import org.haiku.haikudepotserver.api1.model.user.GetUserUsageConditionsRequest;
+import org.haiku.haikudepotserver.api1.model.user.GetUserUsageConditionsResult;
+import org.haiku.haikudepotserver.api1.model.user.InitiatePasswordResetRequest;
+import org.haiku.haikudepotserver.api1.model.user.RenewTokenRequest;
+import org.haiku.haikudepotserver.api1.model.user.RenewTokenResult;
+import org.haiku.haikudepotserver.api1.model.user.SearchUsersRequest;
+import org.haiku.haikudepotserver.api1.model.user.SearchUsersResult;
+import org.haiku.haikudepotserver.api1.model.user.UpdateUserRequest;
+import org.haiku.haikudepotserver.api1.support.AbstractSearchRequest;
+import org.haiku.haikudepotserver.captcha.model.Captcha;
+import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.passwordreset.PasswordResetException;
-import org.haiku.haikudepotserver.api1.support.AbstractSearchRequest;
-import org.haiku.haikudepotserver.captcha.model.CaptchaService;
-import org.haiku.haikudepotserver.captcha.model.Captcha;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haiku.haikudepotserver.passwordreset.PasswordResetException;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetServiceImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -44,7 +60,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     private PasswordResetServiceImpl passwordResetService;
 
     @Test
-    public void testUpdateUser() throws Exception {
+    public void testUpdateUser() {
 
         {
             ObjectContext context = serverRuntime.newContext();
@@ -70,7 +86,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateUser() throws Exception {
+    public void testCreateUser() {
 
         Captcha captcha = captchaService.generate();
         CreateUserRequest request = new CreateUserRequest();

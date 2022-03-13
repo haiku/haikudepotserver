@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Andrew Lindesay
+ * Copyright 2019-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.user.controller;
@@ -8,7 +8,7 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.config.TestAppConfig;
 import org.haiku.haikudepotserver.config.TestServletConfig;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;

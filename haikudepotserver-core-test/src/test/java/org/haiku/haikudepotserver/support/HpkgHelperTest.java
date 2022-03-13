@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Andrew Lindesay
+ * Copyright 2021-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support;
@@ -8,15 +8,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import junit.framework.AssertionFailedError;
 import org.fest.assertions.Assertions;
 import org.haiku.pkg.AttributeContext;
 import org.haiku.pkg.HpkgFileExtractor;
 import org.haiku.pkg.model.Attribute;
 import org.haiku.pkg.model.AttributeId;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,8 +28,8 @@ public class HpkgHelperTest {
             0x6e, 0x63, 0x69, 0x66
     };
 
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @TempDir
+    File temporaryFolder;
 
     @Test
     public void testFindIconAttributesFromAppExecutableDirEntries() throws Exception {
@@ -56,7 +54,7 @@ public class HpkgHelperTest {
 
     File prepareTestFile(String resource) throws IOException {
         byte[] payload = Resources.toByteArray(Resources.getResource(resource));
-        File temporaryFile = temporaryFolder.newFile(resource);
+        File temporaryFile = new File(temporaryFolder, resource);
         Files.write(payload, temporaryFile);
         return temporaryFile;
     }
@@ -65,7 +63,8 @@ public class HpkgHelperTest {
         Assertions.assertThat(payload.length).isGreaterThan(HVIF_MAGIC.length);
         for (int i = 0; i < HVIF_MAGIC.length; i++) {
             if ((0xff & payload[i]) != HVIF_MAGIC[i]) {
-                throw new AssertionFailedError("mismatch on the magic in the data payload");
+                org.junit.jupiter.api.Assertions.fail(
+                        "mismatch on the magic in the data payload");
             }
         }
     }

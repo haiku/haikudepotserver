@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,8 +16,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -58,7 +57,7 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
 
         jobService.awaitJobFinishedUninterruptibly(guid, 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
-        Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         // pull in the ZIP file now and extract the data
 

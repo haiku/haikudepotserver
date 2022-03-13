@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
+import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
@@ -20,8 +21,7 @@ import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -55,7 +55,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Assert.assertEquals(Pkg.getByName(context, "pkg2").getPkgSupplement().getPkgIcons().size(), 0);
+            Assertions.assertThat(Pkg.getByName(context, "pkg2").getPkgSupplement().getPkgIcons()).hasSize(0);
         }
 
         // load in an icon for pkg2 in order to check that the removal phase does happen.
@@ -87,7 +87,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         JobSnapshot snapshot = jobService.tryGetJob(jobGuid).get();
-        Assert.assertEquals(snapshot.getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshot.getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         // check that the pkg2 is now loaded-up with icons from the tar-ball.
 
@@ -95,21 +95,21 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg2 = Pkg.getByName(context, "pkg2");
 
-            Assert.assertEquals(pkg2.getPkgSupplement().getPkgIcons().size(), 2);
+            Assertions.assertThat(pkg2.getPkgSupplement().getPkgIcons()).hasSize(2);
 
-            Assert.assertTrue(pkg2.getPkgSupplement().getPkgIcon(
+            Assertions.assertThat(pkg2.getPkgSupplement().getPkgIcon(
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE
                     ),
-                    null).isPresent());
+                    null).isPresent()).isTrue();
 
-            Assert.assertTrue(pkg2.getPkgSupplement().getPkgIcon(
+            Assertions.assertThat(pkg2.getPkgSupplement().getPkgIcon(
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG
                     ),
-                    32).isPresent());
+                    32).isPresent()).isTrue();
         }
 
         // check that the output report is as expected.

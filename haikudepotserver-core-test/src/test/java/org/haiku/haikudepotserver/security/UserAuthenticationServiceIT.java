@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -76,15 +76,17 @@ public class UserAuthenticationServiceIT extends AbstractIntegrationTest {
         Assertions.assertThat(userAuthenticationService.matchPassword(user, "Other")).isFalse();
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testClearPassword() {
-        User user = new User();
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+            User user = new User();
 
-        // -----------------
-        userAuthenticationService.setPassword(user, null);
-        // -----------------
+            // -----------------
+            userAuthenticationService.setPassword(user, null);
+            // -----------------
 
-        // expecting an exception.
+            // expecting an exception.
+        });
     }
 
 }

@@ -1,13 +1,19 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg;
 
 import com.google.common.collect.ImmutableList;
-import org.haiku.pkg.model.*;
-import org.junit.Test;
+import org.haiku.pkg.model.Attribute;
+import org.haiku.pkg.model.AttributeId;
+import org.haiku.pkg.model.IntAttribute;
+import org.haiku.pkg.model.Pkg;
+import org.haiku.pkg.model.PkgArchitecture;
+import org.haiku.pkg.model.PkgUrlType;
+import org.haiku.pkg.model.StringInlineAttribute;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 

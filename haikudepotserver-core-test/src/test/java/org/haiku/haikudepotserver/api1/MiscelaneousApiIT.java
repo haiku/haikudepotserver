@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,17 +9,28 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.api1.model.miscellaneous.*;
-import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GenerateFeedUrlRequest;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllArchitecturesRequest;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllArchitecturesResult;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllMessagesRequest;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllMessagesResult;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllNaturalLanguagesRequest;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllNaturalLanguagesResult;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllPkgCategoriesRequest;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllPkgCategoriesResult;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllUserRatingStabilitiesRequest;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllUserRatingStabilitiesResult;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetRuntimeInformationRequest;
+import org.haiku.haikudepotserver.api1.model.miscellaneous.GetRuntimeInformationResult;
+import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;

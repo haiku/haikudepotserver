@@ -1,13 +1,12 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.graphics;
 
 import com.google.common.io.ByteStreams;
-import org.haiku.haikudepotserver.graphics.ImageHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;

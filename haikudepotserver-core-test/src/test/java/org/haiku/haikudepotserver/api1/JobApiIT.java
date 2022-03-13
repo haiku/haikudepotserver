@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,13 +8,17 @@ package org.haiku.haikudepotserver.api1;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.api1.model.job.*;
+import org.haiku.haikudepotserver.api1.model.job.GetJobRequest;
+import org.haiku.haikudepotserver.api1.model.job.GetJobResult;
+import org.haiku.haikudepotserver.api1.model.job.JobStatus;
+import org.haiku.haikudepotserver.api1.model.job.SearchJobsRequest;
+import org.haiku.haikudepotserver.api1.model.job.SearchJobsResult;
 import org.haiku.haikudepotserver.config.BasicConfig;
 import org.haiku.haikudepotserver.config.TestBasicConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,7 +37,7 @@ public class JobApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testSearchJobs_all() throws Exception {
+    public void testSearchJobs_all() {
         setAuthenticatedUserToRoot();
 
         // ------------------------------------
@@ -44,7 +48,7 @@ public class JobApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSearchJobs_startedOnly() throws Exception {
+    public void testSearchJobs_startedOnly() {
         setAuthenticatedUserToRoot();
 
         SearchJobsRequest request = new SearchJobsRequest();
@@ -66,7 +70,7 @@ public class JobApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testSearchJobs_userOnly() throws Exception {
+    public void testSearchJobs_userOnly() {
 
         {
             ObjectContext context = serverRuntime.newContext();
@@ -94,7 +98,7 @@ public class JobApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetJob() throws Exception {
+    public void testGetJob() {
         setAuthenticatedUserToRoot();
 
         GetJobRequest request = new GetJobRequest();

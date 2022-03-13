@@ -1,21 +1,18 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2017-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.driversettings;
 
 import com.google.common.base.Charsets;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.fest.assertions.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
 
 public class DriverSettingsTest {
 
@@ -35,7 +32,7 @@ public class DriverSettingsTest {
             List<Parameter> parameters = DriverSettings.parse(reader);
             // ---------------------------
 
-            Assert.assertThat(parameters.size(), is(6));
+            Assertions.assertThat(parameters.size()).isEqualTo(6);
             assertSimpleParameter(parameters.get(0), "name", "HaikuPorts");
             assertSimpleParameter(parameters.get(1), "vendor", "Haiku Project");
             assertSimpleParameter(parameters.get(2), "summary", "The HaikuPorts repository");
@@ -47,10 +44,10 @@ public class DriverSettingsTest {
     }
 
     private void assertSimpleParameter(Parameter parameter, String key, String value) {
-        Assert.assertThat(parameter.getValues().size(), is(1));
-        Assert.assertThat(parameter.getParameters().size(), is(0));
-        Assert.assertThat(parameter.getName(), is(key));
-        Assert.assertThat(parameter.getValues().get(0), is(value));
+        Assertions.assertThat(parameter.getValues().size()).isEqualTo(1);
+        Assertions.assertThat(parameter.getParameters().size()).isEqualTo(0);
+        Assertions.assertThat(parameter.getName()).isEqualTo(key);
+        Assertions.assertThat(parameter.getValues().get(0)).isEqualTo(value);
     }
 
     @Test
@@ -65,69 +62,69 @@ public class DriverSettingsTest {
             List<Parameter> parameters = DriverSettings.parse(reader);
             // ---------------------------
 
-            Assert.assertThat(parameters.size(), is(3));
+            Assertions.assertThat(parameters.size()).isEqualTo(3);
 
             {
                 Parameter parameter0 = parameters.get(0);
 
-                Assert.assertThat(parameter0.getName(), is("keyA"));
-                Assert.assertThat(parameter0.getValues(), CoreMatchers.hasItems("b", "c", "d"));
+                Assertions.assertThat(parameter0.getName()).isEqualTo("keyA");
+                Assertions.assertThat(parameter0.getValues()).contains("b", "c", "d");
 
                 List<Parameter> parameters0 = parameter0.getParameters();
-                Assert.assertThat(parameters0.size(), is(1));
+                Assertions.assertThat(parameters0).hasSize(1);
                 Parameter parameter00 = parameters0.get(0);
-                Assert.assertThat(parameter00.getName(), is("keyB"));
-                Assert.assertThat(parameter00.getValues().size(), is(0));
+                Assertions.assertThat(parameter00.getName()).isEqualTo("keyB");
+                Assertions.assertThat(parameter00.getValues()).isEmpty();;
 
                 List<Parameter> parameters00 = parameter00.getParameters();
-                Assert.assertThat(parameters00.size(), is(1));
+                Assertions.assertThat(parameters00).hasSize(1);
                 Parameter parameter000 = parameters00.get(0);
-                Assert.assertThat(parameter000.getName(), is("keyC"));
-                Assert.assertThat(parameter000.getValues(), CoreMatchers.hasItems("d", "e", "f"));
+                Assertions.assertThat(parameter000.getName()).isEqualTo("keyC");
+                Assertions.assertThat(parameter000.getValues()).contains("d", "e", "f");
 
                 List<Parameter> parameters000 = parameter000.getParameters();
-                Assert.assertThat(parameters000.size(), is(2));
+                Assertions.assertThat(parameters000).hasSize(2);
                 Parameter parameter0000 = parameters000.get(0);
                 Parameter parameter0001 = parameters000.get(1);
-                Assert.assertThat(parameter0000.getName(), is("keyD"));
-                Assert.assertThat(parameter0000.getValues(), CoreMatchers.hasItems("e"));
-                Assert.assertThat(parameter0001.getName(), is("keyE"));
-                Assert.assertThat(parameter0001.getValues(), CoreMatchers.hasItems("f"));
+                Assertions.assertThat(parameter0000.getName()).isEqualTo("keyD");
+                Assertions.assertThat(parameter0000.getValues()).contains("e");
+                Assertions.assertThat(parameter0001.getName()).isEqualTo("keyE");
+                Assertions.assertThat(parameter0001.getValues()).contains("f");
             }
 
             {
                 Parameter parameter1 = parameters.get(1);
-                Assert.assertThat(parameter1.getName(), is("keyA"));
-                Assert.assertThat(parameter1.getValues().size(), is(0));
+                Assertions.assertThat(parameter1.getName()).isEqualTo("keyA");
+                Assertions.assertThat(parameter1.getValues()).isEmpty();;
                 List<Parameter> parameters1 = parameter1.getParameters();
-                Assert.assertThat(parameters1.size(), is(1));
+                Assertions.assertThat(parameters1).hasSize(1);
                 Parameter parameter10 = parameters1.get(0);
-                Assert.assertThat(parameter10.getName(), is("disabled"));
-                Assert.assertThat(parameter10.getValues().size(), is(0));
-                Assert.assertThat(parameter10.getParameters().size(), is(0));
+                Assertions.assertThat(parameter10.getName()).isEqualTo("disabled");
+                Assertions.assertThat(parameter10.getValues()).isEmpty();
+                Assertions.assertThat(parameter10.getParameters()).isEmpty();
             }
 
             {
                 Parameter parameter2 = parameters.get(2);
-                Assert.assertThat(parameter2.getName(), is("keyA"));
-                Assert.assertThat(parameter2.getValues().size(), is(2));
-                Assert.assertThat(parameter2.getValues(), CoreMatchers.hasItems("=", "b"));
+                Assertions.assertThat(parameter2.getName()).isEqualTo("keyA");
+                Assertions.assertThat(parameter2.getValues()).hasSize(2);
+                Assertions.assertThat(parameter2.getValues()).contains("=", "b");
                 List<Parameter> parameters2 = parameter2.getParameters();
-                Assert.assertThat(parameters2.size(), is(1));
+                Assertions.assertThat(parameters2).hasSize(1);
                 Parameter parameter20 = parameters2.get(0);
-                Assert.assertThat(parameter20.getName(), is("keyB=d"));
-                Assert.assertThat(parameter20.getValues().size(), is(1));
-                Assert.assertThat(parameter20.getValues(), CoreMatchers.hasItems("=e"));
+                Assertions.assertThat(parameter20.getName()).isEqualTo("keyB=d");
+                Assertions.assertThat(parameter20.getValues()).hasSize(1);
+                Assertions.assertThat(parameter20.getValues()).contains("=e");
                 List<Parameter> parameters20 = parameter20.getParameters();
-                Assert.assertThat(parameters20.size(), is(2));
+                Assertions.assertThat(parameters20).hasSize(2);
                 Parameter parameter200 = parameters20.get(0);
-                Assert.assertThat(parameter200.getName(), is("keyC"));
-                Assert.assertThat(parameter200.getValues().size(), is(1));
-                Assert.assertThat(parameter200.getValues(), CoreMatchers.hasItems("f g"));
+                Assertions.assertThat(parameter200.getName()).isEqualTo("keyC");
+                Assertions.assertThat(parameter200.getValues()).hasSize(1);
+                Assertions.assertThat(parameter200.getValues()).contains("f g");
                 Parameter parameter201 = parameters20.get(1);
-                Assert.assertThat(parameter201.getName(), is("keyD"));
-                Assert.assertThat(parameter201.getValues().size(), is(1));
-                Assert.assertThat(parameter201.getValues(), CoreMatchers.hasItems("h"));
+                Assertions.assertThat(parameter201.getName()).isEqualTo("keyD");
+                Assertions.assertThat(parameter201.getValues()).hasSize(1);
+                Assertions.assertThat(parameter201.getValues()).contains("h");
             }
 
         }

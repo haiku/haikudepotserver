@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,16 +19,16 @@ import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.security.UserAuthentication;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -53,7 +53,7 @@ import java.util.stream.Stream;
  * transaction.</p>
  */
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public abstract class AbstractIntegrationTest {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
@@ -95,7 +95,7 @@ public abstract class AbstractIntegrationTest {
                 actualLine = actual.readLine();
 
                 if(!Objects.equals(expectedLine, actualLine)) {
-                    Assert.fail("mismatch expected and actual; [" + expectedLine + "] [" + actualLine + "] @ line " + line);
+                    Assertions.fail("mismatch expected and actual; [" + expectedLine + "] [" + actualLine + "] @ line " + line);
                 }
 
                 line++;
@@ -127,7 +127,7 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    @After
+    @AfterEach
     public void afterEachTest() {
         setUnauthenticated();
         mailSender.clear();
@@ -138,7 +138,7 @@ public abstract class AbstractIntegrationTest {
      * them back again.</p>
      */
 
-    @Before
+    @BeforeEach
     public void beforeEachTest() {
         LOGGER.debug("will prepare for the next test");
         clearCaches();

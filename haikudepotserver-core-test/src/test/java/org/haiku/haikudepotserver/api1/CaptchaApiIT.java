@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ package org.haiku.haikudepotserver.api1;
 
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
 import org.haiku.haikudepotserver.captcha.model.CaptchaRepository;
-import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;

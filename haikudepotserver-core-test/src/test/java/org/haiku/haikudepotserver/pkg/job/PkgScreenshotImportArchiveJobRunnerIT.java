@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
+import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
@@ -20,9 +21,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -95,7 +94,7 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
         // ------------------------------------
 
         JobSnapshot snapshot = jobService.tryGetJob(jobGuid).get();
-        Assert.assertEquals(snapshot.getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshot.getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         // check that the pkg1 is now loaded-up with screenshots from the tar-ball.
 
@@ -121,21 +120,21 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
 
             // compare actual generated with expected.
 
-            Assert.assertThat(outputLines.size(), CoreMatchers.is(8));
-            Assert.assertThat(outputLines.get(1),
-                    CoreMatchers.startsWith("\"\",\"pkg1\",\"REMOVED\",\"\",\""));
-            Assert.assertThat(outputLines.get(2),
-                    CoreMatchers.startsWith("\"\",\"pkg1\",\"REMOVED\",\"\",\""));
-            Assert.assertThat(outputLines.get(3),
-                    CoreMatchers.startsWith("\"hscr/pkg1/200.png\",\"pkg1\",\"ADDED\",\"\",\""));
-            Assert.assertThat(outputLines.get(4),
-                    CoreMatchers.startsWith("\"hscr/pkg1/201.png\",\"pkg1\",\"ADDED\",\"\",\""));
-            Assert.assertThat(outputLines.get(5),
-                    CoreMatchers.is("\"hscr/pkg1/202.png\",\"pkg1\",\"INVALID\",,\"\""));
-            Assert.assertThat(outputLines.get(6),
-                    CoreMatchers.startsWith("\"hscr/pkg1/23.png\",\"pkg1\",\"PRESENT\",\"\",\""));
-            Assert.assertThat(outputLines.get(7),
-                    CoreMatchers.is("\"hscr/notexists/3.png\",\"notexists\",\"NOTFOUND\",\"\",\"\""));
+            Assertions.assertThat(outputLines.size()).isEqualTo(8);
+            Assertions.assertThat(outputLines.get(1)).startsWith(
+                    "\"\",\"pkg1\",\"REMOVED\",\"\",\"");
+            Assertions.assertThat(outputLines.get(2)).startsWith(
+                    "\"\",\"pkg1\",\"REMOVED\",\"\",\"");
+            Assertions.assertThat(outputLines.get(3)).startsWith(
+                    "\"hscr/pkg1/200.png\",\"pkg1\",\"ADDED\",\"\",\"");
+            Assertions.assertThat(outputLines.get(4)).startsWith(
+                    "\"hscr/pkg1/201.png\",\"pkg1\",\"ADDED\",\"\",\"");
+            Assertions.assertThat(outputLines.get(5)).isEqualTo(
+                    "\"hscr/pkg1/202.png\",\"pkg1\",\"INVALID\",,\"\"");
+            Assertions.assertThat(outputLines.get(6)).startsWith(
+                    "\"hscr/pkg1/23.png\",\"pkg1\",\"PRESENT\",\"\",\"");
+            Assertions.assertThat(outputLines.get(7)).isEqualTo(
+                    "\"hscr/notexists/3.png\",\"notexists\",\"NOTFOUND\",\"\",\"\"");
 
         }
 
@@ -167,7 +166,7 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
         // ------------------------------------
 
         JobSnapshot snapshot = jobService.tryGetJob(jobGuid).get();
-        Assert.assertEquals(snapshot.getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshot.getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         // check that the pkg1 is now loaded-up with screenshots from the tar-ball.
 
@@ -193,17 +192,17 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
 
             // compare actual generated with expected.
 
-            Assert.assertThat(outputLines.size(), CoreMatchers.is(6));
-            Assert.assertThat(outputLines.get(1),
-                    CoreMatchers.startsWith("\"hscr/pkg1/200.png\",\"pkg1\",\"ADDED\",\"\",\""));
-            Assert.assertThat(outputLines.get(2),
-                    CoreMatchers.startsWith("\"hscr/pkg1/201.png\",\"pkg1\",\"ADDED\",\"\",\""));
-            Assert.assertThat(outputLines.get(3),
-                    CoreMatchers.is("\"hscr/pkg1/202.png\",\"pkg1\",\"INVALID\",,\"\""));
-            Assert.assertThat(outputLines.get(4),
-                    CoreMatchers.startsWith("\"hscr/pkg1/23.png\",\"pkg1\",\"PRESENT\",\"\",\""));
-            Assert.assertThat(outputLines.get(5),
-                    CoreMatchers.is("\"hscr/notexists/3.png\",\"notexists\",\"NOTFOUND\",\"\",\"\""));
+            Assertions.assertThat(outputLines).hasSize(6);
+            Assertions.assertThat(outputLines.get(1)).startsWith(
+                    "\"hscr/pkg1/200.png\",\"pkg1\",\"ADDED\",\"\",\"");
+            Assertions.assertThat(outputLines.get(2)).startsWith(
+                    "\"hscr/pkg1/201.png\",\"pkg1\",\"ADDED\",\"\",\"");
+            Assertions.assertThat(outputLines.get(3)).isEqualTo(
+                    "\"hscr/pkg1/202.png\",\"pkg1\",\"INVALID\",,\"\"");
+            Assertions.assertThat(outputLines.get(4)).startsWith(
+                    "\"hscr/pkg1/23.png\",\"pkg1\",\"PRESENT\",\"\",\"");
+            Assertions.assertThat(outputLines.get(5)).isEqualTo(
+                    "\"hscr/notexists/3.png\",\"notexists\",\"NOTFOUND\",\"\",\"\"");
 
         }
 
@@ -214,14 +213,14 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
         Pkg pkg1 = Pkg.getByName(context, "pkg1");
         PkgSupplement pkg1Supplement = pkg1.getPkgSupplement();
 
-        Assert.assertThat(pkg1Supplement.getPkgScreenshots().size(), CoreMatchers.is(expectedSha1Sums.length));
+        Assertions.assertThat(pkg1Supplement.getPkgScreenshots()).hasSize(expectedSha1Sums.length);
         List<PkgScreenshot> screenshots = pkg1Supplement.getSortedPkgScreenshots();
 
         for (int i = 0 ; i < screenshots.size(); i++) {
             PkgScreenshot screenshot = screenshots.get(i);
             String actualSha1Sum = Hashing.sha1().hashBytes(screenshot.getPkgScreenshotImage().getData()).toString();
             String expectedSha1Sum = expectedSha1Sums[i];
-            Assert.assertThat(actualSha1Sum, CoreMatchers.is(expectedSha1Sum));
+            Assertions.assertThat(actualSha1Sum).isEqualTo(expectedSha1Sum);
         }
     }
 

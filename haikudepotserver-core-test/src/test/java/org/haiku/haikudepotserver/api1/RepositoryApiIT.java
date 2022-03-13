@@ -6,21 +6,35 @@
 package org.haiku.haikudepotserver.api1;
 
 import com.google.common.collect.ImmutableList;
-import junit.framework.Assert;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
-import org.haiku.haikudepotserver.api1.model.repository.*;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositoryRequest;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositorySourceRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoriesRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoriesResult;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoryRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoryResult;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceMirrorResult;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceResult;
+import org.haiku.haikudepotserver.api1.model.repository.RemoveRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.SearchRepositoriesRequest;
+import org.haiku.haikudepotserver.api1.model.repository.SearchRepositoriesResult;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositoryRequest;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositorySourceRequest;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -189,7 +203,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
             repositoryApi.createRepository(request);
             // ------------------------------------
 
-            Assert.fail("the repository should not have been able to be created against an already existing repository code");
+            org.junit.jupiter.api.Assertions.fail("the repository should not have been able to be created against an already existing repository code");
         }
         catch(ValidationException ve) {
             Assertions.assertThat(ve.getValidationFailures().size()).isEqualTo(1);

@@ -1,13 +1,13 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
-
 import com.google.common.base.Charsets;
 import com.google.common.io.ByteSource;
+import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
@@ -16,8 +16,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -52,7 +51,7 @@ public class PkgScreenshotSpreadsheetJobReportRunnerIT extends AbstractIntegrati
 
         jobService.awaitJobFinishedUninterruptibly(guid, 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
-        Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         String dataGuid = snapshotOptional
                 .get()

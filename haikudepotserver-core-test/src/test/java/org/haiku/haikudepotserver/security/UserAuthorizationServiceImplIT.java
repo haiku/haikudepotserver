@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020, Andrew Lindesay
+ * Copyright 2019-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,9 +13,9 @@ import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
-import org.haiku.haikudepotserver.security.model.UserAuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.junit.Test;
+import org.haiku.haikudepotserver.security.model.UserAuthorizationService;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -38,36 +38,36 @@ public class UserAuthorizationServiceImplIT extends AbstractIntegrationTest {
      * <code>USER_VIEW</code> against a package!</p>
      */
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPerformCheckOnWrongTargetType() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            IntegrationTestSupportService.StandardTestData standardTestData
+                    = integrationTestSupportService.createStandardTestData();
 
-        IntegrationTestSupportService.StandardTestData standardTestData
-                = integrationTestSupportService.createStandardTestData();
+            {
+                ObjectContext context = serverRuntime.newContext();
+                User user = integrationTestSupportService
+                        .createBasicUser(context, "testuser", "guwfwef67");
+                integrationTestSupportService
+                        .agreeToUserUsageConditions(context, user);
+            }
 
-        {
-            ObjectContext context = serverRuntime.newContext();
-            User user = integrationTestSupportService
-                    .createBasicUser(context, "testuser", "guwfwef67");
-            integrationTestSupportService
-                    .agreeToUserUsageConditions(context, user);
-        }
+            {
+                ObjectContext context = serverRuntime.newContext();
+                User user = User.getByNickname(context, "testuser");
 
-        {
-            ObjectContext context = serverRuntime.newContext();
-            User user = User.getByNickname(context, "testuser");
+                // ---------------------------------
+                userAuthorizationService.check(
+                        context,
+                        user,
+                        standardTestData.pkg1, // <--- package
+                        Permission.USER_VIEW // <--- permission that checks a user
+                );
+                // ---------------------------------
+            }
 
-            // ---------------------------------
-            userAuthorizationService.check(
-                    context,
-                    user,
-                    standardTestData.pkg1, // <--- package
-                    Permission.USER_VIEW // <--- permission that checks a user
-            );
-            // ---------------------------------
-        }
-
-        // throws an exception.
-
+            // throws an exception.
+        });
     }
 
     /**

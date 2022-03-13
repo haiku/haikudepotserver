@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -30,7 +30,7 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testUpdatePkgLocalization_develPkgHandling() throws Exception {
+    public void testUpdatePkgLocalization_develPkgHandling() {
 
         // setup the two packages.
 

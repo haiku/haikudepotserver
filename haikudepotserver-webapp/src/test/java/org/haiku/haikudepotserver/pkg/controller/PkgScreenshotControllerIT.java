@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,12 +9,12 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestAppConfig;
 import org.haiku.haikudepotserver.config.TestServletConfig;
-import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
-import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.junit.Test;
+import org.haiku.haikudepotserver.graphics.ImageHelper;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;

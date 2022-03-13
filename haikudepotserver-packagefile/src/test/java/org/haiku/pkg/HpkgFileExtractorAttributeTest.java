@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Andrew Lindesay
+ * Copyright 2021-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.pkg;
@@ -8,10 +8,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
-import junit.framework.AssertionFailedError;
 import org.fest.assertions.Assertions;
-import org.haiku.pkg.model.*;
-import org.junit.Test;
+import org.haiku.pkg.model.Attribute;
+import org.haiku.pkg.model.AttributeId;
+import org.haiku.pkg.model.AttributeType;
+import org.haiku.pkg.model.IntAttribute;
+import org.haiku.pkg.model.StringAttribute;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,12 +61,15 @@ public class HpkgFileExtractorAttributeTest extends AbstractHpkTest {
             HashCode hashCode = binaryDataByteSource.hash(Hashing.md5());
             Assertions.assertThat(hashCode.toString().toLowerCase(Locale.ROOT)).isEqualTo("13b16cd7d035ddda09a744c49a8ebdf2");
 
-            Attribute iconAttribute = tipsterDirectoryEntry.getChildAttributes(AttributeId.FILE_ATTRIBUTE)
+            Optional<StringAttribute> iconAttributeOptional = tipsterDirectoryEntry.getChildAttributes(AttributeId.FILE_ATTRIBUTE)
                     .stream()
                     .map(a -> (StringAttribute) a)
                     .filter(a -> a.getValue(tocContext).equals("BEOS:ICON"))
-                    .findFirst()
-                    .orElseThrow(() -> new AssertionFailedError("could not find icon attribute"));
+                    .findFirst();
+
+            Assertions.assertThat(iconAttributeOptional.isPresent()).isTrue();
+            Attribute iconAttribute = iconAttributeOptional.get();
+
             Attribute iconBinaryData = iconAttribute.getChildAttribute(AttributeId.DATA);
             ByteSource iconDataByteSource = (ByteSource) iconBinaryData.getValue(tocContext);
             byte[] iconBytes = iconDataByteSource.read();
@@ -106,7 +112,7 @@ public class HpkgFileExtractorAttributeTest extends AbstractHpkTest {
         Assertions.assertThat(payload.length).isGreaterThan(HVIF_MAGIC.length);
         for (int i = 0; i < HVIF_MAGIC.length; i++) {
             if ((0xff & payload[i]) != HVIF_MAGIC[i]) {
-                throw new AssertionFailedError("mismatch on the magic in the data payload");
+                org.junit.jupiter.api.Assertions.fail("mismatch on the magic in the data payload");
             }
         }
     }

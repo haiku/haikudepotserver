@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,13 +11,27 @@ import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
-import org.haiku.haikudepotserver.api1.model.userrating.*;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api1.model.userrating.AbstractGetUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionResult;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.RemoveUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsResult;
+import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingRequest;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.dataobjects.UserRating;
+import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -74,7 +88,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdateUserRating() throws Exception {
+    public void testUpdateUserRating() {
 
         integrationTestSupportService.createStandardTestData();
         String userRatingCode = createTestUserAndSampleUserRating();
@@ -106,7 +120,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetUserRating() throws Exception {
+    public void testGetUserRating() {
         integrationTestSupportService.createStandardTestData();
         String userRatingCode = createTestUserAndSampleUserRating();
 
@@ -144,7 +158,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
 
 
     @Test
-    public void testCreateUserRating() throws Exception {
+    public void testCreateUserRating() {
         integrationTestSupportService.createStandardTestData();
 
         {
@@ -249,7 +263,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testRemoveUserRatings() throws Exception {
+    public void testRemoveUserRatings() {
 
         integrationTestSupportService.createStandardTestData();
         integrationTestSupportService.createUserRatings();

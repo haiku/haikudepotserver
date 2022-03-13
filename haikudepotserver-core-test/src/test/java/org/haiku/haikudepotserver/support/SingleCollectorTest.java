@@ -1,7 +1,11 @@
+/*
+ * Copyright 2022, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 package org.haiku.haikudepotserver.support;
 
 import org.fest.assertions.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,14 +27,18 @@ public class SingleCollectorTest {
         ).isEqualTo(Optional.of("a"));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOptional_moreThanOne() {
-        Arrays.asList("a","b").stream().collect(SingleCollector.optional());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
+            Arrays.asList("a", "b").stream().collect(SingleCollector.optional());
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testSingle_empty() {
-        Collections.emptyList().stream().collect(SingleCollector.single());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
+            Collections.emptyList().stream().collect(SingleCollector.single());
+        });
     }
 
     @Test
@@ -40,9 +48,11 @@ public class SingleCollectorTest {
         ).isEqualTo(Optional.of("a"));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testSingle_moreThanOne() {
-        Arrays.asList("a","b").stream().collect(SingleCollector.single());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> {
+            Arrays.asList("a", "b").stream().collect(SingleCollector.single());
+        });
     }
 
 }

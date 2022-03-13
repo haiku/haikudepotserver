@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,18 +13,49 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
+import org.haiku.haikudepotserver.api1.model.pkg.ConfigurePkgIconRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogResult;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgIconsRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgIconsResult;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgLocalizationsRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgLocalizationsResult;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgResult;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgScreenshotRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgScreenshotResult;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgScreenshotsRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgScreenshotsResult;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgVersionLocalizationsRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.GetPkgVersionLocalizationsResult;
+import org.haiku.haikudepotserver.api1.model.pkg.IncrementViewCounterRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.IncrementViewCounterResult;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgLocalization;
 import org.haiku.haikudepotserver.api1.model.pkg.PkgScreenshot;
-import org.haiku.haikudepotserver.api1.model.pkg.*;
+import org.haiku.haikudepotserver.api1.model.pkg.RemovePkgIconRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.RemovePkgScreenshotRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.ReorderPkgScreenshotsRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.SearchPkgsResult;
+import org.haiku.haikudepotserver.api1.model.pkg.UpdatePkgCategoriesRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.UpdatePkgChangelogRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.UpdatePkgLocalizationRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.UpdatePkgProminenceRequest;
+import org.haiku.haikudepotserver.api1.model.pkg.UpdatePkgVersionRequest;
 import org.haiku.haikudepotserver.api1.support.BadPkgIconException;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.PkgPkgCategory;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
@@ -41,7 +72,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     private PkgApi pkgApi;
 
     @Test
-    public void testUpdatePkgCategories() throws Exception {
+    public void testUpdatePkgCategories() {
 
         setAuthenticatedUserToRoot();
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
@@ -253,19 +284,19 @@ public class PkgApiIT extends AbstractIntegrationTest {
             pkgApi.getPkg(request);
             // ------------------------------------
 
-            Assert.fail("expected an instance of " + ObjectNotFoundException.class.getSimpleName() + " to be thrown, but was not");
+            org.junit.jupiter.api.Assertions.fail("expected an instance of " + ObjectNotFoundException.class.getSimpleName() + " to be thrown, but was not");
         }
         catch(ObjectNotFoundException onfe) {
             Assertions.assertThat(onfe.getEntityName()).isEqualTo(Pkg.class.getSimpleName());
             Assertions.assertThat(onfe.getIdentifier()).isEqualTo("pkg9");
         }
         catch(Throwable th) {
-            Assert.fail("expected an instance of "+ObjectNotFoundException.class.getSimpleName()+" to be thrown, but "+th.getClass().getSimpleName()+" was instead");
+            org.junit.jupiter.api.Assertions.fail("expected an instance of "+ObjectNotFoundException.class.getSimpleName()+" to be thrown, but "+th.getClass().getSimpleName()+" was instead");
         }
     }
 
     @Test
-    public void testGetPkgIcons() throws Exception {
+    public void testGetPkgIcons() {
 
         integrationTestSupportService.createStandardTestData();
 
@@ -313,7 +344,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
             pkgApi.configurePkgIcon(request);
             // ------------------------------------
 
-            Assert.fail("expected an instance of '"+BadPkgIconException.class.getSimpleName()+"' to have been thrown");
+            org.junit.jupiter.api.Assertions.fail("expected an instance of '"+BadPkgIconException.class.getSimpleName()+"' to have been thrown");
 
         }
         catch(BadPkgIconException bpie) {
@@ -430,7 +461,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testRemoveIcon() throws Exception {
+    public void testRemoveIcon() {
 
         setAuthenticatedUserToRoot();
 
@@ -469,7 +500,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.items.size()).isEqualTo(pkgSupplement.getPkgScreenshots().size());
         List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshots = pkgSupplement.getSortedPkgScreenshots();
 
-        Assert.assertThat(sortedScreenshots.size(), CoreMatchers.is(3));
+        Assertions.assertThat(sortedScreenshots).hasSize(3);
 
         int[] widths = { 320, 240, 320 };
         int[] heights = { 240, 320, 240 };
@@ -484,9 +515,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(pkgScreenshot.getHeight()).isEqualTo(apiPkgScreenshot.height);
             Assertions.assertThat(pkgScreenshot.getLength()).isEqualTo(apiPkgScreenshot.length);
 
-            Assert.assertThat(apiPkgScreenshot.width, CoreMatchers.is(widths[i]));
-            Assert.assertThat(apiPkgScreenshot.height, CoreMatchers.is(heights[i]));
-            Assert.assertThat(apiPkgScreenshot.length, CoreMatchers.is(lengths[i]));
+            Assertions.assertThat(apiPkgScreenshot.width).isEqualTo(widths[i]);
+            Assertions.assertThat(apiPkgScreenshot.height).isEqualTo(heights[i]);
+            Assertions.assertThat(apiPkgScreenshot.length).isEqualTo(lengths[i]);
         }
     }
 
@@ -514,7 +545,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testRemovePkgScreenshot() throws Exception {
+    public void testRemovePkgScreenshot() {
         setAuthenticatedUserToRoot();
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
@@ -545,7 +576,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testReorderPkgScreenshots() throws Exception {
+    public void testReorderPkgScreenshots() {
         setAuthenticatedUserToRoot();
 
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
@@ -578,7 +609,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdatePkgLocalization() throws Exception {
+    public void testUpdatePkgLocalization() {
         setAuthenticatedUserToRoot();
 
         integrationTestSupportService.createStandardTestData();
@@ -616,7 +647,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testGetPkgLocalizations() throws Exception {
+    public void testGetPkgLocalizations() {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgLocalizationsRequest request = new GetPkgLocalizationsRequest();
@@ -641,7 +672,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
      */
 
     @Test
-    public void testGetPkgVersionLocalizations() throws Exception {
+    public void testGetPkgVersionLocalizations() {
         setAuthenticatedUserToRoot();
 
         integrationTestSupportService.createStandardTestData();
@@ -662,7 +693,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdatePkgProminence() throws Exception {
+    public void testUpdatePkgProminence() {
 
         setAuthenticatedUserToRoot();
 
@@ -687,7 +718,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testeGetPkgChangelog() throws Exception {
+    public void testeGetPkgChangelog() {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgChangelogRequest request = new GetPkgChangelogRequest();
