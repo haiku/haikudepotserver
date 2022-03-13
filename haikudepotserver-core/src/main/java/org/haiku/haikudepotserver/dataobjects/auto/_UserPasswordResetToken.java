@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
@@ -22,18 +25,29 @@ public abstract class _UserPasswordResetToken extends AbstractDataObject {
     public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
     public static final Property<User> USER = Property.create("user", User.class);
 
+    protected String code;
+    protected Timestamp createTimestamp;
+
+    protected Object user;
+
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setUser(User user) {
@@ -44,5 +58,67 @@ public abstract class _UserPasswordResetToken extends AbstractDataObject {
         return (User)readProperty("user");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "code":
+                return this.code;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "user":
+                return this.user;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "code":
+                this.code = (String)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "user":
+                this.user = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.code);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.user);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.code = (String)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.user = in.readObject();
+    }
 
 }

@@ -1,5 +1,9 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
@@ -21,11 +25,19 @@ public abstract class _PkgScreenshotImage extends AbstractDataObject {
     public static final Property<MediaType> MEDIA_TYPE = Property.create("mediaType", MediaType.class);
     public static final Property<PkgScreenshot> PKG_SCREENSHOT = Property.create("pkgScreenshot", PkgScreenshot.class);
 
+    protected byte[] data;
+
+    protected Object mediaType;
+    protected Object pkgScreenshot;
+
     public void setData(byte[] data) {
-        writeProperty("data", data);
+        beforePropertyWrite("data", this.data, data);
+        this.data = data;
     }
+
     public byte[] getData() {
-        return (byte[])readProperty("data");
+        beforePropertyRead("data");
+        return this.data;
     }
 
     public void setMediaType(MediaType mediaType) {
@@ -36,7 +48,6 @@ public abstract class _PkgScreenshotImage extends AbstractDataObject {
         return (MediaType)readProperty("mediaType");
     }
 
-
     public void setPkgScreenshot(PkgScreenshot pkgScreenshot) {
         setToOneTarget("pkgScreenshot", pkgScreenshot, true);
     }
@@ -45,5 +56,67 @@ public abstract class _PkgScreenshotImage extends AbstractDataObject {
         return (PkgScreenshot)readProperty("pkgScreenshot");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "data":
+                return this.data;
+            case "mediaType":
+                return this.mediaType;
+            case "pkgScreenshot":
+                return this.pkgScreenshot;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "data":
+                this.data = (byte[])val;
+                break;
+            case "mediaType":
+                this.mediaType = val;
+                break;
+            case "pkgScreenshot":
+                this.pkgScreenshot = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.data);
+        out.writeObject(this.mediaType);
+        out.writeObject(this.pkgScreenshot);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.data = (byte[])in.readObject();
+        this.mediaType = in.readObject();
+        this.pkgScreenshot = in.readObject();
+    }
 
 }

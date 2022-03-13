@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -28,65 +31,195 @@ public abstract class _Publisher extends AbstractDataObject {
     public static final Property<String> SITE_URL = Property.create("siteUrl", String.class);
     public static final Property<List<Pkg>> PKGS = Property.create("pkgs", List.class);
 
+    protected Boolean active;
+    protected String code;
+    protected Timestamp createTimestamp;
+    protected String email;
+    protected Timestamp modifyTimestamp;
+    protected String name;
+    protected String siteUrl;
+
+    protected Object pkgs;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setEmail(String email) {
-        writeProperty("email", email);
+        beforePropertyWrite("email", this.email, email);
+        this.email = email;
     }
+
     public String getEmail() {
-        return (String)readProperty("email");
+        beforePropertyRead("email");
+        return this.email;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setName(String name) {
-        writeProperty("name", name);
+        beforePropertyWrite("name", this.name, name);
+        this.name = name;
     }
+
     public String getName() {
-        return (String)readProperty("name");
+        beforePropertyRead("name");
+        return this.name;
     }
 
     public void setSiteUrl(String siteUrl) {
-        writeProperty("siteUrl", siteUrl);
+        beforePropertyWrite("siteUrl", this.siteUrl, siteUrl);
+        this.siteUrl = siteUrl;
     }
+
     public String getSiteUrl() {
-        return (String)readProperty("siteUrl");
+        beforePropertyRead("siteUrl");
+        return this.siteUrl;
     }
 
     public void addToPkgs(Pkg obj) {
         addToManyTarget("pkgs", obj, true);
     }
+
     public void removeFromPkgs(Pkg obj) {
         removeToManyTarget("pkgs", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<Pkg> getPkgs() {
         return (List<Pkg>)readProperty("pkgs");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "code":
+                return this.code;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "email":
+                return this.email;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "name":
+                return this.name;
+            case "siteUrl":
+                return this.siteUrl;
+            case "pkgs":
+                return this.pkgs;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "code":
+                this.code = (String)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "email":
+                this.email = (String)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "name":
+                this.name = (String)val;
+                break;
+            case "siteUrl":
+                this.siteUrl = (String)val;
+                break;
+            case "pkgs":
+                this.pkgs = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.code);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.email);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.name);
+        out.writeObject(this.siteUrl);
+        out.writeObject(this.pkgs);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.code = (String)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.email = (String)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.name = (String)in.readObject();
+        this.siteUrl = (String)in.readObject();
+        this.pkgs = in.readObject();
+    }
 
 }

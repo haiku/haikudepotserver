@@ -1,9 +1,14 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.cayenne.exp.Property;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySourceExtraIdentifier;
 import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
@@ -26,43 +31,93 @@ public abstract class _RepositorySource extends AbstractDataObject {
     public static final Property<String> FORCED_INTERNAL_BASE_URL = Property.create("forcedInternalBaseUrl", String.class);
     public static final Property<String> IDENTIFIER = Property.create("identifier", String.class);
     public static final Property<Timestamp> LAST_IMPORT_TIMESTAMP = Property.create("lastImportTimestamp", Timestamp.class);
+    public static final Property<Architecture> ARCHITECTURE = Property.create("architecture", Architecture.class);
+    public static final Property<List<PkgVersion>> PKG_VERSIONS = Property.create("pkg_versions", List.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
     public static final Property<List<RepositorySourceExtraIdentifier>> REPOSITORY_SOURCE_EXTRA_IDENTIFIERS = Property.create("repositorySourceExtraIdentifiers", List.class);
     public static final Property<List<RepositorySourceMirror>> REPOSITORY_SOURCE_MIRRORS = Property.create("repositorySourceMirrors", List.class);
 
+    protected Boolean active;
+    protected String code;
+    protected String forcedInternalBaseUrl;
+    protected String identifier;
+    protected Timestamp lastImportTimestamp;
+
+    protected Object architecture;
+    protected Object pkg_versions;
+    protected Object repository;
+    protected Object repositorySourceExtraIdentifiers;
+    protected Object repositorySourceMirrors;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setForcedInternalBaseUrl(String forcedInternalBaseUrl) {
-        writeProperty("forcedInternalBaseUrl", forcedInternalBaseUrl);
+        beforePropertyWrite("forcedInternalBaseUrl", this.forcedInternalBaseUrl, forcedInternalBaseUrl);
+        this.forcedInternalBaseUrl = forcedInternalBaseUrl;
     }
+
     public String getForcedInternalBaseUrl() {
-        return (String)readProperty("forcedInternalBaseUrl");
+        beforePropertyRead("forcedInternalBaseUrl");
+        return this.forcedInternalBaseUrl;
     }
 
     public void setIdentifier(String identifier) {
-        writeProperty("identifier", identifier);
+        beforePropertyWrite("identifier", this.identifier, identifier);
+        this.identifier = identifier;
     }
+
     public String getIdentifier() {
-        return (String)readProperty("identifier");
+        beforePropertyRead("identifier");
+        return this.identifier;
     }
 
     public void setLastImportTimestamp(Timestamp lastImportTimestamp) {
-        writeProperty("lastImportTimestamp", lastImportTimestamp);
+        beforePropertyWrite("lastImportTimestamp", this.lastImportTimestamp, lastImportTimestamp);
+        this.lastImportTimestamp = lastImportTimestamp;
     }
+
     public Timestamp getLastImportTimestamp() {
-        return (Timestamp)readProperty("lastImportTimestamp");
+        beforePropertyRead("lastImportTimestamp");
+        return this.lastImportTimestamp;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        setToOneTarget("architecture", architecture, true);
+    }
+
+    public Architecture getArchitecture() {
+        return (Architecture)readProperty("architecture");
+    }
+
+    public void addToPkg_versions(PkgVersion obj) {
+        addToManyTarget("pkg_versions", obj, true);
+    }
+
+    public void removeFromPkg_versions(PkgVersion obj) {
+        removeToManyTarget("pkg_versions", obj, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<PkgVersion> getPkg_versions() {
+        return (List<PkgVersion>)readProperty("pkg_versions");
     }
 
     public void setRepository(Repository repository) {
@@ -73,29 +128,142 @@ public abstract class _RepositorySource extends AbstractDataObject {
         return (Repository)readProperty("repository");
     }
 
-
     public void addToRepositorySourceExtraIdentifiers(RepositorySourceExtraIdentifier obj) {
         addToManyTarget("repositorySourceExtraIdentifiers", obj, true);
     }
+
     public void removeFromRepositorySourceExtraIdentifiers(RepositorySourceExtraIdentifier obj) {
         removeToManyTarget("repositorySourceExtraIdentifiers", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<RepositorySourceExtraIdentifier> getRepositorySourceExtraIdentifiers() {
         return (List<RepositorySourceExtraIdentifier>)readProperty("repositorySourceExtraIdentifiers");
     }
 
-
     public void addToRepositorySourceMirrors(RepositorySourceMirror obj) {
         addToManyTarget("repositorySourceMirrors", obj, true);
     }
+
     public void removeFromRepositorySourceMirrors(RepositorySourceMirror obj) {
         removeToManyTarget("repositorySourceMirrors", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<RepositorySourceMirror> getRepositorySourceMirrors() {
         return (List<RepositorySourceMirror>)readProperty("repositorySourceMirrors");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "code":
+                return this.code;
+            case "forcedInternalBaseUrl":
+                return this.forcedInternalBaseUrl;
+            case "identifier":
+                return this.identifier;
+            case "lastImportTimestamp":
+                return this.lastImportTimestamp;
+            case "architecture":
+                return this.architecture;
+            case "pkg_versions":
+                return this.pkg_versions;
+            case "repository":
+                return this.repository;
+            case "repositorySourceExtraIdentifiers":
+                return this.repositorySourceExtraIdentifiers;
+            case "repositorySourceMirrors":
+                return this.repositorySourceMirrors;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "code":
+                this.code = (String)val;
+                break;
+            case "forcedInternalBaseUrl":
+                this.forcedInternalBaseUrl = (String)val;
+                break;
+            case "identifier":
+                this.identifier = (String)val;
+                break;
+            case "lastImportTimestamp":
+                this.lastImportTimestamp = (Timestamp)val;
+                break;
+            case "architecture":
+                this.architecture = val;
+                break;
+            case "pkg_versions":
+                this.pkg_versions = val;
+                break;
+            case "repository":
+                this.repository = val;
+                break;
+            case "repositorySourceExtraIdentifiers":
+                this.repositorySourceExtraIdentifiers = val;
+                break;
+            case "repositorySourceMirrors":
+                this.repositorySourceMirrors = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.code);
+        out.writeObject(this.forcedInternalBaseUrl);
+        out.writeObject(this.identifier);
+        out.writeObject(this.lastImportTimestamp);
+        out.writeObject(this.architecture);
+        out.writeObject(this.pkg_versions);
+        out.writeObject(this.repository);
+        out.writeObject(this.repositorySourceExtraIdentifiers);
+        out.writeObject(this.repositorySourceMirrors);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.code = (String)in.readObject();
+        this.forcedInternalBaseUrl = (String)in.readObject();
+        this.identifier = (String)in.readObject();
+        this.lastImportTimestamp = (Timestamp)in.readObject();
+        this.architecture = in.readObject();
+        this.pkg_versions = in.readObject();
+        this.repository = in.readObject();
+        this.repositorySourceExtraIdentifiers = in.readObject();
+        this.repositorySourceMirrors = in.readObject();
+    }
 
 }

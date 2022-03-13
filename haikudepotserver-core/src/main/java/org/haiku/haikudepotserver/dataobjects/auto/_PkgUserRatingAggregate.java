@@ -1,5 +1,9 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -22,18 +26,30 @@ public abstract class _PkgUserRatingAggregate extends AbstractDataObject {
     public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
 
+    protected Float derivedRating;
+    protected Integer derivedRatingSampleSize;
+
+    protected Object pkg;
+    protected Object repository;
+
     public void setDerivedRating(Float derivedRating) {
-        writeProperty("derivedRating", derivedRating);
+        beforePropertyWrite("derivedRating", this.derivedRating, derivedRating);
+        this.derivedRating = derivedRating;
     }
+
     public Float getDerivedRating() {
-        return (Float)readProperty("derivedRating");
+        beforePropertyRead("derivedRating");
+        return this.derivedRating;
     }
 
     public void setDerivedRatingSampleSize(Integer derivedRatingSampleSize) {
-        writeProperty("derivedRatingSampleSize", derivedRatingSampleSize);
+        beforePropertyWrite("derivedRatingSampleSize", this.derivedRatingSampleSize, derivedRatingSampleSize);
+        this.derivedRatingSampleSize = derivedRatingSampleSize;
     }
+
     public Integer getDerivedRatingSampleSize() {
-        return (Integer)readProperty("derivedRatingSampleSize");
+        beforePropertyRead("derivedRatingSampleSize");
+        return this.derivedRatingSampleSize;
     }
 
     public void setPkg(Pkg pkg) {
@@ -44,7 +60,6 @@ public abstract class _PkgUserRatingAggregate extends AbstractDataObject {
         return (Pkg)readProperty("pkg");
     }
 
-
     public void setRepository(Repository repository) {
         setToOneTarget("repository", repository, true);
     }
@@ -53,5 +68,74 @@ public abstract class _PkgUserRatingAggregate extends AbstractDataObject {
         return (Repository)readProperty("repository");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "derivedRating":
+                return this.derivedRating;
+            case "derivedRatingSampleSize":
+                return this.derivedRatingSampleSize;
+            case "pkg":
+                return this.pkg;
+            case "repository":
+                return this.repository;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "derivedRating":
+                this.derivedRating = (Float)val;
+                break;
+            case "derivedRatingSampleSize":
+                this.derivedRatingSampleSize = (Integer)val;
+                break;
+            case "pkg":
+                this.pkg = val;
+                break;
+            case "repository":
+                this.repository = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.derivedRating);
+        out.writeObject(this.derivedRatingSampleSize);
+        out.writeObject(this.pkg);
+        out.writeObject(this.repository);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.derivedRating = (Float)in.readObject();
+        this.derivedRatingSampleSize = (Integer)in.readObject();
+        this.pkg = in.readObject();
+        this.repository = in.readObject();
+    }
 
 }

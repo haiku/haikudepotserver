@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
@@ -23,24 +26,113 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
     public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
     public static final Property<String> NAME = Property.create("name", String.class);
 
+    protected String code;
+    protected Timestamp createTimestamp;
+    protected Boolean isPopular;
+    protected Timestamp modifyTimestamp;
+    protected String name;
+
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public Boolean getIsPopular() {
-        return (Boolean)readProperty("isPopular");
+        beforePropertyRead("isPopular");
+        return this.isPopular;
     }
 
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public String getName() {
-        return (String)readProperty("name");
+        beforePropertyRead("name");
+        return this.name;
+    }
+
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "code":
+                return this.code;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "isPopular":
+                return this.isPopular;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "name":
+                return this.name;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "code":
+                this.code = (String)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "isPopular":
+                this.isPopular = (Boolean)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "name":
+                this.name = (String)val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.code);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.isPopular);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.name);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.code = (String)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.isPopular = (Boolean)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.name = (String)in.readObject();
     }
 
 }

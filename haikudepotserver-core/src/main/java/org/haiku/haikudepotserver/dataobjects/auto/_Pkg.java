@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -33,57 +36,82 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final Property<List<PkgUserRatingAggregate>> PKG_USER_RATING_AGGREGATES = Property.create("pkgUserRatingAggregates", List.class);
     public static final Property<Publisher> PUBLISHER = Property.create("publisher", Publisher.class);
 
+    protected Boolean active;
+    protected Timestamp createTimestamp;
+    protected Timestamp modifyTimestamp;
+    protected String name;
+
+    protected Object permissionUserPkgs;
+    protected Object pkgProminences;
+    protected Object pkgSupplement;
+    protected Object pkgUserRatingAggregates;
+    protected Object publisher;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setName(String name) {
-        writeProperty("name", name);
+        beforePropertyWrite("name", this.name, name);
+        this.name = name;
     }
+
     public String getName() {
-        return (String)readProperty("name");
+        beforePropertyRead("name");
+        return this.name;
     }
 
     public void addToPermissionUserPkgs(PermissionUserPkg obj) {
         addToManyTarget("permissionUserPkgs", obj, true);
     }
+
     public void removeFromPermissionUserPkgs(PermissionUserPkg obj) {
         removeToManyTarget("permissionUserPkgs", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PermissionUserPkg> getPermissionUserPkgs() {
         return (List<PermissionUserPkg>)readProperty("permissionUserPkgs");
     }
 
-
     public void addToPkgProminences(PkgProminence obj) {
         addToManyTarget("pkgProminences", obj, true);
     }
+
     public void removeFromPkgProminences(PkgProminence obj) {
         removeToManyTarget("pkgProminences", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgProminence> getPkgProminences() {
         return (List<PkgProminence>)readProperty("pkgProminences");
     }
-
 
     public void setPkgSupplement(PkgSupplement pkgSupplement) {
         setToOneTarget("pkgSupplement", pkgSupplement, true);
@@ -93,18 +121,18 @@ public abstract class _Pkg extends AbstractDataObject {
         return (PkgSupplement)readProperty("pkgSupplement");
     }
 
-
     public void addToPkgUserRatingAggregates(PkgUserRatingAggregate obj) {
         addToManyTarget("pkgUserRatingAggregates", obj, true);
     }
+
     public void removeFromPkgUserRatingAggregates(PkgUserRatingAggregate obj) {
         removeToManyTarget("pkgUserRatingAggregates", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgUserRatingAggregate> getPkgUserRatingAggregates() {
         return (List<PkgUserRatingAggregate>)readProperty("pkgUserRatingAggregates");
     }
-
 
     public void setPublisher(Publisher publisher) {
         setToOneTarget("publisher", publisher, true);
@@ -114,5 +142,109 @@ public abstract class _Pkg extends AbstractDataObject {
         return (Publisher)readProperty("publisher");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "name":
+                return this.name;
+            case "permissionUserPkgs":
+                return this.permissionUserPkgs;
+            case "pkgProminences":
+                return this.pkgProminences;
+            case "pkgSupplement":
+                return this.pkgSupplement;
+            case "pkgUserRatingAggregates":
+                return this.pkgUserRatingAggregates;
+            case "publisher":
+                return this.publisher;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "name":
+                this.name = (String)val;
+                break;
+            case "permissionUserPkgs":
+                this.permissionUserPkgs = val;
+                break;
+            case "pkgProminences":
+                this.pkgProminences = val;
+                break;
+            case "pkgSupplement":
+                this.pkgSupplement = val;
+                break;
+            case "pkgUserRatingAggregates":
+                this.pkgUserRatingAggregates = val;
+                break;
+            case "publisher":
+                this.publisher = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.name);
+        out.writeObject(this.permissionUserPkgs);
+        out.writeObject(this.pkgProminences);
+        out.writeObject(this.pkgSupplement);
+        out.writeObject(this.pkgUserRatingAggregates);
+        out.writeObject(this.publisher);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.name = (String)in.readObject();
+        this.permissionUserPkgs = in.readObject();
+        this.pkgProminences = in.readObject();
+        this.pkgSupplement = in.readObject();
+        this.pkgUserRatingAggregates = in.readObject();
+        this.publisher = in.readObject();
+    }
 
 }

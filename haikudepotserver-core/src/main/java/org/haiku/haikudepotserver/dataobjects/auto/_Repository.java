@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -30,78 +33,231 @@ public abstract class _Repository extends AbstractDataObject {
     public static final Property<String> PASSWORD_SALT = Property.create("passwordSalt", String.class);
     public static final Property<List<RepositorySource>> REPOSITORY_SOURCES = Property.create("repositorySources", List.class);
 
+    protected Boolean active;
+    protected String code;
+    protected Timestamp createTimestamp;
+    protected String description;
+    protected String informationUrl;
+    protected Timestamp modifyTimestamp;
+    protected String name;
+    protected String passwordHash;
+    protected String passwordSalt;
+
+    protected Object repositorySources;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setDescription(String description) {
-        writeProperty("description", description);
+        beforePropertyWrite("description", this.description, description);
+        this.description = description;
     }
+
     public String getDescription() {
-        return (String)readProperty("description");
+        beforePropertyRead("description");
+        return this.description;
     }
 
     public void setInformationUrl(String informationUrl) {
-        writeProperty("informationUrl", informationUrl);
+        beforePropertyWrite("informationUrl", this.informationUrl, informationUrl);
+        this.informationUrl = informationUrl;
     }
+
     public String getInformationUrl() {
-        return (String)readProperty("informationUrl");
+        beforePropertyRead("informationUrl");
+        return this.informationUrl;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setName(String name) {
-        writeProperty("name", name);
+        beforePropertyWrite("name", this.name, name);
+        this.name = name;
     }
+
     public String getName() {
-        return (String)readProperty("name");
+        beforePropertyRead("name");
+        return this.name;
     }
 
     public void setPasswordHash(String passwordHash) {
-        writeProperty("passwordHash", passwordHash);
+        beforePropertyWrite("passwordHash", this.passwordHash, passwordHash);
+        this.passwordHash = passwordHash;
     }
+
     public String getPasswordHash() {
-        return (String)readProperty("passwordHash");
+        beforePropertyRead("passwordHash");
+        return this.passwordHash;
     }
 
     public void setPasswordSalt(String passwordSalt) {
-        writeProperty("passwordSalt", passwordSalt);
+        beforePropertyWrite("passwordSalt", this.passwordSalt, passwordSalt);
+        this.passwordSalt = passwordSalt;
     }
+
     public String getPasswordSalt() {
-        return (String)readProperty("passwordSalt");
+        beforePropertyRead("passwordSalt");
+        return this.passwordSalt;
     }
 
     public void addToRepositorySources(RepositorySource obj) {
         addToManyTarget("repositorySources", obj, true);
     }
+
     public void removeFromRepositorySources(RepositorySource obj) {
         removeToManyTarget("repositorySources", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<RepositorySource> getRepositorySources() {
         return (List<RepositorySource>)readProperty("repositorySources");
+    }
+
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "code":
+                return this.code;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "description":
+                return this.description;
+            case "informationUrl":
+                return this.informationUrl;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "name":
+                return this.name;
+            case "passwordHash":
+                return this.passwordHash;
+            case "passwordSalt":
+                return this.passwordSalt;
+            case "repositorySources":
+                return this.repositorySources;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "code":
+                this.code = (String)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "description":
+                this.description = (String)val;
+                break;
+            case "informationUrl":
+                this.informationUrl = (String)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "name":
+                this.name = (String)val;
+                break;
+            case "passwordHash":
+                this.passwordHash = (String)val;
+                break;
+            case "passwordSalt":
+                this.passwordSalt = (String)val;
+                break;
+            case "repositorySources":
+                this.repositorySources = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.code);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.description);
+        out.writeObject(this.informationUrl);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.name);
+        out.writeObject(this.passwordHash);
+        out.writeObject(this.passwordSalt);
+        out.writeObject(this.repositorySources);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.code = (String)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.description = (String)in.readObject();
+        this.informationUrl = (String)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.name = (String)in.readObject();
+        this.passwordHash = (String)in.readObject();
+        this.passwordSalt = (String)in.readObject();
+        this.repositorySources = in.readObject();
     }
 
 }

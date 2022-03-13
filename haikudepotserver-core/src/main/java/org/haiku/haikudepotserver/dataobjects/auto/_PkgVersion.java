@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -44,81 +47,134 @@ public abstract class _PkgVersion extends AbstractDataObject {
     public static final Property<List<PkgVersionUrl>> PKG_VERSION_URLS = Property.create("pkgVersionUrls", List.class);
     public static final Property<RepositorySource> REPOSITORY_SOURCE = Property.create("repositorySource", RepositorySource.class);
 
+    protected Boolean active;
+    protected Timestamp createTimestamp;
+    protected Boolean isLatest;
+    protected String major;
+    protected String micro;
+    protected String minor;
+    protected Timestamp modifyTimestamp;
+    protected Long payloadLength;
+    protected String preRelease;
+    protected Integer revision;
+    protected Long viewCounter;
+
+    protected Object architecture;
+    protected Object pkg;
+    protected Object pkgVersionCopyrights;
+    protected Object pkgVersionLicenses;
+    protected Object pkgVersionLocalizations;
+    protected Object pkgVersionUrls;
+    protected Object repositorySource;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setIsLatest(Boolean isLatest) {
-        writeProperty("isLatest", isLatest);
+        beforePropertyWrite("isLatest", this.isLatest, isLatest);
+        this.isLatest = isLatest;
     }
+
     public Boolean getIsLatest() {
-        return (Boolean)readProperty("isLatest");
+        beforePropertyRead("isLatest");
+        return this.isLatest;
     }
 
     public void setMajor(String major) {
-        writeProperty("major", major);
+        beforePropertyWrite("major", this.major, major);
+        this.major = major;
     }
+
     public String getMajor() {
-        return (String)readProperty("major");
+        beforePropertyRead("major");
+        return this.major;
     }
 
     public void setMicro(String micro) {
-        writeProperty("micro", micro);
+        beforePropertyWrite("micro", this.micro, micro);
+        this.micro = micro;
     }
+
     public String getMicro() {
-        return (String)readProperty("micro");
+        beforePropertyRead("micro");
+        return this.micro;
     }
 
     public void setMinor(String minor) {
-        writeProperty("minor", minor);
+        beforePropertyWrite("minor", this.minor, minor);
+        this.minor = minor;
     }
+
     public String getMinor() {
-        return (String)readProperty("minor");
+        beforePropertyRead("minor");
+        return this.minor;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setPayloadLength(Long payloadLength) {
-        writeProperty("payloadLength", payloadLength);
+        beforePropertyWrite("payloadLength", this.payloadLength, payloadLength);
+        this.payloadLength = payloadLength;
     }
+
     public Long getPayloadLength() {
-        return (Long)readProperty("payloadLength");
+        beforePropertyRead("payloadLength");
+        return this.payloadLength;
     }
 
     public void setPreRelease(String preRelease) {
-        writeProperty("preRelease", preRelease);
+        beforePropertyWrite("preRelease", this.preRelease, preRelease);
+        this.preRelease = preRelease;
     }
+
     public String getPreRelease() {
-        return (String)readProperty("preRelease");
+        beforePropertyRead("preRelease");
+        return this.preRelease;
     }
 
     public void setRevision(Integer revision) {
-        writeProperty("revision", revision);
+        beforePropertyWrite("revision", this.revision, revision);
+        this.revision = revision;
     }
+
     public Integer getRevision() {
-        return (Integer)readProperty("revision");
+        beforePropertyRead("revision");
+        return this.revision;
     }
 
     public void setViewCounter(Long viewCounter) {
-        writeProperty("viewCounter", viewCounter);
+        beforePropertyWrite("viewCounter", this.viewCounter, viewCounter);
+        this.viewCounter = viewCounter;
     }
+
     public Long getViewCounter() {
-        return (Long)readProperty("viewCounter");
+        beforePropertyRead("viewCounter");
+        return this.viewCounter;
     }
 
     public void setArchitecture(Architecture architecture) {
@@ -129,7 +185,6 @@ public abstract class _PkgVersion extends AbstractDataObject {
         return (Architecture)readProperty("architecture");
     }
 
-
     public void setPkg(Pkg pkg) {
         setToOneTarget("pkg", pkg, true);
     }
@@ -138,54 +193,57 @@ public abstract class _PkgVersion extends AbstractDataObject {
         return (Pkg)readProperty("pkg");
     }
 
-
     public void addToPkgVersionCopyrights(PkgVersionCopyright obj) {
         addToManyTarget("pkgVersionCopyrights", obj, true);
     }
+
     public void removeFromPkgVersionCopyrights(PkgVersionCopyright obj) {
         removeToManyTarget("pkgVersionCopyrights", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgVersionCopyright> getPkgVersionCopyrights() {
         return (List<PkgVersionCopyright>)readProperty("pkgVersionCopyrights");
     }
 
-
     public void addToPkgVersionLicenses(PkgVersionLicense obj) {
         addToManyTarget("pkgVersionLicenses", obj, true);
     }
+
     public void removeFromPkgVersionLicenses(PkgVersionLicense obj) {
         removeToManyTarget("pkgVersionLicenses", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgVersionLicense> getPkgVersionLicenses() {
         return (List<PkgVersionLicense>)readProperty("pkgVersionLicenses");
     }
 
-
     public void addToPkgVersionLocalizations(PkgVersionLocalization obj) {
         addToManyTarget("pkgVersionLocalizations", obj, true);
     }
+
     public void removeFromPkgVersionLocalizations(PkgVersionLocalization obj) {
         removeToManyTarget("pkgVersionLocalizations", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgVersionLocalization> getPkgVersionLocalizations() {
         return (List<PkgVersionLocalization>)readProperty("pkgVersionLocalizations");
     }
 
-
     public void addToPkgVersionUrls(PkgVersionUrl obj) {
         addToManyTarget("pkgVersionUrls", obj, true);
     }
+
     public void removeFromPkgVersionUrls(PkgVersionUrl obj) {
         removeToManyTarget("pkgVersionUrls", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgVersionUrl> getPkgVersionUrls() {
         return (List<PkgVersionUrl>)readProperty("pkgVersionUrls");
     }
-
 
     public void setRepositorySource(RepositorySource repositorySource) {
         setToOneTarget("repositorySource", repositorySource, true);
@@ -195,5 +253,172 @@ public abstract class _PkgVersion extends AbstractDataObject {
         return (RepositorySource)readProperty("repositorySource");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "isLatest":
+                return this.isLatest;
+            case "major":
+                return this.major;
+            case "micro":
+                return this.micro;
+            case "minor":
+                return this.minor;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "payloadLength":
+                return this.payloadLength;
+            case "preRelease":
+                return this.preRelease;
+            case "revision":
+                return this.revision;
+            case "viewCounter":
+                return this.viewCounter;
+            case "architecture":
+                return this.architecture;
+            case "pkg":
+                return this.pkg;
+            case "pkgVersionCopyrights":
+                return this.pkgVersionCopyrights;
+            case "pkgVersionLicenses":
+                return this.pkgVersionLicenses;
+            case "pkgVersionLocalizations":
+                return this.pkgVersionLocalizations;
+            case "pkgVersionUrls":
+                return this.pkgVersionUrls;
+            case "repositorySource":
+                return this.repositorySource;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "isLatest":
+                this.isLatest = (Boolean)val;
+                break;
+            case "major":
+                this.major = (String)val;
+                break;
+            case "micro":
+                this.micro = (String)val;
+                break;
+            case "minor":
+                this.minor = (String)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "payloadLength":
+                this.payloadLength = (Long)val;
+                break;
+            case "preRelease":
+                this.preRelease = (String)val;
+                break;
+            case "revision":
+                this.revision = (Integer)val;
+                break;
+            case "viewCounter":
+                this.viewCounter = (Long)val;
+                break;
+            case "architecture":
+                this.architecture = val;
+                break;
+            case "pkg":
+                this.pkg = val;
+                break;
+            case "pkgVersionCopyrights":
+                this.pkgVersionCopyrights = val;
+                break;
+            case "pkgVersionLicenses":
+                this.pkgVersionLicenses = val;
+                break;
+            case "pkgVersionLocalizations":
+                this.pkgVersionLocalizations = val;
+                break;
+            case "pkgVersionUrls":
+                this.pkgVersionUrls = val;
+                break;
+            case "repositorySource":
+                this.repositorySource = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.isLatest);
+        out.writeObject(this.major);
+        out.writeObject(this.micro);
+        out.writeObject(this.minor);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.payloadLength);
+        out.writeObject(this.preRelease);
+        out.writeObject(this.revision);
+        out.writeObject(this.viewCounter);
+        out.writeObject(this.architecture);
+        out.writeObject(this.pkg);
+        out.writeObject(this.pkgVersionCopyrights);
+        out.writeObject(this.pkgVersionLicenses);
+        out.writeObject(this.pkgVersionLocalizations);
+        out.writeObject(this.pkgVersionUrls);
+        out.writeObject(this.repositorySource);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.isLatest = (Boolean)in.readObject();
+        this.major = (String)in.readObject();
+        this.micro = (String)in.readObject();
+        this.minor = (String)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.payloadLength = (Long)in.readObject();
+        this.preRelease = (String)in.readObject();
+        this.revision = (Integer)in.readObject();
+        this.viewCounter = (Long)in.readObject();
+        this.architecture = in.readObject();
+        this.pkg = in.readObject();
+        this.pkgVersionCopyrights = in.readObject();
+        this.pkgVersionLicenses = in.readObject();
+        this.pkgVersionLocalizations = in.readObject();
+        this.pkgVersionUrls = in.readObject();
+        this.repositorySource = in.readObject();
+    }
 
 }

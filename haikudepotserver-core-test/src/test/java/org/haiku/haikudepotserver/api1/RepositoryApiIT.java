@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -132,7 +132,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void getRepositoryTest() throws Exception {
+    public void getRepositoryTest() {
         integrationTestSupportService.createStandardTestData();
 
         GetRepositoryRequest request = new GetRepositoryRequest();
@@ -151,10 +151,11 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(repositorySource.code).isEqualTo("testreposrc_xyz");
         Assertions.assertThat(repositorySource.active).isTrue();
         Assertions.assertThat(repositorySource.url).startsWith("file:///");
+        Assertions.assertThat(repositorySource.architectureCode).isEqualTo("x86_64");
     }
 
     @Test
-    public void testCreateRepository_ok() throws Exception {
+    public void testCreateRepository_ok() {
         setAuthenticatedUserToRoot();
 
         CreateRepositoryRequest request = new CreateRepositoryRequest();
@@ -175,7 +176,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateRepository_codeNotUnique() throws Exception {
+    public void testCreateRepository_codeNotUnique() {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -198,7 +199,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetRepositorySource() throws Exception {
+    public void testGetRepositorySource() {
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
 
         GetRepositorySourceRequest request = new GetRepositorySourceRequest();
@@ -214,6 +215,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.identifier).isEqualTo("http://www.example.com/test/identifier/url");
         Assertions.assertThat(result.repositorySourceMirrors.size()).isEqualTo(2);
         Assertions.assertThat(result.extraIdentifiers).containsExactly("example:haiku:identifier");
+        Assertions.assertThat(result.architectureCode).isEqualTo("x86_64");
 
         GetRepositorySourceResult.RepositorySourceMirror mirror0 = result.repositorySourceMirrors.get(0);
         GetRepositorySourceResult.RepositorySourceMirror mirror1 = result.repositorySourceMirrors.get(1);
@@ -226,7 +228,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdateRepositorySource() throws Exception {
+    public void testUpdateRepositorySource() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -254,7 +256,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateRepositorySource() throws Exception {
+    public void testCreateRepositorySource() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -278,7 +280,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateRepositorySourceMirror() throws Exception {
+    public void testCreateRepositorySourceMirror() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -303,7 +305,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testUpdateRepositorySourceMirror() throws Exception {
+    public void testUpdateRepositorySourceMirror() {
         integrationTestSupportService.createStandardTestData();
         setAuthenticatedUserToRoot();
 
@@ -343,7 +345,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testGetRepositorySourceMirror() throws Exception {
+    public void testGetRepositorySourceMirror() {
         integrationTestSupportService.createStandardTestData();
 
         GetRepositorySourceMirrorRequest request = new GetRepositorySourceMirrorRequest();
@@ -360,7 +362,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testRemoveRepositorySourceMirror() throws Exception {
+    public void testRemoveRepositorySourceMirror() {
         integrationTestSupportService.createStandardTestData();
 
         RemoveRepositorySourceMirrorRequest request = new RemoveRepositorySourceMirrorRequest();

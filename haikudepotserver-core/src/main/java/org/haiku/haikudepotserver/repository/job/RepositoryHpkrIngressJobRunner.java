@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.haiku.driversettings.DriverSettings;
 import org.haiku.driversettings.DriverSettingsException;
 import org.haiku.driversettings.Parameter;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -32,7 +33,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +65,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     @Deprecated // replaced with "identifier"
     private final static String PARAMETER_NAME_URL = "url";
     private final static String PARAMETER_NAME_IDENTIFIER = "identifier";
+    private final static String PARAMETER_ARCHITECTURE = "architecture";
 
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
@@ -164,6 +171,25 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                     repositorySource.getRepository().setModifyTimestamp();
                     mainContext.commitChanges();
                 }
+
+                Optional<String> architectureCodeOptional = tryGetParameterValue(parameters, PARAMETER_ARCHITECTURE);
+
+                if (architectureCodeOptional.isEmpty()) {
+                    throw new RepositoryHpkrIngressException(
+                            "repository source [" + repositorySource.getCode()
+                                    + "] has no architecture code");
+                }
+
+                Optional<Architecture> architectureOptional = Architecture.tryGetByCode(mainContext, architectureCodeOptional.get());
+
+                if (architectureOptional.isEmpty()) {
+                    throw new RepositoryHpkrIngressException(
+                            "repository source [" + repositorySource.getCode()
+                                    + "] has unknown architecture code ["
+                                    + architectureCodeOptional.get() + "]");
+                }
+
+                repositorySource.setArchitecture(architectureOptional.get());
             }
         } catch (IOException | DriverSettingsException e) {
             throw new RepositoryHpkrIngressException(
@@ -213,7 +239,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             FileHelper.streamUrlDataToFile(url, temporaryFile, TIMEOUT_REPOSITORY_SOURCE_FETCH);
 
             LOGGER.info("did copy {} bytes for repository hpkr [{}] ({}) to temporary file",
-                    temporaryFile.length(), repositorySource, url.toString());
+                    temporaryFile.length(), repositorySource, url);
 
             HpkrFileExtractor fileExtractor = new HpkrFileExtractor(temporaryFile);
 
@@ -242,7 +268,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                     pkgImportContext.commitChanges();
                 }
                 catch(Throwable th) {
-                    throw new RepositoryHpkrIngressException("unable to store package [" + pkg.toString() + "]", th);
+                    throw new RepositoryHpkrIngressException("unable to store package [" + pkg + "]", th);
                 }
             }
 
@@ -269,7 +295,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
                     if (changes > 0) {
                         removalContext.commitChanges();
-                        LOGGER.info("did remove all versions of package {} from repository source {} because this package is no longer in the repository", persistedPkgName, repositorySource.toString());
+                        LOGGER.info("did remove all versions of package {} from repository source {} because this package is no longer in the repository", persistedPkgName, repositorySource);
                     }
 
                 }

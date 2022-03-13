@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,12 +12,29 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.model.*;
-import org.haiku.haikudepotserver.support.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.MediaType;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.PkgUrlType;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.PkgVersionCopyright;
+import org.haiku.haikudepotserver.dataobjects.PkgVersionLicense;
+import org.haiku.haikudepotserver.dataobjects.PkgVersionUrl;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
+import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.pkg.model.PkgImportService;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.support.ExposureType;
+import org.haiku.haikudepotserver.support.HpkgHelper;
+import org.haiku.haikudepotserver.support.URLHelperService;
+import org.haiku.haikudepotserver.support.VersionCoordinates;
+import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haiku.pkg.AttributeContext;
 import org.haiku.pkg.HpkgFileExtractor;
 import org.haiku.pkg.model.Attribute;
@@ -42,19 +59,16 @@ public class PkgImportServiceImpl implements PkgImportService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgImportServiceImpl.class);
 
-    private final ServerRuntime serverRuntime;
     private final PkgServiceImpl pkgServiceImpl;
     private final PkgIconService pkgIconService;
     private final PkgLocalizationService pkgLocalizationService;
     private final URLHelperService urlHelperService;
 
     public PkgImportServiceImpl(
-            ServerRuntime serverRuntime,
             PkgServiceImpl pkgServiceImpl,
             PkgIconService pkgIconService,
             PkgLocalizationService pkgLocalizationService,
             URLHelperService urlHelperService) {
-        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgServiceImpl = Preconditions.checkNotNull(pkgServiceImpl);
         this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
         this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
@@ -92,7 +106,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                 .orElseThrow(IllegalStateException::new);
         PkgVersion persistedPkgVersion = null;
 
-        if (!persistedPkgOptional.isPresent()) {
+        if (persistedPkgOptional.isEmpty()) {
             persistedPkg = createPkg(objectContext, pkg.getName());
             pkgServiceImpl.ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
             LOGGER.info("the package [{}] did not exist; will create", pkg.getName());
@@ -173,7 +187,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             populateFromPayload(objectContext, persistedPkgVersion);
         }
 
-        LOGGER.debug("have processed package {}", pkg.toString());
+        LOGGER.debug("have processed package {}", pkg);
     }
 
     private Pkg createPkg(ObjectContext objectContext, String name) {
@@ -431,7 +445,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             } else {
                 boolean isRealArchitecture = !persistedPkgVersion.getArchitecture().getCode().equals(Architecture.CODE_SOURCE);
 
-                if(0==c) {
+                if(0 == c) {
                     if(isRealArchitecture) {
                         LOGGER.debug(
                                 "imported a package version [{}] of [{}] which is the same as the existing [{}]",

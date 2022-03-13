@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -31,73 +34,110 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
     public static final Property<List<PkgScreenshotImage>> PKG_SCREENSHOT_IMAGES = Property.create("pkgScreenshotImages", List.class);
     public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
 
+    protected String code;
+    protected Timestamp createTimestamp;
+    protected String hashSha256;
+    protected Integer height;
+    protected Integer length;
+    protected Timestamp modifyTimestamp;
+    protected Integer ordering;
+    protected Integer width;
+
+    protected Object pkgScreenshotImages;
+    protected Object pkgSupplement;
+
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setHashSha256(String hashSha256) {
-        writeProperty("hashSha256", hashSha256);
+        beforePropertyWrite("hashSha256", this.hashSha256, hashSha256);
+        this.hashSha256 = hashSha256;
     }
+
     public String getHashSha256() {
-        return (String)readProperty("hashSha256");
+        beforePropertyRead("hashSha256");
+        return this.hashSha256;
     }
 
     public void setHeight(Integer height) {
-        writeProperty("height", height);
+        beforePropertyWrite("height", this.height, height);
+        this.height = height;
     }
+
     public Integer getHeight() {
-        return (Integer)readProperty("height");
+        beforePropertyRead("height");
+        return this.height;
     }
 
     public void setLength(Integer length) {
-        writeProperty("length", length);
+        beforePropertyWrite("length", this.length, length);
+        this.length = length;
     }
+
     public Integer getLength() {
-        return (Integer)readProperty("length");
+        beforePropertyRead("length");
+        return this.length;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setOrdering(Integer ordering) {
-        writeProperty("ordering", ordering);
+        beforePropertyWrite("ordering", this.ordering, ordering);
+        this.ordering = ordering;
     }
+
     public Integer getOrdering() {
-        return (Integer)readProperty("ordering");
+        beforePropertyRead("ordering");
+        return this.ordering;
     }
 
     public void setWidth(Integer width) {
-        writeProperty("width", width);
+        beforePropertyWrite("width", this.width, width);
+        this.width = width;
     }
+
     public Integer getWidth() {
-        return (Integer)readProperty("width");
+        beforePropertyRead("width");
+        return this.width;
     }
 
     public void addToPkgScreenshotImages(PkgScreenshotImage obj) {
         addToManyTarget("pkgScreenshotImages", obj, true);
     }
+
     public void removeFromPkgScreenshotImages(PkgScreenshotImage obj) {
         removeToManyTarget("pkgScreenshotImages", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgScreenshotImage> getPkgScreenshotImages() {
         return (List<PkgScreenshotImage>)readProperty("pkgScreenshotImages");
     }
-
 
     public void setPkgSupplement(PkgSupplement pkgSupplement) {
         setToOneTarget("pkgSupplement", pkgSupplement, true);
@@ -107,5 +147,116 @@ public abstract class _PkgScreenshot extends AbstractDataObject {
         return (PkgSupplement)readProperty("pkgSupplement");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "code":
+                return this.code;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "hashSha256":
+                return this.hashSha256;
+            case "height":
+                return this.height;
+            case "length":
+                return this.length;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "ordering":
+                return this.ordering;
+            case "width":
+                return this.width;
+            case "pkgScreenshotImages":
+                return this.pkgScreenshotImages;
+            case "pkgSupplement":
+                return this.pkgSupplement;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "code":
+                this.code = (String)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "hashSha256":
+                this.hashSha256 = (String)val;
+                break;
+            case "height":
+                this.height = (Integer)val;
+                break;
+            case "length":
+                this.length = (Integer)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "ordering":
+                this.ordering = (Integer)val;
+                break;
+            case "width":
+                this.width = (Integer)val;
+                break;
+            case "pkgScreenshotImages":
+                this.pkgScreenshotImages = val;
+                break;
+            case "pkgSupplement":
+                this.pkgSupplement = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.code);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.hashSha256);
+        out.writeObject(this.height);
+        out.writeObject(this.length);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.ordering);
+        out.writeObject(this.width);
+        out.writeObject(this.pkgScreenshotImages);
+        out.writeObject(this.pkgSupplement);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.code = (String)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.hashSha256 = (String)in.readObject();
+        this.height = (Integer)in.readObject();
+        this.length = (Integer)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.ordering = (Integer)in.readObject();
+        this.width = (Integer)in.readObject();
+        this.pkgScreenshotImages = in.readObject();
+        this.pkgSupplement = in.readObject();
+    }
 
 }

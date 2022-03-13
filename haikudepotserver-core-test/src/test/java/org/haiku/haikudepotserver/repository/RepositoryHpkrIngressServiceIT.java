@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -224,6 +224,8 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 ObjectContext context = serverRuntime.newContext();
                 RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testsrc_xyz").get();
                 Assertions.assertThat(repositorySource.getIdentifier()).isEqualTo("f0c086e5-e096-429c-b38d-57beabd764e9");
+                // ^^ as defined in the repo info file.
+                Assertions.assertThat(repositorySource.getArchitecture().getCode()).isEqualTo("x86_gcc2");
                 // ^^ as defined in the repo info file.
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -160,6 +160,7 @@ public class IntegrationTestSupportService {
         result.repositorySource.setCode("testreposrc_xyz");
         result.repositorySource.setRepository(result.repository);
         result.repositorySource.setIdentifier("http://www.example.com/test/identifier/url");
+        result.repositorySource.setArchitecture(x86_64);
 
         RepositorySourceExtraIdentifier repositorySourceExtraIdentifier = context.newObject(RepositorySourceExtraIdentifier.class);
         repositorySourceExtraIdentifier.setIdentifier("example:haiku:identifier");

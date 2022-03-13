@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
@@ -33,6 +34,7 @@ import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
@@ -113,6 +115,10 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                 .map((rs) -> {
                     DumpExportRepositorySource dumpRepositorySource = new DumpExportRepositorySource();
                     dumpRepositorySource.setCode(rs.getCode());
+                    dumpRepositorySource.setArchitectureCode(
+                            Optional.ofNullable(rs.getArchitecture())
+                                    .map(Architecture::getCode)
+                                    .orElse(null));
                     dumpRepositorySource.setIdentifier(rs.getIdentifier());
                     dumpRepositorySource.setRepoInfoUrl(rs.getIdentifier());
                     // ^^ deprecated; repoInfoUrl is replaced with identifier

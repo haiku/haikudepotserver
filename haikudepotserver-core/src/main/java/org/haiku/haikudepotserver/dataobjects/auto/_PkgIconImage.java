@@ -1,5 +1,9 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -19,11 +23,18 @@ public abstract class _PkgIconImage extends AbstractDataObject {
     public static final Property<byte[]> DATA = Property.create("data", byte[].class);
     public static final Property<PkgIcon> PKG_ICON = Property.create("pkgIcon", PkgIcon.class);
 
+    protected byte[] data;
+
+    protected Object pkgIcon;
+
     public void setData(byte[] data) {
-        writeProperty("data", data);
+        beforePropertyWrite("data", this.data, data);
+        this.data = data;
     }
+
     public byte[] getData() {
-        return (byte[])readProperty("data");
+        beforePropertyRead("data");
+        return this.data;
     }
 
     public void setPkgIcon(PkgIcon pkgIcon) {
@@ -34,5 +45,60 @@ public abstract class _PkgIconImage extends AbstractDataObject {
         return (PkgIcon)readProperty("pkgIcon");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "data":
+                return this.data;
+            case "pkgIcon":
+                return this.pkgIcon;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "data":
+                this.data = (byte[])val;
+                break;
+            case "pkgIcon":
+                this.pkgIcon = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.data);
+        out.writeObject(this.pkgIcon);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.data = (byte[])in.readObject();
+        this.pkgIcon = in.readObject();
+    }
 
 }

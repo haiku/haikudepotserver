@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -57,6 +57,12 @@ public class GetRepositoryResult {
          */
 
         public Long lastImportTimestamp;
+
+        /**
+         * @since 2022-03-12
+         */
+
+        public String architectureCode;
 
     }
 

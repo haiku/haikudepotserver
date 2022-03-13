@@ -1,5 +1,9 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Prominence;
@@ -22,6 +26,11 @@ public abstract class _PkgProminence extends AbstractDataObject {
     public static final Property<Prominence> PROMINENCE = Property.create("prominence", Prominence.class);
     public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
 
+
+    protected Object pkg;
+    protected Object prominence;
+    protected Object repository;
+
     public void setPkg(Pkg pkg) {
         setToOneTarget("pkg", pkg, true);
     }
@@ -29,7 +38,6 @@ public abstract class _PkgProminence extends AbstractDataObject {
     public Pkg getPkg() {
         return (Pkg)readProperty("pkg");
     }
-
 
     public void setProminence(Prominence prominence) {
         setToOneTarget("prominence", prominence, true);
@@ -39,7 +47,6 @@ public abstract class _PkgProminence extends AbstractDataObject {
         return (Prominence)readProperty("prominence");
     }
 
-
     public void setRepository(Repository repository) {
         setToOneTarget("repository", repository, true);
     }
@@ -48,5 +55,67 @@ public abstract class _PkgProminence extends AbstractDataObject {
         return (Repository)readProperty("repository");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "pkg":
+                return this.pkg;
+            case "prominence":
+                return this.prominence;
+            case "repository":
+                return this.repository;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "pkg":
+                this.pkg = val;
+                break;
+            case "prominence":
+                this.prominence = val;
+                break;
+            case "repository":
+                this.repository = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.pkg);
+        out.writeObject(this.prominence);
+        out.writeObject(this.repository);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.pkg = in.readObject();
+        this.prominence = in.readObject();
+        this.repository = in.readObject();
+    }
 
 }

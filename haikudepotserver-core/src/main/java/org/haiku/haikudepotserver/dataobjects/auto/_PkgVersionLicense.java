@@ -1,5 +1,9 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -19,11 +23,18 @@ public abstract class _PkgVersionLicense extends AbstractDataObject {
     public static final Property<String> BODY = Property.create("body", String.class);
     public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
 
+    protected String body;
+
+    protected Object pkgVersion;
+
     public void setBody(String body) {
-        writeProperty("body", body);
+        beforePropertyWrite("body", this.body, body);
+        this.body = body;
     }
+
     public String getBody() {
-        return (String)readProperty("body");
+        beforePropertyRead("body");
+        return this.body;
     }
 
     public void setPkgVersion(PkgVersion pkgVersion) {
@@ -34,5 +45,60 @@ public abstract class _PkgVersionLicense extends AbstractDataObject {
         return (PkgVersion)readProperty("pkgVersion");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "body":
+                return this.body;
+            case "pkgVersion":
+                return this.pkgVersion;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "body":
+                this.body = (String)val;
+                break;
+            case "pkgVersion":
+                this.pkgVersion = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.body);
+        out.writeObject(this.pkgVersion);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.body = (String)in.readObject();
+        this.pkgVersion = in.readObject();
+    }
 
 }

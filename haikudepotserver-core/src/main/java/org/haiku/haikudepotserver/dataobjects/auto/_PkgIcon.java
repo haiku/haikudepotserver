@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 
 import org.apache.cayenne.exp.Property;
@@ -25,11 +28,20 @@ public abstract class _PkgIcon extends AbstractDataObject {
     public static final Property<List<PkgIconImage>> PKG_ICON_IMAGES = Property.create("pkgIconImages", List.class);
     public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
 
+    protected Integer size;
+
+    protected Object mediaType;
+    protected Object pkgIconImages;
+    protected Object pkgSupplement;
+
     public void setSize(Integer size) {
-        writeProperty("size", size);
+        beforePropertyWrite("size", this.size, size);
+        this.size = size;
     }
+
     public Integer getSize() {
-        return (Integer)readProperty("size");
+        beforePropertyRead("size");
+        return this.size;
     }
 
     public void setMediaType(MediaType mediaType) {
@@ -40,18 +52,18 @@ public abstract class _PkgIcon extends AbstractDataObject {
         return (MediaType)readProperty("mediaType");
     }
 
-
     public void addToPkgIconImages(PkgIconImage obj) {
         addToManyTarget("pkgIconImages", obj, true);
     }
+
     public void removeFromPkgIconImages(PkgIconImage obj) {
         removeToManyTarget("pkgIconImages", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PkgIconImage> getPkgIconImages() {
         return (List<PkgIconImage>)readProperty("pkgIconImages");
     }
-
 
     public void setPkgSupplement(PkgSupplement pkgSupplement) {
         setToOneTarget("pkgSupplement", pkgSupplement, true);
@@ -61,5 +73,74 @@ public abstract class _PkgIcon extends AbstractDataObject {
         return (PkgSupplement)readProperty("pkgSupplement");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "size":
+                return this.size;
+            case "mediaType":
+                return this.mediaType;
+            case "pkgIconImages":
+                return this.pkgIconImages;
+            case "pkgSupplement":
+                return this.pkgSupplement;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "size":
+                this.size = (Integer)val;
+                break;
+            case "mediaType":
+                this.mediaType = val;
+                break;
+            case "pkgIconImages":
+                this.pkgIconImages = val;
+                break;
+            case "pkgSupplement":
+                this.pkgSupplement = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.size);
+        out.writeObject(this.mediaType);
+        out.writeObject(this.pkgIconImages);
+        out.writeObject(this.pkgSupplement);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.size = (Integer)in.readObject();
+        this.mediaType = in.readObject();
+        this.pkgIconImages = in.readObject();
+        this.pkgSupplement = in.readObject();
+    }
 
 }

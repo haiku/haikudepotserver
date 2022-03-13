@@ -348,6 +348,7 @@
 	</db-entity>
 	<db-entity name="repository_source" schema="haikudepot">
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
+		<db-attribute name="architecture_id" type="BIGINT"/>
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="forced_internal_base_url" type="VARCHAR" length="1024"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
@@ -670,6 +671,9 @@
 		<obj-attribute name="timestampAgreed" type="java.sql.Timestamp" db-attribute-path="timestamp_agreed"/>
 		<post-add method-name="onPostAdd"/>
 	</obj-entity>
+	<db-relationship name="untitledRel" source="architecture" target="repository_source" toMany="true">
+		<db-attribute-pair source="id" target="architecture_id"/>
+	</db-relationship>
 	<db-relationship name="repository_source_mirrors" source="country" target="repository_source_mirror" toMany="true">
 		<db-attribute-pair source="id" target="country_id"/>
 	</db-relationship>
@@ -871,6 +875,9 @@
 	<db-relationship name="repository_source_mirrors" source="repository_source" target="repository_source_mirror" toMany="true">
 		<db-attribute-pair source="id" target="repository_source_id"/>
 	</db-relationship>
+	<db-relationship name="architecture" source="repository_source" target="architecture">
+		<db-attribute-pair source="architecture_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="repository_source" source="repository_source_extra_identifier" target="repository_source">
 		<db-attribute-pair source="repository_source_id" target="id"/>
 	</db-relationship>
@@ -972,6 +979,8 @@
 	<obj-relationship name="pkgVersion" source="PkgVersionUrl" target="PkgVersion" deleteRule="Nullify" db-relationship-path="pkg_version"/>
 	<obj-relationship name="pkgs" source="Publisher" target="Pkg" deleteRule="Deny" db-relationship-path="pkgs"/>
 	<obj-relationship name="repositorySources" source="Repository" target="RepositorySource" deleteRule="Deny" db-relationship-path="repository_sources"/>
+	<obj-relationship name="architecture" source="RepositorySource" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>
+	<obj-relationship name="pkg_versions" source="RepositorySource" target="PkgVersion" deleteRule="Deny" db-relationship-path="pkg_versions"/>
 	<obj-relationship name="repository" source="RepositorySource" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="repositorySourceExtraIdentifiers" source="RepositorySource" target="RepositorySourceExtraIdentifier" deleteRule="Cascade" db-relationship-path="repository_source_extra_identifiers"/>
 	<obj-relationship name="repositorySourceMirrors" source="RepositorySource" target="RepositorySourceMirror" deleteRule="Cascade" db-relationship-path="repository_source_mirrors"/>
@@ -1040,7 +1049,7 @@ FROM
   JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
   JOIN haikudepot.prominence pr ON pr.id = ppr.prominence_id
 WHERE 1 = 1
-  AND rs.code = #bind($resourceSourceCode)
+  AND rs.code = #bind($repositorySourceCode)
   AND pv.active = true
   AND p.active = true
   AND pv.is_latest = true
@@ -1299,4 +1308,17 @@ OFFSET #bind($search.offset)
 LIMIT #bind($search.limit)
 #end]]></sql>
 	</query>
+	<cgen xmlns="http://cayenne.apache.org/schema/10/cgen">
+		<destDir>../java</destDir>
+		<mode>all</mode>
+		<template>templates/v4_1/subclass.vm</template>
+		<superTemplate>templates/v4_1/superclass.vm</superTemplate>
+		<outputPattern>*.java</outputPattern>
+		<makePairs>true</makePairs>
+		<usePkgPath>true</usePkgPath>
+		<overwrite>false</overwrite>
+		<createPropertyNames>false</createPropertyNames>
+		<createPKProperties>false</createPKProperties>
+		<client>false</client>
+	</cgen>
 </data-map>

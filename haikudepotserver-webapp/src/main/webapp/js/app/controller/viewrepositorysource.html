@@ -15,9 +15,16 @@
         <dd><active-indicator state="repositorySource.active"></active-indicator>&nbsp;</dd>
         <dt><message key="viewRepositorySource.identifier.title"></message></dt>
         <dd>
-            <span ng-show="repositorySource.identifier">{{repositorySource.identifier}}</span>
+            <span ng-show="repositorySource.identifier"><code>{{repositorySource.identifier}}</code></span>
             <span ng-show="!repositorySource.identifier" class="text-error">
                 <message key="viewRepositorySource.identifier.undefined"></message>
+            </span>
+        </dd>
+        <dt><message key="gen.architecture.title"></message></dt>
+        <dd>
+            <span ng-show="repositorySource.architectureCode"><code>{{repositorySource.architectureCode}}</code></span>
+            <span ng-show="!repositorySource.architectureCode" class="text-error">
+                <message key="viewRepositorySource.architecture.undefined"></message>
             </span>
         </dd>
         <dt><message key="viewRepositorySource.lastImportTimestamp.title"></message></dt>

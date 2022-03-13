@@ -1,5 +1,9 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -20,32 +24,120 @@ public abstract class _UserUsageConditions extends AbstractDataObject {
     public static final Property<Integer> MINIMUM_AGE = Property.create("minimumAge", Integer.class);
     public static final Property<Integer> ORDERING = Property.create("ordering", Integer.class);
 
+    protected String code;
+    protected String copyMarkdown;
+    protected Integer minimumAge;
+    protected Integer ordering;
+
+
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setCopyMarkdown(String copyMarkdown) {
-        writeProperty("copyMarkdown", copyMarkdown);
+        beforePropertyWrite("copyMarkdown", this.copyMarkdown, copyMarkdown);
+        this.copyMarkdown = copyMarkdown;
     }
+
     public String getCopyMarkdown() {
-        return (String)readProperty("copyMarkdown");
+        beforePropertyRead("copyMarkdown");
+        return this.copyMarkdown;
     }
 
     public void setMinimumAge(Integer minimumAge) {
-        writeProperty("minimumAge", minimumAge);
+        beforePropertyWrite("minimumAge", this.minimumAge, minimumAge);
+        this.minimumAge = minimumAge;
     }
+
     public Integer getMinimumAge() {
-        return (Integer)readProperty("minimumAge");
+        beforePropertyRead("minimumAge");
+        return this.minimumAge;
     }
 
     public void setOrdering(Integer ordering) {
-        writeProperty("ordering", ordering);
+        beforePropertyWrite("ordering", this.ordering, ordering);
+        this.ordering = ordering;
     }
+
     public Integer getOrdering() {
-        return (Integer)readProperty("ordering");
+        beforePropertyRead("ordering");
+        return this.ordering;
+    }
+
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "code":
+                return this.code;
+            case "copyMarkdown":
+                return this.copyMarkdown;
+            case "minimumAge":
+                return this.minimumAge;
+            case "ordering":
+                return this.ordering;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "code":
+                this.code = (String)val;
+                break;
+            case "copyMarkdown":
+                this.copyMarkdown = (String)val;
+                break;
+            case "minimumAge":
+                this.minimumAge = (Integer)val;
+                break;
+            case "ordering":
+                this.ordering = (Integer)val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.code);
+        out.writeObject(this.copyMarkdown);
+        out.writeObject(this.minimumAge);
+        out.writeObject(this.ordering);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.code = (String)in.readObject();
+        this.copyMarkdown = (String)in.readObject();
+        this.minimumAge = (Integer)in.readObject();
+        this.ordering = (Integer)in.readObject();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -59,7 +59,7 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
 
         jobService.awaitJobFinishedUninterruptibly(guid, 10000);
         Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
-        Assert.assertEquals(snapshotOptional.get().getStatus(), JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
 
         // pull in the ZIP file now and extract the data
 
@@ -84,6 +84,9 @@ public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
 
             JsonNode repositorySourceIdentifier = rootNode.at("/items/0/repositorySources/0/identifier");
             Assert.assertThat(repositorySourceIdentifier.asText(), CoreMatchers.is("http://www.example.com/test/identifier/url"));
+
+            JsonNode architectureCode = rootNode.at("/items/0/repositorySources/0/architectureCode");
+            Assertions.assertThat(architectureCode.asText()).isEqualTo("x86_64");
 
             JsonNode mirror0CountryCode = rootNode.at("/items/0/repositorySources/0/repositorySourceMirrors/0/countryCode");
             Assert.assertThat(mirror0CountryCode.asText(), CoreMatchers.is("ZA"));

@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -37,74 +40,120 @@ public abstract class _User extends AbstractDataObject {
     public static final Property<List<UserPasswordResetToken>> USER_PASSWORD_RESET_TOKENS = Property.create("userPasswordResetTokens", List.class);
     public static final Property<List<UserUsageConditionsAgreement>> USER_USAGE_CONDITIONS_AGREEMENTS = Property.create("userUsageConditionsAgreements", List.class);
 
+    protected Boolean active;
+    protected Boolean canManageUsers;
+    protected Timestamp createTimestamp;
+    protected String email;
+    protected Boolean isRoot;
+    protected Timestamp lastAuthenticationTimestamp;
+    protected Timestamp modifyTimestamp;
+    protected String nickname;
+    protected String passwordHash;
+    protected String passwordSalt;
+
+    protected Object naturalLanguage;
+    protected Object permissionUserPkgs;
+    protected Object userPasswordResetTokens;
+    protected Object userUsageConditionsAgreements;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setCanManageUsers(Boolean canManageUsers) {
-        writeProperty("canManageUsers", canManageUsers);
+        beforePropertyWrite("canManageUsers", this.canManageUsers, canManageUsers);
+        this.canManageUsers = canManageUsers;
     }
+
     public Boolean getCanManageUsers() {
-        return (Boolean)readProperty("canManageUsers");
+        beforePropertyRead("canManageUsers");
+        return this.canManageUsers;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setEmail(String email) {
-        writeProperty("email", email);
+        beforePropertyWrite("email", this.email, email);
+        this.email = email;
     }
+
     public String getEmail() {
-        return (String)readProperty("email");
+        beforePropertyRead("email");
+        return this.email;
     }
 
     public void setIsRoot(Boolean isRoot) {
-        writeProperty("isRoot", isRoot);
+        beforePropertyWrite("isRoot", this.isRoot, isRoot);
+        this.isRoot = isRoot;
     }
+
     public Boolean getIsRoot() {
-        return (Boolean)readProperty("isRoot");
+        beforePropertyRead("isRoot");
+        return this.isRoot;
     }
 
     public void setLastAuthenticationTimestamp(Timestamp lastAuthenticationTimestamp) {
-        writeProperty("lastAuthenticationTimestamp", lastAuthenticationTimestamp);
+        beforePropertyWrite("lastAuthenticationTimestamp", this.lastAuthenticationTimestamp, lastAuthenticationTimestamp);
+        this.lastAuthenticationTimestamp = lastAuthenticationTimestamp;
     }
+
     public Timestamp getLastAuthenticationTimestamp() {
-        return (Timestamp)readProperty("lastAuthenticationTimestamp");
+        beforePropertyRead("lastAuthenticationTimestamp");
+        return this.lastAuthenticationTimestamp;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setNickname(String nickname) {
-        writeProperty("nickname", nickname);
+        beforePropertyWrite("nickname", this.nickname, nickname);
+        this.nickname = nickname;
     }
+
     public String getNickname() {
-        return (String)readProperty("nickname");
+        beforePropertyRead("nickname");
+        return this.nickname;
     }
 
     public void setPasswordHash(String passwordHash) {
-        writeProperty("passwordHash", passwordHash);
+        beforePropertyWrite("passwordHash", this.passwordHash, passwordHash);
+        this.passwordHash = passwordHash;
     }
+
     public String getPasswordHash() {
-        return (String)readProperty("passwordHash");
+        beforePropertyRead("passwordHash");
+        return this.passwordHash;
     }
 
     public void setPasswordSalt(String passwordSalt) {
-        writeProperty("passwordSalt", passwordSalt);
+        beforePropertyWrite("passwordSalt", this.passwordSalt, passwordSalt);
+        this.passwordSalt = passwordSalt;
     }
+
     public String getPasswordSalt() {
-        return (String)readProperty("passwordSalt");
+        beforePropertyRead("passwordSalt");
+        return this.passwordSalt;
     }
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
@@ -115,43 +164,185 @@ public abstract class _User extends AbstractDataObject {
         return (NaturalLanguage)readProperty("naturalLanguage");
     }
 
-
     public void addToPermissionUserPkgs(PermissionUserPkg obj) {
         addToManyTarget("permissionUserPkgs", obj, true);
     }
+
     public void removeFromPermissionUserPkgs(PermissionUserPkg obj) {
         removeToManyTarget("permissionUserPkgs", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<PermissionUserPkg> getPermissionUserPkgs() {
         return (List<PermissionUserPkg>)readProperty("permissionUserPkgs");
     }
 
-
     public void addToUserPasswordResetTokens(UserPasswordResetToken obj) {
         addToManyTarget("userPasswordResetTokens", obj, true);
     }
+
     public void removeFromUserPasswordResetTokens(UserPasswordResetToken obj) {
         removeToManyTarget("userPasswordResetTokens", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<UserPasswordResetToken> getUserPasswordResetTokens() {
         return (List<UserPasswordResetToken>)readProperty("userPasswordResetTokens");
     }
 
-
     public void addToUserUsageConditionsAgreements(UserUsageConditionsAgreement obj) {
         addToManyTarget("userUsageConditionsAgreements", obj, true);
     }
+
     public void removeFromUserUsageConditionsAgreements(UserUsageConditionsAgreement obj) {
         removeToManyTarget("userUsageConditionsAgreements", obj, true);
     }
+
     @SuppressWarnings("unchecked")
     public List<UserUsageConditionsAgreement> getUserUsageConditionsAgreements() {
         return (List<UserUsageConditionsAgreement>)readProperty("userUsageConditionsAgreements");
     }
 
-
     protected abstract void onPostAdd();
+
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "canManageUsers":
+                return this.canManageUsers;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "email":
+                return this.email;
+            case "isRoot":
+                return this.isRoot;
+            case "lastAuthenticationTimestamp":
+                return this.lastAuthenticationTimestamp;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "nickname":
+                return this.nickname;
+            case "passwordHash":
+                return this.passwordHash;
+            case "passwordSalt":
+                return this.passwordSalt;
+            case "naturalLanguage":
+                return this.naturalLanguage;
+            case "permissionUserPkgs":
+                return this.permissionUserPkgs;
+            case "userPasswordResetTokens":
+                return this.userPasswordResetTokens;
+            case "userUsageConditionsAgreements":
+                return this.userUsageConditionsAgreements;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "canManageUsers":
+                this.canManageUsers = (Boolean)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "email":
+                this.email = (String)val;
+                break;
+            case "isRoot":
+                this.isRoot = (Boolean)val;
+                break;
+            case "lastAuthenticationTimestamp":
+                this.lastAuthenticationTimestamp = (Timestamp)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "nickname":
+                this.nickname = (String)val;
+                break;
+            case "passwordHash":
+                this.passwordHash = (String)val;
+                break;
+            case "passwordSalt":
+                this.passwordSalt = (String)val;
+                break;
+            case "naturalLanguage":
+                this.naturalLanguage = val;
+                break;
+            case "permissionUserPkgs":
+                this.permissionUserPkgs = val;
+                break;
+            case "userPasswordResetTokens":
+                this.userPasswordResetTokens = val;
+                break;
+            case "userUsageConditionsAgreements":
+                this.userUsageConditionsAgreements = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.canManageUsers);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.email);
+        out.writeObject(this.isRoot);
+        out.writeObject(this.lastAuthenticationTimestamp);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.nickname);
+        out.writeObject(this.passwordHash);
+        out.writeObject(this.passwordSalt);
+        out.writeObject(this.naturalLanguage);
+        out.writeObject(this.permissionUserPkgs);
+        out.writeObject(this.userPasswordResetTokens);
+        out.writeObject(this.userUsageConditionsAgreements);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.canManageUsers = (Boolean)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.email = (String)in.readObject();
+        this.isRoot = (Boolean)in.readObject();
+        this.lastAuthenticationTimestamp = (Timestamp)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.nickname = (String)in.readObject();
+        this.passwordHash = (String)in.readObject();
+        this.passwordSalt = (String)in.readObject();
+        this.naturalLanguage = in.readObject();
+        this.permissionUserPkgs = in.readObject();
+        this.userPasswordResetTokens = in.readObject();
+        this.userUsageConditionsAgreements = in.readObject();
+    }
 
 }

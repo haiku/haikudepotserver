@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -52,6 +52,12 @@ public class GetRepositorySourceResult {
      */
 
     public List<RepositorySourceMirror> repositorySourceMirrors;
+
+    /**
+     * @since 2022-03-12
+     */
+
+    public String architectureCode;
 
     public static class RepositorySourceMirror {
 

@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
@@ -29,53 +32,85 @@ public abstract class _RepositorySourceMirror extends AbstractDataObject {
     public static final Property<Country> COUNTRY = Property.create("country", Country.class);
     public static final Property<RepositorySource> REPOSITORY_SOURCE = Property.create("repositorySource", RepositorySource.class);
 
+    protected Boolean active;
+    protected String baseUrl;
+    protected String code;
+    protected Timestamp createTimestamp;
+    protected String description;
+    protected Boolean isPrimary;
+    protected Timestamp modifyTimestamp;
+
+    protected Object country;
+    protected Object repositorySource;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setBaseUrl(String baseUrl) {
-        writeProperty("baseUrl", baseUrl);
+        beforePropertyWrite("baseUrl", this.baseUrl, baseUrl);
+        this.baseUrl = baseUrl;
     }
+
     public String getBaseUrl() {
-        return (String)readProperty("baseUrl");
+        beforePropertyRead("baseUrl");
+        return this.baseUrl;
     }
 
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setDescription(String description) {
-        writeProperty("description", description);
+        beforePropertyWrite("description", this.description, description);
+        this.description = description;
     }
+
     public String getDescription() {
-        return (String)readProperty("description");
+        beforePropertyRead("description");
+        return this.description;
     }
 
     public void setIsPrimary(Boolean isPrimary) {
-        writeProperty("isPrimary", isPrimary);
+        beforePropertyWrite("isPrimary", this.isPrimary, isPrimary);
+        this.isPrimary = isPrimary;
     }
+
     public Boolean getIsPrimary() {
-        return (Boolean)readProperty("isPrimary");
+        beforePropertyRead("isPrimary");
+        return this.isPrimary;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setCountry(Country country) {
@@ -86,7 +121,6 @@ public abstract class _RepositorySourceMirror extends AbstractDataObject {
         return (Country)readProperty("country");
     }
 
-
     public void setRepositorySource(RepositorySource repositorySource) {
         setToOneTarget("repositorySource", repositorySource, true);
     }
@@ -95,5 +129,109 @@ public abstract class _RepositorySourceMirror extends AbstractDataObject {
         return (RepositorySource)readProperty("repositorySource");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "baseUrl":
+                return this.baseUrl;
+            case "code":
+                return this.code;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "description":
+                return this.description;
+            case "isPrimary":
+                return this.isPrimary;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "country":
+                return this.country;
+            case "repositorySource":
+                return this.repositorySource;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "baseUrl":
+                this.baseUrl = (String)val;
+                break;
+            case "code":
+                this.code = (String)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "description":
+                this.description = (String)val;
+                break;
+            case "isPrimary":
+                this.isPrimary = (Boolean)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "country":
+                this.country = val;
+                break;
+            case "repositorySource":
+                this.repositorySource = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.baseUrl);
+        out.writeObject(this.code);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.description);
+        out.writeObject(this.isPrimary);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.country);
+        out.writeObject(this.repositorySource);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.baseUrl = (String)in.readObject();
+        this.code = (String)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.description = (String)in.readObject();
+        this.isPrimary = (Boolean)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.country = in.readObject();
+        this.repositorySource = in.readObject();
+    }
 
 }

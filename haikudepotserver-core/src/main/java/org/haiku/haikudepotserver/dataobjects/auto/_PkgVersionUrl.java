@@ -1,5 +1,9 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.cayenne.exp.Property;
 import org.haiku.haikudepotserver.dataobjects.PkgUrlType;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -22,18 +26,30 @@ public abstract class _PkgVersionUrl extends AbstractDataObject {
     public static final Property<PkgUrlType> PKG_URL_TYPE = Property.create("pkgUrlType", PkgUrlType.class);
     public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
 
+    protected String name;
+    protected String url;
+
+    protected Object pkgUrlType;
+    protected Object pkgVersion;
+
     public void setName(String name) {
-        writeProperty("name", name);
+        beforePropertyWrite("name", this.name, name);
+        this.name = name;
     }
+
     public String getName() {
-        return (String)readProperty("name");
+        beforePropertyRead("name");
+        return this.name;
     }
 
     public void setUrl(String url) {
-        writeProperty("url", url);
+        beforePropertyWrite("url", this.url, url);
+        this.url = url;
     }
+
     public String getUrl() {
-        return (String)readProperty("url");
+        beforePropertyRead("url");
+        return this.url;
     }
 
     public void setPkgUrlType(PkgUrlType pkgUrlType) {
@@ -44,7 +60,6 @@ public abstract class _PkgVersionUrl extends AbstractDataObject {
         return (PkgUrlType)readProperty("pkgUrlType");
     }
 
-
     public void setPkgVersion(PkgVersion pkgVersion) {
         setToOneTarget("pkgVersion", pkgVersion, true);
     }
@@ -53,5 +68,74 @@ public abstract class _PkgVersionUrl extends AbstractDataObject {
         return (PkgVersion)readProperty("pkgVersion");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "name":
+                return this.name;
+            case "url":
+                return this.url;
+            case "pkgUrlType":
+                return this.pkgUrlType;
+            case "pkgVersion":
+                return this.pkgVersion;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "name":
+                this.name = (String)val;
+                break;
+            case "url":
+                this.url = (String)val;
+                break;
+            case "pkgUrlType":
+                this.pkgUrlType = val;
+                break;
+            case "pkgVersion":
+                this.pkgVersion = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.name);
+        out.writeObject(this.url);
+        out.writeObject(this.pkgUrlType);
+        out.writeObject(this.pkgVersion);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.name = (String)in.readObject();
+        this.url = (String)in.readObject();
+        this.pkgUrlType = in.readObject();
+        this.pkgVersion = in.readObject();
+    }
 
 }

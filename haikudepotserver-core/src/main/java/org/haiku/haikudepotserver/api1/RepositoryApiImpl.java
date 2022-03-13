@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,11 +16,41 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api1.model.repository.*;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositoryRequest;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositoryResult;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositorySourceMirrorResult;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositorySourceRequest;
+import org.haiku.haikudepotserver.api1.model.repository.CreateRepositorySourceResult;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoriesRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoriesResult;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoryRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositoryResult;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceMirrorResult;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceRequest;
+import org.haiku.haikudepotserver.api1.model.repository.GetRepositorySourceResult;
+import org.haiku.haikudepotserver.api1.model.repository.RemoveRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.RemoveRepositorySourceMirrorResult;
+import org.haiku.haikudepotserver.api1.model.repository.SearchRepositoriesRequest;
+import org.haiku.haikudepotserver.api1.model.repository.SearchRepositoriesResult;
+import org.haiku.haikudepotserver.api1.model.repository.TriggerImportRepositoryRequest;
+import org.haiku.haikudepotserver.api1.model.repository.TriggerImportRepositoryResult;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositoryRequest;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositoryResult;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositorySourceMirrorRequest;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositorySourceMirrorResult;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositorySourceRequest;
+import org.haiku.haikudepotserver.api1.model.repository.UpdateRepositorySourceResult;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api1.support.ValidationException;
 import org.haiku.haikudepotserver.api1.support.ValidationFailure;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.Country;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceExtraIdentifier;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -29,7 +59,6 @@ import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpeci
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +67,12 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component("repositoryApiImplV1")
@@ -49,19 +83,16 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
 
     private final ServerRuntime serverRuntime;
     private final PermissionEvaluator permissionEvaluator;
-    private final UserAuthenticationService userAuthenticationService;
     private final RepositoryService repositoryService;
     private final JobService jobService;
 
     public RepositoryApiImpl(
             ServerRuntime serverRuntime,
             PermissionEvaluator permissionEvaluator,
-            UserAuthenticationService userAuthenticationService,
             RepositoryService repositoryService,
             JobService jobService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
-        this.userAuthenticationService = Preconditions.checkNotNull(userAuthenticationService);
         this.repositoryService = Preconditions.checkNotNull(repositoryService);
         this.jobService = Preconditions.checkNotNull(jobService);
     }
@@ -237,6 +268,9 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
                     resultRs.code = rs.getCode();
                     resultRs.url = rs.tryGetPrimaryMirror().map(_RepositorySourceMirror::getBaseUrl).orElse(null);
                     resultRs.identifier = rs.getIdentifier();
+                    resultRs.architectureCode = Optional.ofNullable(rs.getArchitecture())
+                            .map(Architecture::getCode)
+                            .orElse(null);
 
                     if (null != rs.getLastImportTimestamp()) {
                         resultRs.lastImportTimestamp = rs.getLastImportTimestamp().getTime();
@@ -394,6 +428,9 @@ public class RepositoryApiImpl extends AbstractApiImpl implements RepositoryApi 
         result.code = repositorySource.getCode();
         result.repositoryCode = repositorySource.getRepository().getCode();
         result.identifier = repositorySource.getIdentifier();
+        result.architectureCode = Optional.ofNullable(repositorySource.getArchitecture())
+                .map(Architecture::getCode)
+                .orElse(null);
 
         if (null != repositorySource.getLastImportTimestamp()) {
             result.lastImportTimestamp = repositorySource.getLastImportTimestamp().getTime();

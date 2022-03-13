@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
@@ -32,46 +35,76 @@ public abstract class _UserRating extends AbstractDataObject {
     public static final Property<User> USER = Property.create("user", User.class);
     public static final Property<UserRatingStability> USER_RATING_STABILITY = Property.create("userRatingStability", UserRatingStability.class);
 
+    protected Boolean active;
+    protected String code;
+    protected String comment;
+    protected Timestamp createTimestamp;
+    protected Timestamp modifyTimestamp;
+    protected Short rating;
+
+    protected Object naturalLanguage;
+    protected Object pkgVersion;
+    protected Object user;
+    protected Object userRatingStability;
+
     public void setActive(Boolean active) {
-        writeProperty("active", active);
+        beforePropertyWrite("active", this.active, active);
+        this.active = active;
     }
+
     public Boolean getActive() {
-        return (Boolean)readProperty("active");
+        beforePropertyRead("active");
+        return this.active;
     }
 
     public void setCode(String code) {
-        writeProperty("code", code);
+        beforePropertyWrite("code", this.code, code);
+        this.code = code;
     }
+
     public String getCode() {
-        return (String)readProperty("code");
+        beforePropertyRead("code");
+        return this.code;
     }
 
     public void setComment(String comment) {
-        writeProperty("comment", comment);
+        beforePropertyWrite("comment", this.comment, comment);
+        this.comment = comment;
     }
+
     public String getComment() {
-        return (String)readProperty("comment");
+        beforePropertyRead("comment");
+        return this.comment;
     }
 
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setRating(Short rating) {
-        writeProperty("rating", rating);
+        beforePropertyWrite("rating", this.rating, rating);
+        this.rating = rating;
     }
+
     public Short getRating() {
-        return (Short)readProperty("rating");
+        beforePropertyRead("rating");
+        return this.rating;
     }
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
@@ -82,7 +115,6 @@ public abstract class _UserRating extends AbstractDataObject {
         return (NaturalLanguage)readProperty("naturalLanguage");
     }
 
-
     public void setPkgVersion(PkgVersion pkgVersion) {
         setToOneTarget("pkgVersion", pkgVersion, true);
     }
@@ -90,7 +122,6 @@ public abstract class _UserRating extends AbstractDataObject {
     public PkgVersion getPkgVersion() {
         return (PkgVersion)readProperty("pkgVersion");
     }
-
 
     public void setUser(User user) {
         setToOneTarget("user", user, true);
@@ -100,7 +131,6 @@ public abstract class _UserRating extends AbstractDataObject {
         return (User)readProperty("user");
     }
 
-
     public void setUserRatingStability(UserRatingStability userRatingStability) {
         setToOneTarget("userRatingStability", userRatingStability, true);
     }
@@ -109,7 +139,118 @@ public abstract class _UserRating extends AbstractDataObject {
         return (UserRatingStability)readProperty("userRatingStability");
     }
 
-
     protected abstract void onPostAdd();
+
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "active":
+                return this.active;
+            case "code":
+                return this.code;
+            case "comment":
+                return this.comment;
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "rating":
+                return this.rating;
+            case "naturalLanguage":
+                return this.naturalLanguage;
+            case "pkgVersion":
+                return this.pkgVersion;
+            case "user":
+                return this.user;
+            case "userRatingStability":
+                return this.userRatingStability;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "active":
+                this.active = (Boolean)val;
+                break;
+            case "code":
+                this.code = (String)val;
+                break;
+            case "comment":
+                this.comment = (String)val;
+                break;
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "rating":
+                this.rating = (Short)val;
+                break;
+            case "naturalLanguage":
+                this.naturalLanguage = val;
+                break;
+            case "pkgVersion":
+                this.pkgVersion = val;
+                break;
+            case "user":
+                this.user = val;
+                break;
+            case "userRatingStability":
+                this.userRatingStability = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.active);
+        out.writeObject(this.code);
+        out.writeObject(this.comment);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.rating);
+        out.writeObject(this.naturalLanguage);
+        out.writeObject(this.pkgVersion);
+        out.writeObject(this.user);
+        out.writeObject(this.userRatingStability);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.active = (Boolean)in.readObject();
+        this.code = (String)in.readObject();
+        this.comment = (String)in.readObject();
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.rating = (Short)in.readObject();
+        this.naturalLanguage = in.readObject();
+        this.pkgVersion = in.readObject();
+        this.user = in.readObject();
+        this.userRatingStability = in.readObject();
+    }
 
 }

@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
@@ -28,18 +31,33 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
     public static final Property<LocalizationContent> SUMMARY_LOCALIZATION_CONTENT = Property.create("summaryLocalizationContent", LocalizationContent.class);
     public static final Property<LocalizationContent> TITLE_LOCALIZATION_CONTENT = Property.create("titleLocalizationContent", LocalizationContent.class);
 
+    protected Timestamp createTimestamp;
+    protected Timestamp modifyTimestamp;
+
+    protected Object descriptionLocalizationContent;
+    protected Object naturalLanguage;
+    protected Object pkgVersion;
+    protected Object summaryLocalizationContent;
+    protected Object titleLocalizationContent;
+
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
-        writeProperty("modifyTimestamp", modifyTimestamp);
+        beforePropertyWrite("modifyTimestamp", this.modifyTimestamp, modifyTimestamp);
+        this.modifyTimestamp = modifyTimestamp;
     }
+
     public Timestamp getModifyTimestamp() {
-        return (Timestamp)readProperty("modifyTimestamp");
+        beforePropertyRead("modifyTimestamp");
+        return this.modifyTimestamp;
     }
 
     public void setDescriptionLocalizationContent(LocalizationContent descriptionLocalizationContent) {
@@ -50,7 +68,6 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
         return (LocalizationContent)readProperty("descriptionLocalizationContent");
     }
 
-
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
         setToOneTarget("naturalLanguage", naturalLanguage, true);
     }
@@ -58,7 +75,6 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
     public NaturalLanguage getNaturalLanguage() {
         return (NaturalLanguage)readProperty("naturalLanguage");
     }
-
 
     public void setPkgVersion(PkgVersion pkgVersion) {
         setToOneTarget("pkgVersion", pkgVersion, true);
@@ -68,7 +84,6 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
         return (PkgVersion)readProperty("pkgVersion");
     }
 
-
     public void setSummaryLocalizationContent(LocalizationContent summaryLocalizationContent) {
         setToOneTarget("summaryLocalizationContent", summaryLocalizationContent, true);
     }
@@ -76,7 +91,6 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
     public LocalizationContent getSummaryLocalizationContent() {
         return (LocalizationContent)readProperty("summaryLocalizationContent");
     }
-
 
     public void setTitleLocalizationContent(LocalizationContent titleLocalizationContent) {
         setToOneTarget("titleLocalizationContent", titleLocalizationContent, true);
@@ -86,5 +100,95 @@ public abstract class _PkgVersionLocalization extends AbstractDataObject {
         return (LocalizationContent)readProperty("titleLocalizationContent");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "modifyTimestamp":
+                return this.modifyTimestamp;
+            case "descriptionLocalizationContent":
+                return this.descriptionLocalizationContent;
+            case "naturalLanguage":
+                return this.naturalLanguage;
+            case "pkgVersion":
+                return this.pkgVersion;
+            case "summaryLocalizationContent":
+                return this.summaryLocalizationContent;
+            case "titleLocalizationContent":
+                return this.titleLocalizationContent;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "modifyTimestamp":
+                this.modifyTimestamp = (Timestamp)val;
+                break;
+            case "descriptionLocalizationContent":
+                this.descriptionLocalizationContent = val;
+                break;
+            case "naturalLanguage":
+                this.naturalLanguage = val;
+                break;
+            case "pkgVersion":
+                this.pkgVersion = val;
+                break;
+            case "summaryLocalizationContent":
+                this.summaryLocalizationContent = val;
+                break;
+            case "titleLocalizationContent":
+                this.titleLocalizationContent = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.modifyTimestamp);
+        out.writeObject(this.descriptionLocalizationContent);
+        out.writeObject(this.naturalLanguage);
+        out.writeObject(this.pkgVersion);
+        out.writeObject(this.summaryLocalizationContent);
+        out.writeObject(this.titleLocalizationContent);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.modifyTimestamp = (Timestamp)in.readObject();
+        this.descriptionLocalizationContent = in.readObject();
+        this.naturalLanguage = in.readObject();
+        this.pkgVersion = in.readObject();
+        this.summaryLocalizationContent = in.readObject();
+        this.titleLocalizationContent = in.readObject();
+    }
 
 }

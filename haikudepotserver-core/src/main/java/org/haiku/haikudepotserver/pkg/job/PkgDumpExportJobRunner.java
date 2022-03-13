@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -171,7 +171,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
                 .getQueryDescriptor("PkgNamesForRepositorySource").buildQuery();
         SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
-                "resourceSourceCode", repositorySource.getCode()));
+                "repositorySourceCode", repositorySource.getCode()));
         query.setFetchingDataRows(true);
 
         List<DataRow> dataRows = (List<DataRow>) context.performQuery(query);

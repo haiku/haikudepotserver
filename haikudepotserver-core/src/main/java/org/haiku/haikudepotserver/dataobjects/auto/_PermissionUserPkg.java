@@ -1,5 +1,8 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
 import org.apache.cayenne.exp.Property;
@@ -25,11 +28,20 @@ public abstract class _PermissionUserPkg extends AbstractDataObject {
     public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
     public static final Property<User> USER = Property.create("user", User.class);
 
+    protected Timestamp createTimestamp;
+
+    protected Object permission;
+    protected Object pkg;
+    protected Object user;
+
     public void setCreateTimestamp(Timestamp createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Timestamp getCreateTimestamp() {
-        return (Timestamp)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setPermission(Permission permission) {
@@ -40,7 +52,6 @@ public abstract class _PermissionUserPkg extends AbstractDataObject {
         return (Permission)readProperty("permission");
     }
 
-
     public void setPkg(Pkg pkg) {
         setToOneTarget("pkg", pkg, true);
     }
@@ -48,7 +59,6 @@ public abstract class _PermissionUserPkg extends AbstractDataObject {
     public Pkg getPkg() {
         return (Pkg)readProperty("pkg");
     }
-
 
     public void setUser(User user) {
         setToOneTarget("user", user, true);
@@ -58,5 +68,74 @@ public abstract class _PermissionUserPkg extends AbstractDataObject {
         return (User)readProperty("user");
     }
 
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "permission":
+                return this.permission;
+            case "pkg":
+                return this.pkg;
+            case "user":
+                return this.user;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "createTimestamp":
+                this.createTimestamp = (Timestamp)val;
+                break;
+            case "permission":
+                this.permission = val;
+                break;
+            case "pkg":
+                this.pkg = val;
+                break;
+            case "user":
+                this.user = val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.permission);
+        out.writeObject(this.pkg);
+        out.writeObject(this.user);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.createTimestamp = (Timestamp)in.readObject();
+        this.permission = in.readObject();
+        this.pkg = in.readObject();
+        this.user = in.readObject();
+    }
 
 }
