@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Andrew Lindesay
+ * Copyright 2019-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,8 +10,8 @@ import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
-import com.vladsch.flexmark.util.options.DataSet;
-import com.vladsch.flexmark.util.options.MutableDataSet;
+import com.vladsch.flexmark.util.data.DataHolder;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -59,7 +59,7 @@ public class UserController {
 
         Optional<UserUsageConditions> markdownOptional = tryGetUserUsageConditions(code);
 
-        if (!markdownOptional.isPresent()) {
+        if (markdownOptional.isEmpty()) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
             return;
         }
@@ -81,7 +81,7 @@ public class UserController {
 
         Optional<UserUsageConditions> markdownOptional = tryGetUserUsageConditions(code);
 
-        if (!markdownOptional.isPresent()) {
+        if (markdownOptional.isEmpty()) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
             return;
         }
@@ -106,9 +106,9 @@ public class UserController {
         return UserUsageConditions.tryGetByCode(context, code);
     }
 
-    private DataSet createMarkdownOptions() {
+    private DataHolder createMarkdownOptions() {
         MutableDataSet options = new MutableDataSet();
-        options.set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create()));
+        options.set(Parser.EXTENSIONS, List.of(TablesExtension.create()));
         return options;
     }
 

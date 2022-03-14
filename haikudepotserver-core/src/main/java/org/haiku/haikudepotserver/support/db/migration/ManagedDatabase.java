@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -65,11 +65,15 @@ public class ManagedDatabase {
             Preconditions.checkNotNull(getDataSource());
             Preconditions.checkState(!Strings.isNullOrEmpty(getSchema()));
 
-            Flyway flyway = new Flyway();
-            flyway.setSchemas(getSchema());
-            flyway.setLocations(String.format("db/%s/migration", getSchema()));
-            flyway.setValidateOnMigrate(null==validateOnMigrate || validateOnMigrate);
-            flyway.setDataSource(dataSource);
+            Flyway flyway = Flyway
+                    .configure()
+                    .schemas(getSchema())
+                    .dataSource(dataSource)
+                    .locations(String.format("db/%s/migration", getSchema()))
+                    .validateOnMigrate(null == validateOnMigrate || validateOnMigrate)
+                    .table("schema_version")
+                        // ^ note this was an older Flyway table name
+                    .load();
 
             LOGGER.info("will migrate database to latest version...");
             flyway.migrate();

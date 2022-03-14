@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -75,7 +75,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
+                CSVWriter writer = new CSVWriter(outputStreamWriter)
         ) {
 
             Optional<Pkg> paramPkgOptional = Optional.empty();

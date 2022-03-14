@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -70,7 +70,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
+                CSVWriter writer = new CSVWriter(outputStreamWriter)
         ) {
 
             // headers

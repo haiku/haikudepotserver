@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -103,7 +103,7 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
+                CSVWriter writer = new CSVWriter(outputStreamWriter)
         ) {
 
             final String[] cells = new String[4 + naturalLanguages.size()];

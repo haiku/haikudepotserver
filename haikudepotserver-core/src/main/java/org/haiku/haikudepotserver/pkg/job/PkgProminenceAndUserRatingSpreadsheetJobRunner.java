@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -68,7 +68,7 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
+                CSVWriter writer = new CSVWriter(outputStreamWriter)
         ) {
 
             writer.writeNext(new String[]{

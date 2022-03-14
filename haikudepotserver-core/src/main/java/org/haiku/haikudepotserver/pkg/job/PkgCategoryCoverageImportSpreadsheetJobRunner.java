@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvValidationException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
@@ -78,7 +79,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',');
+                CSVWriter writer = new CSVWriter(outputStreamWriter);
                 InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 CSVReader reader = new CSVReader(inputStreamReader);
@@ -190,6 +191,8 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                 return null;
             });
 
+        } catch (CsvValidationException e) {
+            throw new JobRunnerException("unable to validate the csv data", e);
         }
 
     }

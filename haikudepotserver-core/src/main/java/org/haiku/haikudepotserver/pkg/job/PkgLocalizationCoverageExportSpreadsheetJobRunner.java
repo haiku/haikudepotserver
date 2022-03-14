@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,11 +35,11 @@ import java.util.stream.Collectors;
 public class PkgLocalizationCoverageExportSpreadsheetJobRunner
         extends AbstractJobRunner<PkgLocalizationCoverageExportSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgLocalizationCoverageExportSpreadsheetJobRunner.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PkgLocalizationCoverageExportSpreadsheetJobRunner.class);
 
-    private ServerRuntime serverRuntime;
-    private PkgService pkgService;
-    private NaturalLanguageService naturalLanguageService;
+    final private ServerRuntime serverRuntime;
+    final private PkgService pkgService;
+    final private NaturalLanguageService naturalLanguageService;
 
     public PkgLocalizationCoverageExportSpreadsheetJobRunner(
             ServerRuntime serverRuntime,
@@ -92,7 +92,7 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
+                CSVWriter writer = new CSVWriter(outputStreamWriter)
         ) {
 
             final String[] cells = new String[1 + naturalLanguages.size()];

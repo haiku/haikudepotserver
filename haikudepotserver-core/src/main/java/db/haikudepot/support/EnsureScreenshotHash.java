@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,8 @@ package db.haikudepot.support;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.flywaydb.core.api.migration.BaseJavaMigration;
+import org.flywaydb.core.api.migration.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
  * changes and would get complicated.</p>
  */
 
-public abstract class EnsureScreenshotHash implements JdbcMigration {
+public abstract class EnsureScreenshotHash extends BaseJavaMigration {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnsureScreenshotHash.class);
 
@@ -36,7 +37,11 @@ public abstract class EnsureScreenshotHash implements JdbcMigration {
     public abstract String createScreenshotIdStatement();
 
     @Override
-    public void migrate(Connection connection) throws Exception {
+    public void migrate(Context context) throws Exception {
+        migrate(context.getConnection());
+    }
+
+    protected void migrate(Connection connection) throws Exception {
 
         int total = countScreenshotsWithoutHash(connection);
 

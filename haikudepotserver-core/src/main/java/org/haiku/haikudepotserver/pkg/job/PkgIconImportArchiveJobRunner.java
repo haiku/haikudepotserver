@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -101,7 +101,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 
-        if(!jobDataWithByteSourceOptional.isPresent()) {
+        if(jobDataWithByteSourceOptional.isEmpty()) {
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
@@ -110,7 +110,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             try (
                     OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                     OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                    CSVWriter writer = new CSVWriter(outputStreamWriter, ',')) {
+                    CSVWriter writer = new CSVWriter(outputStreamWriter)) {
 
                 String[] headings = new String[]{"path", "action", "message"};
                 writer.writeNext(headings);
@@ -238,7 +238,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
             Optional<org.haiku.haikudepotserver.dataobjects.MediaType> mediaType =
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, leafnameExtension);
 
-            if (!mediaType.isPresent()) {
+            if (mediaType.isEmpty()) {
                 return new ArchiveEntryResult(Action.INVALID, "unknown file-extension");
             }
 

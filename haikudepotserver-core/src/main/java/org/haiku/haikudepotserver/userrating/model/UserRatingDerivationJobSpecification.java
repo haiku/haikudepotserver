@@ -1,11 +1,11 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.userrating.model;
 
-import org.flywaydb.core.internal.util.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
 
@@ -50,7 +50,7 @@ public class UserRatingDerivationJobSpecification extends AbstractJobSpecificati
     public boolean isEquivalent(JobSpecification other) {
         if(super.isEquivalent(other)) {
             UserRatingDerivationJobSpecification other2 = (UserRatingDerivationJobSpecification) other;
-            return ObjectUtils.nullSafeEquals(other2.getPkgName(), getPkgName());
+            return StringUtils.equals(other2.getPkgName(), getPkgName());
         }
 
         return false;

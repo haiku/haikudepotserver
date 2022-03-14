@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -106,7 +106,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             try (
                     OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                     OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                    CSVWriter writer = new CSVWriter(outputStreamWriter, ',')) {
+                    CSVWriter writer = new CSVWriter(outputStreamWriter)) {
 
                 Map<String, ScreenshotImportMetadatas> metadatas = new HashMap<>();
 

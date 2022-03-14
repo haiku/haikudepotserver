@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020, Andrew Lindesay
+ * Copyright 2016-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,6 @@ import org.haiku.haikudepotserver.security.model.AuthorizationRulesSpreadsheetJo
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -59,7 +58,7 @@ public class AuthorizationRulesSpreadsheetJobRunner
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter, ',')
+                CSVWriter writer = new CSVWriter(outputStreamWriter)
         ) {
 
             writer.writeNext(new String[]{
