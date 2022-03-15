@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2022, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -37,15 +37,6 @@ Distributed under the terms of the MIT License.
         </para>
     </section>
 
-        <section>
-            <title>Linux</title>
-            <para>
-                Building on a linux host will also cause the build system to produce an RPM file.  The RPM tooling
-                is required on the build host to make this possible.  More detail about this can be found at
-                <link linkend="prerequisites-buildingonlinux">here</link>.
-            </para>
-        </section>
-
     <section>
         <title>Automated Testing</title>
 
@@ -59,45 +50,11 @@ Distributed under the terms of the MIT License.
 
             <para>
                 Some of the automated tests are &quot;integration tests&quot;.  The integration tests can be run
-                with the following maven command; &quot;mvn clean &amp;&amp; mvn verify&quot;
+                with the following maven command; &quot;mvn clean verify&quot;.  These tests will execute against
+                an actual Postgres database.  The Postgres database is started by the test logic using
+                the "Test Containers" system.
             </para>
 
-            <para>
-                The integration tests <emphasis>require</emphasis> the presence of a specifically configured
-                Postgres database in order to execute.  The database for the execution of integration tests
-                should be available at localhost:5432 where the build is occurring.  The database should be
-                setup as follows;
-            </para>
-
-            <informaltable>
-                <tgroup cols="2">
-                    <tbody>
-                        <row>
-                            <entry>Database name</entry>
-                            <entry>haikudepotserver_integrationtest</entry>
-                        </row>
-                        <row>
-                            <entry>Database owner</entry>
-                            <entry>haikudepotserver_integrationtest</entry>
-                        </row>
-                        <row>
-                            <entry>User</entry>
-                            <entry>haikudepotserver_integrationtest</entry>
-                        </row>
-                        <row>
-                            <entry>User password</entry>
-                            <entry>haikudepotserver_integrationtest</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </informaltable>
-
-            <para>
-                The configuration for accessing this database is located in the file &quot;local.properties&quot;
-                within the test resources of the &quot;haikudepotserver-webapp&quot; module, but it should not
-                be necessary to edit this file.  As part of the integration testing process, various tables will
-                be cleared of data prior to the next test.
-            </para>
         </section>
     </section>
 
@@ -188,7 +145,7 @@ Distributed under the terms of the MIT License.
             </para>
 
             <para>
-                <programlisting>python support/hdsrelease.py
+                <programlisting>python3 support/hdsrelease.py
 git push
 git push --tags</programlisting>
             </para>

@@ -14,6 +14,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.DataMap;
 import org.apache.cayenne.map.DbEntity;
 import org.apache.cayenne.map.ObjEntity;
+import org.flywaydb.core.internal.database.postgresql.PostgreSQLConnection;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
@@ -26,9 +27,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.support.TestPropertySourceUtils;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -54,9 +61,20 @@ import java.util.stream.Stream;
  */
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(initializers = AbstractIntegrationTest.PostgresContainerInitializer.class)
 public abstract class AbstractIntegrationTest {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+
+    private static final PostgreSQLContainer<?> POSTGRES_SQL_CONTAINER =
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("14.2"))
+                    .withDatabaseName("haikudepotserver_integrationtest")
+                    .withUsername("haikudepotserver_integrationtest")
+                    .withPassword("haikudepotserver_integrationtest");
+
+    static {
+        POSTGRES_SQL_CONTAINER.start();
+    }
 
     private final static Set<String> CDO_NAMES_RETAINED =
             Stream.of(User.class, UserUsageConditions.class)
@@ -231,7 +249,6 @@ public abstract class AbstractIntegrationTest {
                     }
                 }
 
-
                 connection.commit();
             }
             catch(SQLException se) {
@@ -261,6 +278,20 @@ public abstract class AbstractIntegrationTest {
 
     private void setUnauthenticated() {
         SecurityContextHolder.clearContext();
+    }
+
+    static class PostgresContainerInitializer
+            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext applicationContext) {
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
+                    applicationContext,
+                    "jdbc.url=" + POSTGRES_SQL_CONTAINER.getJdbcUrl(),
+                    "jdbc.username=" + POSTGRES_SQL_CONTAINER.getUsername(),
+                    "jdbc.password=" + POSTGRES_SQL_CONTAINER.getPassword()
+            );
+        }
     }
 
 }

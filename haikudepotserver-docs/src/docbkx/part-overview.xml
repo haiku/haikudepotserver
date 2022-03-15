@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright 2018, Andrew Lindesay
+  ~ Copyright 2018-2022, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -62,10 +62,10 @@
 
         <para>
             <itemizedlist>
-                <listitem><ulink url="https://community.java.net/open-jdk">Java</ulink> (&gt;= 8)</listitem>
-                <listitem><ulink url="http://maven.apache.org">Maven</ulink> (&gt;= 3.3)</listitem>
-                <listitem><ulink url="https://www.postgres.org">Postgres</ulink> (&gt;= 9.3)</listitem>
-                <listitem><ulink url="http://www.eclipse.org/jetty/documentation/current/runner.html">Jetty Runner</ulink> (&gt;= 9.3) (deployment)</listitem>
+                <listitem><ulink url="https://community.java.net/open-jdk">Java</ulink> (&gt;= 11)</listitem>
+                <listitem><ulink url="http://maven.apache.org">Maven</ulink> (&gt;= 3.6)</listitem>
+                <listitem><ulink url="https://www.postgres.org">Postgres</ulink> (&gt;= 11)</listitem>
+                <listitem><ulink url="http://www.eclipse.org/jetty/documentation/current/runner.html">Jetty Runner</ulink> (&gt;= 9.4) (deployment)</listitem>
             </itemizedlist>
         </para>
 
@@ -161,7 +161,7 @@ apt-get install postgresql postgresql-client</programlisting>
         <title>hvif2png Rendering Tool</title>
 
             <para>
-                Software on the Haiku operating system tends to use the HVIF file format for representing icons.  This
+                Software on the Haiku operating system uses the HVIF file format for representing icons.  This
                 format is vector-art based rather than bitmaps.  To render icons clearly at any size, Haiku Depot
                 Server uses an external tool to render the HVIF data into PNG images for display on the web browser.
                 Part of the <ulink url="https://www.haiku-os.org/development">Haiku Source Code</ulink> includes
