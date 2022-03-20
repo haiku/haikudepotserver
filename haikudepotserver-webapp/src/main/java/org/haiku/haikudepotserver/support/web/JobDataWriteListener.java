@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,7 +35,7 @@ public class JobDataWriteListener implements WriteListener {
     private final ServletOutputStream outputStream;
 
     private int payloadOffset = 0;
-    private byte[] subPayloadBuffer = new byte[BUFFER_SIZE];
+    private final byte[] subPayloadBuffer = new byte[BUFFER_SIZE];
 
     public JobDataWriteListener(
             String jobDataGuid,
@@ -53,7 +53,7 @@ public class JobDataWriteListener implements WriteListener {
     public void onWritePossible() throws IOException {
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(jobDataGuid);
 
-        if (!jobDataWithByteSourceOptional.isPresent()) {
+        if (jobDataWithByteSourceOptional.isEmpty()) {
             LOGGER.error("unable to find the job data for; " + jobDataGuid);
             async.complete();
         } else {

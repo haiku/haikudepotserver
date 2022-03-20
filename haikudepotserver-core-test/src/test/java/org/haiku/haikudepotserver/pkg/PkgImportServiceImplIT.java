@@ -20,7 +20,6 @@ import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
-import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
@@ -74,7 +73,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             integrationTestSupportService.createStandardTestData();
 
             ObjectContext context = serverRuntime.newContext();
-            RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
+            RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
             respositorySourceObjectId = repositorySource.getObjectId();
         }
 
@@ -182,7 +181,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.newContext();
-                RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
                 repositoryDirectory = new File(repositorySource.tryGetPackagesBaseURL(ExposureType.INTERNAL_FACING).get().getPath());
 
                 if (!repositoryDirectory.mkdirs()) {
@@ -199,7 +198,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
             {
                 ObjectContext context = serverRuntime.newContext();
-                RepositorySource repositorySource = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
 
                 // ---------------------------------
 
@@ -220,12 +219,13 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
                 org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "testpkg");
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
                 org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkg,
-                        Repository.tryGetByCode(context, "testrepo").get(),
+                        repositorySource,
                         Collections.singletonList(
-                                Architecture.tryGetByCode(context, "x86_64").get()
+                                Architecture.getByCode(context, "x86_64")
                         )).get();
 
                 Assertions.assertThat(pkgVersion.getPayloadLength()).isEqualTo(expectedPayloadLength);

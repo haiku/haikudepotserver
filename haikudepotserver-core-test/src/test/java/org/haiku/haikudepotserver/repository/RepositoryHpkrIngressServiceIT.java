@@ -273,7 +273,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     Assertions.assertThat(PkgVersion.getForPkg(
                             context,
                             pkgVersion.getPkg(),
-                            Repository.tryGetByCode(context, "test").get(),
+                            RepositorySource.tryGetByCode(context, "testsrc_xyz").get(),
                             true).size())
                             .isEqualTo(1); // include inactive
 

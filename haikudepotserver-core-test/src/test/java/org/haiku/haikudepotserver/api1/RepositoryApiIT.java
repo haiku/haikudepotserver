@@ -39,8 +39,9 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ContextConfiguration(classes = TestConfig.class)
 public class RepositoryApiIT extends AbstractIntegrationTest {
@@ -141,7 +142,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         RepositorySource repositorySource = context.newObject(RepositorySource.class);
         repositorySource.setCode("zigzag_x86_64");
         repositorySource.setIdentifier("http://example.com/zigzag");
-        repositorySource.setRepository(Repository.tryGetByCode(context, "testrepo").get());
+        repositorySource.setRepository(Repository.getByCode(context, "testrepo"));
         context.commitChanges();
     }
 
@@ -159,13 +160,24 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.active).isTrue();
         Assertions.assertThat(result.code).isEqualTo("testrepo");
         Assertions.assertThat(result.informationUrl).isEqualTo("http://example1.haiku.org/");
-        Assertions.assertThat(result.repositorySources.size()).isEqualTo(1);
+        Assertions.assertThat(result.repositorySources.size()).isEqualTo(2);
+            // ^ one for x86_64 and one for x86_gcc2
 
-        GetRepositoryResult.RepositorySource repositorySource = result.repositorySources.get(0);
-        Assertions.assertThat(repositorySource.code).isEqualTo("testreposrc_xyz");
-        Assertions.assertThat(repositorySource.active).isTrue();
-        Assertions.assertThat(repositorySource.url).startsWith("file:///");
-        Assertions.assertThat(repositorySource.architectureCode).isEqualTo("x86_64");
+        List<GetRepositoryResult.RepositorySource> repositorySourcesSorted = result.repositorySources.stream()
+                .sorted(Comparator.comparing(rs1 -> rs1.code))
+                .collect(Collectors.toList());
+
+        GetRepositoryResult.RepositorySource repositorySource0 = repositorySourcesSorted.get(0);
+        Assertions.assertThat(repositorySource0.code).isEqualTo("testreposrc_xyz");
+        Assertions.assertThat(repositorySource0.active).isTrue();
+        Assertions.assertThat(repositorySource0.url).startsWith("file:///");
+        Assertions.assertThat(repositorySource0.architectureCode).isEqualTo("x86_64");
+
+        GetRepositoryResult.RepositorySource repositorySource1 = repositorySourcesSorted.get(1);
+        Assertions.assertThat(repositorySource1.code).isEqualTo("testreposrc_xyz_x86_gcc2");
+        Assertions.assertThat(repositorySource1.active).isTrue();
+//        Assertions.assertThat(repositorySource1.url).startsWith("file:///");
+        Assertions.assertThat(repositorySource1.architectureCode).isEqualTo("x86_gcc2");
     }
 
     @Test
@@ -182,11 +194,11 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<Repository> repositoryAfterOptional = Repository.tryGetByCode(context,"differentrepo");
-        Assertions.assertThat(repositoryAfterOptional.get().getActive()).isTrue();
-        Assertions.assertThat(repositoryAfterOptional.get().getCode()).isEqualTo("differentrepo");
-        Assertions.assertThat(repositoryAfterOptional.get().getName()).isEqualTo("Different Repo");
-        Assertions.assertThat(repositoryAfterOptional.get().getInformationUrl()).isEqualTo("http://zink.haiku.org");
+        Repository repositoryAfter = Repository.getByCode(context,"differentrepo");
+        Assertions.assertThat(repositoryAfter.getActive()).isTrue();
+        Assertions.assertThat(repositoryAfter.getCode()).isEqualTo("differentrepo");
+        Assertions.assertThat(repositoryAfter.getName()).isEqualTo("Different Repo");
+        Assertions.assertThat(repositoryAfter.getInformationUrl()).isEqualTo("http://zink.haiku.org");
     }
 
     @Test
@@ -260,7 +272,7 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            RepositorySource repositorySourceAfter = RepositorySource.tryGetByCode(context, "testreposrc_xyz").get();
+            RepositorySource repositorySourceAfter = RepositorySource.getByCode(context, "testreposrc_xyz");
             // this url was set before and is retained after the update.
             Assertions.assertThat(repositorySourceAfter.getIdentifier()).isEqualTo("http://www.example.com/test/identifier/url");
             Assertions.assertThat(repositorySourceAfter.getActive()).isFalse();
@@ -284,11 +296,11 @@ public class RepositoryApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Optional<RepositorySource> repositorySourceOptional = RepositorySource.tryGetByCode(context, "testreposrcxx_xyz");
-            Assertions.assertThat(repositorySourceOptional.get().getActive()).isTrue();
-            Assertions.assertThat(repositorySourceOptional.get().getIdentifier()).isNull();
-            Assertions.assertThat(repositorySourceOptional.get().getRepository().getCode()).isEqualTo("testrepo");
-            Assertions.assertThat(repositorySourceOptional.get().getCode()).isEqualTo("testreposrcxx_xyz");
+            RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrcxx_xyz");
+            Assertions.assertThat(repositorySource.getActive()).isTrue();
+            Assertions.assertThat(repositorySource.getIdentifier()).isNull();
+            Assertions.assertThat(repositorySource.getRepository().getCode()).isEqualTo("testrepo");
+            Assertions.assertThat(repositorySource.getCode()).isEqualTo("testreposrcxx_xyz");
         }
 
     }

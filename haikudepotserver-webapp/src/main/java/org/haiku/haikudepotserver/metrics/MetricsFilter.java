@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,7 +43,7 @@ public class MetricsFilter implements Filter {
         Object requestStartObj = request.getAttribute(KEY_REQUEST_METRIC);
 
         if (null != requestStartObj) {
-            RequestStart requestStart = RequestStart.class.cast(requestStartObj);
+            RequestStart requestStart = (RequestStart) requestStartObj;
             MetricsHelper.add(metricRegistry, requestStart);
         }
     }

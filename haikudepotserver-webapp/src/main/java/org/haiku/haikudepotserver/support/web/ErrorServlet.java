@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2020, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -38,7 +38,7 @@ import java.util.Optional;
 
 public class ErrorServlet extends HttpServlet {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(ErrorServlet.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(ErrorServlet.class);
 
     private final static String PARAM_JSONRPCERRORCODE = "jrpcerrorcd";
 
@@ -104,8 +104,6 @@ public class ErrorServlet extends HttpServlet {
     private void renderTextualMessages(
             Writer out, String naturalLanguageCode,
             Integer jsonRpcErrorCode, Integer httpStatusCode) throws IOException {
-        HtmlEscapers.htmlEscaper();
-
         Locale locale = new Locale(naturalLanguageCode);
         String title = messageSource.getMessage("error.title", null, locale);
         String body = messageSource.getMessage(deriveBodyKey(jsonRpcErrorCode, httpStatusCode), null, locale);

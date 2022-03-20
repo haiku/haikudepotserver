@@ -25,7 +25,7 @@ public class SimpleMathProblemCaptchaAlgorithm implements CaptchaAlgorithm {
     private static final int WIDTH = 128;
     private static final int HEIGHT = 24;
 
-    private final Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
+    private static final Font FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
 
     private final BufferedImage bufferedImage;
     private final Graphics bufferedImageGraphics;
@@ -41,8 +41,8 @@ public class SimpleMathProblemCaptchaAlgorithm implements CaptchaAlgorithm {
                 BufferedImage.TYPE_INT_RGB);
 
         bufferedImageGraphics = bufferedImage.getGraphics();
-        bufferedImageGraphics.setFont(font);
-        fontMetrics = bufferedImageGraphics.getFontMetrics(font);
+        bufferedImageGraphics.setFont(FONT);
+        fontMetrics = bufferedImageGraphics.getFontMetrics(FONT);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Andrew Lindesay
+ * Copyright 2021-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -7,14 +7,29 @@ package org.haiku.haikudepotserver.api2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
-import org.haiku.haikudepotserver.api1.model.userrating.*;
+import org.haiku.haikudepotserver.api1.model.userrating.AbstractUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingResult;
 import org.haiku.haikudepotserver.api1.support.AbstractSearchRequest;
+import org.haiku.haikudepotserver.api2.model.CreateUserRatingRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.CreateUserRatingResponseEnvelope;
 import org.haiku.haikudepotserver.api2.model.CreateUserRatingResult;
+import org.haiku.haikudepotserver.api2.model.GetUserRatingByUserAndPkgVersionRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.GetUserRatingByUserAndPkgVersionResponseEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetUserRatingByUserAndPkgVersionResult;
+import org.haiku.haikudepotserver.api2.model.PkgVersion;
+import org.haiku.haikudepotserver.api2.model.PkgVersionPkg;
+import org.haiku.haikudepotserver.api2.model.SearchUserRatingsRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResponseEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResult;
-import org.haiku.haikudepotserver.api2.model.*;
+import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResultItems;
+import org.haiku.haikudepotserver.api2.model.UpdateUserRatingRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.UpdateUserRatingResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 import javax.validation.Valid;
@@ -24,7 +39,7 @@ import java.util.stream.Collectors;
 @Controller
 public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
 
-    private org.haiku.haikudepotserver.api1.UserRatingApi userRatingApiV1;
+    private final org.haiku.haikudepotserver.api1.UserRatingApi userRatingApiV1;
 
     public UserRatingApiImpl(org.haiku.haikudepotserver.api1.UserRatingApi userRatingApiV1) {
         this.userRatingApiV1 = userRatingApiV1;
@@ -51,6 +66,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     public ResponseEntity<CreateUserRatingResponseEnvelope> createUserRating(@Valid CreateUserRatingRequestEnvelope createUserRatingRequestEnvelope) {
         CreateUserRatingRequest requestV1 = new CreateUserRatingRequest();
         requestV1.repositoryCode = createUserRatingRequestEnvelope.getRepositoryCode();
+        requestV1.repositorySourceCode = createUserRatingRequestEnvelope.getRepositorySourceCode();
         requestV1.naturalLanguageCode = createUserRatingRequestEnvelope.getNaturalLanguageCode();
         requestV1.userNickname = createUserRatingRequestEnvelope.getUserNickname();
         requestV1.userRatingStabilityCode = createUserRatingRequestEnvelope.getUserRatingStabilityCode();
@@ -73,6 +89,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     public ResponseEntity<GetUserRatingByUserAndPkgVersionResponseEnvelope> getUserRatingByUserAndPkgVersion(@Valid GetUserRatingByUserAndPkgVersionRequestEnvelope getUserRatingByUserAndPkgVersionRequestEnvelope) {
         GetUserRatingByUserAndPkgVersionRequest requestV1 = new GetUserRatingByUserAndPkgVersionRequest();
         requestV1.repositoryCode = getUserRatingByUserAndPkgVersionRequestEnvelope.getRepositoryCode();
+        requestV1.repositorySourceCode = getUserRatingByUserAndPkgVersionRequestEnvelope.getRepositorySourceCode();
         requestV1.userNickname = getUserRatingByUserAndPkgVersionRequestEnvelope.getUserNickname();
         requestV1.pkgName = getUserRatingByUserAndPkgVersionRequestEnvelope.getPkgName();
         requestV1.pkgVersionArchitectureCode = getUserRatingByUserAndPkgVersionRequestEnvelope.getPkgVersionArchitectureCode();
@@ -101,6 +118,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     public ResponseEntity<SearchUserRatingsResponseEnvelope> searchUserRatings(@Valid SearchUserRatingsRequestEnvelope searchUserRatingsRequestEnvelope) {
         SearchUserRatingsRequest requestV1 = new SearchUserRatingsRequest();
         requestV1.repositoryCode = searchUserRatingsRequestEnvelope.getRepositoryCode();
+        requestV1.repositorySourceCode = searchUserRatingsRequestEnvelope.getRepositorySourceCode();
         requestV1.pkgName = searchUserRatingsRequestEnvelope.getPkgName();
         requestV1.userNickname = searchUserRatingsRequestEnvelope.getUserNickname();
         requestV1.pkgVersionArchitectureCode = searchUserRatingsRequestEnvelope.getPkgVersionArchitectureCode();
@@ -142,6 +160,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         return new PkgVersion()
                 .pkg(new PkgVersionPkg().name(pkgVersion.pkg.name))
                 .repositoryCode(pkgVersion.repositoryCode)
+                .repositorySourceCode(pkgVersion.repositorySourceCode)
                 .architectureCode(pkgVersion.architectureCode)
                 .major(pkgVersion.major)
                 .minor(pkgVersion.minor)

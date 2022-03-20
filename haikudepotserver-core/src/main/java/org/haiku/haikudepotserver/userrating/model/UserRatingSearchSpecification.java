@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,12 @@ public class UserRatingSearchSpecification extends AbstractSearchSpecification {
 
     private Pkg pkg;
 
+    /**
+     * @deprecated should use the {@link #repositorySource}
+     */
     private Repository repository;
+
+    private RepositorySource repositorySource;
 
     private Architecture architecture;
 
@@ -26,12 +31,26 @@ public class UserRatingSearchSpecification extends AbstractSearchSpecification {
 
     private Integer daysSinceCreated;
 
+    /**
+     * @deprecated use {@link #repositorySource} instead
+     */
     public Repository getRepository() {
         return repository;
     }
 
+    /**
+     * @deprecated use {@link #repositorySource} instead
+     */
     public void setRepository(Repository repository) {
         this.repository = repository;
+    }
+
+    public RepositorySource getRepositorySource() {
+        return repositorySource;
+    }
+
+    public void setRepositorySource(RepositorySource repositorySource) {
+        this.repositorySource = repositorySource;
     }
 
     public User getUser() {

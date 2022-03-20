@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,9 +11,33 @@ import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api1.model.userrating.*;
+import org.haiku.haikudepotserver.api1.model.userrating.AbstractGetUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.AbstractUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.DeriveAndStoreUserRatingForPkgRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.DeriveAndStoreUserRatingForPkgResult;
+import org.haiku.haikudepotserver.api1.model.userrating.DeriveAndStoreUserRatingsForAllPkgsResult;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionResult;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.RemoveUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.RemoveUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsResult;
+import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingResult;
 import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.dataobjects.UserRating;
+import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -32,9 +56,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component("userRatingApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/userrating") // TODO; legacy path - remove
@@ -42,11 +69,11 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
 
-    private ServerRuntime serverRuntime;
-    private PermissionEvaluator permissionEvaluator;
-    private JobService jobService;
-    private UserRatingService userRatingService;
-    private PkgService pkgService;
+    private final ServerRuntime serverRuntime;
+    private final PermissionEvaluator permissionEvaluator;
+    private final JobService jobService;
+    private final UserRatingService userRatingService;
+    private final PkgService pkgService;
 
     public UserRatingApiImpl(
             ServerRuntime serverRuntime,
@@ -72,6 +99,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkNotNull(pkgVersion);
         AbstractUserRatingResult.PkgVersion result = new AbstractUserRatingResult.PkgVersion();
         result.repositoryCode = pkgVersion.getRepositorySource().getRepository().getCode();
+        result.repositorySourceCode = pkgVersion.getRepositorySource().getCode();
         result.architectureCode = pkgVersion.getArchitecture().getCode();
         result.major = pkgVersion.getMajor();
         result.minor = pkgVersion.getMinor();
@@ -178,7 +206,13 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.userNickname), "the user nickname must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode), "the pkg version architecture code must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionMajor),"the package version major code must be supplied");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
+        // temporary support the `repositoryCode` for the desktop client.
+        Preconditions.checkArgument(
+                Stream.of(request.pkgVersionArchitectureCode, request.repositoryCode)
+                        .map(StringUtils::trimToNull)
+                        .filter(Objects::nonNull)
+                        .count() == 2 || StringUtils.isNotBlank(request.repositorySourceCode),
+                "the (repository code and architecture) are required or the repository source code");
 
         final ObjectContext context = serverRuntime.newContext();
 
@@ -188,7 +222,19 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Pkg pkg = Pkg.tryGetByName(context, request.pkgName).orElseThrow(
                 () -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
 
-        Repository repository = getRepository(context, request.repositoryCode);
+        // because there are some older HD desktop clients that will still come
+        // through with architecture + repository, we can work with this to
+        // probably get the repository source.
+
+        RepositorySource repositorySource;
+
+        if (StringUtils.isNotBlank(request.repositorySourceCode)) {
+            repositorySource = getRepositorySource(context, request.repositorySourceCode);
+        } else {
+            repositorySource = getRepository(context, request.repositoryCode)
+                    .tryGetRepositorySourceForArchitecture(architecture)
+                    .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), ""));
+        }
 
         VersionCoordinates versionCoordinates = new VersionCoordinates(
                 request.pkgVersionMajor,
@@ -198,12 +244,12 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 request.pkgVersionRevision);
 
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
-                context, pkg, repository, architecture, versionCoordinates);
+                context, pkg, repositorySource, architecture, versionCoordinates);
 
         if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
             throw new ObjectNotFoundException(
                     PkgVersion.class.getSimpleName(),
-                    request.pkgName + "@" + versionCoordinates.toString());
+                    request.pkgName + "@" + versionCoordinates);
         }
 
         Optional<UserRating> userRatingOptional = UserRating.getByUserAndPkgVersion(context, user, pkgVersionOptional.get());
@@ -225,15 +271,19 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode));
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code should be supplied");
+        // temporary support the `repositoryCode` for the desktop client.
+        Preconditions.checkArgument(
+                Stream.of(request.pkgVersionArchitectureCode, request.repositoryCode)
+                        .map(StringUtils::trimToNull)
+                        .filter(Objects::nonNull)
+                        .count() == 2 || StringUtils.isNotBlank(request.repositorySourceCode),
+                "the (repository code and architecture) are required or the repository source code");
         Preconditions.checkArgument(null == request.rating || request.rating >= UserRating.MIN_USER_RATING,
                 "the user rating " + request.rating + " is less than the minimum allowed of " + UserRating.MIN_USER_RATING);
         Preconditions.checkArgument(null == request.rating || request.rating <= UserRating.MAX_USER_RATING,
                 "the user rating " + request.rating + " is greater than the maximum allowed of " + UserRating.MIN_USER_RATING);
 
-        if(null!=request.comment) {
-            request.comment = Strings.emptyToNull(request.comment.trim());
-        }
+        request.comment = StringUtils.trimToNull(request.comment);
 
         // check to see that the user has not tried to create a user rating with essentially nothing
         // in it.
@@ -253,9 +303,22 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
         }
 
+        // because there are some older HD desktop clients that will still come
+        // through with architecture + repository, we can work with this to
+        // probably get the repository source.
+
         Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
+        RepositorySource repositorySource;
+
+        if (StringUtils.isNotBlank(request.repositorySourceCode)) {
+            repositorySource = getRepositorySource(context, request.repositorySourceCode);
+        } else {
+            repositorySource = getRepository(context, request.repositoryCode)
+                    .tryGetRepositorySourceForArchitecture(architecture)
+                    .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), ""));
+        }
+
         NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
-        Repository repository = getRepository(context, request.repositoryCode);
         User user = User.tryGetByNickname(context, request.userNickname).orElseThrow(
                 () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
 
@@ -299,13 +362,13 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
-                        repository,
+                        repositorySource,
                         Collections.singletonList(architecture));
                 break;
 
             case SPECIFIC:
                 pkgVersionOptional = PkgVersion.getForPkg(
-                        context, pkgOptional.get(), repository, architecture,
+                        context, pkgOptional.get(), repositorySource, architecture,
                         new VersionCoordinates(
                                 request.pkgVersionMajor,
                                 request.pkgVersionMinor,
@@ -349,8 +412,8 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
 
         LOGGER.info(
                 "did create user rating for user {} on package {}",
-                user.toString(),
-                pkgOptional.get().toString());
+                user,
+                pkgOptional.get());
 
         return new CreateUserRatingResult(userRating.getCode());
 
@@ -466,21 +529,27 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             }
         }
 
-        Optional<Repository> repositoryOptional = Optional.empty();
+        RepositorySource repositorySource = Optional.ofNullable(request.repositorySourceCode)
+                .map(StringUtils::trimToNull)
+                .map(rsc -> getRepositorySource(context, rsc))
+                .orElse(null);
+        searchSpecification.setRepositorySource(repositorySource);
 
-        if (!Strings.isNullOrEmpty(request.repositoryCode)) {
-            searchSpecification.setRepository(getRepository(
-                    context,
-                    request.repositoryCode));
-        }
+        // this is temporarily here to support the desktop application; remove
+        // when that version of the client is no longer supported.
+        Repository repository = Optional.ofNullable(request.repositoryCode)
+                .map(StringUtils::trimToNull)
+                .map(rc -> getRepository(context, rc))
+                .orElse(null);
+        searchSpecification.setRepository(repository);
 
         // if there is a major version specified then we must be requesting a specific package version,
         // otherwise we will constrain based on the architecture and/or the package name.
 
         if (null != request.pkgVersionMajor) {
 
-            if (repositoryOptional.isEmpty()) {
-                throw new IllegalStateException("the repository is required when a pkg version is specified");
+            if (null == repositorySource) {
+                throw new IllegalStateException("the repository source is required when a pkg version is specified");
             }
 
             if (pkgOptional.isEmpty()) {
@@ -494,7 +563,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
             PkgVersion pkgVersion = PkgVersion.getForPkg(
                     context,
                     pkgOptional.get(),
-                    repositoryOptional.get(),
+                    repositorySource,
                     architecture,
                     new VersionCoordinates(
                             request.pkgVersionMajor,
@@ -509,10 +578,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         }
         else {
             searchSpecification.setArchitecture(architecture);
-
-            if (pkgOptional.isPresent()) {
-                searchSpecification.setPkg(pkgOptional.get());
-            }
+            searchSpecification.setPkg(pkgOptional.orElse(null));
         }
 
         if (null != request.userNickname) {

@@ -12,6 +12,7 @@ import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.security.AbstractUserAuthenticationAware;
 
 /**
@@ -45,6 +46,18 @@ public abstract class AbstractApiImpl extends AbstractUserAuthenticationAware {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(repositoryCode), "a repository code is required to search for the repository");
         return Repository.tryGetByCode(context, repositoryCode)
                 .orElseThrow(() -> new ObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode));
+    }
+
+    /**
+     * <p>Obtains and returns the repository source based on the supplied code.  It will throw a runtime exception if the code
+     * is not supplied or if no repository source was able to be found for the code supplied.</p>
+     */
+
+    protected RepositorySource getRepositorySource(ObjectContext context, String repositorySourceCode) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(repositorySourceCode), "a repository code is required to search for the repository");
+        return RepositorySource.tryGetByCode(context, repositorySourceCode)
+                .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), repositorySourceCode));
     }
 
 }

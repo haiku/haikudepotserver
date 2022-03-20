@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -52,36 +52,13 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
             boolean includeInactive) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
-        return getForPkg(context, pkg, null, null, includeInactive);
-    }
-
-    public static List<PkgVersion> getForPkg(
-            ObjectContext context,
-            Pkg pkg,
-            Repository repository,
-            boolean includeInactive) {
-        Preconditions.checkArgument(null != context, "the context must be supplied");
-        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
-        Preconditions.checkArgument(null != repository, "a repository must be supplied to give context to obtaining a pkg version for a pkg");
-        return getForPkg(context, pkg, null, repository, includeInactive);
+        return getForPkg(context, pkg, null, includeInactive);
     }
 
     public static List<PkgVersion> getForPkg(
             ObjectContext context,
             Pkg pkg,
             RepositorySource repositorySource,
-            boolean includeInactive) {
-        Preconditions.checkArgument(null != context, "the context must be supplied");
-        Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
-        Preconditions.checkArgument(null != repositorySource, "a repository source must be supplied to give context to obtaining a pkg version for a pkg");
-        return getForPkg(context, pkg, repositorySource, null, includeInactive);
-    }
-
-    private static List<PkgVersion> getForPkg(
-            ObjectContext context,
-            Pkg pkg,
-            RepositorySource repositorySource,
-            Repository repository,
             boolean includeInactive) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
@@ -98,31 +75,26 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
             select = select.and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource));
         }
 
-        if (null != repository) {
-            select = select.and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).eq(repository));
-        }
-
         return select.select(context);
     }
 
     public static Optional<PkgVersion> getForPkg(
             ObjectContext context,
             Pkg pkg,
-            Repository repository,
+            RepositorySource repositorySource,
             Architecture architecture,
             VersionCoordinates versionCoordinates) {
 
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
-        Preconditions.checkArgument(null != architecture, "the architecture must be supplied");
-        Preconditions.checkArgument(null != versionCoordinates && null!=versionCoordinates.getMajor(), "missing or malformed version coordinates");
-        Preconditions.checkArgument(null != repository, "the repository is required to lookup a package version");
+        Preconditions.checkArgument(null != versionCoordinates && null != versionCoordinates.getMajor(), "missing or malformed version coordinates");
+        Preconditions.checkArgument(null != repositorySource, "the repository source is required to lookup a package version");
 
         return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)
                 .where(ExpressionHelper.toExpression(versionCoordinates))
                 .and(PKG.eq(pkg))
                 .and(ARCHITECTURE.eq(architecture))
-                .and(REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).eq(repository))
+                .and(REPOSITORY_SOURCE.eq(repositorySource))
                 .selectOne(context));
     }
 
@@ -211,30 +183,6 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
     }
 
     /**
-     * <p>This method will return the localization for the language specified or will return the localization
-     * for english if the desired language is not available.</p>
-     */
-
-    // have to add the 'byCode' for JSP to be able to work with it.
-    public PkgVersionLocalization getPkgVersionLocalizationOrFallbackByCode(final String naturalLanguageCode) {
-        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = Optional.empty();
-
-        if (!Strings.isNullOrEmpty(naturalLanguageCode)) {
-            pkgVersionLocalizationOptional = getPkgVersionLocalization(naturalLanguageCode);
-        }
-
-        if (pkgVersionLocalizationOptional.isEmpty()) {
-            pkgVersionLocalizationOptional = getPkgVersionLocalization(NaturalLanguage.CODE_ENGLISH);
-        }
-
-        if (pkgVersionLocalizationOptional.isEmpty()) {
-            throw new IllegalStateException("unable to find the fallback localization for " + toString());
-        }
-
-        return pkgVersionLocalizationOptional.get();
-    }
-
-    /**
      * <p>Renders the copyright entities into a list of strings.</p>
      */
 
@@ -257,26 +205,6 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
 
     public Optional<PkgUserRatingAggregate> getPkgUserRatingAggregate() {
         return getPkg().getPkgUserRatingAggregate(getRepositorySource().getRepository());
-    }
-
-    public Optional<Float> getDerivedAggregatedUserRating() {
-        Optional<PkgUserRatingAggregate> aggregateOptional = getPkgUserRatingAggregate();
-
-        if(aggregateOptional.isPresent()) {
-            return Optional.of(aggregateOptional.get().getDerivedRating());
-        }
-
-        return Optional.empty();
-    }
-
-    public Optional<Integer> getDerivedAggregatedUserRatingSampleSize() {
-        Optional<PkgUserRatingAggregate> aggregateOptional = getPkgUserRatingAggregate();
-
-        if(aggregateOptional.isPresent()) {
-            return Optional.of(aggregateOptional.get().getDerivedRatingSampleSize());
-        }
-
-        return Optional.empty();
     }
 
     /**
@@ -353,13 +281,10 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
     public UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
         getPkg().appendPathSegments(builder);
         getRepositorySource().getRepository().appendPathSegments(builder);
+        getRepositorySource().appendPathSegments(builder);
         toVersionCoordinates().appendPathSegments(builder);
         getArchitecture().appendPathSegments(builder);
         return builder;
-    }
-
-    public String toStringWithPkgAndArchitecture() {
-        return getPkg().getName() + " - " + toString() + " - " + getArchitecture().getCode();
     }
 
     @Override

@@ -174,7 +174,7 @@ angular.module('haikudepotserver').controller(
                                         {
                                             userNickname: userState.user().nickname,
                                             pkgName: pkg.name,
-                                            repositoryCode : pkg.versions[0].repositoryCode,
+                                            repositorySourceCode : pkg.versions[0].repositorySourceCode,
                                             pkgVersionArchitectureCode: pkg.versions[0].architectureCode,
                                             pkgVersionMajor: pkg.versions[0].major,
                                             pkgVersionMinor: pkg.versions[0].minor,
@@ -329,7 +329,7 @@ angular.module('haikudepotserver').controller(
                             [
                                 {
                                     naturalLanguageCode: $scope.workingUserRating.naturalLanguageCode,
-                                    repositoryCode: $scope.workingUserRating.pkgVersion.repositoryCode,
+                                    repositorySourceCode: $scope.workingUserRating.pkgVersion.repositorySourceCode,
                                     userNickname: $scope.workingUserRating.user.nickname,
                                     userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
                                     comment: $scope.workingUserRating.comment,

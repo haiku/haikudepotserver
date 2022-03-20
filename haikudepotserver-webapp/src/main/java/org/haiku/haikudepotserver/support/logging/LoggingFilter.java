@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -47,7 +47,7 @@ public class LoggingFilter implements Filter {
         OPERA("opr"),
         MSIE("msie");
 
-        String code;
+        private final String code;
 
         Agent(String code) {
             this.code = code;
@@ -139,12 +139,7 @@ public class LoggingFilter implements Filter {
 
                 if (!Strings.isNullOrEmpty(userAgent)) {
                     MDC.put(KEY_USERAGENT, userAgent);
-
-                    Optional<Agent> agentOptional = browserDetect(userAgent);
-
-                    if (agentOptional.isPresent()) {
-                        MDC.put(KEY_USERAGENTCODE, agentOptional.get().getCode());
-                    }
+                    browserDetect(userAgent).ifPresent(agent -> MDC.put(KEY_USERAGENTCODE, agent.getCode()));
                 }
             }
 
@@ -153,7 +148,6 @@ public class LoggingFilter implements Filter {
         finally {
             MDC.clear();
         }
-
 
     }
 

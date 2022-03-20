@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -67,7 +67,7 @@ public class NaturalLanguageWebHelper {
             }
         }
 
-        return NaturalLanguage.tryGetByCode(context, NaturalLanguage.CODE_ENGLISH).get();
+        return NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH);
     }
 
 }

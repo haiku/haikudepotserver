@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -149,7 +149,7 @@ public class FeedController {
 
         FeedSpecification specification = new FeedSpecification();
         specification.setFeedType(feedType);
-        specification.setLimit(limit > MAX_LIMIT ? MAX_LIMIT : limit);
+        specification.setLimit(limit);
         specification.setNaturalLanguageCode(!Strings.isNullOrEmpty(naturalLanguageCode) ? naturalLanguageCode : NaturalLanguage.CODE_ENGLISH);
 
         if(Strings.isNullOrEmpty(types)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,17 +30,13 @@ public class PlainTextContentTag extends RequestContextAwareTag {
 
     @Override
     protected int doStartTagInternal() throws Exception {
-
         if (!Strings.isNullOrEmpty(value)) {
-
             pageContext.getOut().print(
                     Arrays.stream(value.split("[\n\r]"))
                             .map(s -> HtmlEscapers.htmlEscaper().escape(s))
                             .collect(Collectors.joining("<br/>\n"))
             );
-
         }
-
         return SKIP_BODY;
     }
 

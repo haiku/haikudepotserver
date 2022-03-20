@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -41,21 +41,21 @@ angular.module('haikudepotserver').factory('pkg',
              * @param {boolean} incrementCounter
              */
 
-            function getPkgWithSpecificVersion(pkgName, repositoryCode, versionCoordinates, architectureCode, incrementCounter) {
+            function getPkgWithSpecificVersion(pkgName, repositorySourceCode, versionCoordinates, architectureCode, incrementCounter) {
 
-                if(!pkgName||!pkgName.length) {
+                if (!pkgName) {
                     throw Error('pkg name must be supplied');
                 }
 
-                if(!repositoryCode||!repositoryCode.length) {
+                if (!repositorySourceCode) {
                     throw Error('the repository code must be supplied');
                 }
 
-                if(!versionCoordinates||!versionCoordinates.major) {
+                if (!versionCoordinates||!versionCoordinates.major) {
                     throw Error('version coordinates must be supplied');
                 }
 
-                if(!architectureCode||!architectureCode.length) {
+                if (!architectureCode) {
                     throw Error('architecture code must be supplied');
                 }
 
@@ -64,7 +64,7 @@ angular.module('haikudepotserver').factory('pkg',
                     'getPkg',
                     [{
                         name : pkgName,
-                        repositoryCode: repositoryCode,
+                        repositorySourceCode: repositorySourceCode,
                         versionType : 'SPECIFIC',
                         incrementViewCounter : !!incrementCounter,
                         architectureCode : architectureCode,
@@ -101,7 +101,7 @@ angular.module('haikudepotserver').factory('pkg',
                 }
 
                 function hyphenToNull(val) {
-                    if('-'==val) {
+                    if('-' === val) {
                         return null;
                     }
 
@@ -110,7 +110,7 @@ angular.module('haikudepotserver').factory('pkg',
 
                 return getPkgWithSpecificVersion(
                     routeParams.name,
-                    routeParams.repositoryCode,
+                    routeParams.repositorySourceCode,
                     {
                         major : hyphenToNull(routeParams.major),
                         minor : hyphenToNull(routeParams.minor),

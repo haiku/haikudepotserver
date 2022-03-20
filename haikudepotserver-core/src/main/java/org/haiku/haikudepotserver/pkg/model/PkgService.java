@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -53,7 +53,7 @@ public interface PkgService {
     Optional<PkgVersion> getLatestPkgVersionForPkg(
             ObjectContext context,
             Pkg pkg,
-            Repository repository);
+            RepositorySource repositorySource);
 
     /**
      * <p>This method will return the latest PkgVersion for the supplied package.</p>
@@ -62,7 +62,7 @@ public interface PkgService {
     Optional<PkgVersion> getLatestPkgVersionForPkg(
             ObjectContext context,
             Pkg pkg,
-            Repository repository,
+            RepositorySource repository,
             final List<Architecture> architectures);
 
     /**

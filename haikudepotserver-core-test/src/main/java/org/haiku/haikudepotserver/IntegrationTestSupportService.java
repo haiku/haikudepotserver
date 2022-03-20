@@ -162,6 +162,12 @@ public class IntegrationTestSupportService {
         result.repositorySource.setIdentifier("http://www.example.com/test/identifier/url");
         result.repositorySource.setArchitecture(x86_64);
 
+        RepositorySource repositorySourceX86Gcc2 = context.newObject(RepositorySource.class);
+        repositorySourceX86Gcc2.setCode("testreposrc_xyz_x86_gcc2");
+        repositorySourceX86Gcc2.setRepository(result.repository);
+        repositorySourceX86Gcc2.setIdentifier("http://www.example.com/test/identifier/url/x86_gcc2");
+        repositorySourceX86Gcc2.setArchitecture(x86_gcc2);
+
         RepositorySourceExtraIdentifier repositorySourceExtraIdentifier = context.newObject(RepositorySourceExtraIdentifier.class);
         repositorySourceExtraIdentifier.setIdentifier("example:haiku:identifier");
         repositorySourceExtraIdentifier.setRepositorySource(result.repositorySource);
@@ -190,7 +196,7 @@ public class IntegrationTestSupportService {
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
             result.pkg1.getPkgSupplement().addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
-            pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "graphics").get());
+            pkgPkgCategory.setPkgCategory(PkgCategory.tryGetByCode(context, "graphics").get());
         }
 
         {
@@ -264,7 +270,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86_gcc2.setRevision(4);
         result.pkg1Version2x86_gcc2.setIsLatest(true);
         result.pkg1Version2x86_gcc2.setPkg(result.pkg1);
-        result.pkg1Version2x86_gcc2.setRepositorySource(result.repositorySource);
+        result.pkg1Version2x86_gcc2.setRepositorySource(repositorySourceX86Gcc2);
 
         // this is the same as the x86 version so that comparisons with English will happen.
 
@@ -378,7 +384,7 @@ public class IntegrationTestSupportService {
         PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                 context,
                 pkg,
-                Repository.getByCode(context, "testrepo"),
+                RepositorySource.getByCode(context, "testreposrc_xyz"),
                 Collections.singletonList(x86_64)).get();
 
         NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH);

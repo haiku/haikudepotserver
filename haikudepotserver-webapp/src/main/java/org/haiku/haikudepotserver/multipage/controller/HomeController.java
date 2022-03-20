@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -120,18 +120,12 @@ public class HomeController {
         searchSpecification.setRepositories(null == repository ? Repository.getAllActive(context) : Collections.singletonList(repository));
 
         Architecture architecture = Architecture.getByCode(context, architectureCode);
-
-        searchSpecification.setArchitectures(
-                ImmutableList.of(
-                        architecture,
-                        Architecture.getByCode(context, Architecture.CODE_ANY)
-                )
-        );
+        searchSpecification.setArchitecture(architecture);
 
         Optional<PkgCategory> pkgCategoryOptional = Optional.empty();
 
         if (null != pkgCategoryCode) {
-            pkgCategoryOptional = PkgCategory.getByCode(context, pkgCategoryCode);
+            pkgCategoryOptional = PkgCategory.tryGetByCode(context, pkgCategoryCode);
         }
 
         NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest);

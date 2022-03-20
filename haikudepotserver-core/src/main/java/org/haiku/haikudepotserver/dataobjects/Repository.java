@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -76,6 +76,18 @@ public class Repository extends _Repository implements MutableCreateAndModifyTim
                 .sharedCache()
                 .cacheGroup(HaikuDepot.CacheGroup.REPOSITORY.name())
                 .select(context);
+    }
+
+    public Optional<RepositorySource> tryGetRepositorySourceForArchitectureCode(String architectureCode) {
+        return getRepositorySources().stream()
+                .filter(rs -> rs.getArchitecture().getCode().equals(architectureCode))
+                .collect(SingleCollector.optional());
+    }
+
+    public Optional<RepositorySource> tryGetRepositorySourceForArchitecture(Architecture architecture) {
+        return getRepositorySources().stream()
+                .filter(rs -> rs.getArchitecture().equals(architecture))
+                .collect(SingleCollector.optional());
     }
 
     @Override

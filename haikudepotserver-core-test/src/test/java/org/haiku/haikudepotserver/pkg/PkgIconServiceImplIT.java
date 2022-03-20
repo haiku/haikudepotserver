@@ -81,7 +81,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
                             context,
                             "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
 
-            PkgIcon pkgIcon = pkg1Devel.getPkgSupplement().getPkgIcon(pngMediaType, 32).get();
+            PkgIcon pkgIcon = pkg1Devel.getPkgSupplement().tryGetPkgIcon(pngMediaType, 32).get();
 
             Assertions.assertThat(pkgIcon.getSize()).isEqualTo(32);
         }

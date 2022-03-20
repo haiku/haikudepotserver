@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,9 +9,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import com.googlecode.jsonrpc4j.InvocationListener;
-import org.haiku.haikudepotserver.metrics.model.RequestStart;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +22,7 @@ import java.util.regex.Pattern;
  */
 public class MetricsInvocationListener implements InvocationListener {
 
-    private static Pattern PATTERN_API_PACKAGE = Pattern.compile("^.+\\.api([0-9]+)$");
+    private final static Pattern PATTERN_API_PACKAGE = Pattern.compile("^.+\\.api([0-9]+)$");
 
     private final MetricRegistry metricRegistry;
 
@@ -32,7 +30,7 @@ public class MetricsInvocationListener implements InvocationListener {
         this.metricRegistry = Preconditions.checkNotNull(metricRegistry);
     }
 
-    private String formulateMetricName(Class klass) {
+    private String formulateMetricName(Class<?> klass) {
         Matcher matcher = PATTERN_API_PACKAGE.matcher(klass.getPackage().getName());
         return "jrpc-api" + (matcher.matches() ? matcher.group(1) : "") + "." + klass.getSimpleName();
     }

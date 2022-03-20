@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
@@ -26,7 +27,12 @@ public class PkgCategory extends _PkgCategory implements Coded, CreateAndModifyT
         return ObjectSelect.query(PkgCategory.class).sharedCache().orderBy(NAME.asc()).select(context);
     }
 
-    public static Optional<PkgCategory> getByCode(ObjectContext context, final String code) {
+    public static PkgCategory getByCode(ObjectContext context, final String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new ObjectNotFoundException(PkgCategory.class.getSimpleName(), code));
+    }
+
+    public static Optional<PkgCategory> tryGetByCode(ObjectContext context, final String code) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return getAll(context).stream().filter(pc -> pc.getCode().equals(code)).collect(SingleCollector.optional());

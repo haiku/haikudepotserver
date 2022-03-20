@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -50,10 +50,11 @@ public class PkgVersionLinkTag extends RequestContextAwareTag {
         JspWriter jspWriter = pageContext.getOut();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(String.format(
-                "%s/pkg/%s/%s/%s/%s/%s/%s/%s/%s",
+                "%s/pkg/%s/%s/%s/%s/%s/%s/%s/%s/%s",
                 MultipageConstants.PATH_MULTIPAGE,
                 pkgVersion.getPkg().getName(),
                 pkgVersion.getRepositorySource().getRepository().getCode(),
+                pkgVersion.getRepositorySource().getCode(),
                 emptyToHyphen(pkgVersion.getMajor()),
                 emptyToHyphen(pkgVersion.getMinor()),
                 emptyToHyphen(pkgVersion.getMicro()),

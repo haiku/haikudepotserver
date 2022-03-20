@@ -120,14 +120,14 @@ public class PkgImportServiceImpl implements PkgImportService {
             persistedPkgVersion = PkgVersion.getForPkg(
                     objectContext,
                     persistedPkg,
-                    repositorySource.getRepository(),
+                    repositorySource,
                     architecture,
                     new VersionCoordinates(pkg.getVersion())).orElse(null);
 
             persistedLatestExistingPkgVersion = pkgServiceImpl.getLatestPkgVersionForPkg(
                     objectContext,
                     persistedPkg,
-                    repositorySource.getRepository(),
+                    repositorySource,
                     Collections.singletonList(architecture));
         }
 
@@ -445,8 +445,8 @@ public class PkgImportServiceImpl implements PkgImportService {
             } else {
                 boolean isRealArchitecture = !persistedPkgVersion.getArchitecture().getCode().equals(Architecture.CODE_SOURCE);
 
-                if(0 == c) {
-                    if(isRealArchitecture) {
+                if (0 == c) {
+                    if (isRealArchitecture) {
                         LOGGER.debug(
                                 "imported a package version [{}] of [{}] which is the same as the existing [{}]",
                                 persistedPkgVersionCoords,
@@ -454,7 +454,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                                 persistedLatestExistingPkgVersionCoords);
                     }
                 } else {
-                    if(isRealArchitecture) {
+                    if (isRealArchitecture) {
 
                         // [apl 3.dec.2016]
                         // If the package from the repository is older than the one that is presently marked as latest
@@ -464,7 +464,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                         List<PkgVersion> pkgVersionsToDeactivate = PkgVersion.getForPkg(
                                 objectContext,
                                 persistedPkgVersion.getPkg(),
-                                persistedPkgVersion.getRepositorySource().getRepository(),
+                                persistedPkgVersion.getRepositorySource(),
                                 false)
                                 .stream()
                                 .filter((pv) -> pv.getArchitecture().equals(persistedPkgVersion.getArchitecture()))
@@ -482,7 +482,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                                 persistedLatestExistingPkgVersionCoords,
                                 pkgVersionsToDeactivate.size());
 
-                        for(PkgVersion pkgVersionToDeactivate : pkgVersionsToDeactivate) {
+                        for (PkgVersion pkgVersionToDeactivate : pkgVersionsToDeactivate) {
                             pkgVersionToDeactivate.setActive(false);
                             pkgVersionToDeactivate.setIsLatest(false);
                             LOGGER.info("deactivated {}", pkgVersionToDeactivate);

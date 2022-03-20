@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,8 +7,8 @@ angular.module('haikudepotserver').config(
     [
         '$routeProvider',
         function($routeProvider) {
-            // eg; '/pkg/apr/1/4/6/3/7/x86'
-            var pkgVersionPrefix = '/pkg/:name/:repositoryCode/:major/:minor?/:micro?/:preRelease?/:revision?/:architectureCode';
+            // eg; '/pkg/apr/haikuports/haikuports_x86_64/1/4/6/3/7/x86'
+            var pkgVersionPrefix = '/pkg/:name/:repositoryCode/:repositorySourceCode/:major/:minor?/:micro?/:preRelease?/:revision?/:architectureCode';
             var repositorySourcePrefix = '/repository/:repositoryCode/source/:repositorySourceCode';
             var controllerTemplatePathPrefix = '/__js/app/controller';
 
@@ -76,9 +76,7 @@ angular.module('haikudepotserver').controller(
         function(
             $log,$location,
             errorHandling) {
-
             errorHandling.handleUnknownLocation();
-
         }
     ]
 );

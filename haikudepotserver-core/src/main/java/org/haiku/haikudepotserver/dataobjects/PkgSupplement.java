@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Andrew Lindesay
+ * Copyright 2019-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
@@ -55,7 +56,12 @@ public class PkgSupplement extends _PkgSupplement implements MutableCreateAndMod
                 .orElseThrow(() -> new IllegalStateException("there are no associated pkgs"));
     }
 
-    public Optional<PkgIcon> getPkgIcon(final MediaType mediaType, final Integer size) {
+    public PkgIcon getPkgIcon(final MediaType mediaType, final Integer size) {
+        return tryGetPkgIcon(mediaType, size)
+                .orElseThrow(() -> new ObjectNotFoundException(PkgIcon.class.getSimpleName(), mediaType));
+    }
+
+    public Optional<PkgIcon> tryGetPkgIcon(final MediaType mediaType, final Integer size) {
         Preconditions.checkNotNull(mediaType);
 
         List<PkgIcon> icons = getPkgIcons(mediaType,size);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -142,11 +142,15 @@ public class PkgSearchController {
             Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, query);
 
             if (pkgOptional.isPresent()) {
+                Architecture architecture = Architecture.getByCode(context, defaultArchitectureCode);
                 pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
                         context,
                         pkgOptional.get(),
-                        Repository.getByCode(context, Repository.CODE_DEFAULT), // TODO - user interface for choosing?
-                        Collections.singletonList(Architecture.tryGetByCode(context, defaultArchitectureCode).get()));
+                        Repository.getByCode(context, Repository.CODE_DEFAULT)
+                                .tryGetRepositorySourceForArchitecture(architecture)
+                                .orElseThrow(() -> new IllegalStateException("cannot find repository source")),
+                        // ^ TODO - user interface for choosing?
+                        Collections.singletonList(architecture));
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,9 +11,16 @@ public class CreateUserRatingRequest {
 
     /**
      * @since 2015-05-27
+     * @deprecated use the {@link #repositorySourceCode} instead
      */
 
     public String repositoryCode;
+
+    /**
+     * @since 2022-03-17
+     */
+
+    public String repositorySourceCode;
 
     public String naturalLanguageCode;
 

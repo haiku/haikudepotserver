@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -125,7 +125,7 @@ public class PkgIconServiceImpl implements PkgIconService {
                 }
 
                 size = pngSize.width;
-                pkgIconOptional = pkgSupplement.getPkgIcon(mediaType, pngSize.width);
+                pkgIconOptional = pkgSupplement.tryGetPkgIcon(mediaType, pngSize.width);
                 break;
 
             case MediaType.MEDIATYPE_HAIKUVECTORICONFILE:
@@ -134,7 +134,7 @@ public class PkgIconServiceImpl implements PkgIconService {
                             + "look like hvif", pkgSupplement.getBasePkgName());
                     throw new BadPkgIconException();
                 }
-                pkgIconOptional = pkgSupplement.getPkgIcon(mediaType, null);
+                pkgIconOptional = pkgSupplement.tryGetPkgIcon(mediaType, null);
                 break;
 
             default:

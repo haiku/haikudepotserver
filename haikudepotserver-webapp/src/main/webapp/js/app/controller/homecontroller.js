@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -175,7 +175,7 @@ angular.module('haikudepotserver').controller(
                     if (!$scope.selectedRepositories || !$scope.selectedRepositories.length) {
                         return repositoryService.preferentialSearchRepositories().then(
                             function (data) {
-                                if(!data || !data.length) {
+                                if (!data || !data.length) {
                                     throw Error('unable to establish the preferential search repositories');
                                 }
 
@@ -638,10 +638,7 @@ angular.module('haikudepotserver').controller(
                         repositoryCodes : _.map($scope.selectedRepositories, function(r) {
                             return r.code;
                         }),
-                        architectureCodes: [
-                            'any',
-                            $scope.selectedArchitecture.code
-                        ],
+                        architectureCode: $scope.selectedArchitecture.code,
                         naturalLanguageCode : userState.naturalLanguageCode(),
                         offset: $scope.pkgs.offset,
                         limit: PAGESIZE

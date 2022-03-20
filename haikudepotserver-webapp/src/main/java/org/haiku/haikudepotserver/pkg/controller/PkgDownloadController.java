@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,7 +15,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
@@ -49,6 +49,7 @@ public class PkgDownloadController {
 
     private final static String KEY_PKGNAME = "pkgName";
     private final static String KEY_REPOSITORYCODE = "repositoryCode";
+    private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
     private final static String KEY_MAJOR = "major";
     private final static String KEY_MINOR = "minor";
     private final static String KEY_MICRO = "micro";
@@ -56,7 +57,7 @@ public class PkgDownloadController {
     private final static String KEY_REVISION = "revision";
     private final static String KEY_ARCHITECTURECODE = "architectureCode";
 
-    private final static String PATH = "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
+    private final static String PATH = "/{" + KEY_PKGNAME + "}/{" + KEY_REPOSITORYCODE + "}/{" + KEY_REPOSITORYSOURCECODE + "}/{" + KEY_MAJOR + "}/{" + KEY_MINOR + "}/{" +
             KEY_MICRO + "}/{" + KEY_PRERELEASE + "}/{" + KEY_REVISION + "}/{" + KEY_ARCHITECTURECODE + "}/package.hpkg";
 
     private final ServerRuntime serverRuntime;
@@ -80,6 +81,7 @@ public class PkgDownloadController {
             HttpServletResponse response,
             @PathVariable(value = KEY_PKGNAME) String pkgName,
             @PathVariable(value = KEY_REPOSITORYCODE) String repositoryCode,
+            @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode,
             @PathVariable(value = KEY_MAJOR) String major,
             @PathVariable(value = KEY_MINOR) String minor,
             @PathVariable(value = KEY_MICRO) String micro,
@@ -98,10 +100,18 @@ public class PkgDownloadController {
             return new RequestObjectNotFound();
         });
 
-        Repository repository = Repository.tryGetByCode(context, repositoryCode).orElseThrow(() -> {
-            LOGGER.info("unable to find the repository; {}", repositoryCode);
+        RepositorySource repositorySource = RepositorySource.tryGetByCode(context, repositorySourceCode).orElseThrow(() -> {
+            LOGGER.info("unable to find the repository source; {}", repositorySourceCode);
             return new RequestObjectNotFound();
         });
+
+        // extra check; probably not required
+
+        if (!repositorySource.getRepository().getCode().equals(repositoryCode)) {
+            LOGGER.info("mismatch between the repository source [{}] and repository [{}]",
+                    repositorySourceCode, repositoryCode);
+            throw new RequestObjectNotFound();
+        }
 
         Architecture architecture = Architecture.tryGetByCode(context, architectureCode).orElseThrow(() -> {
             LOGGER.info("unable to find the architecture; {}", architectureCode);
@@ -115,9 +125,9 @@ public class PkgDownloadController {
                 hyphenToNull(minor),
                 hyphenToNull(micro),
                 hyphenToNull(prerelease),
-                null==revisionStr ? null : Integer.parseInt(revisionStr));
+                null == revisionStr ? null : Integer.parseInt(revisionStr));
 
-        PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repository, architecture, versionCoordinates)
+        PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repositorySource, architecture, versionCoordinates)
                 .orElseThrow(() -> {
                     LOGGER.info("unable to find the pkg version; {}, {}", pkgName, versionCoordinates);
                     return new RequestObjectNotFound();
@@ -140,7 +150,7 @@ public class PkgDownloadController {
                 response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
 
                 PrintWriter writer = response.getWriter();
-                writer.print(url.toString());
+                writer.print(url);
                 writer.flush();
             } else {
                 response.setContentType(MediaType.OCTET_STREAM.toString());
@@ -157,7 +167,7 @@ public class PkgDownloadController {
                 } catch (IOException ioe) {
                     // logged without a stack trace because it happens fairly often that a robot will initiate the download and then drop it.
                     LOGGER.error("unable to relay data to output stream from '{}'; {} -- {}",
-                            url.toString(), ioe.getClass().getSimpleName(), ioe.getMessage());
+                            url, ioe.getClass().getSimpleName(), ioe.getMessage());
                 }
             }
         }

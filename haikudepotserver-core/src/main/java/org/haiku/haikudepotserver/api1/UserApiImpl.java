@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -108,7 +108,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
                     user.setNaturalLanguage(getNaturalLanguage(context, updateUserRequest.naturalLanguageCode));
 
-                    LOGGER.info("will update the natural language on the user {} to {}", user.toString(), updateUserRequest.naturalLanguageCode);
+                    LOGGER.info("will update the natural language on the user {} to {}", user, updateUserRequest.naturalLanguageCode);
 
                     break;
 
@@ -146,7 +146,7 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
                 LOGGER.info(
                         "will update user rating derivation for {} packages owing to active state change on user {}",
                         pkgNames.size(),
-                        user.toString());
+                        user);
 
                 for (String pkgName : pkgNames) {
                     jobService.submit(

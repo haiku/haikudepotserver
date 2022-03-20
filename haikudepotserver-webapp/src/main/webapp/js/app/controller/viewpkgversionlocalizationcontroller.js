@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -74,7 +74,7 @@ angular.module('haikudepotserver').controller(
                                     'getPkgVersionLocalizations',
                                     [{
                                         pkgName: $routeParams.name,
-                                        repositoryCode : $routeParams.repositoryCode,
+                                        repositorySourceCode : $routeParams.repositorySourceCode,
                                         major : version.major,
                                         minor : version.minor,
                                         micro : version.micro,

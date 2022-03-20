@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -57,6 +57,7 @@ public class FallbackController {
     private final PkgService pkgService;
     private final RepositoryService repositoryService;
     private final String baseUrl;
+    private final String defaultArchitectureCode;
 
     @Autowired(required = false)
     private ServletContext servletContext;
@@ -65,11 +66,13 @@ public class FallbackController {
             ServerRuntime serverRuntime,
             PkgService pkgService,
             RepositoryService repositoryService,
+            @Value("${architecture.default.code}") String defaultArchitectureCode,
             @Value("${baseurl}") String baseUrl) {
         this.serverRuntime = serverRuntime;
         this.pkgService = pkgService;
         this.repositoryService = repositoryService;
         this.baseUrl = baseUrl;
+        this.defaultArchitectureCode = defaultArchitectureCode;
     }
 
     private String termDebug(String term) {
@@ -141,7 +144,10 @@ public class FallbackController {
                 .flatMap(t -> Pkg.tryGetByName(context, t))
                 .flatMap(pkg -> repositoryService.getRepositoriesForPkg(context, pkg)
                         .stream()
-                        .map(r -> pkgService.getLatestPkgVersionForPkg(context, pkg, r))
+                        .map(r -> r.tryGetRepositorySourceForArchitectureCode(defaultArchitectureCode))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(rs -> pkgService.getLatestPkgVersionForPkg(context, pkg, rs))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .findFirst());

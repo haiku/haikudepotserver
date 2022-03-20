@@ -38,6 +38,8 @@ components:
       properties:
         repositoryCode:
           type: string
+        repositorySourceCode:
+          type: string
         architectureCode:
           type: string
         major:

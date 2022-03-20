@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -38,7 +38,11 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     private List<Repository> repositories;
 
-    private List<Architecture> architectures;
+    /**
+     * @since 2022-03-26
+     */
+
+    private Architecture architecture;
 
     private PkgCategory pkgCategory;
 
@@ -53,7 +57,7 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
     }
 
     public void setRepositories(Collection<Repository> repositories) {
-        this.repositories = new ArrayList(repositories);
+        this.repositories = List.copyOf(repositories);
     }
 
     public NaturalLanguage getNaturalLanguage() {
@@ -72,12 +76,12 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
         this.pkgNames = pkgNames;
     }
 
-    public List<Architecture> getArchitectures() {
-        return architectures;
+    public Architecture getArchitecture() {
+        return architecture;
     }
 
-    public void setArchitectures(List<Architecture> architectures) {
-        this.architectures = architectures;
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
     }
 
     public PkgCategory getPkgCategory() {

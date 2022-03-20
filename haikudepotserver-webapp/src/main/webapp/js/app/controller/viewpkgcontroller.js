@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -443,7 +443,7 @@ angular.module('haikudepotserver').controller(
                     [{
                         filter : [ 'ACTIVE' ],
                         active : false,
-                        repositoryCode : pv.repository.code,
+                        repositorySourceCode : pv.repositorySource.code,
                         pkgName : $routeParams.name,
                         architectureCode : pv.architectureCode,
                         major : pv.major,

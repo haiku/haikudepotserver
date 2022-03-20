@@ -1195,12 +1195,12 @@ FROM
 haikudepot.pkg_version pv
 JOIN haikudepot.pkg p ON p.id = pv.pkg_id
 JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
-#if($search.repositories || $search.sortOrdering.name() == "PROMINENCE")
+#if($search.repositories || $search.sortOrdering.name() == "PROMINENCE" || $search.architecture)
   JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
   JOIN haikudepot.repository r ON rs.repository_id = r.id
 #end
-#if($search.architectures)
-JOIN haikudepot.architecture a ON a.id = pv.architecture_id
+#if($search.architecture)
+JOIN haikudepot.architecture a ON a.id = rs.architecture_id
 #end
 LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_supplement_id = ps.id AND
     #if($search.naturalLanguage)
@@ -1247,15 +1247,8 @@ AND r.code IN (
     #end
 )
 #end
-#if($search.architectures)
-AND a.code IN (
-    #foreach( $architecture in $search.architectures )
-        #bind($architecture.code)
-        #if($foreach.hasNext)
-        ,
-        #end
-    #end
-)
+#if($search.architecture)
+AND a.code = #bind($search.architecture.code)
 #end
 #if($search.daysSinceLatestVersion)
 AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGER') * INTERVAL '1 DAY'

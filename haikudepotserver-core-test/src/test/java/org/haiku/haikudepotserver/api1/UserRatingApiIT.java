@@ -25,7 +25,7 @@ import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
@@ -57,9 +57,9 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         userRating.setComment("How now brown cow");
         userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,
-                Pkg.tryGetByName(context, "pkg1").get(),
-                Repository.tryGetByCode(context, "testrepo").get(),
-                Collections.singletonList(Architecture.tryGetByCode(context, "x86_64").get())).get());
+                Pkg.getByName(context, "pkg1"),
+                RepositorySource.getByCode(context, "testreposrc_xyz"),
+                Collections.singletonList(Architecture.getByCode(context, "x86_64"))).get());
         userRating.setRating((short) 3);
         userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_VERYUNSTABLE).get());
         userRating.setUser(user);
@@ -110,12 +110,12 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            Optional<UserRating> userRatingOptional = UserRating.tryGetByCode(context, userRatingCode);
-            Assertions.assertThat(userRatingOptional.get().getActive()).isFalse();
-            Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 1);
-            Assertions.assertThat(userRatingOptional.get().getComment()).isEqualTo("Highlighter orange");
-            Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
-            Assertions.assertThat(userRatingOptional.get().getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_MOSTLYSTABLE);
+            UserRating userRating = UserRating.getByCode(context, userRatingCode);
+            Assertions.assertThat(userRating.getActive()).isFalse();
+            Assertions.assertThat(userRating.getRating()).isEqualTo((short) 1);
+            Assertions.assertThat(userRating.getComment()).isEqualTo("Highlighter orange");
+            Assertions.assertThat(userRating.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
+            Assertions.assertThat(userRating.getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_MOSTLYSTABLE);
         }
     }
 
@@ -238,6 +238,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
             Assertions.assertThat(userRating.pkgVersion.pkg.name).isEqualTo("pkg3");
             Assertions.assertThat(userRating.pkgVersion.repositoryCode).isEqualTo("testrepo");
+            Assertions.assertThat(userRating.pkgVersion.repositorySourceCode).isEqualTo("testreposrc_xyz");
             Assertions.assertThat(userRating.pkgVersion.architectureCode).isEqualTo("x86_64");
             Assertions.assertThat(userRating.pkgVersion.major).isEqualTo("1");
             Assertions.assertThat(userRating.pkgVersion.micro).isEqualTo("2");

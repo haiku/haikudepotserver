@@ -46,21 +46,6 @@ public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
                 .selectOne(context));
     }
 
-    public static List<Pkg> findByNames(ObjectContext context, Collection<String> names) {
-        Preconditions.checkArgument(null!=context, "a context must be provided to lookup a package");
-
-        if (CollectionUtils.isEmpty(names)) {
-            return Collections.emptyList();
-        }
-
-        return ObjectSelect
-                .query(Pkg.class)
-                .where(NAME.in(names))
-                .sharedCache()
-                .cacheGroup(HaikuDepot.CacheGroup.PKG.name())
-                .select(context);
-    }
-
     @Override
     public void validateForInsert(ValidationResult validationResult) {
 

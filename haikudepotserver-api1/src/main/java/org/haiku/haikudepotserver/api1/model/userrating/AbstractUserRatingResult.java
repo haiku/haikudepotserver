@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,9 +11,16 @@ public class AbstractUserRatingResult {
 
         /**
          * @since 2015-07-07
+         * @deprecated please use {@link #repositorySourceCode} instead.
          */
 
         public String repositoryCode;
+
+        /**
+         * @since 2022-03-24
+         */
+
+        public String repositorySourceCode;
 
         public String architectureCode;
 

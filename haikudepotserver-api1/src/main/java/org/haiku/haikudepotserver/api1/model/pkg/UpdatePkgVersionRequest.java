@@ -20,7 +20,10 @@ public class UpdatePkgVersionRequest {
     // ---------------------
     // attributes used to identify the pkg version to update
 
-    public String repositoryCode;
+    /**
+     * @since 2022-03-17
+     */
+    public String repositorySourceCode;
 
     public String pkgName;
 

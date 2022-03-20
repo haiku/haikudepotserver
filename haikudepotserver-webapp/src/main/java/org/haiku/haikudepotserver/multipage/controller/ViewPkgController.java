@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,8 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.MultipageObjectNotFoundException;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haiku.haikudepotserver.support.web.WebConstants;
@@ -33,10 +35,15 @@ import java.util.Optional;
 @RequestMapping(MultipageConstants.PATH_MULTIPAGE + "/pkg")
 public class ViewPkgController {
 
-    private ServerRuntime serverRuntime;
+    private final ServerRuntime serverRuntime;
 
-    public ViewPkgController(ServerRuntime serverRuntime) {
+    private final PkgLocalizationService pkgLocalizationService;
+
+    public ViewPkgController(
+            ServerRuntime serverRuntime,
+            PkgLocalizationService pkgLocalizationService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
     }
 
     private String hyphenToNull(String part) {
@@ -53,32 +60,16 @@ public class ViewPkgController {
                 PkgVersion.getForPkg(
                 context,
                 sourcePkgOptional.get(),
-                pkgVersion.getRepositorySource().getRepository(),
+                pkgVersion.getRepositorySource(),
                 Architecture.getByCode(context, Architecture.CODE_SOURCE),
                 pkgVersion.toVersionCoordinates()).isPresent();
     }
 
-    // TODO; Legacy - perhaps remove by late 2015?
-    @RequestMapping(value = "{name}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
-    public ModelAndView viewPkg_legacyNoRepository(
-            HttpServletRequest httpServletRequest,
-            @PathVariable(value="name") String pkgName,
-            @PathVariable(value="major") String major,
-            @PathVariable(value="minor") String minor,
-            @PathVariable(value="micro") String micro,
-            @PathVariable(value="preRelease") String preRelease,
-            @PathVariable(value="revision") String revisionStr,
-            @PathVariable(value="architectureCode") String architectureCode) throws MultipageObjectNotFoundException {
-          return viewPkg(
-                  httpServletRequest,
-                  Repository.CODE_DEFAULT,
-                  pkgName, major, minor, micro, preRelease, revisionStr, architectureCode);
-    }
-
-    @RequestMapping(value = "{name}/{repositoryCode}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
+    @RequestMapping(value = "{name}/{repositoryCode}/{repositorySourceCode}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
     public ModelAndView viewPkg(
             HttpServletRequest httpServletRequest,
             @PathVariable(value="repositoryCode") String repositoryCode,
+            @PathVariable(value="repositorySourceCode") String repositorySourceCode,
             @PathVariable(value="name") String pkgName,
             @PathVariable(value="major") String major,
             @PathVariable(value="minor") String minor,
@@ -98,15 +89,20 @@ public class ViewPkgController {
         ObjectContext context = serverRuntime.newContext();
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
-        if(!pkgOptional.isPresent()) {
+        if(pkgOptional.isEmpty()) {
             throw new MultipageObjectNotFoundException(Pkg.class.getSimpleName(), pkgName); // 404
         }
 
         Architecture architecture = Architecture.tryGetByCode(context, architectureCode).orElseThrow(() ->
                 new MultipageObjectNotFoundException(Architecture.class.getSimpleName(), architectureCode));
 
-        Repository repository = Repository.tryGetByCode(context, repositoryCode).orElseThrow(() ->
-                new MultipageObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode));
+        RepositorySource repositorySource = RepositorySource.tryGetByCode(context, repositorySourceCode).orElseThrow(() ->
+                new MultipageObjectNotFoundException(Repository.class.getSimpleName(), repositorySourceCode));
+
+        // possibly unnecessary extra check
+        if (!repositorySource.getRepository().getCode().equals(repositoryCode)) {
+            throw new MultipageObjectNotFoundException(Repository.class.getSimpleName(), repositoryCode);
+        }
 
         VersionCoordinates coordinates = new VersionCoordinates(
                 Strings.emptyToNull(major),
@@ -116,9 +112,9 @@ public class ViewPkgController {
                 revision);
 
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
-                context, pkgOptional.get(), repository, architecture, coordinates);
+                context, pkgOptional.get(), repositorySource, architecture, coordinates);
 
-        if(!pkgVersionOptional.isPresent() || !pkgVersionOptional.get().getActive()) {
+        if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
             throw new MultipageObjectNotFoundException(PkgVersion.class.getSimpleName(), pkgName + "...");
         }
 
@@ -136,9 +132,18 @@ public class ViewPkgController {
         }
 
         ViewPkgVersionData data = new ViewPkgVersionData();
+        NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest);
 
         data.setPkgVersion(pkgVersionOptional.get());
-        data.setCurrentNaturalLanguage(NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest));
+        data.setResolvedPkgVersionLocalization(
+                pkgLocalizationService.resolvePkgVersionLocalization(
+                        context,
+                        pkgVersionOptional.get(),
+                        null,
+                        naturalLanguage
+                )
+        );
+        data.setCurrentNaturalLanguage(naturalLanguage);
         data.setHomeUrl(homeUrl);
         data.setIsSourceAvailable(hasSource(context, pkgVersionOptional.get()));
 
@@ -158,11 +163,21 @@ public class ViewPkgController {
 
         private PkgVersion pkgVersion;
 
+        private ResolvedPkgVersionLocalization resolvedPkgVersionLocalization;
+
         private NaturalLanguage currentNaturalLanguage;
 
         private String homeUrl;
 
         private Boolean isSourceAvailable;
+
+        public ResolvedPkgVersionLocalization getResolvedPkgVersionLocalization() {
+            return resolvedPkgVersionLocalization;
+        }
+
+        public void setResolvedPkgVersionLocalization(ResolvedPkgVersionLocalization resolvedPkgVersionLocalization) {
+            this.resolvedPkgVersionLocalization = resolvedPkgVersionLocalization;
+        }
 
         public Boolean getIsSourceAvailable() {
             return isSourceAvailable;

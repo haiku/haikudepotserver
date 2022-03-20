@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -135,13 +135,21 @@ public class UserRatingServiceImpl implements UserRatingService {
             whereExpressions.add("ur." + UserRating.ACTIVE.getName() + " = true");
         }
 
-        if(null != search.getRepository()) {
+        if (null != search.getRepository()) {
             parameterAccumulator.add(search.getRepository());
             whereExpressions.add(
                     "ur."
                             + UserRating.PKG_VERSION.getName() + "."
                             + PkgVersion.REPOSITORY_SOURCE.getName() + "."
                             + RepositorySource.REPOSITORY.getName() + " = ?" + parameterAccumulator.size());
+        }
+
+        if (null != search.getRepositorySource()) {
+            parameterAccumulator.add(search.getRepositorySource());
+            whereExpressions.add(
+                    "ur."
+                            + UserRating.PKG_VERSION.getName() + "."
+                            + PkgVersion.REPOSITORY_SOURCE.getName() + " = ?" + parameterAccumulator.size());
         }
 
         if (null != search.getDaysSinceCreated()) {
@@ -202,7 +210,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         List<Object> parameters = new ArrayList<>();
         EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(ur) FROM UserRating AS ur WHERE " + prepareWhereClause(parameters, context, search));
 
-        for(int i=0;i<parameters.size();i++) {
+        for (int i = 0; i < parameters.size(); i++) {
             ejbQuery.setParameter(i+1,parameters.get(i));
         }
 
@@ -259,7 +267,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkgVersions);
 
-        if(pkgVersions.isEmpty()) {
+        if (pkgVersions.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -268,12 +276,12 @@ public class UserRatingServiceImpl implements UserRatingService {
         queryBuilder.append("SELECT DISTINCT ur.user.nickname FROM UserRating ur WHERE ur.user.active=true AND ur.active=true");
         queryBuilder.append(" AND (");
 
-        for(int i=0;i<pkgVersions.size();i++) {
-            if(0!=i) {
+        for (int i = 0; i < pkgVersions.size(); i++) {
+            if (0 != i) {
                 queryBuilder.append(" OR ");
             }
 
-            queryBuilder.append("ur.pkgVersion=?"+Integer.toString(i + 1));
+            queryBuilder.append("ur.pkgVersion=?" + (i + 1));
         }
 
         queryBuilder.append(")");
@@ -363,7 +371,7 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         LOGGER.info("calculated the user rating for {} in {} in {}ms", pkg, repository, System.currentTimeMillis() - beforeMillis);
 
-        if(!rating.isPresent()) {
+        if(rating.isEmpty()) {
             LOGGER.info("unable to establish a user rating for {} in {}", pkg, repository);
         }
         else {
@@ -418,7 +426,9 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         // haul all of the pkg versions into memory first.
 
-        List<PkgVersion> pkgVersions = PkgVersion.getForPkg(context, pkg, repository, false); // active only
+        List<PkgVersion> pkgVersions = repository.getRepositorySources().stream()
+                .flatMap(rs -> PkgVersion.getForPkg(context, pkg, rs, false).stream()) // active only
+                .collect(Collectors.toList());
 
         if(!pkgVersions.isEmpty()) {
 
@@ -442,7 +452,7 @@ public class UserRatingServiceImpl implements UserRatingService {
                 oldestVersionCoordinates = versionCoordinates.get(0);
             }
             else {
-                oldestVersionCoordinates = versionCoordinates.get(versionCoordinates.size()-(userRatingDerivationVersionsBack +1));
+                oldestVersionCoordinates = versionCoordinates.get(versionCoordinates.size() - (userRatingDerivationVersionsBack +1));
             }
 
             // now we need to find all of the package versions that are including this one or newer.

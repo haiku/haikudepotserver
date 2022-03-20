@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,7 +22,12 @@ public class SearchPkgsRequest extends AbstractSearchRequest {
         VERSIONVIEWCOUNTER
     }
 
-    public List<String> architectureCodes;
+    /**
+     * <p>This effectively specifies the repository sources to use.</p>
+     * @since 2022-03-26
+     */
+
+    public String architectureCode;
 
     /**
      * <p>This field specifies the repositories that the search will look for packages in.</p>

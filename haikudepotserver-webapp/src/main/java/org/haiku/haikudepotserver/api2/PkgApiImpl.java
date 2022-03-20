@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Andrew Lindesay
+ * Copyright 2021-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -27,6 +27,7 @@ public class PkgApiImpl extends AbstractApiImpl implements  PkgApi {
         IncrementViewCounterRequest requestV1 = new IncrementViewCounterRequest();
         requestV1.architectureCode = incrementViewCounterRequestEnvelope.getArchitectureCode();
         requestV1.repositoryCode = incrementViewCounterRequestEnvelope.getRepositoryCode();
+        requestV1.repositorySourceCode = incrementViewCounterRequestEnvelope.getRepositorySourceCode();
         requestV1.name = incrementViewCounterRequestEnvelope.getName();
         requestV1.major = incrementViewCounterRequestEnvelope.getMajor();
         requestV1.minor = incrementViewCounterRequestEnvelope.getMinor();

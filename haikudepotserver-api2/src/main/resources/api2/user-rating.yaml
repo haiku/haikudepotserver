@@ -156,6 +156,9 @@ components:
       properties:
         repositoryCode:
           type: string
+          description: deprecated; use the repositorySourceCode instead
+        repositorySourceCode:
+          type: string
         naturalLanguageCode:
           type: string
         userNickname:
@@ -202,6 +205,9 @@ components:
       type: object
       properties:
         repositoryCode:
+          type: string
+          description: deprecated; use the repositorySourceCode instead
+        repositorySourceCode:
           type: string
         userNickname:
           type: string
@@ -261,6 +267,9 @@ components:
         - type: object
           properties:
             repositoryCode:
+              type: string
+              description: deprecated; use the repositorySourceCode instead
+            repositorySourceCode:
               type: string
             userNickname:
               description: >

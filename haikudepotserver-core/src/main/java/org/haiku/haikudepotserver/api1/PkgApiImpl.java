@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -186,7 +186,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     @Override
     public SearchPkgsResult searchPkgs(final SearchPkgsRequest request) {
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(null != request.architectureCodes && !request.architectureCodes.isEmpty(), "architecture codes must be supplied and at least one is required");
+        Preconditions.checkState(StringUtils.isNotBlank(request.architectureCode), "an architecture code must be supplied");
         Preconditions.checkState(null!=request.repositoryCodes && !request.repositoryCodes.isEmpty(),"repository codes must be supplied and at least one is required");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkNotNull(request.limit);
@@ -210,7 +210,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         specification.setExpression(exp);
 
         if (null != request.pkgCategoryCode) {
-            specification.setPkgCategory(PkgCategory.getByCode(context, request.pkgCategoryCode).get());
+            specification.setPkgCategory(PkgCategory.tryGetByCode(context, request.pkgCategoryCode).get());
         }
 
         if (null != request.expressionType) {
@@ -221,7 +221,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         specification.setNaturalLanguage(getNaturalLanguage(context, request.naturalLanguageCode));
         specification.setDaysSinceLatestVersion(request.daysSinceLatestVersion);
         specification.setSortOrdering(PkgSearchSpecification.SortOrdering.valueOf(request.sortOrdering.name()));
-        specification.setArchitectures(transformCodesToArchitectures(context, request.architectureCodes));
+        specification.setArchitecture(getArchitecture(context, request.architectureCode));
         specification.setRepositories(transformCodesToRepositories(context, request.repositoryCodes));
         specification.setLimit(request.limit);
         specification.setOffset(request.offset);
@@ -405,23 +405,21 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkArgument(
                 EnumSet.of(PkgVersionType.NONE, PkgVersionType.ALL).contains(request.versionType)
-                        || !Strings.isNullOrEmpty(request.repositoryCode),
-                "the repository code should be supplied of the version request is not ALL or NONE");
+                        || StringUtils.isNotBlank(request.repositorySourceCode),
+                "the repository source code should be supplied of the version request is not ALL or NONE");
 
         final ObjectContext context = serverRuntime.newContext();
 
-        Optional<Architecture> architectureOptional = Optional.empty();
-
-        if (!Strings.isNullOrEmpty(request.architectureCode)) {
-            architectureOptional = Architecture.tryGetByCode(context, request.architectureCode);
-        }
+        Architecture architecture = Optional.ofNullable(request.architectureCode)
+                .map(StringUtils::trimToNull)
+                .map(ac -> Architecture.getByCode(context, ac))
+                .orElse(null);
 
         Pkg pkg = getPkg(context, request.name);
-        Repository repository = null;
-
-        if (!Strings.isNullOrEmpty(request.repositoryCode)) {
-            repository = getRepository(context, request.repositoryCode);
-        }
+        RepositorySource repositorySource = Optional.ofNullable(request.repositorySourceCode)
+                .map(StringUtils::trimToNull)
+                .map(rsc -> RepositorySource.getByCode(context, rsc))
+                .orElse(null);
 
         final NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
 
@@ -436,8 +434,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 .map(ppc -> ppc.getPkgCategory().getCode())
                 .collect(Collectors.toList());
 
-        if (null != repository) {
-            Optional<PkgUserRatingAggregate> userRatingAggregate = pkg.getPkgUserRatingAggregate(repository);
+        if (null != repositorySource) {
+            Optional<PkgUserRatingAggregate> userRatingAggregate = pkg.getPkgUserRatingAggregate(repositorySource.getRepository());
 
             if (userRatingAggregate.isPresent()) {
                 result.derivedRating = userRatingAggregate.get().getDerivedRating();
@@ -445,8 +443,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             }
         }
 
-        if (null != repository) {
-            result.prominenceOrdering = pkg.getPkgProminence(repository)
+        if (null != repositorySource) {
+            result.prominenceOrdering = pkg.getPkgProminence(repositorySource.getRepository())
                     .map(pp -> pp.getProminence().getOrdering())
                     .orElse(null);
         }
@@ -459,18 +457,16 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
             case ALL: {
 
-                List<PkgVersion> allVersions;
+                List<PkgVersion> allVersions = Optional.ofNullable(repositorySource)
+                        .map(rs -> PkgVersion.getForPkg(context, pkg, rs, false))
+                            // ^ active only
+                        .orElseGet(() -> PkgVersion.getForPkg(context, pkg, false));
+                            // ^ active only
 
-                if(null==repository) {
-                    allVersions = PkgVersion.getForPkg(context, pkg, false); // active only
-                }
-                else {
-                    allVersions = PkgVersion.getForPkg(context, pkg, repository, false); // active only
-                }
-
-                if(architectureOptional.isPresent()) {
-                    final Architecture a = architectureOptional.get();
-                    allVersions = allVersions.stream().filter(v -> v.getArchitecture().equals(a)).collect(Collectors.toList());
+                if (null != architecture) {
+                    allVersions = allVersions.stream()
+                            .filter(v -> v.getArchitecture().equals(architecture))
+                            .collect(Collectors.toList());
                 }
 
                 // now sort those.
@@ -492,7 +488,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             break;
 
             case SPECIFIC: {
-                if (architectureOptional.isEmpty()) {
+                if (null == architecture) {
                     throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
                 }
 
@@ -500,7 +496,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         request.major, request.minor, request.micro,
                         request.preRelease, request.revision);
 
-                PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repository, architectureOptional.get(), coordinates)
+                PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repositorySource, architecture, coordinates)
                         .filter(_PkgVersion::getActive)
                         .orElseThrow(() ->
                             new ObjectNotFoundException(PkgVersion.class.getSimpleName(), "")
@@ -518,17 +514,8 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             break;
 
             case LATEST: {
-                if (architectureOptional.isEmpty()) {
-                    throw new IllegalStateException("the specified architecture was not able to be found; " + request.architectureCode);
-                }
-
-                PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
-                        context, pkg, repository,
-                        ImmutableList.of(
-                                architectureOptional.get(),
-                                Architecture.tryGetByCode(context, Architecture.CODE_ANY).get(),
-                                Architecture.tryGetByCode(context, Architecture.CODE_SOURCE).get())
-                ).orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), request.name));
+                PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(context, pkg, repositorySource)
+                        .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), request.name));
 
                 if (null != request.incrementViewCounter && request.incrementViewCounter) {
                     incrementCounter(pkgVersion);
@@ -588,7 +575,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, request.pkgName);
 
-        User user = obtainAuthenticatedUser(context);
+        obtainAuthenticatedUser(context);
 
         if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
@@ -829,7 +816,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, updatePkgLocalizationRequest.pkgName);
 
-        User authUser = obtainAuthenticatedUser(context);
+        obtainAuthenticatedUser(context);
 
         if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
@@ -896,22 +883,22 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.architectureCode));
         Preconditions.checkState(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.pkgName));
         Preconditions.checkNotNull(getPkgVersionLocalizationsRequest.naturalLanguageCodes);
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.repositoryCode), "the repository code must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(getPkgVersionLocalizationsRequest.repositorySourceCode), "the repository code must be supplied");
 
         final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, getPkgVersionLocalizationsRequest.pkgName);
         Architecture architecture = getArchitecture(context, getPkgVersionLocalizationsRequest.architectureCode);
-        Repository repository = getRepository(context, getPkgVersionLocalizationsRequest.repositoryCode);
+        RepositorySource repositorySource = getRepositorySource(context, getPkgVersionLocalizationsRequest.repositorySourceCode);
         Optional<PkgVersion> pkgVersionOptional;
 
         if (null==getPkgVersionLocalizationsRequest.major) {
             pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
-                    context, pkg, repository,
+                    context, pkg, repositorySource,
                     Collections.singletonList(architecture));
         }
         else {
             pkgVersionOptional = PkgVersion.getForPkg(
-                    context, pkg, repository, architecture,
+                    context, pkg, repositorySource, architecture,
                     new VersionCoordinates(
                             getPkgVersionLocalizationsRequest.major,
                             getPkgVersionLocalizationsRequest.minor,
@@ -973,7 +960,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         pkgProminence.setProminence(prominenceOptional.get());
         context.commitChanges();
 
-        LOGGER.info("the prominence for {} has been set to; {}", pkg.toString(), prominenceOptional.get().toString());
+        LOGGER.info("the prominence for {} has been set to; {}", pkg, prominenceOptional.get());
 
         return new UpdatePkgProminenceResult();
     }
@@ -1000,7 +987,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "a package name must be supplied");
 
         ObjectContext context = serverRuntime.newContext();
-        User authUser = obtainAuthenticatedUser(context);
+        obtainAuthenticatedUser(context);
         Pkg pkg = getPkg(context, request.pkgName);
 
         if (!permissionEvaluator.hasPermission(
@@ -1025,7 +1012,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public UpdatePkgVersionResult updatePkgVersion(UpdatePkgVersionRequest request) {
         Preconditions.checkArgument(null!=request, "the request object must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.pkgName), "the package name must be supplied");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code must be supplied");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositorySourceCode), "the repository source code must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.architectureCode), "the architecture code must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.major), "the version major must be supplied");
 
@@ -1039,18 +1026,16 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         PkgVersion pkgVersion = PkgVersion.getForPkg(
-                context, pkg, getRepository(context, request.repositoryCode),
+                context, pkg, getRepositorySource(context, request.repositorySourceCode),
                 getArchitecture(context, request.architectureCode),
                 new VersionCoordinates(request.major, request.minor, request.micro, request.preRelease, request.revision)
         ).orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), null));
 
         for(UpdatePkgVersionRequest.Filter filter : request.filter) {
-            switch (filter) {
-                case ACTIVE:
-                    LOGGER.info("will update the package version active flag to {} for {}", request.active, pkgVersion.toString());
-                    pkgVersion.setActive(request.active);
-                    pkgService.adjustLatest(context, pkgVersion.getPkg(), pkgVersion.getArchitecture());
-                    break;
+            if (filter == UpdatePkgVersionRequest.Filter.ACTIVE) {
+                LOGGER.info("will update the package version active flag to {} for {}", request.active, pkgVersion.toString());
+                pkgVersion.setActive(request.active);
+                pkgService.adjustLatest(context, pkgVersion.getPkg(), pkgVersion.getArchitecture());
             }
         }
 
@@ -1063,7 +1048,13 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
     public IncrementViewCounterResult incrementViewCounter(IncrementViewCounterRequest request) {
         Preconditions.checkArgument(null!=request, "the request object must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.name), "the package name must be supplied");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(request.architectureCode), "the architecture must be supplied");
+        // temporary support the `repositoryCode` for the desktop client.
+        Preconditions.checkArgument(
+                Stream.of(request.architectureCode, request.repositoryCode)
+                        .map(StringUtils::trimToNull)
+                        .filter(Objects::nonNull)
+                        .count() == 2 || StringUtils.isNotBlank(request.repositorySourceCode),
+                "the (repository code and architecture) are required or the repository source code");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.repositoryCode), "the repository code must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.major), "the version major must be supplied");
 
@@ -1076,17 +1067,43 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                 request.preRelease,
                 request.revision
         );
-        PkgVersion pkgVersion = PkgVersion.getForPkg(
-                context,
-                Pkg.getByName(context, request.name),
-                Repository.getByCode(context, request.repositoryCode),
-                Architecture.getByCode(context, request.architectureCode),
-                versionCoordinates
-        ).orElseThrow(() -> new ObjectNotFoundException(
-                PkgVersion.class.getSimpleName(),
-                versionCoordinates));
 
-        incrementCounter(pkgVersion);
+        // because there are some older HD desktop clients that will still come
+        // through with architecture + repository, we can work with this to
+        // probably get the repository source.
+
+        Architecture architecture = getArchitecture(context, request.architectureCode);
+        RepositorySource repositorySource = null;
+
+        if (StringUtils.isNotBlank(request.repositorySourceCode)) {
+            repositorySource = getRepositorySource(context, request.repositoryCode);
+        }
+        else {
+            if (!Set.of(Architecture.CODE_SOURCE, Architecture.CODE_ANY).contains(architecture.getCode())) {
+                repositorySource = getRepository(context, request.repositoryCode)
+                        .tryGetRepositorySourceForArchitecture(architecture)
+                        .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), ""));
+            }
+            else {
+                LOGGER.info("unable to find the repository source from the repository [{}] and architecture [{}]"
+                        + " - will not increment the counter",
+                        request.repositoryCode, architecture);
+            }
+        }
+
+        if (null != repositorySource) {
+            PkgVersion pkgVersion = PkgVersion.getForPkg(
+                    context,
+                    getPkg(context, request.name),
+                    repositorySource,
+                    architecture,
+                    versionCoordinates
+            ).orElseThrow(() -> new ObjectNotFoundException(
+                    PkgVersion.class.getSimpleName(),
+                    versionCoordinates));
+
+            incrementCounter(pkgVersion);
+        }
 
         return new IncrementViewCounterResult();
     }

@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 @RequestMapping("/" + WebConstants.PATH_COMPONENT_SECURED)
 public class JobController extends AbstractController {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(JobController.class);
 
     private final static Pattern PATTERN_GUID = Pattern.compile("^[A-Za-z0-9_-]+$");
 

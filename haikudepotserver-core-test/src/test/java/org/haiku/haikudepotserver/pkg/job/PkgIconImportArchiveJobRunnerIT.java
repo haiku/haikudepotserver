@@ -97,14 +97,14 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
             Assertions.assertThat(pkg2.getPkgSupplement().getPkgIcons()).hasSize(2);
 
-            Assertions.assertThat(pkg2.getPkgSupplement().getPkgIcon(
+            Assertions.assertThat(pkg2.getPkgSupplement().tryGetPkgIcon(
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE
                     ),
                     null).isPresent()).isTrue();
 
-            Assertions.assertThat(pkg2.getPkgSupplement().getPkgIcon(
+            Assertions.assertThat(pkg2.getPkgSupplement().tryGetPkgIcon(
                     org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
                             context,
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG

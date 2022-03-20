@@ -127,7 +127,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
 
                         for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
                             cells.add(
-                                    pkgSupplement.getPkgIcon(
+                                    pkgSupplement.tryGetPkgIcon(
                                             pkgIconConfiguration.getMediaType(),
                                             pkgIconConfiguration.getSize()
                                     ).map(pi -> MARKER).orElse(""));

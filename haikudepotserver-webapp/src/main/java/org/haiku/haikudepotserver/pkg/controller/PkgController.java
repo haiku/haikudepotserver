@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -74,7 +74,7 @@ public class PkgController {
         Optional<RepositorySource> repositorySourceOptional =
                 RepositorySource.tryGetByCode(objectContext, repositorySourceCode);
 
-        if (!repositorySourceOptional.isPresent()) {
+        if (repositorySourceOptional.isEmpty()) {
             LOGGER.info("repository source [" + repositorySourceCode + "] not found");
             response.setStatus(HttpStatus.NOT_FOUND.value());
         } else {

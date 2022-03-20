@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -65,6 +65,10 @@ public class RepositorySource extends _RepositorySource {
                 .where(REPOSITORY.eq(repository))
                 .and(ACTIVE.isTrue())
                 .select(context);
+    }
+
+    UriComponentsBuilder appendPathSegments(UriComponentsBuilder builder) {
+        return builder.pathSegment(getCode());
     }
 
     @Override

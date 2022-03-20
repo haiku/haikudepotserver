@@ -141,32 +141,28 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
                         for(Repository repository : repositoryService.getRepositoriesForPkg(context, pkg)) {
 
-                            for (Architecture architecture : architectures) {
+                            architectures.stream()
+                                    .map(repository::tryGetRepositorySourceForArchitecture)
+                                    .filter(Optional::isPresent)
+                                    .map(Optional::get)
+                                    .map(rs -> pkgService.getLatestPkgVersionForPkg(context, pkg, rs))
+                                    .filter(Optional::isPresent)
+                                    .map(Optional::get)
+                                    .forEach(pv -> {
+                                        int c = 0;
 
-                                Optional<PkgVersion> pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
-                                        context,
-                                        pkg,
-                                        repository,
-                                        Collections.singletonList(architecture));
+                                        cells[c++] = pkg.getName();
+                                        cells[c++] = pv.getRepositorySource().getRepository().getCode();
+                                        cells[c++] = pv.getArchitecture().getCode();
+                                        cells[c++] = pv.toVersionCoordinates().toString();
 
-                                if (pkgVersionOptional.isPresent()) {
-                                    int c = 0;
+                                        for (NaturalLanguage naturalLanguage : naturalLanguages) {
+                                            Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pv.getPkgVersionLocalization(naturalLanguage);
+                                            cells[c++] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
+                                        }
 
-                                    cells[c++] = pkg.getName();
-                                    cells[c++] = pkgVersionOptional.get().getRepositorySource().getRepository().getCode();
-                                    cells[c++] = architecture.getCode();
-                                    cells[c++] = pkgVersionOptional.get().toVersionCoordinates().toString();
-
-                                    for (NaturalLanguage naturalLanguage : naturalLanguages) {
-                                        Optional<PkgVersionLocalization> pkgVersionLocalizationOptional = pkgVersionOptional.get().getPkgVersionLocalization(naturalLanguage);
-                                        cells[c++] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
-                                    }
-
-                                    writer.writeNext(cells);
-
-                                }
-                            }
-
+                                        writer.writeNext(cells);
+                                    });
                         }
 
                         jobService.setJobProgressPercent(

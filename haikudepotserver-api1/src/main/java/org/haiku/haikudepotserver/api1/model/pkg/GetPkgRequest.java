@@ -10,12 +10,10 @@ import org.haiku.haikudepotserver.api1.model.PkgVersionType;
 public class GetPkgRequest {
 
     /**
-     * <p>This code defines the repository that you would like to find the package in.  If no such repository
-     * is specified then it will default to "haikuports".</p>
-     * @since 2015-05-26
+     * @since 2022-03-17
      */
 
-    public String repositoryCode;
+    public String repositorySourceCode;
 
     /**
      * <p>This is the name of the package that you wish to obtain.</p>

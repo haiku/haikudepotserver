@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -222,7 +222,7 @@ public class PkgIconController extends AbstractController {
         ObjectContext context = serverRuntime.newContext();
         Optional<Pkg> pkg = Pkg.tryGetByName(context, pkgName); // cached
 
-        if (!pkg.isPresent()) {
+        if (pkg.isEmpty()) {
             LOGGER.debug("request for icon for package '{}', but no such package was able to be found", pkgName);
             throw new PkgNotFound();
         }
@@ -232,7 +232,7 @@ public class PkgIconController extends AbstractController {
         switch (format) {
 
             case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_HAIKUVECTORICONFILE:
-                Optional<PkgIcon> hvifPkgIcon = pkg.get().getPkgSupplement().getPkgIcon(
+                Optional<PkgIcon> hvifPkgIcon = pkg.get().getPkgSupplement().tryGetPkgIcon(
                         org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, format).get(),
                         null);
 

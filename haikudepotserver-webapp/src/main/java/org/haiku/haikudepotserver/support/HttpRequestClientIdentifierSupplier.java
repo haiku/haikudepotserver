@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019, Andrew Lindesay
+ * Copyright 2016-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,7 +49,7 @@ public class HttpRequestClientIdentifierSupplier implements ClientIdentifierSupp
         Matcher ipv4Matcher = PATTERN_IPV4_ADDRESS.matcher(str);
 
         if (ipv4Matcher.matches()) {
-            return HASH.hashString(str, Charsets.UTF_8).toString() + "." + ipv4Matcher.group(4);
+            return HASH.hashString(str, Charsets.UTF_8) + "." + ipv4Matcher.group(4);
         }
 
         return HASH.hashString(str, Charsets.UTF_8).toString();

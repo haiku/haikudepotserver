@@ -12,11 +12,10 @@ public class GetPkgVersionLocalizationsRequest {
     public String pkgName;
 
     /**
-     * <p>This repository code identifies a repository from which to get the package version from</p>
-     * @since 2015-05-27
+     * @since 2022-03-17
      */
 
-    public String repositoryCode;
+    public String repositorySourceCode;
 
     public List<String> naturalLanguageCodes;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -125,7 +125,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
 
                 {
                     MediaType hvifMediaType = MediaType.getByCode(context, MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
-                    Optional<PkgIcon> hvifPkgIconOptional = pkgSupplement.getPkgIcon(hvifMediaType, null);
+                    Optional<PkgIcon> hvifPkgIconOptional = pkgSupplement.tryGetPkgIcon(hvifMediaType, null);
 
                     if (hvifPkgIconOptional.isPresent()) {
                         byte[] hvifData = hvifPkgIconOptional.get().getPkgIconImage().getData();

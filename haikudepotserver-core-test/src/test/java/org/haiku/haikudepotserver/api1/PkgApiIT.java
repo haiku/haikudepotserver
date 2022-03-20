@@ -54,6 +54,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgPkgCategory;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -62,7 +63,6 @@ import javax.annotation.Resource;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -85,13 +85,13 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
-                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "games").get());
+                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "games"));
                 pkg.getPkgSupplement().addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             }
 
             {
                 PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
-                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "business").get());
+                pkgPkgCategory.setPkgCategory(PkgCategory.getByCode(context, "business"));
                 pkg.getPkgSupplement().addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
             }
 
@@ -128,7 +128,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = ImmutableList.of("any","x86_64");
+        request.architectureCode = "x86_64";
         request.naturalLanguageCode = NaturalLanguage.CODE_ENGLISH;
         request.repositoryCodes = Collections.singletonList("testrepo");
         request.expression = "pk";
@@ -158,7 +158,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = Collections.singletonList("x86_64");
+        request.architectureCode = "x86_64";
         request.repositoryCodes = Collections.singletonList("testrepo");
         request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
         request.expression = "feij";
@@ -180,7 +180,6 @@ public class PkgApiIT extends AbstractIntegrationTest {
     /**
      * <p>This test checks where the client is searching for a package in a specific language, but
      * there is no localization for that specific language.  In this case, </p>
-     * @throws ObjectNotFoundException
      */
 
     @Test
@@ -188,7 +187,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.createStandardTestData();
 
         SearchPkgsRequest request = new SearchPkgsRequest();
-        request.architectureCodes = Collections.singletonList("x86_64");
+        request.architectureCode = "x86_64";
         request.naturalLanguageCode = NaturalLanguage.CODE_FRENCH;
         request.repositoryCodes = Collections.singletonList("testrepo");
         request.expression = "persimon";
@@ -213,7 +212,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgRequest request = new GetPkgRequest();
         request.architectureCode = "x86_64";
         request.name = "pkg1";
-        request.repositoryCode = "testrepo";
+        request.repositorySourceCode = "testreposrc_xyz";
         request.versionType = PkgVersionType.SPECIFIC;
         request.naturalLanguageCode = NaturalLanguage.CODE_ENGLISH;
         request.major = "1";
@@ -249,7 +248,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         GetPkgRequest request = new GetPkgRequest();
         request.architectureCode = "x86_64";
         request.name = "pkg1";
-        request.repositoryCode = "testrepo";
+        request.repositorySourceCode = "testreposrc_xyz";
         request.versionType = PkgVersionType.LATEST;
         request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
 
@@ -276,7 +275,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
         request.name = "pkg9";
         request.versionType = PkgVersionType.LATEST;
         request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
-        request.repositoryCode = "testrepo";
+        request.repositorySourceCode = "testreposrc_xyz";
 
         try {
 
@@ -403,14 +402,14 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
             Assertions.assertThat(pkgSupplementAfter.getPkgIcons().size()).isEqualTo(3);
 
-            Optional<PkgIcon> pkgIcon16Optional = pkgSupplementAfter.getPkgIcon(mediaTypePng, 16);
-            Assertions.assertThat(pkgIcon16Optional.get().getPkgIconImage().getData()).isEqualTo(sample16);
+            PkgIcon pkgIcon16 = pkgSupplementAfter.getPkgIcon(mediaTypePng, 16);
+            Assertions.assertThat(pkgIcon16.getPkgIconImage().getData()).isEqualTo(sample16);
 
-            Optional<PkgIcon> pkgIcon32Optional = pkgSupplementAfter.getPkgIcon(mediaTypePng, 32);
-            Assertions.assertThat(pkgIcon32Optional.get().getPkgIconImage().getData()).isEqualTo(sample32);
+            PkgIcon pkgIcon32 = pkgSupplementAfter.getPkgIcon(mediaTypePng, 32);
+            Assertions.assertThat(pkgIcon32.getPkgIconImage().getData()).isEqualTo(sample32);
 
-            Optional<PkgIcon> pkgIcon64Optional = pkgSupplementAfter.getPkgIcon(mediaTypePng, 64);
-            Assertions.assertThat(pkgIcon64Optional.get().getPkgIconImage().getData()).isEqualTo(sample64);
+            PkgIcon pkgIcon64 = pkgSupplementAfter.getPkgIcon(mediaTypePng, 64);
+            Assertions.assertThat(pkgIcon64.getPkgIconImage().getData()).isEqualTo(sample64);
         }
     }
 
@@ -451,8 +450,8 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
             Assertions.assertThat(pkgSupplementAfter.getPkgIcons().size()).isEqualTo(1);
 
-            Optional<PkgIcon> pkgIconHvifOptional = pkgSupplementAfter.getPkgIcon(mediaTypeHvif, null);
-            Assertions.assertThat(pkgIconHvifOptional.get().getPkgIconImage().getData()).isEqualTo(sampleHvif);
+            PkgIcon pkgIconHvif = pkgSupplementAfter.getPkgIcon(mediaTypeHvif, null);
+            Assertions.assertThat(pkgIconHvif.getPkgIconImage().getData()).isEqualTo(sampleHvif);
         }
     }
 
@@ -679,7 +678,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         GetPkgVersionLocalizationsRequest request = new GetPkgVersionLocalizationsRequest();
         request.architectureCode = "x86_64";
-        request.repositoryCode = "testrepo";
+        request.repositorySourceCode = "testreposrc_xyz";
         request.naturalLanguageCodes = ImmutableList.of(NaturalLanguage.CODE_ENGLISH, NaturalLanguage.CODE_GERMAN);
         request.pkgName = "pkg1";
 
@@ -718,7 +717,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testeGetPkgChangelog() {
+    public void testGetPkgChangelog() {
         integrationTestSupportService.createStandardTestData();
 
         GetPkgChangelogRequest request = new GetPkgChangelogRequest();
@@ -788,7 +787,7 @@ public class PkgApiIT extends AbstractIntegrationTest {
 
         UpdatePkgVersionRequest request = new UpdatePkgVersionRequest();
         request.pkgName = "pkg1";
-        request.repositoryCode = "testrepo";
+        request.repositorySourceCode = "testreposrc_xyz";
         request.architectureCode = "x86_64";
         request.major = "1";
         request.micro = "2";
@@ -804,9 +803,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg1 = Pkg.getByName(context, "pkg1");
-            Repository repository = Repository.getByCode(context, "testrepo");
+            RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
             Architecture architecture = Architecture.getByCode(context, "x86_64");
-            PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
+            PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repositorySource, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
             Assertions.assertThat(pkgVersion.getActive()).isFalse();
         }
     }
@@ -832,9 +831,9 @@ public class PkgApiIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg1 = Pkg.getByName(context, "pkg1");
-            Repository repository = Repository.getByCode(context, "testrepo");
+            RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
             Architecture architecture = Architecture.getByCode(context, "x86_64");
-            PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repository, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
+            PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg1, repositorySource, architecture, new VersionCoordinates("1",null,"2",null,3)).get();
             Assertions.assertThat(pkgVersion.getViewCounter()).isEqualTo(1L);
         }
 

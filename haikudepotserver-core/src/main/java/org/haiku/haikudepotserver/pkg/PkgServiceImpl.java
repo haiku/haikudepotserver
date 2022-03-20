@@ -71,7 +71,7 @@ public class PkgServiceImpl implements PkgService {
     public Optional<PkgVersion> getLatestPkgVersionForPkg(
             ObjectContext context,
             Pkg pkg,
-            Repository repository) {
+            RepositorySource repositorySource) {
 
         Preconditions.checkArgument(null != context, "a context must be provided");
         Preconditions.checkArgument(null != pkg, "a package must be provided");
@@ -79,7 +79,7 @@ public class PkgServiceImpl implements PkgService {
         Optional<PkgVersion> pkgVersionOptional = getLatestPkgVersionForPkg(
                 context,
                 pkg,
-                repository,
+                repositorySource,
                 Collections.singletonList(Architecture.getByCode(context, defaultArchitectureCode)));
 
         if(pkgVersionOptional.isEmpty()) {
@@ -91,7 +91,7 @@ public class PkgServiceImpl implements PkgService {
                 pkgVersionOptional = getLatestPkgVersionForPkg(
                         context,
                         pkg,
-                        repository,
+                        repositorySource,
                         Collections.singletonList(architectures.get(i)));
             }
         }
@@ -107,13 +107,13 @@ public class PkgServiceImpl implements PkgService {
     public Optional<PkgVersion> getLatestPkgVersionForPkg(
             ObjectContext context,
             Pkg pkg,
-            Repository repository,
+            RepositorySource repositorySource,
             final List<Architecture> architectures) {
 
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(null != pkg, "the pkg must must be provided");
         Preconditions.checkArgument(null != architectures && !architectures.isEmpty(), "the architectures must be provided and must not be empty");
-        Preconditions.checkArgument(null != repository, "the repository must be provided");
+        Preconditions.checkArgument(null != repositorySource, "the repository source must be provided");
 
         return Optional.ofNullable(ObjectSelect.query(PkgVersion.class)
                 .where(PkgVersion.PKG.eq(pkg))
@@ -121,7 +121,7 @@ public class PkgServiceImpl implements PkgService {
                 .and(PkgVersion.IS_LATEST.isTrue())
                 .and(PkgVersion.ARCHITECTURE.in(architectures))
                 .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.ACTIVE).isTrue())
-                .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).eq(repository))
+                .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
                 .selectOne(context));
     }
 

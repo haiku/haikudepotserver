@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,19 +27,19 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgVersionLocalization pvl) {
         if(Strings.isNullOrEmpty(result.getTitle())
                 && !Strings.isNullOrEmpty(pvl.getTitle().orElse(null))
-                && (null==pattern || pattern.matcher(pvl.getTitle().get()).matches())) {
+                && (null == pattern || pattern.matcher(pvl.getTitle().get()).matches())) {
             result.setTitle(pvl.getTitle().get());
         }
 
         if(Strings.isNullOrEmpty(result.getSummary())
                 && !Strings.isNullOrEmpty(pvl.getSummary().orElse(null))
-                && (null==pattern || pattern.matcher(pvl.getSummary().get()).matches()) ) {
+                && (null == pattern || pattern.matcher(pvl.getSummary().get()).matches()) ) {
             result.setSummary(pvl.getSummary().orElse(null));
         }
 
         if(Strings.isNullOrEmpty(result.getDescription())
                 && !Strings.isNullOrEmpty(pvl.getDescription().orElse(null))
-                && (null==pattern || pattern.matcher(pvl.getDescription().get()).matches()) ) {
+                && (null == pattern || pattern.matcher(pvl.getDescription().get()).matches()) ) {
             result.setDescription(pvl.getDescription().orElse(null));
         }
     }
@@ -47,19 +47,19 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgLocalization pl) {
         if(Strings.isNullOrEmpty(result.getTitle())
                 && !Strings.isNullOrEmpty(pl.getTitle())
-                && (null==pattern || pattern.matcher(pl.getTitle()).matches())) {
+                && (null == pattern || pattern.matcher(pl.getTitle()).matches())) {
             result.setTitle(pl.getTitle());
         }
 
         if(Strings.isNullOrEmpty(result.getSummary())
                 && !Strings.isNullOrEmpty(pl.getSummary())
-                && (null==pattern || pattern.matcher(pl.getSummary()).matches())) {
+                && (null == pattern || pattern.matcher(pl.getSummary()).matches())) {
             result.setSummary(pl.getSummary());
         }
 
         if(Strings.isNullOrEmpty(result.getDescription())
                 && !Strings.isNullOrEmpty(pl.getDescription())
-                && (null==pattern || pattern.matcher(pl.getDescription()).matches())) {
+                && (null == pattern || pattern.matcher(pl.getDescription()).matches())) {
             result.setDescription(pl.getDescription());
         }
     }
@@ -111,7 +111,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             Pattern searchPattern,
             NaturalLanguage naturalLanguage) {
         ResolvedPkgVersionLocalization result = new ResolvedPkgVersionLocalization();
-        fillResolvedPkgVersionLocalization(result,context,pkgVersion,searchPattern,naturalLanguage);
+        fillResolvedPkgVersionLocalization(result, context, pkgVersion, searchPattern, naturalLanguage);
         return result;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ public class DataLengthTag extends RequestContextAwareTag {
 
     private Integer length;
 
-    private DecimalFormat numberFormat = new DecimalFormat("#,##0.#");
+    private final static DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0.#");
 
     public Integer getLength() {
         return length;
@@ -29,7 +29,7 @@ public class DataLengthTag extends RequestContextAwareTag {
     }
 
     private void outputValueAndUnit(JspWriter writer, double value, String unit) throws Exception {
-        writer.write(numberFormat.format(value));
+        writer.write(NUMBER_FORMAT.format(value));
         writer.write(' ');
         writer.write(unit);
     }
@@ -54,9 +54,9 @@ public class DataLengthTag extends RequestContextAwareTag {
                     }
                     else {
                         if (length < 1024 * 1024 * 1024) {
-                            outputValueAndUnit(writer, length / (1024 * 1024), "MB");
+                            outputValueAndUnit(writer, length / (1024.0 * 1024.0), "MB");
                         } else {
-                            outputValueAndUnit(writer, length / (1024 * 1024 * 1024), "GB");
+                            outputValueAndUnit(writer, length / (1024.0 * 1024.0 * 1024.0), "GB");
                         }
                     }
                 }

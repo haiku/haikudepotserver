@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -24,9 +23,9 @@ import java.util.List;
 @RequestMapping("/")
 public class EntryPointController {
 
-    private static int MAX_TOPTEMPLATES = 25;
+    private final static int MAX_TOPTEMPLATES = 25;
 
-    private SinglePageTemplateFrequencyMetrics singlePageTemplateFrequencyMetrics;
+    private final SinglePageTemplateFrequencyMetrics singlePageTemplateFrequencyMetrics;
 
     public EntryPointController(SinglePageTemplateFrequencyMetrics singlePageTemplateFrequencyMetrics) {
         this.singlePageTemplateFrequencyMetrics = Preconditions.checkNotNull(singlePageTemplateFrequencyMetrics);
