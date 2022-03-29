@@ -54,7 +54,7 @@ class Hvif2PngHvifRenderingServiceImpl
 
     static class Context {
 
-        private int size;
+        private final int size;
 
         Context(int size) {
             this.size = size;

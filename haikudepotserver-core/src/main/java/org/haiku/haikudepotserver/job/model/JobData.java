@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,11 +20,11 @@ import java.util.Date;
 
 public class JobData {
 
-    private JobDataType dataType;
-    private String useCode;
-    private String guid;
-    private String mediaTypeCode;
-    private Date createTimestamp;
+    private final JobDataType dataType;
+    private final String useCode;
+    private final String guid;
+    private final String mediaTypeCode;
+    private final Date createTimestamp;
 
     public JobData(String guid, JobDataType dataType, String useCode, String mediaTypeCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid), "the guid must be supplied to identify the data");
@@ -60,12 +60,8 @@ public class JobData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         JobData jobData = (JobData) o;
-
-        if (!guid.equals(jobData.guid)) return false;
-
-        return true;
+        return guid.equals(jobData.guid);
     }
 
     @Override

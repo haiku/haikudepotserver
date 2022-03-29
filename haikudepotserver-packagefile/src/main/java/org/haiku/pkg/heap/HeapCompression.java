@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ public enum HeapCompression {
      * <p>This appears in the binary file as a means of identifying the heap compression.</p>
      */
 
-    private int numericValue;
+    private final int numericValue;
 
     HeapCompression(int numericValue) {
         this.numericValue = numericValue;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -76,7 +76,7 @@ public abstract class AbstractJobSpecification implements JobSpecification {
         result.append("js <");
 
         if(g.length() > 4) {
-            result.append(g.substring(0, 4));
+            result.append(g, 0, 4);
             result.append("..");
         }
         else {

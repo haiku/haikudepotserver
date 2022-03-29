@@ -7,7 +7,6 @@ package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
 import org.haiku.pkg.AttributeContext;
-import org.haiku.pkg.HpkException;
 import org.haiku.pkg.HpkStringTable;
 
 /**

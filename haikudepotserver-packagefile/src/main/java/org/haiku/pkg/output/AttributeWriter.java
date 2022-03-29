@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -55,8 +55,6 @@ public class AttributeWriter extends FilterWriter {
                     }
                     break;
                 case INT:
-                    write(attribute.getValue(context).toString());
-                    break;
                 case STRING:
                     write(attribute.getValue(context).toString());
                     break;
@@ -66,7 +64,7 @@ public class AttributeWriter extends FilterWriter {
             }
         }
         catch (HpkException e) {
-            throw new IOException("unable to process an attribute '" + attribute.toString() + "'",e);
+            throw new IOException("unable to process an attribute '" + attribute + "'",e);
         }
 
         write("\n");

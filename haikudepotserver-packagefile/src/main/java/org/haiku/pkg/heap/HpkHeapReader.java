@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -77,7 +77,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
             heapChunkUncompressedCache = CacheBuilder
                     .newBuilder()
                     .maximumSize(3)
-                    .build(new CacheLoader<Integer, byte[]>() {
+                    .build(new CacheLoader<>() {
                         @Override
                         public byte[] load(@SuppressWarnings("NullableProblems") Integer key) throws Exception {
                             Preconditions.checkNotNull(key);
@@ -149,7 +149,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
         int count = getHeapChunkCount();
         long totalCompressedLength = 0;
-        randomAccessFile.seek(heapOffset + compressedSize - (2 * (count - 1)));
+        randomAccessFile.seek(heapOffset + compressedSize - (2 * ((long) count - 1)));
 
         for (int i = 0; i < count - 1; i++) {
 

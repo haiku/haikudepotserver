@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,8 +15,8 @@ import com.google.common.io.ByteSink;
 
 public class JobDataWithByteSink {
 
-    private JobData jobData;
-    private ByteSink byteSink;
+    private final JobData jobData;
+    private final ByteSink byteSink;
 
     public JobDataWithByteSink(JobData jobData, ByteSink byteSink) {
         Preconditions.checkArgument(null!=jobData, "the job data must be supplied");

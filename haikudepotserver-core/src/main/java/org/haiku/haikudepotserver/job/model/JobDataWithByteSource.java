@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,8 +15,8 @@ import com.google.common.io.ByteSource;
 
 public class JobDataWithByteSource {
 
-    private JobData jobData;
-    private ByteSource byteSource;
+    private final JobData jobData;
+    private final ByteSource byteSource;
 
     public JobDataWithByteSource(JobData jobData, ByteSource byteSource) {
         Preconditions.checkArgument(null!=jobData, "job data must be supplied");

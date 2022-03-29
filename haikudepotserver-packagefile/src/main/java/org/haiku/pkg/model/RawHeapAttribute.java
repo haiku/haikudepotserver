@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 public class RawHeapAttribute extends RawAttribute {
 
-    private HeapCoordinates heapCoordinates;
+    private final HeapCoordinates heapCoordinates;
 
     public RawHeapAttribute(AttributeId attributeId, HeapCoordinates heapCoordinates) {
         super(attributeId);

@@ -13,7 +13,7 @@ public enum FileAttributesValues {
 
     BEOS_ICON("BEOS:ICON");
 
-    private String attributeValue;
+    private final String attributeValue;
 
     FileAttributesValues(String attributeValue) {
         this.attributeValue = attributeValue;

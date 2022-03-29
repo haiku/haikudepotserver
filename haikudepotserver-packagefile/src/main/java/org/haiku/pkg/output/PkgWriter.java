@@ -6,7 +6,6 @@
 package org.haiku.pkg.output;
 
 import com.google.common.base.Preconditions;
-import org.haiku.pkg.HpkException;
 import org.haiku.pkg.PkgException;
 import org.haiku.pkg.PkgIterator;
 import org.haiku.pkg.model.Pkg;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,7 @@ import java.math.BigInteger;
 
 public class IntAttribute extends Attribute {
 
-    private BigInteger numericValue;
+    private final BigInteger numericValue;
 
     public IntAttribute(AttributeId attributeId, BigInteger numericValue) {
         super(attributeId);

@@ -16,8 +16,8 @@ import org.haiku.pkg.model.Pkg;
 
 public class PkgIterator {
 
-    private AttributeIterator attributeIterator;
-    private PkgFactory pkgFactory;
+    private final AttributeIterator attributeIterator;
+    private final PkgFactory pkgFactory;
 
     public PkgIterator(AttributeIterator attributeIterator) {
         this(attributeIterator, new PkgFactory());

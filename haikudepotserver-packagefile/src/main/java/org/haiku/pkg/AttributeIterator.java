@@ -51,7 +51,7 @@ public class AttributeIterator {
 
     private long offset;
 
-    private AttributeContext context;
+    private final AttributeContext context;
 
     private BigInteger nextTag = null;
 
@@ -303,7 +303,7 @@ public class AttributeIterator {
             int b = context.getHeapReader().readHeap(offset);
             offset++;
 
-            result = result.or(BigInteger.valueOf((long) (b & 0x7f)).shiftLeft(shift));
+            result = result.or(BigInteger.valueOf((b & 0x7f)).shiftLeft(shift));
 
             if (0 == (b & 0x80)) {
                 return result;

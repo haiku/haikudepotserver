@@ -5,13 +5,11 @@
 
 package org.haiku.pkg;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import org.haiku.pkg.model.FileType;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Optional;

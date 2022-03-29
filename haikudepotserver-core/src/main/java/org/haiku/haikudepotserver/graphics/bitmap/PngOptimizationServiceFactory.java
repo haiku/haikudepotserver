@@ -5,12 +5,10 @@
 
 package org.haiku.haikudepotserver.graphics.bitmap;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * <p>This will create a PNG optimization service based on the configuration.</p>

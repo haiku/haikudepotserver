@@ -17,13 +17,13 @@ import org.haiku.pkg.heap.HpkHeapReader;
 
 public class HpkStringTable implements StringTable {
 
-    private HpkHeapReader heapReader;
+    private final HpkHeapReader heapReader;
 
-    private long expectedCount;
+    private final long expectedCount;
 
-    private long heapLength;
+    private final long heapLength;
 
-    private long heapOffset;
+    private final long heapOffset;
 
     private String[] values = null;
 

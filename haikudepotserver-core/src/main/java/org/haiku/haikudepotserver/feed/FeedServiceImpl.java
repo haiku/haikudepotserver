@@ -49,10 +49,10 @@ public class FeedServiceImpl implements FeedService {
         if(null!=specification.getSupplierTypes()) {
             builder.queryParam(
                     KEY_TYPES,
-                    String.join(
-                        ",",
-                        specification.getSupplierTypes().stream().map(FeedSpecification.SupplierType::name).collect(Collectors.toList())
-                    )
+                    specification.getSupplierTypes()
+                            .stream()
+                            .map(FeedSpecification.SupplierType::name)
+                            .collect(Collectors.joining(","))
             );
         }
 

@@ -6,15 +6,14 @@
 package org.haiku.pkg;
 
 import com.google.common.base.Preconditions;
-import org.haiku.pkg.heap.HpkHeapReader;
 import org.haiku.pkg.heap.HeapCompression;
+import org.haiku.pkg.heap.HpkHeapReader;
 import org.haiku.pkg.model.FileType;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
 
 /**
  * <p>This object represents an object that can extract an Hpkr (Haiku Pkg Repository) file.  If you are wanting to

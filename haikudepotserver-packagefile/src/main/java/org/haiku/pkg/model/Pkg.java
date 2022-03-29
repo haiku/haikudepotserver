@@ -5,8 +5,6 @@
 
 package org.haiku.pkg.model;
 
-import com.google.common.base.Strings;
-
 import java.util.Collections;
 import java.util.List;
 

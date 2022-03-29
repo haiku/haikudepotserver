@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
 import org.haiku.pkg.AttributeContext;
-import org.haiku.pkg.HpkException;
 
 /**
  * <p>This type of attribute is a string.  The string is supplied in the stream of attributes so this attribute will
@@ -16,7 +15,7 @@ import org.haiku.pkg.HpkException;
 
 public class StringInlineAttribute extends StringAttribute {
 
-    private String stringValue;
+    private final String stringValue;
 
     public StringInlineAttribute(AttributeId attributeId, String stringValue) {
         super(attributeId);

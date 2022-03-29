@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2020, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.feed.model;
 import com.google.common.net.MediaType;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>This class defines the specification of a feed (rss) from this system.</p>
@@ -109,7 +110,7 @@ public class FeedSpecification {
         if (!feedType.equals(that.feedType)) return false;
         if (!limit.equals(that.limit)) return false;
         if (!naturalLanguageCode.equals(that.naturalLanguageCode)) return false;
-        if (pkgNames != null ? !pkgNames.equals(that.pkgNames) : that.pkgNames != null) return false;
+        if (!Objects.equals(pkgNames, that.pkgNames)) return false;
         if (!supplierTypes.equals(that.supplierTypes)) return false;
 
         return true;
