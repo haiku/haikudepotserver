@@ -66,6 +66,7 @@
                 <listitem><ulink url="http://maven.apache.org">Maven</ulink> (&gt;= 3.6)</listitem>
                 <listitem><ulink url="https://www.postgres.org">Postgres</ulink> (&gt;= 11)</listitem>
                 <listitem><ulink url="http://www.eclipse.org/jetty/documentation/current/runner.html">Jetty Runner</ulink> (&gt;= 9.4) (deployment)</listitem>
+                <listitem><ulink url="https://www.docker.com/">Docker</ulink></listitem>
             </itemizedlist>
         </para>
 

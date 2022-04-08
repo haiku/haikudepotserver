@@ -1,6 +1,5 @@
-
 # =====================================
-# Copyright 2014-2018, Andrew Lindesay
+# Copyright 2014-2022, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -16,6 +15,37 @@ import re
 import xml.etree.ElementTree as etree
 import subprocess
 
+
+# =====================================
+# TYPES
+
+class GroupArtifactVersion:
+
+    _groupId = None
+    _artifactId = None
+    _version = None
+
+    def __init__(self, groupid, artifactid, version):
+        if not groupid:
+            raise RuntimeError('expected `group` to be supplied')
+        if not artifactid:
+            raise RuntimeError('expected `artifact` to be supplied')
+        if not version:
+            raise RuntimeError('expected `version` to be supplied')
+        self._groupId = groupid
+        self._artifactId = artifactid
+        self._version = version
+
+    def groupid(self):
+        return self._groupId
+
+    def artifactid(self):
+        return self._artifactId
+
+    def version(self):
+        return self._version
+
+
 # =====================================
 # DICT HANDLING
 
@@ -25,13 +55,13 @@ def uniondicts(d1, d2):
     d.update(d2)
     return d
 
+
 # This function will return the list of modules' names based on scanning the file
 # system rather than looking at the top level POM.  It does this because different
 # profiles may be employed to avoid, for example, building an RPM on a non-linux
 # host.
 
 def scanmodules():
-
     result = []
 
     for f in os.listdir('.'):
@@ -49,52 +79,45 @@ def scanmodules():
 
 
 def extractdefaultnamespace(tag):
-    if "{" != tag[0]:
-        print("invalid tag missing namespace (open) ; " + tag)
-        sys.exit(1)
-
-    closebraceindex = tag.find("}")
-
-    if -1 == closebraceindex:
-        print("invalid tag missing namespace (close) ; " + tag)
-        sys.exit(1)
-
-    return tag[1:closebraceindex]
+    nsmatch = re.match("^{(.+)}.+$", tag)
+    if not nsmatch:
+        raise RuntimeError("invalid tag missing namespace (open) ; " + tag)
+    return nsmatch.group(1)
 
 
-def pomtoplevelelement(tree, taglocalname):
-    roote = tree.getroot()
-    namespace = extractdefaultnamespace(roote.tag)
-
-    el = roote.find("{"+namespace+"}"+taglocalname)
-
-    if el is None:
-        print("unable to find the "+taglocalname+" element")
-        sys.exit(1)
-
-    return el
+def pomtoplevelelement(el, taglocalname):
+    namespace = extractdefaultnamespace(el.tag)
+    resulte = el.find(("{0}"+taglocalname).format('{'+namespace+'}'))
+    if None is resulte:
+        raise RuntimeError("unable to find the top level element [" + taglocalname + "]")
+    return resulte
 
 
 # =====================================
 # DOM / ELEMENT HANDLING FOR POM
 
 def pomextractartifactid(tree):
-    return pomtoplevelelement(tree, "artifactId").text
+    return pomextractgav(tree).artifactid()
 
 
 def pomextractversion(tree):
-    return pomtoplevelelement(tree, "version").text
+    return pomextractgav(tree).version()
+
+
+def pomextractgav(el):
+    return GroupArtifactVersion(
+        pomtoplevelelement(el, "groupId").text,
+        pomtoplevelelement(el, "artifactId").text,
+        pomtoplevelelement(el, "version").text)
 
 
 def pomextractproperty(tree, name):
-    propertiese = pomtoplevelelement(tree, "properties")
-    namespace = extractdefaultnamespace(propertiese.tag)
-    propertye = propertiese.find("{"+namespace+"}" + name)
+    roote = tree.getroot()
+    namespace = extractdefaultnamespace(roote.tag)
+    propertye = roote.find(('./{0}properties/{0}' + name).format('{'+namespace+'}'))
 
     if propertye is None:
         raise Exception('unable to find the property [' + name + ']')
-
-    print(propertye)
 
     property = propertye.text
 
@@ -104,6 +127,23 @@ def pomextractproperty(tree, name):
     return property
 
 
+# This function will walk through the POM's plugins and extract their
+# GAV values.
+
+def pomextractplugingavs(tree):
+    roote = tree.getroot()
+    namespace = extractdefaultnamespace(roote.tag)
+    plugines = roote.findall('./{0}build/{0}plugins/{0}plugin'.format('{'+namespace+'}'))
+    return map(lambda el: pomextractgav(el), plugines)
+
+
+def pomextractdependencygavs(tree):
+    roote = tree.getroot()
+    namespace = extractdefaultnamespace(roote.tag)
+    dependencyes = roote.findall('./{0}dependencies/{0}dependency'.format('{'+namespace+'}'))
+    return map(lambda el: pomextractgav(el), dependencyes)
+
+
 # =====================================
 # LOGIC CHUNKS
 
@@ -111,10 +151,9 @@ def ensurecurrentversionconsistencyformodule(modulename, expectedversion):
     modulepomtree = etree.parse(modulename + "/pom.xml")
 
     if not modulepomtree:
-        print("the 'pom.xml' for module "+modulename+" should be accessible")
-        sys.exit(1)
+        raise RuntimeError("the 'pom.xml' for module "+modulename+" should be accessible")
 
-    parente = pomtoplevelelement(modulepomtree, "parent")
+    parente = pomtoplevelelement(modulepomtree.getroot(), "parent")
     namespace = extractdefaultnamespace(parente.tag)
     versione = parente.find("{"+namespace+"}version")
 
@@ -159,35 +198,8 @@ def gitaddpomformodule(modulename):
 # =====================================
 # MAVEN
 
-
 def mvnversionsset(version):
     if 0 == subprocess.call(["mvn", "-q", "versions:set", "-DnewVersion=" + version, "-DgenerateBackupPoms=false"]):
         print("versions:set to " + version)
     else:
         raise RuntimeError("failed to set maven versions to [" + version + "]")
-
-
-# =====================================
-# DOCKERFILE
-
-
-def dockerreplaceenvs(filename, replacements):
-    with open(filename, "r") as dockerfile:
-        dockerlines = dockerfile.readlines()
-
-    def maybereplaceenv(l):
-        envmatch = re.match("^ENV ([A-Z0-9_]+) \".+\"$", l)
-
-        if envmatch:
-            envname = envmatch.group(1)
-            replacementvalue = replacements.get(envname)
-
-            if replacementvalue:
-                return 'ENV ' + envname + ' "' + replacementvalue + '"\n'
-
-        return l
-
-    dockerlines = list(map(maybereplaceenv, dockerlines))
-
-    with open(filename, "w") as dockerfile:
-        dockerfile.writelines(dockerlines)
