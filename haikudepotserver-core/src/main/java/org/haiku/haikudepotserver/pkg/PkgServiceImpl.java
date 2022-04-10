@@ -190,8 +190,7 @@ public class PkgServiceImpl implements PkgService {
 
         return pkgSourceOptional.map(pkg -> ObjectSelect.query(PkgVersion.class)
                 .where(PkgVersion.PKG.eq(pkg))
-                .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY)
-                        .eq(pkgVersion.getRepositorySource().getRepository()))
+                .and(PkgVersion.REPOSITORY_SOURCE.eq(pkgVersion.getRepositorySource()))
                 .and(PkgVersion.ACTIVE.isTrue())
                 .and(PkgVersion.ARCHITECTURE.eq(Architecture.getByCode(context, Architecture.CODE_SOURCE)))
                 .and(ExpressionHelper.toExpression(pkgVersion.toVersionCoordinates(), null))

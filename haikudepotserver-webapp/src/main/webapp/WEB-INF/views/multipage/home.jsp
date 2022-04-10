@@ -176,8 +176,8 @@
                                     <multipage:dataLength length="${pkgVersion.payloadLength}"></multipage:dataLength>
                                 </td>
                                 <td>
-                                    <c:if test="${pkgVersion.derivedAggregatedUserRating.present}">
-                                        <multipage:ratingIndicator value="${pkgVersion.derivedAggregatedUserRating.get()}"></multipage:ratingIndicator>
+                                    <c:if test="${pkgVersion.pkgUserRatingAggregate.present}">
+                                        <multipage:ratingIndicator value="${pkgVersion.pkgUserRatingAggregate.get().getDerivedRating()}"></multipage:ratingIndicator>
                                     </c:if>
                                 </td>
                                 <c:if test="${empty data.repository}">

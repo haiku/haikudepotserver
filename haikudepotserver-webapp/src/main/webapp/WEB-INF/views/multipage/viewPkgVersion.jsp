@@ -57,12 +57,12 @@
 
         <c:if test="${data.pkgVersion.isLatest && data.pkgVersion.pkgUserRatingAggregate.present}">
             <div class="pkg-rating-indicator-container">
-                <multipage:ratingIndicator value="${data.pkgVersion.derivedAggregatedUserRating.get()}"></multipage:ratingIndicator>
+                <multipage:ratingIndicator value="${data.pkgVersion.pkgUserRatingAggregate.get().getDerivedRating()}"></multipage:ratingIndicator>
               <span class="pkg-ratings-indicator-sample">
                 <small>
                     <spring:message
                             code="viewPkg.derivedUserRating.sampleSize"
-                            arguments="${data.pkgVersion.derivedAggregatedUserRatingSampleSize.get()}">
+                            arguments="${data.pkgVersion.pkgUserRatingAggregate.get().getDerivedRatingSampleSize()}">
                     </spring:message>
                 </small>
               </span>
