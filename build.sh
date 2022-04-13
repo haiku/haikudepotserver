@@ -3,6 +3,13 @@
 # This can be used to build the HaikuDepotServer.  It should be
 # run from the top level of the HDS project.
 
+git diff-index --quiet HEAD
+
+if [[ $? != 0 ]]; then
+  echo "! it seems that there are uncommitted changes - commit the changes before proceeding"
+  exit 1
+fi
+
 HDS_TAG="$(git describe --tags)"
 HDS_TAG_REGEX='^haikudepotserver-([0-9]+\.[0-9]+\.[0-9]+)$'
 
