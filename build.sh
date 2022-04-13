@@ -20,6 +20,13 @@ else
   exit 1
 fi
 
+TOP_POM_VERSION="$(sed -n -e "s/\s*<version>\(..*\)<\/version>\s*/\1/p" pom.xml)"
+
+if [[ ${TOP_POM_VERSION} != ${HDS_VERSION} ]]; then
+  echo "! the top-level pom version [${TOP_POM_VERSION}] is not the same as the tag version [${HDS_VERSION}]"
+  exit 1
+fi
+
 read -r -p "Press 'y' to docker build HaikuDepotServer ${HDS_VERSION}: " choice
 if ! [[ "$choice" = 'y' ]]; then
   exit 1
