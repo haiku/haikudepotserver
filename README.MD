@@ -4,7 +4,7 @@
 
 This web application is an online tool for working with the software packages of the [Haiku operating system](https://www.haiku-os.org).  The web application aims to provide the following functionality:
 
-* An internet-accessible catalog of the packages.
+* An internet-accessible catalog of the packages
 * A repository of _additional data_ related to packages that is not included in the standard package format - such as;
   * Screenshots
   * Iconography

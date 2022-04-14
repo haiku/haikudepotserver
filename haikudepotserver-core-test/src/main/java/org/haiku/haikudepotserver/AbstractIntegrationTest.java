@@ -14,12 +14,12 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.map.DataMap;
 import org.apache.cayenne.map.DbEntity;
 import org.apache.cayenne.map.ObjEntity;
-import org.flywaydb.core.internal.database.postgresql.PostgreSQLConnection;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.security.UserAuthentication;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
+import org.haiku.haikudepotserver.support.TestDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +34,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -66,14 +64,10 @@ public abstract class AbstractIntegrationTest {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    private static final PostgreSQLContainer<?> POSTGRES_SQL_CONTAINER =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("14.2"))
-                    .withDatabaseName("haikudepotserver_integrationtest")
-                    .withUsername("haikudepotserver_integrationtest")
-                    .withPassword("haikudepotserver_integrationtest");
+    protected static TestDatabase.DatabaseConnectionDetails databaseConnectionDetails;
 
     static {
-        POSTGRES_SQL_CONTAINER.start();
+        databaseConnectionDetails = TestDatabase.startDatabase(TestDatabase.deriveType());
     }
 
     private final static Set<String> CDO_NAMES_RETAINED =
@@ -134,7 +128,7 @@ public abstract class AbstractIntegrationTest {
 
         try (
                 PreparedStatement preparedStatement = connection.prepareStatement("SELECT current_database()");
-                ResultSet resultSet = preparedStatement.executeQuery();
+                ResultSet resultSet = preparedStatement.executeQuery()
         ) {
 
             if(!resultSet.next()) {
@@ -280,6 +274,13 @@ public abstract class AbstractIntegrationTest {
         SecurityContextHolder.clearContext();
     }
 
+    /**
+     * <p>This will add some config parameters into the Spring environment to connect to the
+     * test databases.  If Test Containers are used then this will connect to that.  If test
+     * containers are not used then it will expect that a local database is supplied via an
+     * environment variable.</p>
+     */
+
     static class PostgresContainerInitializer
             implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -287,9 +288,9 @@ public abstract class AbstractIntegrationTest {
         public void initialize(ConfigurableApplicationContext applicationContext) {
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
                     applicationContext,
-                    "jdbc.url=" + POSTGRES_SQL_CONTAINER.getJdbcUrl(),
-                    "jdbc.username=" + POSTGRES_SQL_CONTAINER.getUsername(),
-                    "jdbc.password=" + POSTGRES_SQL_CONTAINER.getPassword()
+                    "jdbc.url=" + databaseConnectionDetails.getUrl(),
+                    "jdbc.username=" + databaseConnectionDetails.getUsername(),
+                    "jdbc.password=" + databaseConnectionDetails.getPassword()
             );
         }
     }

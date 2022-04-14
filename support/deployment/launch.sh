@@ -24,8 +24,8 @@ fi
 "-Djdbc.password=${HDS_JDBC_PASSWORD}" \
 "-Dsmtp.host=${HDS_SMTP_HOST}" \
 "-Dauthentication.jws.issuer=${HDS_AUTHENTICATION_JWS_ISSUER}" \
-"-jar" "${HDS_ROOT}/${JETTY_JAR}" \
-"--jar" "${HDS_ROOT}/${PG_JAR}" \
+"-jar" "${HDS_ROOT}/jetty-runner.jar" \
+"--jar" "${HDS_ROOT}/postgresql.jar" \
 "--port" "${HDS_PORT}" \
-"${HDS_ROOT}/${HDS_WAR}" \
+"${HDS_ROOT}/app.war" \
 
