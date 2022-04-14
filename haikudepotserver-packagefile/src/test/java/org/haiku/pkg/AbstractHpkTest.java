@@ -5,6 +5,7 @@
 
 package org.haiku.pkg;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,6 +24,7 @@ abstract class AbstractHpkTest {
      */
 
     File prepareTestFile(String resource) throws IOException {
+        Preconditions.checkState(null != temporaryFolder);
         byte[] payload = Resources.toByteArray(Resources.getResource(resource));
         File temporaryFile = new File(temporaryFolder, resource);
         Files.write(payload, temporaryFile);
