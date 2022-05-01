@@ -1076,7 +1076,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         RepositorySource repositorySource = null;
 
         if (StringUtils.isNotBlank(request.repositorySourceCode)) {
-            repositorySource = getRepositorySource(context, request.repositoryCode);
+            repositorySource = getRepositorySource(context, request.repositorySourceCode);
         }
         else {
             if (!Set.of(Architecture.CODE_SOURCE, Architecture.CODE_ANY).contains(architecture.getCode())) {
