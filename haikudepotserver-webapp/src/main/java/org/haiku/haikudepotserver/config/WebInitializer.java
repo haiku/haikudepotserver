@@ -47,6 +47,7 @@ public class WebInitializer implements WebApplicationInitializer {
 
         // note that the spring security filters are not included here.
 
+        registerSpringFilter(servletContext, "delayFilter", "/*");
         registerSpringFilter(servletContext, "forwardedHeaderFilter", "/*");
         registerSpringFilter(servletContext, "metricsFilter", "/*");
         registerSpringFilter(servletContext, "springSecurityFilterChain", "/*");

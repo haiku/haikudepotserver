@@ -373,7 +373,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             cacheKey = pkgVersionId + "@" + remoteIdentifier;
         }
 
-        if (null==cacheKey) {
+        if (null == cacheKey) {
             shouldIncrement = true;
         } else {
             Boolean previouslyIncremented = remoteIdentifierToPkgView.getIfPresent(cacheKey);
@@ -391,7 +391,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             pkgService.incrementViewCounter(serverRuntime, pkgVersion.getObjectId());
         }
 
-        if (null!=cacheKey) {
+        if (null != cacheKey) {
             remoteIdentifierToPkgView.put(cacheKey, Boolean.TRUE);
         }
     }
