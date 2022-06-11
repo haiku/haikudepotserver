@@ -1,4 +1,4 @@
-# Copyright 2021, Andrew Lindesay
+# Copyright 2021-2022, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -11,6 +11,74 @@ tags:
   - name: user-rating
 paths:
 
+  /__api/v2/user-rating/derive-and-store-user-rating-for-pkg:
+    description: >
+      This method will re-calculate and store the user rating for the nominated packaging.
+    post:
+      tags:
+        - user-rating
+      operationId: deriveAndStoreUserRatingForPkg
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/deriveAndStoreUserRatingForPkgRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response of invoking this API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/deriveAndStoreUserRatingForPkgResponseEnvelope"
+
+  /__api/v2/user-rating/derive-and-store-user-ratings-for-all-pkgs:
+    description: >
+      This method will trigger the re-calculation of user ratings for all of the packages in the system.
+    post:
+      tags:
+        - user-rating
+      operationId: deriveAndStoreUserRatingsForAllPkgs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/deriveAndStoreUserRatingsForAllPkgsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response of invoking this API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/deriveAndStoreUserRatingsForAllPkgsResponseEnvelope"
+
+  /__api/v2/user-rating/get-user-rating:
+    description: >
+      This will find the user rating identified by the supplied code and will return data pertaining to that
+      or if the user rating was not able to be found for the code supplied then it will throw an instance of
+      {@link ObjectNotFoundException}.  Note that this invocation
+      has no authorization on it; it is effectively public.
+    post:
+      tags:
+        - user-rating
+      operationId: getUserRating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getUserRatingRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response of invoking this API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getUserRatingResponseEnvelope"
 
   /__api/v2/user-rating/update-user-rating:
     description: >
@@ -35,7 +103,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/updateUserRatingResponseEnvelope"
 
-
   /__api/v2/user-rating/create-user-rating:
     description: >
       This method will create a user rating based on the data provided.  In the result is a code that
@@ -58,8 +125,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/createUserRatingResponseEnvelope"
-
-
 
   /__api/v2/user-rating/get-user-rating-by-user-and-pkg-version:
     description: >
@@ -85,7 +150,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionResponseEnvelope"
 
-
   /__api/v2/user-rating/search-user-ratings:
     description: >
       This method will return user rating search results based on the
@@ -109,10 +173,128 @@ paths:
               schema:
                 $ref: "#/components/schemas/searchUserRatingsResponseEnvelope"
 
+  /__api/v2/user-rating/remove-user-rating:
+    description: >
+      This method will delete a user rating so that it is no longer stored.
+    post:
+      tags:
+        - user-rating
+      operationId: removeUserRating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/removeUserRatingRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The search results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/removeUserRatingResponseEnvelope"
 
 components:
   schemas:
 
+    deriveAndStoreUserRatingForPkgRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+    deriveAndStoreUserRatingForPkgResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/deriveAndStoreUserRatingForPkgResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    deriveAndStoreUserRatingForPkgResult:
+      type: object
+
+    deriveAndStoreUserRatingsForAllPkgsRequestEnvelope:
+      type: object
+    deriveAndStoreUserRatingsForAllPkgsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/deriveAndStoreUserRatingsForAllPkgsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    deriveAndStoreUserRatingsForAllPkgsResult:
+      type: object
+
+    getUserRatingRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+    getUserRatingResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getUserRatingResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getUserRatingResult:
+      type: object
+      properties:
+        code:
+          type: string
+        naturalLanguageCode:
+          type: string
+        user:
+          $ref: "#/components/schemas/getUserRatingUser"
+        userRatingStabilityCode:
+          type: string
+        active:
+          type: boolean
+        comment:
+          type: string
+        modifyTimestamp:
+          type: integer
+          format: int64
+        createTimestamp:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+        pkgVersion:
+          $ref: "#/components/schemas/getUserRatingPkgVersion"
+    getUserRatingUser:
+      type: object
+      properties:
+        nickname:
+          type: string
+    getUserRatingPkgVersion:
+      type: object
+      properties:
+        repositoryCode:
+          type: string
+          description: >
+            @deprecated please use {@link #repositorySourceCode} instead.
+        repositorySourceCode:
+          type: string
+        architectureCode:
+          type: string
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+        pkg:
+          $ref: "#/components/schemas/getUserRatingPkg"
+    getUserRatingPkg:
+      type: object
+      properties:
+        name:
+          type: string
 
     updateUserRatingRequestEnvelope:
       type: object
@@ -149,7 +331,6 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     updateUserRatingResult:
       type: object
-
 
     createUserRatingRequestEnvelope:
       type: object
@@ -200,7 +381,6 @@ components:
         code:
           type: string
 
-
     getUserRatingByUserAndPkgVersionRequestEnvelope:
       type: object
       properties:
@@ -241,7 +421,7 @@ components:
         naturalLanguageCode:
           type: string
         user:
-          $ref: "./common.yaml#/components/schemas/user"
+          $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionUser"
         userRatingStabilityCode:
           type: string
         active:
@@ -258,8 +438,40 @@ components:
           type: integer
           format: int32
         pkgVersion:
-          $ref: "./common.yaml#/components/schemas/pkgVersion"
-
+          $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionPkgVersion"
+    getUserRatingByUserAndPkgVersionUser:
+      type: object
+      properties:
+        nickname:
+          type: string
+    getUserRatingByUserAndPkgVersionPkgVersion:
+      type: object
+      properties:
+        repositoryCode:
+          type: string
+          description: >
+            @deprecated please use {@link #repositorySourceCode} instead.
+        repositorySourceCode:
+          type: string
+        architectureCode:
+          type: string
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+        pkg:
+          $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionPkg"
+    getUserRatingByUserAndPkgVersionPkg:
+      type: object
+      properties:
+        name:
+          type: string
 
     searchUserRatingsRequestEnvelope:
       allOf:
@@ -335,6 +547,54 @@ components:
                 type: integer
                 format: int32
               pkgVersion:
-                $ref: "./common.yaml#/components/schemas/pkgVersion"
+                $ref: "#/components/schemas/searchUserRatingsPkgVersion"
               user:
-                $ref: "./common.yaml#/components/schemas/user"
+                $ref: "#/components/schemas/searchUserRatingsUser"
+    searchUserRatingsUser:
+      type: object
+      properties:
+        nickname:
+          type: string
+    searchUserRatingsPkgVersion:
+      type: object
+      properties:
+        repositoryCode:
+          type: string
+          description: >
+            @deprecated please use {@link #repositorySourceCode} instead.
+        repositorySourceCode:
+          type: string
+        architectureCode:
+          type: string
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+        pkg:
+          $ref: "#/components/schemas/searchUserRatingsPkg"
+    searchUserRatingsPkg:
+      type: object
+      properties:
+        name:
+          type: string
+
+    removeUserRatingRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+    removeUserRatingResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/removeUserRatingResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    removeUserRatingResult:
+      type: object

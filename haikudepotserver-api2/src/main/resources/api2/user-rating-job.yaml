@@ -1,0 +1,57 @@
+# Copyright 2022, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS User Rating Job API
+  version: "2.0"
+tags:
+  - name: user-rating-job
+paths:
+  /__api/v2/user-rating-job/queue-user-rating-spreadsheet-job:
+    description: >
+      Enqueues a request to run a report about user ratings such that they are output as a spreadsheet.  The
+      result contains a GUID that is a handle to the job.  The job is able to be managed by the
+      {@link JobApi}.
+    post:
+      tags:
+        - user-rating-job
+      operationId: queueUserRatingSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queueUserRatingSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The generated captcha data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queueUserRatingSpreadsheetJobResponseEnvelope"
+
+components:
+  schemas:
+    queueUserRatingSpreadsheetJobRequestEnvelope:
+      type: object
+      properties:
+        userNickname:
+          type: string
+        pkgName:
+          type: string
+        repositoryCode:
+          type: string
+    queueUserRatingSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queueUserRatingSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queueUserRatingSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string

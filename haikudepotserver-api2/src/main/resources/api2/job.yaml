@@ -1,0 +1,162 @@
+# Copyright 2022, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Job API
+  version: "2.0"
+tags:
+  - name: job
+paths:
+  /__api/v2/job/search-jobs:
+    post:
+      tags:
+        - job
+      operationId: searchJobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/searchJobsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of searching for a job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchJobsResponseEnvelope"
+  /__api/v2/job/get-job:
+    post:
+      tags:
+        - job
+      operationId: getJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of querying a job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getJobResponseEnvelope"
+
+components:
+  schemas:
+    searchJobsRequestEnvelope:
+      allOf:
+        - $ref: "./common.yaml#/components/schemas/abstractSearchRequest"
+        - type: object
+          properties:
+            ownerUserNickname:
+              type: string
+            statuses:
+              type: array
+              items:
+                $ref: "./common.yaml#/components/schemas/jobStatus"
+    searchJobsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/searchJobsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    searchJobsResult:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/searchJobsResultItem"
+    searchJobsResultItem:
+      type: object
+      properties:
+        guid:
+          type: string
+        jobStatus:
+          $ref: "./common.yaml#/components/schemas/jobStatus"
+        jobTypeCode:
+          type: string
+        ownerUserNickname:
+          type: string
+        startTimestamp:
+          type: integer
+          format: int64
+        finishTimestamp:
+          type: integer
+          format: int64
+        queuedTimestamp:
+          type: integer
+          format: int64
+        failTimestamp:
+          type: integer
+          format: int64
+        cancelTimestamp:
+          type: integer
+          format: int64
+        progressPercent:
+          type: integer
+    getJobRequestEnvelope:
+      type: object
+      properties:
+        guid:
+          type: string
+    getJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+        jobStatus:
+          $ref: "./common.yaml#/components/schemas/jobStatus"
+        jobTypeCode:
+          type: string
+        ownerUserNickname:
+          type: string
+        startTimestamp:
+          type: integer
+          format: int64
+        finishTimestamp:
+          type: integer
+          format: int64
+        queuedTimestamp:
+          type: integer
+          format: int64
+        failTimestamp:
+          type: integer
+          format: int64
+        cancelTimestamp:
+          type: integer
+          format: int64
+        progressPercent:
+          type: integer
+        generatedDatas:
+          type: array
+          items:
+            $ref: "#/components/schemas/jobData"
+    jobData:
+      type: object
+      properties:
+        useCode:
+          type: string
+        guid:
+          type: string
+        mediaTypeCode:
+          type: string
+        filename:
+          type: string

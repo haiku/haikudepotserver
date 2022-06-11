@@ -1,0 +1,253 @@
+# Copyright 2022, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Authorization API
+  version: "2.0"
+  description: >
+    API related to authorization.
+tags:
+  - name: authorization
+paths:
+  /__api/v2/authorization/check-authorization:
+    description: >
+      This method will take in a list of permissions with targets and will return the list of those that
+      pass authorization checks against the presently authenticated user.
+    post:
+      tags:
+        - authorization
+      operationId: checkAuthorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/checkAuthorizationRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of checking the authorization.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/checkAuthorizationResponseEnvelope"
+  /__api/v2/authorization/create-authorization-pkg-rule:
+    description: >
+      This method will create a new authorization rule.  It will do this based on the data encapsulated in
+      the request.
+    post:
+      tags:
+        - authorization
+      operationId: createAuthorizationPkgRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createAuthorizationPkgRuleRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of creating the authorization pkg rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createAuthorizationPkgRuleResponseEnvelope"
+  /__api/v2/authorization/remove-authorization-pkg-rule:
+    description: >
+      This method will delete an authorization rule identified by the coordinates in the request.  If it
+      was not able to find the rule to delete then it will thrown an instance of
+      {@link ObjectNotFoundException}.
+    post:
+      tags:
+        - authorization
+      operationId: removeAuthorizationPkgRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/removeAuthorizationPkgRuleRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of removing the authorization pkg rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/removeAuthorizationPkgRuleResponseEnvelope"
+  /__api/v2/authorization/search-authorization-pkg-rules:
+    post:
+      tags:
+        - authorization
+      operationId: searchAuthorizationPkgRules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/searchAuthorizationPkgRulesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of searching for a authorization pkg rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchAuthorizationPkgRulesResponseEnvelope"
+
+components:
+  schemas:
+    checkAuthorizationRequestEnvelope:
+      type: object
+      properties:
+        targetAndPermissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/authorizationTargetAndPermissionRequest"
+    checkAuthorizationResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/checkAuthorizationResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    checkAuthorizationResult:
+      type: object
+      properties:
+        targetAndPermissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/authorizationTargetAndPermissionResult"
+    authorizationTargetAndPermissionRequest:
+      type: object
+      required:
+        - targetIdentifier
+        - permissionCode
+      properties:
+        targetType:
+          $ref: "#/components/schemas/authorizationTargetType"
+        targetIdentifier:
+          type: string
+          description: >
+            This identifier will identify an instance of the #targetType that has the authorization applied to it.  Some
+            permissions may not require a target identifier; in which case this value can be supplied as null.
+        permissionCode:
+          type: string
+          description: >
+            This is a list of permissions that the client would like to check for in the context of the target
+            identified by other parameters in this request.
+    authorizationTargetAndPermissionResult:
+      type: object
+      required:
+        - targetIdentifier
+        - permissionCode
+        - authorized
+      properties:
+        targetType:
+          $ref: "#/components/schemas/authorizationTargetType"
+        targetIdentifier:
+          type: string
+          description: >
+            This identifier will identify an instance of the #targetType that has the authorization applied to it.  Some
+            permissions may not require a target identifier; in which case this value can be supplied as null.
+        permissionCode:
+          type: string
+          description: >
+            This is a list of permissions that the client would like to check for in the context of the target
+            identified by other parameters in this request.
+        authorized:
+          type: boolean
+          description: >
+            This boolean will be true if the target is authorized; false if not.
+    authorizationTargetType:
+      type: string
+      enum:
+        - PKG
+        - USER
+        - REPOSITORY
+        - USERRATING
+      description: >
+        The target type defines what sort of object you want to check your authorization for.  The #targetIdentifier
+        then identifies an instance of that type.
+
+    createAuthorizationPkgRuleRequestEnvelope:
+      type: object
+      properties:
+        userNickname:
+          type: string
+        pkgName:
+          type: string
+        permissionCode:
+          type: string
+    createAuthorizationPkgRuleResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/createAuthorizationPkgRuleResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    createAuthorizationPkgRuleResult:
+      type: object
+
+    removeAuthorizationPkgRuleRequestEnvelope:
+      type: object
+      properties:
+        userNickname:
+          type: string
+        pkgName:
+          type: string
+        permissionCode:
+          type: string
+    removeAuthorizationPkgRuleResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/removeAuthorizationPkgRuleResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    removeAuthorizationPkgRuleResult:
+      type: object
+
+    searchAuthorizationPkgRulesRequestEnvelope:
+      allOf:
+        - $ref: "./common.yaml#/components/schemas/abstractSearchRequest"
+        - type: object
+          properties:
+            userNickname:
+              type: string
+            pkgName:
+              type: string
+            permissionCodes:
+              type: array
+              description: >
+                If permission codes are supplied then only rules related to those permission codes will be shown.  If this
+                field is blank then all permissions will be considered.
+              items:
+                type: string
+    searchAuthorizationPkgRulesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/searchAuthorizationPkgRulesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    searchAuthorizationPkgRulesResult:
+      type: object
+      properties:
+        total:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/searchAuthorizationPkgRulesResultItem"
+    searchAuthorizationPkgRulesResultItem:
+      type: object
+      properties:
+        userNickname:
+          type: string
+        pkgName:
+          type: string
+        permissionCode:
+          type: string

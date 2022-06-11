@@ -1,0 +1,488 @@
+# Copyright 2022, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Package Job API
+  version: "2.0"
+tags:
+  - name: pkg-job
+paths:
+
+  /__api/v2/pkg/queue-pkg-category-coverage-export-spreadsheet-job:
+    description: >
+      Enqueues a request on behalf of the current user to produce a spreadsheet showing the coverage of categories
+      for the packages.  See the {@link JobApi} for details on how to control the
+      job.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgCategoryCoverageExportSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgCategoryCoverageExportSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgCategoryCoverageExportSpreadsheetJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-category-coverage-import-spreadsheet-job:
+    description: >
+      Enqueues a request on behalf od the current user to import package data from a spreadsheet that is uploaded
+      to the server.  It does this and also produces an outbound spreadsheet of the result.
+      @throws ObjectNotFoundException in the case that the data identified by GUID does not exist
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgCategoryCoverageImportSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgCategoryCoverageImportSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgCategoryCoverageImportSpreadsheetJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-screenshot-spreadsheet-job:
+    description: >
+      Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have spreadsheets
+      associated with them.  See the {@link JobApi} for details on how to control the job.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgScreenshotSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgScreenshotSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgScreenshotSpreadsheetJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-icon-spreadsheet-job:
+    description: >
+      Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have icons
+      associated with them.  See the {@link JobApi} for details on how to control the
+      job.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgIconSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgIconSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgIconSpreadsheetJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-prominence-and-userrating-spreadsheet-job:
+    description: >
+      Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have what
+      prominence.  See the {@link JobApi} for details on how to control the
+      job.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgProminenceAndUserRatingSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgProminenceAndUserRatingSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgProminenceAndUserRatingSpreadsheetJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-icon-export-archive-job:
+    description: >
+      Enqueues a request to produce an archive of all of the icons of the packages.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgIconExportArchiveJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgIconExportArchiveJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgIconExportArchiveJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-icon-import-archive-job:
+    description: >
+      Enqueues a request (linked to some data) that will import a tar-ball of data
+      containing package icons.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgIconArchiveImportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgIconArchiveImportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgIconArchiveImportJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-version-payload-length-population-job:
+    description: >
+      Enqueues a job to cause all PkgVersion objects with no payload length to get those populated if possible.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgVersionPayloadLengthPopulationJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgVersionPayloadLengthPopulationJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgVersionPayloadLengthPopulationJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-version-localization-coverage-export-spreadsheet-job:
+    description: >
+      Enqueues a job to produce a spreadsheet of the coverage of package version localizations.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgVersionLocalizationCoverageExportSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgVersionLocalizationCoverageExportSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgVersionLocalizationCoverageExportSpreadsheetJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-localization-coverage-export-spreadsheet-job:
+    description: >
+      Enqueues a job to produce a spreadsheet of the coverage of package version localizations.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgLocalizationCoverageExportSpreadsheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgLocalizationCoverageExportSpreadsheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgLocalizationCoverageExportSpreadsheetJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-screenshot-export-archive-job:
+    description: >
+      Enqueues a job to produce a spreadsheet of the coverage of package localizations.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgScreenshotExportArchiveJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgScreenshotExportArchiveJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgScreenshotExportArchiveJobResponseEnvelope"
+
+  /__api/v2/pkg/queue-pkg-screenshot-archive-import-job:
+    description: >
+      Enqueues a request (linked to some data) that will import a tar-ball of data
+      containing package screenshots.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgScreenshotArchiveImportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgScreenshotArchiveImportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgScreenshotArchiveImportJobResponseEnvelope"
+
+components:
+  schemas:
+
+    queuePkgCategoryCoverageExportSpreadsheetJobRequestEnvelope:
+      type: object
+    queuePkgCategoryCoverageExportSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgCategoryCoverageExportSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgCategoryCoverageExportSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgCategoryCoverageImportSpreadsheetJobRequestEnvelope:
+      type: object
+      properties:
+        inputDataGuid:
+          type: string
+    queuePkgCategoryCoverageImportSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgCategoryCoverageImportSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgCategoryCoverageImportSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgScreenshotSpreadsheetJobRequestEnvelope:
+      type: object
+    queuePkgScreenshotSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgScreenshotSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgScreenshotSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgIconSpreadsheetJobRequestEnvelope:
+      type: object
+    queuePkgIconSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgIconSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgIconSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgProminenceAndUserRatingSpreadsheetJobRequestEnvelope:
+      type: object
+    queuePkgProminenceAndUserRatingSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgProminenceAndUserRatingSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgProminenceAndUserRatingSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgIconExportArchiveJobRequestEnvelope:
+      type: object
+    queuePkgIconExportArchiveJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgIconExportArchiveJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgIconExportArchiveJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgIconArchiveImportJobRequestEnvelope:
+      type: object
+      properties:
+        inputDataGuid:
+          type: string
+    queuePkgIconArchiveImportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgIconArchiveImportJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgIconArchiveImportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgVersionPayloadLengthPopulationJobRequestEnvelope:
+      type: object
+    queuePkgVersionPayloadLengthPopulationJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgVersionPayloadLengthPopulationJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgVersionPayloadLengthPopulationJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgVersionLocalizationCoverageExportSpreadsheetJobRequestEnvelope:
+      type: object
+    queuePkgVersionLocalizationCoverageExportSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgVersionLocalizationCoverageExportSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgVersionLocalizationCoverageExportSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgLocalizationCoverageExportSpreadsheetJobRequestEnvelope:
+      type: object
+    queuePkgLocalizationCoverageExportSpreadsheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgLocalizationCoverageExportSpreadsheetJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgLocalizationCoverageExportSpreadsheetJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgScreenshotExportArchiveJobRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+    queuePkgScreenshotExportArchiveJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgScreenshotExportArchiveJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgScreenshotExportArchiveJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgScreenshotArchiveImportJobRequestEnvelope:
+      type: object
+      properties:
+        inputDataGuid:
+          type: string
+        importStrategy:
+          $ref: "#/components/schemas/queuePkgScreenshotArchiveImportJobImportStrategy"
+    queuePkgScreenshotArchiveImportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgScreenshotArchiveImportJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgScreenshotArchiveImportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+    queuePkgScreenshotArchiveImportJobImportStrategy:
+      type: string
+      enum:
+        - AUGMENT
+        - REPLACE
+

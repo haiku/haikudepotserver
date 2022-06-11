@@ -75,7 +75,23 @@
                 <executions>
 
                     <execution>
-                        <id>captcha:generate-captcha</id>
+                        <id>authorization</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/authorization.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>authorization-job</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/authorization-job.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>captcha</id>
                         <goals><goal>generate</goal></goals>
                         <configuration>
                             <inputSpec>${inputspec.basedir}/captcha.yaml</inputSpec>
@@ -83,7 +99,23 @@
                     </execution>
 
                     <execution>
-                        <id>captcha:generate-user</id>
+                        <id>job</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/job.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>miscellaneous</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/miscellaneous.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>user</id>
                         <goals><goal>generate</goal></goals>
                         <configuration>
                             <inputSpec>${inputspec.basedir}/user.yaml</inputSpec>
@@ -91,7 +123,7 @@
                     </execution>
 
                     <execution>
-                        <id>captcha:generate-pkg</id>
+                        <id>pkg</id>
                         <goals><goal>generate</goal></goals>
                         <configuration>
                             <inputSpec>${inputspec.basedir}/pkg.yaml</inputSpec>
@@ -99,10 +131,34 @@
                     </execution>
 
                     <execution>
-                        <id>captcha:generate-user-rating</id>
+                        <id>pkg-job</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/pkg-job.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>repository</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/repository.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>user-rating</id>
                         <goals><goal>generate</goal></goals>
                         <configuration>
                             <inputSpec>${inputspec.basedir}/user-rating.yaml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>user-rating-job</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${inputspec.basedir}/user-rating-job.yaml</inputSpec>
                         </configuration>
                     </execution>
 

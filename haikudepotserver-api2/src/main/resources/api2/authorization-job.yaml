@@ -1,0 +1,46 @@
+# Copyright 2022, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Authorization Job API
+  version: "2.0"
+tags:
+  - name: authorization-job
+paths:
+  /__api/v2/authorization-job/queue-authorization-rules-spreadsheet:
+    post:
+      tags:
+        - authorization-job
+      operationId: queueAuthorizationRulesSpreadsheet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queueAuthorizationRulesSpreadsheetRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of initiating the queuing of an authorization rules spreadsheet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queueAuthorizationRulesSpreadsheetResponseEnvelope"
+
+components:
+  schemas:
+    queueAuthorizationRulesSpreadsheetRequestEnvelope:
+      type: object
+    queueAuthorizationRulesSpreadsheetResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queueAuthorizationRulesSpreadsheetResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queueAuthorizationRulesSpreadsheetResult:
+      type: object
+      properties:
+        guid:
+          type: string

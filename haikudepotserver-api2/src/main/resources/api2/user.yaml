@@ -1,4 +1,4 @@
-# Copyright 2021, Andrew Lindesay
+# Copyright 2021-2022, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -11,6 +11,28 @@ tags:
   - name: user
 paths:
 
+  /__api/v2/user/update-user:
+    description: >
+      This method will update the user based on the data in the request.  Only the data which is included
+      in the filter will be updated.
+    post:
+      tags:
+        - user
+      operationId: updateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateUserRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of having updated the user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateUserResponseEnvelope"
 
   /__api/v2/user/create-user:
     description: >
@@ -36,7 +58,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/createUserResponseEnvelope"
-
 
   /__api/v2/user/get-user-usage-conditions:
     description: >
@@ -85,7 +106,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/getUserResponseEnvelope"
 
-
   /__api/v2/user/authenticate-user:
     description: >
       This endpoint will allow a client to authenticate against the server.  If this is
@@ -110,6 +130,119 @@ paths:
               schema:
                 $ref: "#/components/schemas/authenticateUserResponseEnvelope"
 
+  /__api/v2/user/renew-token:
+    description: >
+      This method will renew the token supplied.  If the token has expired then this
+      method will return a null value for the token.
+    post:
+      tags:
+        - user
+      operationId: renewToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/renewTokenRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of renewing an authentication token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/renewTokenResponseEnvelope"
+
+  /__api/v2/user/change-password:
+    description: >
+      This method will allow the client to modify the password of a user.
+    post:
+      tags:
+        - user
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/changePasswordRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of making the API call.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/changePasswordResponseEnvelope"
+
+  /__api/v2/user/search-users:
+    description: >
+      This method will allow a search for users.
+    post:
+      tags:
+        - user
+      operationId: searchUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/searchUsersRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of making the API call.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchUsersResponseEnvelope"
+
+  /__api/v2/user/initiate-password-reset:
+    description: >
+      This method will kick-off a process to reset a user's password by email.  The user will be sent
+      an email containing a URL.  They will then click on the URL which will take them to a page allowing
+      them to reset their password.
+    post:
+      tags:
+        - user
+      operationId: initiatePasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/initiatePasswordResetRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of making the API call.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/initiatePasswordResetResponseEnvelope"
+
+  /__api/v2/user/complete-password-reset:
+    description: >
+      This method will complete the password reset process by taking the token and a new password then
+      configuring that password on the user.
+    post:
+      tags:
+        - user
+      operationId: completePasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/completePasswordResetRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result of making the API call.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/completePasswordResetResponseEnvelope"
 
   /__api/v2/user/agree-user-usage-conditions:
     description: >
@@ -139,7 +272,6 @@ paths:
 components:
   schemas:
 
-
     agreeUserUsageConditionsRequestEnvelope:
       type: object
       properties:
@@ -157,6 +289,36 @@ components:
     agreeUserUsageConditionsResult:
       type: object
 
+    updateUserRequestEnvelope:
+      type: object
+      properties:
+        nickname:
+          type: string
+        naturalLanguageCode:
+          type: string
+        active:
+          type: boolean
+        email:
+          type: string
+        filter:
+          type: array
+          items:
+            $ref: "#/components/schemas/updateUserFilter"
+    updateUserResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updateUserResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updateUserResult:
+      type: object
+    updateUserFilter:
+      type: string
+      enum:
+        - NATURALLANGUAGE
+        - EMAIL
+        - ACTIVE
 
     createUserRequestEnvelope:
       type: object
@@ -193,7 +355,6 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     createUserResult:
       type: object
-
 
     getUserUsageConditionsRequestEnvelope:
       type: object
@@ -272,7 +433,6 @@ components:
                 recent wording.
               type: boolean
 
-
     authenticateUserRequestEnvelope:
       type: object
       properties:
@@ -296,3 +456,131 @@ components:
             In the case of a successful authentication, this field will be non-null and will contain a standard
             formatted json-web-token.  If the authentication had failed then this token will be null.
 
+    renewTokenRequestEnvelope:
+      type: object
+      properties:
+        token:
+          type: string
+    renewTokenResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/renewTokenResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    renewTokenResult:
+      type: object
+      properties:
+        token:
+          type: string
+
+    changePasswordRequestEnvelope:
+      type: object
+      properties:
+        nickname:
+          type: string
+        oldPasswordClear:
+          type: string
+        newPasswordClear:
+          type: string
+        captchaToken:
+          type: string
+        captchaResponse:
+          type: string
+    changePasswordResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/changePasswordResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    changePasswordResult:
+      type: object
+
+    searchUsersRequestEnvelope:
+      allOf:
+        - $ref: "./common.yaml#/components/schemas/abstractSearchRequest"
+        - type: object
+          properties:
+            includeInactive:
+              type: boolean
+    searchUsersResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/searchUsersResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    searchUsersResult:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/searchUsersUser"
+    searchUsersUser:
+      type: object
+      properties:
+        nickname:
+          type: string
+        active:
+          type: boolean
+
+    initiatePasswordResetRequestEnvelope:
+      type: object
+      properties:
+        email:
+          type: string
+        captchaToken:
+          type: string
+          description: >
+            The captcha token is obtained from an earlier invocation to the
+            {@link CaptchaApi} method to get
+            a captcha.  This identifies the captcha for which the captcha response should
+            correlate.
+        captchaResponse:
+          type: string
+          description: >
+            This is the human-supplied text string that matches the image that would have been
+            provided with the captcha that is identified by the cpatchaToken.
+    initiatePasswordResetResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/initiatePasswordResetResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    initiatePasswordResetResult:
+      type: object
+
+    completePasswordResetRequestEnvelope:
+      type: object
+      properties:
+        token:
+          type: string
+        passwordClear:
+          type: string
+        captchaToken:
+          type: string
+          description: >
+            The captcha token is obtained from an earlier invocation to the
+            {@link CaptchaApi} method to get
+            a captcha.  This identifies the captcha for which the captcha response should
+            correlate.
+        captchaResponse:
+          type: string
+          description: >
+            This is the human-supplied text string that matches the image that would have been
+            provided with the captcha that is identified by the captchaToken.
+    completePasswordResetResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/completePasswordResetResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    completePasswordResetResult:
+      type: object

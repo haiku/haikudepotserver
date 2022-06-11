@@ -1,4 +1,4 @@
-# Copyright 2021, Andrew Lindesay
+# Copyright 2021-2022, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 components:
@@ -28,33 +28,11 @@ components:
         - LATEST
         - NONE
         - SPECIFIC
-    user:
-      type: object
-      properties:
-        nickname:
-          type: string
-    pkgVersion:
-      type: object
-      properties:
-        repositoryCode:
-          type: string
-        repositorySourceCode:
-          type: string
-        architectureCode:
-          type: string
-        major:
-          type: string
-        minor:
-          type: string
-        micro:
-          type: string
-        preRelease:
-          type: string
-        revision:
-          type: integer
-          format: int32
-        pkg:
-          type: object
-          properties:
-            name:
-              type: string
+    jobStatus:
+      type: string
+      enum:
+        - QUEUED
+        - STARTED
+        - FINISHED
+        - FAILED
+        - CANCELLED

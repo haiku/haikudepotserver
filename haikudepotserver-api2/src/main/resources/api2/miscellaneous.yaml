@@ -1,0 +1,569 @@
+# Copyright 2022, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Miscellaneous API
+  version: "2.0"
+tags:
+  - name: miscellaneous
+paths:
+  /__api/v2/miscellaneous/get-all-pkg-categories:
+    post:
+      description: >
+        Returns a list of all of the categories.  If a natural language code is supplied in the reuqest, then
+        the results' names will be localized; otherwise a database-based default will be returned.
+      tags:
+        - miscellaneous
+      operationId: getAllPkgCategories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllPkgCategoriesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing all of the package categories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllPkgCategoriesResponseEnvelope"
+  /__api/v2/miscellaneous/get-all-natural-languages:
+    post:
+      description: >
+        Returns a list of all of the natural languages.  If a natural language code is supplied in the request
+        then the results' names will be localized; otherwise a database-based default will be returned.
+      tags:
+        - miscellaneous
+      operationId: getAllNaturalLanguages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllNaturalLanguagesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing all of the natural languages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllNaturalLanguagesResponseEnvelope"
+  /__api/v2/miscellaneous/raise-exception:
+    post:
+      description: >
+        This method will raise a runtime exception to test the behaviour of the server and client in this
+        situation.
+      tags:
+        - miscellaneous
+      operationId: raiseException
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/raiseExceptionRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the results of raising an exception.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/raiseExceptionResponseEnvelope"
+  /__api/v2/miscellaneous/get-runtime-information:
+    post:
+      description: >
+        This method will return information about the running application server.
+      tags:
+        - miscellaneous
+      operationId: getRuntimeInformation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getRuntimeInformationRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the runtime information.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getRuntimeInformationResponseEnvelope"
+  /__api/v2/miscellaneous/get-all-messages:
+    post:
+      description: >
+        This method will return all of the localization messages that might be able to be displayed
+        to the user from the result of validation problems and so on.  This method will throw an instance of
+        {@link ObjectNotFoundException} if the natural language
+        specified in the request does not exist.
+      tags:
+        - miscellaneous
+      operationId: getAllMessages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllMessagesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllMessagesResponseEnvelope"
+  /__api/v2/miscellaneous/get-all-architectures:
+    post:
+      description: >
+        This method will return a list of all of the possible architectures in the system such as x86 or arm.
+        Note that this will explicitly exclude the pseudo-architectures of "source" and "any".
+      tags:
+        - miscellaneous
+      operationId: getAllArchitectures
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllArchitecturesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the architectures
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllArchitecturesResponseEnvelope"
+  /__api/v2/miscellaneous/get-all-user-rating-stabilities:
+    post:
+      description: >
+        This method will return all of the possible user rating stabilities that can be used when the user
+        rates a package version.  If a natural language code is supplied in the request then the results' names
+        will be localized; otherwise a database-based default will be used.
+      tags:
+        - miscellaneous
+      operationId: getAllUserRatingStabilities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllUserRatingStabilitiesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the user rating stabilities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllUserRatingStabilitiesResponseEnvelope"
+
+  /__api/v2/miscellaneous/get-all-prominences:
+    post:
+      description: >
+        This method will return all of the possible prominences.
+      tags:
+        - miscellaneous
+      operationId: getAllProminences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllProminencesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the prominences.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllProminencesResponseEnvelope"
+
+  /__api/v2/miscellaneous/get-all-countries:
+    post:
+      description: >
+        This method will return all of the possible countries.
+      tags:
+        - miscellaneous
+      operationId: getAllCountries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllCountriesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the countries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllCountriesResponseEnvelope"
+
+  /__api/v2/miscellaneous/generate-feed-url:
+    post:
+      description: >
+        This method will return a feed URL based on the supplied information in the request.  If
+        any of the elements supplied in the request do not exist then this method will throw an
+        instance of {@link ObjectNotFoundException}.
+      tags:
+        - miscellaneous
+      operationId: generateFeedUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/generateFeedUrlRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the feed URL.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generateFeedUrlResponseEnvelope"
+
+  /__api/v2/miscellaneous/get-all-contributors:
+    post:
+      description: >
+        Returns a list of all of the people who have contributed to this application server in
+        some way.
+      tags:
+        - miscellaneous
+      operationId: getAllContributors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getAllContributorsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing all of the contributors.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllContributorsResponseEnvelope"
+
+components:
+  schemas:
+
+    getAllPkgCategoriesRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+    getAllPkgCategoriesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllPkgCategoriesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllPkgCategoriesResult:
+      type: object
+      properties:
+        pkgCategories:
+          type: array
+          items:
+            $ref: "#/components/schemas/pkgCategory"
+    pkgCategory:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+
+    getAllNaturalLanguagesRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+    getAllNaturalLanguagesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllNaturalLanguagesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllNaturalLanguagesResult:
+      type: object
+      properties:
+        naturalLanguages:
+          type: array
+          items:
+            $ref: "#/components/schemas/naturalLanguage"
+    naturalLanguage:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+
+    raiseExceptionRequestEnvelope:
+      type: object
+    raiseExceptionResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/raiseExceptionResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    raiseExceptionResult:
+      type: object
+
+    getRuntimeInformationRequestEnvelope:
+      type: object
+    getRuntimeInformationResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getRuntimeInformationResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getRuntimeInformationResult:
+      type: object
+      properties:
+        projectVersion:
+          type: string
+        javaVersion:
+          type: string
+        startTimestamp:
+          type: integer
+          format: int64
+        isProduction:
+          type: boolean
+        defaults:
+          type: object
+          properties:
+            architectureCode:
+              type: string
+            repositoryCode:
+              type: string
+
+    getAllMessagesRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+    getAllMessagesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllMessagesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllMessagesResult:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/message"
+    message:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+
+    getAllArchitecturesRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+    getAllArchitecturesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllArchitecturesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllArchitecturesResult:
+      type: object
+      properties:
+        architectures:
+          type: array
+          items:
+            $ref: "#/components/schemas/architecture"
+    architecture:
+      type: object
+      properties:
+        code:
+          type: string
+
+    getAllUserRatingStabilitiesRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+    getAllUserRatingStabilitiesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllUserRatingStabilitiesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllUserRatingStabilitiesResult:
+      type: object
+      properties:
+        userRatingStabilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/userRatingStability"
+    userRatingStability:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        ordering:
+          type: integer
+
+    getAllProminencesRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+    getAllProminencesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllProminencesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllProminencesResult:
+      type: object
+      properties:
+        prominences:
+          type: array
+          items:
+            $ref: "#/components/schemas/prominence"
+    prominence:
+      type: object
+      properties:
+        ordering:
+          type: integer
+        name:
+          type: string
+
+    getAllCountriesRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+    getAllCountriesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllCountriesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllCountriesResult:
+      type: object
+      properties:
+        countries:
+          type: array
+          items:
+            $ref: "#/components/schemas/country"
+    country:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+
+    generateFeedUrlRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+          description: >
+            If possible, the content may be localized.  In this case, the preference for the language
+            is made by supplying the natural language code.
+        pkgNames:
+          type: array
+          items:
+            type: string
+          description: >
+            The package names for which the feed may be generated are specified with this.  If the list
+            is empty then the feed will be empty.  If the list is null then the feed will draw from all
+            of the packages.
+        limit:
+          type: integer
+          description: >
+            This is the limit to the number of entries that will be provided by a given feed.  The
+            feed may have an absolute limit as well; so you may ask for X, but only be provided with
+            less than X items because of the absolute limit.
+        supplierTypes:
+          type: array
+          description: >
+            These are essentially the sources from which the feed will be sourced.
+          items:
+            $ref: "#/components/schemas/generateFeedUrlSupplierType"
+    generateFeedUrlResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/generateFeedUrlResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    generateFeedUrlResult:
+      type: object
+      properties:
+        url:
+          type: string
+    generateFeedUrlSupplierType:
+      type: string
+      enum:
+        # Provide feed entries from creations of package versions.
+        - CREATEDPKGVERSION
+        # Provide feed entries from creations of user ratings.
+        - CREATEDUSERRATING
+
+    getAllContributorsRequestEnvelope:
+      type: object
+    getAllContributorsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getAllContributorsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getAllContributorsResult:
+      type: object
+      properties:
+        contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/contributor"
+    contributor:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/contributorType"
+        name:
+          type: string
+        naturalLanguageCode:
+          type: string
+    contributorType:
+      type: string
+      enum:
+        - ENGINEERING
+        - LOCALIZATION

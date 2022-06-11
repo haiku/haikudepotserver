@@ -1,4 +1,4 @@
-# Copyright 2021, Andrew Lindesay
+# Copyright 2021-2022, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -11,6 +11,402 @@ tags:
   - name: pkg
 paths:
 
+  /__api/v2/pkg/update-pkg-categories:
+    description: >
+      This method will ensure that the categories configured on the nominated package are as per the list of
+      packages.
+    post:
+      tags:
+        - pkg
+      operationId: updatePkgCategories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updatePkgCategoriesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updatePkgCategoriesResponseEnvelope"
+
+  /__api/v2/pkg/search-pkgs:
+    description: >
+      This method can be invoked to get a list of all of the packages that match some search critera in the
+      request.
+    post:
+      tags:
+        - pkg
+      operationId: searchPkgs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/searchPkgsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchPkgsResponseEnvelope"
+
+  /__api/v2/pkg/get-pkg:
+    description: >
+      This method will return a package and the specified versions.  It will throw an
+      {@link ObjectNotFoundException} if the package was not able to be located.
+    post:
+      tags:
+        - pkg
+      operationId: getPkg
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgResponseEnvelope"
+
+  /__api/v2/pkg/get-pkg-icons:
+    description: >
+      Returns a list of meta-data regarding the icon data related to the pkg.  This does not contain the icon
+      data itself; just the meta data.
+    post:
+      tags:
+        - pkg
+      operationId: getPkgIcons
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgIconsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgIconsResponseEnvelope"
+
+  /__api/v2/pkg/configure-pkg-icon:
+    description: >
+      This request will configure the icons for the package nominated.  Note that only certain configurations of
+      icon data may be acceptable; for example, it will require a 16x16px and 32x32px bitmap image.
+    post:
+      tags:
+        - pkg
+      operationId: configurePkgIcon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/configurePkgIconRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/configurePkgIconResponseEnvelope"
+
+  /__api/v2/pkg/remove-pkg-icon:
+    description: >
+      This request will remove any icons from the package.
+    post:
+      tags:
+        - pkg
+      operationId: removePkgIcon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/removePkgIconRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/removePkgIconResponseEnvelope"
+
+  /__api/v2/pkg/get-pkg-screenshot:
+    description: >
+      This method will get the details of a screenshot image.
+    post:
+      tags:
+        - pkg
+      operationId: getPkgScreenshot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgScreenshotRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgScreenshotResponseEnvelope"
+
+  /__api/v2/pkg/get-pkg-screenshots:
+    description: >
+      This method will return an ordered list of the screenshots that are available for this package.  It will
+      throw an {@link ObjectNotFoundException} in the case where the
+      nominated package is not able to be found.
+    post:
+      tags:
+        - pkg
+      operationId: getPkgScreenshots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgScreenshotsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgScreenshotsResponseEnvelope"
+
+  /__api/v2/pkg/remove-pkg-screenshot:
+    description: >
+      This method will remove the nominated screenshot from the package.  If the screenshot is not able to be
+      found using the code supplied, the method will throw an instance of
+      {@link ObjectNotFoundException}.
+    post:
+      tags:
+        - pkg
+      operationId: removePkgScreenshot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/removePkgScreenshotRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/removePkgScreenshotResponseEnvelope"
+
+  /__api/v2/pkg/reorder-pkg-screenshots:
+    description: >
+      This method will reorder the screenshots related to the nominated package.  If any of the screenshots are
+      not accounted for, they will be ordered at the end in an indeterminate manner.  If the package is not able to be
+      found given the name supplied, an instance of
+      {@link ObjectNotFoundException} will be thrown.
+    post:
+      tags:
+        - pkg
+      operationId: reorderPkgScreenshots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/reorderPkgScreenshotsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/reorderPkgScreenshotsResponseEnvelope"
+
+  /__api/v2/pkg/update-pkg-localization:
+    description: >
+      This method will update the localizations supplied for the package identified in the request.  In order to
+      remove a localization for a given language, supply the localization data for that language as NULL.
+    post:
+      tags:
+        - pkg
+      operationId: updatePkgLocalization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updatePkgLocalizationRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updatePkgLocalizationResponseEnvelope"
+
+  /__api/v2/pkg/get-pkg-localizations:
+    description: >
+      This method will return all of the localizations that are specific to the
+      package identified in the request.
+    post:
+      tags:
+        - pkg
+      operationId: getPkgLocalizations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgLocalizationsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgLocalizationsResponseEnvelope"
+
+  /__api/v2/pkg/get-pkg-version-localizations:
+    description: >
+      This method will return the package version localizations for the nominated package.  It will return
+      data for the latest package version in the architecture nominated in the request.  The architecture is
+      required.  If a "major" value is supplied in the request then it is assumed that the request is in the
+      context of a specific package version rather than the latest.
+    post:
+      tags:
+        - pkg
+      operationId: getPkgVersionLocalizations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgVersionLocalizationsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgVersionLocalizationsResponseEnvelope"
+
+  /__api/v2/pkg/update-pkg-prominence:
+    description: >
+      This method will update the prominence of the nominated package.  The prominence is identified by the
+      ordering of the prominence as a natural identifier.
+    post:
+      tags:
+        - pkg
+      operationId: updatePkgProminence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updatePkgProminenceRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updatePkgProminenceResponseEnvelope"
+
+  /__api/v2/pkg/get-pkg-changelog:
+    description: >
+      The package might have a change log associated with it.  This is just a long string with notes
+      about what versions were released and what changed in those releases.  If there is no change log
+      stored for this package, a NULL value may be returned in {@link GetPkgChangelogResult#content}.
+    post:
+      tags:
+        - pkg
+      operationId: getPkgChangelog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPkgChangelogRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPkgChangelogResponseEnvelope"
+
+  /__api/v2/pkg/update-pkg-changelog:
+    description: >
+      The package is able to have a change log associated with it.  This method will update the change
+      log.  If the change log content is supplied as NULL or an empty string then the change log may be
+      removed.
+    post:
+      tags:
+        - pkg
+      operationId: updatePkgChangelog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updatePkgChangelogRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updatePkgChangelogResponseEnvelope"
+
+  /__api/v2/pkg/update-pkg-version:
+    description: >
+      This method will allow a package version to be updated.
+      @throws ObjectNotFoundException if the package version is not able to be found.
+    post:
+      tags:
+        - pkg
+      operationId: updatePkgVersion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updatePkgVersionRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updatePkgVersionResponseEnvelope"
 
   /__api/v2/pkg/increment-view-counter:
     description: >
@@ -33,7 +429,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/incrementViewCounterResponseEnvelope"
-
 
   /__api/v2/pkg/get-pkg-change-log:
     description: >
@@ -59,9 +454,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/getPkgChangeLogResponseEnvelope"
 
+
+
 components:
   schemas:
-
 
     incrementViewCounterRequestEnvelope:
       type: object
@@ -96,7 +492,6 @@ components:
     incrementViewCounterResult:
       type: object
 
-
     getPkgChangeLogRequestEnvelope:
       type: object
       properties:
@@ -115,3 +510,657 @@ components:
         content:
           type: string
 
+    updatePkgCategoriesRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        pkgCategoryCodes:
+          type: array
+          items:
+            type: string
+    updatePkgCategoriesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updatePkgCategoriesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updatePkgCategoriesResult:
+      type: object
+
+    searchPkgsRequestEnvelope:
+      allOf:
+        - $ref: "./common.yaml#/components/schemas/abstractSearchRequest"
+        - type: object
+          properties:
+            architectureCode:
+              type: string
+              description: >
+                This effectively specifies the repository sources to use.
+            repositoryCodes:
+              type: array
+              description: >
+                This field specifies the repositories that the search will look for packages in.
+              items:
+                type: string
+            pkgCategoryCode:
+              type: string
+            sortOrdering:
+              $ref: "#/components/schemas/searchPkgsSortOrdering"
+            naturalLanguageCode:
+              type: string
+            daysSinceLatestVersion:
+              type: integer
+    searchPkgsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/searchPkgsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    searchPkgsResult:
+      type: object
+      properties:
+        total:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/searchPkgsPkg"
+    searchPkgsSortOrdering:
+      type: string
+      enum:
+        - NAME
+        - PROMINENCE
+        - VERSIONCREATETIMESTAMP
+        - VERSIONVIEWCOUNTER
+    searchPkgsPkgVersion:
+      type: object
+      properties:
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+        createTimestamp:
+          type: integer
+          format: int64
+        viewCounter:
+          type: integer
+          format: int64
+        architectureCode:
+          type: string
+        summary:
+          type: string
+        payloadLength:
+          type: integer
+          format: int64
+        descriptionSnippet:
+          type: string
+          description: >
+            If this is relevant to the search then it may be returned.
+        title:
+          type: string
+          description: >
+            This value is localized.
+        repositorySourceCode:
+          type: string
+        repositoryCode:
+          type: string
+    searchPkgsPkg:
+      type: object
+      properties:
+        name:
+          type: string
+        modifyTimestamp:
+          type: integer
+          format: int64
+        hasAnyPkgIcons:
+          type: boolean
+          description: >
+            This will be true if the package has any icon data stored for it;
+            regardless of the format of that icon.  This can be used as a cue as
+            to the value in using a specific URL to get a specific icon for the
+            package or to use a generic icon.
+        versions:
+          type: array
+          description: >
+            This versions value should only contain the one item actually, but is
+            provided in this form to retain consistency with other API.
+          items:
+            $ref : "#/components/schemas/searchPkgsPkgVersion"
+        derivedRating:
+          type: number
+
+    getPkgRequestEnvelope:
+      type: object
+      properties:
+        repositorySourceCode:
+          type: string
+        name:
+          type: string
+          description: >
+            This is the name of the package that you wish to obtain.
+        incrementViewCounter:
+          type: boolean
+          description: >
+            If this is true then the counter on the version is incremented; indicating that the package has been
+            seen.  Do not use this unless the user is being displayed a user-interface of the package so that they
+            have <em>really</em> seen it.  This value may be supplied as null.  This only applies when the
+            {@link PkgVersionType#LATEST} version type is
+            being requested.  Also note that the system has a feature to avoid double counting from the same address in
+            quick succession.
+        architectureCode:
+          type: string
+          description: >
+            Only a version of the package for this architecture will be returned.  Note that this also
+            includes the pseudo-architectures "any" and "source".
+        versionType:
+          $ref: "./common.yaml#/components/schemas/pkgVersionType"
+        naturalLanguageCode:
+          type: string
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+    getPkgResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgResult:
+      type: object
+      description: >
+        This is the result model that comes back from the get packages API invocation.
+      properties:
+        name:
+          type: string
+        modifyTimestamp:
+          type: integer
+          format: int64
+          description: >
+            This is the timestamp (millis since epoc) at which the package was last edited.  This is helpful for
+            situations where it is necessary to create a url that will cause the browser to refresh the data.
+        versions:
+          type: array
+          items:
+            $ref: "#/components/schemas/getPkgPkgVersion"
+        pkgCategoryCodes:
+          type: array
+          items:
+            type: string
+        derivedRating:
+          type: number
+        derivedRatingSampleSize:
+          type: integer
+        prominenceOrdering:
+          type: integer
+          description: >
+            This relates to the repository requested.
+        vanityLinkUrl:
+          type: string
+        hasChangelog:
+          type: boolean
+    getPkgPkgVersionUrl:
+      type: object
+      properties:
+        url:
+          type: string
+        urlTypeCode:
+          type: string
+    getPkgPkgVersion:
+      type: object
+      properties:
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+        architectureCode:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+        title:
+          type: string
+          description: >
+            This title is localized.
+        repositorySourceCode:
+          type: string
+        repositoryCode:
+          type: string
+        licenses:
+          type: array
+          items:
+            type: string
+        copyrights:
+          type: array
+          items:
+            type: string
+        urls:
+          type: array
+          items:
+            $ref: "#/components/schemas/getPkgPkgVersionUrl"
+        viewCounter:
+          type: integer
+          format: int64
+        isLatest:
+          type: boolean
+        payloadLength:
+          type: integer
+          format: int64
+          description: >
+            The length in bytes of the package payload.
+        createTimestamp:
+          type: integer
+          format: int64
+          description: >
+            This represents when the package version was created in the HDS system.
+        hasSource:
+          type: boolean
+          description: >
+            Is true if the package version has a source package available.
+        hpkgDownloadURL:
+          type: string
+          description: >
+            This value may be a path or may be a full URL.  If it is path then it is assumed
+            that the base URL (scheme and path) are the same as the one on which you have
+            accessed this API on.
+
+    getPkgIconsRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+    getPkgIconsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgIconsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgIconsResult:
+      type: object
+      properties:
+        pkgIcons:
+          type: array
+          items:
+            $ref: "#/components/schemas/getPkgIconsPkgIcon"
+    getPkgIconsPkgIcon:
+      type: object
+      properties:
+        mediaTypeCode:
+          type: string
+        size:
+          type: integer
+
+    configurePkgIconRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        pkgIcons:
+          type: array
+          items:
+            $ref: "#/components/schemas/configurePkgIconPkgIcon"
+    configurePkgIconResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/configurePkgIconResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    configurePkgIconResult:
+      type: object
+    configurePkgIconPkgIcon:
+      type: object
+      properties:
+        mediaTypeCode:
+          type: string
+        size:
+          type: integer
+        dataBase64:
+          type: string
+
+    removePkgIconRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+    removePkgIconResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/removePkgIconResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    removePkgIconResult:
+      type: object
+
+    getPkgScreenshotRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+    getPkgScreenshotResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgScreenshotResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgScreenshotResult:
+      type: object
+      properties:
+        code:
+          type: string
+        length:
+          type: integer
+        height:
+          type: integer
+        width:
+          type: integer
+
+    getPkgScreenshotsRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+    getPkgScreenshotsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgScreenshotsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgScreenshotsResult:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/getPkgScreenshotsScreenshot"
+    getPkgScreenshotsScreenshot:
+      type: object
+      properties:
+        code:
+          type: string
+        length:
+          type: integer
+        height:
+          type: integer
+        width:
+          type: integer
+
+    removePkgScreenshotRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+    removePkgScreenshotResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/removePkgScreenshotResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    removePkgScreenshotResult:
+      type: object
+
+    reorderPkgScreenshotsRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        codes:
+          type: array
+          description: >
+            This is an ordered list of codes that describe the ordering desired for the screenshots of this package.
+          items:
+            type: string
+    reorderPkgScreenshotsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/reorderPkgScreenshotsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    reorderPkgScreenshotsResult:
+      type: object
+
+    updatePkgLocalizationRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        pkgLocalizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/updatePkgLocalizationLocalization"
+    updatePkgLocalizationResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updatePkgLocalizationResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updatePkgLocalizationResult:
+      type: object
+    updatePkgLocalizationLocalization:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+
+    getPkgLocalizationsRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        naturalLanguageCodes:
+          type: array
+          items:
+            type: string
+    getPkgLocalizationsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgLocalizationsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgLocalizationsResult:
+      type: object
+      properties:
+        pkgLocalizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/getPkgLocalizationsPkgLocalization"
+    getPkgLocalizationsPkgLocalization:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+
+    getPkgVersionLocalizationsRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        repositorySourceCode:
+          type: string
+        naturalLanguageCodes:
+          type: array
+          items:
+            type: string
+        architectureCode:
+          type: string
+          description: >
+            The architecture is required and is considered if the request is for the latest version of the package
+            or for a specific version.
+        major:
+          type: string
+          description: >
+            If the major value is supplied then the request will be considered to be in the context of a specific
+            package version.  If it is not supplied then the request will be considered to be referring to the
+            latest version of the package.
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+    getPkgVersionLocalizationsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgVersionLocalizationsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgVersionLocalizationsResult:
+      type: object
+      properties:
+        pkgVersionLocalizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/getPkgVersionLocalizationsPkgVersionLocalization"
+    getPkgVersionLocalizationsPkgVersionLocalization:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+
+    updatePkgProminenceRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        repositoryCode:
+          type: string
+          description: >
+            This update will occur to the nominated package in relation only to
+            this repository.
+        prominenceOrdering:
+          type: integer
+    updatePkgProminenceResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updatePkgProminenceResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updatePkgProminenceResult:
+      type: object
+
+    getPkgChangelogRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+    getPkgChangelogResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPkgChangelogResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPkgChangelogResult:
+      type: object
+      properties:
+        content:
+          type: string
+
+    updatePkgChangelogRequestEnvelope:
+      type: object
+      properties:
+        pkgName:
+          type: string
+        content:
+          type: string
+    updatePkgChangelogResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updatePkgChangelogResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updatePkgChangelogResult:
+      type: object
+
+    updatePkgVersionRequestEnvelope:
+      type: object
+      properties:
+        repositorySourceCode:
+          type: string
+        pkgName:
+          type: string
+        architectureCode:
+          type: string
+        major:
+          type: string
+        minor:
+          type: string
+        micro:
+          type: string
+        preRelease:
+          type: string
+        revision:
+          type: integer
+        active:
+          type: boolean
+          description: >
+            This value can be set.
+        public List<Filter> filter:
+          type: array
+          items:
+            $ref: "#/components/schemas/updatePkgVersionFilter"
+    updatePkgVersionResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updatePkgVersionResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updatePkgVersionResult:
+      type: object
+    updatePkgVersionFilter:
+      type: string
+      enum:
+        - ACTIVE

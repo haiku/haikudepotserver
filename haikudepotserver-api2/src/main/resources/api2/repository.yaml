@@ -1,0 +1,720 @@
+# Copyright 2022, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Repository API
+  version: "2.0"
+tags:
+  - name: repository
+paths:
+
+  /__api/v2/captcha/get-repositories:
+    description: >
+      This method will return a list of all of the repositories which exist in the system.
+      Minimal data is returned and it is expected that the caller will use the
+      {@link #getRepository(GetRepositoryRequest)} to get specific details for repositories
+      for which finer detail is required.
+    post:
+      tags:
+        - repository
+      operationId: getRepositories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getRepositoriesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getRepositoriesResponseEnvelope"
+
+  /__api/v2/captcha/search-repositories:
+    description: >
+      This method will search the repositories according to the supplied criteria and will
+      return a list of those found.  Any user is able to see the repositories.
+    post:
+      tags:
+        - repository
+      operationId: searchRepositories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/searchRepositoriesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/searchRepositoriesResponseEnvelope"
+
+  /__api/v2/captcha/get-repository:
+    description: >
+      This method will return the repository details for the repository identified by the
+      code in the request object.
+    post:
+      tags:
+        - repository
+      operationId: getRepository
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getRepositoryRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getRepositoryResponseEnvelope"
+
+  /__api/v2/captcha/update-repository:
+    description: >
+      This method will update the repository.  As well as the data to update, it also includes a 'filter' that
+      defines the fields that should be updated in this request.
+    post:
+      tags:
+        - repository
+      operationId: updateRepository
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateRepositoryRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateRepositoryResponseEnvelope"
+
+  /__api/v2/captcha/trigger-import-repository:
+    description: >
+      This method will trigger the import process for a repository.
+    post:
+      tags:
+        - repository
+      operationId: triggerImportRepository
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/triggerImportRepositoryRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/triggerImportRepositoryResponseEnvelope"
+
+  /__api/v2/captcha/create-repository:
+    description: >
+      This method will create a repository.  This method will throw
+      {@link ObjectNotFoundException} if the architecture identified by a
+      supplied code is not able to be found as an architecture.
+    post:
+      tags:
+        - repository
+      operationId: createRepository
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createRepositoryRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createRepositoryResponseEnvelope"
+
+  /__api/v2/captcha/get-repository-source:
+    description: >
+      Returns details of the repository source.</p>
+      @throws ObjectNotFoundException is the repository source is not available.
+    post:
+      tags:
+        - repository
+      operationId: getRepositorySource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getRepositorySourceRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getRepositorySourceResponseEnvelope"
+
+  /__api/v2/captcha/update-repository-source:
+    description: >
+      Allows the repository source to be updated.</p>
+      @throws ObjectNotFoundException if the repository source was not able to be found given the code supplied.
+    post:
+      tags:
+        - repository
+      operationId: updateRepositorySource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateRepositorySourceRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateRepositorySourceResponseEnvelope"
+
+  /__api/v2/captcha/create-repository-source:
+    description: >
+      Creates the repository source.
+    post:
+      tags:
+        - repository
+      operationId: createRepositorySource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createRepositorySourceRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createRepositorySourceResponseEnvelope"
+
+  /__api/v2/captcha/create-repository-source-mirror:
+    description: >
+      Creates a new mirror for a repository source.
+    post:
+      tags:
+        - repository
+      operationId: createRepositorySourceMirror
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createRepositorySourceMirrorRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createRepositorySourceMirrorResponseEnvelope"
+
+  /__api/v2/captcha/update-repository-source-mirror:
+    description: >
+      Updates an existing mirror.  The mirror should be identified by its code.
+      A number of fields can be supplied to change.  The changes that are applied
+      are determined by a set of update filters that should be supplied with the
+      request.
+    post:
+      tags:
+        - repository
+      operationId: updateRepositorySourceMirror
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateRepositorySourceMirrorRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateRepositorySourceMirrorResponseEnvelope"
+
+  /__api/v2/captcha/get-repository-source-mirror:
+    post:
+      tags:
+        - repository
+      operationId: getRepositorySourceMirror
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getRepositorySourceMirrorRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getRepositorySourceMirrorResponseEnvelope"
+
+  /__api/v2/captcha/remove-repository-source-mirror:
+    post:
+      tags:
+        - repository
+      operationId: removeRepositorySourceMirror
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/removeRepositorySourceMirrorRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/removeRepositorySourceMirrorResponseEnvelope"
+
+components:
+  schemas:
+
+    getRepositoriesRequestEnvelope:
+      type: object
+      properties:
+        includeInactive:
+          type: boolean
+    getRepositoriesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getRepositoriesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getRepositoriesResult:
+      type: object
+      properties:
+        repositories:
+          type: array
+          items:
+            $ref: "#/components/schemas/getRepositoriesRepository"
+    getRepositoriesRepository:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+
+    searchRepositoriesRequestEnvelope:
+      allOf:
+        - $ref: "./common.yaml#/components/schemas/abstractSearchRequest"
+        - type: object
+          properties:
+            includeInactive:
+              type: boolean
+    searchRepositoriesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/searchRepositoriesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    searchRepositoriesResult:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/searchRepositoriesRepository"
+    searchRepositoriesRepository:
+      type: object
+      properties:
+        active:
+          type: boolean
+        code:
+          type: string
+        name:
+          type: string
+
+    getRepositoryRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+        includeInactiveRepositorySources:
+          type: boolean
+    getRepositoryResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getRepositoryResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getRepositoryResult:
+      type: object
+      properties:
+        active:
+          type: boolean
+        name:
+          type: string
+        code:
+          type: string
+        createTimestamp:
+          type: integer
+          format: int64
+        modifyTimestamp:
+          type: integer
+          format: int64
+        informationUrl:
+          type: string
+        hasPassword:
+          type: boolean
+        repositorySources:
+          type: array
+          items:
+            $ref: "#/components/schemas/getRepositoryRepositorySource"
+    getRepositoryRepositorySource:
+      type: object
+      properties:
+        active:
+          type: boolean
+        code:
+          type: string
+        url:
+          type: string
+        identifier:
+          type: string
+          description: >
+            This was previously (confusingly) called the `url`.
+        lastImportTimestamp:
+          type: integer
+          format: int64
+        architectureCode:
+          type: string
+
+    updateRepositoryRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        active:
+          type: boolean
+        informationUrl:
+          type: string
+        passwordClear:
+          type: string
+          description: >
+            If this field is NULL or the empty string then the password will be cleared.
+        filter:
+          type: array
+          items:
+            $ref: "#/components/schemas/updateRepositoryFilter"
+    updateRepositoryResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updateRepositoryResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updateRepositoryResult:
+      type: object
+    updateRepositoryFilter:
+      type: string
+      enum:
+        - ACTIVE
+        - NAME
+        - INFORMATIONURL
+        - PASSWORD
+
+    triggerImportRepositoryRequestEnvelope:
+      type: object
+      properties:
+        repositoryCode:
+          type: string
+        repositorySourceCodes:
+          type: string
+    triggerImportRepositoryResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/triggerImportRepositoryResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    triggerImportRepositoryResult:
+      type: object
+
+    createRepositoryRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        informationUrl:
+          type: string
+    createRepositoryResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/createRepositoryResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    createRepositoryResult:
+      type: object
+
+    getRepositorySourceRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+        includeInactiveRepositorySourceMirrors:
+          type: boolean
+    getRepositorySourceResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getRepositorySourceResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getRepositorySourceResult:
+      type: object
+      properties:
+        code:
+          type: string
+        repositoryCode:
+          type: string
+        active:
+          type: boolean
+        identifier:
+          type: string
+          description: >
+            Historically this was called the `url`, but the name was changed in 2020.
+        forcedInternalBaseUrl:
+          type: string
+          description: >
+            This URL is only shown to some users.  If it is not able to be
+            provided in the current authentication context, it will be NULL.
+        lastImportTimestamp:
+          type: integer
+          format: int64
+        extraIdentifiers:
+          type: array
+          items:
+            type: string
+        repositorySourceMirrors:
+          type: array
+          items:
+            $ref: "#/components/schemas/getRepositorySourceRepositorySourceMirror"
+        architectureCode:
+          type: string
+    getRepositorySourceRepositorySourceMirror:
+      type: object
+      properties:
+        active:
+          type: boolean
+        countryCode:
+          type: string
+        code:
+          type: string
+        baseUrl:
+          type: string
+        isPrimary:
+          type: boolean
+
+    updateRepositorySourceRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+          description: >
+            This is used to identify the repository source.
+        active:
+          type: boolean
+        forcedInternalBaseUrl:
+          type: string
+        filter:
+          type: array
+          items:
+            $ref: "#/components/schemas/updateRepositorySourceFilter"
+        extraIdentifiers:
+          type: array
+          items:
+            type: string
+    updateRepositorySourceResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updateRepositorySourceResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updateRepositorySourceResult:
+      type: object
+    updateRepositorySourceFilter:
+      type: string
+      enum:
+        - ACTIVE
+        - FORCED_INTERNAL_BASE_URL
+        - EXTRA_IDENTIFIERS
+
+    createRepositorySourceRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+        repositoryCode:
+          type: string
+    createRepositorySourceResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/createRepositorySourceResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    createRepositorySourceResult:
+      type: object
+
+    createRepositorySourceMirrorRequestEnvelope:
+      type: object
+      properties:
+        repositorySourceCode:
+          type: string
+        baseUrl:
+          type: string
+        countryCode:
+          type: string
+        description:
+          type: string
+    createRepositorySourceMirrorResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/createRepositorySourceMirrorResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    createRepositorySourceMirrorResult:
+      type: object
+      properties:
+        code:
+          type: string
+
+    updateRepositorySourceMirrorRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+        baseUrl:
+          type: string
+        countryCode:
+          type: string
+        description:
+          type: string
+        isPrimary:
+          type: boolean
+        active:
+          type: boolean
+        filter:
+          type: array
+          items:
+            $ref: "#/components/schemas/updateRepositorySourceMirrorFilter"
+    updateRepositorySourceMirrorResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updateRepositorySourceMirrorResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updateRepositorySourceMirrorResult:
+      type: object
+    updateRepositorySourceMirrorFilter:
+      type: string
+      enum:
+        - ACTIVE
+        - BASE_URL
+        - DESCRIPTION
+        - IS_PRIMARY
+        - COUNTRY
+
+    getRepositorySourceMirrorRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+    getRepositorySourceMirrorResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getRepositorySourceMirrorResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getRepositorySourceMirrorResult:
+      type: object
+      properties:
+        code:
+          type: string
+        active:
+          type: boolean
+        baseUrl:
+          type: string
+        createTimestamp:
+          type: integer
+          format: int64
+        modifyTimestamp:
+          type: integer
+          format: int64
+        description:
+          type: string
+        countryCode:
+          type: string
+        isPrimary:
+          type: boolean
+        repositorySourceCode:
+          type: string
+
+    removeRepositorySourceMirrorRequestEnvelope:
+      type: object
+      properties:
+        code:
+          type: string
+    removeRepositorySourceMirrorResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/removeRepositorySourceMirrorResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    removeRepositorySourceMirrorResult:
+      type: object
