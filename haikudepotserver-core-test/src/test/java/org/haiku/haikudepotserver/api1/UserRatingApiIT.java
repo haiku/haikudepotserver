@@ -61,7 +61,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
                 RepositorySource.getByCode(context, "testreposrc_xyz"),
                 Collections.singletonList(Architecture.getByCode(context, "x86_64"))).get());
         userRating.setRating((short) 3);
-        userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_VERYUNSTABLE).get());
+        userRating.setUserRatingStability(UserRatingStability.tryGetByCode(context, UserRatingStability.CODE_VERYUNSTABLE).get());
         userRating.setUser(user);
         context.commitChanges();
 

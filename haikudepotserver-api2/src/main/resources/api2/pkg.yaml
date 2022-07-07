@@ -430,31 +430,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/incrementViewCounterResponseEnvelope"
 
-  /__api/v2/pkg/get-pkg-change-log:
-    description: >
-      The package might have a change log associated with it.  This is just a long string with notes
-      about what versions were released and what changed in those releases.  If there is no change log
-      stored for this package, a NULL value may be returned in the response.
-    post:
-      tags:
-        - pkg
-      operationId: getPkgChangeLog
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/getPkgChangeLogRequestEnvelope"
-      responses:
-        200:
-          description: >
-            The response envelope containing the change log.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/getPkgChangeLogResponseEnvelope"
-
-
 
 components:
   schemas:
@@ -491,24 +466,6 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     incrementViewCounterResult:
       type: object
-
-    getPkgChangeLogRequestEnvelope:
-      type: object
-      properties:
-        pkgName:
-          type: string
-    getPkgChangeLogResponseEnvelope:
-      type: object
-      properties:
-        result:
-          $ref: "#/components/schemas/getPkgChangeLogResult"
-        error:
-          $ref: "./error.yaml#/components/schemas/error"
-    getPkgChangeLogResult:
-      type: object
-      properties:
-        content:
-          type: string
 
     updatePkgCategoriesRequestEnvelope:
       type: object
@@ -1147,7 +1104,7 @@ components:
           type: boolean
           description: >
             This value can be set.
-        public List<Filter> filter:
+        filter:
           type: array
           items:
             $ref: "#/components/schemas/updatePkgVersionFilter"

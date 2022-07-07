@@ -1,11 +1,11 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.passwordreset;
 
-public class PasswordResetException extends Exception {
+public class PasswordResetException extends Error {
 
     public PasswordResetException(String message) {
         super(message);

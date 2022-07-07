@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/miscellaneous") // TODO; legacy path - remove
 public class MiscellaneousApiImpl extends AbstractApiImpl implements MiscellaneousApi {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgApiImpl.class);
+    protected static Logger LOGGER = LoggerFactory.getLogger(MiscellaneousApiImpl.class);
 
     private final ServerRuntime serverRuntime;
     private final RuntimeInformationService runtimeInformationService;

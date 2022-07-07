@@ -312,6 +312,12 @@ components:
           type: string
         name:
           type: string
+        isPopular:
+          type: boolean
+        hasData:
+          type: boolean
+        hasLocalizationMessages:
+          type: boolean
 
     raiseExceptionRequestEnvelope:
       type: object

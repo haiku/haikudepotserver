@@ -238,6 +238,7 @@ components:
       properties:
         total:
           type: integer
+          format: int64
         items:
           type: array
           items:

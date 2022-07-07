@@ -315,13 +315,15 @@ components:
         filter:
           type: array
           items:
-            type: string
-            enum:
-              - ACTIVE
-              - NATURALLANGUAGE
-              - USERRATINGSTABILITY
-              - COMMENT
-              - RATING
+            $ref: "#/components/schemas/updateUserRatingFilter"
+    updateUserRatingFilter:
+      type: string
+      enum:
+        - ACTIVE
+        - NATURALLANGUAGE
+        - USERRATINGSTABILITY
+        - COMMENT
+        - RATING
     updateUserRatingResponseEnvelope:
       type: object
       properties:

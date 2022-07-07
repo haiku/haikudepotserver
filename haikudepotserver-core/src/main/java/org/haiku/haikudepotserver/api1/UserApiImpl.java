@@ -101,15 +101,12 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
             switch (filter) {
 
                 case NATURALLANGUAGE:
-
                     if (Strings.isNullOrEmpty(updateUserRequest.naturalLanguageCode)) {
                         throw new IllegalStateException("the natural language code is required to update the natural language on a user");
                     }
 
                     user.setNaturalLanguage(getNaturalLanguage(context, updateUserRequest.naturalLanguageCode));
-
                     LOGGER.info("will update the natural language on the user {} to {}", user, updateUserRequest.naturalLanguageCode);
-
                     break;
 
                 case EMAIL:
@@ -123,14 +120,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
                     activeDidChange = user.getActive() != updateUserRequest.active;
                     user.setActive(updateUserRequest.active);
-
                     break;
 
                 default:
                     throw new IllegalStateException("unknown filter in edit user; " + filter.name());
-
             }
-
         }
 
         if (context.hasChanges()) {

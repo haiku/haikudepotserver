@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
+import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._UserRatingStability;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 
@@ -23,7 +24,12 @@ public class UserRatingStability extends _UserRatingStability implements Coded {
     public final static String CODE_MOSTLYSTABLE="mostlystable";
     public final static String CODE_STABLE="stable";
 
-    public static Optional<UserRatingStability> getByCode(ObjectContext context, String code) {
+    public static UserRatingStability getByCode(ObjectContext context, String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new ObjectNotFoundException(UserRatingStability.class.getSimpleName(), code));
+    }
+
+    public static Optional<UserRatingStability> tryGetByCode(ObjectContext context, String code) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be supplied");
         return getAll(context).stream().filter((urs) -> urs.getCode().equals(code)).findFirst();

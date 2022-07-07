@@ -22,6 +22,11 @@
 
         <dependency>
             <groupId>org.haiku</groupId>
+            <artifactId>haikudepotserver-api2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.haiku</groupId>
             <artifactId>haikudepotserver-packagefile</artifactId>
             <version>${project.version}</version>
         </dependency>

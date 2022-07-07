@@ -3,7 +3,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.api1.model.authorization;
+package org.haiku.haikudepotserver.api2.support;
 
 /**
  * <p>This exception is thrown in the case where adding a new rule is going to conflict with

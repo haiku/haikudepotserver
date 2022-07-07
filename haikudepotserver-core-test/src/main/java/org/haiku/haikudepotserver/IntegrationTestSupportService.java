@@ -414,7 +414,7 @@ public class IntegrationTestSupportService {
                 userRating.setPkgVersion(pkgVersion);
                 userRating.setComment("Winter banana apples");
                 userRating.setCode("GHIJKL"); // known code that can be used for reference later
-                userRating.setUserRatingStability(UserRatingStability.getByCode(context, UserRatingStability.CODE_UNSTABLEBUTUSABLE).get());
+                userRating.setUserRatingStability(UserRatingStability.tryGetByCode(context, UserRatingStability.CODE_UNSTABLEBUTUSABLE).get());
             }
         }
 

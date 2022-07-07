@@ -58,7 +58,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -325,7 +324,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Optional<UserRatingStability> userRatingStabilityOptional = Optional.empty();
 
         if(null!=request.userRatingStabilityCode) {
-            userRatingStabilityOptional = UserRatingStability.getByCode(context, request.userRatingStabilityCode);
+            userRatingStabilityOptional = UserRatingStability.tryGetByCode(context, request.userRatingStabilityCode);
 
             if(userRatingStabilityOptional.isEmpty()) {
                 throw new ObjectNotFoundException(
@@ -472,7 +471,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                         userRating.setUserRatingStability(null);
                     }
                     else {
-                        userRating.setUserRatingStability(UserRatingStability.getByCode(
+                        userRating.setUserRatingStability(UserRatingStability.tryGetByCode(
                                 context,
                                 request.userRatingStabilityCode).orElseThrow(
                                 () -> new ObjectNotFoundException(
