@@ -52,8 +52,8 @@ import org.haiku.haikudepotserver.api2.model.UpdatePkgChangelogRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
-import org.haiku.haikudepotserver.api2.support.BadPkgIconException;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
@@ -542,7 +542,7 @@ public class PkgApiService extends AbstractApiService {
                             request.getRevision()));
     }
 
-    void incrementViewCounter(IncrementViewCounterRequestEnvelope request) {
+    public void incrementViewCounter(IncrementViewCounterRequestEnvelope request) {
         Preconditions.checkArgument(null != request, "the request object must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.getName()), "the package name must be supplied");
         // temporary support the `repositoryCode` for the desktop client.
@@ -594,7 +594,7 @@ public class PkgApiService extends AbstractApiService {
                     repositorySource,
                     architecture,
                     versionCoordinates
-            ).orElseThrow(() -> new org.haiku.haikudepotserver.api1.support.ObjectNotFoundException(
+            ).orElseThrow(() -> new ObjectNotFoundException(
                     PkgVersion.class.getSimpleName(),
                     versionCoordinates));
 

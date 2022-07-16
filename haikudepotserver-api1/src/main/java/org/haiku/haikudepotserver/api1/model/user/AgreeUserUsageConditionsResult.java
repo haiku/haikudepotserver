@@ -4,6 +4,6 @@
  */
 
 package org.haiku.haikudepotserver.api1.model.user;
-
+@Deprecated
 public class AgreeUserUsageConditionsResult {
 }

@@ -12,7 +12,12 @@ import com.googlecode.jsonrpc4j.DefaultErrorResolver;
 import com.googlecode.jsonrpc4j.ErrorResolver;
 import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.SimpleValidationFailure;
-import org.haiku.haikudepotserver.api1.model.authorization.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
+import org.haiku.haikudepotserver.support.exception.CaptchaBadResponseException;
+import org.haiku.haikudepotserver.support.exception.InvalidUserUsageConditionsException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ValidationException;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.lang.reflect.Method;

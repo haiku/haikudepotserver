@@ -15,7 +15,7 @@ import org.haiku.haikudepotserver.api2.model.JobStatus;
 import org.haiku.haikudepotserver.api2.model.SearchJobsRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchJobsResult;
 import org.haiku.haikudepotserver.api2.model.SearchJobsResultItem;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -125,7 +125,7 @@ public class JobApiService extends AbstractApiService {
         }
         else {
             ownerUser = User.tryGetByNickname(context, request.getOwnerUserNickname())
-                    .orElseThrow(() -> new org.haiku.haikudepotserver.api1.support.ObjectNotFoundException(
+                    .orElseThrow(() -> new ObjectNotFoundException(
                             User.class.getSimpleName(), request.getOwnerUserNickname()));
 
             if (!permissionEvaluator.hasPermission(

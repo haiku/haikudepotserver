@@ -6,22 +6,32 @@
 package org.haiku.haikudepotserver.job;
 
 import com.google.common.io.ByteSource;
-import org.haiku.haikudepotserver.api1.JobApi;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.model.*;
+import org.haiku.haikudepotserver.job.model.Job;
+import org.haiku.haikudepotserver.job.model.JobData;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.job.model.JobSpecification;
+import org.haiku.haikudepotserver.job.model.TestJobSpecificationImpl;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * <p>This implementation of {@link JobService} has some
- * jobs in "suspended" state so that tests of the {@link JobApi} are able to
+ * jobs in "suspended" state so that tests of the JobApi are able to
  * query that known state.</p>
  */
 

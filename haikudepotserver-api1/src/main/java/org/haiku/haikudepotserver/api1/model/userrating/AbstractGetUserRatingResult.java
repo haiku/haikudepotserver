@@ -4,7 +4,7 @@
 */
 
 package org.haiku.haikudepotserver.api1.model.userrating;
-
+@Deprecated
 public abstract class AbstractGetUserRatingResult extends AbstractUserRatingResult {
 
     public String code;

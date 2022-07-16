@@ -7,158 +7,42 @@ package org.haiku.haikudepotserver.api1;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
-import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.ObjectId;
-import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api1.model.user.*;
-import org.haiku.haikudepotserver.api1.support.*;
-import org.haiku.haikudepotserver.captcha.model.CaptchaService;
-import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
-import org.haiku.haikudepotserver.dataobjects.UserUsageConditionsAgreement;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
-import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.security.PermissionEvaluator;
-import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
-import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
-import org.haiku.haikudepotserver.user.model.UserService;
-import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
-import org.haiku.haikudepotserver.userrating.model.UserRatingService;
+import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsRequest;
+import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsResult;
+import org.haiku.haikudepotserver.api1.model.user.AuthenticateUserRequest;
+import org.haiku.haikudepotserver.api1.model.user.AuthenticateUserResult;
+import org.haiku.haikudepotserver.api1.model.user.CreateUserRequest;
+import org.haiku.haikudepotserver.api1.model.user.CreateUserResult;
+import org.haiku.haikudepotserver.api1.model.user.GetUserRequest;
+import org.haiku.haikudepotserver.api1.model.user.GetUserResult;
+import org.haiku.haikudepotserver.api1.model.user.GetUserUsageConditionsRequest;
+import org.haiku.haikudepotserver.api1.model.user.GetUserUsageConditionsResult;
+import org.haiku.haikudepotserver.api2.UserApiService;
+import org.haiku.haikudepotserver.api2.model.AgreeUserUsageConditionsRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.AuthenticateUserRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.CreateUserRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.GetUserRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.GetUserResultUserUsageConditionsAgreement;
+import org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsRequestEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+@Deprecated
 @Component("userApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/user") // TODO; legacy path - remove
-public class UserApiImpl extends AbstractApiImpl implements UserApi {
+public class UserApiImpl implements UserApi {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
+    private final UserApiService userApiService;
 
-    private final ServerRuntime serverRuntime;
-    private final PermissionEvaluator permissionEvaluator;
-    private final CaptchaService captchaService;
-    private final UserAuthenticationService userAuthenticationService;
-    private final UserService userService;
-    private final UserRatingService userRatingService;
-    private final PasswordResetService passwordResetService;
-    private final JobService jobService;
-
-    public UserApiImpl(
-            ServerRuntime serverRuntime,
-            PermissionEvaluator permissionEvaluator,
-            CaptchaService captchaService,
-            UserAuthenticationService userAuthenticationService,
-            UserService userService,
-            UserRatingService userRatingService,
-            PasswordResetService passwordResetService,
-            JobService jobService) {
-        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
-        this.captchaService = Preconditions.checkNotNull(captchaService);
-        this.userAuthenticationService = Preconditions.checkNotNull(userAuthenticationService);
-        this.userService = Preconditions.checkNotNull(userService);
-        this.userRatingService = Preconditions.checkNotNull(userRatingService);
-        this.passwordResetService = Preconditions.checkNotNull(passwordResetService);
-        this.jobService = Preconditions.checkNotNull(jobService);
+    public UserApiImpl(UserApiService userApiService) {
+        this.userApiService = Preconditions.checkNotNull(userApiService);
     }
 
     @Override
-    public UpdateUserResult updateUser(UpdateUserRequest updateUserRequest) {
-
-        Preconditions.checkNotNull(updateUserRequest);
-        Preconditions.checkState(!Strings.isNullOrEmpty(updateUserRequest.nickname));
-        Preconditions.checkNotNull(updateUserRequest.filter);
-
-        final ObjectContext context = serverRuntime.newContext();
-        boolean activeDidChange = false;
-
-        User user = User.tryGetByNickname(context, updateUserRequest.nickname)
-                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
-
-        if (!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                user, Permission.USER_EDIT)) {
-            throw new AccessDeniedException("cannot edit [" + user + "]");
-        }
-
-        for (UpdateUserRequest.Filter filter : updateUserRequest.filter) {
-
-            switch (filter) {
-
-                case NATURALLANGUAGE:
-                    if (Strings.isNullOrEmpty(updateUserRequest.naturalLanguageCode)) {
-                        throw new IllegalStateException("the natural language code is required to update the natural language on a user");
-                    }
-
-                    user.setNaturalLanguage(getNaturalLanguage(context, updateUserRequest.naturalLanguageCode));
-                    LOGGER.info("will update the natural language on the user {} to {}", user, updateUserRequest.naturalLanguageCode);
-                    break;
-
-                case EMAIL:
-                    user.setEmail(updateUserRequest.email);
-                    break;
-
-                case ACTIVE:
-                    if (null==updateUserRequest.active) {
-                        throw new IllegalStateException("the 'active' attribute is required to configure active on the user.");
-                    }
-
-                    activeDidChange = user.getActive() != updateUserRequest.active;
-                    user.setActive(updateUserRequest.active);
-                    break;
-
-                default:
-                    throw new IllegalStateException("unknown filter in edit user; " + filter.name());
-            }
-        }
-
-        if (context.hasChanges()) {
-            context.commitChanges();
-            LOGGER.info("did update the user {}", user.toString());
-
-            // if a user is made active or inactive will have some impact on the user-ratings.
-
-            if (activeDidChange) {
-                List<String> pkgNames = userRatingService.pkgNamesEffectedByUserActiveStateChange(
-                        context, user);
-
-                LOGGER.info(
-                        "will update user rating derivation for {} packages owing to active state change on user {}",
-                        pkgNames.size(),
-                        user);
-
-                for (String pkgName : pkgNames) {
-                    jobService.submit(
-                            new UserRatingDerivationJobSpecification(pkgName),
-                            JobSnapshot.COALESCE_STATUSES_QUEUED);
-                }
-            }
-
-        }
-        else {
-            LOGGER.info("no changes in updating the user {}", user.toString());
-        }
-
-        return new UpdateUserResult();
-    }
-
-    @Override
-    public CreateUserResult createUser(CreateUserRequest createUserRequest) throws InvalidUserUsageConditionsException {
+    public CreateUserResult createUser(CreateUserRequest createUserRequest) {
 
         Preconditions.checkNotNull(createUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.nickname));
@@ -167,63 +51,14 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.captchaResponse),"a capture response is required to create a user");
         Preconditions.checkState(!Strings.isNullOrEmpty(createUserRequest.naturalLanguageCode));
 
-        if (!userAuthenticationService.validatePassword(createUserRequest.passwordClear)) {
-            throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
-        }
-
-        // check the supplied catcha matches the token.
-
-        if (!captchaService.verify(createUserRequest.captchaToken, createUserRequest.captchaResponse)) {
-            throw new CaptchaBadResponseException();
-        }
-
-        // we need to check the nickname even before we create the user because we have to
-        // check for uniqueness of the nickname across all of the users.
-
-        if (Strings.isNullOrEmpty(createUserRequest.nickname)) {
-            throw new ValidationException(
-                    new ValidationFailure(User.NICKNAME.getName(), "required")
-            );
-        }
-
-        if (StringUtils.isBlank(createUserRequest.userUsageConditionsCode)) {
-            throw new InvalidUserUsageConditionsException();
-        }
-
-        final ObjectContext context = serverRuntime.newContext();
-        String latestUserUsageConditionsCode = UserUsageConditions.getLatest(context).getCode();
-
-        if (!latestUserUsageConditionsCode.equals(createUserRequest.userUsageConditionsCode)) {
-            throw new InvalidUserUsageConditionsException();
-        }
-
-        UserUsageConditions userUsageConditions = UserUsageConditions.getByCode(
-                context, createUserRequest.userUsageConditionsCode);
-
-        //need to check that the nickname is not already in use.
-
-        if (User.tryGetByNickname(context,createUserRequest.nickname).isPresent()) {
-            throw new ValidationException(
-                    new ValidationFailure(
-                            User.NICKNAME.getName(), "notunique")
-            );
-        }
-
-        User user = context.newObject(User.class);
-        user.setNaturalLanguage(getNaturalLanguage(context, createUserRequest.naturalLanguageCode));
-        user.setNickname(createUserRequest.nickname);
-        user.setEmail(createUserRequest.email);
-
-        userAuthenticationService.setPassword(user, createUserRequest.passwordClear);
-
-        UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
-        agreement.setUser(user);
-        agreement.setTimestampAgreed();
-        agreement.setUserUsageConditions(userUsageConditions);
-
-        context.commitChanges();
-
-        LOGGER.info("data create user; {}", user.getNickname());
+        userApiService.createUser(new CreateUserRequestEnvelope()
+                .nickname(createUserRequest.nickname)
+                .passwordClear(createUserRequest.passwordClear)
+                .email(createUserRequest.email)
+                .captchaToken(createUserRequest.captchaToken)
+                .captchaResponse(createUserRequest.captchaResponse)
+                .naturalLanguageCode(createUserRequest.naturalLanguageCode)
+                .userUsageConditionsCode(createUserRequest.userUsageConditionsCode));
 
         return new CreateUserResult();
     }
@@ -233,37 +68,27 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkNotNull(getUserRequest);
         Preconditions.checkState(!Strings.isNullOrEmpty(getUserRequest.nickname));
 
-        final ObjectContext context = serverRuntime.newContext();
-        User user = User.tryGetByNickname(context, getUserRequest.nickname)
-                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
-
-        if (!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                user, Permission.USER_VIEW)) {
-            throw new AccessDeniedException("unable to view user [" + user + "]");
-        }
+        org.haiku.haikudepotserver.api2.model.GetUserResult resultV2
+                = userApiService.getUser(new GetUserRequestEnvelope().nickname(getUserRequest.nickname));
 
         GetUserResult result = new GetUserResult();
-        result.nickname = user.getNickname();
-        result.email = user.getEmail();
-        result.isRoot = user.getIsRoot();
-        result.active = user.getActive();
-        result.naturalLanguageCode = user.getNaturalLanguage().getCode();
-        result.createTimestamp = user.getCreateTimestamp().getTime();
-        result.modifyTimestamp = user.getModifyTimestamp().getTime();
-        result.lastAuthenticationTimestamp =
-                Optional.ofNullable(user.getLastAuthenticationTimestamp())
-                        .map(Timestamp::getTime)
-                        .orElse(null);
+        result.nickname = resultV2.getNickname();
+        result.email = resultV2.getEmail();
+        result.isRoot = resultV2.getIsRoot();
+        result.active = resultV2.getActive();
+        result.naturalLanguageCode = resultV2.getNaturalLanguageCode();
+        result.createTimestamp = resultV2.getCreateTimestamp();
+        result.modifyTimestamp = resultV2.getModifyTimestamp();
+        result.lastAuthenticationTimestamp = resultV2.getLastAuthenticationTimestamp();
 
-        user.tryGetUserUsageConditionsAgreement().ifPresent(uuca -> {
+        GetUserResultUserUsageConditionsAgreement uuca = resultV2.getUserUsageConditionsAgreement();
+
+        if (null != uuca) {
             result.userUsageConditionsAgreement = new GetUserResult.UserUsageConditionsAgreement();
-            result.userUsageConditionsAgreement.timestampAgreed = uuca.getTimestampAgreed().getTime();
-            result.userUsageConditionsAgreement.userUsageConditionsCode = uuca.getUserUsageConditions().getCode();
-            result.userUsageConditionsAgreement.isLatest =
-                    uuca.getUserUsageConditions().getCode().equals(
-                            UserUsageConditions.getLatest(context).getCode());
-        });
+            result.userUsageConditionsAgreement.timestampAgreed = uuca.getTimestampAgreed();
+            result.userUsageConditionsAgreement.userUsageConditionsCode = uuca.getUserUsageConditionsCode();
+            result.userUsageConditionsAgreement.isLatest = uuca.getIsLatest();
+        }
 
         return result;
     }
@@ -273,239 +98,27 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
     @Override
     public AuthenticateUserResult authenticateUser(AuthenticateUserRequest authenticateUserRequest) {
         Preconditions.checkNotNull(authenticateUserRequest);
+
+        org.haiku.haikudepotserver.api2.model.AuthenticateUserResult resultV2
+                = userApiService.authenticateUser(new AuthenticateUserRequestEnvelope()
+                .nickname(authenticateUserRequest.nickname)
+                .passwordClear(authenticateUserRequest.passwordClear));
+
         AuthenticateUserResult authenticateUserResult = new AuthenticateUserResult();
-        authenticateUserResult.token = null;
-
-        if (null != authenticateUserRequest.nickname) {
-            authenticateUserRequest.nickname = authenticateUserRequest.nickname.trim();
-        }
-
-        if (null != authenticateUserRequest.passwordClear) {
-            authenticateUserRequest.passwordClear = authenticateUserRequest.passwordClear.trim();
-        }
-
-        Optional<ObjectId> userOidOptional = userAuthenticationService.authenticateByNicknameAndPassword(
-                authenticateUserRequest.nickname,
-                authenticateUserRequest.passwordClear);
-
-        if (userOidOptional.isEmpty()) {
-
-            // if the authentication has failed then best to sleep for a moment
-            // to make brute forcing a bit more tricky.
-            // TODO; this will eat threads; any other way to do it?
-
-            Uninterruptibles.sleepUninterruptibly(5,TimeUnit.SECONDS);
-        }
-        else {
-            ObjectContext context = serverRuntime.newContext();
-            User user = User.getByObjectId(context, userOidOptional.get());
-            authenticateUserResult.token = userAuthenticationService.generateToken(user);
-        }
-
+        authenticateUserResult.token = resultV2.getToken();
         return authenticateUserResult;
     }
 
     @Override
-    public RenewTokenResult renewToken(RenewTokenRequest renewTokenRequest) {
-        Preconditions.checkNotNull(renewTokenRequest);
-        Preconditions.checkState(!Strings.isNullOrEmpty(renewTokenRequest.token));
-        RenewTokenResult result = new RenewTokenResult();
-
-        Optional<ObjectId> userOidOptional = userAuthenticationService.authenticateByToken(renewTokenRequest.token);
-
-        if (userOidOptional.isPresent()) {
-            ObjectContext context = serverRuntime.newContext();
-            User user = User.getByObjectId(context, userOidOptional.get());
-            result.token = userAuthenticationService.generateToken(user);
-            LOGGER.debug("did renew token for user; {}", user.toString());
-        }
-        else {
-            LOGGER.info("unable to renew token");
-        }
-
-        return result;
-    }
-
-
-    @Override
-    public ChangePasswordResult changePassword(
-            ChangePasswordRequest changePasswordRequest)
-            throws ValidationException {
-
-        Preconditions.checkNotNull(changePasswordRequest);
-        Preconditions.checkState(!Strings.isNullOrEmpty(changePasswordRequest.nickname));
-        Preconditions.checkState(!Strings.isNullOrEmpty(changePasswordRequest.newPasswordClear));
-
-        // get the logged in and target user.
-
-        final ObjectContext context = serverRuntime.newContext();
-
-        User authUser = obtainAuthenticatedUser(context);
-
-        User targetUser = User.tryGetByNickname(context, changePasswordRequest.nickname).orElseThrow(
-                () -> new ObjectNotFoundException(User.class.getSimpleName(), changePasswordRequest.nickname)
-        );
-
-        if (!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                targetUser, Permission.USER_CHANGEPASSWORD)) {
-            throw new AccessDeniedException(
-                    "the logged in user is not allowed to change the password of another user ["
-                            + changePasswordRequest.nickname + "]");
-        }
-
-        // if the user is changing their own password then they need to know their existing password
-        // first.
-
-        if (!userAuthenticationService.validatePassword(changePasswordRequest.newPasswordClear)) {
-            throw new ValidationException(new ValidationFailure("passwordClear", "invalid"));
-        }
-
-        // we need to make sure that the captcha is valid.
-
-        if (Strings.isNullOrEmpty(changePasswordRequest.captchaToken)) {
-            throw new IllegalStateException("the captcha token must be supplied to change the password");
-        }
-
-        if (Strings.isNullOrEmpty(changePasswordRequest.captchaResponse)) {
-            throw new IllegalStateException("the captcha response must be supplied to change the password");
-        }
-
-        if (!captchaService.verify(changePasswordRequest.captchaToken, changePasswordRequest.captchaResponse)) {
-            throw new CaptchaBadResponseException();
-        }
-
-        // we need to make sure that the old and new passwords match-up.
-
-        if (targetUser.getNickname().equals(authUser.getNickname())) {
-            if (Strings.isNullOrEmpty(changePasswordRequest.oldPasswordClear)) {
-                throw new IllegalStateException("the old password clear is required to change the password of a user unless the logged in user is root.");
-            }
-
-            if (userAuthenticationService.authenticateByNicknameAndPassword(
-                    changePasswordRequest.nickname,
-                    changePasswordRequest.oldPasswordClear).isEmpty()) {
-
-                // if the old password does not match to the user then we should present this
-                // as a validation failure rather than an authorization failure.
-
-                LOGGER.info("the supplied old password is invalid for the user {}", changePasswordRequest.nickname);
-
-                throw new ValidationException(new ValidationFailure("oldPasswordClear", "mismatched"));
-            }
-        }
-
-        userAuthenticationService.setPassword(targetUser, changePasswordRequest.newPasswordClear);
-
-        context.commitChanges();
-        LOGGER.info("did change password for user {}", changePasswordRequest.nickname);
-
-        return new ChangePasswordResult();
-    }
-
-    @Override
-    public SearchUsersResult searchUsers(SearchUsersRequest searchUsersRequest) {
-        Preconditions.checkNotNull(searchUsersRequest);
-
-        final ObjectContext context = serverRuntime.newContext();
-
-        if (!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                null,
-                Permission.USER_LIST)) {
-            throw new AccessDeniedException("unable to list users");
-        }
-
-        UserSearchSpecification specification = new UserSearchSpecification();
-        String exp = searchUsersRequest.expression;
-
-        if (null != exp) {
-            exp = Strings.emptyToNull(exp.trim().toLowerCase());
-        }
-
-        specification.setExpression(exp);
-        if (null != searchUsersRequest.expressionType) {
-            specification.setExpressionType(
-                    PkgSearchSpecification.ExpressionType.valueOf(searchUsersRequest.expressionType.name()));
-        }
-
-        specification.setLimit(searchUsersRequest.limit);
-        specification.setOffset(searchUsersRequest.offset);
-        specification.setIncludeInactive(null!= searchUsersRequest.includeInactive && searchUsersRequest.includeInactive);
-
-        SearchUsersResult result = new SearchUsersResult();
-
-        result.total = userService.total(context,specification);
-        result.items = Collections.emptyList();
-
-        if (0 != result.total) {
-            List<User> searchedUsers = userService.search(context,specification);
-
-            result.items = searchedUsers.stream().map(u -> {
-                SearchUsersResult.User resultUser = new SearchUsersResult.User();
-                resultUser.active = u.getActive();
-                resultUser.nickname = u.getNickname();
-                return resultUser;
-            }).collect(Collectors.toList());
-        }
-
-        return result;
-
-    }
-
-    @Override
-    public InitiatePasswordResetResult initiatePasswordReset(InitiatePasswordResetRequest initiatePasswordResetRequest) {
-        Preconditions.checkNotNull(initiatePasswordResetRequest);
-
-        if (!captchaService.verify(initiatePasswordResetRequest.captchaToken, initiatePasswordResetRequest.captchaResponse)) {
-            throw new CaptchaBadResponseException();
-        }
-
-        try {
-            passwordResetService.initiate(initiatePasswordResetRequest.email);
-        }
-        catch(Throwable th) {
-            LOGGER.error("unable to initiate password reset", th);
-        }
-
-        return new InitiatePasswordResetResult();
-    }
-
-    @Override
-    public CompletePasswordResetResult completePasswordReset(CompletePasswordResetRequest completePasswordResetRequest) {
-        Preconditions.checkNotNull(completePasswordResetRequest);
-        Preconditions.checkState(!Strings.isNullOrEmpty(completePasswordResetRequest.captchaToken), "a capture token is required");
-        Preconditions.checkState(!Strings.isNullOrEmpty(completePasswordResetRequest.token), "a token is required to facilitate the reset of the password");
-        Preconditions.checkState(!Strings.isNullOrEmpty(completePasswordResetRequest.passwordClear), "a new password is required to reset the password");
-
-        if (!captchaService.verify(completePasswordResetRequest.captchaToken, completePasswordResetRequest.captchaResponse)) {
-            throw new CaptchaBadResponseException();
-        }
-
-        try {
-            passwordResetService.complete(
-                    completePasswordResetRequest.token,
-                    completePasswordResetRequest.passwordClear);
-        }
-        catch(Throwable th) {
-            LOGGER.error("unable to complete password reset", th);
-        }
-
-        return new CompletePasswordResetResult();
-    }
-
-    @Override
     public GetUserUsageConditionsResult getUserUsageConditions(GetUserUsageConditionsRequest request) {
-                    Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(request);
 
-        final ObjectContext context = serverRuntime.newContext();
-        UserUsageConditions userUsageConditions = StringUtils.isNotBlank(request.code)
-                ? UserUsageConditions.getByCode(context, request.code)
-                : UserUsageConditions.getLatest(context);
+        org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsResult resultV2
+                = userApiService.getUserUsageConditions(new GetUserUsageConditionsRequestEnvelope().code(request.code));
 
         GetUserUsageConditionsResult result = new GetUserUsageConditionsResult();
-        result.code = userUsageConditions.getCode();
-        result.minimumAge = userUsageConditions.getMinimumAge();
+        result.code = resultV2.getCode();
+        result.minimumAge = resultV2.getMinimumAge();
         return result;
     }
 
@@ -515,30 +128,9 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         Preconditions.checkArgument(StringUtils.isNotBlank(request.nickname));
         Preconditions.checkArgument(StringUtils.isNotBlank(request.userUsageConditionsCode));
 
-        final ObjectContext context = serverRuntime.newContext();
-        User user = User.getByNickname(context, request.nickname);
-
-        // only the authenticated user is able to agree to the user compliance.
-
-        if (!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                user,
-                Permission.USER_AGREE_USAGE_CONDITIONS)) {
-            throw new AccessDeniedException("unable to agree user usage conditions for user [" + user + "]");
-        }
-
-        // remove any existing agreement
-
-        user.getUserUsageConditionsAgreements().forEach(uuca -> uuca.setActive(false));
-
-        UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
-        agreement.setUser(user);
-        agreement.setTimestampAgreed();
-        agreement.setUserUsageConditions(UserUsageConditions.getByCode(context, request.userUsageConditionsCode));
-
-        context.commitChanges();
-
-        LOGGER.info("did agree to user usage conditions [{}]", request.userUsageConditionsCode);
+        userApiService.agreeUserUsageConditions(new AgreeUserUsageConditionsRequestEnvelope()
+                .nickname(request.nickname)
+                .userUsageConditionsCode(request.userUsageConditionsCode));
 
         return new AgreeUserUsageConditionsResult();
     }

@@ -20,7 +20,7 @@ import org.haiku.haikudepotserver.api2.model.RemoveAuthorizationPkgRuleRequestEn
 import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResult;
 import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResultItem;
-import org.haiku.haikudepotserver.api2.support.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.Pkg;

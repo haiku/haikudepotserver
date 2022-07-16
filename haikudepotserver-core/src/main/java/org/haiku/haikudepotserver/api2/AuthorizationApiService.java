@@ -18,10 +18,10 @@ import org.haiku.haikudepotserver.api2.model.RemoveAuthorizationPkgRuleRequestEn
 import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResult;
 import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResultItem;
-import org.haiku.haikudepotserver.api2.support.AuthorizationRuleConflictException;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
-import org.haiku.haikudepotserver.api2.support.ValidationException;
-import org.haiku.haikudepotserver.api2.support.ValidationFailure;
+import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ValidationException;
+import org.haiku.haikudepotserver.support.exception.ValidationFailure;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleSearchSpecification;

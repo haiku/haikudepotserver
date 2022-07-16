@@ -11,7 +11,7 @@ import java.util.List;
  * <p>Some of the API performs searches into various data sets such as packages.  This abstract class is able to
  * provide some common material for the returned data.</p>
  */
-
+@Deprecated
 public abstract class AbstractSearchResult<T> {
 
     /**

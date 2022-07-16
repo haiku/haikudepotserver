@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
  */
 
 @JsonRpcService("/__api/v1/captcha")
+@Deprecated
 public interface CaptchaApi {
 
     /**
@@ -25,6 +26,7 @@ public interface CaptchaApi {
      * human) is required to be supplied with an API request.</p>
      */
 
+    @Deprecated
     GenerateCaptchaResult generateCaptcha(GenerateCaptchaRequest generateCaptchaRequest);
 
 }

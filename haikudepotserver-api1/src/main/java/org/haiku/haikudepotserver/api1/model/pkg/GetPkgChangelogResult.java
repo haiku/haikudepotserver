@@ -8,7 +8,7 @@ package org.haiku.haikudepotserver.api1.model.pkg;
 /**
  * @since 2015-09-15
  */
-
+@Deprecated
 public class GetPkgChangelogResult {
 
     public String content;

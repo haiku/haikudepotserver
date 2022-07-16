@@ -10,7 +10,7 @@ package org.haiku.haikudepotserver.api1.support;
  * such as the offset into the list and the maximum number of results to return.  This abstract class contains those
  * values for re-use.</p>
  */
-
+@Deprecated
 public abstract class AbstractSearchRequest {
 
     public enum ExpressionType {

@@ -15,9 +15,6 @@ import org.haiku.haikudepotserver.api1.model.userrating.AbstractGetUserRatingRes
 import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionResult;
-import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingRequest;
-import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingResult;
-import org.haiku.haikudepotserver.api1.model.userrating.RemoveUserRatingRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsResult;
 import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingRequest;
@@ -117,18 +114,6 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
             Assertions.assertThat(userRating.getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_MOSTLYSTABLE);
         }
-    }
-
-    @Test
-    public void testGetUserRating() {
-        integrationTestSupportService.createStandardTestData();
-        String userRatingCode = createTestUserAndSampleUserRating();
-
-        // ------------------------------------
-        GetUserRatingResult result = userRatingApi.getUserRating(new GetUserRatingRequest(userRatingCode));
-        // ------------------------------------
-
-        checkAssertionsOnAbstractGetUserRatingResult(result);
     }
 
     @Test
@@ -259,32 +244,6 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.comment).isEqualTo("Winter banana apples");
             Assertions.assertThat(userRating.user.nickname).isEqualTo("urtest2");
             Assertions.assertThat(userRating.userRatingStabilityCode).isEqualTo(UserRatingStability.CODE_UNSTABLEBUTUSABLE);
-        }
-
-    }
-
-    @Test
-    public void testRemoveUserRatings() {
-
-        integrationTestSupportService.createStandardTestData();
-        integrationTestSupportService.createUserRatings();
-        // note that the user here has not agreed to the user usage conditions,
-        // but this is OK because the user is still able to delete a user
-        // rating.
-
-        setAuthenticatedUser("urtest2");
-
-        RemoveUserRatingRequest request = new RemoveUserRatingRequest();
-        request.code = "GHIJKL";
-
-        // ------------------------------------
-        userRatingApi.removeUserRating(request);
-        // ------------------------------------
-
-        {
-            ObjectContext context = serverRuntime.newContext();
-            Optional<UserRating> userRatingOptional = UserRating.tryGetByCode(context, "GHIJKL");
-            Assertions.assertThat(userRatingOptional.isPresent()).isFalse();
         }
 
     }

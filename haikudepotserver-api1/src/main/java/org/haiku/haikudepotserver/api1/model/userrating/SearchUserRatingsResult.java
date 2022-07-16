@@ -6,7 +6,7 @@
 package org.haiku.haikudepotserver.api1.model.userrating;
 
 import org.haiku.haikudepotserver.api1.support.AbstractSearchResult;
-
+@Deprecated
 public class SearchUserRatingsResult extends AbstractSearchResult<SearchUserRatingsResult.UserRating> {
 
     public static class UserRating {

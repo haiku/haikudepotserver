@@ -32,7 +32,7 @@ import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceMirrorFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceMirrorRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceRequestEnvelope;
-import org.haiku.haikudepotserver.api2.support.ValidationException;
+import org.haiku.haikudepotserver.support.exception.ValidationException;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;

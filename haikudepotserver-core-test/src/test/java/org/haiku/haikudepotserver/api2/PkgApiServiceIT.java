@@ -44,8 +44,8 @@ import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationRequestEnvelop
 import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionFilter;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
-import org.haiku.haikudepotserver.api2.support.BadPkgIconException;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;

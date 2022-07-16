@@ -6,7 +6,7 @@
 package org.haiku.haikudepotserver.api1.model.userrating;
 
 import java.util.List;
-
+@Deprecated
 public class UpdateUserRatingRequest {
 
     public enum Filter {

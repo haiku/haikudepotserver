@@ -1,8 +1,6 @@
 package org.haiku.haikudepotserver.support;
 
-import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api1.model.pkg.SearchPkgsRequest;
 
 import java.util.Optional;
 

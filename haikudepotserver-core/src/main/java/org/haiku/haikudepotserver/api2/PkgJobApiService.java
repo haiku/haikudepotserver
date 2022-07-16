@@ -25,7 +25,7 @@ import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotExportArchiveJobR
 import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotSpreadsheetJobResult;
 import org.haiku.haikudepotserver.api2.model.QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult;
 import org.haiku.haikudepotserver.api2.model.QueuePkgVersionPayloadLengthPopulationJobResult;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;

@@ -40,9 +40,6 @@ import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceMirrorFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceMirrorRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceRequestEnvelope;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
-import org.haiku.haikudepotserver.api2.support.ValidationException;
-import org.haiku.haikudepotserver.api2.support.ValidationFailure;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -57,6 +54,9 @@ import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpeci
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.model.Permission;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ValidationException;
+import org.haiku.haikudepotserver.support.exception.ValidationFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -600,7 +600,7 @@ public class RepositoryApiService extends AbstractApiService {
         final ObjectContext context = serverRuntime.newContext();
 
         RepositorySourceMirror repositorySourceMirror = RepositorySourceMirror.tryGetByCode(context, request.getCode())
-                .orElseThrow(() -> new org.haiku.haikudepotserver.api1.support.ObjectNotFoundException(
+                .orElseThrow(() -> new ObjectNotFoundException(
                         RepositorySourceMirror.class.getSimpleName(), request.getCode()));
 
         if (!permissionEvaluator.hasPermission(
@@ -638,7 +638,7 @@ public class RepositoryApiService extends AbstractApiService {
                     break;
                 case COUNTRY:
                     Country country = Country.tryGetByCode(context, request.getCountryCode())
-                            .orElseThrow(() -> new org.haiku.haikudepotserver.api1.support.ObjectNotFoundException(
+                            .orElseThrow(() -> new ObjectNotFoundException(
                                     Country.class.getSimpleName(), request.getCountryCode()));
                     repositorySourceMirror.setCountry(country);
                     break;
@@ -652,7 +652,7 @@ public class RepositoryApiService extends AbstractApiService {
                             repositorySourceMirror.getRepositorySource().getPrimaryMirror().setIsPrimary(false);
                             repositorySourceMirror.setIsPrimary(true);
                         } else {
-                            throw new org.haiku.haikudepotserver.api1.support.ValidationException(new org.haiku.haikudepotserver.api1.support.ValidationFailure(
+                            throw new ValidationException(new ValidationFailure(
                                     RepositorySourceMirror.IS_PRIMARY.getName(), "confict"));
                         }
                     }

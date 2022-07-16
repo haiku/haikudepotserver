@@ -6,8 +6,7 @@
 package org.haiku.haikudepotserver.api1.model.user;
 
 import org.haiku.haikudepotserver.api1.CaptchaApi;
-import org.haiku.haikudepotserver.api1.model.miscellaneous.GetAllNaturalLanguagesResult;
-
+@Deprecated
 public class CreateUserRequest {
 
     public String nickname;
@@ -29,11 +28,6 @@ public class CreateUserRequest {
      */
 
     public String captchaResponse;
-
-    /**
-     * <p>This code comes from the {@link GetAllNaturalLanguagesResult.NaturalLanguage}
-     * entity.</p>
-     */
 
     public String naturalLanguageCode;
 

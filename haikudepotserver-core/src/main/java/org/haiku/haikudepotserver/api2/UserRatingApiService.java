@@ -9,7 +9,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api2.model.CreateUserRatingRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.CreateUserRatingResult;
 import org.haiku.haikudepotserver.api2.model.DeriveAndStoreUserRatingForPkgRequestEnvelope;

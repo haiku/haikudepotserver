@@ -6,33 +6,32 @@
 package org.haiku.haikudepotserver.api1;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.BaseEncoding;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
-import org.haiku.haikudepotserver.captcha.model.Captcha;
-import org.haiku.haikudepotserver.captcha.model.CaptchaService;
+import org.haiku.haikudepotserver.api2.CaptchaApiService;
 import org.springframework.stereotype.Component;
 
+@Deprecated
 @Component("captchaApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/captcha") // TODO; legacy path - remove
 public class CaptchaApiImpl implements CaptchaApi {
 
-    private final CaptchaService captchaService;
+    private final CaptchaApiService captchaApiService;
 
-    public CaptchaApiImpl(CaptchaService captchaService) {
-        this.captchaService = Preconditions.checkNotNull(captchaService);
+    public CaptchaApiImpl(CaptchaApiService captchaApiService) {
+        this.captchaApiService = Preconditions.checkNotNull(captchaApiService);
     }
 
     @Override
     public GenerateCaptchaResult generateCaptcha(GenerateCaptchaRequest generateCaptchaRequest) {
         Preconditions.checkNotNull(generateCaptchaRequest);
 
-        Captcha captcha = captchaService.generate();
+        org.haiku.haikudepotserver.api2.model.GenerateCaptchaResult resultV2 = captchaApiService.generateCaptcha();
 
         GenerateCaptchaResult result = new GenerateCaptchaResult();
-        result.token = captcha.getToken();
-        result.pngImageDataBase64 = BaseEncoding.base64().encode(captcha.getPngImageData());
+        result.token = resultV2.getToken();
+        result.pngImageDataBase64 = resultV2.getPngImageDataBase64();
         return result;
     }
 }

@@ -9,7 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;

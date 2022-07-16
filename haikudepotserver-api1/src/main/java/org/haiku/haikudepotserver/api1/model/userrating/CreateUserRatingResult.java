@@ -4,7 +4,7 @@
 */
 
 package org.haiku.haikudepotserver.api1.model.userrating;
-
+@Deprecated
 public class CreateUserRatingResult {
 
     public String code;

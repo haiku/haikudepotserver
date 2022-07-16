@@ -8,83 +8,40 @@ package org.haiku.haikudepotserver.api1;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
-import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.haiku.haikudepotserver.api1.model.userrating.AbstractGetUserRatingResult;
 import org.haiku.haikudepotserver.api1.model.userrating.AbstractUserRatingResult;
 import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingResult;
-import org.haiku.haikudepotserver.api1.model.userrating.DeriveAndStoreUserRatingForPkgRequest;
-import org.haiku.haikudepotserver.api1.model.userrating.DeriveAndStoreUserRatingForPkgResult;
-import org.haiku.haikudepotserver.api1.model.userrating.DeriveAndStoreUserRatingsForAllPkgsResult;
 import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionResult;
-import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingRequest;
-import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingResult;
-import org.haiku.haikudepotserver.api1.model.userrating.RemoveUserRatingRequest;
-import org.haiku.haikudepotserver.api1.model.userrating.RemoveUserRatingResult;
 import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsResult;
 import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingRequest;
 import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingResult;
-import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
-import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.api2.UserRatingApiService;
+import org.haiku.haikudepotserver.api2.model.CreateUserRatingRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.GetUserRatingByUserAndPkgVersionRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.PkgVersionType;
+import org.haiku.haikudepotserver.api2.model.SearchUserRatingsRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.UpdateUserRatingFilter;
+import org.haiku.haikudepotserver.api2.model.UpdateUserRatingRequestEnvelope;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.dataobjects.UserRating;
-import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
-import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.security.PermissionEvaluator;
-import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
-import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
-import org.haiku.haikudepotserver.userrating.model.UserRatingService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+@Deprecated
 @Component("userRatingApiImplV1")
 @AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/userrating") // TODO; legacy path - remove
-public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
+public class UserRatingApiImpl implements UserRatingApi {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
+    private final UserRatingApiService userRatingApiService;
 
-    private final ServerRuntime serverRuntime;
-    private final PermissionEvaluator permissionEvaluator;
-    private final JobService jobService;
-    private final UserRatingService userRatingService;
-    private final PkgService pkgService;
-
-    public UserRatingApiImpl(
-            ServerRuntime serverRuntime,
-            PermissionEvaluator permissionEvaluator,
-            JobService jobService,
-            UserRatingService userRatingService,
-            PkgService pkgService) {
-        this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
-        this.jobService = Preconditions.checkNotNull(jobService);
-        this.userRatingService = Preconditions.checkNotNull(userRatingService);
-        this.pkgService = Preconditions.checkNotNull(pkgService);
+    public UserRatingApiImpl(UserRatingApiService userRatingApiService) {
+        this.userRatingApiService = Preconditions.checkNotNull(userRatingApiService);
     }
 
     private AbstractGetUserRatingResult.User createUser(User user) {
@@ -110,94 +67,6 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         return result;
     }
 
-    /**
-     * <p>Some of the result subclass from this abstract one.  This convenience method will full the
-     * abstract result with the data from the user rating so that this code does not need to be
-     * repeated across multiple API methods.</p>
-     */
-
-    private void fillAbstractGetUserRatingResult(UserRating userRating, AbstractGetUserRatingResult result) {
-        Preconditions.checkNotNull(userRating);
-        Preconditions.checkNotNull(result);
-
-        result.active = userRating.getActive();
-        result.code = userRating.getCode();
-        result.naturalLanguageCode = userRating.getNaturalLanguage().getCode();
-        result.user = createUser(userRating.getUser());
-        result.rating = userRating.getRating();
-        result.comment = userRating.getComment();
-        result.modifyTimestamp = userRating.getModifyTimestamp().getTime();
-        result.createTimestamp = userRating.getCreateTimestamp().getTime();
-        result.pkgVersion = createPkgVersion(userRating.getPkgVersion());
-
-        if(null!=userRating.getUserRatingStability()) {
-            result.userRatingStabilityCode = userRating.getUserRatingStability().getCode();
-        }
-    }
-
-    @Override
-    public DeriveAndStoreUserRatingForPkgResult deriveAndStoreUserRatingForPkg(DeriveAndStoreUserRatingForPkgRequest request) {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
-
-        final ObjectContext context = serverRuntime.newContext();
-
-        if(!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                null,
-                Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
-            throw new AccessDeniedException("unable to derive and store user ratings");
-        }
-
-        Pkg.tryGetByName(context, request.pkgName).
-                orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
-
-        jobService.submit(
-                new UserRatingDerivationJobSpecification(request.pkgName),
-                JobSnapshot.COALESCE_STATUSES_QUEUED);
-
-        return new DeriveAndStoreUserRatingForPkgResult();
-    }
-
-    @Override
-    public DeriveAndStoreUserRatingsForAllPkgsResult deriveAndStoreUserRatingsForAllPkgs(DeriveAndStoreUserRatingsForAllPkgsResult request) {
-        Preconditions.checkNotNull(request);
-
-        if(!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                null,
-                Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
-            throw new AccessDeniedException("unable to derive and store user ratings");
-        }
-
-        jobService.submit(
-                new UserRatingDerivationJobSpecification(),
-                JobSnapshot.COALESCE_STATUSES_QUEUED);
-
-        LOGGER.info("did enqueue request to derive and store user ratings for all packages");
-
-        return new DeriveAndStoreUserRatingsForAllPkgsResult();
-    }
-
-
-    @Override
-    public GetUserRatingResult getUserRating(GetUserRatingRequest request) {
-
-        Preconditions.checkNotNull(request);
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.code));
-
-        final ObjectContext context = serverRuntime.newContext();
-
-        UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
-                () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code)
-        );
-
-        GetUserRatingResult result = new GetUserRatingResult();
-        fillAbstractGetUserRatingResult(userRating, result);
-
-        return result;
-    }
-
     @Override
     public GetUserRatingByUserAndPkgVersionResult getUserRatingByUserAndPkgVersion(GetUserRatingByUserAndPkgVersionRequest request) {
         Preconditions.checkNotNull(request);
@@ -205,64 +74,48 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.userNickname), "the user nickname must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode), "the pkg version architecture code must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionMajor),"the package version major code must be supplied");
-        // temporary support the `repositoryCode` for the desktop client.
-        Preconditions.checkArgument(
-                Stream.of(request.pkgVersionArchitectureCode, request.repositoryCode)
-                        .map(StringUtils::trimToNull)
-                        .filter(Objects::nonNull)
-                        .count() == 2 || StringUtils.isNotBlank(request.repositorySourceCode),
-                "the (repository code and architecture) are required or the repository source code");
 
-        final ObjectContext context = serverRuntime.newContext();
-
-        Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
-        User user = User.tryGetByNickname(context, request.userNickname).orElseThrow(
-                () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
-        Pkg pkg = Pkg.tryGetByName(context, request.pkgName).orElseThrow(
-                () -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName));
-
-        // because there are some older HD desktop clients that will still come
-        // through with architecture + repository, we can work with this to
-        // probably get the repository source.
-
-        RepositorySource repositorySource;
-
-        if (StringUtils.isNotBlank(request.repositorySourceCode)) {
-            repositorySource = getRepositorySource(context, request.repositorySourceCode);
-        } else {
-            repositorySource = getRepository(context, request.repositoryCode)
-                    .tryGetRepositorySourceForArchitecture(architecture)
-                    .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), ""));
-        }
-
-        VersionCoordinates versionCoordinates = new VersionCoordinates(
-                request.pkgVersionMajor,
-                request.pkgVersionMinor,
-                request.pkgVersionMicro,
-                request.pkgVersionPreRelease,
-                request.pkgVersionRevision);
-
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.tryGetForPkg(
-                context, pkg, repositorySource, architecture, versionCoordinates);
-
-        if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
-            throw new ObjectNotFoundException(
-                    PkgVersion.class.getSimpleName(),
-                    request.pkgName + "@" + versionCoordinates);
-        }
-
-        Optional<UserRating> userRatingOptional = UserRating.getByUserAndPkgVersion(context, user, pkgVersionOptional.get());
-
-        if(userRatingOptional.isEmpty()) {
-            throw new ObjectNotFoundException(UserRating.class.getSimpleName(), "");
-        }
+        org.haiku.haikudepotserver.api2.model.GetUserRatingByUserAndPkgVersionResult resultV2
+                = userRatingApiService.getUserRatingByUserAndPkgVersion(new GetUserRatingByUserAndPkgVersionRequestEnvelope()
+                .repositoryCode(request.repositoryCode)
+                .repositorySourceCode(request.repositorySourceCode)
+                .userNickname(request.userNickname)
+                .pkgName(request.pkgName)
+                .pkgVersionArchitectureCode(request.pkgVersionArchitectureCode)
+                .pkgVersionMajor(request.pkgVersionMajor)
+                .pkgVersionMinor(request.pkgVersionMinor)
+                .pkgVersionMicro(request.pkgVersionMicro)
+                .pkgVersionPreRelease(request.pkgVersionPreRelease)
+                .pkgVersionRevision(request.pkgVersionRevision));
 
         GetUserRatingByUserAndPkgVersionResult result = new GetUserRatingByUserAndPkgVersionResult();
-        fillAbstractGetUserRatingResult(userRatingOptional.get(), result);
+        result.active = resultV2.getActive();
+        result.code = resultV2.getCode();
+        result.naturalLanguageCode = resultV2.getNaturalLanguageCode();
+        result.rating = Optional.ofNullable(resultV2.getRating()).map(Number::shortValue).orElse(null);
+        result.comment = resultV2.getComment();
+        result.modifyTimestamp = resultV2.getModifyTimestamp();
+        result.createTimestamp = resultV2.getCreateTimestamp();
+        result.userRatingStabilityCode = resultV2.getUserRatingStabilityCode();
+
+        result.pkgVersion = new AbstractUserRatingResult.PkgVersion();
+        result.pkgVersion.repositoryCode = resultV2.getPkgVersion().getRepositoryCode();
+        result.pkgVersion.repositorySourceCode = resultV2.getPkgVersion().getRepositorySourceCode();
+        result.pkgVersion.architectureCode = resultV2.getPkgVersion().getArchitectureCode();
+        result.pkgVersion.major = resultV2.getPkgVersion().getMajor();
+        result.pkgVersion.minor = resultV2.getPkgVersion().getMinor();
+        result.pkgVersion.micro = resultV2.getPkgVersion().getMicro();
+        result.pkgVersion.preRelease = resultV2.getPkgVersion().getPreRelease();
+        result.pkgVersion.revision = resultV2.getPkgVersion().getRevision();
+
+        result.pkgVersion.pkg = new AbstractUserRatingResult.Pkg();
+        result.pkgVersion.pkg.name = resultV2.getPkgVersion().getPkg().getName();
+
+        result.user = new AbstractUserRatingResult.User();
+        result.user.nickname = resultV2.getUser().getNickname();
 
         return result;
     }
-
 
     @Override
     public CreateUserRatingResult createUserRating(CreateUserRatingRequest request) {
@@ -270,152 +123,26 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.naturalLanguageCode));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgName));
         Preconditions.checkState(!Strings.isNullOrEmpty(request.pkgVersionArchitectureCode));
-        // temporary support the `repositoryCode` for the desktop client.
-        Preconditions.checkArgument(
-                Stream.of(request.pkgVersionArchitectureCode, request.repositoryCode)
-                        .map(StringUtils::trimToNull)
-                        .filter(Objects::nonNull)
-                        .count() == 2 || StringUtils.isNotBlank(request.repositorySourceCode),
-                "the (repository code and architecture) are required or the repository source code");
-        Preconditions.checkArgument(null == request.rating || request.rating >= UserRating.MIN_USER_RATING,
-                "the user rating " + request.rating + " is less than the minimum allowed of " + UserRating.MIN_USER_RATING);
-        Preconditions.checkArgument(null == request.rating || request.rating <= UserRating.MAX_USER_RATING,
-                "the user rating " + request.rating + " is greater than the maximum allowed of " + UserRating.MIN_USER_RATING);
 
-        request.comment = StringUtils.trimToNull(request.comment);
+        org.haiku.haikudepotserver.api2.model.CreateUserRatingResult resultV2
+                = userRatingApiService.createUserRating(new CreateUserRatingRequestEnvelope()
+                .repositoryCode(request.repositoryCode)
+                .repositorySourceCode(request.repositorySourceCode)
+                .naturalLanguageCode(request.naturalLanguageCode)
+                .userNickname(request.userNickname)
+                .userRatingStabilityCode(request.userRatingStabilityCode)
+                .comment(request.comment)
+                .rating(Optional.ofNullable(request.rating).map(Number::intValue).orElse(null))
+                .pkgName(request.pkgName)
+                .pkgVersionArchitectureCode(request.pkgVersionArchitectureCode)
+                .pkgVersionMajor(request.pkgVersionMajor)
+                .pkgVersionMinor(request.pkgVersionMinor)
+                .pkgVersionMicro(request.pkgVersionMicro)
+                .pkgVersionPreRelease(request.pkgVersionPreRelease)
+                .pkgVersionRevision(request.pkgVersionRevision)
+                .pkgVersionType(PkgVersionType.fromValue(request.pkgVersionType.name())));
 
-        // check to see that the user has not tried to create a user rating with essentially nothing
-        // in it.
-
-        if(
-                Strings.isNullOrEmpty(request.comment)
-                        && null==request.userRatingStabilityCode
-                        && null==request.rating) {
-            throw new IllegalStateException("it is not possible to create a user rating with no meaningful rating data");
-        }
-
-        final ObjectContext context = serverRuntime.newContext();
-
-        Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, request.pkgName);
-
-        if(pkgOptional.isEmpty()) {
-            throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
-        }
-
-        // because there are some older HD desktop clients that will still come
-        // through with architecture + repository, we can work with this to
-        // probably get the repository source.
-
-        Architecture architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
-        RepositorySource repositorySource;
-
-        if (StringUtils.isNotBlank(request.repositorySourceCode)) {
-            repositorySource = getRepositorySource(context, request.repositorySourceCode);
-        } else {
-            repositorySource = getRepository(context, request.repositoryCode)
-                    .tryGetRepositorySourceForArchitecture(architecture)
-                    .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), ""));
-        }
-
-        NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
-        User user = User.tryGetByNickname(context, request.userNickname).orElseThrow(
-                () -> new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname));
-
-        Optional<UserRatingStability> userRatingStabilityOptional = Optional.empty();
-
-        if(null!=request.userRatingStabilityCode) {
-            userRatingStabilityOptional = UserRatingStability.tryGetByCode(context, request.userRatingStabilityCode);
-
-            if(userRatingStabilityOptional.isEmpty()) {
-                throw new ObjectNotFoundException(
-                        UserRatingStability.class.getSimpleName(),
-                        request.userRatingStabilityCode);
-            }
-        }
-
-        // check authorization
-
-        Optional<User> authenticatedUserOptional = tryObtainAuthenticatedUser(context);
-
-        if(authenticatedUserOptional.isEmpty()) {
-            throw new AccessDeniedException("only authenticated users are able to add user ratings");
-        }
-
-        if(!authenticatedUserOptional.get().getNickname().equals(user.getNickname())) {
-            throw new AccessDeniedException("it is not allowed to add a user rating for another user");
-        }
-
-        if(!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                pkgOptional.get(),
-                Permission.PKG_CREATEUSERRATING)) {
-            throw new AccessDeniedException("unable to create user ratings for [" + pkgOptional.get() + "]");
-        }
-
-        // check the package version
-
-        Optional<PkgVersion> pkgVersionOptional;
-
-        switch(request.pkgVersionType) {
-            case LATEST:
-                pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
-                        context,
-                        pkgOptional.get(),
-                        repositorySource,
-                        Collections.singletonList(architecture));
-                break;
-
-            case SPECIFIC:
-                pkgVersionOptional = PkgVersion.tryGetForPkg(
-                        context, pkgOptional.get(), repositorySource, architecture,
-                        new VersionCoordinates(
-                                request.pkgVersionMajor,
-                                request.pkgVersionMinor,
-                                request.pkgVersionMicro,
-                                request.pkgVersionPreRelease,
-                                request.pkgVersionRevision));
-                break;
-
-            default:
-                throw new IllegalStateException("unsupported pkg version type; " + request.pkgVersionType.name());
-        }
-
-        if(pkgVersionOptional.isEmpty()) {
-            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkgOptional.get().getName()+"_"+request.pkgVersionType.name());
-        }
-
-        if(!pkgVersionOptional.get().getIsLatest()) {
-            throw new IllegalStateException("it is not possible to add a user rating to a version other than the latest version.");
-        }
-
-        List<UserRating> legacyUserRatings = UserRating.findByUserAndPkg(context, user, pkgOptional.get());
-
-        for(UserRating legacyUserRating : legacyUserRatings) {
-            if(legacyUserRating.getPkgVersion().equals(pkgVersionOptional.get())) {
-                throw new IllegalStateException("an existing user rating '"+legacyUserRating.getCode()+"' already exists for this package version; it is not possible to add another one");
-            }
-        }
-
-        // now create the new user rating.
-
-        UserRating userRating = context.newObject(UserRating.class);
-        userRating.setCode(UUID.randomUUID().toString());
-        userRating.setUserRatingStability(userRatingStabilityOptional.orElse(null));
-        userRating.setUser(user);
-        userRating.setComment(Strings.emptyToNull(Strings.nullToEmpty(request.comment).trim()));
-        userRating.setPkgVersion(pkgVersionOptional.get());
-        userRating.setNaturalLanguage(naturalLanguage);
-        userRating.setRating(request.rating);
-
-        context.commitChanges();
-
-        LOGGER.info(
-                "did create user rating for user {} on package {}",
-                user,
-                pkgOptional.get());
-
-        return new CreateUserRatingResult(userRating.getCode());
-
+        return new CreateUserRatingResult(resultV2.getCode());
     }
 
     @Override
@@ -424,76 +151,16 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkState(!Strings.isNullOrEmpty(request.code));
         Preconditions.checkNotNull(request.filter);
 
-        final ObjectContext context = serverRuntime.newContext();
-
-        UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
-                () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
-
-        if (!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                userRating,
-                Permission.USERRATING_EDIT)) {
-            throw new AccessDeniedException("unable to edit the userrating");
-        }
-
-        for (UpdateUserRatingRequest.Filter filter : request.filter) {
-
-            switch(filter) {
-
-                case ACTIVE:
-                    if (null == request.active) {
-                        throw new IllegalStateException("the active flag must be supplied to configure this field");
-                    }
-
-                    userRating.setActive(request.active);
-                    break;
-
-                case COMMENT:
-                    if (null != request.comment) {
-                        userRating.setComment(Strings.emptyToNull(request.comment.trim()));
-                    }
-                    else {
-                        userRating.setComment(null);
-                    }
-                    break;
-
-                case NATURALLANGUAGE:
-                    NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.naturalLanguageCode);
-                    userRating.setNaturalLanguage(naturalLanguage);
-                    break;
-
-                case RATING:
-                    userRating.setRating(request.rating);
-                    break;
-
-                case USERRATINGSTABILITY:
-                    if (null == request.userRatingStabilityCode) {
-                        userRating.setUserRatingStability(null);
-                    }
-                    else {
-                        userRating.setUserRatingStability(UserRatingStability.tryGetByCode(
-                                context,
-                                request.userRatingStabilityCode).orElseThrow(
-                                () -> new ObjectNotFoundException(
-                                        UserRatingStability.class.getSimpleName(),
-                                        request.userRatingStabilityCode)
-                        ));
-                    }
-                    break;
-
-                default:
-                    throw new IllegalStateException("the filter; "+filter.name()+" is not handled");
-
-            }
-
-        }
-
-        LOGGER.info(
-                "did update user rating for user {} on package {}",
-                userRating.getUser().toString(),
-                userRating.getPkgVersion().getPkg().toString());
-
-        context.commitChanges();
+        userRatingApiService.updateUserRating(new UpdateUserRatingRequestEnvelope()
+                .code(request.code)
+                .active(request.active)
+                .naturalLanguageCode(request.naturalLanguageCode)
+                .userRatingStabilityCode(request.userRatingStabilityCode)
+                .comment(request.comment)
+                .rating(Optional.ofNullable(request.rating).map(Number::intValue).orElse(null))
+                .filter(CollectionUtils.emptyIfNull(request.filter).stream()
+                        .map(f -> UpdateUserRatingFilter.fromValue(f.name()))
+                        .collect(Collectors.toUnmodifiableList())));
 
         return new UpdateUserRatingResult();
     }
@@ -504,139 +171,65 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
         Preconditions.checkNotNull(request.limit);
         Preconditions.checkState(request.limit > 0);
 
-        final ObjectContext context = serverRuntime.newContext();
+        org.haiku.haikudepotserver.api2.model.SearchUserRatingsResult resultV2 = userRatingApiService.searchUserRatings(new SearchUserRatingsRequestEnvelope()
+                .expression(request.expression)
+                .expressionType(
+                        Optional.ofNullable(request.expressionType)
+                                .map(Enum::name)
+                                .map(SearchUserRatingsRequestEnvelope.ExpressionTypeEnum::fromValue)
+                                .orElse(null))
+                .offset(request.offset)
+                .limit(request.limit)
+                .repositoryCode(request.repositoryCode)
+                .repositorySourceCode(request.repositorySourceCode)
+                .userNickname(request.userNickname)
+                .pkgName(request.pkgName)
+                .pkgVersionArchitectureCode(request.pkgVersionArchitectureCode)
+                .pkgVersionMajor(request.pkgVersionMajor)
+                .pkgVersionMinor(request.pkgVersionMinor)
+                .pkgVersionMicro(request.pkgVersionMinor)
+                .pkgVersionPreRelease(request.pkgVersionPreRelease)
+                .pkgVersionRevision(request.pkgVersionRevision)
+                .daysSinceCreated(Optional.ofNullable(request.daysSinceCreated).map(Number::intValue).orElse(null))
+        );
 
-        UserRatingSearchSpecification searchSpecification = new UserRatingSearchSpecification();
+        SearchUserRatingsResult result = new SearchUserRatingsResult();
+        result.total = resultV2.getTotal();
+        result.items = resultV2.getItems().stream()
+                .map(itemV2 -> {
+                    SearchUserRatingsResult.UserRating item = new SearchUserRatingsResult.UserRating();
 
-        if (null != request.daysSinceCreated) {
-            searchSpecification.setDaysSinceCreated(request.daysSinceCreated.intValue());
-        }
+                    item.code = itemV2.getCode();
+                    item.naturalLanguageCode = itemV2.getNaturalLanguageCode();
+                    item.userRatingStabilityCode = itemV2.getUserRatingStabilityCode();
+                    item.active = itemV2.getActive();
+                    item.comment = itemV2.getComment();
+                    item.modifyTimestamp = itemV2.getModifyTimestamp();
+                    item.createTimestamp = itemV2.getCreateTimestamp();
+                    item.rating = Optional.ofNullable(itemV2.getRating())
+                            .map(Number::shortValue)
+                            .orElse(null);
 
-        Architecture architecture = null;
+                    item.pkgVersion = new AbstractUserRatingResult.PkgVersion();
+                    item.pkgVersion.repositoryCode = itemV2.getPkgVersion().getRepositoryCode();
+                    item.pkgVersion.repositorySourceCode = itemV2.getPkgVersion().getRepositorySourceCode();
+                    item.pkgVersion.architectureCode = itemV2.getPkgVersion().getArchitectureCode();
+                    item.pkgVersion.major = itemV2.getPkgVersion().getMajor();
+                    item.pkgVersion.minor = itemV2.getPkgVersion().getMinor();
+                    item.pkgVersion.micro = itemV2.getPkgVersion().getMicro();
+                    item.pkgVersion.preRelease = itemV2.getPkgVersion().getPreRelease();
+                    item.pkgVersion.revision = itemV2.getPkgVersion().getRevision();
 
-        if (null != request.pkgVersionArchitectureCode) {
-            architecture = getArchitecture(context, request.pkgVersionArchitectureCode);
-        }
+                    item.pkgVersion.pkg = new AbstractUserRatingResult.Pkg();
+                    item.pkgVersion.pkg.name = itemV2.getPkgVersion().getPkg().getName();
 
-        Optional<Pkg> pkgOptional = Optional.empty();
+                    item.user = new AbstractUserRatingResult.User();
+                    item.user.nickname = itemV2.getUser().getNickname();
 
-        if (null != request.pkgName) {
-            pkgOptional = Pkg.tryGetByName(context, request.pkgName);
-
-            if (pkgOptional.isEmpty()) {
-                throw new ObjectNotFoundException(Pkg.class.getSimpleName(), request.pkgName);
-            }
-        }
-
-        RepositorySource repositorySource = Optional.ofNullable(request.repositorySourceCode)
-                .map(StringUtils::trimToNull)
-                .map(rsc -> getRepositorySource(context, rsc))
-                .orElse(null);
-        searchSpecification.setRepositorySource(repositorySource);
-
-        // this is temporarily here to support the desktop application; remove
-        // when that version of the client is no longer supported.
-        Repository repository = Optional.ofNullable(request.repositoryCode)
-                .map(StringUtils::trimToNull)
-                .map(rc -> getRepository(context, rc))
-                .orElse(null);
-        searchSpecification.setRepository(repository);
-
-        // if there is a major version specified then we must be requesting a specific package version,
-        // otherwise we will constrain based on the architecture and/or the package name.
-
-        if (null != request.pkgVersionMajor) {
-
-            if (null == repositorySource) {
-                throw new IllegalStateException("the repository source is required when a pkg version is specified");
-            }
-
-            if (pkgOptional.isEmpty()) {
-                throw new IllegalStateException("the pkg is required when a pkg version is specified");
-            }
-
-            if (null == architecture) {
-                throw new IllegalStateException("the architecture is required when a pkg version is specified");
-            }
-
-            PkgVersion pkgVersion = PkgVersion.tryGetForPkg(
-                    context,
-                    pkgOptional.get(),
-                    repositorySource,
-                    architecture,
-                    new VersionCoordinates(
-                            request.pkgVersionMajor,
-                            request.pkgVersionMinor,
-                            request.pkgVersionMicro,
-                            request.pkgVersionPreRelease,
-                            request.pkgVersionRevision))
-                    .filter(_PkgVersion::getActive)
-                    .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(),""));
-
-            searchSpecification.setPkgVersion(pkgVersion);
-        }
-        else {
-            searchSpecification.setArchitecture(architecture);
-            searchSpecification.setPkg(pkgOptional.orElse(null));
-        }
-
-        if (null != request.userNickname) {
-            Optional<User> userOptional = User.tryGetByNickname(context, request.userNickname);
-
-            if (userOptional.isEmpty()) {
-                throw new ObjectNotFoundException(User.class.getSimpleName(), request.userNickname);
-            }
-
-            searchSpecification.setUser(userOptional.get());
-        }
-
-        searchSpecification.setLimit(request.limit);
-        searchSpecification.setOffset(request.offset);
-
-        List<UserRating> foundUserRatings = userRatingService.search(context, searchSpecification);
-
-        final SearchUserRatingsResult result = new SearchUserRatingsResult();
-        result.total = userRatingService.total(context, searchSpecification);
-        result.items = foundUserRatings
-                .stream()
-                .map(ur -> {
-                    SearchUserRatingsResult.UserRating resultUserRating = new SearchUserRatingsResult.UserRating();
-                    resultUserRating.active = ur.getActive();
-                    resultUserRating.code = ur.getCode();
-                    resultUserRating.comment = ur.getComment();
-                    resultUserRating.createTimestamp = ur.getCreateTimestamp().getTime();
-                    resultUserRating.modifyTimestamp = ur.getModifyTimestamp().getTime();
-                    resultUserRating.userRatingStabilityCode = null!=ur.getUserRatingStability() ? ur.getUserRatingStability().getCode() : null;
-                    resultUserRating.naturalLanguageCode = ur.getNaturalLanguage().getCode();
-                    resultUserRating.pkgVersion = createPkgVersion(ur.getPkgVersion());
-                    resultUserRating.rating = ur.getRating();
-                    resultUserRating.user = createUser(ur.getUser());
-                    return resultUserRating;
+                    return item;
                 })
-                .collect(Collectors.toList());
-
+                .collect(Collectors.toUnmodifiableList());
         return result;
-    }
-
-    @Override
-    public RemoveUserRatingResult removeUserRating(RemoveUserRatingRequest request) {
-        Preconditions.checkNotNull(request);
-        Preconditions.checkState(StringUtils.isNotBlank(request.code));
-
-        final ObjectContext context = serverRuntime.newContext();
-
-        UserRating userRating = UserRating.tryGetByCode(context, request.code).orElseThrow(
-                () -> new ObjectNotFoundException(UserRating.class.getSimpleName(), request.code));
-
-        if (!permissionEvaluator.hasPermission(
-                SecurityContextHolder.getContext().getAuthentication(),
-                userRating, Permission.USERRATING_REMOVE)) {
-            throw new AccessDeniedException("unable to delete the userrating");
-        }
-
-        userRatingService.removeUserRatingAtomically(userRating.getCode());
-
-        return new RemoveUserRatingResult();
     }
 
 }

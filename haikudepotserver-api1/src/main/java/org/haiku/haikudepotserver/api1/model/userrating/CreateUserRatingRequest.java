@@ -6,7 +6,7 @@
 package org.haiku.haikudepotserver.api1.model.userrating;
 
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
-
+@Deprecated
 public class CreateUserRatingRequest {
 
     /**

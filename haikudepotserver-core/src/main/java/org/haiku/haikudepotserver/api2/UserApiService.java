@@ -31,11 +31,11 @@ import org.haiku.haikudepotserver.api2.model.SearchUsersResult;
 import org.haiku.haikudepotserver.api2.model.SearchUsersUser;
 import org.haiku.haikudepotserver.api2.model.UpdateUserFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRequestEnvelope;
-import org.haiku.haikudepotserver.api2.support.CaptchaBadResponseException;
-import org.haiku.haikudepotserver.api2.support.InvalidUserUsageConditionsException;
-import org.haiku.haikudepotserver.api2.support.ObjectNotFoundException;
-import org.haiku.haikudepotserver.api2.support.ValidationException;
-import org.haiku.haikudepotserver.api2.support.ValidationFailure;
+import org.haiku.haikudepotserver.support.exception.CaptchaBadResponseException;
+import org.haiku.haikudepotserver.support.exception.InvalidUserUsageConditionsException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ValidationException;
+import org.haiku.haikudepotserver.support.exception.ValidationFailure;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
@@ -427,7 +427,7 @@ public class UserApiService extends AbstractApiService {
         boolean activeDidChange = false;
 
         User user = User.tryGetByNickname(context, request.getNickname())
-                .orElseThrow(() -> new org.haiku.haikudepotserver.api1.support.ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), User.NICKNAME.getName()));
 
         if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),

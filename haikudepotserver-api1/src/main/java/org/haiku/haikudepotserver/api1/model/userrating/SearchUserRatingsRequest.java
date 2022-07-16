@@ -11,7 +11,7 @@ import org.haiku.haikudepotserver.api1.support.AbstractSearchRequest;
  * <p>Note that if a value for "pkgVersionMajor" is supplied then it is assumed that the
  * search should incorporate a version.</p>
  */
-
+@Deprecated
 public class SearchUserRatingsRequest extends AbstractSearchRequest {
 
     /**
