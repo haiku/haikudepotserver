@@ -57,7 +57,7 @@ public class ViewPkgController {
     private boolean hasSource(ObjectContext context, PkgVersion pkgVersion) {
         Optional<Pkg> sourcePkgOptional = Pkg.tryGetByName(context, pkgVersion.getPkg().getName() + "_source");
         return sourcePkgOptional.isPresent() &&
-                PkgVersion.getForPkg(
+                PkgVersion.tryGetForPkg(
                 context,
                 sourcePkgOptional.get(),
                 pkgVersion.getRepositorySource(),
@@ -111,7 +111,7 @@ public class ViewPkgController {
                 Strings.emptyToNull(preRelease),
                 revision);
 
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.tryGetForPkg(
                 context, pkgOptional.get(), repositorySource, architecture, coordinates);
 
         if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {

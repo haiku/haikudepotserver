@@ -117,7 +117,7 @@ public class PkgImportServiceImpl implements PkgImportService {
 
             // if we know that the package exists then we should look for the version.
 
-            persistedPkgVersion = PkgVersion.getForPkg(
+            persistedPkgVersion = PkgVersion.tryGetForPkg(
                     objectContext,
                     persistedPkg,
                     repositorySource,
@@ -461,7 +461,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                         // then a regression has occurred.  In this case make the imported one be the latest and mark
                         // the later ones as "inactive".
 
-                        List<PkgVersion> pkgVersionsToDeactivate = PkgVersion.getForPkg(
+                        List<PkgVersion> pkgVersionsToDeactivate = PkgVersion.findForPkg(
                                 objectContext,
                                 persistedPkgVersion.getPkg(),
                                 persistedPkgVersion.getRepositorySource(),

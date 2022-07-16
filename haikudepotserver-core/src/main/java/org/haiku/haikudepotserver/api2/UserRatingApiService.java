@@ -184,7 +184,7 @@ public class UserRatingApiService extends AbstractApiService {
                 break;
 
             case SPECIFIC:
-                pkgVersionOptional = PkgVersion.getForPkg(
+                pkgVersionOptional = PkgVersion.tryGetForPkg(
                         context, pkg, repositorySource, architecture,
                         new VersionCoordinates(
                                 request.getPkgVersionMajor(),
@@ -340,7 +340,7 @@ public class UserRatingApiService extends AbstractApiService {
                 request.getPkgVersionPreRelease(),
                 request.getPkgVersionRevision());
 
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.tryGetForPkg(
                 context, pkg, repositorySource, architecture, versionCoordinates);
 
         if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
@@ -448,7 +448,7 @@ public class UserRatingApiService extends AbstractApiService {
                 throw new IllegalStateException("the architecture is required when a pkg version is specified");
             }
 
-            PkgVersion pkgVersion = PkgVersion.getForPkg(
+            PkgVersion pkgVersion = PkgVersion.tryGetForPkg(
                             context,
                             pkg,
                             repositorySource,
@@ -488,7 +488,10 @@ public class UserRatingApiService extends AbstractApiService {
                             .comment(ur.getComment())
                             .createTimestamp(ur.getCreateTimestamp().getTime())
                             .modifyTimestamp(ur.getModifyTimestamp().getTime())
-                            .userRatingStabilityCode(ur.getUserRatingStability().getCode())
+                            .userRatingStabilityCode(
+                                    Optional.ofNullable(ur.getUserRatingStability())
+                                            .map(UserRatingStability::getCode)
+                                            .orElse(null))
                             .naturalLanguageCode(ur.getNaturalLanguage().getCode())
                             .rating(Optional.ofNullable(ur.getRating()).map(Number::intValue).orElse(null))
                             .user(new SearchUserRatingsUser().nickname(ur.getUser().getNickname()))

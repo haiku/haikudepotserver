@@ -16,6 +16,7 @@ import org.apache.cayenne.map.DbEntity;
 import org.apache.cayenne.map.ObjEntity;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.security.UserAuthentication;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
@@ -97,6 +98,9 @@ public abstract class AbstractIntegrationTest {
     @Resource
     protected NaturalLanguageService naturalLanguageService;
 
+    @Resource
+    protected JobService jobService;
+
     protected void assertEqualsLineByLine(BufferedReader expected, BufferedReader actual) throws IOException {
             String expectedLine;
             String actualLine;
@@ -153,12 +157,19 @@ public abstract class AbstractIntegrationTest {
     @BeforeEach
     public void beforeEachTest() {
         LOGGER.debug("will prepare for the next test");
+        clearJobs();
         clearCaches();
         clearDatabaseTables();
         clearTestUserUsageConditions();
         setUnauthenticated();
         mailSender.clear();
         LOGGER.debug("did prepare for the next test");
+    }
+
+    protected void clearJobs() {
+        if (!jobService.awaitAllJobsFinishedUninterruptibly(30_000L)) {
+            Assertions.fail("unable to complete all jobs in timeout");
+        }
     }
 
     protected void clearCaches() {

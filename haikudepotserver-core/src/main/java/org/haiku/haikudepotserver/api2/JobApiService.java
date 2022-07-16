@@ -141,14 +141,14 @@ public class JobApiService extends AbstractApiService {
         List<SearchJobsResultItem> items = List.of();
         long total = 0L;
 
-        if (null == request.getStatuses() || CollectionUtils.isEmpty(request.getStatuses())) {
+        if (null == request.getStatuses() || CollectionUtils.isNotEmpty(request.getStatuses())) {
             Set<JobSnapshot.Status> statuses = null;
 
             if (null != request.getStatuses()) {
                 statuses = request.getStatuses().stream().map(s -> JobSnapshot.Status.valueOf(s.name())).collect(Collectors.toSet());
             }
 
-            total = (long) jobService.totalJobs(ownerUser, statuses);
+            total = jobService.totalJobs(ownerUser, statuses);
             items = jobService.findJobs(
                     ownerUser,
                     statuses,

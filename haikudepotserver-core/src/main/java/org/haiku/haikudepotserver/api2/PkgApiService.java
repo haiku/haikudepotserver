@@ -306,7 +306,7 @@ public class PkgApiService extends AbstractApiService {
             }
 
             result = result.prominenceOrdering(
-                    pkg.getPkgProminence(repositorySource.getRepository())
+                    pkg.tryGetPkgProminence(repositorySource.getRepository())
                             .map(pp -> pp.getProminence().getOrdering())
                             .orElse(null));
         }
@@ -369,9 +369,9 @@ public class PkgApiService extends AbstractApiService {
             case ALL: {
                 final VersionCoordinatesComparator vcc = new VersionCoordinatesComparator();
                 return Optional.ofNullable(repositorySource)
-                        .map(rs -> PkgVersion.getForPkg(context, pkg, rs, false))
+                        .map(rs -> PkgVersion.findForPkg(context, pkg, rs, false))
                         // ^ active only
-                        .orElseGet(() -> PkgVersion.getForPkg(context, pkg, false))
+                        .orElseGet(() -> PkgVersion.findForPkg(context, pkg, false))
                         // ^ active only
                         .stream()
                         .filter(pv -> null == architecture || pv.getArchitecture().equals(architecture))
@@ -392,7 +392,7 @@ public class PkgApiService extends AbstractApiService {
                         request.getMajor(), request.getMinor(), request.getMicro(),
                         request.getPreRelease(), request.getRevision());
 
-                PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repositorySource, architecture, coordinates)
+                PkgVersion pkgVersion = PkgVersion.tryGetForPkg(context, pkg, repositorySource, architecture, coordinates)
                         .filter(_PkgVersion::getActive)
                         .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), ""));
 
@@ -411,7 +411,7 @@ public class PkgApiService extends AbstractApiService {
         }
     }
 
-    public GetPkgChangelogResult getPkgChangeLog(GetPkgChangelogRequestEnvelope request) {
+    public GetPkgChangelogResult getPkgChangelog(GetPkgChangelogRequestEnvelope request) {
         Preconditions.checkArgument(null != request, "a request must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(request.getPkgName()), "a package name must be supplied");
 
@@ -451,6 +451,7 @@ public class PkgApiService extends AbstractApiService {
 
         return new GetPkgLocalizationsResult()
                 .pkgLocalizations(pkgLocalizations.stream()
+                        .filter(pl -> request.getNaturalLanguageCodes().contains(pl.getNaturalLanguage().getCode()))
                         .map(pl -> new GetPkgLocalizationsPkgLocalization()
                                 .naturalLanguageCode(pl.getNaturalLanguage().getCode())
                                 .title(pl.getTitle())
@@ -531,7 +532,7 @@ public class PkgApiService extends AbstractApiService {
                     context, pkg, repositorySource,
                     Collections.singletonList(architecture));
         }
-        return PkgVersion.getForPkg(
+        return PkgVersion.tryGetForPkg(
                     context, pkg, repositorySource, architecture,
                     new VersionCoordinates(
                             request.getMajor(),
@@ -587,7 +588,7 @@ public class PkgApiService extends AbstractApiService {
         }
 
         if (null != repositorySource) {
-            PkgVersion pkgVersion = PkgVersion.getForPkg(
+            PkgVersion pkgVersion = PkgVersion.tryGetForPkg(
                     context,
                     getPkg(context, request.getName()),
                     repositorySource,
@@ -943,7 +944,7 @@ public class PkgApiService extends AbstractApiService {
             throw new AccessDeniedException("unable to update the package version for package [" + pkg + "]");
         }
 
-        PkgVersion pkgVersion = PkgVersion.getForPkg(
+        PkgVersion pkgVersion = PkgVersion.tryGetForPkg(
                 context, pkg, getRepositorySource(context, request.getRepositorySourceCode()),
                 getArchitecture(context, request.getArchitectureCode()),
                 new VersionCoordinates(

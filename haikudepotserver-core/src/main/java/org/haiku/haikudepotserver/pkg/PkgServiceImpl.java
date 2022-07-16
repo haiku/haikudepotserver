@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -428,7 +427,7 @@ public class PkgServiceImpl implements PkgService {
 
         int count = 0;
 
-        for (PkgVersion pkgVersion : PkgVersion.getForPkg(context, pkg, repositorySource, false)) { // active only
+        for (PkgVersion pkgVersion : PkgVersion.findForPkg(context, pkg, repositorySource, false)) { // active only
             if (pkgVersion.getRepositorySource().equals(repositorySource)) {
                 if (pkgVersion.getActive()) {
                     pkgVersion.setActive(false);
@@ -504,7 +503,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != prominence, "the prominence must be provided");
         Preconditions.checkArgument(null != repository, "the repository must be provided");
         Preconditions.checkArgument(null != pkg, "the pkg must be provided");
-        Optional<PkgProminence> pkgProminenceOptional = pkg.getPkgProminence(repository);
+        Optional<PkgProminence> pkgProminenceOptional = pkg.tryGetPkgProminence(repository);
 
         if (pkgProminenceOptional.isEmpty()) {
             PkgProminence pkgProminence = objectContext.newObject(PkgProminence.class);

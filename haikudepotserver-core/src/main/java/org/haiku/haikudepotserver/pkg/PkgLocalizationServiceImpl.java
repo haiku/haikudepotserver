@@ -78,7 +78,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         }
 
         if(!result.hasAll()) {
-            PkgLocalization.getForPkgAndNaturalLanguageCode(
+            PkgLocalization.tryGetForPkgAndNaturalLanguageCode(
                     context,
                     pkgVersion.getPkg(),
                     naturalLanguage.getCode())
@@ -92,7 +92,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         }
 
         if(!result.hasAll()) {
-            PkgLocalization.getForPkgAndNaturalLanguageCode(
+            PkgLocalization.tryGetForPkgAndNaturalLanguageCode(
                     context,
                     pkgVersion.getPkg(),
                     NaturalLanguage.CODE_ENGLISH)

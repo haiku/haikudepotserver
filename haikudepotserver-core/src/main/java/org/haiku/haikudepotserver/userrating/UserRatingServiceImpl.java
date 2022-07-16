@@ -427,7 +427,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         // haul all of the pkg versions into memory first.
 
         List<PkgVersion> pkgVersions = repository.getRepositorySources().stream()
-                .flatMap(rs -> PkgVersion.getForPkg(context, pkg, rs, false).stream()) // active only
+                .flatMap(rs -> PkgVersion.findForPkg(context, pkg, rs, false).stream()) // active only
                 .collect(Collectors.toList());
 
         if(!pkgVersions.isEmpty()) {

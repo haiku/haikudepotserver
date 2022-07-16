@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019, Andrew Lindesay
+ * Copyright 2016-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.ValidationResult;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -31,7 +32,12 @@ public class PkgLocalization extends _PkgLocalization implements MutableCreateAn
                 .select(context);
     }
 
-    public static Optional<PkgLocalization> getForPkgAndNaturalLanguageCode(ObjectContext context, Pkg pkg, final String naturalLanguageCode) {
+    public static PkgLocalization getForPkgAndNaturalLanguageCode(ObjectContext context, Pkg pkg, final String naturalLanguageCode) {
+        return tryGetForPkgAndNaturalLanguageCode(context, pkg, naturalLanguageCode)
+                .orElseThrow(() -> new ObjectNotFoundException(PkgLocalization.class.getSimpleName(), null));
+    }
+
+    public static Optional<PkgLocalization> tryGetForPkgAndNaturalLanguageCode(ObjectContext context, Pkg pkg, final String naturalLanguageCode) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");

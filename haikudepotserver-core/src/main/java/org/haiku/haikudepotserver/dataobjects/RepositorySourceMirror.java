@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 
@@ -26,6 +27,13 @@ public class RepositorySourceMirror
         implements MutableCreateAndModifyTimestamped, Comparable<RepositorySourceMirror> {
 
     private static final long serialVersionUID = 1L;
+
+    public static RepositorySourceMirror getByCode(
+            ObjectContext context, String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        RepositorySourceMirror.class.getSimpleName(), code));
+    }
 
     public static Optional<RepositorySourceMirror> tryGetByCode(
             ObjectContext context, String code) {

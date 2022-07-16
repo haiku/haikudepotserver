@@ -169,10 +169,13 @@ public class AuthorizationApiService extends AbstractApiService {
                 .map(un -> ensureUser(context, un))
                 .orElse(null)
         );
-        specification.setPermissions(CollectionUtils.emptyIfNull(request.getPermissionCodes())
-                .stream()
-                .map(pc -> ensurePermission(context, pc))
-                .collect(Collectors.toList()));
+        specification.setPermissions(
+                Optional.ofNullable(request.getPermissionCodes())
+                        .map(pcs -> CollectionUtils.emptyIfNull(request.getPermissionCodes())
+                                .stream()
+                                .map(pc -> ensurePermission(context, pc))
+                                .collect(Collectors.toList()))
+                        .orElse(null));
         specification.setPkg(Optional.ofNullable(request.getPkgName())
                 .map(pn -> ensurePkg(context, pn))
                 .orElse(null));
@@ -199,7 +202,7 @@ public class AuthorizationApiService extends AbstractApiService {
     }
 
     private org.haiku.haikudepotserver.dataobjects.Permission ensurePermission(ObjectContext context, String code) {
-        return org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, code)
+        return org.haiku.haikudepotserver.dataobjects.Permission.tryGetByCode(context, code)
                 .orElseThrow(() -> new ObjectNotFoundException(
                         org.haiku.haikudepotserver.dataobjects.Permission.class.getSimpleName(),
                         code));

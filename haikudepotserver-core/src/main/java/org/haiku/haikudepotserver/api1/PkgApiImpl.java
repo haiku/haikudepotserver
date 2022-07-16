@@ -444,7 +444,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         if (null != repositorySource) {
-            result.prominenceOrdering = pkg.getPkgProminence(repositorySource.getRepository())
+            result.prominenceOrdering = pkg.tryGetPkgProminence(repositorySource.getRepository())
                     .map(pp -> pp.getProminence().getOrdering())
                     .orElse(null);
         }
@@ -458,9 +458,9 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             case ALL: {
 
                 List<PkgVersion> allVersions = Optional.ofNullable(repositorySource)
-                        .map(rs -> PkgVersion.getForPkg(context, pkg, rs, false))
+                        .map(rs -> PkgVersion.findForPkg(context, pkg, rs, false))
                             // ^ active only
-                        .orElseGet(() -> PkgVersion.getForPkg(context, pkg, false));
+                        .orElseGet(() -> PkgVersion.findForPkg(context, pkg, false));
                             // ^ active only
 
                 if (null != architecture) {
@@ -496,7 +496,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                         request.major, request.minor, request.micro,
                         request.preRelease, request.revision);
 
-                PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repositorySource, architecture, coordinates)
+                PkgVersion pkgVersion = PkgVersion.tryGetForPkg(context, pkg, repositorySource, architecture, coordinates)
                         .filter(_PkgVersion::getActive)
                         .orElseThrow(() ->
                             new ObjectNotFoundException(PkgVersion.class.getSimpleName(), "")
@@ -897,7 +897,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
                     Collections.singletonList(architecture));
         }
         else {
-            pkgVersionOptional = PkgVersion.getForPkg(
+            pkgVersionOptional = PkgVersion.tryGetForPkg(
                     context, pkg, repositorySource, architecture,
                     new VersionCoordinates(
                             getPkgVersionLocalizationsRequest.major,
@@ -1025,7 +1025,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
             throw new AccessDeniedException("unable to update the package version for package [" + pkg + "]");
         }
 
-        PkgVersion pkgVersion = PkgVersion.getForPkg(
+        PkgVersion pkgVersion = PkgVersion.tryGetForPkg(
                 context, pkg, getRepositorySource(context, request.repositorySourceCode),
                 getArchitecture(context, request.architectureCode),
                 new VersionCoordinates(request.major, request.minor, request.micro, request.preRelease, request.revision)
@@ -1092,7 +1092,7 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         }
 
         if (null != repositorySource) {
-            PkgVersion pkgVersion = PkgVersion.getForPkg(
+            PkgVersion pkgVersion = PkgVersion.tryGetForPkg(
                     context,
                     getPkg(context, request.name),
                     repositorySource,

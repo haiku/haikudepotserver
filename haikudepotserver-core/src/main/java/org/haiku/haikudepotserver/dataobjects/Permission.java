@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._Permission;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
@@ -24,7 +25,12 @@ public class Permission extends _Permission {
         return ObjectSelect.query(Permission.class).orderBy(NAME.asc()).sharedCache().select(context);
     }
 
-    public static Optional<Permission> getByCode(ObjectContext context, final String code) {
+    public static Permission getByCode(ObjectContext context, final String code) {
+        return tryGetByCode(context, code)
+                .orElseThrow(() -> new ObjectNotFoundException(Permission.class.getSimpleName(), code));
+    }
+
+    public static Optional<Permission> tryGetByCode(ObjectContext context, final String code) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the permission code must be provided");
         return getAll(context).stream().filter(p -> p.getCode().equals(code)).collect(SingleCollector.optional());

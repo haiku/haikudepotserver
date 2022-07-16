@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,11 +13,11 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._Pkg;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.SingleCollector;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
@@ -90,7 +90,13 @@ public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
         return builder.pathSegment(getName());
     }
 
-    public Optional<PkgProminence> getPkgProminence(Repository repository) {
+    public PkgProminence getPkgProminence(Repository repository) {
+        return tryGetPkgProminence(repository)
+                .orElseThrow(() -> new ObjectNotFoundException(
+                        PkgProminence.class.getSimpleName(), repository.getCode()));
+    }
+
+    public Optional<PkgProminence> tryGetPkgProminence(Repository repository) {
         Preconditions.checkArgument(null != repository, "the repository must be provided");
         return getPkgProminences()
                 .stream()

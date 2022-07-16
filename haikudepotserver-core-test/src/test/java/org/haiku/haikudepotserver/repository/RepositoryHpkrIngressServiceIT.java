@@ -270,7 +270,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                     PkgVersion pkgVersion = PkgVersion.get(context, originalFfmpegPkgOid);
                     Assertions.assertThat(pkgVersion.getActive()).isTrue();
                     Assertions.assertThat(pkgVersion.getIsLatest()).isTrue();
-                    Assertions.assertThat(PkgVersion.getForPkg(
+                    Assertions.assertThat(PkgVersion.findForPkg(
                             context,
                             pkgVersion.getPkg(),
                             RepositorySource.tryGetByCode(context, "testsrc_xyz").get(),

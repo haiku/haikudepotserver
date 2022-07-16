@@ -306,7 +306,7 @@ public class RepositoryApiService extends AbstractApiService {
                 .architectureCode(Optional.ofNullable(repositorySource.getArchitecture())
                         .map(Architecture::getCode)
                         .orElse(null))
-                .lastImportTimestamp(Optional.of(repositorySource.getLastImportTimestamp()).map(Date::getTime).orElse(null))
+                .lastImportTimestamp(Optional.ofNullable(repositorySource.getLastImportTimestamp()).map(Date::getTime).orElse(null))
                 .extraIdentifiers(repositorySource.getExtraIdentifiers())
                 .repositorySourceMirrors(repositorySource.getRepositorySourceMirrors()
                         .stream()

@@ -18,11 +18,11 @@ import java.util.Optional;
 
 public class UserRatingStability extends _UserRatingStability implements Coded {
 
-    public final static String CODE_NOSTART="nostart";
-    public final static String CODE_VERYUNSTABLE="veryunstable";
-    public final static String CODE_UNSTABLEBUTUSABLE="unstablebutusable";
-    public final static String CODE_MOSTLYSTABLE="mostlystable";
-    public final static String CODE_STABLE="stable";
+    public final static String CODE_NOSTART = "nostart";
+    public final static String CODE_VERYUNSTABLE = "veryunstable";
+    public final static String CODE_UNSTABLEBUTUSABLE = "unstablebutusable";
+    public final static String CODE_MOSTLYSTABLE = "mostlystable";
+    public final static String CODE_STABLE = "stable";
 
     public static UserRatingStability getByCode(ObjectContext context, String code) {
         return tryGetByCode(context, code)

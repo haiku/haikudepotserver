@@ -16,6 +16,7 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.haiku.haikudepotserver.api1.support.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.ExposureType;
@@ -46,16 +47,16 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
         return ((List<PkgVersion>) context.performQuery(new ObjectIdQuery(objectId))).stream().collect(SingleCollector.single());
     }
 
-    public static List<PkgVersion> getForPkg(
+    public static List<PkgVersion> findForPkg(
             ObjectContext context,
             Pkg pkg,
             boolean includeInactive) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
-        return getForPkg(context, pkg, null, includeInactive);
+        return findForPkg(context, pkg, null, includeInactive);
     }
 
-    public static List<PkgVersion> getForPkg(
+    public static List<PkgVersion> findForPkg(
             ObjectContext context,
             Pkg pkg,
             RepositorySource repositorySource,
@@ -78,7 +79,17 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
         return select.select(context);
     }
 
-    public static Optional<PkgVersion> getForPkg(
+    public static PkgVersion getForPkg(
+            ObjectContext context,
+            Pkg pkg,
+            RepositorySource repositorySource,
+            Architecture architecture,
+            VersionCoordinates versionCoordinates) {
+        return tryGetForPkg(context, pkg, repositorySource, architecture, versionCoordinates)
+                .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), null));
+    }
+
+    public static Optional<PkgVersion> tryGetForPkg(
             ObjectContext context,
             Pkg pkg,
             RepositorySource repositorySource,

@@ -309,7 +309,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.getForPkg(
+            List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.findForPkg(
                     context,
                     org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkgx"),
                     true);

@@ -127,7 +127,7 @@ public class PkgDownloadController {
                 hyphenToNull(prerelease),
                 null == revisionStr ? null : Integer.parseInt(revisionStr));
 
-        PkgVersion pkgVersion = PkgVersion.getForPkg(context, pkg, repositorySource, architecture, versionCoordinates)
+        PkgVersion pkgVersion = PkgVersion.tryGetForPkg(context, pkg, repositorySource, architecture, versionCoordinates)
                 .orElseThrow(() -> {
                     LOGGER.info("unable to find the pkg version; {}, {}", pkgName, versionCoordinates);
                     return new RequestObjectNotFound();

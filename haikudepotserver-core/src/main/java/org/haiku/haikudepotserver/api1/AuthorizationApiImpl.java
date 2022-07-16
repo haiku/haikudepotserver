@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -56,7 +56,7 @@ public class AuthorizationApiImpl extends AbstractApiImpl implements Authorizati
     // HELPERS
 
     private org.haiku.haikudepotserver.dataobjects.Permission ensurePermission(ObjectContext context, String code) {
-        return org.haiku.haikudepotserver.dataobjects.Permission.getByCode(context, code)
+        return org.haiku.haikudepotserver.dataobjects.Permission.tryGetByCode(context, code)
                 .orElseThrow(() -> new ObjectNotFoundException(
                         org.haiku.haikudepotserver.dataobjects.Permission.class.getSimpleName(),
                         code));

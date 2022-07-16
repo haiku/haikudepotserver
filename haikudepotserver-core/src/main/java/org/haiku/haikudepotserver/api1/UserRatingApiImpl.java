@@ -242,7 +242,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 request.pkgVersionPreRelease,
                 request.pkgVersionRevision);
 
-        Optional<PkgVersion> pkgVersionOptional = PkgVersion.getForPkg(
+        Optional<PkgVersion> pkgVersionOptional = PkgVersion.tryGetForPkg(
                 context, pkg, repositorySource, architecture, versionCoordinates);
 
         if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
@@ -366,7 +366,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 break;
 
             case SPECIFIC:
-                pkgVersionOptional = PkgVersion.getForPkg(
+                pkgVersionOptional = PkgVersion.tryGetForPkg(
                         context, pkgOptional.get(), repositorySource, architecture,
                         new VersionCoordinates(
                                 request.pkgVersionMajor,
@@ -559,7 +559,7 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
                 throw new IllegalStateException("the architecture is required when a pkg version is specified");
             }
 
-            PkgVersion pkgVersion = PkgVersion.getForPkg(
+            PkgVersion pkgVersion = PkgVersion.tryGetForPkg(
                     context,
                     pkgOptional.get(),
                     repositorySource,

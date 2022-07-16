@@ -133,7 +133,7 @@ public class PkgApiImpl implements PkgApi {
     public ResponseEntity<GetPkgChangelogResponseEnvelope> getPkgChangelog(GetPkgChangelogRequestEnvelope request) {
         return ResponseEntity.ok(
                 new GetPkgChangelogResponseEnvelope()
-                        .result(pkgApiService.getPkgChangeLog(request)));
+                        .result(pkgApiService.getPkgChangelog(request)));
     }
 
     @Override
