@@ -1,4 +1,5 @@
 "pkg-name","repository","architecture","latest-version-coordinates","de","en","es"
+"pkg1","testrepo","x86_gcc2","1-4","","","*"
 "pkg1","testrepo","x86_64","1-4","","*","*"
 "pkg1","testrepo","x86_gcc2","1-4","","","*"
 "pkg2","testrepo","x86_64","1.1.2-3","","*",""

@@ -83,7 +83,7 @@ public class RepositoryServiceImpl implements RepositoryService {
         ejbql.append(PkgVersion.class.getSimpleName());
         ejbql.append(" pv WHERE pv.repositorySource.repository=r");
         ejbql.append(" AND pv.pkg=:pkg");
-        ejbql.append(")");
+        ejbql.append(") ORDER BY r.code");
 
         EJBQLQuery query = new EJBQLQuery(ejbql.toString());
         query.setParameter("pkg", pkg);
