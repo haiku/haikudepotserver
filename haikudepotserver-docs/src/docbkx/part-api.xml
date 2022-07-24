@@ -14,7 +14,8 @@ Distributed under the terms of the MIT License.
         <title>General</title>
 
         <para>
-            This information applies to all areas of the API for the system; both JSON-RPC and REST packaged.
+            This information applies to all areas of the API for the system.  Some of the APIs are "REST" in nature.
+            Other APIs are RPC-over-HTTP in nature.  An older API exists which is presented in JSON-RPC.
         </para>
 
         <section>
@@ -28,8 +29,10 @@ Distributed under the terms of the MIT License.
         <section>
             <title>API Version</title>
             <para>
-                The application generally refers to &quot;api 1&quot; in anticipation that at some point there
-                is the <emphasis>possibility</emphasis> that a second, incompatible API may be required.
+                The JSON-RPC API is known as &quot;version 1&quot; and the RPC-over-HTTP is known as
+                &quot;version 2&quot;.  The latter will eventually completely replace the former.
+                Version 1 is still required for some time until all clients using the version 1 are
+                no longer required.
             </para>
         </section>
 
@@ -102,93 +105,43 @@ Distributed under the terms of the MIT License.
     </section>
 
     <section>
-        <title>JSON-RPC API</title>
+        <title>RPC-over-HTTP API</title>
 
         <para>
-            Most API is vended as
-            <ulink url="http://www.jsonrpc.org">JSON-RPC</ulink>
-            encoded HTTP POST invocations.  The data transfer objects (DTOs) that describe the request and the
-            response data as well as the APIs' interfaces exist in the &quot;haikudepotserver-api&quot; module in
-            the java package; &quot;org.haiku.haikudepotserver.api1&quot;.
+            This API is achieved by sending JSON payloads over HTTP.  The request is expressed as JSON and the response
+            is also expressed as JSON.  The request is a JSON object with key-value pairs of data.  The response has the
+            following shape;
         </para>
 
         <para>
-            The documentation and list of available methods can be obtained by viewing the java interfaces and
-            corresponding model objects in that module.
-        </para>
-
-        <example>
-            <title>Example: Get a Package using the JSON-RPC API</title>
-
-            <para>
-                In this example, the client knows the <emphasis>name</emphasis> of the package and would like
-                to get the details of the package.  The java model objects that document the data required in
-                request and the data that can be expected in the response can be found in the project.  The
-                request model is &quot;org.haiku.haikudepotserver.api1.model.pkg.GetPkgRequest&quot;.  The
-                response model is &quot;org.haiku.haikudepotserver.api1.model.pkg.GetPkgResult&quot;.  The
-                actual server method that is invoked as a result of this request can be found at
-                &quot;org.haiku.haikudepotserver.api1.PkgApi#getPkg(..)&quot;.
-            </para>
-
-            <para>
-                You will notice at the top of this interface, there is an annotation that describes the path or
-                &quot;endpoint&quot; for this API.  In this case it is &quot;/api/v1/pkg&quot;.  Given a host
-                and port, this can be extrapolated into a URL that can be used to invoke to this method.
-                An example would be &quot;http://localhost:8080/api/v1/pkg&quot;.
-            </para>
-
-            <para>
-                The invocation is made using the HTTP protocol to such a URL with the method POST.  The Content-Type
-                HTTP header must be set to &quot;application/json&quot; for both the request and the response.
-                The request object would look something like this;
-            </para>
-
-            <para>
-                <programlisting>{
-  &quot;jsonrpc&quot;:&quot;2.0&quot;,
-  &quot;id&quot;:4143431,
-  &quot;method&quot;:&quot;getPkg&quot;,
-  &quot;params&quot;:[{
-    &quot;name&quot;:&quot;apr&quot;,
-    &quot;architectureCode&quot;:&quot;x86&quot;,
-    &quot;versionType&quot;:&quot;NONE&quot;
-  }]
-}</programlisting>
-            </para>
-
-            <para>
-                The &quot;id&quot; value here can be anything.  It must be supplied and is used to correlate a
-                request with a response; the same &quot;id&quot; value that arrives in the request is relayed
-                back in the response.  If a client were using the API in an asynchronous manner then being able
-                to correlate the request and the response might be important.
-            </para>
-            
-            <para>
-                All going well, the following (abridged) form of response would be sent back to the client;
-            </para>
-
-            <para>
-                <programlisting>{
-  &quot;jsonrpc&quot;:&quot;2.0&quot;,
-  &quot;id&quot;:4143431,
-  &quot;result&quot;:{
-    &quot;name&quot;:&quot;apr&quot;,
-    &quot;hasIcon&quot;:true,
-    &quot;canEdit&quot;:false,
-    &quot;versions&quot;:[],
-    &quot;modifyTimestamp&quot;:12345678
+            <programlisting>{
+  "result": {
+    "code": "beam",
+    "name": "Beam Email Program"
   }
 }</programlisting>
-            </para>
+        </para>
 
-            <para>
-                See the
-                <ulink url="http://www.jsonrpc.org">JSON-RPC</ulink>
-                web site for examples of the response envelope format for the scenario in which an error has
-                arisen in the invocation.
-            </para>
+        <para>
+            In the event that there is an error, this is expressed in the response as follows;
+        </para>
 
-        </example>
+        <para>
+            <programlisting>{
+  "error": {
+    "code": 12345,
+    "message": "Something has gone wrong",
+    "data": [
+      { "key": "something", "value": "Feet" }
+    ]
+  }
+}</programlisting>
+        </para>
+
+        <para>
+            One can find the definitions for the APIs in Open-API format in the source
+            code in the module &quot;haikudepotserver-api2&quot;.
+        </para>
 
         <section>
             <title>Error Codes</title>
