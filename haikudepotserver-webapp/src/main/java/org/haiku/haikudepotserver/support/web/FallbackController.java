@@ -10,9 +10,11 @@ import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.Comparator;
 import java.util.Optional;
 
 /**
@@ -144,9 +147,10 @@ public class FallbackController {
                 .flatMap(t -> Pkg.tryGetByName(context, t))
                 .flatMap(pkg -> repositoryService.getRepositoriesForPkg(context, pkg)
                         .stream()
-                        .map(r -> r.tryGetRepositorySourceForArchitectureCode(defaultArchitectureCode))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(r -> r.getRepositorySources().stream())
+                        .sorted(ComparatorUtils.chainedComparator(
+                                Comparator.comparing(rs -> rs.getCode().equals(defaultArchitectureCode)),
+                                Comparator.comparing(_RepositorySource::getCode)))
                         .map(rs -> pkgService.getLatestPkgVersionForPkg(context, pkg, rs))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
