@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ViewUserRatingController',
     [
         '$scope', '$log', '$location', '$routeParams',
-        'jsonRpc', 'constants', 'errorHandling', 'breadcrumbs',
+        'remoteProcedureCall', 'constants', 'errorHandling', 'breadcrumbs',
         'breadcrumbFactory', 'userState',
         function(
             $scope, $log, $location, $routeParams,
-            jsonRpc, constants, errorHandling, breadcrumbs,
+            remoteProcedureCall, constants, errorHandling, breadcrumbs,
             breadcrumbFactory, userState) {
 
             var amUpdating = false;
@@ -63,10 +63,10 @@ angular.module('haikudepotserver').controller(
             }
 
             function refreshUserRating() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
-                    "getUserRating",
-                    [{ code : $routeParams.code }]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USERRATING,
+                    "get-user-rating",
+                    { code : $routeParams.code }
                 ).then(
                     function (userRatingData) {
                         $scope.userRating = userRatingData;
@@ -75,7 +75,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('fetched user rating; '+userRatingData.code);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -113,10 +113,10 @@ angular.module('haikudepotserver').controller(
 
                 amUpdating = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
-                    "removeUserRating",
-                    [{code : $scope.userRating.code}]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USERRATING,
+                    "remove-user-rating",
+                    { code : $scope.userRating.code }
                 ).then(
                     function () {
                         $log.info('did remove the user rating');
@@ -126,7 +126,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (err) {
                         $log.info('an error arose removing the user rating');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
@@ -139,14 +139,14 @@ angular.module('haikudepotserver').controller(
 
                 amUpdating = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
-                    "updateUserRating",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USERRATING,
+                    "update-user-rating",
+                    {
                         code : $scope.userRating.code,
                         filter : [ 'ACTIVE' ],
                         active : !!flag
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('did update the active flag on the user rating to; ' + flag);
@@ -155,7 +155,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (err) {
                         $log.info('an error arose updating the active flag on the user rating');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 

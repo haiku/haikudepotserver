@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'AddEditUserRatingController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState',
+        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState',
         'errorHandling','referenceData','pkg','messageSource',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,
+            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,
             errorHandling,referenceData,pkg,messageSource) {
 
             if(!userState.user()) {
@@ -139,17 +139,17 @@ angular.module('haikudepotserver').controller(
 
                         // we will know the package based on the user rating that is found.
 
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_USERRATING,
-                            'getUserRating',
-                            [{ code: $routeParams.code }]
+                      remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_USERRATING,
+                            'get-user-rating',
+                            { code: $routeParams.code }
                         ).then(
                             function (result) {
                                 $scope.workingUserRating = assembleWorkingUserRatingFromApiResult(result);
                                 fnChain(chain);
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
 
@@ -167,22 +167,20 @@ angular.module('haikudepotserver').controller(
                                 // version.  If this is the case then they should not be allowed to add another -- they
                                 // need to edit the one that they already have.
 
-                                jsonRpc.call(
-                                    constants.ENDPOINT_API_V1_USERRATING,
-                                    'getUserRatingByUserAndPkgVersion',
-                                    [
-                                        {
-                                            userNickname: userState.user().nickname,
-                                            pkgName: pkg.name,
-                                            repositorySourceCode : pkg.versions[0].repositorySourceCode,
-                                            pkgVersionArchitectureCode: pkg.versions[0].architectureCode,
-                                            pkgVersionMajor: pkg.versions[0].major,
-                                            pkgVersionMinor: pkg.versions[0].minor,
-                                            pkgVersionMicro: pkg.versions[0].micro,
-                                            pkgVersionPreRelease: pkg.versions[0].preRelease,
-                                            pkgVersionRevision: pkg.versions[0].revision
-                                        }
-                                    ]
+                              remoteProcedureCall.call(
+                                    constants.ENDPOINT_API_V2_USERRATING,
+                                    'get-user-rating-by-user-and-pkg-version',
+                                    {
+                                        userNickname: userState.user().nickname,
+                                        pkgName: pkg.name,
+                                        repositorySourceCode : pkg.versions[0].repositorySourceCode,
+                                        pkgVersionArchitectureCode: pkg.versions[0].architectureCode,
+                                        pkgVersionMajor: pkg.versions[0].major,
+                                        pkgVersionMinor: pkg.versions[0].minor,
+                                        pkgVersionMicro: pkg.versions[0].micro,
+                                        pkgVersionPreRelease: pkg.versions[0].preRelease,
+                                        pkgVersionRevision: pkg.versions[0].revision
+                                    }
                                 )
                                     .then(
                                     function (existingUserRatingData) {
@@ -190,8 +188,8 @@ angular.module('haikudepotserver').controller(
                                         $scope.workingUserRating = assembleWorkingUserRatingFromApiResult(existingUserRatingData);
                                         fnChain(chain);
                                     },
-                                    function (jsonRpcErrorEnvelope) {
-                                        if (jsonRpcErrorEnvelope.code === jsonRpc.errorCodes.OBJECTNOTFOUND) {
+                                    function (remoteProcedureCallErrorEnvelope) {
+                                        if (remoteProcedureCallErrorEnvelope.code === remoteProcedureCall.errorCodes.OBJECTNOTFOUND) {
 
                                             // no existing user rating for this package version -> will make a new
                                             // one.
@@ -217,7 +215,7 @@ angular.module('haikudepotserver').controller(
 
                                         }
                                         else {
-                                            errorHandling.handleJsonRpcError(jsonRpcErrorEnvelope);
+                                            errorHandling.handleRemoteProcedureCallError(remoteProcedureCallErrorEnvelope);
                                         }
                                     }
                                 );
@@ -291,54 +289,50 @@ angular.module('haikudepotserver').controller(
                     amSaving = true;
 
                     if ($scope.workingUserRating.code) {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_USERRATING,
-                            'updateUserRating',
-                            [
-                                {
-                                    active: true, // in case an older rating is being edited that was de-activated
-                                    code: $scope.workingUserRating.code,
-                                    naturalLanguageCode: $scope.workingUserRating.naturalLanguageCode,
-                                    userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
-                                    comment: $scope.workingUserRating.comment,
-                                    rating: $scope.workingUserRating.rating,
-                                    filter: [
-                                        'NATURALLANGUAGE',
-                                        'USERRATINGSTABILITY',
-                                        'COMMENT',
-                                        'RATING',
-                                        'ACTIVE'
-                                    ]
-                                }
-                            ]
+                      remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_USERRATING,
+                            'update-user-rating',
+                            {
+                                active: true, // in case an older rating is being edited that was de-activated
+                                code: $scope.workingUserRating.code,
+                                naturalLanguageCode: $scope.workingUserRating.naturalLanguageCode,
+                                userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
+                                comment: $scope.workingUserRating.comment,
+                                rating: $scope.workingUserRating.rating,
+                                filter: [
+                                    'NATURALLANGUAGE',
+                                    'USERRATINGSTABILITY',
+                                    'COMMENT',
+                                    'RATING',
+                                    'ACTIVE'
+                                ]
+                            }
                         ).then(
                             function () {
                                 $log.info('did update user rating; ' + $scope.workingUserRating.code);
                                 breadcrumbs.popAndNavigate();
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 amSaving = false;
                             }
                         );
                     }
                     else {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_USERRATING,
-                            "createUserRating",
-                            [
-                                {
-                                    naturalLanguageCode: $scope.workingUserRating.naturalLanguageCode,
-                                    repositorySourceCode: $scope.workingUserRating.pkgVersion.repositorySourceCode,
-                                    userNickname: $scope.workingUserRating.user.nickname,
-                                    userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
-                                    comment: $scope.workingUserRating.comment,
-                                    rating: $scope.workingUserRating.rating,
-                                    pkgName: $scope.workingUserRating.pkgVersion.pkg.name,
-                                    pkgVersionType: 'LATEST',
-                                    pkgVersionArchitectureCode: $scope.workingUserRating.pkgVersion.architectureCode
-                                }
-                            ]
+                      remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_USERRATING,
+                            "create-user-rating",
+                            {
+                                naturalLanguageCode: $scope.workingUserRating.naturalLanguageCode,
+                                repositorySourceCode: $scope.workingUserRating.pkgVersion.repositorySourceCode,
+                                userNickname: $scope.workingUserRating.user.nickname,
+                                userRatingStabilityCode: $scope.workingUserRating.userRatingStabilityOption.code,
+                                comment: $scope.workingUserRating.comment,
+                                rating: $scope.workingUserRating.rating,
+                                pkgName: $scope.workingUserRating.pkgVersion.pkg.name,
+                                pkgVersionType: 'LATEST',
+                                pkgVersionArchitectureCode: $scope.workingUserRating.pkgVersion.architectureCode
+                            }
                         ).then(
                             function (data) {
                                 $log.info('did create user rating; ' + data.code);
@@ -346,7 +340,7 @@ angular.module('haikudepotserver').controller(
                                 breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewUserRating(data)); // just needs the code
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 amSaving = false;
                             }
                         );

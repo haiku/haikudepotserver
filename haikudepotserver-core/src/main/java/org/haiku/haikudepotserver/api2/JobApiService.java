@@ -149,24 +149,27 @@ public class JobApiService extends AbstractApiService {
             }
 
             total = jobService.totalJobs(ownerUser, statuses);
-            items = jobService.findJobs(
-                    ownerUser,
-                    statuses,
-                    Optional.ofNullable(request.getOffset()).orElse(0),
-                    Optional.ofNullable(request.getLimit()).orElse(Integer.MAX_VALUE))
-                    .stream()
-                    .map(js -> new SearchJobsResultItem()
-                            .guid(js.getGuid())
-                            .jobStatus(JobStatus.valueOf(js.getStatus().name()))
-                            .jobTypeCode(js.getJobTypeCode())
-                            .ownerUserNickname(js.getOwnerUserNickname())
-                            .startTimestamp(Optional.ofNullable(js.getStartTimestamp()).map(Date::getTime).orElse(null))
-                            .finishTimestamp(Optional.ofNullable(js.getFinishTimestamp()).map(Date::getTime).orElse(null))
-                            .queuedTimestamp(Optional.ofNullable(js.getQueuedTimestamp()).map(Date::getTime).orElse(null))
-                            .failTimestamp(Optional.ofNullable(js.getFailTimestamp()).map(Date::getTime).orElse(null))
-                            .cancelTimestamp(Optional.ofNullable(js.getCancelTimestamp()).map(Date::getTime).orElse(null))
-                            .progressPercent(js.getProgressPercent()))
-                    .collect(Collectors.toList());
+
+            if (total > 0) {
+                items = jobService.findJobs(
+                                ownerUser,
+                                statuses,
+                                Optional.ofNullable(request.getOffset()).orElse(0),
+                                Optional.ofNullable(request.getLimit()).orElse(Integer.MAX_VALUE))
+                        .stream()
+                        .map(js -> new SearchJobsResultItem()
+                                .guid(js.getGuid())
+                                .jobStatus(JobStatus.valueOf(js.getStatus().name()))
+                                .jobTypeCode(js.getJobTypeCode())
+                                .ownerUserNickname(js.getOwnerUserNickname())
+                                .startTimestamp(Optional.ofNullable(js.getStartTimestamp()).map(Date::getTime).orElse(null))
+                                .finishTimestamp(Optional.ofNullable(js.getFinishTimestamp()).map(Date::getTime).orElse(null))
+                                .queuedTimestamp(Optional.ofNullable(js.getQueuedTimestamp()).map(Date::getTime).orElse(null))
+                                .failTimestamp(Optional.ofNullable(js.getFailTimestamp()).map(Date::getTime).orElse(null))
+                                .cancelTimestamp(Optional.ofNullable(js.getCancelTimestamp()).map(Date::getTime).orElse(null))
+                                .progressPercent(js.getProgressPercent()))
+                        .collect(Collectors.toList());
+            }
 
             LOGGER.info("search for jobs found {} results", items.size());
         }

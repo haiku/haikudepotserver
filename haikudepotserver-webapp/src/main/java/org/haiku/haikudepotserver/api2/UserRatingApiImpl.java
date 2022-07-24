@@ -26,7 +26,7 @@ import javax.validation.Valid;
 import java.util.Map;
 
 @Controller
-public class UserRatingApiImpl implements UserRatingApi {
+public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi {
 
     private final UserRatingApiService userRatingApiService;
 

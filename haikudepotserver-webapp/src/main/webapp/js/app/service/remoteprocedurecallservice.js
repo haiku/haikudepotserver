@@ -1,34 +1,20 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 /**
- * <p>This service provides JSON-RPC functionality on top of the AngularJS $http service.</p>
+ * <p>This service provides RPC functionality on top of the AngularJS $http service.</p>
  */
 
-// see http://www.jsonrpc.org/specification
-
-angular.module('haikudepotserver').factory('jsonRpc',
+angular.module('haikudepotserver').factory('remoteProcedureCall',
     [
-        '$log','$http','$q',
-        function($log,$http,$q) {
-
-            /**
-             * <p>This counter is used to generate an id which can be used to identify a request-response method
-             * invocation in the json-rpc potocol.</p>
-             */
-
-            var generatedIdCounter = 1000;
+        '$log', '$http', '$q',
+        function($log, $http, $q) {
 
             var headers = {};
 
-            function nextGeneratedId() {
-                generatedIdCounter += 1;
-                return generatedIdCounter;
-            }
-
-            function callWithAdditionalHeaders(endpoint, method, params, id, additionalHttpHeaders) {
+            function callWithAdditionalHeaders(endpoint, method, params, additionalHttpHeaders) {
 
                 if (!endpoint) {
                     throw Error('the endpoint is required to invoke a json-rpc method');
@@ -38,16 +24,20 @@ angular.module('haikudepotserver').factory('jsonRpc',
                     throw Error('the method is required to invoke a json-rpc method');
                 }
 
-                if (!params) {
-                    params = [];
+                if (params) {
+                    if (!_.isObject(params)) {
+                        throw Error('the params should be an object');
+                    }
+                    if (_.isArray(params)) {
+                        throw Error('the params should not be an array');
+                    }
                 }
-
-                if (!id) {
-                    id = nextGeneratedId();
+                else {
+                    params = {};
                 }
 
                 function mkTransportErr(httpStatus) {
-                    return mkErr(httpStatus, JsonRpcService.errorCodes.TRANSPORTFAILURE, 'transport-failure');
+                    return mkErr(httpStatus, RemoteProcedureCallService.errorCodes.TRANSPORTFAILURE, 'transport-failure');
                 }
 
                 function mkErr(httpStatus, code, message) {
@@ -61,16 +51,11 @@ angular.module('haikudepotserver').factory('jsonRpc',
                 return $http({
                     cache: false,
                     method: 'POST',
-                    url: endpoint,
+                    url: endpoint + '/' + method,
                     headers: _.extend(
                         {'Content-Type': 'application/json'},
                         additionalHttpHeaders || {}),
-                    data: {
-                        jsonrpc: "2.0",
-                        method: method,
-                        params: params,
-                        id: id
-                    }
+                    data: params
                 }).then(
                     function successCallback(response) {
                         if (200 !== response.status) {
@@ -79,7 +64,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
 
                         if (!response.data.result) {
                             if (!response.data.error) {
-                                return $q.reject(mkErr(response.status, JsonRpcService.errorCodes.INVALIDRESPONSE, 'invalid-response'));
+                                return $q.reject(mkErr(response.status, RemoteProcedureCallService.errorCodes.INVALIDRESPONSE, 'invalid-response'));
                             }
 
                             return $q.reject(response.data.error);
@@ -93,7 +78,7 @@ angular.module('haikudepotserver').factory('jsonRpc',
                 );
             }
 
-            var JsonRpcService = {
+            var RemoteProcedureCallService = {
 
                 errorCodes : {
                     PARSEERROR : -32700,
@@ -119,11 +104,11 @@ angular.module('haikudepotserver').factory('jsonRpc',
 
                 setHeader : function(name, value) {
 
-                    if (!name || 0 === '' + name.length) {
+                    if (!name || 0 === name.length) {
                         throw Error('the name of the http header is required');
                     }
 
-                    if (!value || 0 === '' + value.length) {
+                    if (!value || 0 === value.length) {
                         delete headers[name];
                     } else {
                         headers[name] = value;
@@ -138,15 +123,15 @@ angular.module('haikudepotserver').factory('jsonRpc',
                  * remote server has responded.</p>
                  */
 
-                call : function(endpoint, method, params, id) {
-                    return callWithAdditionalHeaders(endpoint, method, params, id, headers);
+                call : function(endpoint, method, params) {
+                    return callWithAdditionalHeaders(endpoint, method, params, headers);
                 },
 
                 callWithAdditionalHeaders : callWithAdditionalHeaders
 
             };
 
-            return JsonRpcService;
+            return RemoteProcedureCallService;
 
         }
     ]

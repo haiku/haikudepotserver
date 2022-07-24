@@ -20,14 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 public class UserRatingDerivationJobSpecification extends AbstractJobSpecification {
 
+    private String userNickname;
+
     private String pkgName;
 
     public UserRatingDerivationJobSpecification() {
-    }
-
-    public UserRatingDerivationJobSpecification(String pkgName) {
-        super();
-        this.pkgName = pkgName;
     }
 
     public String getPkgName() {
@@ -38,19 +35,29 @@ public class UserRatingDerivationJobSpecification extends AbstractJobSpecificati
         this.pkgName = value;
     }
 
+    public String getUserNickname() {
+        return userNickname;
+    }
+
+    public void setUserNickname(String userNickname) {
+        this.userNickname = userNickname;
+    }
+
     public Optional<Long> tryGetTimeToLiveMillis() {
         return Optional.of(TimeUnit.MILLISECONDS.convert(120, TimeUnit.SECONDS)); // only stay around for a short while
     }
 
     public boolean appliesToAllPkgs() {
-        return null==getPkgName();
+        return null == getPkgName();
     }
 
     @Override
     public boolean isEquivalent(JobSpecification other) {
         if(super.isEquivalent(other)) {
             UserRatingDerivationJobSpecification other2 = (UserRatingDerivationJobSpecification) other;
-            return StringUtils.equals(other2.getPkgName(), getPkgName());
+            return
+                    StringUtils.equals(other2.getUserNickname(), getUserNickname())
+                    && StringUtils.equals(other2.getPkgName(), getPkgName());
         }
 
         return false;

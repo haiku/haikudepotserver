@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2020, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'AboutController',
     [
         '$scope', '$log', '$location',
-        'jsonRpc', 'constants', 'userState', 'runtimeInformation',
+        'remoteProcedureCall', 'constants', 'userState', 'runtimeInformation',
         'breadcrumbs', 'breadcrumbFactory', 'errorHandling',
         'messageSource',
         function(
             $scope, $log, $location,
-            jsonRpc, constants, userState, runtimeInformation,
+            remoteProcedureCall, constants, userState, runtimeInformation,
             breadcrumbs, breadcrumbFactory, errorHandling,
             messageSource) {
 
@@ -58,7 +58,7 @@ angular.module('haikudepotserver').controller(
                     };
                 }
 
-                jsonRpc.call(constants.ENDPOINT_API_V1_MISCELLANEOUS, "getAllContributors", [{}])
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_MISCELLANEOUS, "get-all-contributors")
                     .then(
                         function (result) {
                             $scope.contributors = _.sortBy(
@@ -79,7 +79,7 @@ angular.module('haikudepotserver').controller(
                             return $scope.contributors;
                         },
                         function (err) {
-                            errorHandling.handleJsonRpcError(err);
+                            errorHandling.handleRemoteProcedureCallError(err);
                         }
                     );
             }

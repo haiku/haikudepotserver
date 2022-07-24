@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'HomeController',
     [
         '$log','$scope','$rootScope','$q','$location',
-        'jsonRpc','constants','userState','messageSource','errorHandling',
+        'remoteProcedureCall','constants','userState','messageSource','errorHandling',
         'referenceData','breadcrumbs','breadcrumbFactory','searchMixins',
         'repositoryService', 'runtimeInformation',
         function(
             $log,$scope,$rootScope,$q,$location,
-            jsonRpc,constants,userState,messageSource,errorHandling,
+            remoteProcedureCall,constants,userState,messageSource,errorHandling,
             referenceData,breadcrumbs,breadcrumbFactory,searchMixins,
             repositoryService, runtimeInformation) {
 
@@ -227,7 +227,7 @@ angular.module('haikudepotserver').controller(
                         return $scope.architectures[0];
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -685,7 +685,7 @@ angular.module('haikudepotserver').controller(
 
                     $scope.lastRefetchPkgsSearchExpression = $scope.searchExpression;
 
-                    jsonRpc.call(constants.ENDPOINT_API_V1_PKG, "searchPkgs", [req]).then(
+                    remoteProcedureCall.call(constants.ENDPOINT_API_V2_PKG, "search-pkgs", req).then(
                         function (result) {
 
                             $log.debug('searching for packages has returned ' + result.items.length + ' results on the current page');
@@ -724,7 +724,7 @@ angular.module('haikudepotserver').controller(
                             amFetchingPkgs = false;
                         },
                         function (err) {
-                            errorHandling.handleJsonRpcError(err);
+                            errorHandling.handleRemoteProcedureCallError(err);
                         }
                     );
                 }

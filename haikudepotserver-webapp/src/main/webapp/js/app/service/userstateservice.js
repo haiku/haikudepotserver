@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 /**
  * <p>This service is here to maintain the current user's state.  When the user logs in for example, this is stored
- * here.  This service may take other actions such as configuring headers in the jsonRpc service when the user logs-in
+ * here.  This service may take other actions such as configuring headers in the remoteProcedureCall service when the user logs-in
  * or logs-out.</p>
  *
  * <p>This service also manages authorization information.  There is the possibility to "check" on a permission.</p>
@@ -14,11 +14,11 @@
 angular.module('haikudepotserver').factory('userState',
     [
         '$log', '$q', '$rootScope', '$timeout', '$window', '$location', '$cacheFactory',
-        'jsonRpc', 'pkgScreenshot', 'errorHandling',
+        'remoteProcedureCall', 'pkgScreenshot', 'errorHandling',
         'constants', 'referenceData', 'jobs', 'jwt', 'localStorageProxy',
         function(
             $log, $q, $rootScope, $timeout, $window, $location, $cacheFactory,
-            jsonRpc, pkgScreenshot, errorHandling,
+            remoteProcedureCall, pkgScreenshot, errorHandling,
             constants, referenceData, jobs, jwt, localStorageProxy) {
 
             var CHECKED_PERMISSION_CACHE_SIZE = 1000;
@@ -85,7 +85,7 @@ angular.module('haikudepotserver').factory('userState',
 
                 function setAuthorizationHeader(value) {
                     _.each(
-                        [jsonRpc, pkgScreenshot, jobs],
+                        [remoteProcedureCall, pkgScreenshot, jobs],
                         function(svc) { svc.setHeader('Authorization', value); }
                     );
                 }
@@ -165,7 +165,7 @@ angular.module('haikudepotserver').factory('userState',
                         tokenRenewalTimeoutPromise = $timeout(function () {
                                 if (jwt.millisUntilExpirationForToken(token()) < 0) {
                                     $log.info('am going to renew token, but it has already expired');
-                                    errorHandling.navigateToError(jsonRpc.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
+                                    errorHandling.navigateToError(remoteProcedureCall.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
                                 }
                                 else {
 
@@ -189,10 +189,10 @@ angular.module('haikudepotserver').factory('userState',
                                     // END : EXCESSIVE TOKEN RENEWAL UPDATE CHECK
                                     // -------------
 
-                                    jsonRpc.call(
-                                        constants.ENDPOINT_API_V1_USER,
-                                        'renewToken',
-                                        [ { token: token() } ]
+                                    remoteProcedureCall.call(
+                                        constants.ENDPOINT_API_V2_USER,
+                                        'renew-token',
+                                        { token: token() }
                                     ).then(
                                         function (renewTokenResponse) {
                                             if (renewTokenResponse.token) {
@@ -202,12 +202,12 @@ angular.module('haikudepotserver').factory('userState',
                                             }
                                             else {
                                                 $log.info('was not able to renew authentication token');
-                                                errorHandling.navigateToError(jsonRpc.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
+                                                errorHandling.navigateToError(remoteProcedureCall.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
                                             }
                                         },
                                         function (err) {
                                             $log.info('failure to renew the authentication token');
-                                            errorHandling.handleJsonRpcError(err);
+                                            errorHandling.handleRemoteProcedureCallError(err);
                                         }
                                     );
                                 }
@@ -399,10 +399,10 @@ angular.module('haikudepotserver').factory('userState',
                             }
                         );
 
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_AUTHORIZATION,
-                            'checkAuthorization',
-                            [{targetAndPermissions: callTargetAndPermissions}]
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_AUTHORIZATION,
+                            'check-authorization',
+                            { targetAndPermissions: callTargetAndPermissions }
                         ).then(
                             function (data) {
                                 _.each(data.targetAndPermissions, function (item) {
@@ -414,7 +414,7 @@ angular.module('haikudepotserver').factory('userState',
                             },
                             function (err) {
                                 $log.error('a problem has arisen checking the authorization');
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 rejectAllQueued();
                                 resetAuthorization();
                             }
@@ -452,16 +452,16 @@ angular.module('haikudepotserver').factory('userState',
                     var u = user();
 
                     if (u) {
-                        authorizationData.isRootPromise = jsonRpc.call(
-                            constants.ENDPOINT_API_V1_USER,
-                            'getUser',
-                            [{nickname: u.nickname}]
+                        authorizationData.isRootPromise = remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_USER,
+                            'get-user',
+                            { nickname: u.nickname }
                         ).then(
                             function (result) {
                                 return !!result.isRoot;
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
                     } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ViewRepositorySourceMirrorController',
     [
         '$scope', '$log', '$location', '$routeParams',
-        'jsonRpc', 'constants', 'errorHandling', 'breadcrumbs',
+        'remoteProcedureCall', 'constants', 'errorHandling', 'breadcrumbs',
         'breadcrumbFactory', 'referenceData',
         function(
             $scope, $log, $location, $routeParams,
-            jsonRpc, constants, errorHandling, breadcrumbs,
+            remoteProcedureCall, constants, errorHandling, breadcrumbs,
             breadcrumbFactory, referenceData) {
 
             $scope.repositorySourceMirror = undefined;
@@ -27,17 +27,17 @@ angular.module('haikudepotserver').controller(
             function runUpdate(requestPayload) {
                 amUpdatingActive = true;
 
-                return jsonRpc.call(
-                    constants.ENDPOINT_API_V1_REPOSITORY,
-                    "updateRepositorySourceMirror",
-                    [_.extend({code : $scope.repositorySourceMirror.code}, requestPayload)]
+                return remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_REPOSITORY,
+                    "update-repository-source-mirror",
+                    _.extend({code : $scope.repositorySourceMirror.code}, requestPayload)
                 ).then(
                     function (data) {
                         amUpdatingActive = false;
                         return data;
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -116,10 +116,10 @@ angular.module('haikudepotserver').controller(
                     throw Error('cannot delete the mirror when not in delete mode');
                 }
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_REPOSITORY,
-                    "removeRepositorySourceMirror",
-                    [{ code: $routeParams.repositorySourceMirrorCode }]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_REPOSITORY,
+                    "remove-repository-source-mirror",
+                    { code: $routeParams.repositorySourceMirrorCode }
                 ).then(
                     function () {
                         $scope.amDeleting = false;
@@ -128,7 +128,7 @@ angular.module('haikudepotserver').controller(
                         breadcrumbs.popAndNavigate();
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
@@ -157,49 +157,49 @@ angular.module('haikudepotserver').controller(
 
                 fnChain([
                     function (chain) {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_REPOSITORY,
-                            "getRepositorySourceMirror",
-                            [{ code: $routeParams.repositorySourceMirrorCode }]
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_REPOSITORY,
+                            "get-repository-source-mirror",
+                            { code: $routeParams.repositorySourceMirrorCode }
                         ).then(
                             function (result) {
                                 repositorySourceMirror = result;
                                 fnChain(chain);
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
                     },
 
                     function (chain) {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_REPOSITORY,
-                            "getRepositorySource",
-                            [{ code: repositorySourceMirror.repositorySourceCode }]
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_REPOSITORY,
+                            "get-repository-source",
+                            { code: repositorySourceMirror.repositorySourceCode }
                         ).then(
                             function (result) {
                                 repositorySourceMirror.repositorySource = result;
                                 fnChain(chain);
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
                     },
 
                     function (chain) {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_REPOSITORY,
-                            "getRepository",
-                            [{ code: repositorySourceMirror.repositorySource.repositoryCode }]
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_REPOSITORY,
+                            "get-repository",
+                            { code: repositorySourceMirror.repositorySource.repositoryCode }
                         ).then(
                             function (result) {
                                 repositorySourceMirror.repositorySource.repository = result;
                                 fnChain(chain);
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
                     },

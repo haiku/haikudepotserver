@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
  * returned to the client with specific codes and with specific data.</p>
  */
 
+@Deprecated
 public class ErrorResolverImpl implements ErrorResolver {
 
     @Override

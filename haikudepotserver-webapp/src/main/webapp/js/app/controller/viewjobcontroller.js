@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ViewJobController',
     [
         '$scope','$log','$location','$routeParams','$window',
-        'jsonRpc','constants','errorHandling','messageSource','userState','breadcrumbs',
+        'remoteProcedureCall','constants','errorHandling','messageSource','userState','breadcrumbs',
         'breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,$window,
-            jsonRpc,constants,errorHandling,messageSource,userState,breadcrumbs,
+            remoteProcedureCall,constants,errorHandling,messageSource,userState,breadcrumbs,
             breadcrumbFactory) {
 
             $scope.breadcrumbItems = undefined;
@@ -44,10 +44,10 @@ angular.module('haikudepotserver').controller(
             }
 
             function refreshJob() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_JOB,
-                    "getJob",
-                    [{ guid : $routeParams.guid }]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_JOB,
+                    "get-job",
+                    { guid : $routeParams.guid }
                 ).then(
                     function (result) {
                         $scope.job = result;
@@ -60,17 +60,17 @@ angular.module('haikudepotserver').controller(
                     function (err) {
                         switch (err.code) {
 
-                            case jsonRpc.errorCodes.OBJECTNOTFOUND:
+                            case remoteProcedureCall.errorCodes.OBJECTNOTFOUND:
                                 if (err.data.entityName === 'Job') {
                                     $scope.job = {};
                                 }
                                 else {
-                                    errorHandling.handleJsonRpcError(err);
+                                    errorHandling.handleRemoteProcedureCallError(err);
                                 }
                                 break;
 
                             default:
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 break;
                         }
 

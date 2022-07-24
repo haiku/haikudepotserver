@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'EditPkgIconController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','pkgIcon','errorHandling',
+        'remoteProcedureCall','constants','pkgIcon','errorHandling',
         'breadcrumbs','breadcrumbFactory','userState','pkg',
         'miscService',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgIcon,errorHandling,
+            remoteProcedureCall,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,userState,pkg,
             miscService) {
 
@@ -127,13 +127,13 @@ angular.module('haikudepotserver').controller(
 
                 function handleStorePkgIcons(preparedIconInputs) {
 
-                    jsonRpc.call(
-                            constants.ENDPOINT_API_V1_PKG,
-                            "configurePkgIcon",
-                            [{
+                    remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_PKG,
+                            "configure-pkg-icon",
+                            {
                                 pkgName: $routeParams.name,
                                 pkgIcons: preparedIconInputs
-                            }]
+                            }
                         ).then(
                         function () {
                             $log.info('have updated the pkg icons for pkg '+$scope.pkg.name);
@@ -147,7 +147,7 @@ angular.module('haikudepotserver').controller(
                                 // the inbound error may involve reporting on bad data.  If this is the case then the error
                                 // should be reverse mapped to the input field.
 
-                                case jsonRpc.errorCodes.BADPKGICON:
+                                case remoteProcedureCall.errorCodes.BADPKGICON:
 
                                     if (err.data) {
                                         switch (err.data.mediaTypeCode) {
@@ -187,7 +187,7 @@ angular.module('haikudepotserver').controller(
                                     break;
 
                                 default:
-                                    errorHandling.handleJsonRpcError(err);
+                                    errorHandling.handleRemoteProcedureCallError(err);
                                     break;
 
                             }

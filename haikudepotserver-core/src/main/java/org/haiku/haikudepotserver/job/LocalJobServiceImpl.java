@@ -423,15 +423,11 @@ public class LocalJobServiceImpl
 
         clearExpiredInternalJobs();
 
-        if (CollectionUtils.isEmpty(statuses)) {
-            return Collections.emptyList();
-        }
-
         return jobs
                 .values()
                 .stream()
                 .filter(v -> null == user || user.getNickname().equals(v.getOwnerUserNickname()))
-                .filter(v -> statuses.contains(v.getStatus()))
+                .filter(v -> null == statuses || statuses.contains(v.getStatus()))
                 .collect(Collectors.toList());
 
     }
@@ -446,7 +442,7 @@ public class LocalJobServiceImpl
         Preconditions.checkArgument(offset >= 0, "illegal offset value");
         Preconditions.checkArgument(limit >= 1, "illegal limit value");
 
-        if(null!=statuses && statuses.isEmpty()) {
+        if (null != statuses && statuses.isEmpty()) {
             return Collections.emptyList();
         }
 

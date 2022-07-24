@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,8 +16,8 @@ angular.module('haikudepotserver')
     ])
     .factory('messageSource',
     [
-        '$log','$q','constants','jsonRpc','errorHandling','naturalLanguageMessagesCache',
-        function($log,$q,constants,jsonRpc,errorHandling,naturalLanguageMessagesCache) {
+        '$log','$q','constants','remoteProcedureCall','errorHandling','naturalLanguageMessagesCache',
+        function($log,$q,constants,remoteProcedureCall,errorHandling,naturalLanguageMessagesCache) {
 
             /**
              * <p>This method will go off to the server and pull back the messages for the identified natural language
@@ -32,18 +32,24 @@ angular.module('haikudepotserver')
                 var result = naturalLanguageMessagesCache.get(naturalLanguageCode);
 
                 if(!result) {
-                    result = jsonRpc.call(
-                        constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                        'getAllMessages',
-                        [
-                            {naturalLanguageCode: naturalLanguageCode}
-                        ]
+                    result = remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_MISCELLANEOUS,
+                        'get-all-messages',
+                        { naturalLanguageCode: naturalLanguageCode }
                     ).then(
                         function successCallback(data) {
-                            return data.messages;
+                            return _.reduce(
+                              data.messages,
+                              function (result, item) {
+                                  var itemObj = {};
+                                  itemObj[item.key] = item.value;
+                                  return _.extend(result, itemObj);
+                              },
+                              {}
+                            );
                         },
                         function errorCallback(err) {
-                            errorHandling.logJsonRpcError(err, 'unable to get the messages from the server for natural language; ' + naturalLanguageCode);
+                            errorHandling.logRemoteProcedureCallError(err, 'unable to get the messages from the server for natural language; ' + naturalLanguageCode);
                             return $q.reject();
                         }
                     );

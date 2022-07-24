@@ -21,10 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 import java.util.Optional;
 
+@Component("userRatingJobApiServiceV2")
 public class UserRatingJobApiService extends AbstractApiService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingJobApiService.class);

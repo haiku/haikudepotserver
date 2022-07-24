@@ -9,10 +9,10 @@
 
 angular.module('haikudepotserver').factory('pkg',
     [
-        '$log','$q','jsonRpc','userState','errorHandling',
+        '$log', '$q', 'remoteProcedureCall', 'userState', 'errorHandling',
         'constants',
         function(
-            $log,$q,jsonRpc,userState,errorHandling,
+            $log, $q, remoteProcedureCall, userState, errorHandling,
             constants) {
 
             var SUFFIX_DEVEL = "_devel";
@@ -59,10 +59,10 @@ angular.module('haikudepotserver').factory('pkg',
                     throw Error('architecture code must be supplied');
                 }
 
-                return jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    'getPkg',
-                    [{
+                return remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    'get-pkg',
+                    {
                         name : pkgName,
                         repositorySourceCode: repositorySourceCode,
                         versionType : 'SPECIFIC',
@@ -74,14 +74,14 @@ angular.module('haikudepotserver').factory('pkg',
                         micro : versionCoordinates.micro,
                         preRelease : versionCoordinates.preRelease,
                         revision : versionCoordinates.revision
-                    }]
+                    }
                 ).then(
                     function(result) {
                         $log.info('fetched ' + result.name + ' pkg');
                         return result;
                     },
                     function(err) {
-                        errorHandling.logJsonRpcError(err);
+                        errorHandling.logRemoteProcedureCallError(err);
                         return $q.reject();
                     }
                 );

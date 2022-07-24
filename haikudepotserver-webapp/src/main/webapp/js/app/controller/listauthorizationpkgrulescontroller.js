@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ListAuthorizationPkgRulesController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','errorHandling','userState','breadcrumbs','breadcrumbFactory',
+        'remoteProcedureCall','constants','errorHandling','userState','breadcrumbs','breadcrumbFactory',
         'messageSource',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,errorHandling,userState,breadcrumbs,breadcrumbFactory,
+            remoteProcedureCall,constants,errorHandling,userState,breadcrumbs,breadcrumbFactory,
             messageSource) {
 
             var PAGESIZE = 15;
@@ -70,15 +70,15 @@ angular.module('haikudepotserver').controller(
                 $location.search(KEY_USERNICKNAME, $scope.criteria.userNickname ? $scope.criteria.userNickname : '');
                 breadcrumbs.peek().search = $location.search();
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_AUTHORIZATION,
-                    "searchAuthorizationPkgRules",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_AUTHORIZATION,
+                    "search-authorization-pkg-rules",
+                    {
                         userNickname : $scope.criteria.userNickname,
                         pkgName : $scope.criteria.pkgName,
                         offset : $scope.rules.offset,
                         limit : $scope.rules.max
-                    }]
+                    }
                 ).then(
                     function (result) {
 
@@ -119,7 +119,7 @@ angular.module('haikudepotserver').controller(
 
                         switch (err.code) {
 
-                            case jsonRpc.errorCodes.OBJECTNOTFOUND:
+                            case remoteProcedureCall.errorCodes.OBJECTNOTFOUND:
 
                                 switch (err.data.entityName) {
 
@@ -132,7 +132,7 @@ angular.module('haikudepotserver').controller(
                                         break;
 
                                     default:
-                                        errorHandling.handleJsonRpcError(err);
+                                        errorHandling.handleRemoteProcedureCallError(err);
                                         break;
 
                                 }
@@ -140,7 +140,7 @@ angular.module('haikudepotserver').controller(
                                 break;
 
                             default:
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 break;
 
                         }
@@ -163,14 +163,14 @@ angular.module('haikudepotserver').controller(
 
             $scope.goConfirmDeleteRule = function () {
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_AUTHORIZATION,
-                    "removeAuthorizationPkgRule",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_AUTHORIZATION,
+                    "remove-authorization-pkg-rule",
+                    {
                         userNickname : $scope.ruleToDelete.user.nickname,
                         pkgName : $scope.ruleToDelete.pkg ? $scope.ruleToDelete.pkg.name : null,
                         permissionCode : $scope.ruleToDelete.permission.code
-                    }]
+                    }
                 ).then(
                     function () {
                         $scope.ruleToDelete = undefined;
@@ -178,7 +178,7 @@ angular.module('haikudepotserver').controller(
                         $scope.goSearch();
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 

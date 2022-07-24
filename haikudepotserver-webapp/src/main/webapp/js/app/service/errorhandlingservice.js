@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -40,20 +40,18 @@ angular.module('haikudepotserver').factory('errorHandling',
 
                 var result = true;
 
-                if(validationFailures) {
-                    _.each(validationFailures, function(vf) {
-                        if(vf.property && vf.property.length) {
-                            var model = form[vf.property];
+                _.each(validationFailures||[], function(vf) {
+                    if(vf.key && vf.key.length) {
+                        var model = form[vf.key];
 
-                            if(model) {
-                                model.$setValidity(vf.message, false);
-                            }
-                            else {
-                                result = false;
-                            }
+                        if (model) {
+                            model.$setValidity(vf.value, false);
                         }
-                    })
-                }
+                        else {
+                            result = false;
+                        }
+                    }
+                });
 
                 return result;
             }
@@ -86,22 +84,22 @@ angular.module('haikudepotserver').factory('errorHandling',
                 sendErrorLogMessageToServer(message);
             }
 
-            function logAndSendJsonRpcErrorToServer(jsonRpcErrorEnvelope, message) {
-                var prefix = message ? message + ' - json-rpc error; ' : 'json-rpc error; ';
+            function logAndSendRemoteProcedureCallErrorToServer(remoteProcedureCallErrorEnvelope, message) {
+                var prefix = message ? message + ' - rpc error; ' : 'rpc error; ';
 
-                if(!jsonRpcErrorEnvelope) {
+                if(!remoteProcedureCallErrorEnvelope) {
                     logAndSendErrorMessageToServer(prefix+'cause is unknown as no error was available in the envelope');
                 }
                 else {
 
-                    if (jsonRpcErrorEnvelope.error && !jsonRpcErrorEnvelope.code) {
+                    if (remoteProcedureCallErrorEnvelope.error && !remoteProcedureCallErrorEnvelope.code) {
                         // TODO - remove at some point in the future.
                         logAndSendErrorMessageToServer('illegal state; provided bad envelope; should be the \'error\' component of the response rather than the entire response -- will try to correct for now');
-                        jsonRpcErrorEnvelope = jsonRpcErrorEnvelope.error;
+                        remoteProcedureCallErrorEnvelope = remoteProcedureCallErrorEnvelope.error;
                     }
 
-                    var logCode = jsonRpcErrorEnvelope.code ? jsonRpcErrorEnvelope.code : '?';
-                    var logMessage = jsonRpcErrorEnvelope.message ? jsonRpcErrorEnvelope.message : '?';
+                    var logCode = remoteProcedureCallErrorEnvelope.code ? remoteProcedureCallErrorEnvelope.code : '?';
+                    var logMessage = remoteProcedureCallErrorEnvelope.message ? remoteProcedureCallErrorEnvelope.message : '?';
                     logAndSendErrorMessageToServer(prefix + 'code:' + logCode + ", msg:" + logMessage);
                 }
             }
@@ -145,8 +143,8 @@ angular.module('haikudepotserver').factory('errorHandling',
                     window.location.href = '/__error';
                 },
 
-                logJsonRpcError : function(jsonRpcErrorEnvelope, message) {
-                    logAndSendJsonRpcErrorToServer(jsonRpcErrorEnvelope,message);
+                logRemoteProcedureCallError : function(remoteProcedureCallErrorEnvelope, message) {
+                    logAndSendRemoteProcedureCallErrorToServer(remoteProcedureCallErrorEnvelope,message);
                 },
 
                 /**
@@ -154,9 +152,9 @@ angular.module('haikudepotserver').factory('errorHandling',
                  * handling.</p>
                  */
 
-                handleJsonRpcError : function(jsonRpcErrorEnvelope) {
-                    logAndSendJsonRpcErrorToServer(jsonRpcErrorEnvelope);
-                    var code = jsonRpcErrorEnvelope ? jsonRpcErrorEnvelope.code : undefined;
+                handleRemoteProcedureCallError : function(remoteProcedureCallErrorEnvelope) {
+                    logAndSendRemoteProcedureCallErrorToServer(remoteProcedureCallErrorEnvelope);
+                    var code = remoteProcedureCallErrorEnvelope ? remoteProcedureCallErrorEnvelope.code : undefined;
 
                     if(code == -32803) { // TODO; should be a constant
                         clearLocalStorage();

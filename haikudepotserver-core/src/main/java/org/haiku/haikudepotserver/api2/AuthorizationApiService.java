@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api2.model.AuthorizationTargetAndPermissionRequest;
 import org.haiku.haikudepotserver.api2.model.AuthorizationTargetAndPermissionResult;
 import org.haiku.haikudepotserver.api2.model.CheckAuthorizationRequestEnvelope;
@@ -166,6 +167,7 @@ public class AuthorizationApiService extends AbstractApiService {
         specification.setOffset(request.getOffset());
         specification.setIncludeInactive(false);
         specification.setUser(Optional.ofNullable(request.getUserNickname())
+                .filter(StringUtils::isNotBlank)
                 .map(un -> ensureUser(context, un))
                 .orElse(null)
         );
@@ -177,26 +179,27 @@ public class AuthorizationApiService extends AbstractApiService {
                                 .collect(Collectors.toList()))
                         .orElse(null));
         specification.setPkg(Optional.ofNullable(request.getPkgName())
+                .filter(StringUtils::isNotBlank)
                 .map(pn -> ensurePkg(context, pn))
                 .orElse(null));
 
         return new SearchAuthorizationPkgRulesResult()
                 .total(authorizationPkgRulesService.total(context, specification))
                 .items(authorizationPkgRulesService.search(context, specification)
-                    .stream()
-                    .map(r -> new SearchAuthorizationPkgRulesResultItem()
-                            .permissionCode(r.getPermission().getCode())
-                            .userNickname(
-                                    Optional.ofNullable(r.getUser())
-                                            .map(User::getNickname)
-                                            .orElse(null)
-                            )
-                            .pkgName(
-                                    Optional.ofNullable(r.getPkg())
-                                            .map(Pkg::getName)
-                                            .orElse(null)
-                            )
-                    )
+                        .stream()
+                        .map(r -> new SearchAuthorizationPkgRulesResultItem()
+                                .permissionCode(r.getPermission().getCode())
+                                .userNickname(
+                                        Optional.ofNullable(r.getUser())
+                                                .map(User::getNickname)
+                                                .orElse(null)
+                                )
+                                .pkgName(
+                                        Optional.ofNullable(r.getPkg())
+                                                .map(Pkg::getName)
+                                                .orElse(null)
+                                )
+                        )
                         .collect(Collectors.toList())
                 );
     }

@@ -1,12 +1,12 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 angular.module('haikudepotserver').factory('runtimeInformation',
     [
-        '$log', '$rootScope', 'jsonRpc', 'errorHandling', 'constants',
-        function($log, $rootScope, jsonRpc, errorHandling, constants) {
+        '$log', '$rootScope', 'remoteProcedureCall', 'errorHandling', 'constants',
+        function($log, $rootScope, remoteProcedureCall, errorHandling, constants) {
 
             var runtimeInformationPromise = undefined;
 
@@ -19,16 +19,16 @@ angular.module('haikudepotserver').factory('runtimeInformation',
                 "getRuntimeInformation": function() {
 
                     if (!runtimeInformationPromise) {
-                        runtimeInformationPromise = jsonRpc.call(
-                            constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                            'getRuntimeInformation', [{}]
+                        runtimeInformationPromise = remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_MISCELLANEOUS,
+                            'get-runtime-information'
                         ).then(
                             function(result) {
                                 $log.info('have fetched the runtime information');
                                 return result;
                             },
                             function(err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                             );
                     }

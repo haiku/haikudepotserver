@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.userrating.job;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
@@ -34,11 +35,16 @@ public class UserRatingDerivationJobRunner
     public void run(JobService jobService, UserRatingDerivationJobSpecification job) {
         Preconditions.checkNotNull(job);
 
-        if(job.appliesToAllPkgs()) {
-            userRatingService.updateUserRatingDerivationsForAllPkgs();
+        if (StringUtils.isNotBlank(job.getUserNickname())) {
+            userRatingService.updateUserRatingDerivationsForUser(job.getUserNickname());
         }
         else {
-            userRatingService.updateUserRatingDerivation(job.getPkgName());
+            if (StringUtils.isNotBlank(job.getPkgName())) {
+                userRatingService.updateUserRatingDerivationsForPkg(job.getPkgName());
+            }
+            else {
+                userRatingService.updateUserRatingDerivationsForAllPkgs();
+            }
         }
     }
 

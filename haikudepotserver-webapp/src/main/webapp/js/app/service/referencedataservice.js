@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,8 +17,8 @@ angular.module('haikudepotserver')
     ])
     .factory('referenceData',
     [
-        '$log','$q','jsonRpc','constants','errorHandling','referenceDataCache',
-        function($log, $q, jsonRpc,constants,errorHandling,referenceDataCache) {
+        '$log','$q','remoteProcedureCall','constants','errorHandling','referenceDataCache',
+        function($log, $q, remoteProcedureCall,constants,errorHandling,referenceDataCache) {
 
             /**
              * <p>This method will get the data requested by deriving a method name on the misc api.  The 'what' value
@@ -27,23 +27,40 @@ angular.module('haikudepotserver')
 
             function getData(what) {
 
-                if(!what || !what.length) {
+                function fromLowerCamelToLowerKebab(str) {
+                    return _.reduce(
+                      _.flatten(_.map(
+                        str.split(''),
+                        function (s) {
+                            if (/[A-Z]/.test(s)) {
+                                return ['-', s.toLowerCase()];
+                            }
+                            return [s];
+                        }
+                      )),
+                      function (result, item) {
+                          return result + item;
+                      },
+                      ''
+                    );
+                }
+
+                if (!what || !what.length) {
                     throw Error('the method name is expected in order to get reference data');
                 }
 
                 var result = referenceDataCache.get(what);
 
                 if(!result) {
-                    result = jsonRpc.call(
-                        constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                        'getAll' + what.charAt(0).toUpperCase() + what.substring(1),
-                        [{}]
+                    result = remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_MISCELLANEOUS,
+                        'get-all-' + fromLowerCamelToLowerKebab(what)
                     ).then(
                         function successCallback(data) {
                           return data[what];
                         },
                         function errorCallback(err) {
-                            errorHandling.logJsonRpcError(err,'issue obtaining data for the misc method; ' + what);
+                            errorHandling.logRemoteProcedureCallError(err,'issue obtaining data for the misc method; ' + what);
                             return $q.reject();
                         }
                     );

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ListRepositoriesController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants',
+        'remoteProcedureCall','constants',
         'breadcrumbs','breadcrumbFactory','errorHandling',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,
+            remoteProcedureCall,constants,
             breadcrumbs,breadcrumbFactory,errorHandling) {
 
             breadcrumbs.mergeCompleteStack([
@@ -64,16 +64,16 @@ angular.module('haikudepotserver').controller(
 
                 amFetchingRepositories = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_REPOSITORY,
-                    "searchRepositories",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_REPOSITORY,
+                    "search-repositories",
+                    {
                         expression: $scope.searchExpression,
                         expressionType: 'CONTAINS',
                         includeInactive: $scope.amShowingInactive,
                         offset: $scope.repositories.offset,
                         limit: $scope.repositories.max
-                    }]
+                    }
                 ).then(
                     function (result) {
                         $scope.repositories.items = result.items;
@@ -82,7 +82,7 @@ angular.module('haikudepotserver').controller(
                         amFetchingRepositories = false;
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 

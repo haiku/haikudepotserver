@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'AddEditRepositorySourceController',
     [
         '$scope','$log','$routeParams',
-        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
+        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
         function(
             $scope,$log,$routeParams,
-            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
+            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
             $scope.newExtraIdentifier = '';
             $scope.workingRepositorySource = undefined;
@@ -60,10 +60,10 @@ angular.module('haikudepotserver').controller(
 
             function refreshRepositorySource() {
                 if ($routeParams.repositorySourceCode) {
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "getRepositorySource",
-                        [{ code : $routeParams.repositorySourceCode }]
+                    remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_REPOSITORY,
+                        "get-repository-source",
+                        { code : $routeParams.repositorySourceCode }
                     ).then(
                         function(result) {
                             $scope.workingRepositorySource = _.clone(result);
@@ -71,7 +71,7 @@ angular.module('haikudepotserver').controller(
                             $log.info('fetched repository source; '+result.code);
                         },
                         function(err) {
-                            errorHandling.handleJsonRpcError(err);
+                            errorHandling.handleRemoteProcedureCallError(err);
                         }
                     );
                 }
@@ -114,15 +114,15 @@ angular.module('haikudepotserver').controller(
                 amSaving = true;
 
                 if ($scope.amEditing) {
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "updateRepositorySource",
-                        [{
+                    remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_REPOSITORY,
+                        "update-repository-source",
+                        {
                             filter : [ 'FORCED_INTERNAL_BASE_URL', 'EXTRA_IDENTIFIERS' ],
                             forcedInternalBaseUrl : $scope.workingRepositorySource.forcedInternalBaseUrl,
                             extraIdentifiers: $scope.workingRepositorySource.extraIdentifiers,
                             code : $routeParams.repositorySourceCode
-                        }]
+                        }
                     ).then(
                         function () {
                             $log.info('did update repository source; '+$routeParams.repositorySourceCode);
@@ -131,14 +131,13 @@ angular.module('haikudepotserver').controller(
                         function (err) {
 
                             switch (err.code) {
-                                case jsonRpc.errorCodes.VALIDATION:
+                                case remoteProcedureCall.errorCodes.VALIDATION:
                                     errorHandling.relayValidationFailuresIntoForm(
-                                        err.data.validationfailures,
-                                        $scope.addEditRepositorySourceForm);
+                                        err.data, $scope.addEditRepositorySourceForm);
                                     break;
 
                                 default:
-                                    errorHandling.handleJsonRpcError(err);
+                                    errorHandling.handleRemoteProcedureCallError(err);
                                     break;
                             }
 
@@ -147,13 +146,13 @@ angular.module('haikudepotserver').controller(
                     );
                 }
                 else {
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        "createRepositorySource",
-                        [{
+                    remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_REPOSITORY,
+                        "create-repository-source",
+                        {
                             repositoryCode : $scope.workingRepositorySource.repositoryCode,
                             code : $scope.workingRepositorySource.code
-                        }]
+                        }
                     ).then(
                         function () {
                             $log.info('did create repository source; '+$scope.workingRepositorySource.code);
@@ -163,14 +162,13 @@ angular.module('haikudepotserver').controller(
                         function(err) {
 
                             switch (err.code) {
-                                case jsonRpc.errorCodes.VALIDATION:
+                                case remoteProcedureCall.errorCodes.VALIDATION:
                                     errorHandling.relayValidationFailuresIntoForm(
-                                        err.data.validationfailures,
-                                        $scope.addEditRepositorySourceForm);
+                                        err.data, $scope.addEditRepositorySourceForm);
                                     break;
 
                                 default:
-                                    errorHandling.handleJsonRpcError(err);
+                                    errorHandling.handleRemoteProcedureCallError(err);
                                     break;
                             }
 

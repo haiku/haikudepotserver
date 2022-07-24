@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,17 +17,17 @@ angular.module('haikudepotserver')
 
         RECENT_DAYS : 90,
 
-        ENDPOINT_API_V1_REPOSITORY : '/__api/v1/repository',
-        ENDPOINT_API_V1_PKG : '/__api/v1/pkg',
-        ENDPOINT_API_V1_PKG_JOB: '/__api/v1/pkg/job',
-        ENDPOINT_API_V1_CAPTCHA : '/__api/v1/captcha',
-        ENDPOINT_API_V1_MISCELLANEOUS : '/__api/v1/miscellaneous',
-        ENDPOINT_API_V1_USER : '/__api/v1/user',
-        ENDPOINT_API_V1_JOB : '/__api/v1/job',
-        ENDPOINT_API_V1_USERRATING : '/__api/v1/userrating',
-        ENDPOINT_API_V1_USERRATING_JOB : '/__api/v1/userrating/job',
-        ENDPOINT_API_V1_AUTHORIZATION : '/__api/v1/authorization',
-        ENDPOINT_API_V1_AUTHORIZATION_JOB : '/__api/v1/authorization/job',
+        ENDPOINT_API_V2_REPOSITORY : '/__api/v2/repository',
+        ENDPOINT_API_V2_PKG : '/__api/v2/pkg',
+        ENDPOINT_API_V2_PKG_JOB: '/__api/v2/pkg-job',
+        ENDPOINT_API_V2_CAPTCHA : '/__api/v2/captcha',
+        ENDPOINT_API_V2_MISCELLANEOUS : '/__api/v2/miscellaneous',
+        ENDPOINT_API_V2_USER : '/__api/v2/user',
+        ENDPOINT_API_V2_JOB : '/__api/v2/job',
+        ENDPOINT_API_V2_USERRATING : '/__api/v2/user-rating',
+        ENDPOINT_API_V2_USERRATING_JOB : '/__api/v2/user-rating-job',
+        ENDPOINT_API_V2_AUTHORIZATION : '/__api/v2/authorization',
+        ENDPOINT_API_V2_AUTHORIZATION_JOB : '/__api/v2/authorization-job',
 
         MEDIATYPE_PNG : 'image/png',
         MEDIATYPE_HAIKUVECTORICONFILE : 'application/x-vnd.haiku-icon',

@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectSelect;
@@ -85,7 +86,11 @@ public class Repository extends _Repository implements MutableCreateAndModifyTim
     }
 
     public Optional<RepositorySource> tryGetRepositorySourceForArchitecture(Architecture architecture) {
+        if (architecture.getCode().equals(Architecture.CODE_ANY)) {
+            return getRepositorySources().stream().findFirst();
+        }
         return getRepositorySources().stream()
+                .filter(rs -> null != rs.getArchitecture())
                 .filter(rs -> rs.getArchitecture().equals(architecture))
                 .collect(SingleCollector.optional());
     }

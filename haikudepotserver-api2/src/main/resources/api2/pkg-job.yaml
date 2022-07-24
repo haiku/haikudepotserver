@@ -9,7 +9,7 @@ tags:
   - name: pkg-job
 paths:
 
-  /__api/v2/pkg/queue-pkg-category-coverage-export-spreadsheet-job:
+  /__api/v2/pkg-job/queue-pkg-category-coverage-export-spreadsheet-job:
     description: >
       Enqueues a request on behalf of the current user to produce a spreadsheet showing the coverage of categories
       for the packages.  See the {@link JobApi} for details on how to control the
@@ -33,7 +33,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgCategoryCoverageExportSpreadsheetJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-category-coverage-import-spreadsheet-job:
+  /__api/v2/pkg-job/queue-pkg-category-coverage-import-spreadsheet-job:
     description: >
       Enqueues a request on behalf od the current user to import package data from a spreadsheet that is uploaded
       to the server.  It does this and also produces an outbound spreadsheet of the result.
@@ -57,7 +57,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgCategoryCoverageImportSpreadsheetJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-screenshot-spreadsheet-job:
+  /__api/v2/pkg-job/queue-pkg-screenshot-spreadsheet-job:
     description: >
       Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have spreadsheets
       associated with them.  See the {@link JobApi} for details on how to control the job.
@@ -80,7 +80,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgScreenshotSpreadsheetJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-icon-spreadsheet-job:
+  /__api/v2/pkg-job/queue-pkg-icon-spreadsheet-job:
     description: >
       Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have icons
       associated with them.  See the {@link JobApi} for details on how to control the
@@ -104,7 +104,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgIconSpreadsheetJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-prominence-and-userrating-spreadsheet-job:
+  /__api/v2/pkg-job/queue-pkg-prominence-and-user-rating-spreadsheet-job:
     description: >
       Enqueues a request on behalf of the current user to produce a spreadsheet showing which packages have what
       prominence.  See the {@link JobApi} for details on how to control the
@@ -128,7 +128,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgProminenceAndUserRatingSpreadsheetJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-icon-export-archive-job:
+  /__api/v2/pkg-job/queue-pkg-icon-export-archive-job:
     description: >
       Enqueues a request to produce an archive of all of the icons of the packages.
     post:
@@ -150,7 +150,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgIconExportArchiveJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-icon-import-archive-job:
+  /__api/v2/pkg-job/queue-pkg-icon-import-archive-job:
     description: >
       Enqueues a request (linked to some data) that will import a tar-ball of data
       containing package icons.
@@ -173,7 +173,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgIconArchiveImportJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-version-payload-length-population-job:
+  /__api/v2/pkg-job/queue-pkg-version-payload-length-population-job:
     description: >
       Enqueues a job to cause all PkgVersion objects with no payload length to get those populated if possible.
     post:
@@ -195,7 +195,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgVersionPayloadLengthPopulationJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-version-localization-coverage-export-spreadsheet-job:
+  /__api/v2/pkg-job/queue-pkg-version-localization-coverage-export-spreadsheet-job:
     description: >
       Enqueues a job to produce a spreadsheet of the coverage of package version localizations.
     post:
@@ -217,7 +217,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgVersionLocalizationCoverageExportSpreadsheetJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-localization-coverage-export-spreadsheet-job:
+  /__api/v2/pkg-job/queue-pkg-localization-coverage-export-spreadsheet-job:
     description: >
       Enqueues a job to produce a spreadsheet of the coverage of package version localizations.
     post:
@@ -239,7 +239,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgLocalizationCoverageExportSpreadsheetJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-screenshot-export-archive-job:
+  /__api/v2/pkg-job/queue-pkg-screenshot-export-archive-job:
     description: >
       Enqueues a job to produce a spreadsheet of the coverage of package localizations.
     post:
@@ -261,7 +261,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgScreenshotExportArchiveJobResponseEnvelope"
 
-  /__api/v2/pkg/queue-pkg-screenshot-archive-import-job:
+  /__api/v2/pkg-job/queue-pkg-screenshot-archive-import-job:
     description: >
       Enqueues a request (linked to some data) that will import a tar-ball of data
       containing package screenshots.

@@ -7,13 +7,13 @@ package org.haiku.haikudepotserver.api2;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.security.AbstractUserAuthenticationAware;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
 public abstract class AbstractApiService extends AbstractUserAuthenticationAware {
 

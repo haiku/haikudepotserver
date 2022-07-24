@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'PkgCategoryCoverageImportSpreadsheetController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','pkgIcon','errorHandling',
+        'remoteProcedureCall','constants','pkgIcon','errorHandling',
         'breadcrumbs','breadcrumbFactory','pkg','jobs',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgIcon,errorHandling,
+            remoteProcedureCall,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,pkg,jobs) {
 
             var IMPORT_SIZE_LIMIT = 256 * 1024; // 100k
@@ -72,10 +72,10 @@ angular.module('haikudepotserver').controller(
                     function (guid) {
                       $log.info('did upload import data to the server; ' + guid);
 
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_PKG_JOB,
-                            "queuePkgCategoryCoverageImportSpreadsheetJob",
-                            [{ inputDataGuid: guid }]
+                      remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_PKG_JOB,
+                            "queue-pkg-category-coverage-import-spreadsheet-job",
+                            { inputDataGuid: guid }
                         ).then(
                             function (result) {
                                 $log.info('did queue pkg category coverage import spreadsheet job; ' + result.guid);
@@ -84,7 +84,7 @@ angular.module('haikudepotserver').controller(
                             },
                             function (err) {
                                 $scope.amQueueing = false;
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,10 +11,10 @@ angular.module('haikudepotserver').controller(
     'EditUserController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
+        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
+            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
             $scope.workingUser = undefined;
             var amSaving = false;
@@ -36,12 +36,10 @@ angular.module('haikudepotserver').controller(
             }
 
             function refreshUser() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "getUser",
-                    [{
-                        nickname : $routeParams.nickname
-                    }]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "get-user",
+                    { nickname : $routeParams.nickname }
                 ).then(
                     function (fetchedUser) {
 
@@ -59,7 +57,7 @@ angular.module('haikudepotserver').controller(
 
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -74,15 +72,15 @@ angular.module('haikudepotserver').controller(
 
                 amSaving = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "updateUser",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "update-user",
+                    {
                         filter : [ 'NATURALLANGUAGE', 'EMAIL' ],
                         nickname : $scope.workingUser.nickname,
                         email : $scope.workingUser.email,
                         naturalLanguageCode : $scope.workingUser.naturalLanguageCode
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('did update user; '+$scope.workingUser.nickname);
@@ -99,14 +97,13 @@ angular.module('haikudepotserver').controller(
                     function (err) {
 
                         switch (err.code) {
-                            case jsonRpc.errorCodes.VALIDATION:
+                            case remoteProcedureCall.errorCodes.VALIDATION:
                                 errorHandling.relayValidationFailuresIntoForm(
-                                    err.data.validationfailures,
-                                    $scope.editUserForm);
+                                    err.data, $scope.editUserForm);
                                 break;
 
                             default:
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 break;
                         }
 

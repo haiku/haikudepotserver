@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,11 +17,11 @@ angular.module('haikudepotserver').controller(
     'EditPkgLocalizationController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','pkgIcon','errorHandling',
+        'remoteProcedureCall','constants','pkgIcon','errorHandling',
         'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg','messageSource',
         function (
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgIcon,errorHandling,
+            remoteProcedureCall,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,userState,referenceData,pkg,messageSource) {
 
             $scope.showHelp = false;
@@ -129,10 +129,10 @@ angular.module('haikudepotserver').controller(
 
                         // now we need to get the _existing_ translations for the package.
 
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_PKG,
-                            'getPkgLocalizations',
-                            [{
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_PKG,
+                            'get-pkg-localizations',
+                            {
                                 pkgName: $routeParams.name,
                                 naturalLanguageCodes : _.map(
                                     naturalLanguageData,
@@ -140,7 +140,7 @@ angular.module('haikudepotserver').controller(
                                         return d.code;
                                     }
                                 )
-                            }]
+                            }
                         )
                             .then(
                             function (pkgLocalizationsData) {
@@ -228,8 +228,8 @@ angular.module('haikudepotserver').controller(
                                 }
 
                             },
-                            function(jsonRpcEnvelope) {
-                                errorHandling.handleJsonRpcError(jsonRpcEnvelope);
+                            function(remoteProcedureCallEnvelope) {
+                                errorHandling.handleRemoteProcedureCallError(remoteProcedureCallEnvelope);
                             }
                         );
                     },
@@ -250,7 +250,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -346,10 +346,10 @@ angular.module('haikudepotserver').controller(
 
                 $scope.amSaving = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    'updatePkgLocalization',
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    'update-pkg-localization',
+                    {
                         pkgName: $routeParams.name,
                         pkgLocalizations: _.map(
                             _.filter(
@@ -365,14 +365,14 @@ angular.module('haikudepotserver').controller(
                                 };
                             }
                         )
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('updated localization on '+$routeParams.name+' pkg');
                         breadcrumbs.popAndNavigate();
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 

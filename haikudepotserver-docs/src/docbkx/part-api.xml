@@ -194,7 +194,7 @@ Distributed under the terms of the MIT License.
             <title>Error Codes</title>
 
             <para>
-                A set of known JSON-RPC error codes are agreed between the client and server.  See the JSON-RPC
+                A set of known RPC error codes are agreed between the client and server.  See the RPC
                 specification for known error codes used for transport-related issues such as invalid parameters.
                 Application-specific error codes are documented in the java source at
                 &quot;org.haiku.haikudepotserver.api1.support.Constants&quot;.

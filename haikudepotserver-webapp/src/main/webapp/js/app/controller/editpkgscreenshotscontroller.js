@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'EditPkgScreenshotsController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','pkgScreenshot','errorHandling',
+        'remoteProcedureCall','constants','pkgScreenshot','errorHandling',
         'breadcrumbs','breadcrumbFactory','userState','pkg',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgScreenshot,errorHandling,
+            remoteProcedureCall,constants,pkgScreenshot,errorHandling,
             breadcrumbs,breadcrumbFactory,userState,pkg) {
 
             // the upload size must be less than this or it is too big for the
@@ -46,10 +46,10 @@ angular.module('haikudepotserver').controller(
             // in a list.
 
             function refetchPkgScreenshots() {
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "getPkgScreenshots",
-                        [{ pkgName: $routeParams.name }]
+                remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_PKG,
+                        "get-pkg-screenshots",
+                        { pkgName: $routeParams.name }
                     ).then(
                     function (result) {
                         $scope.pkgScreenshots = _.map(result.items, function (item) {
@@ -66,7 +66,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('found '+result.items.length+' screenshots for pkg '+result.name);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -132,10 +132,10 @@ angular.module('haikudepotserver').controller(
                         $scope.addPkgScreenshot.file = undefined;
                         $scope.addPkgScreenshotForm.$setPristine();
 
-                        jsonRpc.call(
-                                constants.ENDPOINT_API_V1_PKG,
-                                "getPkgScreenshot",
-                                [{ code : code }]
+                        remoteProcedureCall.call(
+                                constants.ENDPOINT_API_V2_PKG,
+                                "get-pkg-screenshot",
+                                { code : code }
                             ).then(
                             function (result) {
                                 $scope.pkgScreenshots.push({
@@ -150,7 +150,7 @@ angular.module('haikudepotserver').controller(
                                 $scope.amCommunicating = false;
                             },
                             function (err) {
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
                     },
@@ -173,10 +173,10 @@ angular.module('haikudepotserver').controller(
             // REMOVE A SCREENSHOT
 
             $scope.goRemovePkgScreenshot = function(pkgScreenshot) {
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "removePkgScreenshot",
-                        [{ code: pkgScreenshot.code }]
+                remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_PKG,
+                        "remove-pkg-screenshot",
+                        { code: pkgScreenshot.code }
                     ).then(
                     function () {
                         $log.info('did remove screenshot '+pkgScreenshot.code);
@@ -185,7 +185,7 @@ angular.module('haikudepotserver').controller(
                         })
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
@@ -197,20 +197,20 @@ angular.module('haikudepotserver').controller(
 
                 $scope.amCommunicating = true;
 
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "reorderPkgScreenshots",
-                        [{
+                remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_PKG,
+                        "reorder-pkg-screenshots",
+                        {
                             pkgName : $scope.pkg.name,
                             codes: _.map($scope.pkgScreenshots, function(s) { return s.code; })
-                        }]
+                        }
                     ).then(
                     function () {
                         $log.info('did re-order screenshots for package '+$scope.pkg.name);
                         $scope.amCommunicating = false;
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }

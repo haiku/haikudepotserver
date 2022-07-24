@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'RuntimeInformationController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','userState',
+        'constants','userState',
         'breadcrumbs','breadcrumbFactory','errorHandling',
         'runtimeInformation',
         function(
             $scope,$log,$location,
-            jsonRpc,constants,userState,
+            constants,userState,
             breadcrumbs,breadcrumbFactory,errorHandling,
             runtimeInformation) {
 

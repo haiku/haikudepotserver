@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ReportsController',
     [
         '$scope','$log','$timeout',
-        'jsonRpc','breadcrumbs','breadcrumbFactory','userState','constants',
+        'remoteProcedureCall','breadcrumbs','breadcrumbFactory','userState','constants',
         'errorHandling',
         function(
             $scope,$log,$timeout,
-            jsonRpc,breadcrumbs,breadcrumbFactory,userState,constants,
+            remoteProcedureCall,breadcrumbs,breadcrumbFactory,userState,constants,
             errorHandling) {
 
             $scope.didReject = false;
@@ -59,78 +59,66 @@ angular.module('haikudepotserver').controller(
              */
 
             function goBasicPkgReport(methodName) {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG_JOB,
-                    methodName,
-                    [{}]
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_PKG_JOB, methodName).then(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
 
             $scope.goPkgVersionLocalizationCoverageExportSpreadsheet = function () {
-                goBasicPkgReport('queuePkgVersionLocalizationCoverageExportSpreadsheetJob');
+                goBasicPkgReport('queue-pkg-version-localization-coverage-export-spreadsheet-job');
             };
 
             $scope.goPkgLocalizationCoverageExportSpreadsheet = function () {
-                goBasicPkgReport('queuePkgLocalizationCoverageExportSpreadsheetJob');
+                goBasicPkgReport('queue-pkg-localization-coverage-export-spreadsheet-job');
             };
 
             $scope.goPkgCategoryCoverageExportSpreadsheet = function () {
-                goBasicPkgReport('queuePkgCategoryCoverageExportSpreadsheetJob');
+                goBasicPkgReport('queue-pkg-category-coverage-export-spreadsheet-job');
             };
 
             $scope.goPkgProminenceAndUserRatingSpreadsheetReport = function () {
-                goBasicPkgReport('queuePkgProminenceAndUserRatingSpreadsheetJob');
+                goBasicPkgReport('queue-pkg-prominence-and-user-rating-spreadsheet-job');
             };
 
             $scope.goPkgIconSpreadsheetReport = function () {
-                goBasicPkgReport('queuePkgIconSpreadsheetJob');
+                goBasicPkgReport('queue-pkg-icon-spreadsheet-job');
             };
 
             $scope.goPkgScreenshotSpreadsheetReport = function () {
-                goBasicPkgReport('queuePkgScreenshotSpreadsheetJob');
+                goBasicPkgReport('queue-pkg-screenshot-spreadsheet-job');
             };
 
             $scope.goPkgIconExportArchive = function () {
-                goBasicPkgReport('queuePkgIconExportArchiveJob');
+                goBasicPkgReport('queue-pkg-icon-export-archive-job');
             };
 
             $scope.goPkgScreenshotExportArchive = function () {
-                goBasicPkgReport('queuePkgScreenshotExportArchiveJob');
+                goBasicPkgReport('queue-pkg-screenshot-export-archive-job');
             };
 
             $scope.goAuthorizationRulesSpreadsheet= function () {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_AUTHORIZATION_JOB,
-                    'queueAuthorizationRulesSpreadsheet',
-                    [{}]
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_AUTHORIZATION_JOB, 'queue-authorization-rules-spreadsheet').then(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
 
             $scope.goUserRatingSpreadsheetReportAll = function () {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING_JOB,
-                    'queueUserRatingSpreadsheetJob',
-                    [{}] // no spec; get everything!
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_USERRATING_JOB, 'queue-user-rating-spreadsheet-job').then(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };

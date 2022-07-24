@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,11 +11,11 @@ angular.module('haikudepotserver').controller(
     'ViewPkgChangelogController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','pkgIcon','errorHandling',
+        'remoteProcedureCall','constants','pkgIcon','errorHandling',
         'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgIcon,errorHandling,
+            remoteProcedureCall,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,userState,referenceData,pkg) {
 
             $scope.pkg = undefined;
@@ -48,18 +48,16 @@ angular.module('haikudepotserver').controller(
                             fnChain(chain);
                         },
                         function (err) {
-                            errorHandling.handleJsonRpcError(err);
+                            errorHandling.handleRemoteProcedureCallError(err);
                         }
                     );
                 },
 
                 function (chain) {
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        "getPkgChangelog",
-                        [{
-                            pkgName : $scope.pkg.name
-                        }]
+                    remoteProcedureCall.call(
+                      constants.ENDPOINT_API_V2_PKG,
+                      "get-pkg-changelog",
+                      { pkgName : $scope.pkg.name }
                     ).then(
                         function (data) {
                             $scope.pkg.changelog = {
@@ -68,7 +66,7 @@ angular.module('haikudepotserver').controller(
                             fnChain(chain);
                         },
                         function (err) {
-                            errorHandling.handleJsonRpcError(err);
+                            errorHandling.handleRemoteProcedureCallError(err);
                         }
                     );
                 },

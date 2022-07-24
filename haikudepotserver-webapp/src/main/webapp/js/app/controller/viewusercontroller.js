@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ViewUserController',
     [
         '$scope','$log','$location','$routeParams','$window',
-        'jsonRpc','constants','errorHandling','messageSource','userState','breadcrumbs',
+        'remoteProcedureCall','constants','errorHandling','messageSource','userState','breadcrumbs',
         'breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,$window,
-            jsonRpc,constants,errorHandling,messageSource,userState,breadcrumbs,
+            remoteProcedureCall,constants,errorHandling,messageSource,userState,breadcrumbs,
             breadcrumbFactory) {
 
             $scope.breadcrumbItems = undefined;
@@ -34,25 +34,25 @@ angular.module('haikudepotserver').controller(
             }
 
             function fetchUserUsageConditions() {
-                return jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "getUserUsageConditions",
-                    [{code: $scope.user.userUsageConditionsAgreement.userUsageConditionsCode}])
+                return remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "get-user-usage-conditions",
+                    {code: $scope.user.userUsageConditionsAgreement.userUsageConditionsCode})
                     .then(
                         function (userUsageConditionsData) {
                             $scope.userUsageConditions = userUsageConditionsData;
                         },
-                        errorHandling.handleJsonRpcError
+                        errorHandling.handleRemoteProcedureCallError
                     );
             }
 
             function refreshUser() {
-                jsonRpc.call(
-                        constants.ENDPOINT_API_V1_USER,
-                        "getUser",
-                        [{
+                remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_USER,
+                        "get-user",
+                        {
                             nickname : $routeParams.nickname
-                        }]
+                        }
                     ).then(
                     function (result) {
                         $scope.user = result;
@@ -66,7 +66,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('fetched user; '+result.nickname);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -104,21 +104,21 @@ angular.module('haikudepotserver').controller(
             function setActive(flag) {
                 $log.info('will update user active flag; '+flag);
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "updateUser",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "update-user",
+                    {
                         filter : [ 'ACTIVE' ],
                         nickname : $scope.user.nickname,
                         active : flag
-                    }]
+                    }
                 ).then(
                     function () {
                         $scope.user.active = flag;
                         $log.info('did update user active flag; '+flag);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -137,10 +137,10 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goDownloadUserRatings = function () {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING_JOB,
-                    'queueUserRatingSpreadsheetJob',
-                    [{ userNickname: $routeParams.nickname }]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USERRATING_JOB,
+                    'queue-user-rating-spreadsheet-job',
+                    { userNickname: $routeParams.nickname }
                 ).then(
                     function (data) {
                         if (data.guid && data.guid.length) {
@@ -152,7 +152,7 @@ angular.module('haikudepotserver').controller(
                         }
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };

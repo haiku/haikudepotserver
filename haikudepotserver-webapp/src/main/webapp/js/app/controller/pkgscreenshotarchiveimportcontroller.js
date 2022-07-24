@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2017-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'PkgScreenshotArchiveImportController',
     [
         '$scope', '$log', '$location', '$routeParams',
-        'jsonRpc', 'constants', 'errorHandling', 'messageSource', 'userState',
+        'remoteProcedureCall', 'constants', 'errorHandling', 'messageSource', 'userState',
         'breadcrumbs', 'breadcrumbFactory', 'jobs',
         function(
             $scope, $log, $location, $routeParams,
-            jsonRpc, constants, errorHandling, messageSource, userState,
+            remoteProcedureCall, constants, errorHandling, messageSource, userState,
             breadcrumbs, breadcrumbFactory, jobs) {
 
             var IMPORT_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
@@ -102,10 +102,10 @@ angular.module('haikudepotserver').controller(
                     function (guid) {
                         $log.info('did upload import data to the server; ' + guid);
 
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_PKG_JOB,
-                            "queuePkgScreenshotArchiveImportJob",
-                            [{ inputDataGuid: guid, importStrategy: $scope.specification.importStrategy.code }]
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_PKG_JOB,
+                            "queue-pkg-screenshot-archive-import-job",
+                            { inputDataGuid: guid, importStrategy: $scope.specification.importStrategy.code }
                         ).then(
                             function (result) {
                                 $log.info('did queue pkg screenshot archive import job; ' + result.guid);
@@ -114,7 +114,7 @@ angular.module('haikudepotserver').controller(
                             },
                             function (err) {
                                 $scope.amQueueing = false;
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
 

@@ -58,9 +58,9 @@ public class UserRatingDerivationTriggerListener implements LifecycleListener {
     }
 
     private void triggerUpdateUserRatingDerivationForPkgName(String pkgName) {
-        jobService.submit(
-                new UserRatingDerivationJobSpecification(pkgName),
-                JobSnapshot.COALESCE_STATUSES_QUEUED);
+        UserRatingDerivationJobSpecification specification = new UserRatingDerivationJobSpecification();
+        specification.setPkgName(pkgName);
+        jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_QUEUED);
     }
 
     @Override

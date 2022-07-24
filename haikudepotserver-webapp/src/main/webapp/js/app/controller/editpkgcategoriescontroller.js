@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'EditPkgCategoriesController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','errorHandling',
+        'remoteProcedureCall','constants','errorHandling',
         'breadcrumbs','referenceData','userState',
         'pkg','breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling,
+            remoteProcedureCall,constants,errorHandling,
             breadcrumbs,referenceData,userState,
             pkg,breadcrumbFactory) {
 
@@ -97,10 +97,10 @@ angular.module('haikudepotserver').controller(
             // view the pkg again.
 
             $scope.goStorePkgCategories = function () {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    'updatePkgCategories',
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    'update-pkg-categories',
+                    {
                         pkgName : $scope.pkg.name,
                         pkgCategoryCodes : _.map(
                             _.filter(
@@ -111,7 +111,7 @@ angular.module('haikudepotserver').controller(
                                 return c.code;
                             }
                         )
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('have updated the pkg categories for pkg '+$scope.pkg.name);
@@ -119,7 +119,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (err) {
                         $log.error('unable to update pkg categories');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }

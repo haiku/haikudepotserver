@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'ListPkgVersionsForPkgController',
     [
         '$scope','$log','$routeParams',
-        'jsonRpc','constants','errorHandling',
+        'remoteProcedureCall','constants','errorHandling',
         'breadcrumbs','breadcrumbFactory','pkg','userState',
         'repositoryService',
         function(
             $scope,$log,$routeParams,
-            jsonRpc,constants,errorHandling,
+            remoteProcedureCall,constants,errorHandling,
             breadcrumbs,breadcrumbFactory,pkg,userState,
             repositoryService) {
 
@@ -34,15 +34,15 @@ angular.module('haikudepotserver').controller(
 
             function refetchPkg() {
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    'getPkg',
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    'get-pkg',
+                    {
                         name : $routeParams.name,
                         versionType : 'ALL',
                         incrementViewCounter : false,
                         naturalLanguageCode: userState.naturalLanguageCode()
-                    }]
+                    }
                 ).then(
                     function (result) {
                         $log.info('fetched '+result.name+' pkg with ' + result.versions.length + ' versions');
@@ -76,7 +76,7 @@ angular.module('haikudepotserver').controller(
                         );
                     },
                     function() {
-                        errorHandling.handleJsonRpcError();
+                        errorHandling.handleRemoteProcedureCallError();
                     }
                 );
             }

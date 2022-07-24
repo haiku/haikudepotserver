@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class CaptchaApiImpl implements CaptchaApi {
+public class CaptchaApiImpl extends AbstractApiImpl implements CaptchaApi {
 
     private final CaptchaApiService captchaApiService;
 

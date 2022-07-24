@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -60,6 +60,20 @@ public class WebConfig implements WebMvcConfigurer {
         // not -- it is not entirely systematic.
 
         Stream.of(
+
+                // these are crude aggregated paths for API v2
+                "/__api/v2/authorization/**",
+                "/__api/v2/authorization-job/**",
+                "/__api/v2/captcha/**",
+                "/__api/v2/job/**",
+                "/__api/v2/miscellaneous/**",
+                "/__api/v2/pkg/**",
+                "/__api/v2/pkg-job/**",
+                "/__api/v2/repository/**",
+                "/__api/v2/user/**",
+                "/__api/v2/user-rating/**",
+                "/__api/v2/user-rating-job/**",
+
                 "/__feed/**",
                 "/__secured/jobdata/*/download",
                 "/__multipage/**",

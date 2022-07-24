@@ -9,7 +9,7 @@ tags:
   - name: repository
 paths:
 
-  /__api/v2/captcha/get-repositories:
+  /__api/v2/repository/get-repositories:
     description: >
       This method will return a list of all of the repositories which exist in the system.
       Minimal data is returned and it is expected that the caller will use the
@@ -34,7 +34,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/getRepositoriesResponseEnvelope"
 
-  /__api/v2/captcha/search-repositories:
+  /__api/v2/repository/search-repositories:
     description: >
       This method will search the repositories according to the supplied criteria and will
       return a list of those found.  Any user is able to see the repositories.
@@ -57,7 +57,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/searchRepositoriesResponseEnvelope"
 
-  /__api/v2/captcha/get-repository:
+  /__api/v2/repository/get-repository:
     description: >
       This method will return the repository details for the repository identified by the
       code in the request object.
@@ -80,7 +80,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/getRepositoryResponseEnvelope"
 
-  /__api/v2/captcha/update-repository:
+  /__api/v2/repository/update-repository:
     description: >
       This method will update the repository.  As well as the data to update, it also includes a 'filter' that
       defines the fields that should be updated in this request.
@@ -103,7 +103,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/updateRepositoryResponseEnvelope"
 
-  /__api/v2/captcha/trigger-import-repository:
+  /__api/v2/repository/trigger-import-repository:
     description: >
       This method will trigger the import process for a repository.
     post:
@@ -125,7 +125,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/triggerImportRepositoryResponseEnvelope"
 
-  /__api/v2/captcha/create-repository:
+  /__api/v2/repository/create-repository:
     description: >
       This method will create a repository.  This method will throw
       {@link ObjectNotFoundException} if the architecture identified by a
@@ -149,7 +149,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/createRepositoryResponseEnvelope"
 
-  /__api/v2/captcha/get-repository-source:
+  /__api/v2/repository/get-repository-source:
     description: >
       Returns details of the repository source.</p>
       @throws ObjectNotFoundException is the repository source is not available.
@@ -172,7 +172,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/getRepositorySourceResponseEnvelope"
 
-  /__api/v2/captcha/update-repository-source:
+  /__api/v2/repository/update-repository-source:
     description: >
       Allows the repository source to be updated.</p>
       @throws ObjectNotFoundException if the repository source was not able to be found given the code supplied.
@@ -195,7 +195,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/updateRepositorySourceResponseEnvelope"
 
-  /__api/v2/captcha/create-repository-source:
+  /__api/v2/repository/create-repository-source:
     description: >
       Creates the repository source.
     post:
@@ -217,7 +217,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/createRepositorySourceResponseEnvelope"
 
-  /__api/v2/captcha/create-repository-source-mirror:
+  /__api/v2/repository/create-repository-source-mirror:
     description: >
       Creates a new mirror for a repository source.
     post:
@@ -239,7 +239,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/createRepositorySourceMirrorResponseEnvelope"
 
-  /__api/v2/captcha/update-repository-source-mirror:
+  /__api/v2/repository/update-repository-source-mirror:
     description: >
       Updates an existing mirror.  The mirror should be identified by its code.
       A number of fields can be supplied to change.  The changes that are applied
@@ -264,7 +264,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/updateRepositorySourceMirrorResponseEnvelope"
 
-  /__api/v2/captcha/get-repository-source-mirror:
+  /__api/v2/repository/get-repository-source-mirror:
     post:
       tags:
         - repository
@@ -284,7 +284,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/getRepositorySourceMirrorResponseEnvelope"
 
-  /__api/v2/captcha/remove-repository-source-mirror:
+  /__api/v2/repository/remove-repository-source-mirror:
     post:
       tags:
         - repository

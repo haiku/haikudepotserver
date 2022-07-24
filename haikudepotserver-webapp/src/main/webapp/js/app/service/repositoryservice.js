@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,10 +9,10 @@
 
 angular.module('haikudepotserver').factory('repositoryService',
     [
-        '$log', '$q', 'jsonRpc', 'userState', 'errorHandling',
+        '$log', '$q', 'remoteProcedureCall', 'userState', 'errorHandling',
         'constants', 'runtimeInformation', 'localStorageProxy',
         function(
-            $log, $q, jsonRpc, userState, errorHandling,
+            $log, $q, remoteProcedureCall, userState, errorHandling,
             constants, runtimeInformation, localStorageProxy) {
 
             var repositoriesPromise = undefined;
@@ -23,16 +23,15 @@ angular.module('haikudepotserver').factory('repositoryService',
 
             function getRepositories() {
                 if(!repositoriesPromise) {
-                    repositoriesPromise = jsonRpc.call(
-                        constants.ENDPOINT_API_V1_REPOSITORY,
-                        'getRepositories',
-                        [{}]
+                    repositoriesPromise = remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_REPOSITORY,
+                        'get-repositories'
                     ).then(
                         function successCallback(data) {
                             return data.repositories;
                         },
                         function errorCallback(err) {
-                            errorHandling.logJsonRpcError(err);
+                            errorHandling.logRemoteProcedureCallError(err);
                             return $q.reject();
                         }
                     )

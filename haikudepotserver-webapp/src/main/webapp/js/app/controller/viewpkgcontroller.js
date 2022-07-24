@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'ViewPkgController',
     [
         '$scope','$log','$location','$routeParams','$rootScope','$timeout',
-        'jsonRpc','constants','userState','errorHandling',
+        'remoteProcedureCall','constants','userState','errorHandling',
         'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
         'pkg','breadcrumbFactory','repositoryService',
         function(
             $scope,$log,$location,$routeParams,$rootScope,$timeout,
-            jsonRpc,constants,userState,errorHandling,
+            remoteProcedureCall,constants,userState,errorHandling,
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
             pkg,breadcrumbFactory,repositoryService) {
 
@@ -203,10 +203,10 @@ angular.module('haikudepotserver').controller(
                     throw new Error('illegal state -- the package name should be available; ' + $location.path());
                 }
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    "getPkgIcons",
-                    [{ pkgName: pkgName }]
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    "get-pkg-icons",
+                    { pkgName: pkgName }
                 ).then(
                     function (result) {
 
@@ -221,7 +221,7 @@ angular.module('haikudepotserver').controller(
                         hasPkgIcons = !!result.pkgIcons.length;
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 
@@ -235,17 +235,15 @@ angular.module('haikudepotserver').controller(
             function refetchUserRatings() {
 
                 if ($scope.pkg) {
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_USERRATING,
-                        "searchUserRatings",
-                        [
-                            {
-                                offset: $scope.userRatings.offset,
-                                limit: $scope.userRatings.max,
-                                repositoryCode: $scope.pkg.versions[0].repositoryCode,
-                                pkgName: $scope.pkg.name
-                            }
-                        ]
+                  remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_USERRATING,
+                        "search-user-ratings",
+                        {
+                            offset: $scope.userRatings.offset,
+                            limit: $scope.userRatings.max,
+                            repositoryCode: $scope.pkg.versions[0].repositoryCode,
+                            pkgName: $scope.pkg.name
+                        }
                     ).then(
                         function (searchUserRatingsData) {
 
@@ -297,9 +295,9 @@ angular.module('haikudepotserver').controller(
                             });
 
                         },
-                        function (jsonRpcEnvelope) {
+                        function (remoteProcedureCallEnvelope) {
                             $log.info('unable to get the user ratings for the package');
-                            errorHandling.handleJsonRpcError(jsonRpcEnvelope);
+                            errorHandling.handleRemoteProcedureCallError(remoteProcedureCallEnvelope);
                         }
                     );
                 }
@@ -312,10 +310,10 @@ angular.module('haikudepotserver').controller(
 
                 $scope.pkgScreenshots = undefined;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    "getPkgScreenshots",
-                    [{ pkgName: $scope.pkg.name }]
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    "get-pkg-screenshots",
+                    { pkgName: $scope.pkg.name }
                 ).then(
                     function (result) {
 
@@ -355,7 +353,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('found '+result.items.length+' screenshots for pkg '+$routeParams.name);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 
@@ -390,10 +388,10 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goDeriveAndStoreUserRating = function () {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
-                    "deriveAndStoreUserRatingForPkg",
-                    [{ pkgName: $routeParams.name }]
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USERRATING,
+                    "derive-and-store-user-rating-for-pkg",
+                    { pkgName: $routeParams.name }
                 ).then(
                     function () {
                         $log.info('requested derive and store user rating for '+$routeParams.name+' pkg');
@@ -410,16 +408,16 @@ angular.module('haikudepotserver').controller(
                     },
                     function(err) {
                         $log.error('unable to derive and store user rating for '+$routeParams.name+' pkg');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
 
             $scope.goRemoveIcon = function() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    "removePkgIcon",
-                    [{ pkgName: $routeParams.name }]
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    "remove-pkg-icon",
+                    { pkgName: $routeParams.name }
                 ).then(
                     function () {
                         $log.info('removed icons for '+$routeParams.name+' pkg');
@@ -428,7 +426,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (err) {
                         $log.error('unable to remove the icons for '+$routeParams.name+' pkg');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 
@@ -437,10 +435,10 @@ angular.module('haikudepotserver').controller(
             $scope.goDeactivate = function () {
                 var pv = $scope.pkg.versions[0];
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    "updatePkgVersion",
-                    [{
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    "update-pkg-version",
+                    {
                         filter : [ 'ACTIVE' ],
                         active : false,
                         repositorySourceCode : pv.repositorySource.code,
@@ -451,7 +449,7 @@ angular.module('haikudepotserver').controller(
                         micro : pv.micro,
                         preRelease : pv.preRelease,
                         revision : pv.revision
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('deactivated '+$routeParams.name+' pkg version');
@@ -461,7 +459,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (err) {
                         $log.error('unable to deactivate '+$routeParams.name);
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
@@ -472,13 +470,13 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goDownloadUserRatings = function () {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING_JOB,
-                    'queueUserRatingSpreadsheetJob',
-                    [{
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USERRATING_JOB,
+                    'queue-user-rating-spreadsheet-job',
+                    {
                         pkgName: $routeParams.name,
                         repositoryCode : $scope.pkg.versions[0].repositoryCode
-                    }]
+                    }
                 ).then(
                     function (data) {
                         if (data.guid && data.guid.length) {
@@ -490,7 +488,7 @@ angular.module('haikudepotserver').controller(
                         }
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };

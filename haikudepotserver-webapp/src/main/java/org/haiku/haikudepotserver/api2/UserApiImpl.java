@@ -33,7 +33,7 @@ import javax.validation.Valid;
 import java.util.Map;
 
 @Controller
-public class UserApiImpl implements UserApi {
+public class UserApiImpl extends AbstractApiImpl implements UserApi {
 
     private final UserApiService userApiService;
 

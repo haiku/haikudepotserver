@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'AuthenticateUserController',
     [
         '$scope', '$log', '$location',
-        'jsonRpc', 'constants', 'userState', 'errorHandling', 'breadcrumbs',
+        'remoteProcedureCall', 'constants', 'userState', 'errorHandling', 'breadcrumbs',
         'breadcrumbFactory', 'jwt',
         function(
             $scope, $log, $location,
-            jsonRpc, constants, userState, errorHandling, breadcrumbs,
+            remoteProcedureCall, constants, userState, errorHandling, breadcrumbs,
             breadcrumbFactory, jwt) {
 
             if (userState.user()) {
@@ -80,11 +80,10 @@ angular.module('haikudepotserver').controller(
                 // communication going on here, the change of the natural language may happen some time
                 // after the user has actually changed.
 
-                return jsonRpc.callWithAdditionalHeaders(
-                    constants.ENDPOINT_API_V1_USER,
-                    "getUser",
-                    [{ nickname : result.nickname }],
-                    null,
+                return remoteProcedureCall.callWithAdditionalHeaders(
+                    constants.ENDPOINT_API_V2_USER,
+                    "get-user",
+                    { nickname : result.nickname },
                     toAuthorizationHeader(result.token)
                 ).then(
                     function (userData) {
@@ -92,7 +91,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (e) {
                         $log.error('unable to get the natural language of the newly authenticated user');
-                        errorHandling.handleJsonRpcError(e);
+                        errorHandling.handleRemoteProcedureCallError(e);
                     }
                 );
             }
@@ -108,22 +107,24 @@ angular.module('haikudepotserver').controller(
             function authenticate(nickname, passwordClear) {
 
                 function fetchUserUsageConditions(result) {
-                    return jsonRpc.call(constants.ENDPOINT_API_V1_USER, "getUserUsageConditions", [{}])
+                    return remoteProcedureCall.call(
+                      constants.ENDPOINT_API_V2_USER,
+                      "get-user-usage-conditions")
                     .then(
                         function(userUsageConditionsData) {
                             return _.extend(_.clone(result), { userUsageConditions: userUsageConditionsData });
                         },
-                        errorHandling.handleJsonRpcError
+                        errorHandling.handleRemoteProcedureCallError
                     );
                 }
 
-                return jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "authenticateUser",
-                    [{
+                return remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "authenticate-user",
+                    {
                         nickname : nickname,
                         passwordClear : passwordClear
-                    }]
+                    }
                 ).then(
                     // convert the response into a status to say what needs to
                     // happen next.
@@ -160,7 +161,7 @@ angular.module('haikudepotserver').controller(
                         };
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 ).then(
                     function (result) {
@@ -269,14 +270,13 @@ angular.module('haikudepotserver').controller(
                 // provided earlier.  This is only suitable for agreeing to the
                 // user usage conditions.
 
-                return jsonRpc.callWithAdditionalHeaders(
-                    constants.ENDPOINT_API_V1_USER,
-                    "agreeUserUsageConditions",
-                    [{
+                return remoteProcedureCall.callWithAdditionalHeaders(
+                    constants.ENDPOINT_API_V2_USER,
+                    "agree-user-usage-conditions",
+                    {
                         nickname : nickname,
                         userUsageConditionsCode: $scope.userUsageConditions.code
-                    }],
-                    null, // id; not important
+                    },
                     toAuthorizationHeader($scope.tokenPendingAgreeUserUsageConditions)
                 ).then(
                     function () {
@@ -289,7 +289,7 @@ angular.module('haikudepotserver').controller(
                     function (e) {
                         $log.error('unable for the user [' + nickname +
                             '] to agree to user usage conditions');
-                        errorHandling.handleJsonRpcError(e);
+                        errorHandling.handleRemoteProcedureCallError(e);
                     }
                 ).then(
                     // the old token is restricted in that contains flags that
@@ -301,10 +301,10 @@ angular.module('haikudepotserver').controller(
                         if (!result) {
                             return;
                         }
-                        return jsonRpc.call(
-                            constants.ENDPOINT_API_V1_USER,
-                            'renewToken',
-                            [ { token: result.token } ]
+                        return remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_USER,
+                            'renew-token',
+                            { token: result.token }
                         ).then(
                             function (renewTokenResponse) {
                                 if (renewTokenResponse.token) {
@@ -312,12 +312,12 @@ angular.module('haikudepotserver').controller(
                                 }
                                 else {
                                     $log.info('was not able to renew authentication token');
-                                    errorHandling.navigateToError(jsonRpc.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
+                                    errorHandling.navigateToError(remoteProcedureCall.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
                                 }
                             },
                             function (err) {
                                 $log.info('failure to renew the authentication token');
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
                     }

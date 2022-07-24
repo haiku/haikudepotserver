@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,12 @@ angular.module('haikudepotserver').controller(
     'EditPkgProminenceController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','errorHandling',
+        'remoteProcedureCall','constants','errorHandling',
         'breadcrumbs','referenceData',
         'pkg','breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,errorHandling,
+            remoteProcedureCall,constants,errorHandling,
             breadcrumbs,referenceData,
             pkg,breadcrumbFactory) {
 
@@ -89,14 +89,14 @@ angular.module('haikudepotserver').controller(
             // view the pkg again.
 
             $scope.goStoreProminence = function () {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    'updatePkgProminence',
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    'update-pkg-prominence',
+                    {
                         pkgName : $scope.pkgVersion.pkg.name,
                         repositoryCode : $scope.pkgVersion.repositoryCode,
                         prominenceOrdering : $scope.selectedProminence.ordering
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('have updated the prominence for pkg '+$scope.pkgVersion.pkg.name);
@@ -104,7 +104,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (err) {
                         $log.error('unable to update pkg prominence');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Andrew Lindesay
+ * Copyright 2013-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'CreateUserController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','errorHandling','referenceData','userState',
+        'remoteProcedureCall','constants','errorHandling','referenceData','userState',
         'messageSource','breadcrumbs','breadcrumbFactory',
         function(
             $scope, $log, $location,
-            jsonRpc, constants, errorHandling, referenceData, userState,
+            remoteProcedureCall, constants, errorHandling, referenceData, userState,
             messageSource, breadcrumbs, breadcrumbFactory) {
 
             $scope.userNicknamePattern = ('' + constants.PATTERN_USER_NICKNAME).replace(/^\//,'').replace(/\/$/,'');
@@ -48,12 +48,12 @@ angular.module('haikudepotserver').controller(
             }
 
             function fetchUserUsageConditions() {
-                return jsonRpc.call(constants.ENDPOINT_API_V1_USER, "getUserUsageConditions", [{}])
+                return remoteProcedureCall.call(constants.ENDPOINT_API_V2_USER, "get-user-usage-conditions")
                     .then(
                         function (userUsageConditionsData) {
                             $scope.userUsageConditions = userUsageConditionsData;
                         },
-                        errorHandling.handleJsonRpcError
+                        errorHandling.handleRemoteProcedureCallError
                     );
             }
 
@@ -65,17 +65,13 @@ angular.module('haikudepotserver').controller(
                 $scope.captchaImageUrl = undefined;
                 $scope.newUser.captchaResponse = undefined;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_CAPTCHA,
-                    "generateCaptcha",
-                    [{}]
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_CAPTCHA, "generate-captcha").then(
                     function (result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
                         refreshBreadcrumbItems();
                     },
-                    errorHandling.handleJsonRpcError
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -122,10 +118,10 @@ angular.module('haikudepotserver').controller(
 
                 $scope.amSaving = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "createUser",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "create-user",
+                    {
                         nickname : $scope.newUser.nickname,
                         email : $scope.newUser.email,
                         passwordClear : $scope.newUser.passwordClear,
@@ -133,7 +129,7 @@ angular.module('haikudepotserver').controller(
                         captchaResponse : $scope.newUser.captchaResponse,
                         naturalLanguageCode : $scope.newUser.naturalLanguageCode,
                         userUsageConditionsCode: $scope.userUsageConditions.code
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('created new user; '+$scope.newUser.nickname);
@@ -169,35 +165,32 @@ angular.module('haikudepotserver').controller(
 
                         switch (err.code) {
 
-                            case jsonRpc.errorCodes.VALIDATION:
+                            case remoteProcedureCall.errorCodes.VALIDATION:
 
                                 // actually there shouldn't really be any validation problems except that the nickname
                                 // may already be in use.  We can deal with this one and then pass the rest to the
                                 // default handler.
+                                _.each(err.data || [], function (vf) {
+                                    var model = $scope.createUserForm[vf.key];
 
-                                if(err.data && err.data) {
-                                    _.each(err.data.validationfailures, function (vf) {
-                                        var model = $scope.createUserForm[vf.property];
-
-                                        if(model) {
-                                            model.$setValidity(vf.message, false);
-                                        }
-                                        else {
-                                            $log.error('other validation failures exist; will invoke default handling');
-                                            errorHandling.handleJsonRpcError(err);
-                                        }
-                                    })
-                                }
+                                    if(model) {
+                                        model.$setValidity(vf.value, false);
+                                    }
+                                    else {
+                                        $log.error('other validation failures exist; will invoke default handling');
+                                        errorHandling.handleRemoteProcedureCallError(err);
+                                    }
+                                });
 
                                 break;
 
-                            case jsonRpc.errorCodes.CAPTCHABADRESPONSE:
+                            case remoteProcedureCall.errorCodes.CAPTCHABADRESPONSE:
                                 $log.error('the user has mis-interpreted the captcha; will lodge an error into the form and then populate a new one for them');
                                 $scope.createUserForm.captchaResponse.$setValidity('badresponse',false);
                                 break;
 
                             default:
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 break;
                         }
                     }

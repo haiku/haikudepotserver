@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'ChangePasswordController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
+        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
+            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
 
             $scope.user = undefined;
             $scope.captchaToken = undefined;
@@ -48,10 +48,10 @@ angular.module('haikudepotserver').controller(
             }
 
             function refreshUser() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "getUser",
-                    [{ nickname : $routeParams.nickname }]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "get-user",
+                    { nickname : $routeParams.nickname }
                 ).then(
                     function (result) {
                         $scope.user = result;
@@ -59,7 +59,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('fetched user; '+result.nickname);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -70,10 +70,9 @@ angular.module('haikudepotserver').controller(
                 $scope.captchaImageUrl = undefined;
                 $scope.changePasswordData.captchaResponse = undefined;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_CAPTCHA,
-                    "generateCaptcha",
-                    [{}]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_CAPTCHA,
+                    "generate-captcha"
                 ).then(
                     function (result) {
                         $scope.captchaToken = result.token;
@@ -81,7 +80,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -115,16 +114,16 @@ angular.module('haikudepotserver').controller(
 
                 $scope.amChangingPassword = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "changePassword",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "change-password",
+                    {
                         nickname : $scope.user.nickname,
                         oldPasswordClear : $scope.changePasswordData.oldPasswordClear,
                         newPasswordClear : $scope.changePasswordData.newPasswordClear,
                         captchaToken : $scope.captchaToken,
                         captchaResponse : $scope.changePasswordData.captchaResponse
-                    }]
+                    }
                 ).then(
                     function () {
 
@@ -156,34 +155,30 @@ angular.module('haikudepotserver').controller(
                             // should not be any validation failures that we need to deal with here.
 
 
-                            case jsonRpc.errorCodes.VALIDATION:
-
+                            case remoteProcedureCall.errorCodes.VALIDATION:
                                 // actually there shouldn't really be any validation problems except that the oldPasswordClear
                                 // not match to the user for which the change password operation is being performed.
+                                _.each(err.data || [], function(vf) {
+                                    var model = $scope.changePasswordForm[vf.key];
 
-                                if (err.data && err.data) {
-                                    _.each(err.data, function(vf) {
-                                        var model = $scope.changePasswordForm[vf.property];
-
-                                        if (model) {
-                                            model.$setValidity(vf.message, false);
-                                        }
-                                        else {
-                                            $log.error('other validation failures exist; will invoke default handling');
-                                            errorHandling.handleJsonRpcError(err);
-                                        }
-                                    })
-                                }
+                                    if (model) {
+                                        model.$setValidity(vf.value, false);
+                                    }
+                                    else {
+                                        $log.error('other validation failures exist; will invoke default handling');
+                                        errorHandling.handleRemoteProcedureCallError(err);
+                                    }
+                                });
 
                                 break;
 
-                            case jsonRpc.errorCodes.CAPTCHABADRESPONSE:
+                            case remoteProcedureCall.errorCodes.CAPTCHABADRESPONSE:
                                 $log.error('the user has mis-interpreted the captcha; will lodge an error into the form and then populate a new one for them');
                                 $scope.changePasswordForm.captchaResponse.$setValidity('badresponse',false);
                                 break;
 
                             default:
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 break;
                         }
                     }

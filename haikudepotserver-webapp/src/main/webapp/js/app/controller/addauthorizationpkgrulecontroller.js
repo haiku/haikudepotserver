@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'AddAuthorizationPkgRuleController',
     [
         '$scope','$log',
-        'jsonRpc','constants','breadcrumbs','breadcrumbFactory','errorHandling','messageSource',
+        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','errorHandling','messageSource',
         'userState',
         function(
             $scope,$log,
-            jsonRpc,constants,breadcrumbs,breadcrumbFactory,errorHandling,messageSource,
+            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,errorHandling,messageSource,
             userState) {
 
             $scope.pkgNamePattern = ('' + constants.PATTERN_PKG_NAME).replace(/^\//,'').replace(/\/$/,'');
@@ -118,10 +118,10 @@ angular.module('haikudepotserver').controller(
                     request.pkgName = $scope.workingRule.pkgName;
                 }
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_AUTHORIZATION,
-                    "createAuthorizationPkgRule",
-                    [request]
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_AUTHORIZATION,
+                    "create-authorization-pkg-rule",
+                    request
                 ).then(
                     function() {
                         $log.info('did create authorization pkg rule');
@@ -131,25 +131,25 @@ angular.module('haikudepotserver').controller(
 
                         switch(err.code) {
 
-                            case jsonRpc.errorCodes.AUTHORIZATIONRULECONFLICT:
+                            case remoteProcedureCall.errorCodes.AUTHORIZATIONRULECONFLICT:
                                 $scope.wasConflicting = true;
                                 break;
 
-                            case jsonRpc.errorCodes.VALIDATION:
+                            case remoteProcedureCall.errorCodes.VALIDATION:
                                 _.each(
                                     err.data,
                                     function(item) {
-                                        if ('user' === item.property) {
-                                            $scope.addRuleForm.userNickname.$setValidity(item.message,false);
+                                        if ('user' === item.key) {
+                                            $scope.addRuleForm.userNickname.$setValidity(item.value, false);
                                         }
                                         else {
-                                            errorHandling.handleJsonRpcError(err);
+                                            errorHandling.handleRemoteProcedureCallError(err);
                                         }
                                     }
                                 );
                                 break;
 
-                            case jsonRpc.errorCodes.OBJECTNOTFOUND:
+                            case remoteProcedureCall.errorCodes.OBJECTNOTFOUND:
 
                                 switch(err.data.entityName) {
 
@@ -162,7 +162,7 @@ angular.module('haikudepotserver').controller(
                                         break;
 
                                     default:
-                                        errorHandling.handleJsonRpcError(err);
+                                        errorHandling.handleRemoteProcedureCallError(err);
                                         break;
 
                                 }
@@ -170,7 +170,7 @@ angular.module('haikudepotserver').controller(
                                 break;
 
                             default:
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 break;
 
                         }

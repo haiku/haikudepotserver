@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,11 +12,11 @@ angular.module('haikudepotserver').controller(
     'PkgFeedBuilderController',
     [
         '$scope','$log','$location',
-        'jsonRpc','constants','messageSource','referenceData',
+        'remoteProcedureCall','constants','messageSource','referenceData',
         'breadcrumbs','breadcrumbFactory','errorHandling','userState',
         function (
             $scope,$log,$location,
-            jsonRpc,constants,messageSource,referenceData,
+            remoteProcedureCall,constants,messageSource,referenceData,
             breadcrumbs,breadcrumbFactory,errorHandling,userState) {
 
             breadcrumbs.mergeCompleteStack([
@@ -105,15 +105,15 @@ angular.module('haikudepotserver').controller(
                     pkgNames = _.pluck($scope.feedSettings.pkgs,'name');
                 }
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                    'generateFeedUrl',
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_MISCELLANEOUS,
+                    'generate-feed-url',
+                    {
                         naturalLanguageCode : userState.naturalLanguageCode(),
                         pkgNames : pkgNames,
                         limit : $scope.feedSettings.limit,
                         supplierTypes : supplierTypeCodes
-                    }]
+                    }
                 ).then(
                     function (result) {
                         $scope.feedUrl = result.url;
@@ -121,7 +121,7 @@ angular.module('haikudepotserver').controller(
                     },
                     function (err) {
                         $log.error('unable to generate feed url');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 
@@ -141,16 +141,14 @@ angular.module('haikudepotserver').controller(
                     // split on hyphen because it is not allowed in a package name.
 
                     _.each(initialPkgNamesString.split('-'),function (initialPkgNames) {
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_PKG,
-                            'getPkg',
-                            [
-                                {
-                                    naturalLanguageCode: userState.naturalLanguageCode(),
-                                    name: initialPkgNames,
-                                    versionType: 'NONE'
-                                }
-                            ]
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_PKG,
+                            'get-pkg',
+                            {
+                                naturalLanguageCode: userState.naturalLanguageCode(),
+                                name: initialPkgNames,
+                                versionType: 'NONE'
+                            }
                         ).then(
                             function (pkg) {
                                 $scope.feedSettings.pkgs.push(pkg);
@@ -202,16 +200,14 @@ angular.module('haikudepotserver').controller(
                 }
                 else {
 
-                    jsonRpc.call(
-                        constants.ENDPOINT_API_V1_PKG,
-                        'getPkg',
-                        [
-                            {
-                                naturalLanguageCode: userState.naturalLanguageCode(),
-                                name: $scope.pkgChooserName,
-                                versionType: 'NONE'
-                            }
-                        ]
+                    remoteProcedureCall.call(
+                        constants.ENDPOINT_API_V2_PKG,
+                        'get-pkg',
+                        {
+                            naturalLanguageCode: userState.naturalLanguageCode(),
+                            name: $scope.pkgChooserName,
+                            versionType: 'NONE'
+                        }
                     ).then(
                         function (pkg) {
                             $scope.pkgChooserName = '';
@@ -221,13 +217,13 @@ angular.module('haikudepotserver').controller(
 
                             switch (err.code) {
 
-                                case jsonRpc.errorCodes.OBJECTNOTFOUND:
+                                case remoteProcedureCall.errorCodes.OBJECTNOTFOUND:
                                     $scope.feedForm.pkgChooserName.$setValidity('notfound', false);
                                     break;
 
                                 default:
                                     $log.error('unable to get the pkg for name; ' + $scope.pkgChooserName);
-                                    errorHandling.handleJsonRpcError(err);
+                                    errorHandling.handleRemoteProcedureCallError(err);
                                     break;
 
                             }

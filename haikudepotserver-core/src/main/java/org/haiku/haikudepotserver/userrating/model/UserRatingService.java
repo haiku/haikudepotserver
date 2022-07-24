@@ -45,10 +45,15 @@ public interface UserRatingService {
 
     /**
      * <p>This method will update the user rating aggregate across all appropriate
-     * repositories.</p>
+     * repositories for the nominated package.</p>
      */
 
-    void updateUserRatingDerivation(String pkgName);
+    void updateUserRatingDerivationsForPkg(String pkgName);
+
+    /**
+     * <p>This method will update the user rating aggregates for the nominated user.</p>
+     */
+    void updateUserRatingDerivationsForUser(String userNickname);
 
     /**
      * <p>This method will delete the {@link UserRating}.</p>

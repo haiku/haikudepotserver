@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'InitiatePasswordResetController',
     [
         '$scope','$log',
-        'jsonRpc','constants','errorHandling','userState','breadcrumbs','breadcrumbFactory',
+        'remoteProcedureCall','constants','errorHandling','userState','breadcrumbs','breadcrumbFactory',
         function(
             $scope,$log,
-            jsonRpc,constants,errorHandling,userState,breadcrumbs,breadcrumbFactory) {
+            remoteProcedureCall,constants,errorHandling,userState,breadcrumbs,breadcrumbFactory) {
 
             if (userState.user()) {
                 throw Error('it is not possible to reset the password if a user is presently authenticated.');
@@ -54,18 +54,14 @@ angular.module('haikudepotserver').controller(
                 $scope.captchaImageUrl = undefined;
                 $scope.workingInitiatePasswordReset.captchaResponse = undefined;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_CAPTCHA,
-                    "generateCaptcha",
-                    [{}]
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_CAPTCHA, "generate-captcha").then(
                     function (result) {
                         $scope.captchaToken = result.token;
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
                         refreshBreadcrumbItems();
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -89,15 +85,15 @@ angular.module('haikudepotserver').controller(
 
                 $scope.status = Status.UNDERTAKING;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USER,
-                    "initiatePasswordReset",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_USER,
+                    "initiate-password-reset",
+                    {
                         email : $scope.workingInitiatePasswordReset.email,
                         passwordClear : $scope.workingInitiatePasswordReset.passwordClear,
                         captchaToken : $scope.captchaToken,
                         captchaResponse : $scope.workingInitiatePasswordReset.captchaResponse
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('initiated password reset');
@@ -109,14 +105,14 @@ angular.module('haikudepotserver').controller(
 
                         switch (err.code) {
 
-                            case jsonRpc.errorCodes.CAPTCHABADRESPONSE:
+                            case remoteProcedureCall.errorCodes.CAPTCHABADRESPONSE:
                                 $log.error('the user has mis-interpreted the captcha; will lodge an error into the form and then populate a new one for them');
                                 $scope.initiatePasswordResetForm.captchaResponse.$setValidity('badresponse',false);
                                 $scope.status = Status.IDLE;
                                 break;
 
                             default:
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                                 break;
                         }
                     }

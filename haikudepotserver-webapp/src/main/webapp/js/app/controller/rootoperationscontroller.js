@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'RootOperationsController',
     [
         '$scope','$log','$location','$timeout',
-        'jsonRpc','constants','userState',
+        'remoteProcedureCall','constants','userState',
         'breadcrumbs','breadcrumbFactory','errorHandling',
         function(
             $scope,$log,$location,$timeout,
-            jsonRpc,constants,userState,
+            remoteProcedureCall,constants,userState,
             breadcrumbs,breadcrumbFactory,errorHandling) {
 
             breadcrumbs.mergeCompleteStack([
@@ -39,33 +39,25 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goQueuePkgVersionPayloadLengthPopulationJob = function() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_PKG,
-                    "queuePkgVersionPayloadLengthPopulationJob",
-                    [{}]
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_PKG, "queue-pkg-version-payload-length-population-job").then(
                     function() {
                         showDidAction('queuePkgVersionPayloadLengthPopulationJob');
                     },
                     function(err) {
                         $log.error('unable to queue pkg version payload length population job');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
 
             $scope.goDeriveAndStoreUserRatingsForAllPkgs = function() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_USERRATING,
-                    "deriveAndStoreUserRatingsForAllPkgs",
-                    [{}]
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_USERRATING, "derive-and-store-user-ratings-for-all-pkgs").then(
                     function() {
                         showDidAction('deriveAndStoreUserRatingsForAllPkgs');
                     },
                     function(err) {
                         $log.error('unable to derive and store user ratings for all pkgs');
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
@@ -99,16 +91,12 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.goRaiseExceptionInServerRuntime = function() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_MISCELLANEOUS,
-                    "raiseException",
-                    [{}]
-                ).then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_MISCELLANEOUS, "raise-exception").then(
                     function() {
                         $log.error('the exception raised on the server runtime -> should not have reached this point');
                     },
                     function(err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };

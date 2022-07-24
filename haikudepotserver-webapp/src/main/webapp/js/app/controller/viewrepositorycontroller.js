@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ViewRepositoryController',
     [
         '$scope','$log','$location','$routeParams','$timeout',
-        'jsonRpc','constants','userState','errorHandling','breadcrumbs',
+        'remoteProcedureCall','constants','userState','errorHandling','breadcrumbs',
         'breadcrumbFactory',
         function(
             $scope,$log,$location,$routeParams,$timeout,
-            jsonRpc,constants,userState,errorHandling,breadcrumbs,
+            remoteProcedureCall,constants,userState,errorHandling,breadcrumbs,
             breadcrumbFactory) {
 
             $scope.repository = undefined;
@@ -30,14 +30,14 @@ angular.module('haikudepotserver').controller(
 
                 amUpdatingActive = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_REPOSITORY,
-                    "updateRepository",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_REPOSITORY,
+                    "update-repository",
+                    {
                         code : $routeParams.code,
                         active : flag,
                         filter : [ 'ACTIVE' ]
-                    }]
+                    }
                 ).then(
                     function () {
                         amUpdatingActive = false;
@@ -52,7 +52,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('did set the active flag on '+$scope.repository.code+' to '+flag);
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }
@@ -104,21 +104,21 @@ angular.module('haikudepotserver').controller(
 
             $scope.goDeletePassword = function () {
                 amDeletingPassword = true;
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_REPOSITORY,
-                    "updateRepository",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_REPOSITORY,
+                    "update-repository",
+                    {
                         filter: ['PASSWORD'],
                         code: $routeParams.code,
                         passwordClear: null
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('did delete password for repository [' + $scope.repository.code + ']');
                         $scope.repository.hasPassword = false;
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 ).finally(function () {
                     amDeletingPassword = false;
@@ -131,13 +131,13 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goTriggerImport = function() {
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_REPOSITORY,
-                    "triggerImportRepository",
-                    [{
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_REPOSITORY,
+                    "trigger-import-repository",
+                    {
                         repositoryCode: $routeParams.code,
                         repositorySourceCode : null
-                    }]
+                    }
                 ).then(
                     function () {
                         $log.info('triggered import for repository; '+$scope.repository.code);
@@ -148,7 +148,7 @@ angular.module('haikudepotserver').controller(
 
                     },
                     function(err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             };
@@ -165,13 +165,13 @@ angular.module('haikudepotserver').controller(
 
                 $scope.repository = undefined;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_REPOSITORY,
-                    "getRepository",
-                    [{
+              remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_REPOSITORY,
+                    "get-repository",
+                    {
                         code: $routeParams.code,
                         includeInactiveRepositorySources : $scope.amShowingInactiveRepositorySources
-                    }]
+                    }
                 ).then(
                     function (result) {
                         $scope.repository = result;
@@ -186,7 +186,7 @@ angular.module('haikudepotserver').controller(
                         refreshBreadcrumbItems();
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
             }

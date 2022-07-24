@@ -473,19 +473,9 @@ public class UserApiService extends AbstractApiService {
             // if a user is made active or inactive will have some impact on the user-ratings.
 
             if (activeDidChange) {
-                List<String> pkgNames = userRatingService.pkgNamesEffectedByUserActiveStateChange(
-                        context, user);
-
-                LOGGER.info(
-                        "will update user rating derivation for {} packages owing to active state change on user {}",
-                        pkgNames.size(),
-                        user);
-
-                for (String pkgName : pkgNames) {
-                    jobService.submit(
-                            new UserRatingDerivationJobSpecification(pkgName),
-                            JobSnapshot.COALESCE_STATUSES_QUEUED);
-                }
+                UserRatingDerivationJobSpecification specification = new UserRatingDerivationJobSpecification();
+                specification.setUserNickname(user.getNickname());
+                jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_QUEUED);
             }
 
         }

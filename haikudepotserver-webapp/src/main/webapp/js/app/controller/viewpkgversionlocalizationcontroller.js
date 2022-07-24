@@ -12,11 +12,11 @@ angular.module('haikudepotserver').controller(
     'ViewPkgVersionLocalizationController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','pkgIcon','errorHandling',
+        'remoteProcedureCall','constants','pkgIcon','errorHandling',
         'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg','messageSource',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,pkgIcon,errorHandling,
+            remoteProcedureCall,constants,pkgIcon,errorHandling,
             breadcrumbs,breadcrumbFactory,userState,referenceData,pkg,messageSource) {
 
             $scope.showHelp = false;
@@ -69,10 +69,10 @@ angular.module('haikudepotserver').controller(
                                 version.pkg = pkg;
                                 $scope.pkgVersion = version;
 
-                                jsonRpc.call(
-                                    constants.ENDPOINT_API_V1_PKG,
-                                    'getPkgVersionLocalizations',
-                                    [{
+                                remoteProcedureCall.call(
+                                    constants.ENDPOINT_API_V2_PKG,
+                                    'get-pkg-version-localizations',
+                                    {
                                         pkgName: $routeParams.name,
                                         repositorySourceCode : $routeParams.repositorySourceCode,
                                         major : version.major,
@@ -87,7 +87,7 @@ angular.module('haikudepotserver').controller(
                                             }
                                         ),
                                         architectureCode : $routeParams.architectureCode
-                                    }]
+                                    }
                                 ).then(
                                     function (naturalLanguageData) {
                                         $scope.translations = _.sortBy(
@@ -114,9 +114,9 @@ angular.module('haikudepotserver').controller(
 
                                         refreshBreadcrumbItems();
                                     },
-                                    function (jsonRpcErrorEnvelope) {
+                                    function (remoteProcedureCallErrorEnvelope) {
                                         $log.error('unable to get the package localizations');
-                                        errorHandling.handleJsonRpcError(jsonRpcErrorEnvelope);
+                                        errorHandling.handleRemoteProcedureCallError(remoteProcedureCallErrorEnvelope);
                                     }
 
                                 )

@@ -248,9 +248,9 @@ public class UserRatingApiService extends AbstractApiService {
         Pkg.tryGetByName(context, request.getPkgName())
             .orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.getPkgName()));
 
-        jobService.submit(
-                new UserRatingDerivationJobSpecification(request.getPkgName()),
-                JobSnapshot.COALESCE_STATUSES_QUEUED);
+        UserRatingDerivationJobSpecification specification = new UserRatingDerivationJobSpecification();
+        specification.setPkgName(request.getPkgName());
+        jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_QUEUED);
     }
 
     public void deriveAndStoreUserRatingsForAllPkgs() {
@@ -281,7 +281,10 @@ public class UserRatingApiService extends AbstractApiService {
                 .code(userRating.getCode())
                 .naturalLanguageCode(userRating.getNaturalLanguage().getCode())
                 .user(new GetUserRatingUser().nickname(userRating.getUser().getNickname()))
-                .userRatingStabilityCode(userRating.getUserRatingStability().getCode())
+                .userRatingStabilityCode(
+                        Optional.ofNullable(userRating.getUserRatingStability())
+                                .map(UserRatingStability::getCode)
+                                .orElse(null))
                 .active(userRating.getActive())
                 .comment(userRating.getComment())
                 .modifyTimestamp(userRating.getModifyTimestamp().getTime())
@@ -289,6 +292,7 @@ public class UserRatingApiService extends AbstractApiService {
                 .rating(Optional.ofNullable(userRating.getRating()).map(Number::intValue).orElse(null))
                 .pkgVersion(new GetUserRatingPkgVersion()
                         .repositoryCode(pkgVersion.getRepositorySource().getRepository().getCode())
+                        .repositorySourceCode(pkgVersion.getRepositorySource().getCode())
                         .architectureCode(pkgVersion.getArchitecture().getCode())
                         .major(pkgVersion.getMajor())
                         .minor(pkgVersion.getMinor())
@@ -357,7 +361,9 @@ public class UserRatingApiService extends AbstractApiService {
                 .code(userRating.getCode())
                 .naturalLanguageCode(userRating.getNaturalLanguage().getCode())
                 .user(new GetUserRatingByUserAndPkgVersionUser().nickname(userRating.getUser().getNickname()))
-                .userRatingStabilityCode(userRating.getUserRatingStability().getCode())
+                .userRatingStabilityCode(Optional.ofNullable(userRating.getUserRatingStability())
+                        .map(UserRatingStability::getCode)
+                        .orElse(null))
                 .active(userRating.getActive())
                 .comment(userRating.getComment())
                 .modifyTimestamp(userRating.getModifyTimestamp().getTime())
@@ -365,6 +371,7 @@ public class UserRatingApiService extends AbstractApiService {
                 .rating(Optional.ofNullable(userRating.getRating()).map(Number::intValue).orElse(null))
                 .pkgVersion(new GetUserRatingByUserAndPkgVersionPkgVersion()
                         .repositoryCode(pkgVersion.getRepositorySource().getRepository().getCode())
+                        .repositorySourceCode(pkgVersion.getRepositorySource().getCode())
                         .architectureCode(pkgVersion.getArchitecture().getCode())
                         .major(pkgVersion.getMajor())
                         .minor(pkgVersion.getMinor())
@@ -389,7 +396,16 @@ public class UserRatingApiService extends AbstractApiService {
             throw new AccessDeniedException("unable to delete the userrating");
         }
 
+        String pkgName = userRating.getPkgVersion().getPkg().getName();
         userRatingService.removeUserRatingAtomically(userRating.getCode());
+
+        // This cannot be done via a listener because it is, after the deletion
+        // no longer possible to find out the package that was attached to the
+        // user rating.
+
+        UserRatingDerivationJobSpecification specification = new UserRatingDerivationJobSpecification();
+        specification.setPkgName(pkgName);
+        jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_QUEUED);
     }
 
     public SearchUserRatingsResult searchUserRatings(SearchUserRatingsRequestEnvelope request) {

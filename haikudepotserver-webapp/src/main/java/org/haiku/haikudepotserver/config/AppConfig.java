@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
+import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
@@ -31,6 +32,7 @@ import javax.servlet.Filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,8 +54,9 @@ public class AppConfig {
 
     @Bean
     public JobService jobService(
-            DataStorageService dataStorageService) {
-        return new LocalJobServiceImpl(dataStorageService);
+            DataStorageService dataStorageService,
+            Collection<JobRunner> jobRunners) {
+        return new LocalJobServiceImpl(dataStorageService, jobRunners);
     }
 
     @Bean

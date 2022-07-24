@@ -47,7 +47,7 @@ import javax.validation.Valid;
 import java.util.Map;
 
 @Controller
-public class PkgApiImpl implements PkgApi {
+public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
 
     private final PkgApiService pkgApiService;
 

@@ -11,13 +11,17 @@ import com.google.common.collect.ComparisonChain;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
-import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
-import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
@@ -27,7 +31,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,16 +46,13 @@ public class UserRatingServiceImpl implements UserRatingService {
     private final ServerRuntime serverRuntime;
     private final int userRatingDerivationVersionsBack;
     private final int userRatingsDerivationMinRatings;
-    private final JobService jobService;
 
 
     public UserRatingServiceImpl(
             ServerRuntime serverRuntime,
-            JobService jobService,
             @Value("${userrating.aggregation.pkg.versionsback:2}") int userRatingDerivationVersionsBack,
             @Value("${userrating.aggregation.pkg.minratings:3}") int userRatingsDerivationMinRatings) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.jobService = Preconditions.checkNotNull(jobService);
         this.userRatingDerivationVersionsBack = userRatingDerivationVersionsBack;
         this.userRatingsDerivationMinRatings = userRatingsDerivationMinRatings;
     }
@@ -315,7 +320,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         LOGGER.info("will derive and store user ratings for {} packages", pkgNames.size());
 
         for (String pkgName : pkgNames) {
-            updateUserRatingDerivation(pkgName);
+            updateUserRatingDerivationsForPkg(pkgName);
         }
 
         LOGGER.info("did derive and store user ratings for {} packages", pkgNames.size());
@@ -327,7 +332,7 @@ public class UserRatingServiceImpl implements UserRatingService {
      */
 
     @Override
-    public void updateUserRatingDerivation(String pkgName) {
+    public void updateUserRatingDerivationsForPkg(String pkgName) {
          Preconditions.checkArgument(!Strings.isNullOrEmpty(pkgName), "the name of the package is required");
 
         ObjectContext context = serverRuntime.newContext();
@@ -349,6 +354,17 @@ public class UserRatingServiceImpl implements UserRatingService {
         for(String repositoryCode : repositoryCodes) {
             updateUserRatingDerivation(pkgName, repositoryCode);
         }
+    }
+
+    @Override
+    public void updateUserRatingDerivationsForUser(String userNickname) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(userNickname), "the nickname must be provided");
+        ObjectContext context = serverRuntime.newContext();
+        User user = User.getByNickname(context, userNickname);
+        List<String> pkgNames = pkgNamesEffectedByUserActiveStateChange(context, user);
+        LOGGER.info("will update user rating derivations for user [{}] including {} pkgs",
+                user, pkgNames.size());
+        pkgNames.forEach(this::updateUserRatingDerivationsForPkg);
     }
 
     /**
@@ -521,14 +537,6 @@ public class UserRatingServiceImpl implements UserRatingService {
         context.commitChanges();
 
         LOGGER.info("did delete user rating [{}]", userRatingCode);
-
-        // This cannot be done via a listener because it is, after the deletion
-        // no longer possible to find out the package that was attached to the
-        // user rating.
-
-        jobService.submit(
-                new UserRatingDerivationJobSpecification(pkgName),
-                JobSnapshot.COALESCE_STATUSES_QUEUED);
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'ListJobsController',
     [
         '$scope','$log','$location','$routeParams',
-        'jsonRpc','constants','userState',
+        'remoteProcedureCall','constants','userState',
         'breadcrumbs','breadcrumbFactory','errorHandling',
         function(
             $scope,$log,$location,$routeParams,
-            jsonRpc,constants,userState,
+            remoteProcedureCall,constants,userState,
             breadcrumbs,breadcrumbFactory,errorHandling) {
 
             function refreshBreadcrumbItems() {
@@ -81,16 +81,16 @@ angular.module('haikudepotserver').controller(
 
                 amFetchingJobs = true;
 
-                jsonRpc.call(
-                    constants.ENDPOINT_API_V1_JOB,
-                    "searchJobs",
-                    [{
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_JOB,
+                    "search-jobs",
+                    {
                         ownerUserNickname: $routeParams.nickname,
                         expression: null,
                         expressionType: 'CONTAINS',
                         offset: $scope.jobs.offset,
                         limit: $scope.jobs.max
-                    }]
+                    }
                 ).then(
                     function (result) {
 
@@ -114,7 +114,7 @@ angular.module('haikudepotserver').controller(
                         amFetchingJobs = false;
                     },
                     function (err) {
-                        errorHandling.handleJsonRpcError(err);
+                        errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
 

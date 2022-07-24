@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017, Andrew Lindesay
+ * Copyright 2016-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,11 @@ angular.module('haikudepotserver').controller(
     'PkgIconArchiveImportController',
     [
         '$scope', '$log', '$location', '$routeParams',
-        'jsonRpc', 'constants', 'pkgIcon', 'errorHandling',
+        'remoteProcedureCall', 'constants', 'pkgIcon', 'errorHandling',
         'breadcrumbs', 'breadcrumbFactory', 'jobs',
         function(
             $scope, $log, $location, $routeParams,
-            jsonRpc, constants, pkgIcon, errorHandling,
+            remoteProcedureCall, constants, pkgIcon, errorHandling,
             breadcrumbs, breadcrumbFactory, jobs) {
 
             var IMPORT_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
@@ -76,10 +76,10 @@ angular.module('haikudepotserver').controller(
                     function (guid) {
                         $log.info('did upload import data to the server; ' + guid);
 
-                        jsonRpc.call(
-                            constants.ENDPOINT_API_V1_PKG_JOB,
-                            "queuePkgIconArchiveImportJob",
-                            [{ inputDataGuid: guid }]
+                        remoteProcedureCall.call(
+                            constants.ENDPOINT_API_V2_PKG_JOB,
+                            "queue-pkg-icon-archive-import-job",
+                            { inputDataGuid: guid }
                         ).then(
                             function (result) {
                                 $log.info('did queue pkg icon archive import job; ' + result.guid);
@@ -88,7 +88,7 @@ angular.module('haikudepotserver').controller(
                             },
                             function (err) {
                                 $scope.amQueueing = false;
-                                errorHandling.handleJsonRpcError(err);
+                                errorHandling.handleRemoteProcedureCallError(err);
                             }
                         );
 
