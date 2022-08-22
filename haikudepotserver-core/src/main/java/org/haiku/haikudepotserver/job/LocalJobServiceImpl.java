@@ -187,7 +187,7 @@ public class LocalJobServiceImpl
                         + specification.getJobTypeCode()));
 
         for (String guid : specification.getSuppliedDataGuids()) {
-            if (!tryGetData(guid).isPresent()) {
+            if (tryGetData(guid).isEmpty()) {
                 throw new IllegalStateException(
                         "unable to run a job specification because the specified data "
                                 + guid + " was not able to be found");

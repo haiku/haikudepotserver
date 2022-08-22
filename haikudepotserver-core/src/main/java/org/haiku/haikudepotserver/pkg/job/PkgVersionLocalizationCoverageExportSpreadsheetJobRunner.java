@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunner
 extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgVersionLocalizationCoverageExportSpreadsheetJobRunner.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PkgVersionLocalizationCoverageExportSpreadsheetJobRunner.class);
 
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
@@ -88,7 +88,9 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
         final ObjectContext context = serverRuntime.newContext();
 
         final List<NaturalLanguage> naturalLanguages = getNaturalLanguages(context);
-        final List<Architecture> architectures = Architecture.getAllExceptByCode(context, Collections.singleton(Architecture.CODE_SOURCE));
+        final List<Architecture> architectures = Architecture.getAllExceptByCode(
+                context,
+                List.of(Architecture.CODE_SOURCE, Architecture.CODE_ANY));
 
         if(naturalLanguages.isEmpty()) {
             throw new RuntimeException("there appear to be no natural languages in the system");

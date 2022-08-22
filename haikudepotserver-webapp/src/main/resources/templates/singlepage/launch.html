@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<!--/*
+This is a single page application and this is essentially the 'single page'.  It boots-up some libraries and other
+web-resources and then this starts the java-script single page environment driven by the AngularJS library.
+*/-->
+
+<html
+        xmlns:hds="http://depot.haiku-os.org"
+        xmlns:jawr="http://jawr.java.net"
+        xmlns:th="http://www.thymeleaf.org"
+        ng-app="haikudepotserver"
+        environment-class="">
+
+<head>
+
+    <title>Haiku Depot Server</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <div th:replace="includes/favicons.html :: head"></div>
+    <div th:replace="includes/searchheadlink.html :: link"></div>
+
+    <script type="text/javascript" jawr:src="/bundles/libs.js"></script>
+    <script type="text/javascript" jawr:src="/bundles/app.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" jawr:href="/bundles/app.css" />
+
+</head>
+
+<body>
+
+<div id="unsupported">
+    <div id="unsupported-container">
+        <div class="unsupported-image"><img src="/__img/haikudepot-error.png" alt="Haiku Depot Server"></div>
+        <h1>Haiku Depot Server</h1>
+
+        <div class="unsupported-message-container">
+            <hds:includepassivecontent leafname="unsupported.html"></hds:includepassivecontent>
+        </div>
+    </div>
+</div>
+
+<supported></supported>
+
+<banner th:if="${param.banner == null or param.banner == 'true'}"></banner>
+<breadcrumbs th:if="${param.breadcrumbs == null or param.breadcrumbs == 'true'}"></breadcrumbs>
+
+<local-storage-query></local-storage-query>
+
+<div class="container">
+    <div ng-view></div>
+</div>
+
+<div class="footer"></div>
+
+<!--/*
+This IFRAME can be used by application logic to cause a download to occur.
+*/-->
+
+<iframe id="download-iframe" style="display:none"></iframe>
+
+</body>
+
+</html>

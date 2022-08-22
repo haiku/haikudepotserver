@@ -89,12 +89,12 @@ public class HomeController {
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView home(
             HttpServletRequest httpServletRequest,
-            @RequestParam(value=KEY_OFFSET, defaultValue = "0") Integer offset,
-            @RequestParam(value=KEY_REPOSITORIESCODES, required=false) String repositoryCodes,
-            @RequestParam(value=KEY_ARCHITECTURECODE, required=false) String architectureCode,
-            @RequestParam(value=KEY_PKGCATEGORYCODE, required=false) String pkgCategoryCode,
-            @RequestParam(value=KEY_SEARCHEXPRESSION, required=false) String searchExpression,
-            @RequestParam(value=KEY_VIEWCRITERIATYPECODE, required=false) ViewCriteriaType viewCriteriaType) {
+            @RequestParam(value = KEY_OFFSET, defaultValue = "0") Integer offset,
+            @RequestParam(value = KEY_REPOSITORIESCODES, required = false) String repositoryCodes,
+            @RequestParam(value = KEY_ARCHITECTURECODE, required = false) String architectureCode,
+            @RequestParam(value = KEY_PKGCATEGORYCODE, required = false) String pkgCategoryCode,
+            @RequestParam(value = KEY_SEARCHEXPRESSION, required = false) String searchExpression,
+            @RequestParam(value = KEY_VIEWCRITERIATYPECODE, required = false) ViewCriteriaType viewCriteriaType) {
 
         ObjectContext context = serverRuntime.newContext();
 
@@ -220,7 +220,7 @@ public class HomeController {
      * <p>This is the data model for the page to be rendered from.</p>
      */
 
-    @SuppressWarnings("WeakerAccess") // required for JSP rendering.
+    @SuppressWarnings("WeakerAccess") // required for Thymeleaf rendering.
     public static class HomeData {
 
         private NaturalLanguage naturalLanguage;

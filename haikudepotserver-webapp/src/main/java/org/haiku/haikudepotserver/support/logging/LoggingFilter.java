@@ -27,7 +27,6 @@ import java.util.Optional;
  * <a href="http://logback.qos.ch/manual/mdc.html">MDC</a> so that it can be logged on.</p>
  */
 
-@Component
 public class LoggingFilter implements Filter {
 
     private final static String KEY_AUTHENTICATEDUSERNICKNAME = "authUserNickname";

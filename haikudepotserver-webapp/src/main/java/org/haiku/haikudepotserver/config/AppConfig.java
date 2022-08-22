@@ -9,14 +9,17 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
 import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.HttpRequestClientIdentifierSupplier;
+import org.haiku.haikudepotserver.thymeleaf.Dialect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +29,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.context.support.ServletContextAttributeExporter;
-import org.springframework.web.filter.ForwardedHeaderFilter;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
-import javax.servlet.Filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -39,6 +42,7 @@ import java.util.Properties;
 @Import({BasicConfig.class, ScheduleConfig.class})
 @PropertySource(
         value = {
+                "classpath:application.yml",
                 "classpath:local.properties",
                 "${config.properties:file-not-found.properties}"
         },
@@ -137,8 +141,10 @@ public class AppConfig {
     }
 
     @Bean
-    public Filter forwardedHeaderFilter() {
-        return new ForwardedHeaderFilter();
+    public Dialect processorDialect(
+            ServerRuntime serverRuntime,
+            PkgLocalizationLookupService pkgLocalizationLookupService) {
+        return new Dialect(serverRuntime, pkgLocalizationLookupService);
     }
 
 }

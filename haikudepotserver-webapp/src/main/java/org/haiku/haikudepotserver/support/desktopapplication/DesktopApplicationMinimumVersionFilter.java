@@ -13,11 +13,14 @@ import org.haiku.haikudepotserver.support.IntArrayVersionComparator;
 import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -32,7 +35,6 @@ import java.util.regex.Pattern;
  * versions and disallows them.</p>
  */
 
-@Component
 public class DesktopApplicationMinimumVersionFilter implements Filter {
 
     private final static Pattern PATTERN_MINIMUMVERSIONSTRING = Pattern.compile("^[0-9]+(\\.[0-9]+)*$");
@@ -47,8 +49,7 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
 
     private final IntArrayVersionComparator intArrayVersionComparator = new IntArrayVersionComparator();
 
-    public DesktopApplicationMinimumVersionFilter(
-            @Value("${desktop.application.version.min:}") String minimumVersionString) {
+    public DesktopApplicationMinimumVersionFilter(String minimumVersionString) {
         this.minimumVersionString = minimumVersionString;
         this.minimumVersion = deriveVersion(minimumVersionString);
     }

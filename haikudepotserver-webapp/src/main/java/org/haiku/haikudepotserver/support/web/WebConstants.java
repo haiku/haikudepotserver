@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020, Andrew Lindesay
+ * Copyright 2015-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,7 @@ package org.haiku.haikudepotserver.support.web;
 
 public class WebConstants {
 
-    public final static String KEY_NATURALLANGUAGECODE = "natlangcode";
+    public final static String KEY_NATURALLANGUAGECODE = "locale";
 
     public final static String PATH_COMPONENT_SECURED = "__secured";
 

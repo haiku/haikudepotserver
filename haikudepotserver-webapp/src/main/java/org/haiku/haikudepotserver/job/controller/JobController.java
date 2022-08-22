@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -103,13 +104,25 @@ public class JobController extends AbstractController {
             Date lastModifyTimestamp,
             JobSpecification jobSpecification) throws IOException {
 
+        Date now = new Date(Clock.systemUTC().millis());
+
+        if (lastModifyTimestamp.after(now)) {
+            throw new IllegalStateException("the last modify timestamp (data) of ["
+                    + lastModifyTimestamp + "] is after the current timestamp");
+        }
+
         if (!Strings.isNullOrEmpty(ifModifiedSinceHeader)) {
             try {
                 Date requestModifyTimestamp = new Date(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(ifModifiedSinceHeader)).toEpochMilli());
 
-                if (requestModifyTimestamp.getTime() >= lastModifyTimestamp.getTime()) {
-                    response.setStatus(HttpStatus.NOT_MODIFIED.value());
-                    return;
+                if (requestModifyTimestamp.after(now)) {
+                    LOGGER.warn("the supplied if modified since header [{}] is after the current time", requestModifyTimestamp);
+                }
+                else {
+                    if (requestModifyTimestamp.getTime() >= lastModifyTimestamp.getTime()) {
+                        response.setStatus(HttpStatus.NOT_MODIFIED.value());
+                        return;
+                    }
                 }
             } catch (DateTimeParseException dtpe) {
                 LOGGER.warn("bad [{}] header on request; [{}] -- will ignore",

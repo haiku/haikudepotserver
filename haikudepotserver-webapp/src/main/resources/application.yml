@@ -1,0 +1,17 @@
+server:
+  error:
+    path: /__error
+
+logging:
+  level:
+    org:
+      apache:
+        # Cayenne logs quite a bit of material
+        # out; best to turn that quantity of logging down a bit.
+        cayenne: WARN
+    com:
+      googlecode:
+        flyway: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+

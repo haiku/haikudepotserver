@@ -1,1 +1,0 @@
-<link rel="search" type="application/opensearchdescription+xml" title="Haiku Depot" href="/__pkgsearch/opensearch.xml">

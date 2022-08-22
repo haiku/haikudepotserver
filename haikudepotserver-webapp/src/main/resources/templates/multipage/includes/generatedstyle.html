@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!--/*
+this is inline because the localization has to be substituted in
+*/-->
+
+<style th:fragment="style">
+
+    #banner-title > div:before {
+        content: 'Haiku Depot Server ';
+    }
+
+    #banner-multipage-note:before {
+        content: '[[#{multipage.banner.note}]]';
+    }
+
+    @media (max-width:825px) {
+
+        #banner-title > div:before {
+            content: 'HDS ';
+        }
+
+        #banner-multipage-note:before {
+            content: '';
+        }
+
+    }
+
+</style>
+
+</html>

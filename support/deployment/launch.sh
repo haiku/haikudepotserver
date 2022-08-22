@@ -11,7 +11,6 @@ fi
 
 "${JAVA_BIN}" \
 "-Dfile.encoding=UTF-8" \
-"-Dlogback.configurationFile=${DS_ROOT}/logback.xml" \
 "-Duser.timezone=GMT0" \
 "-Xms320m" \
 "-Xmx512m" \
@@ -23,9 +22,6 @@ fi
 "-Djdbc.username=${HDS_JDBC_USERNAME}" \
 "-Djdbc.password=${HDS_JDBC_PASSWORD}" \
 "-Dsmtp.host=${HDS_SMTP_HOST}" \
+"-Dserver.port=${HDS_PORT}" \
 "-Dauthentication.jws.issuer=${HDS_AUTHENTICATION_JWS_ISSUER}" \
-"-jar" "${HDS_ROOT}/jetty-runner.jar" \
-"--jar" "${HDS_ROOT}/postgresql.jar" \
-"--port" "${HDS_PORT}" \
-"${HDS_ROOT}/app.war" \
-
+"-jar" "${HDS_ROOT}/app.jar"

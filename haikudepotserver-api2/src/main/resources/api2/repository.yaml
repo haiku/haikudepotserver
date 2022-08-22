@@ -466,7 +466,9 @@ components:
         repositoryCode:
           type: string
         repositorySourceCodes:
-          type: string
+          type: array
+          items:
+            type: string
     triggerImportRepositoryResponseEnvelope:
       type: object
       properties:

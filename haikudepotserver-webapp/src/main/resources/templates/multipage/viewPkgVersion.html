@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html
+        xmlns:hds="http://depot.haiku-os.org"
+        xmlns:jawr="http://jawr.java.net"
+        xmlns:th="http://www.thymeleaf.org"
+        environment-class="">
+
+<head>
+
+    <title>Haiku Depot Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <div th:replace="includes/favicons.html :: head"></div>
+    <div th:replace="includes/searchheadlink.html :: link"></div>
+    <div th:replace="multipage/includes/generatedstyle.html :: style"></div>
+
+    <!--/*
+    will use the same CSS as the main application
+    */-->
+    <link rel="stylesheet" type="text/css" media="screen" jawr:href="/bundles/app.css" />
+
+</head>
+
+<body>
+
+<div th:replace="multipage/includes/banner.html :: banner"></div>
+
+<div class="container">
+
+    <div id="breadcrumbs-container">
+        <ul>
+            <li>
+                <a th:href="${data.homeUrl}" th:text="#{breadcrumb.home.title}"/>
+            </li>
+            <li>
+                <span th:text="${data.pkgVersion.pkg.name}"/>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content-container">
+
+        <div id="pkg-title">
+            <div id="pkg-title-icon">
+                <hds:pkgicon pkgversion="${data.pkgVersion}" size="32"/>
+            </div>
+            <div id="pkg-title-text">
+                <h1 th:text="${data.resolvedPkgVersionLocalization.summary}"/>
+                <div class="muted">
+                    <small th:text="${data.pkgVersion.pkg.name} + '-' + ${data.pkgVersion.toVersionCoordinates().toString()} + '-' + ${data.pkgVersion.architecture.code}"/>
+                </div>
+            </div>
+        </div>
+
+            <div class="pkg-rating-indicator-container" th:if="${data.pkgVersion.isLatest && data.pkgVersion.pkgUserRatingAggregate.present}">
+                <hds:ratingindicator
+                        th:if="${data.pkgVersion.pkgUserRatingAggregate.present}"
+                        value="${data.pkgVersion.pkgUserRatingAggregate.get().getDerivedRating()}"/>
+                <span class="pkg-ratings-indicator-sample">
+                <small
+                    th:text="#{viewPkg.derivedUserRating.sampleSize(${data.pkgVersion.pkgUserRatingAggregate.get().getDerivedRatingSampleSize()})}"/>
+              </span>
+            </div>
+
+        <div id="pkg-description-container">
+            <p>
+                <hds:plaintext content="${data.resolvedPkgVersionLocalization.description}"></hds:plaintext>
+            </p>
+        </div>
+
+        <div id="pkg-metadata-container">
+
+            <dl>
+                <dt th:text="#{viewPkg.name.title}"></dt>
+                <dd th:text="${data.pkgVersion.pkg.name}"></dd>
+                <dt th:text="#{viewPkg.repository.title}"></dt>
+                <dd th:text="${data.pkgVersion.repositorySource.repository.name}"></dd>
+                <dt th:text="#{viewPkg.repositorySource.title}"></dt>
+                <dd th:text="${data.pkgVersion.repositorySource.code}"></dd>
+                <dt th:text="#{viewPkg.version.title}"></dt>
+                <dd th:text="${data.pkgVersion.toVersionCoordinates().toString()}"></dd>
+                <dt
+                        th:if="${data.pkgVersion.payloadLength > 0}"
+                        th:text="#{viewPkg.payloadLength.title}"></dt>
+                <dd
+                        th:if="${data.pkgVersion.payloadLength > 0}"
+                        th:text="${#hds.formatDataQuantity(data.pkgVersion.payloadLength)}">
+                    <span class="muted" th:text="'(' + ${data.pkgVersion.payloadLength} + ' B)'"></span>
+                </dd>
+                <dt th:text="#{viewPkg.sourceAvailable.title}"></dt>
+                <dd>
+                    <span th:if="${data.isSourceAvailable}" th:text="#{gen.yes}"></span>
+                    <span th:if="!${data.isSourceAvailable}" th:text="#{gen.no}"></span>
+                </dd>
+                <dt th:text="#{viewPkg.categories.title}"></dt>
+                <dd>
+                    <span
+                            th:if="${#arrays.isEmpty(data.pkgVersion.pkg.pkgSupplement.pkgPkgCategories)}"
+                            th:text="#{viewPkg.categories.none}">
+                    </span>
+                    <span th:each="pkgPkgCategory, pkgPkgCategoryStatus : ${data.pkgVersion.pkg.pkgSupplement.pkgPkgCategories}">
+                        <span th:if="${pkgPkgCategoryStatus.index}">, </span>
+                        <span th:text="${#messages.msgOrNull('pkgCategory.' + pkgPkgCategory.pkgCategory.code.toLowerCase() + '.title')}"></span>
+                    </span>
+                </dd>
+                <dt th:text="#{viewPkg.versionViews.title}"></dt>
+                <dd th:text="${data.pkgVersion.viewCounter}"></dd>
+            </dl>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="footer"></div>
+
+</body>
+
+</html>

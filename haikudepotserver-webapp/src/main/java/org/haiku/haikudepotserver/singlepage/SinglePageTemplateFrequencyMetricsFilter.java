@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2022, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
  * templates into the single-page.</p>
  */
 
-@Component
 public class SinglePageTemplateFrequencyMetricsFilter implements Filter {
 
     private static Pattern PATTERN_PATH = Pattern.compile("^/js/app/(controller|directive)/[a-z0-9]+\\.html$");

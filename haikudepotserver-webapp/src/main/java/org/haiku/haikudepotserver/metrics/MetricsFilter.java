@@ -18,7 +18,6 @@ import java.io.IOException;
  * store those into the metrics registry.</p>
  */
 
-@Component
 public class MetricsFilter implements Filter {
 
     static final String KEY_REQUEST_METRIC = "org.haiku.haikudepotserver.RequestMetric";

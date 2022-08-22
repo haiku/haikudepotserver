@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html
+        xmlns:hds="http://depot.haiku-os.org"
+        xmlns:jawr="http://jawr.java.net"
+        xmlns:th="http://www.thymeleaf.org"
+        environment-class="">
+
+<head>
+
+    <title>Haiku Depot Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <div th:replace="includes/favicons.html :: head"></div>
+    <div th:replace="includes/searchheadlink.html :: link"></div>
+    <div th:replace="multipage/includes/generatedstyle.html :: style"></div>
+
+    <!--/*
+    will use the same CSS as the main application
+    */-->
+    <link rel="stylesheet" type="text/css" media="screen" jawr:href="/bundles/app.css" />
+
+</head>
+
+<body onload="hdsOnBodyLoad()">
+
+<div th:replace="multipage/includes/banner.html :: banner"></div>
+
+<div class="container">
+    <div class="content-container home">
+
+        <form method="get" action="/__multipage">
+            <input type="hidden" name="natlangcode" value="${data.naturalLanguage.code}">
+            <div id="search-criteria-container">
+                <div>
+                    <select name="repos">
+                        <option
+                                value=""
+                                th:text="#{multipage.home.allrepositories}"
+                                th:selected="${#strings.isEmpty(data.repository)}"></option>
+                        <option
+                            th:each="aRepository : ${data.allRepositories}"
+                            th:selected="${aRepository == data.repository}"
+                            th:value="${aRepository.code}"
+                            th:text="${aRepository.name}"></option>
+                    </select>
+                </div>
+                <div>
+                    <select name="arch">
+                        <option
+                            th:each="anArchitecture : ${data.allArchitectures}"
+                            th:selected="${anArchitecture == data.architecture}"
+                            th:value="${anArchitecture.code}"
+                            th:text="${anArchitecture.code}"></option>
+                    </select>
+                </div>
+                <div>
+                    <select id="viewcrttyp" name="viewcrttyp" onchange="hdsHideShowPkgCatContainer()">
+                        <option
+                            th:each="aViewCriteriaType : ${data.allViewCriteriaTypes}"
+                            th:selected="${aViewCriteriaType == data.viewCriteriaType}"
+                            th:value="${aViewCriteriaType.name()}"
+                            th:text="#{${aViewCriteriaType.getTitleKey()}}"></option>
+                    </select>
+                </div>
+                <div id="pkgcat-container">
+                    <select name="pkgcat">
+                        <option
+                            th:each="aPkgCategory : ${data.allPkgCategories}"
+                            th:selected="${aPkgCategory == data.pkgCategory}"
+                            th:value="${aPkgCategory.code}"
+                            th:text="#{${aPkgCategory.getTitleKey()}}"></option>
+                    </select>
+                </div>
+                <div>
+                    <input
+                            type="text"
+                            placeholder="zlib"
+                            name="srchexpr"
+                            th:value="${data.searchExpression}">
+
+                    <button type="submit" th:text="#{home.searchButton.title}"></button>
+                </div>
+            </div>
+        </form>
+
+        <!-- RESULTS -->
+
+        <div id="search-results-container">
+
+            <div class="info-container" th:if="${#lists.isEmpty(data.pkgVersions)}">
+                <strong th:text="#{home.noResults.title}">;</strong>
+                <span th:text="#{home.noResults.description}"></span>
+            </div>
+
+                <div class="table-general-container" th:if="${not #lists.isEmpty(data.pkgVersions)}">
+
+                    <div class="table-general-pagination-container">
+                        <hds:paginationlinks pagination="${data.pagination}"></hds:paginationlinks>
+                    </div>
+
+                    <div class="muted">
+                        <span th:text="${data.pagination.total}"/>
+                        <span th:text="${1 == data.pagination.total} ? #{gen.pkg.title} : #{gen.pkg.title.plural}"/>
+                    </div>
+
+                    <table class="table-general">
+                        <thead>
+                        <th></th>
+                        <th th:text="#{gen.pkg.title}"/>
+                        <th th:text="#{home.table.payloadlength.title}"/>
+                        <th th:text="#{home.table.rating.title}"/>
+                        <th th:if="${#arrays.isEmpty(data.repository)}" th:text="#{home.table.repository.title}"/>
+                        <th th:text="#{home.table.version.title}"/>
+                        <th th:if="${'MOSTRECENT' == data.viewCriteriaType?.name()}" th:text="#{home.table.approximateVersionDate.title}"/>
+                        <th th:if="${'MOSTVIEWED' == data.viewCriteriaType?.name()}" th:text="#{home.table.versionViewCounter.title}"/>
+                        </thead>
+                        <tbody>
+
+                            <tr th:each="pkgVersion : ${data.pkgVersions}">
+                                <td>
+                                    <hds:pkgicon pkgversion="${pkgVersion}" size="16"/>
+                                </td>
+                                <td>
+                                    <a
+                                            hds:pkgversionlink="${pkgVersion}"
+                                            hds:pkgversiontitle="${pkgVersion}"
+                                            naturallanguage="${data.naturalLanguage}" />
+                                </td>
+                                <td th:text="${#hds.formatDataQuantity(pkgVersion.payloadLength)}"/>
+                                <td>
+                                    <hds:ratingindicator
+                                            th:if="${pkgVersion.pkgUserRatingAggregate.present}"
+                                            value="${pkgVersion.pkgUserRatingAggregate.get().getDerivedRating()}"/>
+                                </td>
+                                <td class="muted"
+                                    th:if="${#arrays.isEmpty(data.repository)}"
+                                    th:text="${pkgVersion.repositorySource.repository.name}"/>
+                                <td th:text="${pkgVersion.toVersionCoordinates().toString()}"/>
+                                <td th:if="${'MOSTRECENT' == data.viewCriteriaType?.name()}">
+                                  <span class="muted" th:text="${#hds.formatTimestamp(pkgVersion.createTimestamp)}"/>
+                                </td>
+                                <td th:if="${'MOSTVIEWED' == data.viewCriteriaType?.name()}">
+                                    <span class="muted" th:text="${pkgVersion.viewCounter}"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="footer"></div>
+
+<script>
+
+/**
+ * Some very basic javascript to hide and show the categories list as the user chooses
+ * the filtering criteria.  This is a global function, but there is *intentionally*
+ * very little java-script on the page so this is manageable.
+ */
+
+  function hdsHideShowPkgCatContainer() {
+    var select = document.getElementById('viewcrttyp');
+    var value = select.options[select.selectedIndex].value;
+    var container = document.getElementById('pkgcat-container');
+
+    container.setAttribute(
+      'style',
+      (value === 'CATEGORIES') ? '' : 'display:none;'
+    );
+
+  }
+
+  function hdsOnBodyLoad() {
+    hdsHideShowPkgCatContainer();
+  }
+
+</script>
+
+</body>
+
+</html>

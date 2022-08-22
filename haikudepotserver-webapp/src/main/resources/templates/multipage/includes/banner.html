@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html
+        xmlns:hds="http://depot.haiku-os.org"
+        xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="banner">
+    <div id="banner-container">
+
+    <span id="banner-title" class="multipage-banner-title">
+        <div><span th:text="#{multipage.banner.title.suffix}"></span></div>
+    </span>
+
+        <div id="banner-actions" class="multipage-banner-actions">
+            <div id="banner-multipage-note">;
+                <a href="/" th:text="#{multipage.banner.note.full}">
+                </a>
+            </div>
+            <div>
+                <hds:naturallanguagechooser></hds:naturallanguagechooser>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</html>

@@ -10,7 +10,7 @@
 # -------------------------------------
 # Assemble the build image with the dependencies
 
-FROM debian:11.3-slim as build
+FROM debian:11.5-slim as build
 
 RUN apt-get update
 RUN apt-get -y install wget python3 maven openjdk-11-jdk fontconfig fonts-dejavu-core lsb-release gnupg2
@@ -56,7 +56,7 @@ RUN mvn clean install
 # -------------------------------------
 # Create the container that will eventually run HDS
 
-FROM debian:11.3-slim AS runtime
+FROM debian:11.5-slim AS runtime
 
 RUN apt-get update && apt-get -y install wget optipng libpng16-16 curl openjdk-11-jre fontconfig fonts-dejavu-core
 
@@ -69,18 +69,12 @@ COPY ./support/deployment/prop.sh ${HDS_B_PROPBIN}
 RUN chmod 755 ${HDS_B_PROPBIN}
 
 COPY --from=build /hds-src/haikudepotserver-core/target/classes/build.properties ${HDS_B_INSTALL_ROOT}
-COPY --from=build /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.war ${HDS_B_INSTALL_ROOT}/app.war
-
-RUN wget -O ${HDS_B_INSTALL_ROOT}/jetty-runner.jar \
-    "https://search.maven.org/remotecontent?filepath=org/eclipse/jetty/jetty-runner/$(${HDS_B_PROPBIN} jetty.version)/jetty-runner-$(${HDS_B_PROPBIN} jetty.version).jar"
-RUN wget -O ${HDS_B_INSTALL_ROOT}/postgresql.jar \
-    "https://search.maven.org/remotecontent?filepath=org/postgresql/postgresql/$(${HDS_B_PROPBIN} postgresdriver.version)/postgresql-$(${HDS_B_PROPBIN} postgresdriver.version).jar"
+COPY --from=build /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${HDS_B_INSTALL_ROOT}/app.jar
 
 ENV HDS_B_HVIF2PNG_VERSION="hvif2png-hrev53013-linux-x86_64"
 ENV HDS_B_INSTALL_HVIF2PNG_PATH "${HDS_B_INSTALL_ROOT}/hvif2png-hrev53013+1/bin/hvif2png.sh"
 
 COPY ./support/deployment/config.properties ${HDS_B_INSTALL_ROOT}
-COPY ./support/deployment/logback.xml ${HDS_B_INSTALL_ROOT}
 ADD ./support/deployment/${HDS_B_HVIF2PNG_VERSION}.tgz ${HDS_B_INSTALL_ROOT}
 COPY ./support/deployment/launch.sh ${HDS_B_INSTALL_ROOT}
 RUN chmod 755 ${HDS_B_INSTALL_ROOT}/launch.sh

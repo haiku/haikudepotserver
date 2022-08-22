@@ -6,7 +6,6 @@ package org.haiku.haikudepotserver.support.web;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -24,7 +23,6 @@ import java.util.concurrent.TimeUnit;
  * but will give some simulation.</p>
  */
 
-@Component
 public class DelayFilter implements Filter {
 
     @Value("${request.delay-millis:0}")
