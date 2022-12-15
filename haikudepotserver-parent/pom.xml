@@ -30,15 +30,14 @@
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
 
-        <spring.version>5.3.22</spring.version>
-        <spring-boot.version>2.7.0</spring-boot.version>
+        <spring-boot.version>2.7.3</spring-boot.version>
 
         <postgresql.version>42.4.3</postgresql.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <jackson-databind.version>2.13.4.1</jackson-databind.version>
+        <jackson-databind.version>2.14.1</jackson-databind.version>
         <guava.version>31.1-jre</guava.version>
 
-        <openapi-generator-maven-plugin.version>5.4.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>6.2.1</openapi-generator-maven-plugin.version>
         <springfox.version>3.0.0</springfox.version>
 
         <web-lru-cache.versionbase>2.5.0</web-lru-cache.versionbase>
@@ -56,7 +55,7 @@
         <web-modernizr.versionbase>2.8.3</web-modernizr.versionbase>
         <web-modernizr.versionextension>-1</web-modernizr.versionextension>
 
-        <nimbus-jose-jwt.version>9.21</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.25.6</nimbus-jose-jwt.version>
 
         <jasmine.plugin.version>2.2</jasmine.plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
@@ -64,21 +63,20 @@
         <jsonschema2pojo-maven-plugin.version>1.1.2</jsonschema2pojo-maven-plugin.version>
         <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
 
-        <selenium-java.version>3.141.59</selenium-java.version>
-        <jetty.version>9.4.45.v20220203</jetty.version>
+        <selenium-java.version>4.7.2</selenium-java.version>
 
-        <metrics.version>4.2.9</metrics.version>
+        <metrics.version>4.2.13</metrics.version>
 
         <flexmark.version>0.64.0</flexmark.version>
-        <logback-classic.version>1.2.11</logback-classic.version>
+        <logback-classic.version>1.4.5</logback-classic.version>
         <freemarker.version>2.3.31</freemarker.version>
         <jsonrpc4j.version>1.6</jsonrpc4j.version>
         <hikaricp.version>5.0.1</hikaricp.version>
-        <opencsv.version>5.6</opencsv.version>
+        <opencsv.version>5.7.1</opencsv.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
 
-        <testcontainers.version>1.16.3</testcontainers.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -226,7 +224,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.1.13</version>
+                <version>2.2.7</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -286,13 +284,13 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.21</version>
+                <version>1.22</version>
             </dependency>
 
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>8.5.2</version>
+                <version>9.10.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cayenne</groupId>
@@ -303,12 +301,6 @@
                 <groupId>org.apache.cayenne</groupId>
                 <artifactId>cayenne-velocity</artifactId>
                 <version>4.1</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-runner</artifactId>
-                <version>${jetty.version}</version>
             </dependency>
 
             <dependency>
@@ -341,7 +333,7 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>5.8.2</version>
+                <version>5.9.1</version>
             </dependency>
             <dependency>
                 <groupId>org.easytesting</groupId>
@@ -485,7 +477,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>enforce-versions</id>

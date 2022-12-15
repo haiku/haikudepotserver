@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResultItemsInner;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.api2.model.CreateUserRatingRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.CreateUserRatingResult;
@@ -28,7 +29,7 @@ import org.haiku.haikudepotserver.api2.model.SearchUserRatingsPkg;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsPkgVersion;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResult;
-import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResultItems;
+import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResultItemsInner;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsUser;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRatingFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRatingRequestEnvelope;
@@ -493,12 +494,12 @@ public class UserRatingApiService extends AbstractApiService {
         searchSpecification.setOffset(request.getOffset());
 
         long total = userRatingService.total(context, searchSpecification);
-        List<SearchUserRatingsResultItems> items = List.of();
+        List<SearchUserRatingsResultItemsInner> items = List.of();
 
         if (total > 0) {
             items = userRatingService.search(context, searchSpecification)
                     .stream()
-                    .map(ur -> new SearchUserRatingsResultItems()
+                    .map(ur -> new SearchUserRatingsResultItemsInner()
                             .active(ur.getActive())
                             .code(ur.getCode())
                             .comment(ur.getComment())

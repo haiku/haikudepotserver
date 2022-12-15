@@ -11,7 +11,7 @@ import org.apache.cayenne.validation.SimpleValidationFailure;
 import org.apache.cayenne.validation.ValidationFailure;
 import org.haiku.haikudepotserver.api1.support.Constants;
 import org.haiku.haikudepotserver.api2.model.Error;
-import org.haiku.haikudepotserver.api2.model.ErrorData;
+import org.haiku.haikudepotserver.api2.model.ErrorDataInner;
 import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
 import org.haiku.haikudepotserver.support.exception.CaptchaBadResponseException;
@@ -72,12 +72,12 @@ public abstract class AbstractApiImpl {
             Error error = new Error()
                     .code(Constants.ERROR_CODE_CAPTCHABADRESPONSE)
                     .message("captchabadresponse")
-                    .addDataItem(new ErrorData()
+                    .addDataItem(new ErrorDataInner()
                             .key("mediaTypeCode")
                             .value(badPkgIconException.getMediaTypeCode()));
 
             if(null != badPkgIconException.getSize()) {
-                error.addDataItem(new ErrorData()
+                error.addDataItem(new ErrorDataInner()
                         .key("size")
                         .value(Integer.toString(badPkgIconException.getSize())));
             }
@@ -92,12 +92,12 @@ public abstract class AbstractApiImpl {
             Error error = new Error()
                     .code(Constants.ERROR_CODE_OBJECTNOTFOUND)
                     .message("objectnotfound")
-                    .addDataItem(new ErrorData()
+                    .addDataItem(new ErrorDataInner()
                             .key("entityName")
                             .value(objectNotFoundException.getEntityName()));
 
             if (null != objectNotFoundException.getIdentifier()) {
-                error.addDataItem(new ErrorData()
+                error.addDataItem(new ErrorDataInner()
                     .key("identifier")
                     .value(objectNotFoundException.getIdentifier().toString()));
             }
@@ -114,7 +114,7 @@ public abstract class AbstractApiImpl {
                     .message("validationerror")
                             .data(validationException.getValidationFailures()
                                     .stream()
-                                    .map(ve -> new ErrorData()
+                                    .map(ve -> new ErrorDataInner()
                                             .key(ve.getProperty())
                                             .value(ve.getMessage()))
                                     .collect(Collectors.toUnmodifiableList()));
@@ -140,18 +140,18 @@ public abstract class AbstractApiImpl {
                 .message("nothandled");
     }
 
-    private static ErrorData mapToErrorData(ValidationFailure vf) {
+    private static ErrorDataInner mapToErrorData(ValidationFailure vf) {
         if (BeanValidationFailure.class.isAssignableFrom(vf.getClass())) {
             BeanValidationFailure beanValidationFailure = (BeanValidationFailure) vf;
             Object err = beanValidationFailure.getError();
-            return new ErrorData()
+            return new ErrorDataInner()
                     .key(beanValidationFailure.getProperty())
                     .value(null != err ? err.toString() : "");
         }
 
         if (SimpleValidationFailure.class.isAssignableFrom(vf.getClass())) {
             SimpleValidationFailure simpleValidationFailure = (SimpleValidationFailure) vf;
-            return new ErrorData()
+            return new ErrorDataInner()
                     .key("")
                     .value(simpleValidationFailure.getDescription());
         }

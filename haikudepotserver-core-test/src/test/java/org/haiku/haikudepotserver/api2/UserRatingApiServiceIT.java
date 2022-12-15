@@ -18,7 +18,7 @@ import org.haiku.haikudepotserver.api2.model.PkgVersionType;
 import org.haiku.haikudepotserver.api2.model.RemoveUserRatingRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResult;
-import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResultItems;
+import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResultItemsInner;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRatingFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRatingRequestEnvelope;
 import org.haiku.haikudepotserver.config.TestConfig;
@@ -246,7 +246,7 @@ public class UserRatingApiServiceIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.getItems().size()).isEqualTo(2);
 
         {
-            SearchUserRatingsResultItems userRating = result.getItems()
+            SearchUserRatingsResultItemsInner userRating = result.getItems()
                     .stream()
                     .filter(i -> i.getCode().equals("ABCDEF"))
                     .collect(SingleCollector.single());
@@ -271,7 +271,7 @@ public class UserRatingApiServiceIT extends AbstractIntegrationTest {
         }
 
         {
-            SearchUserRatingsResultItems userRating = result.getItems()
+            SearchUserRatingsResultItemsInner userRating = result.getItems()
                     .stream()
                     .filter(i -> i.getCode().equals("GHIJKL"))
                     .collect(SingleCollector.single());
