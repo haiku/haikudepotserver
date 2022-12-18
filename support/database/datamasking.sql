@@ -39,6 +39,67 @@ BEGIN
   RETURN result;
 END; $$;
 
+CREATE OR REPLACE FUNCTION
+    hds_swap_user_rating_users_for_pkg_version_id(in_pkg_version_id BIGINT)
+RETURNS VOID
+LANGUAGE PLPGSQL
+AS
+$$
+DECLARE
+    a_record  RECORD;
+    a_user_id BIGINT;
+    candidate_user_count INT;
+BEGIN
+
+    SELECT COUNT(*)
+    INTO candidate_user_count
+    FROM haikudepot.user_rating ur
+    WHERE ur.pkg_version_id = in_pkg_version_id;
+
+    -- Create a table of the possible users that might be able to replace
+    -- the users who have previously commented on this PkgVersion.  Users
+    -- who have previously commented but not on this PkgVersion are
+    -- chosen.
+
+    CREATE TEMP TABLE candidate_users AS
+    SELECT u.id
+    FROM haikudepot.user u
+    WHERE 1 = 1
+      AND EXISTS(SELECT ur.id FROM haikudepot.user_rating ur WHERE ur.user_id = u.id)
+      AND NOT EXISTS(SELECT ur.id
+                     FROM haikudepot.user_rating ur
+                     WHERE ur.user_id = u.id AND ur.pkg_version_id = in_pkg_version_id)
+    LIMIT candidate_user_count;
+
+    -- In some cases it could come to pass that there are not enough
+    -- users who match the above criteria.  In this case, choose some
+    -- random users from the user pool.
+
+    WHILE (SELECT COUNT(*) FROM candidate_users) < candidate_user_count
+        LOOP
+            INSERT INTO candidate_users (id)
+            SELECT id
+            FROM haikudepot.user u
+            WHERE 1 = 1
+              AND NOT EXISTS(SELECT ur2.id
+                             FROM haikudepot.user_rating ur2
+                             WHERE ur2.user_id = u.id
+                               AND ur2.pkg_version_id = in_pkg_version_id)
+            ORDER BY random()
+            LIMIT 1;
+        END LOOP;
+
+    FOR a_record IN SELECT ur.id FROM haikudepot.user_rating ur WHERE ur.pkg_version_id = in_pkg_version_id
+        LOOP
+            SELECT id INTO a_user_id FROM candidate_users ORDER BY random() LIMIT 1;
+            UPDATE haikudepot.user_rating ur SET user_id = a_user_id WHERE ur.id = a_record.id;
+            DELETE FROM candidate_users WHERE id = a_user_id;
+        END LOOP;
+
+    DROP TABLE candidate_users;
+END;
+$$;
+
 -- remove any captchas
 
 DELETE FROM captcha.response;
@@ -71,6 +132,14 @@ UPDATE haikudepot.user SET
 UPDATE haikudepot.user_rating SET
   comment = hds_scramble_chars(comment);
 
+-- now scramble the authors of the user rating comments by replacing the existing
+-- author of a comment by another author of a different comment.
+
+SELECT hds_swap_user_rating_users_for_pkg_version_id(pv.id)
+FROM haikudepot.pkg_version pv
+WHERE EXISTS(SELECT ur.id FROM haikudepot.user_rating ur WHERE ur.pkg_version_id = pv.id);
+
 -- clean up
 
 DROP FUNCTION hds_scramble_chars;
+DROP FUNCTION hds_swap_user_rating_users_for_pkg_version_id;
