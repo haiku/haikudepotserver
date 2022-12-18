@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PkgDumpExportJobSpecification extends AbstractJobSpecification {
 
-    private final static long TTL_MINUTES = 30;
+    private final static long TTL_MINUTES = 480;
 
     private String repositorySourceCode;
 
