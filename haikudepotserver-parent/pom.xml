@@ -10,7 +10,7 @@
         <artifactId>haikudepotserver</artifactId>
         <groupId>org.haiku</groupId>
         <relativePath>..</relativePath>
-        <version>1.0.136</version>
+        <version>1.0.137-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
