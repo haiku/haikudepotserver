@@ -68,7 +68,6 @@
         <metrics.version>4.2.13</metrics.version>
 
         <flexmark.version>0.64.0</flexmark.version>
-        <logback-classic.version>1.4.5</logback-classic.version>
         <freemarker.version>2.3.31</freemarker.version>
         <jsonrpc4j.version>1.6</jsonrpc4j.version>
         <hikaricp.version>5.0.1</hikaricp.version>
@@ -100,11 +99,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback-classic.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
