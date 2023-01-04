@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2022, Andrew Lindesay
+# Copyright 2022-2023, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -10,14 +10,17 @@
 # -------------------------------------
 # Assemble the build image with the dependencies
 
-FROM debian:11.5-slim as build
+FROM debian:11.6-slim as build
 
 RUN apt-get update
-RUN apt-get -y install wget python3 maven openjdk-11-jdk fontconfig fonts-dejavu-core lsb-release gnupg2
+RUN apt-get -y install wget python3 openjdk-17-jdk fontconfig fonts-dejavu-core lsb-release gnupg2
 RUN apt-get -y install postgresql postgresql-contrib
 
 # copy the source into the build machine
 RUN mkdir /hds-src
+
+COPY ./mvnw /hds-src/mvnw
+COPY ./.mvn/wrapper/maven-wrapper.properties /hds-src/.mvn/wrapper/maven-wrapper.properties
 
 COPY ./pom.xml /hds-src/pom.xml
 COPY ./haikudepotserver-parent/pom.xml /hds-src/haikudepotserver-parent/pom.xml
@@ -33,7 +36,7 @@ COPY ./haikudepotserver-core/pom.xml /hds-src/haikudepotserver-core/pom.xml
 WORKDIR /hds-src
 
 # capture the dependencies into the image
-RUN mvn clean org.apache.maven.plugins:maven-dependency-plugin:3.3.0:go-offline
+RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.3.0:go-offline
 
 # copy the rest of the source
 COPY ./haikudepotserver-parent /hds-src/haikudepotserver-parent
@@ -51,14 +54,14 @@ COPY ./haikudepotserver-core /hds-src/haikudepotserver-core
 ENV TEST_DATABASE_TYPE "START_LOCAL_DATABASE"
 
 # perform the build of the application.
-RUN mvn clean install
+RUN ./mvnw clean install
 
 # -------------------------------------
 # Create the container that will eventually run HDS
 
-FROM debian:11.5-slim AS runtime
+FROM debian:11.6-slim AS runtime
 
-RUN apt-get update && apt-get -y install wget optipng libpng16-16 curl openjdk-11-jre fontconfig fonts-dejavu-core
+RUN apt-get update && apt-get -y install wget optipng libpng16-16 curl openjdk-17-jre fontconfig fonts-dejavu-core
 
 ENV HDS_B_HTTP_PORT=8080
 ENV HDS_B_INSTALL_ROOT="/opt/haikudepotserver"

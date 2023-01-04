@@ -1,5 +1,7 @@
 .*
 *.iml
+support/*.pyc
+support/__pycache__/
 target
 venv
 haikudepotserver-webapp/src/main/webapp/js/lib/**
