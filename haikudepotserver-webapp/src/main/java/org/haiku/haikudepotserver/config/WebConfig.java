@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -38,10 +38,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(WebConstants.ANT_PATTERN_JS).addResourceLocations("classpath:/js/").setCachePeriod(0);
-        registry.addResourceHandler(WebConstants.ANT_PATTERN_WEBJAR).addResourceLocations("classpath:/webjars/");
-        registry.addResourceHandler(WebConstants.ANT_PATTERN_CSS).addResourceLocations("classpath:/css/");
-        registry.addResourceHandler(WebConstants.ANT_PATTERN_IMG).addResourceLocations("classpath:/img/");
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_JS).addResourceLocations("classpath:/spa1/js/").setCachePeriod(0);
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_CSS).addResourceLocations("classpath:/spa1/css/");
+        registry.addResourceHandler(WebConstants.ANT_PATTERN_IMG).addResourceLocations(
+                "classpath:/spa1/img/",
+                "classpath:/img/");
         registry.addResourceHandler(WebConstants.ANT_PATTERN_DOCS).addResourceLocations("classpath:/docs/");
         registry.addResourceHandler("favicon.ico").addResourceLocations("classpath:/img/favicon.ico");
     }

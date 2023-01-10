@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.config;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.codahale.metrics.servlets.PingServlet;
-import net.jawr.web.servlet.JawrServlet;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
 import org.haiku.haikudepotserver.support.web.SessionListener;
@@ -42,8 +41,6 @@ public class WebInitializer implements WebApplicationInitializer {
         registerRemoteLogCaptureServlet(servletContext);
         registerSpringDispatcherServlet(servletContext);
         registerMetricsServlets(servletContext);
-        registerJawrServlet(servletContext, "css");
-        registerJawrServlet(servletContext, "js");
 
         // note that the spring security filters are not included here.
 
@@ -67,18 +64,6 @@ public class WebInitializer implements WebApplicationInitializer {
         FilterRegistration.Dynamic dynamic = servletContext.addFilter(beanName, new DelegatingFilterProxy(beanName));
         dynamic.addMappingForUrlPatterns(null, false, urlPatterns);
         dynamic.setAsyncSupported(true);
-    }
-
-    private void registerJawrServlet(ServletContext servletContext, String type) {
-        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("jawr-servlet-" + type, JawrServlet.class);
-        dispatcher.setInitParameter(
-                "configPropertiesSourceClass",
-                "org.haiku.haikudepotserver.support.web.SpringProvidedConfigPropertiesSource");
-        dispatcher.setInitParameter("mapping", "/__jawr/" + type + "/");
-        dispatcher.setInitParameter("type", type);
-        dispatcher.setLoadOnStartup(1);
-        dispatcher.addMapping("/__jawr/" + type + "/*");
-        dispatcher.setAsyncSupported(true);
     }
 
     private void registerMetricsServlets(ServletContext servletContext) {

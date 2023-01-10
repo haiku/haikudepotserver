@@ -7,7 +7,6 @@ web-resources and then this starts the java-script single page environment drive
 
 <html
         xmlns:hds="http://depot.haiku-os.org"
-        xmlns:jawr="http://jawr.java.net"
         xmlns:th="http://www.thymeleaf.org"
         ng-app="haikudepotserver"
         environment-class="">
@@ -21,9 +20,9 @@ web-resources and then this starts the java-script single page environment drive
     <div th:replace="includes/favicons.html :: head"></div>
     <div th:replace="includes/searchheadlink.html :: link"></div>
 
-    <script type="text/javascript" jawr:src="/bundles/libs.js"></script>
-    <script type="text/javascript" jawr:src="/bundles/app.js"></script>
-    <link rel="stylesheet" type="text/css" media="screen" jawr:href="/bundles/app.css" />
+    <script type="text/javascript" src="/__js/vendor.concat.min.js"></script>
+    <hds:appscripts></hds:appscripts>
+    <link rel="stylesheet" type="text/css" media="screen" href="__css/app.concat.min.css" />
 
 </head>
 

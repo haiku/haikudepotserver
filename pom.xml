@@ -21,6 +21,7 @@
         <module>haikudepotserver-core-test</module>
         <module>haikudepotserver-parent</module>
         <module>haikudepotserver-docs</module>
+        <module>haikudepotserver-spa1</module>
         <module>haikudepotserver-webapp</module>
     </modules>
 

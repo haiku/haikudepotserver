@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +36,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * <p>If somebody makes a query such as "/apr" then the system should search for that as a package
@@ -54,7 +56,7 @@ public class FallbackController {
 
     private final static String KEY_TERM = "term";
 
-    private final static String VALUE_FAVICON = "favicon";
+    private final static Pattern PATTERN_FAVICON = Pattern.compile("^favicon(\\.ico)?$");
 
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
@@ -65,10 +67,13 @@ public class FallbackController {
     @Autowired(required = false)
     private ServletContext servletContext;
 
+    private final Resource faviconResource;
+
     public FallbackController(
             ServerRuntime serverRuntime,
             PkgService pkgService,
             RepositoryService repositoryService,
+            @Value("classpath:/img/favicon.ico") Resource faviconResource,
             @Value("${architecture.default.code}") String defaultArchitectureCode,
             @Value("${baseurl}") String baseUrl) {
         this.serverRuntime = serverRuntime;
@@ -76,6 +81,7 @@ public class FallbackController {
         this.repositoryService = repositoryService;
         this.baseUrl = baseUrl;
         this.defaultArchitectureCode = defaultArchitectureCode;
+        this.faviconResource = faviconResource;
     }
 
     private String termDebug(String term) {
@@ -119,11 +125,7 @@ public class FallbackController {
         Preconditions.checkState(null!=servletContext, "the servlet context must be supplied");
         response.setContentType(com.google.common.net.MediaType.ICO.toString());
 
-        try (InputStream inputStream = servletContext.getResourceAsStream("/img/favicon.ico")) {
-            if (null == inputStream) {
-                throw new IllegalStateException("unable to find the favicon resource");
-            }
-
+        try (InputStream inputStream = faviconResource.getInputStream()) {
             if (method != RequestMethod.HEAD) {
                 ByteStreams.copy(inputStream, response.getOutputStream());
             }
@@ -131,7 +133,7 @@ public class FallbackController {
     }
 
     private FallbackType getFallbackType(String term) {
-        if(term.equals(VALUE_FAVICON)) {
+        if(PATTERN_FAVICON.matcher(term).matches()) {
             return FallbackType.FAVICON;
         }
 

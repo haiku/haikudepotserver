@@ -216,11 +216,8 @@
             <para>
                 The single-page interface is delivered by a single Thymeleaf page.
                 The web resources such as the JavaScript
-                files and CSS files are provided by a framework called
-                <ulink url="https://jawr.java.net/">JAWR</ulink>.
-                JAWR is able to both concatenate as well as compress these resources as they are delivered to the
-                browser.  JavaScript libraries that are used in the project are integrated using
-                <ulink url="http://www.webjars.org/">WebJars</ulink> as maven resources.
+                files and CSS files are assembled in a separate module <code>haikudepotserver-spa1</code>
+                which concatenates and compresses the resources and makes them available to the webapp.
             </para>
                 </section>
 

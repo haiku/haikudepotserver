@@ -198,15 +198,6 @@ key2=value2</programlisting>
             <title>Web-Related</title>
 
             <section>
-                <title>jawr.debug.on</title>
-                <para>
-                    This configuration relates to the
-                    <ulink url="https://jawr.java.net/">JAWR</ulink>
-                    debug setting.  It will default to &quot;false&quot;.
-                </para>
-            </section>
-
-            <section>
                 <title>baseurl</title>
                 <para>
                     This is the base URL used to formulate URLs to be sent out that can be used to return back to the

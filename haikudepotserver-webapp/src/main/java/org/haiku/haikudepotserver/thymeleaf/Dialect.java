@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.thymeleaf;
@@ -13,6 +13,8 @@ import org.haiku.haikudepotserver.multipage.thymeleaf.PkgVersionTitleContentProc
 import org.haiku.haikudepotserver.multipage.thymeleaf.PlainTextContentProcessor;
 import org.haiku.haikudepotserver.multipage.thymeleaf.RatingIndicatorContentProcessor;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
+import org.haiku.haikudepotserver.singlepage.thymeleaf.AppScriptsProcessor;
+import org.springframework.core.io.Resource;
 import org.thymeleaf.dialect.IExpressionObjectDialect;
 import org.thymeleaf.dialect.IProcessorDialect;
 import org.thymeleaf.expression.IExpressionObjectFactory;
@@ -33,9 +35,19 @@ public class Dialect implements IProcessorDialect, IExpressionObjectDialect {
 
     private final PkgLocalizationLookupService pkgLocalizationLookupService;
 
-    public Dialect(ServerRuntime serverRuntime, PkgLocalizationLookupService pkgLocalizationLookupService) {
+    private final boolean isProduction;
+
+    private final Resource singlePageApplicationJavaScriptIndexResource;
+
+    public Dialect(
+            ServerRuntime serverRuntime,
+            PkgLocalizationLookupService pkgLocalizationLookupService,
+            Boolean isProduction,
+            Resource singlePageApplicationJavaScriptIndexResource) {
         this.serverRuntime = serverRuntime;
         this.pkgLocalizationLookupService = pkgLocalizationLookupService;
+        this.isProduction = isProduction;
+        this.singlePageApplicationJavaScriptIndexResource = singlePageApplicationJavaScriptIndexResource;
     }
 
     @Override
@@ -64,7 +76,8 @@ public class Dialect implements IProcessorDialect, IExpressionObjectDialect {
                 new PkgVersionTitleContentProcessor(
                         dialectPrefix, serverRuntime, pkgLocalizationLookupService),
                 new RatingIndicatorContentProcessor(dialectPrefix),
-                new PlainTextContentProcessor(dialectPrefix));
+                new PlainTextContentProcessor(dialectPrefix),
+                new AppScriptsProcessor(dialectPrefix, isProduction, singlePageApplicationJavaScriptIndexResource));
     }
 
     @Override

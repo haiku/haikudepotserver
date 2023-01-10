@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,10 +10,8 @@ import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.codahale.metrics.servlets.PingServlet;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.googlecode.jsonrpc4j.MultipleInvocationListener;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
-import net.jawr.web.servlet.JawrServlet;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.support.ErrorResolverImpl;
 import org.haiku.haikudepotserver.metrics.MetricsFilter;
@@ -28,24 +26,18 @@ import org.haiku.haikudepotserver.support.web.DelayFilter;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
 import org.haiku.haikudepotserver.support.web.SessionListener;
-import org.haiku.haikudepotserver.support.web.StaticConfigPropertiesSource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpSessionListener;
-import java.util.Properties;
 
 @Configuration
 @Import(WebConfig.class)
@@ -108,33 +100,6 @@ public class ServletConfig {
         servletRegistration.addUrlMappings("/__metric/ping");
         servletRegistration.setAsyncSupported(true);
         servletRegistration.setName("metric-admin-ping");
-        return servletRegistration;
-    }
-
-    @Bean
-    @DependsOn("jawrPropertiesSetup")
-    public ServletRegistrationBean<HttpServlet> cssJawrServlet() {
-        return genericJawrServlet("css");
-    }
-
-    @Bean
-    @DependsOn("jawrPropertiesSetup")
-    public ServletRegistrationBean<HttpServlet> jsJawrServlet() {
-        return genericJawrServlet("js");
-    }
-
-    private ServletRegistrationBean<HttpServlet> genericJawrServlet(String type) {
-        ServletRegistrationBean<HttpServlet> servletRegistration = new ServletRegistrationBean<>();
-        servletRegistration.setServlet(new JawrServlet());
-        servletRegistration.addInitParameter(
-                "configPropertiesSourceClass",
-                "org.haiku.haikudepotserver.support.web.StaticConfigPropertiesSource");
-        servletRegistration.addInitParameter("mapping", "/__jawr/" + type + "/");
-        servletRegistration.addInitParameter("type", type);
-        servletRegistration.setLoadOnStartup(1);
-        servletRegistration.addUrlMappings("/__jawr/" + type + "/*");
-        servletRegistration.setAsyncSupported(true);
-        servletRegistration.setName("jawr-servlet-" + type);
         return servletRegistration;
     }
 
@@ -232,24 +197,6 @@ public class ServletConfig {
         exporter.setObjectMapper(objectMapper);
 
         return exporter;
-    }
-
-    @Component("jawrPropertiesSetup")
-    public static class JawrPropertiesSetup {
-
-        private final Properties properties;
-
-        public JawrPropertiesSetup(
-                @Qualifier("jawrConfigProperties") Properties properties) {
-            Preconditions.checkArgument(null != properties, "properties are required");
-            this.properties = properties;
-        }
-
-        @PostConstruct
-        public void init() {
-            StaticConfigPropertiesSource.setProperties(properties);
-        }
-
     }
 
 }

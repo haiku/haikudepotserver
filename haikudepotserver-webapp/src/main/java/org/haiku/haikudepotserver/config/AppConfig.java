@@ -25,16 +25,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.context.support.ServletContextAttributeExporter;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -101,25 +96,6 @@ public class AppConfig {
     }
 
     @Bean
-    public Properties jawrConfigProperties(
-            @Value("${jawr.debug.on:false}") Boolean debug
-    ) {
-        Properties properties = new Properties();
-
-        try (InputStream inputStream = new ClassPathResource("jawr.properties").getInputStream()) {
-            properties.load(inputStream);
-        } catch (IOException ioe) {
-            throw new UncheckedIOException(ioe);
-        }
-
-        properties.setProperty("jawr.debug.on", Boolean.toString(debug));
-        properties.setProperty("jawr.factory.use.orphans.mapper", Boolean.toString(false));
-
-        return properties;
-    }
-
-
-    @Bean
     public ServletContextAttributeExporter servletContextAttributeExporter(
             MetricRegistry metricRegistry,
             HealthCheckRegistry healthCheckRegistry) {
@@ -143,8 +119,14 @@ public class AppConfig {
     @Bean
     public Dialect processorDialect(
             ServerRuntime serverRuntime,
-            PkgLocalizationLookupService pkgLocalizationLookupService) {
-        return new Dialect(serverRuntime, pkgLocalizationLookupService);
+            PkgLocalizationLookupService pkgLocalizationLookupService,
+            @Value("${deployment.isproduction:false}") Boolean isProduction,
+            @Value("classpath:/spa1/js/index.txt") Resource singlePageApplicationJavaScriptIndexResource) {
+        return new Dialect(
+                serverRuntime,
+                pkgLocalizationLookupService,
+                isProduction,
+                singlePageApplicationJavaScriptIndexResource);
     }
 
 }

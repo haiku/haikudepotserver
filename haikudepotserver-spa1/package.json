@@ -1,0 +1,21 @@
+{
+  "name": "haikudepotserver-spa1",
+  "version": "1.0.0",
+  "license": "MIT",
+  "homepage": "https://github.com/haiku/haikudepotserver",
+  "type": "module",
+  "dependencies": {
+    "angular": "^1.8.3",
+    "angular-route": "^1.8.3",
+    "lru-cache": "^2.7.3",
+    "moment": "^2.29.4",
+    "npm-modernizr": "^2.8.3",
+    "underscore": "^1.13.6"
+  },
+  "devDependencies": {
+    "uglify-js": "^3.17.4"
+  },
+  "scripts": {
+    "build": "node ./src/etc/build.js"
+  }
+}

@@ -26,17 +26,24 @@ COPY ./pom.xml /hds-src/pom.xml
 COPY ./haikudepotserver-parent/pom.xml /hds-src/haikudepotserver-parent/pom.xml
 COPY ./haikudepotserver-driversettings/pom.xml /hds-src/haikudepotserver-driversettings/pom.xml
 COPY ./haikudepotserver-core-test/pom.xml /hds-src/haikudepotserver-core-test/pom.xml
+COPY ./haikudepotserver-api1/pom.xml /hds-src/haikudepotserver-api1/pom.xml
 COPY ./haikudepotserver-api2/pom.xml /hds-src/haikudepotserver-api2/pom.xml
 COPY ./haikudepotserver-packagefile/pom.xml /hds-src/haikudepotserver-packagefile/pom.xml
 COPY ./haikudepotserver-docs/pom.xml /hds-src/haikudepotserver-docs/pom.xml
+COPY ./haikudepotserver-spa1/pom.xml /hds-src/haikudepotserver-spa1/pom.xml
 COPY ./haikudepotserver-webapp/pom.xml /hds-src/haikudepotserver-webapp/pom.xml
-COPY ./haikudepotserver-api1/pom.xml /hds-src/haikudepotserver-api1/pom.xml
 COPY ./haikudepotserver-core/pom.xml /hds-src/haikudepotserver-core/pom.xml
 
 WORKDIR /hds-src
 
 # capture the dependencies into the image
 RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.3.0:go-offline
+
+COPY ./haikudepotserver-spa1/package.json /hds-src/haikudepotserver-spa1/package.json
+
+# capture the NodeJS dependencies into the image
+RUN ./mvnw -f haikudepotserver-spa1 com.github.eirslett:frontend-maven-plugin:install-node-and-npm
+RUN ./mvnw -f haikudepotserver-spa1 com.github.eirslett:frontend-maven-plugin:npm -Pfrontend.npm.arguments=ci
 
 # copy the rest of the source
 COPY ./haikudepotserver-parent /hds-src/haikudepotserver-parent
@@ -46,6 +53,7 @@ COPY ./haikudepotserver-api2 /hds-src/haikudepotserver-api2
 COPY ./haikudepotserver-packagefile /hds-src/haikudepotserver-packagefile
 COPY ./haikudepotserver-docs /hds-src/haikudepotserver-docs
 COPY ./haikudepotserver-webapp /hds-src/haikudepotserver-webapp
+COPY ./haikudepotserver-spa1 /hds-src/haikudepotserver-spa1
 COPY ./haikudepotserver-api1 /hds-src/haikudepotserver-api1
 COPY ./haikudepotserver-core /hds-src/haikudepotserver-core
 

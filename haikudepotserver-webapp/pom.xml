@@ -29,6 +29,11 @@
             <artifactId>haikudepotserver-api2</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.haiku</groupId>
+            <artifactId>haikudepotserver-spa1</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- used to render markdown to html -->
         <dependency>
@@ -49,11 +54,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.github.dtrunk90</groupId>
-            <artifactId>thymeleaf-jawr-extension</artifactId>
-            <version>2.0.3</version>
-        </dependency>
 
 
         <!-- required because jee apis are not included by default now and this
@@ -66,39 +66,8 @@
         </dependency>
 
         <dependency>
-            <groupId>net.jawr</groupId>
-            <artifactId>jawr-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>webjars-locator-core</artifactId>
-            <version>0.27</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>angularjs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>underscorejs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>momentjs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>modernizr</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>lru-cache</artifactId>
         </dependency>
 
         <!-- This one will pull in the ...-core module's test resources so that they
@@ -136,23 +105,6 @@
     </dependencies>
 
     <build>
-
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>jawr.properties</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${basedir}/src/main/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>jawr.properties</exclude>
-                </excludes>
-            </resource>
-        </resources>
 
         <plugins>
 
