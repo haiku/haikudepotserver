@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 public class PkgProminenceAndUserRatingSpreadsheetJobRunner
         extends AbstractJobRunner<PkgProminenceAndUserRatingSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgProminenceAndUserRatingSpreadsheetJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgProminenceAndUserRatingSpreadsheetJobRunner.class);
 
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
@@ -95,7 +95,7 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
                         List<Repository> repositories = Stream.concat(
                                 pkgProminences.stream().map(PkgProminence::getRepository),
                                 pkgUserRatingAggregates.stream().map(PkgUserRatingAggregate::getRepository)
-                        ).distinct().sorted().collect(Collectors.toList());
+                        ).distinct().sorted().toList();
 
                         if(repositories.isEmpty()) {
                             writer.writeNext(new String[]{ pkg.getName(),"","","","","" });

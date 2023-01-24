@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -159,21 +159,14 @@ public class AttributeIterator {
     }
 
     private Attribute readAttributeByTagType(int tagType, int encoding, AttributeId attributeId) {
-        switch (tagType) {
-            case ATTRIBUTE_TYPE_INVALID:
-                throw new HpkException("an invalid attribute tag type has been encountered");
-            case ATTRIBUTE_TYPE_INT:
-                return new IntAttribute(attributeId, new BigInteger(readBufferForInt(encoding)));
-            case ATTRIBUTE_TYPE_UINT:
-                return new IntAttribute(attributeId, new BigInteger(1, readBufferForInt(encoding)));
-            case ATTRIBUTE_TYPE_STRING:
-                return readString(encoding, attributeId);
-            case ATTRIBUTE_TYPE_RAW:
-                return readRaw(encoding, attributeId);
-            default:
-                throw new HpkException("unable to read the tag type [" + tagType + "]");
-
-        }
+        return switch (tagType) {
+            case ATTRIBUTE_TYPE_INVALID -> throw new HpkException("an invalid attribute tag type has been encountered");
+            case ATTRIBUTE_TYPE_INT -> new IntAttribute(attributeId, new BigInteger(readBufferForInt(encoding)));
+            case ATTRIBUTE_TYPE_UINT -> new IntAttribute(attributeId, new BigInteger(1, readBufferForInt(encoding)));
+            case ATTRIBUTE_TYPE_STRING -> readString(encoding, attributeId);
+            case ATTRIBUTE_TYPE_RAW -> readRaw(encoding, attributeId);
+            default -> throw new HpkException("unable to read the tag type [" + tagType + "]");
+        };
     }
 
     private byte[] readBufferForInt(int encoding) {
@@ -186,14 +179,11 @@ public class AttributeIterator {
     }
 
     private Attribute readString(int encoding, AttributeId attributeId) {
-        switch (encoding) {
-            case ATTRIBUTE_ENCODING_STRING_INLINE:
-                return readStringInline(attributeId);
-            case ATTRIBUTE_ENCODING_STRING_TABLE:
-                return readStringTable(attributeId);
-            default:
-                throw new HpkException("unknown string encoding; "+encoding);
-        }
+        return switch (encoding) {
+            case ATTRIBUTE_ENCODING_STRING_INLINE -> readStringInline(attributeId);
+            case ATTRIBUTE_ENCODING_STRING_TABLE -> readStringTable(attributeId);
+            default -> throw new HpkException("unknown string encoding; " + encoding);
+        };
     }
 
     private Attribute readStringTable(AttributeId attributeId) {
@@ -227,14 +217,11 @@ public class AttributeIterator {
     }
 
     private Attribute readRaw(int encoding, AttributeId attributeId) {
-        switch (encoding) {
-            case ATTRIBUTE_ENCODING_RAW_INLINE:
-                return readRawInline(attributeId);
-            case ATTRIBUTE_ENCODING_RAW_HEAP:
-                return readRawHeap(attributeId);
-            default:
-                throw new HpkException("unknown raw encoding; "+encoding);
-        }
+        return switch (encoding) {
+            case ATTRIBUTE_ENCODING_RAW_INLINE -> readRawInline(attributeId);
+            case ATTRIBUTE_ENCODING_RAW_HEAP -> readRawHeap(attributeId);
+            default -> throw new HpkException("unknown raw encoding; " + encoding);
+        };
     }
 
     private Attribute readRawInline(AttributeId attributeId) {

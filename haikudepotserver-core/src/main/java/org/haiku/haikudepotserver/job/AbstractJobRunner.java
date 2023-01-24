@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,7 +33,7 @@ public abstract class AbstractJobRunner<T extends JobSpecification> implements J
     public String getJobTypeCode() {
         String sn = this.getClass().getSimpleName();
 
-        if(!sn.endsWith(SUFFIX)) {
+        if (!sn.endsWith(SUFFIX)) {
             throw new IllegalStateException("malformed job runner concrete class; " + sn);
         }
 

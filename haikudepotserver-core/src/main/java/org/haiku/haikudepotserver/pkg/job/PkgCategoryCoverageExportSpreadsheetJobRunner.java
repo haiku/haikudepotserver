@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -38,9 +38,9 @@ import java.util.stream.Collectors;
 @Component
 public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCategorySpreadsheetJobRunner<PkgCategoryCoverageExportSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgCategoryCoverageExportSpreadsheetJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgCategoryCoverageExportSpreadsheetJobRunner.class);
 
-    private RepositoryService repositoryService;
+    private final RepositoryService repositoryService;
 
     public PkgCategoryCoverageExportSpreadsheetJobRunner(
             ServerRuntime serverRuntime,
@@ -93,18 +93,15 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                         PkgSupplement pkgSupplement = pkg.getPkgSupplement();
 
                         List<String> cols = new ArrayList<>();
-                        Optional<PkgVersionLocalization> locOptional = Optional.empty();
-
-                        if (null != pkg) {
-                            locOptional = PkgVersionLocalization.getAnyPkgVersionLocalizationForPkg(context, pkg);
-                        }
+                        Optional<PkgVersionLocalization> locOptional
+                                = PkgVersionLocalization.getAnyPkgVersionLocalizationForPkg(context, pkg);
 
                         cols.add(pkg.getName());
                         cols.add(repositoryService.getRepositoriesForPkg(context, pkg)
                                 .stream()
                                 .map(Repository::getCode)
                                 .collect(Collectors.joining(";")));
-                        cols.add(locOptional.isPresent() ? locOptional.get().getSummary().orElse("") : "");
+                        cols.add(locOptional.map(pkgVersionLocalization -> pkgVersionLocalization.getSummary().orElse("")).orElse(""));
                         cols.add(pkgSupplement.getPkgPkgCategories().isEmpty() ? AbstractJobRunner.MARKER : "");
 
                         for (String pkgCategoryCode : pkgCategoryCodes) {

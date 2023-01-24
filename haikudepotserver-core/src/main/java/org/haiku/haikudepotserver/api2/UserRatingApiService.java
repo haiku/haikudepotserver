@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -29,7 +29,6 @@ import org.haiku.haikudepotserver.api2.model.SearchUserRatingsPkg;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsPkgVersion;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResult;
-import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResultItemsInner;
 import org.haiku.haikudepotserver.api2.model.SearchUserRatingsUser;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRatingFilter;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRatingRequestEnvelope;
@@ -173,31 +172,22 @@ public class UserRatingApiService extends AbstractApiService {
 
         // check the package version
 
-        Optional<PkgVersion> pkgVersionOptional;
-
-        switch(request.getPkgVersionType()) {
-            case LATEST:
-                pkgVersionOptional = pkgService.getLatestPkgVersionForPkg(
-                        context,
-                        pkg,
-                        repositorySource,
-                        Collections.singletonList(architecture));
-                break;
-
-            case SPECIFIC:
-                pkgVersionOptional = PkgVersion.tryGetForPkg(
-                        context, pkg, repositorySource, architecture,
-                        new VersionCoordinates(
-                                request.getPkgVersionMajor(),
-                                request.getPkgVersionMinor(),
-                                request.getPkgVersionMicro(),
-                                request.getPkgVersionPreRelease(),
-                                request.getPkgVersionRevision()));
-                break;
-
-            default:
-                throw new IllegalStateException("unsupported pkg version type; " + request.getPkgVersionType());
-        }
+        Optional<PkgVersion> pkgVersionOptional = switch (request.getPkgVersionType()) {
+            case LATEST -> pkgService.getLatestPkgVersionForPkg(
+                    context,
+                    pkg,
+                    repositorySource,
+                    Collections.singletonList(architecture));
+            case SPECIFIC -> PkgVersion.tryGetForPkg(
+                    context, pkg, repositorySource, architecture,
+                    new VersionCoordinates(
+                            request.getPkgVersionMajor(),
+                            request.getPkgVersionMinor(),
+                            request.getPkgVersionMicro(),
+                            request.getPkgVersionPreRelease(),
+                            request.getPkgVersionRevision()));
+            default -> throw new IllegalStateException("unsupported pkg version type; " + request.getPkgVersionType());
+        };
 
         if(pkgVersionOptional.isEmpty()) {
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName()+"_"+request.getPkgVersionType());
@@ -522,7 +512,7 @@ public class UserRatingApiService extends AbstractApiService {
                                     .preRelease(ur.getPkgVersion().getPreRelease())
                                     .revision(ur.getPkgVersion().getRevision())
                                     .pkg(new SearchUserRatingsPkg().name(ur.getPkgVersion().getPkg().getName()))))
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
 
         return new SearchUserRatingsResult()
@@ -548,38 +538,23 @@ public class UserRatingApiService extends AbstractApiService {
 
         for (UpdateUserRatingFilter filter : request.getFilter()) {
 
-            switch(filter) {
-
-                case ACTIVE:
+            switch (filter) {
+                case ACTIVE -> {
                     if (null == request.getActive()) {
                         throw new IllegalStateException("the active flag must be supplied to configure this field");
                     }
-
                     userRating.setActive(request.getActive());
-                    break;
-
-                case COMMENT:
-                    userRating.setComment(StringUtils.trimToNull(request.getComment()));
-                    break;
-
-                case NATURALLANGUAGE:
-                    userRating.setNaturalLanguage(getNaturalLanguage(context, request.getNaturalLanguageCode()));
-                    break;
-
-                case RATING:
-                    userRating.setRating(Optional.ofNullable(request.getRating()).map(Number::shortValue).orElse(null));
-                    break;
-
-                case USERRATINGSTABILITY:
-                        userRating.setUserRatingStability(
-                                Optional.ofNullable(request.getUserRatingStabilityCode())
-                                                .map(urc -> UserRatingStability.getByCode(context, urc))
-                                                        .orElse(null));
-                    break;
-
-                default:
-                    throw new IllegalStateException("the filter; "+filter.name()+" is not handled");
-
+                }
+                case COMMENT -> userRating.setComment(StringUtils.trimToNull(request.getComment()));
+                case NATURALLANGUAGE ->
+                        userRating.setNaturalLanguage(getNaturalLanguage(context, request.getNaturalLanguageCode()));
+                case RATING ->
+                        userRating.setRating(Optional.ofNullable(request.getRating()).map(Number::shortValue).orElse(null));
+                case USERRATINGSTABILITY -> userRating.setUserRatingStability(
+                        Optional.ofNullable(request.getUserRatingStabilityCode())
+                                .map(urc -> UserRatingStability.getByCode(context, urc))
+                                .orElse(null));
+                default -> throw new IllegalStateException("the filter; " + filter.name() + " is not handled");
             }
 
         }

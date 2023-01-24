@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,7 +10,7 @@ import com.google.common.escape.Escapers;
 
 public class LikeHelper {
 
-    private static char CHAR_ESCAPE = '|';
+    private static final char CHAR_ESCAPE = '|';
 
     public static Escaper ESCAPER = Escapers
             .builder()

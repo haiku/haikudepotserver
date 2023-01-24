@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,8 +43,8 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
 
     private static final String PREFIX_BASE_NAME_CLASSPATH = "classpath:";
 
-    private ServerRuntime serverRuntime;
-    private List<String> messageSourceBaseNames;
+    private final ServerRuntime serverRuntime;
+    private final List<String> messageSourceBaseNames;
 
     /**
      * <p>This data cannot change over the life-span of the application server so
@@ -222,11 +222,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
 
         Boolean pkgLocalizationB = getNaturalLanguageCodeHasPkgLocalization().get(naturalLanguageCode);
 
-        if (null != pkgLocalizationB && pkgLocalizationB) {
-            return true;
-        }
-
-        return false;
+        return null != pkgLocalizationB && pkgLocalizationB;
     }
 
     @Override

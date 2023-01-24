@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -59,11 +59,11 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
             throws IOException {
         append(
                 state,
-                String.class.cast(row.get(COLUMN_PKG_NAME)),
-                Number.class.cast(row.get(COLUMN_SIZE)),
-                String.class.cast(row.get(COLUMN_MEDIA_TYPE_CODE)),
-                byte[].class.cast(row.get(COLUMN_PAYLOAD)),
-                Date.class.cast(row.get(COLUMN_PKG_MODIFY_TIMESTAMP))
+                (String) row.get(COLUMN_PKG_NAME),
+                (Number) row.get(COLUMN_SIZE),
+                (String) row.get(COLUMN_MEDIA_TYPE_CODE),
+                (byte[]) row.get(COLUMN_PAYLOAD),
+                (Date) row.get(COLUMN_PKG_MODIFY_TIMESTAMP)
         );
     }
 

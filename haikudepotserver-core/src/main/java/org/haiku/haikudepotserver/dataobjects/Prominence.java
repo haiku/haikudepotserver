@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,12 @@ public class Prominence extends _Prominence {
 
     public final static Integer ORDERING_LAST = 1000;
 
-    public static Optional<Prominence> getByOrdering(ObjectContext context, Integer ordering) {
+    public static Prominence getByOrdering(ObjectContext context, Integer ordering) {
+        return tryGetByOrdering(context, ordering)
+                .orElseThrow(() -> new IllegalStateException("unable to find prominence for ordering [" + ordering + "]"));
+    }
+
+    public static Optional<Prominence> tryGetByOrdering(ObjectContext context, Integer ordering) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkState(null != ordering && ordering >= 0, "bad ordering");
         return getAll(context).stream().filter((p) -> p.getOrdering().equals(ordering)).findFirst();

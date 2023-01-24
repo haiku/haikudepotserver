@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -236,7 +236,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         if (pkgOptional.isPresent()) {
 
             Optional<org.haiku.haikudepotserver.dataobjects.MediaType> mediaType =
-                    org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, leafnameExtension);
+                    org.haiku.haikudepotserver.dataobjects.MediaType.tryGetByExtension(context, leafnameExtension);
 
             if (mediaType.isEmpty()) {
                 return new ArchiveEntryResult(Action.INVALID, "unknown file-extension");

@@ -145,7 +145,7 @@ public class IntegrationTestSupportService {
 
         StandardTestData result = new StandardTestData();
 
-        Prominence prominence = Prominence.getByOrdering(context, Prominence.ORDERING_LAST).get();
+        Prominence prominence = Prominence.tryGetByOrdering(context, Prominence.ORDERING_LAST).get();
 
         Architecture x86_64 = Architecture.getByCode(context, "x86_64");
         Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2");

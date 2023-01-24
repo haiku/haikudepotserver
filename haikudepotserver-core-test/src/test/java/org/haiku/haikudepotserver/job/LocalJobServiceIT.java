@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,7 +63,7 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
         List<String> guids = IntStream.of(1,2,3,4)
                 .mapToObj((i) -> new TestNumberedLinesJobSpecification(3, 500L))
                 .map((spec) -> jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_NONE))
-                .collect(Collectors.toList());
+                .toList();
         String immediateGuid = jobService.immediate(new TestNumberedLinesJobSpecification(3, 500L), false);
         // -------------------------
 
@@ -91,7 +91,7 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
                             Assertions.assertThat(CharStreams.toString(reader)).isEqualTo("0\n1\n2\n");
                         }
                     } catch (IOException ioe) {
-                        new UncheckedIOException(ioe);
+                        throw new UncheckedIOException(ioe);
                     }
                 });
 

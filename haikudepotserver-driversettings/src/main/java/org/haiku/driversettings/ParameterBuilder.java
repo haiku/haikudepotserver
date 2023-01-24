@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,7 +14,7 @@ import java.util.List;
 public class ParameterBuilder {
 
     private String name = null;
-    private List<String> values = new ArrayList<>();
+    private final List<String> values = new ArrayList<>();
     private List<Parameter> parameters = Collections.emptyList();
 
     private ParameterBuilder() {

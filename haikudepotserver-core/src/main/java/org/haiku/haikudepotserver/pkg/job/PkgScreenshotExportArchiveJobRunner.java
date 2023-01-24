@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -59,10 +59,10 @@ public class PkgScreenshotExportArchiveJobRunner
             throws IOException {
         append(
                 state,
-                String.class.cast(row.get(COLUMN_PKG_NAME)),
-                byte[].class.cast(row.get(COLUMN_PAYLOAD)),
-                Date.class.cast(row.get(COLUMN_PKG_MODIFY_TIMESTAMP)),
-                Integer.class.cast(row.get(COLUMN_ORDERING))
+                (String) row.get(COLUMN_PKG_NAME),
+                (byte[]) row.get(COLUMN_PAYLOAD),
+                (Date) row.get(COLUMN_PKG_MODIFY_TIMESTAMP),
+                (Integer) row.get(COLUMN_ORDERING)
         );
     }
 

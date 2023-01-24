@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -74,7 +74,6 @@ public class UserApiService extends AbstractApiService {
     private final CaptchaService captchaService;
     private final UserAuthenticationService userAuthenticationService;
     private final UserService userService;
-    private final UserRatingService userRatingService;
     private final PasswordResetService passwordResetService;
     private final JobService jobService;
 
@@ -84,7 +83,6 @@ public class UserApiService extends AbstractApiService {
             CaptchaService captchaService,
             UserAuthenticationService userAuthenticationService,
             UserService userService,
-            UserRatingService userRatingService,
             PasswordResetService passwordResetService,
             JobService jobService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
@@ -92,7 +90,6 @@ public class UserApiService extends AbstractApiService {
         this.captchaService = Preconditions.checkNotNull(captchaService);
         this.userAuthenticationService = Preconditions.checkNotNull(userAuthenticationService);
         this.userService = Preconditions.checkNotNull(userService);
-        this.userRatingService = Preconditions.checkNotNull(userRatingService);
         this.passwordResetService = Preconditions.checkNotNull(passwordResetService);
         this.jobService = Preconditions.checkNotNull(jobService);
     }

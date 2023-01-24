@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,7 @@ public class CapturingMailSender implements MailSender {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(CapturingMailSender.class);
 
-    private List<SimpleMailMessage> sentMessages = new ArrayList<>();
+    private final List<SimpleMailMessage> sentMessages = new ArrayList<>();
 
     @Override
     public void send(SimpleMailMessage simpleMessage) throws MailException {

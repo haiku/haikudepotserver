@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,7 +43,7 @@ import java.util.zip.GZIPOutputStream;
 @Component
 public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDumpExportJobSpecification> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgDumpExportJobRunner.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(PkgDumpExportJobRunner.class);
 
     private final ServerRuntime serverRuntime;
     private final MessageSource messageSource;

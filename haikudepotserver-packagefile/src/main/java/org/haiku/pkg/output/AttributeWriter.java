@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,21 +46,16 @@ public class AttributeWriter extends FilterWriter {
 
         try {
             switch (attribute.getAttributeType()) {
-                case RAW:
+                case RAW -> {
                     ByteSource byteSource = (ByteSource) attribute.getValue(context);
                     write(String.format("%d bytes", byteSource.size()));
                     if (byteSource instanceof RawHeapAttribute.HeapByteSource) {
                         HeapCoordinates coordinates = ((RawHeapAttribute.HeapByteSource) byteSource).getHeapCoordinates();
                         write(String.format(" {off:%d, len:%d}", coordinates.getOffset(), coordinates.getLength()));
                     }
-                    break;
-                case INT:
-                case STRING:
-                    write(attribute.getValue(context).toString());
-                    break;
-                default:
-                    write("???");
-                    break;
+                }
+                case INT, STRING -> write(attribute.getValue(context).toString());
+                default -> write("???");
             }
         }
         catch (HpkException e) {

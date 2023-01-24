@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -58,20 +58,17 @@ public class URLHelperService {
         LOGGER.info("will transfer [{}] --> [{}]", url, targetFile);
         String protocol = StringUtils.trimToEmpty(url.getProtocol());
 
-        switch(protocol) {
-            case "http":
-            case "https":
+        switch (protocol) {
+            case "http", "https" -> {
                 FileHelper.streamUrlDataToFile(url, targetFile, PAYLOAD_LENGTH_READ_TIMEOUT);
                 LOGGER.info("copied [{}] to [{}]", url, targetFile);
-                break;
-            case "file":
+            }
+            case "file" -> {
                 File sourceFile = new File(url.getPath());
                 Files.copy(sourceFile, targetFile);
                 LOGGER.info("copied [{}] to [{}]", sourceFile, targetFile);
-                break;
-            default:
-                LOGGER.warn("unable to transfer for URL scheme [{}]", protocol);
-                break;
+            }
+            default -> LOGGER.warn("unable to transfer for URL scheme [{}]", protocol);
         }
     }
 
@@ -81,30 +78,24 @@ public class URLHelperService {
         Optional<Long> result = Optional.empty();
         String protocol = StringUtils.trimToEmpty(url.getProtocol());
 
-        switch(protocol) {
-
-            case "http":
-            case "https":
+        switch (protocol) {
+            case "http", "https" -> {
                 try {
                     result = tryGetPayloadLengthHttp(url.toURI());
                 } catch (URISyntaxException use) {
                     throw new IllegalStateException("unable to obtain a uri from [" + url + "]");
                 }
-                break;
-
-            case "file":
+            }
+            case "file" -> {
                 File file = new File(url.getPath());
-
                 if (file.exists() && file.isFile()) {
                     result = Optional.of(file.length())
                             .filter(l -> l > 0L);
                 } else {
                     LOGGER.warn("unable to find the local file [{}]", url.getPath());
                 }
-                break;
-            default:
-                LOGGER.warn("unable to get the payload length for URL scheme [{}]", protocol);
-                break;
+            }
+            default -> LOGGER.warn("unable to get the payload length for URL scheme [{}]", protocol);
         }
 
         result.ifPresent(l -> LOGGER.info("did obtain length [{}b] for url [{}]", l, url));
@@ -119,17 +110,15 @@ public class URLHelperService {
                             .build(), HttpResponse.BodyHandlers.discarding());
 
             switch (response.statusCode()) {
-                case 200:
-                case 204:
+                case 200, 204 -> {
                     Optional<Long> lengthOptional = response.headers().firstValue(HttpHeaders.CONTENT_LENGTH)
                             .map(Long::parseLong);
                     if (lengthOptional.isEmpty()) {
                         LOGGER.warn("missing or bad content-length header at [{}]", uri);
                     }
                     return lengthOptional;
-                default:
-                    LOGGER.warn("bad response from [" + uri + "] when getting the length");
-                    break;
+                }
+                default -> LOGGER.warn("bad response from [" + uri + "] when getting the length");
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();

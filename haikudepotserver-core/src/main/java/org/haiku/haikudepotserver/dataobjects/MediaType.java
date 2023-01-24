@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,12 +30,17 @@ public class MediaType extends _MediaType {
         return ObjectSelect.query(MediaType.class).orderBy(CODE.asc()).sharedCache().select(context);
     }
 
+    public static MediaType getByExtension(ObjectContext context, String extension) {
+        return tryGetByExtension(context, extension)
+                .orElseThrow(() -> new IllegalStateException("unable to find media type for extension [" + extension + "]"));
+    }
+
     /**
      * <p>Files can have extensions that help to signify what sort of files they are.  For example, a PNG file would
      * have the extension "png".  This method will be able to return a media type for a given file extension.</p>
      */
 
-    public static Optional<MediaType> getByExtension(ObjectContext context, String extension) {
+    public static Optional<MediaType> tryGetByExtension(ObjectContext context, String extension) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(extension), "the extension must be provided");
 

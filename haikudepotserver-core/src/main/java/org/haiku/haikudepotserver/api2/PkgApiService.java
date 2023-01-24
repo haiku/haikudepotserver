@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -914,7 +914,7 @@ public class PkgApiService extends AbstractApiService {
             throw new AccessDeniedException("unable to edit the package prominence for [" + pkg + "]");
         }
 
-        Prominence prominence = Prominence.getByOrdering(context, request.getProminenceOrdering())
+        Prominence prominence = Prominence.tryGetByOrdering(context, request.getProminenceOrdering())
                 .orElseThrow(() -> new ObjectNotFoundException(Prominence.class.getSimpleName(), request.getProminenceOrdering()));
 
         PkgProminence pkgProminence = pkgService.ensurePkgProminence(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Andrew Lindesay
+ * Copyright 2020-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.security;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 public class RepositoryAuthenticationProvider implements org.springframework.security.authentication.AuthenticationProvider {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryAuthenticationProvider.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(RepositoryAuthenticationProvider.class);
 
     private final ServerRuntime serverRuntime;
 

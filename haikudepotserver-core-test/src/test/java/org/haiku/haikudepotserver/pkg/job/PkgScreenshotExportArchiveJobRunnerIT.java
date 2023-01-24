@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -36,7 +36,7 @@ import java.util.zip.GZIPInputStream;
 public class PkgScreenshotExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunnerIT.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunnerIT.class);
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
@@ -79,22 +79,29 @@ public class PkgScreenshotExportArchiveJobRunnerIT extends AbstractIntegrationTe
             Pattern pngPattern = Pattern.compile("^" + PkgScreenshotExportArchiveJobRunner.PATH_COMPONENT_TOP + "/pkg1/([0-9]+).png$");
             ByteSource zipNoCloseInputStreamByteSource = new ByteSource() {
                 @Override
-                public InputStream openStream() throws IOException {
+                public InputStream openStream() {
                     return new WrapWithNoCloseInputStream(tarInputStream);
                 }
             };
-
-            ByteSource expectedScreenshotByteSource = getResourceByteSource("sample-320x240-a.png");
 
             Set<String> foundPkg1Filenames = Sets.newHashSet();
 
             while(null != (tarEntry = tarInputStream.getNextEntry())) {
 
                 if(tarEntry.getName().contains("/pkg1/")) {
+
+                    // we know what the content of the first image should be so check it.
+
+                    if (tarEntry.getName().equals("hscr/pkg1/1.png")) {
+                        ByteSource expectedScreenshotByteSource = getResourceByteSource("sample-320x240-a.png");
+                        Assertions.assertThat(expectedScreenshotByteSource.contentEquals(zipNoCloseInputStreamByteSource)).isTrue();
+                    }
+
+                    // collect the filenames of the other images in the output tar file.
+
                     Matcher matcher = pngPattern.matcher(tarEntry.getName());
 
                     if (matcher.matches()) {
-                        expectedScreenshotByteSource.contentEquals(zipNoCloseInputStreamByteSource);
                         foundPkg1Filenames.add(matcher.group(1) + ".png");
                     }
                     else {

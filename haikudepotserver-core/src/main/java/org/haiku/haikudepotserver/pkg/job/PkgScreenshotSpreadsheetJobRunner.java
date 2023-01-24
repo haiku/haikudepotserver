@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,11 +32,11 @@ import java.util.stream.Collectors;
 
 public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScreenshotSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotSpreadsheetJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotSpreadsheetJobRunner.class);
 
-    private ServerRuntime serverRuntime;
-    private RepositoryService repositoryService;
-    private PkgService pkgService;
+    private final ServerRuntime serverRuntime;
+    private final RepositoryService repositoryService;
+    private final PkgService pkgService;
 
     public PkgScreenshotSpreadsheetJobRunner(
             ServerRuntime serverRuntime,

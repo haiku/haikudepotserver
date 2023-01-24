@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -24,8 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.stream.Collectors;
 
 public abstract class AbstractApiImpl {
 
@@ -117,7 +115,7 @@ public abstract class AbstractApiImpl {
                                     .map(ve -> new ErrorDataInner()
                                             .key(ve.getProperty())
                                             .value(ve.getMessage()))
-                                    .collect(Collectors.toUnmodifiableList()));
+                                    .toList());
         }
 
         // special output for cayenne validation exceptions
@@ -130,7 +128,7 @@ public abstract class AbstractApiImpl {
                     .data(validationException.getValidationResult().getFailures()
                             .stream()
                             .map(AbstractApiImpl::mapToErrorData)
-                            .collect(Collectors.toUnmodifiableList()));
+                            .toList());
         }
 
         LOGGER.error("unhandled exception", t);

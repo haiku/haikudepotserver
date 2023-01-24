@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PasswordResetMaintenanceJobRunner extends AbstractJobRunner<PasswordResetMaintenanceJobSpecification> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PasswordResetMaintenanceJobRunner.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(PasswordResetMaintenanceJobRunner.class);
 
     private final PasswordResetServiceImpl passwordResetService;
 

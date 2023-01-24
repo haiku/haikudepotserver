@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -61,7 +61,7 @@ public class QueryCacheRemoveGroupListener implements LifecycleListener {
     public void init() {
         LifecycleCallbackRegistry callbackRegistry = serverRuntime.getDataDomain().getEntityResolver().getCallbackRegistry();
 
-        for (Class entityClass : entityClasses) {
+        for (Class<?> entityClass : entityClasses) {
             callbackRegistry.addListener(entityClass, this);
         }
 

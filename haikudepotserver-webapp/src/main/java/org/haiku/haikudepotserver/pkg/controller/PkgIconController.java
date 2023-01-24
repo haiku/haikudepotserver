@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -41,7 +41,7 @@ import java.util.Optional;
 @Controller
 public class PkgIconController extends AbstractController {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconController.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(PkgIconController.class);
 
     public final static String SEGMENT_PKGICON = "__pkgicon";
 
@@ -230,49 +230,38 @@ public class PkgIconController extends AbstractController {
         PkgSupplement pkgSupplement = pkg.get().getPkgSupplement();
 
         switch (format) {
-
-            case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_HAIKUVECTORICONFILE:
+            case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_HAIKUVECTORICONFILE -> {
                 Optional<PkgIcon> hvifPkgIcon = pkg.get().getPkgSupplement().tryGetPkgIcon(
-                        org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, format).get(),
+                        org.haiku.haikudepotserver.dataobjects.MediaType.getByExtension(context, format),
                         null);
-
                 if (hvifPkgIcon.isPresent()) {
                     byte[] data = hvifPkgIcon.get().getPkgIconImage().getData();
                     response.setContentType(org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
                     outputToResponse(response, pkgSupplement, data, requestMethod == RequestMethod.GET);
-                }
-                else {
+                } else {
                     throw new PkgIconNotFound();
                 }
-                break;
-
-            case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_PNG:
-
+            }
+            case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_PNG -> {
                 if (null == size) {
                     throw new IllegalArgumentException("the size must be provided when requesting a PNG");
                 }
-
                 size = normalizeSize(size);
                 Optional<byte[]> pngImageData = renderedPkgIconRepository.render(
                         size, context, pkg.get().getPkgSupplement());
-
-                if (!pngImageData.isPresent()) {
+                if (pngImageData.isEmpty()) {
                     if ((null == fallback) || !fallback) {
                         throw new PkgIconNotFound();
                     }
 
                     handleGenericHeadOrGet(requestMethod, response, size, true);
-                }
-                else {
+                } else {
                     byte[] data = pngImageData.get();
                     response.setContentType(MediaType.PNG.toString());
                     outputToResponse(response, pkgSupplement, data, requestMethod == RequestMethod.GET);
                 }
-                break;
-
-            default:
-                throw new IllegalStateException("unexpected format; " + format);
-
+            }
+            default -> throw new IllegalStateException("unexpected format; " + format);
         }
 
     }
@@ -296,15 +285,15 @@ public class PkgIconController extends AbstractController {
     // these are the various errors that can arise in supplying or providing a package icon.
 
     @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the package name must be supplied")
-    private class MissingPkgName extends RuntimeException {}
+    private static class MissingPkgName extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the format must be supplied and must (presently) be 'png'")
-    private class MissingOrBadFormat extends RuntimeException {}
+    private static class MissingOrBadFormat extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
-    private class PkgNotFound extends RuntimeException {}
+    private static class PkgNotFound extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package icon was unable to found")
-    private class PkgIconNotFound extends RuntimeException {}
+    private static class PkgIconNotFound extends RuntimeException {}
 
 }

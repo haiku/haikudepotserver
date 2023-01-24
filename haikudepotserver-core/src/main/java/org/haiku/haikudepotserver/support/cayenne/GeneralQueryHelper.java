@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support.cayenne;
@@ -24,8 +24,7 @@ public class GeneralQueryHelper {
                                 .stream()
                                 .map(CreateAndModifyTimestamped::getModifyTimestamp)
                 )
-                .sorted(Comparator.reverseOrder())
-                .findFirst()
+                .max(Comparator.naturalOrder())
                 .map(DateTimeHelper::secondAccuracyDate)
                 .orElse(new java.sql.Timestamp(0L));
 

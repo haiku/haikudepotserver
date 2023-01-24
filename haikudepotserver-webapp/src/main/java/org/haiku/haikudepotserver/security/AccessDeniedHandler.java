@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Andrew Lindesay
+ * Copyright 2021-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.security;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class AccessDeniedHandler
         implements org.springframework.security.web.access.AccessDeniedHandler {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AccessDeniedHandler.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AccessDeniedHandler.class);
 
     private final ObjectMapper objectMapper;
 

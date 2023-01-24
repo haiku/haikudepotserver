@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022, Andrew Lindesay
+ * Copyright 2015-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,6 @@ public class WebConstants {
     public final static String PATH_COMPONENT_SECURED = "__secured";
 
     public final static String ANT_PATTERN_JS = "/__js/**";
-    public final static String ANT_PATTERN_WEBJAR = "/__webjars/**";
     public final static String ANT_PATTERN_CSS = "/__css/**";
     public final static String ANT_PATTERN_IMG = "/__img/**";
     public final static String ANT_PATTERN_DOCS = "/__docs/**";

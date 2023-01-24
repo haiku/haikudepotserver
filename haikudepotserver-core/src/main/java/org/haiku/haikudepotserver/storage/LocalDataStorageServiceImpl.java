@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public class LocalDataStorageServiceImpl implements DataStorageService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(LocalDataStorageServiceImpl.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(LocalDataStorageServiceImpl.class);
 
     private final static String PATH_APPTMPDIR = "haikudepotserver-data";
 

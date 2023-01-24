@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Repository
 public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository {
@@ -82,6 +81,9 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
     private synchronized byte[] getGenericHvif() {
         if (null == genericHvif) {
             try (InputStream inputStream = RenderedPkgIconRepositoryImpl.class.getResourceAsStream("/img/generic.hvif")) {
+                if (null == inputStream) {
+                    throw new IllegalStateException("unable to find the generic hvif resource");
+                }
                 genericHvif = ByteStreams.toByteArray(inputStream);
             }
             catch(IOException ioe) {
@@ -141,7 +143,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
                             .stream()
                             .filter(pi -> pi.getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.toString()))
                             .sorted(Comparator.comparing(_PkgIcon::getSize))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     for(PkgIcon pkgIcon : pkgIconList) {
                         if(pkgIcon.getSize() >= size) {

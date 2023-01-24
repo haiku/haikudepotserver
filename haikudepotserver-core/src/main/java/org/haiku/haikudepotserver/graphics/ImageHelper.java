@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021, Andrew Lindesay
+ * Copyright 2013-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -108,11 +108,11 @@ public class ImageHelper {
         public int height;
 
         public boolean areSides(int s) {
-            return s==width && s==height;
+            return s == width && s == height;
         }
 
         public String toString() {
-            return String.format("{%d,%d}",width,height);
+            return String.format("{%d,%d}", width, height);
         }
     }
 

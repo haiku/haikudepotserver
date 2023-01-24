@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,7 @@ public class VersionCoordinatesComparator implements Comparator<VersionCoordinat
 
     private boolean ignorePrereleaseAndRevision = false;
 
-    private NaturalStringComparator naturalStringComparator = new NaturalStringComparator();
+    private final NaturalStringComparator naturalStringComparator = new NaturalStringComparator();
 
     public VersionCoordinatesComparator() {
     }

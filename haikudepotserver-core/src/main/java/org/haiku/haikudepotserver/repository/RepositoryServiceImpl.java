@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -61,11 +61,11 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         List<Object> result = context.performQuery(query);
 
-        switch (result.size()) {
-            case 0: return new Date(0);
-            case 1: return DateTimeHelper.secondAccuracyDate((Date) result.get(0));
-            default: throw new IllegalStateException("more than one row returned for a max aggregate.");
-        }
+        return switch (result.size()) {
+            case 0 -> new Date(0);
+            case 1 -> DateTimeHelper.secondAccuracyDate((Date) result.get(0));
+            default -> throw new IllegalStateException("more than one row returned for a max aggregate.");
+        };
     }
 
     @Override
@@ -207,13 +207,10 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
 
-        switch (result.size()) {
-            case 1:
-                return result.get(0).longValue();
-
-            default:
-                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+        if (result.size() == 1) {
+            return result.get(0).longValue();
         }
+        throw new IllegalStateException("expected 1 row from count query, but got " + result.size());
     }
 
     public void setPassword(Repository repository, String passwordClear) {

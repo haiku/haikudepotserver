@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,10 +32,10 @@ import java.util.Optional;
 @Component
 public class PkgScreenshotOptimizationJobRunner extends AbstractJobRunner<PkgScreenshotOptimizationJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotOptimizationJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotOptimizationJobRunner.class);
 
-    private ServerRuntime serverRuntime;
-    private PkgScreenshotService screenshotService;
+    private final ServerRuntime serverRuntime;
+    private final PkgScreenshotService screenshotService;
 
     public PkgScreenshotOptimizationJobRunner(
             ServerRuntime serverRuntime,

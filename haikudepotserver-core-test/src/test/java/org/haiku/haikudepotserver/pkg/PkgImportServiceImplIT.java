@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -317,28 +317,21 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             Assertions.assertThat(pkgVersions.size()).isEqualTo(6);
 
             for(org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion : pkgVersions) {
-                switch(Integer.parseInt(pkgVersion.getMinor())) {
-
-                    case 1:
-                    case 2:
-                    case 3:
+                switch (Integer.parseInt(pkgVersion.getMinor())) {
+                    case 1, 2, 3 -> {
                         Assertions.assertThat(pkgVersion.getActive()).isTrue();
                         Assertions.assertThat(pkgVersion.getIsLatest()).isFalse();
-                        break;
-
-                    case 4:
+                    }
+                    case 4 -> {
                         Assertions.assertThat(pkgVersion.getActive()).isTrue();
                         Assertions.assertThat(pkgVersion.getIsLatest()).isTrue();
-                        break;
-
-                    case 5:
-                    case 6:
+                    }
+                    case 5, 6 -> {
                         Assertions.assertThat(pkgVersion.getActive()).isFalse();
                         Assertions.assertThat(pkgVersion.getIsLatest()).isFalse();
-                        break;
-
-                    default:
-                        throw new IllegalStateException("unknown pkg version; " + pkgVersion.toVersionCoordinates().toString());
+                    }
+                    default ->
+                            throw new IllegalStateException("unknown pkg version; " + pkgVersion.toVersionCoordinates().toString());
                 }
             }
 

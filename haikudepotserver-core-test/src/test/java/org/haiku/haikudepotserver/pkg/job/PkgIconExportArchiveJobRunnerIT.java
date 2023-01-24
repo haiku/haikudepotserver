@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ import java.util.zip.GZIPInputStream;
 @ContextConfiguration(classes = TestConfig.class)
 public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunnerIT.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunnerIT.class);
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
@@ -78,7 +79,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
             Pattern pngPattern = Pattern.compile("^" + PkgIconExportArchiveJobRunner.PATH_COMPONENT_TOP + "/pkg1/([0-9]+).png$");
             ByteSource zipNoCloseInputStreamByteSource = new ByteSource() {
                 @Override
-                public InputStream openStream() throws IOException {
+                public InputStream openStream() {
                     return new WrapWithNoCloseInputStream(tarInputStream);
                 }
             };
@@ -89,7 +90,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
                 if(tarEntry.getName().contains("/pkg1/")) {
                     if (tarEntry.getName().endsWith("/pkg1/icon.hvif")) {
-                        getResourceByteSource("sample.hvif").contentEquals(zipNoCloseInputStreamByteSource);
+                        Assert.assertTrue(getResourceByteSource("sample.hvif").contentEquals(zipNoCloseInputStreamByteSource));
                         foundPkg1Filenames.add("icon.hvif");
                     }
                     else {
@@ -98,7 +99,7 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
                         if (matcher.matches()) {
                             String expectedPath = "sample-" + matcher.group(1) + "x" + matcher.group(1) + ".png";
-                            getResourceByteSource(expectedPath).contentEquals(zipNoCloseInputStreamByteSource);
+                            Assert.assertTrue(getResourceByteSource(expectedPath).contentEquals(zipNoCloseInputStreamByteSource));
                             foundPkg1Filenames.add(matcher.group(1) + ".png");
                         }
                         else {

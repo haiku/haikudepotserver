@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -68,39 +68,24 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
 
         DataObject target = null;
 
-        if(null!=targetType) {
+        if (null != targetType) {
 
-            Optional<? extends DataObject> targetOptional;
-
-            if(Strings.isNullOrEmpty(targetIdentifier)) {
+            if (Strings.isNullOrEmpty(targetIdentifier)) {
                 throw new IllegalStateException("the target type is supplied, but no target identifier");
             }
 
-            switch(targetType) {
-                case PKG:
-                    targetOptional = Pkg.tryGetByName(objectContext, targetIdentifier);
-                    break;
-
-                case REPOSITORY:
-                    targetOptional = Repository.tryGetByCode(objectContext, targetIdentifier);
-                    break;
-
-                case USER:
-                    targetOptional = User.tryGetByNickname(objectContext, targetIdentifier);
-                    break;
-
-                case USERRATING:
-                    targetOptional = UserRating.tryGetByCode(objectContext, targetIdentifier);
-                    break;
-
-                default:
-                    throw new IllegalStateException("the target type is not handled; "+targetType.name());
-            }
+            Optional<? extends DataObject> targetOptional = switch (targetType) {
+                case PKG -> Pkg.tryGetByName(objectContext, targetIdentifier);
+                case REPOSITORY -> Repository.tryGetByCode(objectContext, targetIdentifier);
+                case USER -> User.tryGetByNickname(objectContext, targetIdentifier);
+                case USERRATING -> UserRating.tryGetByCode(objectContext, targetIdentifier);
+                default -> throw new IllegalStateException("the target type is not handled; " + targetType.name());
+            };
 
             // if the object was not able to be found then we should bail-out and say that the permission
             // does not apply.
 
-            if(!targetOptional.isPresent()) {
+            if(targetOptional.isEmpty()) {
                 return false;
             }
 
@@ -166,12 +151,13 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
 
         if (isAuthenticatedUserTarget(authenticatedUser, target)) {
             switch (permission) {
-                case USER_CHANGEPASSWORD:
-                case USER_VIEW:
-                case USER_AGREE_USAGE_CONDITIONS:
-                case USER_EDIT:
-                case USERRATING_REMOVE: // note; checks the user of the user rating
+                case USER_CHANGEPASSWORD,
+                        USER_VIEW,
+                        USER_AGREE_USAGE_CONDITIONS,
+                        USER_EDIT,
+                        USERRATING_REMOVE -> { // note; checks the user of the user rating
                     return true;
+                }
             }
         }
 
@@ -200,12 +186,12 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
 
         if (null != authenticatedUser) {
             switch (permission) {
-                case PKG_EDITICON:
-                case PKG_EDITSCREENSHOT:
-                case PKG_EDITCATEGORIES:
-                case PKG_EDITPROMINENCE:
-                case PKG_EDITCHANGELOG:
-                case PKG_EDITLOCALIZATION: {
+                case PKG_EDITICON,
+                        PKG_EDITSCREENSHOT,
+                        PKG_EDITCATEGORIES,
+                        PKG_EDITPROMINENCE,
+                        PKG_EDITCHANGELOG,
+                        PKG_EDITLOCALIZATION -> {
                     List<? extends AuthorizationPkgRule> rules = authenticatedUser.getAuthorizationPkgRules((Pkg) target);
                     if (rules
                             .stream()
@@ -214,7 +200,6 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
                         return true;
                     }
                 }
-                break;
             }
         }
 
@@ -222,95 +207,73 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
 
 
         switch (permission) {
-
-            case AUTHORIZATION_CONFIGURE:
+            case AUTHORIZATION_CONFIGURE -> {
                 return authenticatedUserIsRoot;
-
-            case REPOSITORY_EDIT:
-            case REPOSITORY_IMPORT:
+            }
+            case REPOSITORY_EDIT, REPOSITORY_IMPORT -> {
                 return authenticatedUserIsRoot;
-
-            case REPOSITORY_VIEW: {
+            }
+            case REPOSITORY_VIEW -> {
                 Repository repository = (Repository) target;
                 return repository.getActive() || authenticatedUserIsRoot;
             }
-
-            case REPOSITORY_LIST:
+            case REPOSITORY_LIST -> {
                 return true;
-
-            case REPOSITORY_LIST_INACTIVE:
+            }
+            case REPOSITORY_LIST_INACTIVE -> {
                 return authenticatedUserIsRoot;
-
-            case REPOSITORY_ADD:
+            }
+            case REPOSITORY_ADD -> {
                 return authenticatedUserIsRoot;
-
-            case USER_VIEWJOBS:
+            }
+            case USER_VIEWJOBS -> {
                 return authenticatedUserIsRoot || isAuthenticatedUserTarget(authenticatedUser, target);
-            case USER_LIST:
+            }
+            case USER_LIST -> {
                 return authenticatedUserIsRoot;
-            case USER_CHANGEPASSWORD:
-            case USER_VIEW:
-            case USER_AGREE_USAGE_CONDITIONS:
-            case USER_EDIT:
+            }
+            case USER_CHANGEPASSWORD, USER_VIEW, USER_AGREE_USAGE_CONDITIONS, USER_EDIT -> {
                 // ^^ see above for case where a user is acting upon themselves
                 return authenticatedUserIsRoot;
-
-            case PKG_CREATEUSERRATING:
+            }
+            case PKG_CREATEUSERRATING -> {
                 return true;
-
-            case PKG_EDITICON:
-            case PKG_EDITSCREENSHOT:
-            case PKG_EDITCATEGORIES:
-            case PKG_EDITLOCALIZATION:
-            case PKG_EDITCHANGELOG:
-            case PKG_EDITPROMINENCE:
-            case PKG_EDITVERSION:
+            }
+            case PKG_EDITICON, PKG_EDITSCREENSHOT, PKG_EDITCATEGORIES, PKG_EDITLOCALIZATION, PKG_EDITCHANGELOG, PKG_EDITPROMINENCE, PKG_EDITVERSION -> {
                 return authenticatedUserIsRoot;
-
-            case USERRATING_REMOVE:
+            }
+            case USERRATING_REMOVE -> {
                 // ^^ see above for case covering the user rating author
                 return authenticatedUserIsRoot;
-
-            case USERRATING_EDIT: {
+            }
+            case USERRATING_EDIT -> {
                 UserRating userRating = (UserRating) target;
                 return null != authenticatedUser && (
                         userRating.getUser().getNickname().equals(authenticatedUser.getNickname())
                                 || authenticatedUserIsRoot);
             }
-            case USERRATING_DERIVEANDSTOREFORPKG:
+            case USERRATING_DERIVEANDSTOREFORPKG -> {
                 return authenticatedUserIsRoot;
-
-            case BULK_PKGLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
-            case BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET:
-            case BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT:
-            case BULK_PKGSCREENSHOTSPREADSHEETREPORT:
-            case BULK_PKGICONSPREADSHEETREPORT:
-            case BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET:
-            case BULK_PKGICONEXPORTARCHIVE:
-            case BULK_PKGSCREENSHOTEXPORTARCHIVE:
+            }
+            case BULK_PKGLOCALIZATIONCOVERAGEEXPORTSPREADSHEET, BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET, BULK_PKGPROMINENCEANDUSERRATINGSPREADSHEETREPORT, BULK_PKGSCREENSHOTSPREADSHEETREPORT, BULK_PKGICONSPREADSHEETREPORT, BULK_PKGCATEGORYCOVERAGEEXPORTSPREADSHEET, BULK_PKGICONEXPORTARCHIVE, BULK_PKGSCREENSHOTEXPORTARCHIVE -> {
                 return null != authenticatedUser;
-
-            case BULK_PKGSCREENSHOTIMPORTARCHIVE:
-            case BULK_PKGICONIMPORTARCHIVE:
-            case BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET:
-            case BULK_USERRATINGSPREADSHEETREPORT_ALL:
-            case BULK_PKGVERSIONPAYLOADLENGTHPOPULATION:
+            }
+            case BULK_PKGSCREENSHOTIMPORTARCHIVE, BULK_PKGICONIMPORTARCHIVE, BULK_PKGCATEGORYCOVERAGEIMPORTSPREADSHEET, BULK_USERRATINGSPREADSHEETREPORT_ALL, BULK_PKGVERSIONPAYLOADLENGTHPOPULATION -> {
                 return authenticatedUserIsRoot;
-
-            case BULK_USERRATINGSPREADSHEETREPORT_PKG:
+            }
+            case BULK_USERRATINGSPREADSHEETREPORT_PKG -> {
                 return null != authenticatedUser;
-
-            case BULK_USERRATINGSPREADSHEETREPORT_USER: {
+            }
+            case BULK_USERRATINGSPREADSHEETREPORT_USER -> {
                 User targetUser = (User) target;
                 return null != authenticatedUser &&
                         (authenticatedUserIsRoot
                                 || authenticatedUser.getNickname().equals(targetUser.getNickname()));
             }
-            case JOBS_VIEW:
+            case JOBS_VIEW -> {
                 return authenticatedUserIsRoot;
-
-            default:
-                throw new IllegalStateException("unhandled permission; " + permission.name());
+            }
+            default -> throw new IllegalStateException("unhandled permission; " + permission.name());
         }
 
     }

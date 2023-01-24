@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,7 +22,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecific
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
 import org.haiku.haikudepotserver.pkg.model.SizeLimitReachedException;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
-import org.haiku.haikudepotserver.security.model.UserAuthorizationService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ByteCounterOutputStream;
 import org.haiku.haikudepotserver.support.web.AbstractController;
@@ -31,7 +30,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,10 +63,10 @@ public class PkgScreenshotController extends AbstractController {
 
     private final static int SCREENSHOT_SIDE_LIMIT = 1500;
 
-    private ServerRuntime serverRuntime;
-    private PkgScreenshotService pkgScreenshotService;
-    private JobService jobService;
-    private PermissionEvaluator permissionEvaluator;
+    private final ServerRuntime serverRuntime;
+    private final PkgScreenshotService pkgScreenshotService;
+    private final JobService jobService;
+    private final PermissionEvaluator permissionEvaluator;
 
     public PkgScreenshotController(
             ServerRuntime serverRuntime,
@@ -112,18 +115,14 @@ public class PkgScreenshotController extends AbstractController {
                 screenshot.getPkgSupplement().getLatestPkgModifyTimestampSecondAccuracy().getTime());
 
         switch (requestMethod) {
-            case HEAD:
+            case HEAD -> {
                 ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(ByteStreams.nullOutputStream());
                 pkgScreenshotService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
                 response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
-                break;
-
-            case GET:
-                pkgScreenshotService.writePkgScreenshotImage(response.getOutputStream(), context, screenshot, targetWidth, targetHeight);
-                break;
-
-            default:
-                throw new IllegalStateException("unhandled request method; "+requestMethod);
+            }
+            case GET ->
+                    pkgScreenshotService.writePkgScreenshotImage(response.getOutputStream(), context, screenshot, targetWidth, targetHeight);
+            default -> throw new IllegalStateException("unhandled request method; " + requestMethod);
         }
 
     }
@@ -183,7 +182,7 @@ public class PkgScreenshotController extends AbstractController {
         ObjectContext context = serverRuntime.newContext();
         PkgScreenshot screenshot = PkgScreenshot.tryGetByCode(context, screenshotCode)
                 .orElseThrow(ScreenshotNotFound::new);
-        byte[] data = screenshot.tryGetPkgScreenshotImage().get().getData();
+        byte[] data = screenshot.getPkgScreenshotImage().getData();
         org.haiku.haikudepotserver.dataobjects.MediaType mediaType = screenshot.tryGetPkgScreenshotImage().get().getMediaType();
 
         // TODO - find a better way to do this.
@@ -234,8 +233,6 @@ public class PkgScreenshotController extends AbstractController {
 
         // check the authorization
 
-        Optional<User> user = tryObtainAuthenticatedUser(context);
-
         if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
                 pkg, Permission.PKG_EDITSCREENSHOT)) {
@@ -270,24 +267,24 @@ public class PkgScreenshotController extends AbstractController {
     // these are the various errors that can arise in supplying or providing a package icon.
 
     @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the target width or height must be greater than zero and less than the maximum")
-    public class BadSize extends RuntimeException {}
+    public static class BadSize extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the package name must be supplied")
-    public class MissingPkgName extends RuntimeException {}
+    public static class MissingPkgName extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the screenshot code must be supplied")
-    public class MissingScreenshotCode extends RuntimeException {}
+    public static class MissingScreenshotCode extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the format must be supplied and must (presently) be 'png'")
-    public class MissingOrBadFormat extends RuntimeException {}
+    public static class MissingOrBadFormat extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
-    public class PkgNotFound extends RuntimeException {}
+    public static class PkgNotFound extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested screenshot was unable to found")
-    public class ScreenshotNotFound extends RuntimeException {}
+    public static class ScreenshotNotFound extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.UNAUTHORIZED, reason="the requested package cannot be edited by the authenticated user")
-    public class PkgAuthorizationFailure extends RuntimeException {}
+    public static class PkgAuthorizationFailure extends RuntimeException {}
 
 }

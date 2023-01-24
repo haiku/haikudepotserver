@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -132,33 +132,19 @@ public class HomeController {
         searchSpecification.setNaturalLanguage(naturalLanguage);
 
         switch (null == viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {
-
-            case FEATURED:
-                searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.PROMINENCE);
-                break;
-
-            case CATEGORIES:
+            case FEATURED -> searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.PROMINENCE);
+            case CATEGORIES -> {
                 searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.NAME);
                 searchSpecification.setPkgCategory(pkgCategoryOptional.orElseThrow(() ->
                         new IllegalStateException(
                                 "the pkg category code was unable to be found; " + pkgCategoryCode)));
-                break;
-
-            case ALL:
-                searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.NAME);
-                break;
-
-            case MOSTVIEWED:
-                searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.VERSIONVIEWCOUNTER);
-                break;
-
-            case MOSTRECENT:
-                searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.VERSIONCREATETIMESTAMP);
-                break;
-
-            default:
-                throw new IllegalStateException("unhandled view criteria type");
-
+            }
+            case ALL -> searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.NAME);
+            case MOSTVIEWED ->
+                    searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.VERSIONVIEWCOUNTER);
+            case MOSTRECENT ->
+                    searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.VERSIONCREATETIMESTAMP);
+            default -> throw new IllegalStateException("unhandled view criteria type");
         }
 
         Long totalPkgVersions = pkgService.total(context, searchSpecification);

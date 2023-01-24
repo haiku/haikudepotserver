@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,14 +49,9 @@ public class AttributeDumpTool implements Runnable {
     public void run() {
         try {
             switch (getType()) {
-                case HPKG:
-                    runHpkg();
-                    break;
-                case HPKR:
-                    runHpkr();
-                    break;
-                default:
-                    throw new IllegalStateException("unknown file format");
+                case HPKG -> runHpkg();
+                case HPKR -> runHpkr();
+                default -> throw new IllegalStateException("unknown file format");
             }
         }
         catch (IOException ioe) {

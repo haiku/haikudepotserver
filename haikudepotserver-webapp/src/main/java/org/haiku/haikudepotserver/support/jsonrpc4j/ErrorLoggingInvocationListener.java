@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020, Andrew Lindesay
+ * Copyright 2015-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ import java.util.List;
 
 public class ErrorLoggingInvocationListener implements InvocationListener {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 
     @Override
     public void willInvoke(Method method, List<JsonNode> arguments) {

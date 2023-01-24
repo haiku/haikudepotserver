@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -178,7 +178,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
 
         return dataRows
                 .stream()
-                .map((dr) -> String.class.cast(dr.get("name")))
+                .map((dr) -> (String) dr.get("name"))
                 .collect(Collectors.toList());
     }
 
@@ -224,7 +224,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         dumpExportPkg.setName(pkg.getName());
         dumpExportPkg.setHasChangelog(pkg.getPkgSupplement().getPkgChangelog().isPresent());
         dumpExportPkg.setProminenceOrdering(pkg.tryGetPkgProminence(repositorySource.getRepository())
-                .map((p) -> p.getProminence().getOrdering()).map(Long::new).orElse(null));
+                .map((p) -> p.getProminence().getOrdering()).map(Number::longValue).orElse(null));
         dumpExportPkg.setDerivedRating(
                 pkg.getPkgUserRatingAggregate(repositorySource.getRepository())
                         .map((v) -> v.getDerivedRating().doubleValue()).orElse(null));

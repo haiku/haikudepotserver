@@ -168,23 +168,13 @@ public class FallbackController {
             throws IOException {
 
         switch (getFallbackType(term)) {
-
-            case APPLETOUCH:
+            case APPLETOUCH -> {
                 LOGGER.debug("unhandled apple touch icon -> 404; {}", term);
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                break;
-
-            case FAVICON:
-                streamFavicon(method, response);
-                break;
-
-            case PKG:
-                redirectToPkg(response, term);
-                break;
-
-            default:
-                LOGGER.error("unable to handle the fallback; {}", term);
-
+            }
+            case FAVICON -> streamFavicon(method, response);
+            case PKG -> redirectToPkg(response, term);
+            default -> LOGGER.error("unable to handle the fallback; {}", term);
         }
 
     }

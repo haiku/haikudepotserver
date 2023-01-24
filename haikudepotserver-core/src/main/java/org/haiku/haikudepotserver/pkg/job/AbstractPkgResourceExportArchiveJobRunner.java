@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -34,11 +34,11 @@ import java.util.zip.GZIPOutputStream;
 
 abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecification> extends AbstractJobRunner<T> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(AbstractPkgResourceExportArchiveJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPkgResourceExportArchiveJobRunner.class);
 
     protected ServerRuntime serverRuntime;
-    private RuntimeInformationService runtimeInformationService;
-    private ObjectMapper objectMapper;
+    private final RuntimeInformationService runtimeInformationService;
+    private final ObjectMapper objectMapper;
 
     public AbstractPkgResourceExportArchiveJobRunner(
             ServerRuntime serverRuntime,

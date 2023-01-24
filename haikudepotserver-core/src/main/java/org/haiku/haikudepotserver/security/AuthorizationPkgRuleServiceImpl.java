@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,7 +33,7 @@ import java.util.Optional;
 @Service
 public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleService {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleServiceImpl.class);
 
     @SuppressWarnings("UnusedParameters")
     private String prepareWhereClause(
@@ -161,13 +161,10 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
 
         @SuppressWarnings("unchecked") List<Number> result = context.performQuery(query);
 
-        switch(result.size()) {
-            case 1:
-                return result.get(0).longValue();
-
-            default:
-                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
+        if (result.size() == 1) {
+            return result.get(0).longValue();
         }
+        throw new IllegalStateException("expected 1 row from count query, but got " + result.size());
     }
 
     @Override
@@ -190,14 +187,10 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
             return true;
         }
 
-        if(ObjectSelect.query(PermissionUserPkg.class).where(baseE)
+        return ObjectSelect.query(PermissionUserPkg.class).where(baseE)
                 .and(PermissionUserPkg.PKG.eq(pkg))
                 .count()
-                .selectFirst(context) > 0) {
-            return true;
-        }
-
-        return false;
+                .selectFirst(context) > 0;
     }
 
     @Override

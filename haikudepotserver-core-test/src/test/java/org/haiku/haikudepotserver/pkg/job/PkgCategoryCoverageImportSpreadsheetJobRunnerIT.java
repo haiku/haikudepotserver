@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -88,7 +88,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
                     .map(c -> c.getPkgCategory().getCode())
                     .collect(Collectors.toSet());
 
-            Assertions.assertThat(pkg1PkgCategoryCodes).isEqualTo(new <String>HashSet(Arrays.asList("audio", "graphics")));
+            Assertions.assertThat(pkg1PkgCategoryCodes).isEqualTo(Set.of("audio", "graphics"));
 
         }
 

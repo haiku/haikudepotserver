@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,7 +35,7 @@ import java.util.Optional;
 public class PkgVersionPayloadLengthPopulationJobRunner
         extends AbstractJobRunner<PkgVersionPayloadLengthPopulationJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgVersionPayloadLengthPopulationJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgVersionPayloadLengthPopulationJobRunner.class);
 
     private final ServerRuntime serverRuntime;
     private final URLHelperService urlHelperService;

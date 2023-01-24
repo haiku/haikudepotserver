@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,17 +9,19 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Objects;
+
 /**
  * <p>This object models the version coordinates of a package.</p>
  */
 
 public class VersionCoordinates {
 
-    private String major;
-    private String minor;
-    private String micro;
-    private String preRelease;
-    private Integer revision;
+    private final String major;
+    private final String minor;
+    private final String micro;
+    private final String preRelease;
+    private final Integer revision;
 
     public VersionCoordinates(org.haiku.pkg.model.PkgVersion version) {
         this(
@@ -91,10 +93,10 @@ public class VersionCoordinates {
         VersionCoordinates that = (VersionCoordinates) o;
 
         if (!major.equals(that.major)) return false;
-        if (micro != null ? !micro.equals(that.micro) : that.micro != null) return false;
-        if (minor != null ? !minor.equals(that.minor) : that.minor != null) return false;
-        if (preRelease != null ? !preRelease.equals(that.preRelease) : that.preRelease != null) return false;
-        if (revision != null ? !revision.equals(that.revision) : that.revision != null) return false;
+        if (!Objects.equals(micro, that.micro)) return false;
+        if (!Objects.equals(minor, that.minor)) return false;
+        if (!Objects.equals(preRelease, that.preRelease)) return false;
+        if (!Objects.equals(revision, that.revision)) return false;
 
         return true;
     }

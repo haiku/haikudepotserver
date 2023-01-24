@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,13 +16,33 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.OptimisticLockException;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.*;
+import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.ObjectIdQuery;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.Query;
+import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgCategory;
+import org.haiku.haikudepotserver.dataobjects.PkgChangelog;
+import org.haiku.haikudepotserver.dataobjects.PkgPkgCategory;
+import org.haiku.haikudepotserver.dataobjects.PkgProminence;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Prominence;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.support.*;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
+import org.haiku.haikudepotserver.support.ExposureType;
+import org.haiku.haikudepotserver.support.SingleCollector;
+import org.haiku.haikudepotserver.support.StoppableConsumer;
+import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +52,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -86,7 +111,7 @@ public class PkgServiceImpl implements PkgService {
                     context,
                     ImmutableList.of(Architecture.CODE_SOURCE, defaultArchitectureCode));
 
-            for (int i = 0; i < architectures.size() && !pkgVersionOptional.isPresent(); i++) {
+            for (int i = 0; i < architectures.size() && pkgVersionOptional.isEmpty(); i++) {
                 pkgVersionOptional = getLatestPkgVersionForPkg(
                         context,
                         pkg,
@@ -491,7 +516,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null!=ordering && ordering > 0, "an ordering must be suppied");
         return ensurePkgProminence(
                 objectContext, pkg, repository,
-                Prominence.getByOrdering(objectContext, ordering).get());
+                Prominence.getByOrdering(objectContext, ordering));
     }
 
     @Override

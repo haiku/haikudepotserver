@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Andrew Lindesay
+ * Copyright 2020-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,7 @@ import java.util.Optional;
 @Component
 public class PermissionEvaluator implements org.springframework.security.access.PermissionEvaluator {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PermissionEvaluator.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(PermissionEvaluator.class);
 
     private final UserAuthorizationService userAuthorizationService;
 
@@ -63,17 +63,12 @@ public class PermissionEvaluator implements org.springframework.security.access.
             return true;
         }
 
-        if (
-                permission == Permission.REPOSITORY_IMPORT
-                        && targetDomainObject instanceof Repository
-                        && Optional.of(targetDomainObject)
-                        .map(po -> (Repository) po)
-                        .filter(r -> checkRepositoryImport(authentication, r))
-                        .isPresent()) {
-            return true;
-        }
-
-        return false;
+        return permission == Permission.REPOSITORY_IMPORT
+                && targetDomainObject instanceof Repository
+                && Optional.of(targetDomainObject)
+                .map(po -> (Repository) po)
+                .filter(r -> checkRepositoryImport(authentication, r))
+                .isPresent();
     }
 
     @Override
@@ -104,17 +99,12 @@ public class PermissionEvaluator implements org.springframework.security.access.
             return true;
         }
 
-        if (
-                null != targetId
-                        && targetType == TargetType.REPOSITORY
-                        && permission == Permission.REPOSITORY_IMPORT
-                        && Repository.tryGetByCode(context, targetId.toString())
-                        .filter(r -> checkRepositoryImport(authentication, r))
-                        .isPresent()) {
-            return true;
-        }
-
-        return false;
+        return null != targetId
+                && targetType == TargetType.REPOSITORY
+                && permission == Permission.REPOSITORY_IMPORT
+                && Repository.tryGetByCode(context, targetId.toString())
+                .filter(r -> checkRepositoryImport(authentication, r))
+                .isPresent();
     }
 
     private Permission toPermission(Object permission) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support;
@@ -74,13 +74,14 @@ public class TestDatabase {
     public static DatabaseConnectionDetails startDatabase(Type type) {
         try {
             switch (type) {
-                case LOCAL_DATABASE:
+                case LOCAL_DATABASE -> {
                     LOGGER.info("am using a postgres database running locally");
                     return new DatabaseConnectionDetails(
                             "jdbc:postgresql://localhost:5432/" + DEFAULT_DATABASE,
                             DEFAULT_USERNAME,
                             DEFAULT_PASSWORD);
-                case START_TEST_CONTAINERS:
+                }
+                case START_TEST_CONTAINERS -> {
                     if (null == POSTGRES_SQL_CONTAINER) {
                         POSTGRES_SQL_CONTAINER =
                                 new PostgreSQLContainer<>(DockerImageName.parse("postgres").withTag("14.2"))
@@ -95,10 +96,11 @@ public class TestDatabase {
                             POSTGRES_SQL_CONTAINER.getUsername(),
                             POSTGRES_SQL_CONTAINER.getPassword()
                     );
-                case START_LOCAL_DATABASE:
+                }
+                case START_LOCAL_DATABASE -> {
                     return startLocalDatabase();
-                default:
-                    throw new IllegalStateException("unanticipated test database [" + type + "]");
+                }
+                default -> throw new IllegalStateException("unanticipated test database [" + type + "]");
             }
         }
         catch (Throwable th) {

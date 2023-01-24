@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -209,7 +209,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
             PkgVersionLocalization pkgVersionLocalization;
 
-            if (!pkgVersionLocalizationOptional.isPresent()) {
+            if (pkgVersionLocalizationOptional.isEmpty()) {
                 pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
                 pkgVersionLocalization.setNaturalLanguage(naturalLanguage);
                 pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS.getName(), pkgVersionLocalization, true);

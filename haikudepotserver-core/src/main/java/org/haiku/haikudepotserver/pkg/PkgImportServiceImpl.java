@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -372,19 +372,13 @@ public class PkgImportServiceImpl implements PkgImportService {
         List<Attribute> iconAttrs = HpkgHelper.findIconAttributesFromExecutableDirEntries(
                 context, hpkgFileExtractor.getToc());
         switch (iconAttrs.size()) {
-            case 0:
-                LOGGER.info("package [{}] version [{}] has no icons",
-                        persistedPkgVersion.getPkg(), persistedPkgVersion);
-                break;
-            case 1:
-                populateIconFromPayload(
-                        objectContext, persistedPkgVersion, context,
-                        Iterables.getFirst(iconAttrs, null));
-                break;
-            default:
-                LOGGER.info("package [{}] version [{}] has {} icons --> ambiguous so will not load any",
-                        persistedPkgVersion.getPkg(), persistedPkgVersion, iconAttrs.size());
-                break;
+            case 0 -> LOGGER.info("package [{}] version [{}] has no icons",
+                    persistedPkgVersion.getPkg(), persistedPkgVersion);
+            case 1 -> populateIconFromPayload(
+                    objectContext, persistedPkgVersion, context,
+                    Iterables.getFirst(iconAttrs, null));
+            default -> LOGGER.info("package [{}] version [{}] has {} icons --> ambiguous so will not load any",
+                    persistedPkgVersion.getPkg(), persistedPkgVersion, iconAttrs.size());
         }
     }
 
@@ -471,7 +465,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                                 .filter((pv) -> versionCoordinatesComparator.compare(
                                         persistedPkgVersionCoords,
                                         pv.toVersionCoordinates()) < 0)
-                                .collect(Collectors.toList());
+                                .toList();
 
                         LOGGER.warn(
                                 "imported a package version {} of {} which is older or the same as the existing {}" +

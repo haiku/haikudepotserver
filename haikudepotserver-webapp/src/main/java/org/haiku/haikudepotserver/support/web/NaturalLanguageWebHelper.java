@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 public class NaturalLanguageWebHelper {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageWebHelper.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(NaturalLanguageWebHelper.class);
 
     /**
      * <p>This will look at parameters on the supplied request and will return a natural language.  It will

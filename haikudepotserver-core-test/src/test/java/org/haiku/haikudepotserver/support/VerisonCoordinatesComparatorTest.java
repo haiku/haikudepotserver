@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 public class VerisonCoordinatesComparatorTest {
 
-    private VersionCoordinatesComparator versionCoordinatesComparator = new VersionCoordinatesComparator();
+    private final VersionCoordinatesComparator versionCoordinatesComparator = new VersionCoordinatesComparator();
 
     @Test
     public void testCarootcertificatesVersionComparison() {

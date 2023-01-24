@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -38,9 +38,9 @@ import java.util.stream.Collectors;
 @Component
 public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PkgIconSpreadsheetJobRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgIconSpreadsheetJobRunner.class);
 
-    private static String MARKER = "*";
+    private static final String MARKER = "*";
 
     private final ServerRuntime serverRuntime;
     private final RepositoryService repositoryService;

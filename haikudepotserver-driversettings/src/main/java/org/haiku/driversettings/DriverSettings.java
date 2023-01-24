@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -61,16 +61,19 @@ public class DriverSettings {
             int c = reader.read();
 
             if (first) {
-                switch(c) {
-                    case -1:
+                switch (c) {
+                    case -1 -> {
                         return new Token(TokenType.EOF);
-                    case CHAR_LINE_SEPARATOR:
-                    case '\n':
+                    }
+                    case CHAR_LINE_SEPARATOR, '\n' -> {
                         return new Token(TokenType.SEPARATOR);
-                    case '}':
+                    }
+                    case '}' -> {
                         return new Token(TokenType.CLOSEPARAMETERS);
-                    case '{':
+                    }
+                    case '{' -> {
                         return new Token(TokenType.OPENPARAMETERS);
+                    }
                 }
             }
 
@@ -99,19 +102,15 @@ public class DriverSettings {
                     result.append((char) c);
                 } else {
                     switch (c) {
-                        case '"':
+                        case '"' -> {
                             if (first) {
                                 quoted = true;
                             } else {
                                 result.append((char) c);
                             }
-                            break;
-                        case '\\':
-                            escape = true;
-                            break;
-                        default:
-                            result.append((char) c);
-                            break;
+                        }
+                        case '\\' -> escape = true;
+                        default -> result.append((char) c);
                     }
                 }
             }
@@ -130,34 +129,32 @@ public class DriverSettings {
             Token token = nextToken(reader);
 
             switch (token.getTokenType()) {
-                case CLOSEPARAMETERS:
+                case CLOSEPARAMETERS -> {
                     if (!withOpenParameters) {
                         throw new DriverSettingsException("dangling close parameters");
                     }
-                    break;
-                case EOF:
+                }
+                case EOF -> {
                     if (withOpenParameters) {
                         throw new DriverSettingsException("unexpected end of file; expecting '}' to terminate parameters");
                     }
-                    break;
+                }
             }
 
             switch (token.getTokenType()) {
-                case CLOSEPARAMETERS:
-                case EOF:
-                case SEPARATOR:
+                case CLOSEPARAMETERS, EOF, SEPARATOR -> {
                     if (parameterBuilder.hasName()) {
                         result.add(parameterBuilder.build());
                         parameterBuilder = ParameterBuilder.newBuilder();
                     }
-                    break;
+                }
             }
 
             switch (token.getTokenType()) {
-                case EOF:
-                case CLOSEPARAMETERS:
+                case EOF, CLOSEPARAMETERS -> {
                     return result;
-                case OPENPARAMETERS:
+                }
+                case OPENPARAMETERS -> {
                     if (!parameterBuilder.hasName()) {
                         throw new DriverSettingsException("starting new block of parameters without a name");
                     }
@@ -165,10 +162,8 @@ public class DriverSettings {
                     // there can be no more data after the parameters.
                     result.add(parameterBuilder.build());
                     parameterBuilder = ParameterBuilder.newBuilder();
-                    break;
-                case WORD:
-                    parameterBuilder.withWord(token.getContent());
-                    break;
+                }
+                case WORD -> parameterBuilder.withWord(token.getContent());
             }
         }
     }

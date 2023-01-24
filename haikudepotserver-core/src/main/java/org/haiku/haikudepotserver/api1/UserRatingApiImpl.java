@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -31,7 +31,6 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Deprecated
 @Component("userRatingApiImplV1")
@@ -160,7 +159,7 @@ public class UserRatingApiImpl implements UserRatingApi {
                 .rating(Optional.ofNullable(request.rating).map(Number::intValue).orElse(null))
                 .filter(CollectionUtils.emptyIfNull(request.filter).stream()
                         .map(f -> UpdateUserRatingFilter.fromValue(f.name()))
-                        .collect(Collectors.toUnmodifiableList())));
+                        .toList()));
 
         return new UpdateUserRatingResult();
     }
@@ -228,7 +227,7 @@ public class UserRatingApiImpl implements UserRatingApi {
 
                     return item;
                 })
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
         return result;
     }
 

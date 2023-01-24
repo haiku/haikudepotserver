@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 public class WrapWithNoCloseInputStream extends InputStream {
 
-    private InputStream inputStream;
+    private final InputStream inputStream;
 
     public WrapWithNoCloseInputStream(InputStream inputStream) {
         this.inputStream = inputStream;

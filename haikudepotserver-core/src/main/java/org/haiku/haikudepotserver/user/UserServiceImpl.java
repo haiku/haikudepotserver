@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private ObjectSelect<User> prepareObjectSelect(UserSearchSpecification search) {
         Preconditions.checkNotNull(search);

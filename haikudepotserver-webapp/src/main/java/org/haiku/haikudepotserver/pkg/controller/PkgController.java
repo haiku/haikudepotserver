@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,7 +32,7 @@ import java.util.Optional;
 @RequestMapping(path = { "__pkg" })
 public class PkgController {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgController.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(PkgController.class);
 
     private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
     private final static String KEY_NATURALLANGUAGECODE = "naturalLanguageCode";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2020, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -102,13 +102,13 @@ public class TestJobServiceImpl implements JobService {
 
     @Override
     public Optional<? extends JobSnapshot> tryGetJob(String guid) {
-        switch(guid) {
-            case "queued" : return Optional.of(queuedJob);
-            case "started" : return Optional.of(startedJob);
-            case "finished" : return Optional.of(finishedJob);
-        }
+        return switch (guid) {
+            case "queued" -> Optional.of(queuedJob);
+            case "started" -> Optional.of(startedJob);
+            case "finished" -> Optional.of(finishedJob);
+            default -> Optional.empty();
+        };
 
-        return Optional.empty();
     }
 
     @Override
@@ -138,9 +138,7 @@ public class TestJobServiceImpl implements JobService {
         }
 
         if (null != statuses) {
-            if (!statuses.contains(job.getStatus())) {
-                return false;
-            }
+            return statuses.contains(job.getStatus());
         }
 
         return true;

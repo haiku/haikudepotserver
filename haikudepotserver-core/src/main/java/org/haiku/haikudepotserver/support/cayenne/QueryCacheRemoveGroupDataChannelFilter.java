@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -56,19 +56,16 @@ public class QueryCacheRemoveGroupDataChannelFilter implements DataChannelFilter
 
         try {
             switch (syncType) {
-
-                case DataChannel.FLUSH_NOCASCADE_SYNC:
-                case DataChannel.FLUSH_CASCADE_SYNC:
+                case DataChannel.FLUSH_NOCASCADE_SYNC,
+                        DataChannel.FLUSH_CASCADE_SYNC -> {
                     @SuppressWarnings("unchecked")
                     Set<String> groups = (Set<String>) originatingContext.getUserProperty(KEY_QUERYCACHEREMOVEGROUPS);
-
                     if (null != groups) {
                         for (String group : groups) {
                             serverRuntime.getDataDomain().getQueryCache().removeGroup(group);
                         }
                     }
-
-                    break;
+                }
             }
         }
         finally {

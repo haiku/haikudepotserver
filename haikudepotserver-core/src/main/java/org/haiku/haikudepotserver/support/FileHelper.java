@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019, Andrew Lindesay
+ * Copyright 2015-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,20 +30,15 @@ public class FileHelper {
 
     public static void streamUrlDataToFile(URL url, File file, long timeoutMillis) throws IOException {
         switch (url.getProtocol()) {
-            case "http":
-            case "https":
+            case "http", "https" -> {
                 try {
                     streamHttpUriDataToFile(url.toURI(), file, timeoutMillis);
                 } catch (URISyntaxException use) {
                     throw new IllegalStateException("unable to convert url [" + url + "] to uri", use);
                 }
-                break;
-            case "file":
-                Files.copy(new File(url.getFile()), file);
-                break;
-
-            default:
-                throw new IllegalStateException("the url scheme of " + url.getProtocol() + " is unsupported.");
+            }
+            case "file" -> Files.copy(new File(url.getFile()), file);
+            default -> throw new IllegalStateException("the url scheme of " + url.getProtocol() + " is unsupported.");
         }
     }
 

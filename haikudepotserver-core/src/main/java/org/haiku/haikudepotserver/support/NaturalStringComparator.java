@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,7 +21,7 @@ import java.util.Comparator;
 
 class NaturalStringComparator implements Comparator<String> {
 
-    private NaturalChunkFormat naturalChunkFormat = new NaturalChunkFormat();
+    private final NaturalChunkFormat naturalChunkFormat = new NaturalChunkFormat();
 
     @Override
     public int compare(String o1, String o2) {
@@ -59,8 +59,7 @@ class NaturalStringComparator implements Comparator<String> {
             }
 
             switch (nc1.getType()) {
-
-                case NUMBER: {
+                case NUMBER -> {
                     if (nc1.getLength() > nc2.getLength()) {
                         return 1;
                     }
@@ -75,20 +74,14 @@ class NaturalStringComparator implements Comparator<String> {
                         return result;
                     }
                 }
-                break;
-
-                case ASCII: {
+                case ASCII -> {
                     int result = nc1.getExtract().compareToIgnoreCase(nc2.getExtract());
 
                     if (0 != result) {
                         return result;
                     }
                 }
-                break;
-
-                default:
-                    throw new IllegalStateException("unhandled natural chunk type; "+nc1.getType());
-
+                default -> throw new IllegalStateException("unhandled natural chunk type; " + nc1.getType());
             }
         }
     }
@@ -105,16 +98,11 @@ class NaturalStringComparator implements Comparator<String> {
         }
 
         private boolean isCharacterOf(NaturalChunk.Type type, char c) {
-            switch (type) {
-                case NUMBER:
-                    return Character.isDigit(c);
-
-                case ASCII:
-                    return !Character.isDigit(c) && !Character.isWhitespace(c);
-
-                default:
-                    throw new IllegalStateException("unhandled natural chunk type; " + type.name());
-            }
+            return switch (type) {
+                case NUMBER -> Character.isDigit(c);
+                case ASCII -> !Character.isDigit(c) && !Character.isWhitespace(c);
+                default -> throw new IllegalStateException("unhandled natural chunk type; " + type.name());
+            };
         }
 
         @Override
@@ -183,16 +171,16 @@ class NaturalStringComparator implements Comparator<String> {
             END
         }
 
-        private Type type;
-        private String source;
-        private int offset;
-        private int length;
+        private final Type type;
+        private final String source;
+        private final int offset;
+        private final int length;
 
         NaturalChunk(Type type, String source, int offset, int length) {
             Preconditions.checkNotNull(type);
             Preconditions.checkNotNull(source);
-            Preconditions.checkNotNull(offset);
-            Preconditions.checkNotNull(length);
+            Preconditions.checkArgument(offset >= 0);
+            Preconditions.checkArgument(length >= 0);
             this.type = type;
             this.source = source;
             this.offset = offset;

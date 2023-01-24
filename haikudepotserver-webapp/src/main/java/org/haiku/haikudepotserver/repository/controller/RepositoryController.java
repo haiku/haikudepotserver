@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,7 +49,7 @@ import java.util.Optional;
 @RequestMapping(path = RepositoryController.SEGMENT_REPOSITORY)
 public class RepositoryController extends AbstractController {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryController.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(RepositoryController.class);
 
     public final static String SEGMENT_REPOSITORY = "__repository";
     public final static String SEGMENT_IMPORT = "import";

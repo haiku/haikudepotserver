@@ -1,11 +1,9 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.web;
-
-import org.springframework.context.annotation.Bean;
 
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;

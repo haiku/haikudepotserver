@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 @Service
 public class UserAuthenticationServiceImpl implements UserAuthenticationService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserAuthenticationServiceImpl.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(UserAuthenticationServiceImpl.class);
 
     private final static String SUFFIX_JSONWEBTOKEN_SUBJECT = "@hds";
 

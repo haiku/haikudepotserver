@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -221,7 +221,7 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
 
-        switch(result.size()) {
+        switch (result.size()) {
             case 1:
                 return result.get(0).longValue();
 
@@ -457,7 +457,7 @@ public class UserRatingServiceImpl implements UserRatingService {
                     .map(pv -> pv.toVersionCoordinates().toVersionCoordinatesWithoutPreReleaseOrRevision())
                     .distinct()
                     .sorted(versionCoordinatesComparator)
-                    .collect(Collectors.toList());
+                    .toList();
 
             // work back VERSIONS_BACK from the latest in order to find out where to start fishing out user
             // ratings from.
@@ -531,7 +531,6 @@ public class UserRatingServiceImpl implements UserRatingService {
     public void removeUserRatingAtomically(String userRatingCode) {
         ObjectContext context = serverRuntime.newContext();
         UserRating userRating = UserRating.getByCode(context, userRatingCode);
-        String pkgName = userRating.getPkgVersion().getPkg().getName();
 
         context.deleteObject(userRating);
         context.commitChanges();
@@ -546,8 +545,8 @@ public class UserRatingServiceImpl implements UserRatingService {
 
     static class DerivedUserRating {
 
-        private float rating;
-        private int sampleSize;
+        private final float rating;
+        private final int sampleSize;
 
         DerivedUserRating(float rating, int sampleSize) {
             this.rating = rating;

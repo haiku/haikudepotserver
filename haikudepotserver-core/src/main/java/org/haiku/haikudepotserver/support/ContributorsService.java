@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 package org.haiku.haikudepotserver.support;
 
 import com.google.common.base.Charsets;
@@ -48,7 +52,7 @@ public class ContributorsService {
     private static List<Contributor> loadContributors(Properties properties) {
         return properties.entrySet().stream()
                 .map(e -> createContributor(e.getKey().toString(), e.getValue().toString()))
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     private static Contributor createContributor(String propertyKey, String name) {
@@ -57,15 +61,16 @@ public class ContributorsService {
         List<String> propertyKeyComponents = ImmutableList.copyOf(Splitter.on('.').split(propertyKey));
         Contributor.Type type = Contributor.Type.valueOf(propertyKeyComponents.get(0).toUpperCase());
         switch (type) {
-            case ENGINEERING:
+            case ENGINEERING -> {
                 return new Contributor(type, name);
-            case LOCALIZATION:
+            }
+            case LOCALIZATION -> {
                 if (propertyKeyComponents.size() != 2) {
                     throw new IllegalStateException("bad property key [" + propertyKey + "]");
                 }
                 return new Contributor(type, name, propertyKeyComponents.get(1));
-            default:
-                throw new IllegalStateException("unknown type of contributor [" + type + "]");
+            }
+            default -> throw new IllegalStateException("unknown type of contributor [" + type + "]");
         }
     }
 

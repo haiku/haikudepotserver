@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -117,7 +117,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
         Optional<PkgScreenshotImage> pkgScreenshotImageOptional = screenshot.tryGetPkgScreenshotImage();
 
-        if (!pkgScreenshotImageOptional.isPresent()) {
+        if (pkgScreenshotImageOptional.isEmpty()) {
             throw new IllegalStateException("the screenshot " + screenshot.getCode() + " is missing a screenshot image");
         }
 
@@ -182,7 +182,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
             }
         }
 
-        MediaType png = MediaType.tryGetByCode(context, com.google.common.net.MediaType.PNG.toString()).get();
+        MediaType png = MediaType.getByCode(context, com.google.common.net.MediaType.PNG.toString());
 
         // now we need to know the largest ordering so we can add this one at the end of the orderings
         // such that it is the next one in the list.

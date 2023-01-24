@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2017-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,12 +16,12 @@ public class ArchiveInfo {
 
     private final static String AGENT = "hds";
 
-    private Date createTimestamp;
-    private String createTimestampIso;
-    private Date dataModifiedTimestamp;
-    private String dataModifiedTimestampIso;
-    private String agent = AGENT;
-    private String agentVersion;
+    private final Date createTimestamp;
+    private final String createTimestampIso;
+    private final Date dataModifiedTimestamp;
+    private final String dataModifiedTimestampIso;
+    private final String agent = AGENT;
+    private final String agentVersion;
 
     public ArchiveInfo(
             Date dataModifiedTimestamp,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -42,7 +42,7 @@ import java.util.Optional;
 @Controller
 public class PkgDownloadController {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgDownloadController.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(PkgDownloadController.class);
 
     // TODO; should be injected into the orchestration service.
     private final static String SEGMENT_PKGDOWNLOAD = PkgServiceImpl.URL_SEGMENT_PKGDOWNLOAD;

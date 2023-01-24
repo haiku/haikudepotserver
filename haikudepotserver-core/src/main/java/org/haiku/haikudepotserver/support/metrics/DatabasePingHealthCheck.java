@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.support.metrics;
 
 import com.codahale.metrics.health.HealthCheck;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +23,7 @@ public class DatabasePingHealthCheck extends HealthCheck {
 
     private final static String STATEMENT = "SELECT pc.code FROM haikudepot.pkg_category pc";
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     public DatabasePingHealthCheck(DataSource dataSource) {
         this.dataSource = dataSource;

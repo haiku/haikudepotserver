@@ -1,26 +1,21 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.cayenne;
 
 import com.google.common.base.Preconditions;
-import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.LifecycleListener;
-import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.reflect.LifecycleCallbackRegistry;
-import org.apache.commons.collections4.CollectionUtils;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
-import org.haiku.haikudepotserver.job.model.JobService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * <p>This listener will detect changes in the user rating entities and will then trigger a process (probably

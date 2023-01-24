@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -98,7 +98,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 
-        if(!jobDataWithByteSourceOptional.isPresent()) {
+        if(jobDataWithByteSourceOptional.isEmpty()) {
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
@@ -113,7 +113,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                 writer.writeNext(new String[]{"path", "pkg-name", "action", "message", "code"});
 
                 // sweep through and collect meta-data about the packages in the tar file.
-                LOGGER.info("will collect data about packages' screenshots from the archive", metadatas.size());
+                LOGGER.info("will collect data about packages' screenshots from the archive");
                 consumeScreenshotArchiveEntries(
                         jobDataWithByteSourceOptional.get().getByteSource(),
                         (ae) -> collectScreenshotMetadataFromArchive(
@@ -138,7 +138,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
                 // sweep through the archive again and load in those screenshots that are not already present.
                 // The ordering of the inbound data should be preserved.
-                LOGGER.info("will load screenshots from archive", metadatas.size());
+                LOGGER.info("will load screenshots from archive");
                 consumeScreenshotArchiveEntries(
                         jobDataWithByteSourceOptional.get().getByteSource(),
                         (ae) -> importScreenshotsFromArchiveAndReport(
@@ -148,7 +148,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                                 ae.getArchiveEntry(),
                                 ae.getPkgName(),
                                 ae.getOrder()));
-                LOGGER.info("did load screenshots from archive", metadatas.size());
+                LOGGER.info("did load screenshots from archive");
                 return true;
             } catch (IOException e) {
                 LOGGER.error("unable to complete the job", e);
@@ -264,7 +264,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             ObjectContext context = serverRuntime.newContext();
             Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
-            if (!pkgOptional.isPresent()) {
+            if (pkgOptional.isEmpty()) {
                 metadatas.setNotFound();
             }
 
@@ -346,7 +346,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             String pkgName,
             int order) {
 
-        String row[] = {
+        String[] row = new String[] {
                 archiveEntry.getName(), // path
                 pkgName, // pkg
                 "", // action
@@ -414,7 +414,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
      * from the path of the archive entry.</p>
      */
 
-    private class ArchiveEntryWithPkgNameAndOrdering {
+    private static class ArchiveEntryWithPkgNameAndOrdering {
 
         private final ArchiveInputStream archiveInputStream;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -28,16 +28,6 @@ public class ExpressionCollector {
         );
     }
 
-    public static Collector<Expression, AndExpressionHolder, Expression> andExp() {
-        //noinspection Convert2MethodRef
-        return Collector.of(
-                AndExpressionHolder::new,
-                (h, i) -> h.combine(i),
-                (h1,h2) -> new AndExpressionHolder(h1,h2),
-                (h1) -> h1.tryGet().orElse(ExpressionFactory.expFalse())
-        );
-    }
-
     private abstract static class AbstractExpressionHolder {
 
         Expression value = null;
@@ -49,11 +39,11 @@ public class ExpressionCollector {
             Optional<Expression> aeO = a.tryGet();
             Optional<Expression> beO = b.tryGet();
 
-            if (!aeO.isPresent() && beO.isPresent()) {
+            if (aeO.isEmpty() && beO.isPresent()) {
                 value = beO.get();
             }
 
-            if (aeO.isPresent() && !beO.isPresent()) {
+            if (aeO.isPresent() && beO.isEmpty()) {
                 value = aeO.get();
             }
 
