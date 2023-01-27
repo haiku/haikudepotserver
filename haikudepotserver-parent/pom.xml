@@ -30,9 +30,9 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.source>17</maven.compiler.source>
 
-        <spring-boot.version>2.7.3</spring-boot.version>
+        <spring-boot.version>2.7.8</spring-boot.version>
 
-        <postgresql.version>42.4.3</postgresql.version>
+        <postgresql.version>42.5.1</postgresql.version>
         <slf4j.version>1.7.36</slf4j.version>
         <jackson-databind.version>2.14.1</jackson-databind.version>
         <guava.version>31.1-jre</guava.version>
@@ -40,35 +40,17 @@
         <openapi-generator-maven-plugin.version>6.2.1</openapi-generator-maven-plugin.version>
         <springfox.version>3.0.0</springfox.version>
 
-        <web-lru-cache.versionbase>2.5.0</web-lru-cache.versionbase>
-        <web-lru-cache.versionextension />
+        <nimbus-jose-jwt.version>9.29</nimbus-jose-jwt.version>
 
-        <web-angularjs.versionbase>1.8.2</web-angularjs.versionbase>
-        <web-angularjs.versionextension />
-
-        <web-underscorejs.versionbase>1.9.0</web-underscorejs.versionbase>
-        <web-underscorejs.versionextension></web-underscorejs.versionextension>
-
-        <web-momentjs.versionbase>2.29.1</web-momentjs.versionbase>
-        <web-momentjs.versionextension />
-
-        <web-modernizr.versionbase>2.8.3</web-modernizr.versionbase>
-        <web-modernizr.versionextension>-1</web-modernizr.versionextension>
-
-        <nimbus-jose-jwt.version>9.25.6</nimbus-jose-jwt.version>
-
-        <jasmine.plugin.version>2.2</jasmine.plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
         <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
         <jsonschema2pojo-maven-plugin.version>1.1.2</jsonschema2pojo-maven-plugin.version>
         <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
 
-        <selenium-java.version>4.7.2</selenium-java.version>
-
         <metrics.version>4.2.13</metrics.version>
 
         <flexmark.version>0.64.0</flexmark.version>
-        <freemarker.version>2.3.31</freemarker.version>
+        <freemarker.version>2.3.32</freemarker.version>
         <jsonrpc4j.version>1.6</jsonrpc4j.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <opencsv.version>5.7.1</opencsv.version>
@@ -292,7 +274,6 @@
                 <version>${hikaricp.version}</version>
             </dependency>
 
-
             <dependency>
                 <groupId>org.imgscalr</groupId>
                 <artifactId>imgscalr-lib</artifactId>
@@ -333,32 +314,6 @@
                         <artifactId>checker-qual</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>angularjs</artifactId>
-                <version>${web-angularjs.versionbase}${web-angularjs.versionextension}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>underscorejs</artifactId>
-                <version>${web-underscorejs.versionbase}${web-underscorejs.versionextension}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>momentjs</artifactId>
-                <version>${web-momentjs.versionbase}${web-momentjs.versionextension}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>modernizr</artifactId>
-                <version>${web-modernizr.versionbase}${web-modernizr.versionextension}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>lru-cache</artifactId>
-                <version>${web-lru-cache.versionbase}${web-lru-cache.versionextension}</version>
             </dependency>
 
             <dependency>
@@ -411,50 +366,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
-            </plugin>
-
-            <!--
-        This plugin handles jasmine java-script tests that can be
-        executed as part of the 'test' lifecycle.
-        -->
-
-            <plugin>
-                <groupId>com.github.searls</groupId>
-                <artifactId>jasmine-maven-plugin</artifactId>
-                <version>${jasmine.plugin.version}</version>
-
-                <configuration>
-                    <skipTests>true</skipTests>
-                </configuration>
-
-                <!--
-                Have to upgrade the selenium component so that it works with recent Firefox versions.
-                -->
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.seleniumhq.selenium</groupId>
-                        <artifactId>selenium-java</artifactId>
-                        <version>${selenium-java.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.seleniumhq.selenium</groupId>
-                        <artifactId>selenium-server</artifactId>
-                        <version>${selenium-java.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <artifactId>servlet-api-2.5</artifactId>
-                                <groupId>org.mortbay.jetty</groupId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.seleniumhq.selenium</groupId>
-                        <artifactId>selenium-remote-driver</artifactId>
-                        <version>${selenium-java.version}</version>
-                    </dependency>
-                </dependencies>
-
             </plugin>
 
             <plugin>
