@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright 2018, Andrew Lindesay
+  ~ Copyright 2018-2023, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -25,14 +25,14 @@
         </figure>
 
         <para>
-            The application server deploy product is a self-contained java &quot;war&quot; file.  It can be run within
-            a servlet container, but the target deployment container is
-            <ulink url="http://www.eclipse.org/jetty/">jetty</ulink>.
+            The application server deploy product is a self-contained java &quot;jar&quot; file.  The application
+            is using the Spring Boot framework and can run itself using an embedded
+            <ulink url="https://tomcat.apache.org/">Apache Tomcat</ulink> server.
         </para>
 
         <para>
             The application server communicates (see <link linkend="api">api</link>) with its clients using the HTTP
-            protocol.  The communications are <emphasis>typically</emphasis> framed as JSON-RPC envelopes, but also
+            protocol.  The communications are <emphasis>typically</emphasis> RPC style in nature, but also
             straight GET, POST and other requests are employed where appropriate.  The web-front end contains a
             JavaScript/HTML client that utilizes the same API as is employed by the &quot;Haiku Depot&quot;
             desktop application running on the Haiku operating system.
@@ -70,13 +70,10 @@
 
         <para>
             The application server uses a number of technologies to provide infrastructure for the application
-            server.  The application server is based on java/j2e/jee technology.  It uses the
-            <ulink url="http://projects.spring.io/spring-framework/">Spring Framework</ulink>
-            to manage dependency injection and wiring-up and SpringMVC to manage vending material over HTTP and
-            providing basic HTTP services.  It uses a library called
-            <ulink url="https://github.com/briandilley/jsonrpc4j">jsonrpc4j</ulink>
-            that integrates with SpringMVC to provide JSON-RPC web service APIs.  You can
-            <link linkend="api">find out more</link> about those APIs in this document.
+            server.  The application server is based on
+            <ulink url="https://spring.io/projects/spring-boot">SpringBoot</ulink> technology.
+            You can find out more about those APIs in
+            <link linkend="api">this</link> document.
         </para>
 
         <section xml:id="architecture-applicationserverinfrastructure-logging">
@@ -161,7 +158,8 @@
             <para>
                 The single-page interface is the primary web-based user interface for the system.  It provides
                 functionality directed at public (unauthenticated), authenticated, administrative and root users.
-                This interface is built using 'modern' HTML and JavaScript.  The single-page interface uses the exact
+                This interface is built using HTML and JavaScript in a &quot;Single Page Application&quot; (SPA)
+                architecture.  The SPA interface uses the exact
                 <emphasis>same</emphasis> APIs as the desktop Haiku Depot application and so is a true client of the
                 application server.
             </para>
@@ -179,7 +177,7 @@
                 <ulink url="https://angularjs.org/">AngularJS</ulink>
                 JavaScript framework.  This framework provides for browser-side page rendering, navigational flow.
                 You can find the AngularJS-centric resources at
-                &quot;/haikudepotserver-webapp/src/main/webapp/js/app/...&quot;
+                &quot;/haikudepotserver-webapp/src/main/webapp/js/app/...&quot;.  AngularJS is no longer supported.
             </para>
                 </section>
 
@@ -269,9 +267,9 @@
 
             <para>
                 These are typically referenced by their natural or artificial identifier.  In the case of a package
-                this would be the name of the package (eg; &quot;git&quot;).
+                this would be the name of the package (eg; &quot;git&quot;, &quot;bemail&quot;).
                 In the case of a user rating, this would be the user
-                rating's code (eg; &quot;FA91FA34-D0BE-47A2-8114-CE33CACAE533&quot;)
+                rating's code (eg; &quot;FA91FA34-D0BE-47A2-8114-CE33CACAE533&quot;).
             </para>
 
             <para>

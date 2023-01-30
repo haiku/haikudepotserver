@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright 2018-2022, Andrew Lindesay
+  ~ Copyright 2018-2023, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -22,7 +22,7 @@
             The application server is able to communicate with remote repositories to retrieve &quot;Haiku Package
             Repository&quot; (.hpkr) files.  .hpkr files contain meta-data of the packages that are stored at that
             repository.  The application server is able to consume the .hpkr data and populate its own internal database
-            with some of the meta-data that it contains.  THe .hpkr format is a binary data structure described
+            with some of the meta-data that it contains.  The .hpkr format is a binary data structure described
             <ulink url="https://dev.haiku-os.org/wiki/PackageManagement/FileFormat">here</ulink>.
         </para>
 
@@ -38,6 +38,24 @@
             </itemizedlist>
 
         </para>
+
+        <warning>
+            <para>
+                The default database setup installs a user with the nickname of &quot;root&quot; with a known password of
+                &quot;p4mphl3t&quot;.  This password <emphasis>must</emphasis> be changed before the system is made
+                available over a network.
+            </para>
+        </warning>
+
+        <warning>
+            <para>
+                The API-related HTTP traffic into the application server uses basic or token bearer authentication.
+                Either technique exposes authentication details in the request and response.  For this reason it is
+                advised that HTTP traffic to and from the application server be transported as secure HTTP (https)
+                in order to prevent a third party from reading the HTTP headers and extracting this information.
+            </para>
+        </warning>
+
     </section>
 
     <section xml:id="overview-icon">
@@ -53,7 +71,7 @@
         <title>Hosted Source Code</title>
         <para>
             The source code is hosted at
-            <ulink url="https://github.com/haiku/haikudepotserver">GitHub</ulink>
+            <ulink url="https://github.com/haiku/haikudepotserver">GitHub</ulink>.
         </para>
     </section>
 
@@ -62,48 +80,19 @@
 
         <para>
             <itemizedlist>
-                <listitem><ulink url="https://community.java.net/open-jdk">Java</ulink> (&gt;= 11)</listitem>
-                <listitem><ulink url="http://maven.apache.org">Maven</ulink> (&gt;= 3.6)</listitem>
-                <listitem><ulink url="https://www.postgres.org">Postgres</ulink> (&gt;= 11)</listitem>
-                <listitem><ulink url="http://www.eclipse.org/jetty/documentation/current/runner.html">Jetty Runner</ulink> (&gt;= 9.4) (deployment)</listitem>
+                <listitem><ulink url="https://adoptium.net/">Java JDK</ulink> (&gt;= 17)</listitem>
                 <listitem><ulink url="https://www.docker.com/">Docker</ulink></listitem>
+                <listitem>Python (3)</listitem>
             </itemizedlist>
         </para>
 
         <para>On a debian host, some of these prerequisites can be installed with;</para>
 
         <para>
-            <programlisting>apt-get install default-jdk
-apt-get install maven
-apt-get install postgresql postgresql-client</programlisting>
+            <programlisting>apt-get install openjdk-17-jdk
+apt-get install postgresql postgresql-client
+apt-get install python3</programlisting>
         </para>
-
-        <para>
-            You can
-            <ulink url="http://mvnrepository.com/artifact/org.eclipse.jetty/jetty-runner">download</ulink>
-            the Jetty Runner jar file from the Maven Repository.
-        </para>
-
-        <section xml:id="overview-prerequisites-buildingonlinux">
-            <title>Building on Linux</title>
-
-            <para>The build system for a linux host requires the presence of RPM assembly tools.</para>
-
-            <informaltable>
-                <tgroup cols="2">
-                    <tbody>
-                        <row>
-                            <entry>RPM-based Linux</entry>
-                            <entry>yum install rpm-build</entry>
-                        </row>
-                        <row>
-                            <entry>Debian-based Linux</entry>
-                            <entry>apt-get install rpm</entry>
-                        </row>
-                    </tbody>
-                </tgroup>
-            </informaltable>
-        </section>
 
         <section xml:id="overview-prerequisites-basicpostgressetup">
             <title>Basic Postgres Setup</title>
@@ -154,52 +143,6 @@ apt-get install postgresql postgresql-client</programlisting>
                 The database schema objects will be automatically populated into the fresh database by the
                 application-server as it launches.  This technique uses
                 <ulink url="https://flywaydb.org/">Flyway</ulink>.
-            </para>
-
-        </section>
-
-        <section xml:id="overview-prerequisites-hvif2png">
-        <title>hvif2png Rendering Tool</title>
-
-            <para>
-                Software on the Haiku operating system uses the HVIF file format for representing icons.  This
-                format is vector-art based rather than bitmaps.  To render icons clearly at any size, Haiku Depot
-                Server uses an external tool to render the HVIF data into PNG images for display on the web browser.
-                Part of the <ulink url="https://www.haiku-os.org/development">Haiku Source Code</ulink> includes
-                a tool called &quot;hvif2png&quot; that can be used for this purpose.
-            </para>
-            <para>
-                Work through building Haiku operating system from source and then build the hvif2png tool using
-                &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  Note that you may need to install the
-                &quot;libpng&quot; libraries for this to build and yield the hvif2png tool as a
-                build artifact.  The build product in this case will be a binary for the build host.
-            </para>
-            <para>
-                To install this on a development or deployment host, you will either need to
-                generate an RPM package for installation into an RPM-based linux environment or a tar-ball to install
-                onto other *NIX like environments such as MacOS-X or debian.  The two scripts that yield the RPM or
-                tar-ball are included in the Haiku Depot Server source at;
-            </para>
-
-            <para>
-                <itemizedlist>
-                    <listitem>support/buildhvif2pngrpm.sh</listitem>
-                    <listitem>support/buildhvif2pngtarball.sh</listitem>
-                </itemizedlist>
-            </para>
-
-            <para>
-                The only argument to these scripts is the &quot;generated&quot; directory where the Haiku operating
-                system build products are situated.  It will yield a tar-ball or RPM in the generated directory in the
-                &quot;tmp&quot; directory.  The tarball can be unpacked anywhere on the target deployment or
-                development host.  The RPM deploys to &quot;/opt/hvif2png/...&quot; on the machine where it is
-                installed.
-            </para>
-
-            <para>
-                You can
-                <link linkend="config-general-hvif2png">configure</link>
-                Haiku Depot Server to then use the deployed hvif2png tool.
             </para>
 
         </section>

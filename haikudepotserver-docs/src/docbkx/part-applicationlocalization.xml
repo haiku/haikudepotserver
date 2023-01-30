@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2020, Andrew Lindesay
+Copyright 2015-2023, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -88,8 +88,7 @@ Distributed under the terms of the MIT License.
         </para>
 
         <itemizedlist>
-            <listitem><code>haikudepotserver-webapp/src/main/webapp/js/app/passivecontent/*.html</code></listitem>
-            <listitem><code>haikudepotserver-webapp/src/main/webapp/WEB-INF/passivecontent/*.html</code></listitem>
+            <listitem><code>haikudepotserver-spa1/src/main/javascript/app/passivecontent/*.html</code></listitem>
         </itemizedlist>
 
         <para>

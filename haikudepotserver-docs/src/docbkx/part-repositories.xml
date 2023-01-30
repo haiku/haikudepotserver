@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2016-2018, Andrew Lindesay
+Copyright 2016-2023, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -141,7 +141,6 @@ architecture x86_gcc2
             to the RepositorySource to the RepositorySourceMirror in order to obtain the
             Base URL to be used in order to access the On-Net files of the repository.
         </para>
-
 
     </section>
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <!--
-Copyright 2015-2019, Andrew Lindesay
+Copyright 2015-2023, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -11,7 +11,7 @@ Distributed under the terms of the MIT License.
     <info>
         <title>Haiku Depot Server</title>
         <copyright>
-            <year>2013-2018</year>
+            <year>2013-2023</year>
             <holder>Andrew Lindesay</holder>
         </copyright>
         <legalnotice>
@@ -29,10 +29,8 @@ Distributed under the terms of the MIT License.
     <xi:include href="part-datalocalization.xml"/>
     <xi:include href="part-security.xml"/>
     <xi:include href="part-config.xml"/>
-    <xi:include href="part-buildandrelease.xml"/>
     <xi:include href="part-deployment.xml"/>
     <xi:include href="part-development.xml"/>
     <xi:include href="part-api.xml"/>
-    <xi:include href="part-testing.xml"/>
 
 </book>

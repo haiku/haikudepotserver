@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015, Andrew Lindesay
+Copyright 2015-2023, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -11,43 +11,261 @@ Distributed under the terms of the MIT License.
     <title>Development</title>
 
     <para>
-        This section covers how to setup the system for development purposes.  First review
+        This section covers how to setup the system for development purposes. First review
         <link linkend="prerequisites">prerequisites</link>.
     </para>
 
-    <para>
-        The project consists of a number of modules.
-        &quot;haikudepotserver-webapp&quot; is the application server module.  You should configure a
-        <emphasis>development</emphasis> configuration file at the following location relative to the
-        top-level of the source; &quot;haikudepotserver-webapp/src/main/resources/local.properties&quot;.
-        See the <link linkend="config">configuration</link> chapter for details on the format and keys
-        for this configuration file.
-    </para>
+    <section xml:id="overview-prerequisites-hvif2png">
+        <title>hvif2png Rendering Tool</title>
 
-    <para>
-        To start-up the application server for development purposes, issue the following command from the
-        same top level of the project;
-    </para>
+        <para>
+            Software on the Haiku operating system uses the HVIF file format for representing icons.  This
+            format is vector-art based rather than using a bitmap representation.
+            To render icons clearly at any size, Haiku Depot
+            Server uses an external tool to render the HVIF data into PNG images for display on the web browser.
+            Part of the <ulink url="https://www.haiku-os.org/development">Haiku Source Code</ulink> includes
+            a tool called &quot;hvif2png&quot; that can be used for this purpose.
+        </para>
+        <para>
+            Work through building Haiku operating system from source and then build the hvif2png tool using
+            &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  Note that you may need to install the
+            &quot;libpng&quot; libraries for this to build and yield the hvif2png tool as a
+            build artifact.  The build product in this case will be a binary for the build host.
+        </para>
+        <para>
+            To install this on a development or deployment host, you will either need to
+            generate a tar-ball to install
+            onto a linux environment such as debian.  The scripts that yields the tar-ball
+            is included in the Haiku Depot Server source at;
+        </para>
 
-    <para>
-        <programlisting>mvn \
+        <para>
+            <itemizedlist>
+                <listitem>support/buildhvif2pngtarball.sh</listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            The only argument to these scripts is the &quot;generated&quot; directory where the Haiku operating
+            system build products are situated.  It will yield a tar-ball in the generated directory in the
+            &quot;tmp&quot; directory.  The tarball can be unpacked anywhere on the target deployment or
+            development host.
+        </para>
+
+        <para>
+            You can
+            <link linkend="config-general-hvif2png">configure</link>
+            Haiku Depot Server to then use the deployed hvif2png tool.
+        </para>
+
+    </section>
+
+    <section>
+        <title>Run from Apache Maven</title>
+
+        <para>
+            The project consists of a number of modules.
+            &quot;haikudepotserver-webapp&quot; is the application server module. You should configure a
+            <emphasis>development</emphasis>
+            configuration file at the following location relative to the
+            top-level of the source; &quot;haikudepotserver-webapp/src/main/resources/local.properties&quot;.
+            See the <link linkend="config">configuration</link> chapter for details on the format and keys
+            for this configuration file.
+        </para>
+
+        <para>
+            To start-up the application server for development purposes, issue the following command from the
+            same top level of the project;
+        </para>
+
+        <para>
+            <programlisting>./mvnw clean package
+./mvnw \
 -Dfile.encoding=UTF-8 \
 -Duser.timezone=GMT0 \
 -Djava.awt.headless=true \
-jetty:run</programlisting>
-    </para>
+spring-boot:run</programlisting>
+        </para>
 
-    <para>
-        This may take some time to start-up; especially the first time.  Once it has started-up, it should be
-        possible to connect to the application server using the following URL;
-        &quot;http://localhost:8080/&quot;
-    </para>
+        <para>
+            This may take some time to start-up; especially the first time. Once it has started-up, it should be
+            possible to connect to the application server using the following URL;
+            &quot;http://localhost:8080/&quot;.  It is also possible to access the actuator endpoint at
+            &quot;http://localhost:8081/actuator&quot;.
+        </para>
 
-    <para>
-        There won't be any repositories or data loaded, and because of this, it is not possible to view any
-        data.  See the section on
-        <link linkend="deployment-settinguprepositories">settng up repositories</link>
-        for details on loading-up some data to view.
-    </para>
+        <para>
+            There won't be any repositories or data loaded, and because of this, it is not possible to view any
+            data. See the section on
+            <link linkend="deployment-settinguprepositories">settng up repositories</link>
+            for details on loading-up some data to view.
+        </para>
+
+    </section>
+
+    <section>
+        <title>Building Locally On-Host and Run</title>
+
+        <para>
+            The build process uses the
+            <ulink url="http://maven.apache.org">Apache Maven</ulink>
+            build tool. The application comes with a script &quot;mvnw&quot;
+            at the top level of the source which will download Apache Maven
+            and use a specific version.
+        </para>
+
+        <para>
+            From source code, you can obtain a clean build by issuing the
+            following command from the UNIX shell;
+            &quot;./mvnw clean package&quot;.
+        </para>
+
+        <para>
+            Given the state of the source code, this will produce corresponding build artifacts. Note that this
+            may take some time for the first build because the process will need to download various dependencies
+            from the internet.
+        </para>
+
+        <para>
+            To launch the binary with 256 megabytes of heap memory, issue a command similar to;
+        </para>
+
+        <para>
+            You will need to <link linkend="config">setup configuration</link>
+            if you have not done so already.
+        </para>
+
+        <para>
+            <programlisting>${JAVA_HOME}/bin/java \
+                -Xmx256m \
+                -Dfile.encoding=UTF-8 \
+                -Duser.timezone=GMT0 \
+                -Djava.awt.headless=true \
+                -Dconfig.properties=file:///etc/haikudepotserver/config.properties \
+                -jar /opt/haikudepotserver/haikudepotserver-webapp-1.2.3.jar
+            </programlisting>
+        </para>
+
+    </section>
+
+    <section>
+        <title>Automated Testing</title>
+
+        <para>
+            The build system has a number of automated tests. To skip automated testing, use the
+            &quot;-DskipTests&quot; flag on the &quot;./mvnw&quot; command.
+        </para>
+
+        <section xml:id="buildandrelease-automatedtesting-integrationtesting">
+            <title>Integration Testing</title>
+
+            <para>
+                The module &quot;haikudepotserver-core-test&quot; contains the automated integration tests for the
+                &quot;haikudepotserver-core&quot; module.  It also provides (as a build artifact) a set of resources
+                that can be used for testing other modules such as &quot;haikudepotserver-webapp&quot;.
+            </para>
+
+            <para>
+                Most of the tests in the project so far are integration tests.  The reason behind this is because the
+                ORM data objects are not POJOs and so they require a backing database of some description.  This is a
+                facit of the ORM technology and makes it difficult to create specific, unit tests.
+            </para>
+
+            <para>
+                The integration tests can be run
+                with the following maven command; &quot;./mvnw clean verify&quot;. These tests will execute against
+                an actual Postgres database. The Postgres database is started by the test logic using
+                the "Test Containers" system.
+            </para>
+
+        </section>
+    </section>
+
+    <section>
+        <title>Docker Image</title>
+
+        <para>
+            The source can again be checked out at the correct tag.  This
+            provides a Dockerfile ready to go.  The Docker tooling is used
+            to create the image.  This will use the files in the HDS source
+            as well as resources from the internet to assemble a Docker
+            image that can be run in Docker on a suitable virtual
+            environment.  From the support/deployment directory;
+        </para>
+
+        <para>
+            <programlisting>docker build --tag haikudepotserver:x.y.z .</programlisting>
+        </para>
+    </section>
+
+    <section>
+        <title>Testing the Docker Image</title>
+
+        <para>
+            To test the local Docker image before using it requires that
+            a suitable database server is configured.  If the database
+            is not available to the test docker container, it is possible
+            to TEMPORARILY port-forward from the internal database to the external
+            address so that the Docker contain can access the service.
+            For example;
+        </para>
+
+        <para>
+            <programlisting>ssh -L 192.1.1.1:5432:localhost:5432 user@192.1.1.1</programlisting>
+        </para>
+
+        <para>
+            A shared volume is
+            used to convey runtime secrets to the Docker container.  This
+            contains a well-known file called &quot;hds_secrets&quot; and
+            HDS reads this as it starts up.  First create the secrets
+            volume;
+        </para>
+
+        <para>
+            <programlisting>docker volume create secrets</programlisting>
+        </para>
+
+        <para>
+            Either you can edit the &quot;hds_secrets&quot; file on the
+            host machine or you can edit from a container that is running a
+            shell.  An example of the file can be found in the deployment
+            sources of the HDS project.  To edit it using a shell on a
+            running container;
+        </para>
+
+        <para>
+            <programlisting>docker run -it -v secrets:/secrets &lt;image-id&gt; /bin/bash</programlisting>
+        </para>
+
+        <para>
+            The file to edit is /secrets/hds_secrets and as the image
+            has no editor, it may be necessary to edit the file with
+            the basic &quot;cat&quot; tool.
+        </para>
+
+        <para>
+            <programlisting>cat - > /secrets/hds_secrets</programlisting>
+        </para>
+
+        <para>
+            Use CTRL-D to terminate and write the output file.
+        </para>
+
+        <para>
+            Now run the container;
+        </para>
+
+        <para>
+            <programlisting>docker run -v secrets:/secrets -p 8080:8080 -p 8081:8081 &lt;image-id&gt;</programlisting>
+        </para>
+
+        <para>
+            It should now be possible to access the running HDS system from a
+            browser on the host system using "http://localhost:8080".  It should
+            be possible to view the actuator information on
+            "http://localhost:8081/actuator".
+        </para>
+    </section>
 
 </chapter>

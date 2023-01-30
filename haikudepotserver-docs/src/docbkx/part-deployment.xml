@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright 2015-2018, Andrew Lindesay
+Copyright 2015-2023, Andrew Lindesay
 Distributed under the terms of the MIT License.
 -->
 
@@ -12,234 +12,131 @@ Distributed under the terms of the MIT License.
 
     <para>
         This section outlines the approximate steps to deploy the web application-server.  The application-server
-        build process produces a standard JEE "war" packaged web application.  In the typical haikudepotserver
-        deployment, this will be launched with the <ulink url="http://www.eclipse.org/jetty">Jetty</ulink> application
-        server.  A special build of the Jetty application server called &quot;jetty-runner&quot; is used which
-        contains the essential Jetty server elements packaged as a single java jar file.  This avoids the need to
-        install the full Jetty distribution.
+        build process produces a stand-alone self-executing &quot;jar&quot; file.
     </para>
 
-    <warning>
-        <para>
-            The default database installs a user with the nickname of &quot;root&quot; with a known password of
-            &quot;p4mphl3t&quot;.  This password <emphasis>must</emphasis> be changed before the system is made
-            available over a network.
-        </para>
-    </warning>
-
-    <warning>
-        <para>
-            The API-related HTTP traffic into the application server uses basic or token bearer authentication.
-            Either technique exposes authentication details in the request and response.  For this reason it is
-            advised that HTTP traffic to and from the application server be transported as secure HTTP (https)
-            in order to prevent a third party from reading the HTTP headers and extracting this information.
-        </para>
-    </warning>
-
-    <para>
-        Please see
-        <link linkend="prerequisites">prerequisites</link> required for running this software and
-        <link linkend="buildandrelease">information</link> about obtaining a build product and possibly also
-        creating a release version.  The build product that you will require for deployment can be found at
-        &quot;haikudepotserver-webapp/target/haikudepotserver-webapp-1.2.3.war&quot;.
-        The leaf-name will vary depending on the release that is being build.  You should also refer to
-        <link linkend="config">the configuration section</link>
-        for details of the format and keys for the configuration file.  You will need to create a configuration
-        file for your deployment.
-    </para>
-
-    <para>
-        To launch the binary with 256 megabytes of heap memory, issue a command similar to;
-    </para>
-
-    <para>
-        <programlisting>java \
-            -Xmx256m \
-            -Dfile.encoding=UTF-8 \
-            -Duser.timezone=GMT0 \
-            -Djava.awt.headless=true \
-            -Dconfig.properties=file:///etc/haikudepotserver/config.properties \
-            -jar /opt/haikudepotserver/jetty-runner.jar \
-            --jar /opt/haikudepotserver/postgresql.jar \
-            --port 8801 \
-            /opt/haikudepotserver/haikudepotserver-webapp.war</programlisting>
-    </para>
-
-    <para>
-        By default the logging will be streamed to stdout/stderr.  It is possible to configure this using
-        <ulink url="http://logback.qos.ch/">logback</ulink>
-        logging configuration file.
-    </para>
-
-    <section xml:id="deployment-settinguprepositories">
-        <title>Setting Up Repositories</title>
+    <section xml:id="deployment-versions">
+        <title>Understanding Versions</title>
 
         <para>
-            The application server will pull &quot;.hpkr&quot; files from remote repositories that contain
-            information about the packages at that repository.  Authenticated as root, it is possible to use
-            the &quot;hamburger&quot; link at the top of the home page to get to the repositories, to add a repository
-            and to trigger the import of a repository.
-        </para>
-
-        <para>
-            You can find out more about repositories in HDS
-            <link linkend="repositories">here</link>.
+            A maven project has a &quot;version&quot; which is either a final version such as &quot;2.3.1&quot;
+            or is a &quot;snapshot&quot; version such as &quot;2.3.2-SNAPSHOT&quot;. The snapshot version is
+            the work-in-progress for the next release. Once the snapshot is ready, a release is made wherein
+            that source-code is fixed to the version number without the trailing &quot;-SNAPSHOT&quot; and then
+            the snapshot version is incremented. The release yields a tag in the source code management system
+            (git) in order to be able to reproduce the source-code for that release against a release version.
+            The tag will have a form such as &quot;haikudepotserver-2.3.2&quot;.
         </para>
     </section>
 
     <section>
-        <title>Accessing the Web Environment</title>
+        <title>Undertaking a Release</title>
 
         <para>
-            Once running, the web environment will be accessible from; &quot;http://localhost:8080/&quot;
+            A Python script is provided to perform a release from the HEAD of the master branch.
+            In the following example, the following assumed (ficticious) version numbers are used for
+            demonstration purposes;
+        </para>
+
+        <informaltable>
+            <tgroup cols="2">
+                <thead>
+                    <row>
+                        <entry>Version</entry>
+                        <entry>Purpose</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry>1.2.3-SNAPSHOT</entry>
+                        <entry>The version <emphasis>prior</emphasis> to release</entry>
+                    </row>
+                    <row>
+                        <entry>1.2.3</entry>
+                        <entry>The version of the release</entry>
+                    </row>
+                    <row>
+                        <entry>1.2.4-SNAPSHOT</entry>
+                        <entry>The version <emphasis>after</emphasis> the release</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </informaltable>
+
+        <para>
+            The script performs the following steps;
+        </para>
+
+        <para>
+            <itemizedlist>
+                <listitem>Check the current version is of the form 1.2.3-SNAPSHOT</listitem>
+                <listitem>Check all modules have the same version</listitem>
+                <listitem>Update all modules to the version 1.2.3</listitem>
+                <listitem>Git commit</listitem>
+                <listitem>Git tag</listitem>
+                <listitem>Update all modules to the version 1.2.4-SNAPSHOT</listitem>
+                <listitem>Git commit</listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            Prior to a release;
+        </para>
+
+        <para>
+            <itemizedlist>
+                <listitem>All changes should be committed</listitem>
+                <listitem>A &quot;verify&quot; goal is run to ensure that automated testing passes</listitem>
+                <listitem>A &quot;clean&quot; goal is run to clean out any build files</listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            The following series of commands would orchestrate the release process;
+        </para>
+
+        <para>
+            <programlisting>python3 support/hdsrelease.py
+...
+git push
+git push --tags</programlisting>
         </para>
     </section>
 
     <section>
-        <title>Deployment with Docker</title>
-
-        <figure>
-            <title>The processes involved in a Docker build and release process.</title>
-            <mediaobject>
-                <imageobject>
-                    <imagedata fileref="images/img-docker-build-process.png" format="PNG"/>
-                </imageobject>
-            </mediaobject>
-        </figure>
+        <title>Obtaining Source for a Release and then Building Docker Image</title>
 
         <para>
-            The coloured lines represent scripted or automated data flows and
-            the black more manual flows or processes.  There is a mix of
-            automation and manual-intervention.
+            In order to obtain source code state for a specific release, first &quot;git pull&quot; any
+            pending changes from the remote repository and then checkout the source at the particular tag;
+            &quot;git checkout tags/haikudepotserver-2.3.2&quot;.
         </para>
 
-        <section>
-            <title>Haiku Vector Icon Rendering</title>
-            <para>
-                The hvif2png program is packaged as a tar-ball in the HDS source.
-                It is build for the correct platform that the HDS Docker image will
-                use as its base image.  This tar-ball is then included in the HDS
-                source.
-            </para>
-        </section>
+        <para>
+            From there it will be possible to create a build product for that particular release by
+            initiating the build process.
+        </para>
 
-        <section>
-            <title>Release Process</title>
+        <para>
+            <programlisting>./build.sh</programlisting>
+        </para>
 
-            <para>
-                This process is driven by Python scripts in the HDS repository.
-                Based on a template, it will render a Dockerfile into the
-                source.  The Dockerfile contains the correct, coordinated
-                versions of;
-            </para>
+        <para>
+            This will trigger a multi-stage Docker build.  The first stage will pull down all of the
+            dependencies of the build and will then build the build products.  The second stage will
+            assemble the immutable Docker container that will run the HDS system.
+        </para>
+    </section>
 
-            <para>
-                <itemizedlist>
-                    <listitem>Haiku Depot Server (.war)</listitem>
-                    <listitem>Postgres Driver (.jar)</listitem>
-                    <listitem>Jetty Runner (.jar)</listitem>
-                </itemizedlist>
-            </para>
-
-            <para>
-                The new release is tagged in GitHub.
-            </para>
-
-        </section>
-
-        <section>
-            <title>Build Process</title>
-            <para>
-                Now the source is checked out by hand at the release tag.  From
-                this process, driven by the Maven build tool, a Java Application
-                .jar file is generated.
-            </para>
-        </section>
-
-        <section>
-            <title>Docker Image</title>
-            <para>
-                The source can again be checked out at the correct tag.  This
-                provides a Dockerfile ready to go.  The Docker tooling is used
-                to create the image.  This will use the files in the HDS source
-                as well as resources from the internet to assemble a Docker
-                image that can be run in Docker on a suitable virtual
-                environment.  From the support/deployment directory;
-            </para>
-
-            <para>
-                <programlisting>docker build --tag haikudepotserver:x.y.z .</programlisting>
-            </para>
-        </section>
-
-        <section>
-            <title>Testing the Docker Image</title>
-
-            <para>
-                To test the local Docker image before using it requires that
-                a suitable database server is configured.  If the database
-                is not available to the test docker container, it is possible
-                to TEMPORARILY port-forward from the internal database to the external
-                address so that the Docker contain can access the service.
-                For example;
-            </para>
-
-            <para>
-                <programlisting>ssh -L 192.1.1.1:5432:localhost:5432 user@192.1.1.1</programlisting>
-            </para>
-
-            <para>
-                A shared volume is
-                used to convey runtime secrets to the Docker container.  This
-                contains a well-known file called &quot;hds_secrets&quot; and
-                HDS reads this as it starts up.  First create the secrets
-                volume;
-            </para>
-
-            <para>
-                <programlisting>docker volume create secrets</programlisting>
-            </para>
-
-            <para>
-                Either you can edit the &quot;hds_secrets&quot; file on the
-                host machine or you can edit from a container that is running a
-                shell.  An example of the file can be found in the deployment
-                sources of the HDS project.  To edit it using a shell on a
-                running container;
-            </para>
-
-            <para>
-                <programlisting>docker run -it -v secrets:/secrets &lt;image-id&gt; /bin/bash</programlisting>
-            </para>
-
-            <para>
-                The file to edit is /secrets/hds_secrets and as the image
-                has no editor, it may be necessary to edit the file with
-                the basic &quot;cat&quot; tool.
-            </para>
-
-            <para>
-                <programlisting>cat - > /secrets/hds_secrets</programlisting>
-            </para>
-
-            <para>
-                Use CTRL-D to terminate and write the output file.
-            </para>
-
-            <para>
-                Now run the container;
-            </para>
-
-            <para>
-                <programlisting>docker run -v secrets:/secrets -p 8080:8080 &lt;image-id&gt;</programlisting>
-            </para>
-
-            <para>
-                It should now be possible to access the running HDS system from a
-                browser on the host system using "http://localhost:8080".
-            </para>
-        </section>
-
+    <section>
+        <title>Haiku Vector Icon Rendering</title>
+        <para>
+            The hvif2png program is pre-built and included in the source as a
+            binary resource; a tar-ball.
+            This tar-ball is then unpacked and included in the Docker container image.  The
+            application then uses the hvif2png tool at runtime to render HVIF icons as
+            PNG for the SPA to display to end users on demand.
+        </para>
     </section>
 
 </chapter>
