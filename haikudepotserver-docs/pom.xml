@@ -78,7 +78,7 @@
         <resources>
             <resource>
                 <directory>${project.build.directory}/site</directory>
-                <targetPath>META-INF/resources/docs/</targetPath>
+                <targetPath>docs</targetPath>
             </resource>
         </resources>
 
