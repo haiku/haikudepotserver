@@ -1,14 +1,11 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.config;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
@@ -28,7 +25,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.web.context.support.ServletContextAttributeExporter;
 
 import java.util.Collection;
 import java.util.List;
@@ -93,18 +89,6 @@ public class AppConfig {
         }
 
         return result;
-    }
-
-    @Bean
-    public ServletContextAttributeExporter servletContextAttributeExporter(
-            MetricRegistry metricRegistry,
-            HealthCheckRegistry healthCheckRegistry) {
-        ServletContextAttributeExporter exporter = new ServletContextAttributeExporter();
-        exporter.setAttributes(ImmutableMap.of(
-                "com.codahale.metrics.servlets.MetricsServlet.registry", metricRegistry,
-                "com.codahale.metrics.servlets.HealthCheckServlet.registry", healthCheckRegistry
-        ));
-        return exporter;
     }
 
     @Bean("messageSourceBaseNames")

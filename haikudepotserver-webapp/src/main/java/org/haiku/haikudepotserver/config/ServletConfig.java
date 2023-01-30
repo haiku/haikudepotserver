@@ -5,19 +5,14 @@
 
 package org.haiku.haikudepotserver.config;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.servlets.HealthCheckServlet;
-import com.codahale.metrics.servlets.MetricsServlet;
-import com.codahale.metrics.servlets.PingServlet;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.jsonrpc4j.MultipleInvocationListener;
 import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.api1.support.ErrorResolverImpl;
-import org.haiku.haikudepotserver.metrics.MetricsFilter;
-import org.haiku.haikudepotserver.metrics.MetricsInvocationListener;
 import org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics;
 import org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetricsFilter;
+import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMetricsFilter;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter;
 import org.haiku.haikudepotserver.support.jsonrpc4j.ErrorLoggingInvocationListener;
 import org.haiku.haikudepotserver.support.jsonrpc4j.HttpStatusCodeProvider;
@@ -71,45 +66,22 @@ public class ServletConfig {
     }
 
     @Bean
-    public ServletRegistrationBean<HttpServlet> metricAdminHealthCheckServlet() {
-        ServletRegistrationBean<HttpServlet> servletRegistration = new ServletRegistrationBean<>();
-        servletRegistration.setServlet(new HealthCheckServlet());
-        servletRegistration.setLoadOnStartup(1);
-        servletRegistration.addUrlMappings("/__metric/healthcheck");
-        servletRegistration.setAsyncSupported(true);
-        servletRegistration.setName("metric-admin-health-check");
-        return servletRegistration;
-    }
-
-    @Bean
-    public ServletRegistrationBean<HttpServlet> metricAdminMetricsServlet() {
-        ServletRegistrationBean<HttpServlet> servletRegistration = new ServletRegistrationBean<>();
-        servletRegistration.setServlet(new MetricsServlet());
-        servletRegistration.setLoadOnStartup(1);
-        servletRegistration.addUrlMappings("/__metric/metrics");
-        servletRegistration.setAsyncSupported(true);
-        servletRegistration.setName("metric-admin-metrics");
-        return servletRegistration;
-    }
-
-    @Bean
-    public ServletRegistrationBean<HttpServlet> metricAdminPingServlet() {
-        ServletRegistrationBean<HttpServlet> servletRegistration = new ServletRegistrationBean<>();
-        servletRegistration.setServlet(new PingServlet());
-        servletRegistration.setLoadOnStartup(1);
-        servletRegistration.addUrlMappings("/__metric/ping");
-        servletRegistration.setAsyncSupported(true);
-        servletRegistration.setName("metric-admin-ping");
-        return servletRegistration;
-    }
-
-    @Bean
     public FilterRegistrationBean<Filter> forwardedHeaderFilter() {
         FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new ForwardedHeaderFilter());
         registrationBean.addUrlPatterns("/*");
         registrationBean.setOrder(5);
         registrationBean.setName("forwarded-header-filter");
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<Filter> desktopApplicationMetricsFilter(MeterRegistry meterRegistry) {
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new DesktopApplicationMetricsFilter(meterRegistry));
+        registrationBean.addUrlPatterns("/*");
+        registrationBean.setOrder(5);
+        registrationBean.setName("desktop-application-metrics-filter");
         return registrationBean;
     }
 
@@ -131,16 +103,6 @@ public class ServletConfig {
         registrationBean.addUrlPatterns("/*");
         registrationBean.setOrder(15);
         registrationBean.setName("delay-filter");
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<Filter> metricsFilter(MetricRegistry metricRegistry) {
-        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new MetricsFilter(metricRegistry));
-        registrationBean.addUrlPatterns("/*");
-        registrationBean.setOrder(20);
-        registrationBean.setName("metrics-filter");
         return registrationBean;
     }
 
@@ -167,10 +129,7 @@ public class ServletConfig {
 
     @Bean
     public BeanFactoryPostProcessor autoJsonRpcServiceImplExporter(
-            ObjectMapper objectMapper,
-            MetricRegistry metricRegistry) {
-
-        MetricsInvocationListener metricsInvocationListener = new MetricsInvocationListener(metricRegistry);
+            ObjectMapper objectMapper) {
 
         AutoJsonRpcServiceImplExporter exporter = new AutoJsonRpcServiceImplExporter();
 
@@ -185,10 +144,7 @@ public class ServletConfig {
 
         // allows hds control over how the exception is logged
         exporter.setInvocationListener(
-                new MultipleInvocationListener(
-                        new ErrorLoggingInvocationListener(),
-                        metricsInvocationListener
-                )
+                new ErrorLoggingInvocationListener()
         );
 
         exporter.setHttpStatusCodeProvider(new HttpStatusCodeProvider());

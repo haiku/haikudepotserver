@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -99,6 +99,17 @@ angular.module('haikudepotserver').controller(
 
             $scope.goPkgScreenshotExportArchive = function () {
                 goBasicPkgReport('queue-pkg-screenshot-export-archive-job');
+            };
+
+            $scope.goMetricsGeneralReport = function() {
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_METRICS_JOB, 'queue-metrics-general-report').then(
+                  function (data) {
+                      navigateToViewJobOrNotifyRejection(data.guid);
+                  },
+                  function (err) {
+                      errorHandling.handleRemoteProcedureCallError(err);
+                  }
+                );
             };
 
             $scope.goAuthorizationRulesSpreadsheet= function () {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -42,7 +42,7 @@ import java.util.List;
                 @ComponentScan.Filter(type = FilterType.ANNOTATION, value = Controller.class),
         }
 )
-@Import({PersistenceConfig.class, MetricsConfig.class})
+@Import({PersistenceConfig.class})
 public class BasicConfig {
 
     // -------------------------------------

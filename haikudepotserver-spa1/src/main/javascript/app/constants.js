@@ -17,6 +17,7 @@ angular.module('haikudepotserver')
 
         RECENT_DAYS : 90,
 
+        ENDPOINT_API_V2_METRICS_JOB : '/__api/v2/metrics-job',
         ENDPOINT_API_V2_REPOSITORY : '/__api/v2/repository',
         ENDPOINT_API_V2_PKG : '/__api/v2/pkg',
         ENDPOINT_API_V2_PKG_JOB: '/__api/v2/pkg-job',

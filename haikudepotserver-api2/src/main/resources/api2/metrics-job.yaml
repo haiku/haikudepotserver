@@ -1,0 +1,51 @@
+# Copyright 2023, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Metrics Job API
+  version: "2.0"
+tags:
+  - name: metrics-job
+paths:
+
+  /__api/v2/metrics-job/queue-metrics-general-report:
+    description: >
+      Enqueues a request on behalf of the current user to produce a report of metrics that might generally
+      be of interest.
+    post:
+      tags:
+        - metrics-job
+      operationId: queueMetricsGeneralReportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queueMetricsGeneralReportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queueMetricsGeneralReportJobResponseEnvelope"
+
+components:
+  schemas:
+
+    queueMetricsGeneralReportJobRequestEnvelope:
+      type: object
+    queueMetricsGeneralReportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queueMetricsGeneralReportJobJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queueMetricsGeneralReportJobJobResult:
+      type: object
+      properties:
+        guid:
+          type: string

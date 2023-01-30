@@ -72,6 +72,7 @@ FROM debian:11.6-slim AS runtime
 RUN apt-get update && apt-get -y install wget optipng libpng16-16 curl openjdk-17-jre fontconfig fonts-dejavu-core
 
 ENV HDS_B_HTTP_PORT=8080
+ENV HDS_B_HTTP_ACTUATOR_PORT=8081
 ENV HDS_B_INSTALL_ROOT="/opt/haikudepotserver"
 ENV HDS_B_PROPBIN="/opt/haikudepotserver/prop.sh"
 RUN mkdir ${HDS_B_INSTALL_ROOT}
@@ -95,9 +96,10 @@ HDS_ROOT=${HDS_B_INSTALL_ROOT}\n\
 JAVA_BIN=java\n\
 HDS_HVIF2PNG_PATH=${HDS_B_INSTALL_HVIF2PNG_PATH}\n\
 HDS_PORT=${HDS_B_HTTP_PORT}\n\
+HDS_ACTUATOR_PORT=${HDS_B_HTTP_ACTUATOR_PORT}\n\
 " >> ${HDS_B_INSTALL_ROOT}/launchenv.sh
 
 CMD [ "/opt/haikudepotserver/launch.sh" ]
 
-HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8080/__metric/healthcheck
-EXPOSE ${HDS_B_HTTP_PORT}
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:${HDS_B_HTTP_ACTUATOR_PORT}/actuator/health
+EXPOSE ${HDS_B_HTTP_PORT} ${HDS_B_HTTP_ACTUATOR_PORT}

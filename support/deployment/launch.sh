@@ -23,5 +23,6 @@ fi
 "-Djdbc.password=${HDS_JDBC_PASSWORD}" \
 "-Dsmtp.host=${HDS_SMTP_HOST}" \
 "-Dserver.port=${HDS_PORT}" \
+"-Dmanagement.server.port=${HDS_ACTUATOR_PORT}" \
 "-Dauthentication.jws.issuer=${HDS_AUTHENTICATION_JWS_ISSUER}" \
 "-jar" "${HDS_ROOT}/app.jar"

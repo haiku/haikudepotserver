@@ -181,6 +181,16 @@
                         </configuration>
                     </execution>
 
+                    <execution>
+                        <id>metrics-job-spring</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${inputspec.basedir}/metrics-job.yaml</inputSpec>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
         </plugins>

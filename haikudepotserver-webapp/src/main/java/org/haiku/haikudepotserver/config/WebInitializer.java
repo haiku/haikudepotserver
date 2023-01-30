@@ -5,9 +5,6 @@
 
 package org.haiku.haikudepotserver.config;
 
-import com.codahale.metrics.servlets.HealthCheckServlet;
-import com.codahale.metrics.servlets.MetricsServlet;
-import com.codahale.metrics.servlets.PingServlet;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
 import org.haiku.haikudepotserver.support.web.SessionListener;
@@ -40,7 +37,6 @@ public class WebInitializer implements WebApplicationInitializer {
         registerErrorServlet(servletContext);
         registerRemoteLogCaptureServlet(servletContext);
         registerSpringDispatcherServlet(servletContext);
-        registerMetricsServlets(servletContext);
 
         // note that the spring security filters are not included here.
 
@@ -50,6 +46,7 @@ public class WebInitializer implements WebApplicationInitializer {
         registerSpringFilter(servletContext, "springSecurityFilterChain", "/*");
         registerSpringFilter(servletContext, "loggingFilter", "/*");
         registerSpringFilter(servletContext, "singlePageTemplateFrequencyMetricsFilter", "/__js/app/*");
+        registerSpringFilter(servletContext, "desktopApplicationMetricsFilter", "/*");
         registerSpringFilter(servletContext, "desktopApplicationMinimumVersionFilter", "/*");
 
         // would be nice to add the error handler here, but this not possible in this
@@ -64,28 +61,6 @@ public class WebInitializer implements WebApplicationInitializer {
         FilterRegistration.Dynamic dynamic = servletContext.addFilter(beanName, new DelegatingFilterProxy(beanName));
         dynamic.addMappingForUrlPatterns(null, false, urlPatterns);
         dynamic.setAsyncSupported(true);
-    }
-
-    private void registerMetricsServlets(ServletContext servletContext) {
-        ServletRegistration.Dynamic healthCheckDispatcher = servletContext.addServlet(
-                "metric-admin-health-check", HealthCheckServlet.class);
-        healthCheckDispatcher.setLoadOnStartup(1);
-        healthCheckDispatcher.addMapping("/__metric/healthcheck");
-        healthCheckDispatcher.setAsyncSupported(true);
-
-        ServletRegistration.Dynamic adminDispatcher = servletContext.addServlet(
-                "metric-admin-metrics",
-                new MetricsServlet());
-        adminDispatcher.setLoadOnStartup(1);
-        adminDispatcher.addMapping("/__metric/metrics");
-        adminDispatcher.setAsyncSupported(true);
-
-        ServletRegistration.Dynamic pingDispatcher = servletContext.addServlet(
-                "metric-admin-ping",
-                new PingServlet());
-        pingDispatcher.setLoadOnStartup(1);
-        pingDispatcher.addMapping("/__metric/ping");
-        pingDispatcher.setAsyncSupported(true);
     }
 
     private void registerErrorServlet(ServletContext servletContext) {
