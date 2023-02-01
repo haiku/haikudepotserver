@@ -27,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -65,10 +67,10 @@ public abstract class AbstractIntegrationTest {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static TestDatabase.DatabaseConnectionDetails databaseConnectionDetails;
+    protected static DataSourceProperties dataSourceProperties;
 
     static {
-        databaseConnectionDetails = TestDatabase.startDatabase(TestDatabase.deriveType());
+        dataSourceProperties = TestDatabase.startDatabase(TestDatabase.deriveType());
     }
 
     private final static Set<String> CDO_NAMES_RETAINED =
@@ -299,9 +301,9 @@ public abstract class AbstractIntegrationTest {
         public void initialize(ConfigurableApplicationContext applicationContext) {
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
                     applicationContext,
-                    "jdbc.url=" + databaseConnectionDetails.getUrl(),
-                    "jdbc.username=" + databaseConnectionDetails.getUsername(),
-                    "jdbc.password=" + databaseConnectionDetails.getPassword()
+                    "spring.datasource.url=" + dataSourceProperties.getUrl(),
+                    "spring.datasource.username=" + dataSourceProperties.getUsername(),
+                    "spring.datasource.password=" + dataSourceProperties.getPassword()
             );
         }
     }

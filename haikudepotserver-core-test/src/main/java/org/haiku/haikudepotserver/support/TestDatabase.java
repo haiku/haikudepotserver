@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.util.FileSystemUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
@@ -71,15 +72,16 @@ public class TestDatabase {
                 .orElse(Type.START_TEST_CONTAINERS);
     }
 
-    public static DatabaseConnectionDetails startDatabase(Type type) {
+    public static DataSourceProperties startDatabase(Type type) {
         try {
             switch (type) {
                 case LOCAL_DATABASE -> {
                     LOGGER.info("am using a postgres database running locally");
-                    return new DatabaseConnectionDetails(
-                            "jdbc:postgresql://localhost:5432/" + DEFAULT_DATABASE,
-                            DEFAULT_USERNAME,
-                            DEFAULT_PASSWORD);
+                    DataSourceProperties properties = new DataSourceProperties();
+                    properties.setUrl("jdbc:postgresql://localhost:5432/" + DEFAULT_DATABASE);
+                    properties.setUsername(DEFAULT_USERNAME);
+                    properties.setPassword(DEFAULT_PASSWORD);
+                    return properties;
                 }
                 case START_TEST_CONTAINERS -> {
                     if (null == POSTGRES_SQL_CONTAINER) {
@@ -91,11 +93,11 @@ public class TestDatabase {
                         POSTGRES_SQL_CONTAINER.start();
                         LOGGER.info("am using a postgres database running in a container");
                     }
-                    return new DatabaseConnectionDetails(
-                            POSTGRES_SQL_CONTAINER.getJdbcUrl(),
-                            POSTGRES_SQL_CONTAINER.getUsername(),
-                            POSTGRES_SQL_CONTAINER.getPassword()
-                    );
+                    DataSourceProperties properties = new DataSourceProperties();
+                    properties.setUrl(POSTGRES_SQL_CONTAINER.getJdbcUrl());
+                    properties.setUsername(POSTGRES_SQL_CONTAINER.getUsername());
+                    properties.setPassword(POSTGRES_SQL_CONTAINER.getPassword());
+                    return properties;
                 }
                 case START_LOCAL_DATABASE -> {
                     return startLocalDatabase();
@@ -111,7 +113,7 @@ public class TestDatabase {
         }
     }
 
-    private static DatabaseConnectionDetails startLocalDatabase() throws IOException {
+    private static DataSourceProperties startLocalDatabase() throws IOException {
         Preconditions.checkState(null == localTestDatabaseLocalPostgresEnvironment);
         Preconditions.checkState(new File(ROOT_TEMP).exists(), "the temporary directory does not exist");
 
@@ -188,9 +190,11 @@ public class TestDatabase {
 
             LOGGER.info("did setup the integration test database");
 
-            return new DatabaseConnectionDetails(
-                    "jdbc:postgresql://localhost:5432/" + DEFAULT_DATABASE,
-                    DEFAULT_USERNAME, DEFAULT_PASSWORD);
+            DataSourceProperties properties = new DataSourceProperties();
+            properties.setUrl("jdbc:postgresql://localhost:5432/" + DEFAULT_DATABASE);
+            properties.setUsername(POSTGRES_SQL_CONTAINER.getUsername());
+            properties.setPassword(POSTGRES_SQL_CONTAINER.getPassword());
+            return properties;
         }
         catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
@@ -297,36 +301,6 @@ public class TestDatabase {
 
         public Path getLogPsql() {
             return Path.of(ROOT_TEMP, uuid + "-psql.log");
-        }
-    }
-
-    /**
-     * <p>This class models the connection details that will be used by the test rig to
-     * connect to the Postgres database to run the tests.</p>
-     */
-
-    public static class DatabaseConnectionDetails {
-
-        private final String url;
-        private final String username;
-        private final String password;
-
-        public DatabaseConnectionDetails(String url, String username, String password) {
-            this.url = Preconditions.checkNotNull(url);
-            this.username = Preconditions.checkNotNull(username);
-            this.password = Preconditions.checkNotNull(password);
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public String getPassword() {
-            return password;
         }
     }
 

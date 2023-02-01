@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,82 +7,43 @@ package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.zaxxer.hikari.HikariDataSource;
 import org.apache.cayenne.DataChannelFilter;
 import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
+import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
+import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.dataobjects.UserRating;
+import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener;
 import org.haiku.haikudepotserver.support.cayenne.ServerRuntimeFactory;
 import org.haiku.haikudepotserver.support.db.UserUsageConditionsInitializer;
-import org.haiku.haikudepotserver.support.db.migration.ManagedDatabase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn;
 
 import javax.sql.DataSource;
 import java.util.Collections;
 
 public class PersistenceConfig {
 
-    @Bean
-    public DataSource dataSource(
-            @Value("${jdbc.driver}") String driverClassName,
-            @Value("${jdbc.url}") String jdbcUrl,
-            @Value("${jdbc.username}") String username,
-            @Value("${jdbc.password}") String password,
-            @Value("${jdbc.pool.maximumpoolsize:8}") Integer maximumPoolSize,
-            @Value("${jdbc.pool.minimumidle:1}") Integer minimumIdle
-    ) {
-        HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl(jdbcUrl);
-        dataSource.setDriverClassName(driverClassName);
-        dataSource.setUsername(username);
-        dataSource.setPassword(password);
-        dataSource.setMaximumPoolSize(maximumPoolSize);
-        dataSource.setMinimumIdle(minimumIdle);
-        return dataSource;
-    }
-
     @Bean(initMethod = "init")
-    public ManagedDatabase haikuDepotManagedDatabase(
-            DataSource dataSource,
-            @Value("${flyway.migrate}") Boolean flywayMigrate,
-            @Value("${flyway.validateOnMigrate:true}") Boolean validateOnMigrate
-    ) {
-        return createManagedDatabase(dataSource, "haikudepot", flywayMigrate, validateOnMigrate);
-    }
-
-    @Bean(initMethod = "init")
-    public ManagedDatabase captchaManagedDatabase(
-            DataSource dataSource,
-            @Value("${flyway.migrate}") Boolean flywayMigrate,
-            @Value("${flyway.validateOnMigrate:true}") Boolean validateOnMigrate
-    ) {
-        return createManagedDatabase(dataSource, "captcha", flywayMigrate, validateOnMigrate);
-    }
-
-    @Bean(initMethod = "init")
-    @DependsOn({"haikuDepotManagedDatabase"})
+//    @DependsOn({"haikuDepotManagedDatabase"})
     public UserUsageConditionsInitializer userUsageConditionsInitializer(
             ServerRuntime serverRuntime,
             ObjectMapper objectMapper
     ) {
         return new UserUsageConditionsInitializer(serverRuntime, objectMapper);
-    }
-
-    private ManagedDatabase createManagedDatabase(
-            DataSource dataSource,
-            String schema,
-            Boolean flywayMigrate,
-            Boolean validateOnMigrate) {
-        ManagedDatabase managedDatabase = new ManagedDatabase();
-        managedDatabase.setDataSource(dataSource);
-        managedDatabase.setMigrate(flywayMigrate);
-        managedDatabase.setSchema(schema);
-        managedDatabase.setValidateOnMigrate(validateOnMigrate);
-        return managedDatabase;
     }
 
     @Bean

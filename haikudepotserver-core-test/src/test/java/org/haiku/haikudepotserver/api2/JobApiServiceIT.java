@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,6 +20,9 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
@@ -117,6 +120,9 @@ public class JobApiServiceIT extends AbstractIntegrationTest {
     }
 
     @Import({
+            DataSourceAutoConfiguration.class,
+            DataSourceTransactionManagerAutoConfiguration.class,
+            FlywayAutoConfiguration.class,
             TestBasicConfig.class,
             BasicConfig.class
     })

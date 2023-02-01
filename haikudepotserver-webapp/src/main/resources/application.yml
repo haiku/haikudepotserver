@@ -15,6 +15,15 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 8
+      minimum-idle: 1
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+
 management:
   server:
     port: 8081
