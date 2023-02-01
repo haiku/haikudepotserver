@@ -199,7 +199,7 @@ def gitaddpomformodule(modulename):
 # MAVEN
 
 def mvnversionsset(version):
-    if 0 == subprocess.call(["mvn", "-q", "versions:set", "-DnewVersion=" + version, "-DgenerateBackupPoms=false"]):
+    if 0 == subprocess.call(["./mvnw", "-q", "versions:set", "-DnewVersion=" + version, "-DgenerateBackupPoms=false"]):
         print("versions:set to " + version)
     else:
         raise RuntimeError("failed to set maven versions to [" + version + "]")
