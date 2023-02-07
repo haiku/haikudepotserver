@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,7 @@ public class FeedServiceImpl implements FeedService {
     private final String baseUrl;
 
     public FeedServiceImpl(
-            @Value("${baseurl}") String baseUrl
+            @Value("${hds.base-url}") String baseUrl
     ) {
         this.baseUrl = Preconditions.checkNotNull(baseUrl);
     }

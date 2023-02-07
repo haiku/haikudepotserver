@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -71,7 +71,7 @@ public class FeedController {
     public FeedController(
             List<SyndEntrySupplier> syndEntrySuppliers,
             MessageSource messageSource,
-            @Value("${baseurl}") String baseUrl) {
+            @Value("${hds.base-url}") String baseUrl) {
         this.syndEntrySuppliers = Preconditions.checkNotNull(syndEntrySuppliers);
         this.messageSource = Preconditions.checkNotNull(messageSource);
         this.baseUrl = Preconditions.checkNotNull(baseUrl);

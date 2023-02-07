@@ -50,8 +50,8 @@ public class UserRatingServiceImpl implements UserRatingService {
 
     public UserRatingServiceImpl(
             ServerRuntime serverRuntime,
-            @Value("${userrating.aggregation.pkg.versionsback:2}") int userRatingDerivationVersionsBack,
-            @Value("${userrating.aggregation.pkg.minratings:3}") int userRatingsDerivationMinRatings) {
+            @Value("${hds.user-rating.aggregation.pkg.versions-back:2}") int userRatingDerivationVersionsBack,
+            @Value("${hds.user-rating.aggregation.pkg.min-ratings:3}") int userRatingsDerivationMinRatings) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.userRatingDerivationVersionsBack = userRatingDerivationVersionsBack;
         this.userRatingsDerivationMinRatings = userRatingsDerivationMinRatings;

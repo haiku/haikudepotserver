@@ -75,7 +75,7 @@ public class HomeController {
     public HomeController(
             ServerRuntime serverRuntime,
             PkgService pkgService,
-            @Value("${architecture.default.code}") String defaultArchitectureCode) {
+            @Value("${hds.architecture.default.code}") String defaultArchitectureCode) {
         this.serverRuntime = serverRuntime;
         this.pkgService = pkgService;
         this.defaultArchitectureCode = defaultArchitectureCode;

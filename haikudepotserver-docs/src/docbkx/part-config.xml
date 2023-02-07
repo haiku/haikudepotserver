@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright 2018, Andrew Lindesay
+  ~ Copyright 2018-2023, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -14,8 +14,8 @@
         <title>Application</title>
 
         <para>
-            The application server is configured using a standard java properties file.  This same format is used in
-            different ways for either an actual deployment or a development environment.
+            The application server is configured using a standard java properties
+            or YAML file.
         </para>
 
         <para>
@@ -29,294 +29,17 @@ key2=value2</programlisting>
         </para>
 
         <para>
-            There are a number of keys which are described below.
+            There are a number of possible keys which are described in a file
+            &quot;.../support/deployment/config.properties&quot;.  Keys which are
+            for HDS specifically are prefixed with &quot;hds.&quot;.  Keys which
+            are for Spring Boot are prefixed with &quot;spring.&quot;.
         </para>
 
-        <section xml:id="config-general">
-            <title>General</title>
-
-            <section>
-                <title>architecture.default.code</title>
-                <para>
-                    This configuration setting defines the code of the default architecture that should be shown.
-                    Example values might be &quot;x86_gcc2&quot; or &quot;ppc&quot;.
-                </para>
-            </section>
-
-            <section>
-                <title>deployment.isproduction</title>
-                <para>
-                    This configuration setting can have a value of &quot;true&quot; or &quot;false&quot;.  When false,
-                    the system will display a warning message on the user interface to indicate that the deployment
-                    is non-production.
-                </para>
-            </section>
-
-            <section>
-                <title>pkgversion.viewcounter.protectrecurringincrementfromsameclient</title>
-                <para>
-                    This configuration setting can have a value of &quot;true&quot; or &quot;false&quot;.  When true
-                    (the default), the system will make basic efforts to protect against one client repeatedly
-                    incrementing a package version's view counter.  This might happen when a user navigates
-                    to view a package and then navigates away and back again.  With this value set as true, within
-                    a window of time, these two visits would be considered to be the same in terms of incrementing
-                    the view counter.
-                </para>
-            </section>
-
-            <section xml:id="config-general-hvif2png">
-                <title>hvif2png.path</title>
-                <para>
-                    This is a system path to the
-                    <link linkend="overview-prerequisites-hvif2png">hvif2png</link> tool.
-                    This tool is used to render HVIF icon data to PNG images that can be displayed on the web
-                    site.  This value is optional, but if absent, no icons for packages will shown.  Instead,
-                    placebo icons will be displayed.
-                </para>
-            </section>
-
-            <section>
-                <title>optipng.path</title>
-                <para>
-                    This is a system path to the
-                    <ulink url="http://optipng.sourceforge.net/">OptiPNG</ulink> tool.
-                    This tool can be used in some situations to optimize PNG data; for example when configuring
-                    icons for packages.  An example value might be &quot;/usr/local/bin/optipng&quot;.
-                </para>
-            </section>
-
-            <section>
-                <title>desktop.application.version.min</title>
-                <para>
-                    This optional value can be configured to specify a minimum version value for the
-                    HaikuDepot desktop application.  If a version of the desktop application attempts to
-                    communicate with the server with a version lower than this value then the server
-                    will return a 412 (precondition failed) HTTP status and a header that describes the
-                    minimum version required.
-                </para>
-            </section>
-
-        </section>
-
-        <section>
-            <title>Package Rating Derivation</title>
-
-            <para>
-                See
-                <link linkend="userrating">the user rating chapter</link>
-                for further details on how the package rating derivation algorithm uses these values to calculate
-                packages' ratings.
-            </para>
-
-            <section>
-                <title>userrating.aggregation.pkg.versionsback</title>
-                <para>
-                    This value is the number of versions back in the past from which the derivation will consider
-                    user ratings.  This value defaults to 2.
-                </para>
-            </section>
-
-            <section>
-                <title>userrating.aggregation.pkg.minratings</title>
-                <para>
-                    When deriving an aggregate rating for a package, if there are not enough user ratings then the
-                    package will have no rating.  This value is the minimum threshold and has a default value of 3.
-                </para>
-            </section>
-        </section>
-
-        <section>
-            <title>Database and Data Related</title>
-
-            <section>
-                <title>jdbc.driver</title>
-                <para>
-                    This is the class name of the JDBC driver employed.  The value should be
-                    &quot;org.postgresql.Driver&quot;
-                </para>
-            </section>
-
-            <section>
-                <title>jdbc.url</title>
-                <para>
-                    This is the JDBC connect URL to the main database.  The value should be of the form
-                    &quot;jdbc:postgresql://localhost:5432/haikudepotserver&quot;
-                </para>
-            </section>
-
-            <section>
-                <title>jdbc.username</title>
-                <para>
-                    This is the database username.
-                </para>
-            </section>
-
-            <section>
-                <title>jdbc.password</title>
-                <para>
-                    This is the database password.
-                </para>
-            </section>
-
-            <section>
-                <title>flyway.migrate</title>
-                <para>
-                    Set this to &quot;true&quot; if you would like database schema migrations to be applied
-                    automatically as necessary.  Generally this should be configured to &quot;true&quot;.
-                </para>
-            </section>
-
-            <section>
-                <title>flyway.validateOnMigrate</title>
-                <para>
-                    Set this to &quot;false&quot; if you want the system to validate schema migrations.  This can
-                    be helpful at development time when the schema is in flux, but should be &quot;true&quot; in
-                    production.
-                </para>
-            </section>
-
-            <section>
-                <title>flyway.validateOnMigrate</title>
-                <para>
-                    Set this to &quot;false&quot; if you want the system to validate schema migrations.  This can
-                    be helpful at development time when the schema is in flux, but should be &quot;true&quot; in
-                    production.
-                </para>
-            </section>
-
-            <section>
-                <title>cayenne.query.cache.size</title>
-                <para>
-                    Cayenne is the ORM system behind this application.  Some queries' results are cached and
-                    this configuration item allows the size of the query cache to be configured.
-                </para>
-            </section>
-
-        </section>
-
-        <section>
-            <title>Web-Related</title>
-
-            <section>
-                <title>baseurl</title>
-                <para>
-                    This is the base URL used to formulate URLs to be sent out that can be used to return back to the
-                    system.
-                </para>
-                <para>
-                    For example; this might be used to create the URL used to manage the password reset process.  The
-                    URL base is included in the email body to users who have requested a password-reset.  This has to
-                    be configured because the application itself does not know the path by which the HTTP request had
-                    reached it.
-                </para>
-                <para>
-                    In the case of a development environment, this base URL might be something like
-                    &quot;http://localhost:8080&quot;
-                </para>
-                <para>
-                    Note that this value should have no trailing slash.
-                </para>
-            </section>
-        </section>
-
-        <section>
-            <title>Token Bearer Authentication</title>
-
-            <para>
-                You can find out more about the token-bearer authentication system
-                <link linkend="security-authentication-tokenbearer">here</link>.
-            </para>
-
-            <section>
-                <title>authentication.jws.sharedkey</title>
-                <para>
-                    This shared key is used to sign the authentication tokens transmitted between the server and the
-                    client.  This value is optional.  If it is not supplied then a random shared key will be used for
-                    each launch of the application server.  Non-configured keys will not work where two or more
-                    load-balanced application servers are employed.  Any random value can be used for this and a possible
-                    way to create values is to use the command &quot;uuidgen&quot;.
-                </para>
-            </section>
-
-            <section>
-                <title>authentication.jws.issuer</title>
-                <para>
-                    This identifies the system that has produced a given token and is required.  It should be a string
-                    with the suffix &quot;.hds&quot;.  For example &quot;staging.hds&quot;.
-                </para>
-            </section>
-
-            <section>
-                <title>authentication.jws.expiryseconds</title>
-                <para>
-                    This configuration value defines how many seconds a token will be able to be used before it expires.
-                    This value is optional and a sensible default will be employed in its absence.
-                </para>
-            </section>
-
-        </section>
-
-        <section>
-            <title>Email</title>
-
-            <para>
-                You can find out more about the email system
-                <link linkend="architecture-applicationserverinfrastructure-email">here</link>.
-            </para>
-
-            <section>
-                <title>smtp.host</title>
-                <para>
-                    The host name or IP address of the SMTP server.  This configuration value is required.
-                </para>
-            </section>
-
-            <section>
-                <title>smtp.port</title>
-                <para>
-                    The port of the SMTP server.  This configuration value is optional and will default to 25.
-                </para>
-            </section>
-
-            <section>
-                <title>smtp.auth</title>
-                <para>
-                    Possible values are &quot;true&quot; or &quot;false&quot;.  When true, SMTP authentication will be
-                    used.  This configuration value is optional and will default to &quot;false&quot;.
-                </para>
-            </section>
-
-            <section>
-                <title>smtp.username</title>
-                <para>
-                    This is only required when SMTP authentication is configured.
-                </para>
-            </section>
-
-            <section>
-                <title>smtp.password</title>
-                <para>
-                    This is only required when SMTP authentication is configured.
-                </para>
-            </section>
-
-            <section>
-                <title>smtp.starttls</title>
-                <para>
-                    Possible values are &quot;true&quot; and &quot;false&quot;.  Configures the SMTP transport.  This
-                    value is optional and defaults to &quot;false&quot;.
-                </para>
-            </section>
-
-            <section>
-                <title>email.from</title>
-                <para>
-                    This is the email address from which emails outbound from the system will be sent.  Typically this
-                    might be a &quot;no-reply&quot; email address such as &quot;noreply@haiku-os.org&quot;.
-                </para>
-            </section>
-
-        </section>
+        <para>
+            To avoid the HDS application server from failing to health check connectivity to
+            a mail service you may wish to configure the configuration property
+            &quot;management.health.mail.enabled&quot; to &quot;false&quot;.
+        </para>
 
     </section>
 

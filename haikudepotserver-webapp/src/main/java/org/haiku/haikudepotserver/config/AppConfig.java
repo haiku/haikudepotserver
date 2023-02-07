@@ -56,39 +56,8 @@ public class AppConfig {
 
     @Bean
     public DataStorageService dataStorageService(
-            @Value("${deployment.isproduction:false}") Boolean isProduction) {
+            @Value("${hds.deployment.is-production:false}") Boolean isProduction) {
         return new LocalDataStorageServiceImpl(isProduction);
-    }
-
-    @Bean
-    public MailSender mailSender(
-            @Value("${smtp.host}") String host,
-            @Value("${smtp.port:25}") Integer port,
-            @Value("${smtp.auth:false}") Boolean smtpAuth,
-            @Value("${smtp.starttls:false}") Boolean startTls,
-            @Value("${smtp.username:}") String username,
-            @Value("${smtp.password:}") String password) {
-
-        Properties properties = new Properties();
-        properties.put("mail.smtp.auth", smtpAuth);
-        properties.put("mail.smtp.starttls.enable", startTls);
-
-        JavaMailSenderImpl result = new JavaMailSenderImpl();
-
-        result.setHost(host);
-        result.setPort(port);
-        result.setProtocol("smtp");
-        result.setJavaMailProperties(properties);
-
-        if (StringUtils.isNotBlank(username)) {
-            result.setUsername(username);
-        }
-
-        if (StringUtils.isNotBlank(password)) {
-            result.setPassword(password);
-        }
-
-        return result;
     }
 
     @Bean("messageSourceBaseNames")
@@ -104,7 +73,7 @@ public class AppConfig {
     public Dialect processorDialect(
             ServerRuntime serverRuntime,
             PkgLocalizationLookupService pkgLocalizationLookupService,
-            @Value("${deployment.isproduction:false}") Boolean isProduction,
+            @Value("${hds.deployment.is-production:false}") Boolean isProduction,
             @Value("classpath:/spa1/js/index.txt") Resource singlePageApplicationJavaScriptIndexResource) {
         return new Dialect(
                 serverRuntime,

@@ -80,7 +80,7 @@ public class PkgServiceImpl implements PkgService {
     private final String defaultArchitectureCode;
 
     public PkgServiceImpl(
-            @Value("${architecture.default.code}") String defaultArchitectureCode) {
+            @Value("${hds.architecture.default.code}") String defaultArchitectureCode) {
         this.defaultArchitectureCode = defaultArchitectureCode;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support.web;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DelayFilter implements Filter {
 
-    @Value("${request.delay-millis:0}")
+    @Value("${hds.request.delay-millis:0}")
     private long delayMillis = 0L;
 
     @Override

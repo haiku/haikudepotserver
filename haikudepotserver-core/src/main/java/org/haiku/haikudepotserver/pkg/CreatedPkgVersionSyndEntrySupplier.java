@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -54,7 +54,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
     public CreatedPkgVersionSyndEntrySupplier(
             ServerRuntime serverRuntime,
-            @Value("${baseurl}") String baseUrl,
+            @Value("${hds.base-url}") String baseUrl,
             MessageSource messageSource,
             PkgLocalizationService pkgLocalizationService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);

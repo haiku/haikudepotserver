@@ -74,8 +74,8 @@ public class FallbackController {
             PkgService pkgService,
             RepositoryService repositoryService,
             @Value("classpath:/img/favicon.ico") Resource faviconResource,
-            @Value("${architecture.default.code}") String defaultArchitectureCode,
-            @Value("${baseurl}") String baseUrl) {
+            @Value("${hds.architecture.default.code}") String defaultArchitectureCode,
+            @Value("${hds.base-url}") String baseUrl) {
         this.serverRuntime = serverRuntime;
         this.pkgService = pkgService;
         this.repositoryService = repositoryService;

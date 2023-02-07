@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -22,7 +22,7 @@ public class HvifRenderingServiceFactory implements FactoryBean<HvifRenderingSer
     private final String hvif2pngPath;
 
     public HvifRenderingServiceFactory(
-            @Value("${hvif2png.path:}") String hvif2pngPath
+            @Value("${hds.hvif2png.path:}") String hvif2pngPath
     ) {
         this.hvif2pngPath = hvif2pngPath;
     }

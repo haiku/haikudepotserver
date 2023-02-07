@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -66,9 +66,9 @@ public class PkgSearchController {
             MessageSource messageSource,
             PkgService pkgService,
             @Qualifier("opensearchFreemarkerConfiguration") Configuration freemarkerConfiguration,
-            @Value("${baseurl}") String baseUrl,
-            @Value("${architecture.default.code}") String defaultArchitectureCode,
-            @Value("${deployment.isproduction:false}") Boolean isProduction) {
+            @Value("${hds.base-url}") String baseUrl,
+            @Value("${hds.architecture.default.code}") String defaultArchitectureCode,
+            @Value("${hds.deployment.is-production:false}") Boolean isProduction) {
         this.serverRuntime = serverRuntime;
         this.messageSource = messageSource;
         this.pkgService = pkgService;

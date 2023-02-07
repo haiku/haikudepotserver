@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -78,9 +78,9 @@ public class MiscellaneousApiService extends AbstractApiService {
             ContributorsService contributorsService,
             MessageSource messageSource,
             NaturalLanguageService naturalLanguageService,
-            @Value("${deployment.isproduction:false}") Boolean isProduction,
-            @Value("${architecture.default.code}") String architectureDefaultCode,
-            @Value("${repository.default.code}") String repositoryDefaultCode) {
+            @Value("${hds.deployment.is-production:false}") Boolean isProduction,
+            @Value("${hds.architecture.default.code}") String architectureDefaultCode,
+            @Value("${hds.repository.default.code}") String repositoryDefaultCode) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
         this.feedService = Preconditions.checkNotNull(feedService);
@@ -105,7 +105,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                     request.getSupplierTypes()
                             .stream()
                             .map(st -> FeedSpecification.SupplierType.valueOf(st.name()))
-                            .collect(Collectors.toUnmodifiableList())
+                            .toList()
             );
         }
 
@@ -120,7 +120,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                             .map(pn -> Pkg.tryGetByName(context, pn))
                             .filter(Optional::isPresent)
                             .map(p -> p.get().getName())
-                            .collect(Collectors.toUnmodifiableList())
+                            .toList()
             );
         }
 
@@ -134,7 +134,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                         .stream()
                         .filter(a -> !a.getCode().equals(Architecture.CODE_SOURCE) && !a.getCode().equals(Architecture.CODE_ANY))
                         .map(a -> new org.haiku.haikudepotserver.api2.model.Architecture().code(a.getCode()))
-                        .collect(Collectors.toUnmodifiableList()));
+                        .toList());
     }
 
     public GetAllContributorsResult getAllContributors() {
@@ -145,7 +145,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                                 .name(c.getName())
                                 .naturalLanguageCode(c.getNaturalLanguageCode())
                         )
-                        .collect(Collectors.toUnmodifiableList()));
+                        .toList());
     }
 
     public GetAllCountriesResult getAllCountries(GetAllCountriesRequestEnvelope request) {
@@ -157,7 +157,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                         .map(c -> new org.haiku.haikudepotserver.api2.model.Country()
                                 .code(c.getCode())
                                 .name(c.getName()))
-                        .collect(Collectors.toUnmodifiableList()));
+                        .toList());
     }
 
     public GetAllMessagesResult getAllMessages(GetAllMessagesRequestEnvelope request) {

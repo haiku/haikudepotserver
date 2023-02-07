@@ -17,12 +17,12 @@ fi
 "-Djava.net.preferIPv4Stack=true" \
 "-Djava.awt.headless=true" \
 "-Dconfig.properties=file://${HDS_ROOT}/config.properties" \
-"-Dhvif2png.path=${HDS_HVIF2PNG_PATH}" \
+"-Dhds.hvif2png.path=${HDS_HVIF2PNG_PATH}" \
 "-Djdbc.url=${HDS_JDBC_URL}" \
 "-Djdbc.username=${HDS_JDBC_USERNAME}" \
 "-Djdbc.password=${HDS_JDBC_PASSWORD}" \
 "-Dsmtp.host=${HDS_SMTP_HOST}" \
 "-Dserver.port=${HDS_PORT}" \
 "-Dmanagement.server.port=${HDS_ACTUATOR_PORT}" \
-"-Dauthentication.jws.issuer=${HDS_AUTHENTICATION_JWS_ISSUER}" \
+"-Dhds.authentication.jws.issuer=${HDS_AUTHENTICATION_JWS_ISSUER}" \
 "-jar" "${HDS_ROOT}/app.jar"

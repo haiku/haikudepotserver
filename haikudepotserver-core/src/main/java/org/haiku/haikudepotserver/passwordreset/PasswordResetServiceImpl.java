@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -60,9 +60,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             MailSender mailSender,
             UserAuthenticationService userAuthenticationService,
             @Qualifier("emailFreemarkerConfiguration") Configuration freemarkerConfiguration,
-            @Value("${passwordreset.ttlhours:1}") Integer timeToLiveHours,
-            @Value("${baseurl}") String baseUrl,
-            @Value("${email.from}") String from
+            @Value("${hds.passwordreset.ttlhours:1}") Integer timeToLiveHours,
+            @Value("${hds.base-url}") String baseUrl,
+            @Value("${hds.email.from}") String from
     ) {
         this.mailSender = Preconditions.checkNotNull(mailSender);
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);

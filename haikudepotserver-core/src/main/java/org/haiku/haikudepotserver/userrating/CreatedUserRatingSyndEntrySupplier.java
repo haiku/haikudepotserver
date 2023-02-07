@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,8 +43,8 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
 
     private final static int CONTENT_LENGTH = 80;
 
-    private final char STAR_FILLED = '*'; // '\u2605';
-    private final char STAR_HOLLOW = '.'; // '\u2606';
+    private final static char STAR_FILLED = '*'; // '\u2605';
+    private final static char STAR_HOLLOW = '.'; // '\u2606';
 
     private final ServerRuntime serverRuntime;
     private final String baseUrl;
@@ -53,7 +53,7 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
 
     public CreatedUserRatingSyndEntrySupplier(
             ServerRuntime serverRuntime,
-            @Value("${baseurl}") String baseUrl,
+            @Value("${hds.base-url}") String baseUrl,
             MessageSource messageSource,
             PkgLocalizationService pkgLocalizationService
     ) {

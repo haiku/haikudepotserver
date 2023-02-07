@@ -74,6 +74,12 @@ Distributed under the terms of the MIT License.
         </para>
 
         <para>
+            To avoid the HDS application server from failing to health check connectivity to
+            a mail service you may wish to configure the configuration property
+            &quot;management.health.mail.enabled&quot; to &quot;false&quot;.
+        </para>
+
+        <para>
             To start-up the application server for development purposes, issue the following command from the
             same top level of the project;
         </para>

@@ -87,7 +87,7 @@ public class ServletConfig {
 
     @Bean
     public FilterRegistrationBean<Filter> desktopApplicationMinimumVersionFilter(
-            @Value("${desktop.application.version.min:}") String minimumVersionString) {
+            @Value("${hds.desktop.application.version.min:}") String minimumVersionString) {
         FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new DesktopApplicationMinimumVersionFilter(minimumVersionString));
         registrationBean.addUrlPatterns("/*");

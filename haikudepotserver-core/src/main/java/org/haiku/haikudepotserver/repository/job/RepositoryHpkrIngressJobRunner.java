@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -76,7 +76,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             ServerRuntime serverRuntime,
             PkgService pkgService,
             PkgImportService pkgImportService,
-            @Value("${repository.import.populatefrompayload:false}") boolean shouldPopulateFromPayload) {
+            @Value("${hds.repository.import.populate-from-payload:false}") boolean shouldPopulateFromPayload) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgService = Preconditions.checkNotNull(pkgService);
         this.pkgImportService = Preconditions.checkNotNull(pkgImportService);

@@ -73,9 +73,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
             ServerRuntime serverRuntime,
             UserService userService,
             PasswordEncoder passwordEncoder,
-            @Value("${authentication.jws.sharedkey:}") String jsonWebTokenSharedKey,
-            @Value("${authentication.jws.expiryseconds:300}") Integer jsonWebTokenExpirySeconds,
-            @Value("${authentication.jws.issuer}") String jsonWebTokenIssuer) {
+            @Value("${hds.authentication.jws.shared-key:}") String jsonWebTokenSharedKey,
+            @Value("${hds.authentication.jws.expiry-seconds:300}") Integer jsonWebTokenExpirySeconds,
+            @Value("${hds.authentication.jws.issuer}") String jsonWebTokenIssuer) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);

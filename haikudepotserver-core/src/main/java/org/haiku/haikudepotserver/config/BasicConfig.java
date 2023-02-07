@@ -60,13 +60,13 @@ public class BasicConfig {
 
     @Bean
     public PngOptimizationService pngOptimizationService(
-            @Value("${optipng.path:}") String optiPngPath) {
+            @Value("${hds.optipng.path:}") String optiPngPath) {
         return new PngOptimizationServiceFactory(optiPngPath).getObject();
     }
 
     @Bean
     public HvifRenderingService hvifRenderingService(
-            @Value("${hvif2png.path:}") String hvif2pngPath) throws Exception {
+            @Value("${hds.hvif2png.path:}") String hvif2pngPath) throws Exception {
         return new HvifRenderingServiceFactory(hvif2pngPath).getObject();
     }
 
@@ -84,7 +84,7 @@ public class BasicConfig {
     @Bean
     public CaptchaRepository captchaRepository(
             ServerRuntime serverRuntime,
-            @Value("${captcha.expiryseconds:120}") Long expirySeconds
+            @Value("${hds.captcha.expiry-seconds:120}") Long expirySeconds
     ) {
         return new DatabaseCaptchaRepository(serverRuntime, expirySeconds);
     }
