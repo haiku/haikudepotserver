@@ -340,7 +340,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
     private void createPasswordResetTestUser() {
         ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
-        user.setEmail("integration-test-recipient@haiku-os.org");
+        user.setEmail("integration-test-recipient@example.com");
         context.commitChanges();
     }
 
@@ -374,7 +374,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
         InitiatePasswordResetRequestEnvelope request = new InitiatePasswordResetRequestEnvelope()
                 .captchaToken(captcha.getToken())
                 .captchaResponse(captcha.getResponse())
-                .email("integration-test-recipient@haiku-os.org");
+                .email("integration-test-recipient@example.com");
 
         // ------------------------------------
         userApiService.initiatePasswordReset(request);
@@ -394,8 +394,8 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
             List<SimpleMailMessage> messages = mailSender.getSentMessages();
             Assertions.assertThat(messages.size()).isEqualTo(1);
             SimpleMailMessage message = messages.get(0);
-            Assertions.assertThat(message.getTo()).isEqualTo(new String[]{"integration-test-recipient@haiku-os.org"});
-            Assertions.assertThat(message.getFrom()).isEqualTo("integration-test-sender@haiku-os.org");
+            Assertions.assertThat(message.getTo()).isEqualTo(new String[]{"integration-test-recipient@example.com"});
+            Assertions.assertThat(message.getFrom()).isEqualTo("integration-test-sender@example.com");
             Assertions.assertThat(message.getText()).contains(token.getCode());
         }
 
@@ -413,7 +413,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
         Assertions.assertThat(getOnlyPasswordResetTokenCodeForTestUser()).isNull();
 
         try {
-            passwordResetService.initiate("integration-test-recipient@haiku-os.org");
+            passwordResetService.initiate("integration-test-recipient@example.com");
         } catch (PasswordResetException pre) {
             throw new IllegalStateException("unable to initiate the password reset when testing complete", pre);
         }

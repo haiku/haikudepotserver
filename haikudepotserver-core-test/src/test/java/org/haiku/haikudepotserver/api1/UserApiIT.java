@@ -186,7 +186,7 @@ public class UserApiIT extends AbstractIntegrationTest {
     private void createPasswordResetTestUser() {
         ObjectContext context = serverRuntime.newContext();
         User user = integrationTestSupportService.createBasicUser(context, "testuser", "yUe4o2Nwe009"); // language is english
-        user.setEmail("integration-test-recipient@haiku-os.org");
+        user.setEmail("integration-test-recipient@example.com");
         context.commitChanges();
     }
 
