@@ -192,8 +192,8 @@ public class TestDatabase {
 
             DataSourceProperties properties = new DataSourceProperties();
             properties.setUrl("jdbc:postgresql://localhost:5432/" + DEFAULT_DATABASE);
-            properties.setUsername(POSTGRES_SQL_CONTAINER.getUsername());
-            properties.setPassword(POSTGRES_SQL_CONTAINER.getPassword());
+            properties.setUsername(DEFAULT_USERNAME);
+            properties.setPassword(DEFAULT_PASSWORD);
             return properties;
         }
         catch (InterruptedException ie) {
