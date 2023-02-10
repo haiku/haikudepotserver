@@ -18,10 +18,10 @@ fi
 "-Djava.awt.headless=true" \
 "-Dconfig.properties=file://${HDS_ROOT}/config.properties" \
 "-Dhds.hvif2png.path=${HDS_HVIF2PNG_PATH}" \
-"-Djdbc.url=${HDS_JDBC_URL}" \
-"-Djdbc.username=${HDS_JDBC_USERNAME}" \
-"-Djdbc.password=${HDS_JDBC_PASSWORD}" \
-"-Dsmtp.host=${HDS_SMTP_HOST}" \
+"-Dspring.datasource.url=${HDS_JDBC_URL}" \
+"-Dspring.datasource.username=${HDS_JDBC_USERNAME}" \
+"-Dspring.datasource.password=${HDS_JDBC_PASSWORD}" \
+"-Dspring.mail.host=${HDS_SMTP_HOST}" \
 "-Dserver.port=${HDS_PORT}" \
 "-Dmanagement.server.port=${HDS_ACTUATOR_PORT}" \
 "-Dhds.authentication.jws.issuer=${HDS_AUTHENTICATION_JWS_ISSUER}" \
