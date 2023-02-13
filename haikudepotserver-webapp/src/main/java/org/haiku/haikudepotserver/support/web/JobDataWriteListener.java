@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Andrew Lindesay
+ * Copyright 2016-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,9 +12,9 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;

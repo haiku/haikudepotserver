@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 /**
@@ -149,9 +149,8 @@ public class ViewPkgController {
 
         ModelAndView result = new ModelAndView("multipage/viewPkgVersion");
         result.addObject("data", data);
-
+        result.addObject("request", httpServletRequest);
         return result;
-
     }
 
 

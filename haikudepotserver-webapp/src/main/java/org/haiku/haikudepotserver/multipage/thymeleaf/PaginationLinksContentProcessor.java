@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.multipage.thymeleaf;
@@ -22,7 +22,7 @@ import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,8 +52,7 @@ public class PaginationLinksContentProcessor extends AbstractElementTagProcessor
             final IProcessableElementTag tag,
             final IElementTagStructureHandler structureHandler) {
 
-        IExpressionObjects expressionObjects = context.getExpressionObjects();
-        HttpServletRequest request = (HttpServletRequest) expressionObjects.getObject("request");
+        HttpServletRequest request = (HttpServletRequest) context.getVariable("request");
 
         final Pagination pagination = derivePagination(context, tag);
         final int linkCount = getLinkCount(tag);

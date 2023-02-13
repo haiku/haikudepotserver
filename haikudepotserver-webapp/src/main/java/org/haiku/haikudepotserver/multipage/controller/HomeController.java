@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -198,7 +198,7 @@ public class HomeController {
 
         ModelAndView result = new ModelAndView("multipage/home");
         result.addObject("data", data);
-
+        result.addObject("request", httpServletRequest);
         return result;
     }
 

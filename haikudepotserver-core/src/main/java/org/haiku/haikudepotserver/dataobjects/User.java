@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,8 +20,8 @@ import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTime
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRule;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;

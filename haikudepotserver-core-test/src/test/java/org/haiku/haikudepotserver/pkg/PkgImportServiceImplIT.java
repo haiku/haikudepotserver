@@ -33,7 +33,7 @@ import org.haiku.pkg.model.PkgVersion;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;

@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.api1.support.ObjectMapperFactory;
 import org.haiku.haikudepotserver.captcha.CaptchaServiceImpl;
 import org.haiku.haikudepotserver.captcha.DatabaseCaptchaRepository;
 import org.haiku.haikudepotserver.captcha.SimpleMathProblemCaptchaAlgorithm;

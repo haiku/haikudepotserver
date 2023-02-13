@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;

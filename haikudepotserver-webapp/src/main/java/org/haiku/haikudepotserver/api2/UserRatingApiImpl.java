@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022, Andrew Lindesay
+ * Copyright 2021-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -22,7 +22,7 @@ import org.haiku.haikudepotserver.api2.model.UpdateUserRatingResponseEnvelope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Map;
 
 @Controller

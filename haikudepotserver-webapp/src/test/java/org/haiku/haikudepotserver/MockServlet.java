@@ -1,12 +1,11 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver;
 
-import javax.servlet.*;
-import java.io.IOException;
+import jakarta.servlet.*;
 
 /**
  * <p>This servlet is here just to capture if it gets hit or not.  It can be used for testing

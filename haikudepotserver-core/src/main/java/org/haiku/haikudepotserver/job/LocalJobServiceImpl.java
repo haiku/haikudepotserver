@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,8 +26,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;

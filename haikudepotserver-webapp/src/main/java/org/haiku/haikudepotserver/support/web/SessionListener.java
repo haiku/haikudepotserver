@@ -5,8 +5,8 @@
 
 package org.haiku.haikudepotserver.support.web;
 
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionListener;
 
 /**
  * <p>This application is stateless and as such should not be creating sessions.  This listener will be invoked if a

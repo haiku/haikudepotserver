@@ -1,10 +1,11 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.multipage.thymeleaf;
 
 import com.google.common.base.Preconditions;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
@@ -15,16 +16,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.context.ITemplateContext;
-import org.thymeleaf.expression.IExpressionObjects;
 import org.thymeleaf.model.IModel;
 import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
-import org.thymeleaf.spring5.context.SpringContextUtils;
+import org.thymeleaf.spring6.context.SpringContextUtils;
 import org.thymeleaf.templatemode.TemplateMode;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,8 +50,7 @@ public class NaturalLanguageChooserContentProcessor extends AbstractElementTagPr
             final IProcessableElementTag tag,
             final IElementTagStructureHandler structureHandler) {
 
-        IExpressionObjects expressionObjects = context.getExpressionObjects();
-        HttpServletRequest request = (HttpServletRequest) expressionObjects.getObject("request");
+        HttpServletRequest request = (HttpServletRequest) context.getVariable("request");
         NaturalLanguagesData naturalLanguagesData = getNaturalLanguagesData(context, request);
 
         final IModelFactory modelFactory = context.getModelFactory();
@@ -94,7 +92,7 @@ public class NaturalLanguageChooserContentProcessor extends AbstractElementTagPr
 
         List<NaturalLanguage> naturalLanguages = naturalLanguagesData.getNaturalLanguages();
 
-        for (int i = 0; i < naturalLanguages.size();i++) {
+        for (int i = 0; i < naturalLanguages.size(); i++) {
 
             NaturalLanguage naturalLanguage = naturalLanguages.get(i);
 

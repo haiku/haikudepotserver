@@ -5,34 +5,25 @@
 
 package org.haiku.haikudepotserver.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImplExporter;
 import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.servlet.Filter;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpSessionListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.api1.support.ErrorResolverImpl;
-import org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetrics;
-import org.haiku.haikudepotserver.singlepage.SinglePageTemplateFrequencyMetricsFilter;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMetricsFilter;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter;
-import org.haiku.haikudepotserver.support.jsonrpc4j.ErrorLoggingInvocationListener;
-import org.haiku.haikudepotserver.support.jsonrpc4j.HttpStatusCodeProvider;
 import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.haiku.haikudepotserver.support.web.DelayFilter;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
 import org.haiku.haikudepotserver.support.web.SessionListener;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.filter.ForwardedHeaderFilter;
-
-import javax.servlet.Filter;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpSessionListener;
 
 @Configuration
 @Import(WebConfig.class)
@@ -114,45 +105,6 @@ public class ServletConfig {
         registrationBean.setOrder(25);
         registrationBean.setName("logging-filter");
         return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<Filter> singlePageTemplateFrequencyMetricsFilter(
-            SinglePageTemplateFrequencyMetrics metrics) {
-        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new SinglePageTemplateFrequencyMetricsFilter(metrics));
-        registrationBean.addUrlPatterns("/*");
-        registrationBean.setOrder(30);
-        registrationBean.setName("single-page-template-frequency-metrics-filter");
-        return registrationBean;
-    }
-
-    @Bean
-    public BeanFactoryPostProcessor autoJsonRpcServiceImplExporter(
-            ObjectMapper objectMapper) {
-
-        AutoJsonRpcServiceImplExporter exporter = new AutoJsonRpcServiceImplExporter();
-
-        // don't log exceptions because they will be logged in the invocation listener
-        exporter.setShouldLogInvocationErrors(false);
-
-        // set the content type explicitly because otherwise it is application/json-rpc
-        exporter.setContentType("application/json");
-
-        // prevents spring from also logging the exception
-        exporter.setRegisterTraceInterceptor(false);
-
-        // allows hds control over how the exception is logged
-        exporter.setInvocationListener(
-                new ErrorLoggingInvocationListener()
-        );
-
-        exporter.setHttpStatusCodeProvider(new HttpStatusCodeProvider());
-
-        exporter.setErrorResolver(new ErrorResolverImpl());
-        exporter.setObjectMapper(objectMapper);
-
-        return exporter;
     }
 
 }

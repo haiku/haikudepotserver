@@ -17,18 +17,25 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.Query;
 import org.apache.cayenne.query.QueryCacheStrategy;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
+import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 

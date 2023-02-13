@@ -1,4 +1,4 @@
-# Copyright 2022, Andrew Lindesay
+# Copyright 2022-2023, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -123,7 +123,6 @@ components:
     authorizationTargetAndPermissionRequest:
       type: object
       required:
-        - targetIdentifier
         - permissionCode
       properties:
         targetType:
@@ -141,7 +140,6 @@ components:
     authorizationTargetAndPermissionResult:
       type: object
       required:
-        - targetIdentifier
         - permissionCode
         - authorized
       properties:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Andrew Lindesay
+ * Copyright 2020-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.config;
@@ -7,12 +7,19 @@ package org.haiku.haikudepotserver.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
-import org.haiku.haikudepotserver.security.*;
+import org.haiku.haikudepotserver.security.AccessDeniedHandler;
+import org.haiku.haikudepotserver.security.AuthenticationEntryPoint;
+import org.haiku.haikudepotserver.security.BearerTokenAuthenticationFilter;
+import org.haiku.haikudepotserver.security.QueryParamAuthenticationFilter;
+import org.haiku.haikudepotserver.security.RepositoryAuthenticationDetailsSource;
+import org.haiku.haikudepotserver.security.RepositoryAuthenticationProvider;
+import org.haiku.haikudepotserver.security.UserAuthenticationProvider;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.filter.CompositeFilter;
 
@@ -23,7 +30,7 @@ import java.util.List;
  */
 
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
     private final ServerRuntime serverRuntime;
 
@@ -45,8 +52,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.repositoryService = repositoryService;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationEntryPoint authenticationEntryPoint = new AuthenticationEntryPoint(objectMapper);
         AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandler(objectMapper);
 
@@ -83,6 +90,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // checks are done in code logic so allow everything through.
 
         http.authorizeRequests().anyRequest().permitAll();
+
+        return http.build();
     }
 
 }

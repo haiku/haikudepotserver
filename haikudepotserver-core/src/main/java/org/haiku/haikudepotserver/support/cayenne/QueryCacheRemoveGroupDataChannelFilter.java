@@ -11,8 +11,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.graph.GraphDiff;
 import org.apache.cayenne.query.Query;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import jakarta.annotation.PostConstruct;
 import java.util.Set;
 
 /**

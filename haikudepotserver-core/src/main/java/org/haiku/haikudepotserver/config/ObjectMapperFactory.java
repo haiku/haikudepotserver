@@ -1,9 +1,9 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
-package org.haiku.haikudepotserver.api1.support;
+package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

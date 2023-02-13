@@ -6,7 +6,7 @@
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.haiku.haikudepotserver.api1.support.ObjectMapperFactory;
+import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import java.util.List;
 
@@ -44,11 +45,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-
 //        registry
 //                .addInterceptor(new LocaleChangeInterceptor())
 //                .addPathPatterns(MultipageConstants.PATH_MULTIPAGE + "/**");
-
     }
 
     @Override

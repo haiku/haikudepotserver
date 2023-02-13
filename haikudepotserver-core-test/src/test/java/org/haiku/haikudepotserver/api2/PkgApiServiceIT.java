@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -62,7 +62,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;

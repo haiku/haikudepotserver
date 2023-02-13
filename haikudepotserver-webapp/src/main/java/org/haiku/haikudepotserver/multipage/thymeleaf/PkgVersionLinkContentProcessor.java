@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.multipage.thymeleaf;
@@ -22,7 +22,7 @@ import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 /**
@@ -57,8 +57,7 @@ public class PkgVersionLinkContentProcessor extends AbstractAttributeTagProcesso
     }
 
     private UriComponents toUriComponents(ITemplateContext context, PkgVersion pkgVersion) {
-        IExpressionObjects expressionObjects = context.getExpressionObjects();
-        HttpServletRequest request = (HttpServletRequest) expressionObjects.getObject("request");
+        HttpServletRequest request = (HttpServletRequest) context.getVariable("request");
 
         return UriComponentsBuilder.newInstance()
                 .path(MultipageConstants.PATH_MULTIPAGE)

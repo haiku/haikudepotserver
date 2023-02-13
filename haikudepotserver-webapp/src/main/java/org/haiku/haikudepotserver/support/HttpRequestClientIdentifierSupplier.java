@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Andrew Lindesay
+ * Copyright 2016-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,8 +13,8 @@ import com.google.common.net.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

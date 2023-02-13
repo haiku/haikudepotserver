@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -80,7 +80,7 @@ public class FeedController {
                 .newBuilder()
                 .maximumSize(10)
                 .expireAfterWrite(EXPIRY_CACHE_SECONDS, TimeUnit.SECONDS)
-                .build(new CacheLoader<FeedSpecification, SyndFeed>() {
+                .build(new CacheLoader<>() {
                     @Override
                     public SyndFeed load(FeedSpecification key) {
                         return createFeed(key);

@@ -14,7 +14,7 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;

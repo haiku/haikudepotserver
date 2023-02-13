@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Optional;

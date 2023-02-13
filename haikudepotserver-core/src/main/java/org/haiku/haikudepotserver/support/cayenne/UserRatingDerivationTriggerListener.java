@@ -15,7 +15,7 @@ import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * <p>This listener will detect changes in the user rating entities and will then trigger a process (probably

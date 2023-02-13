@@ -1,12 +1,12 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support.jsonrpc4j;
 
 import com.googlecode.jsonrpc4j.DefaultHttpStatusCodeProvider;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * <p>Ensures that JSON-RPC invocations always return 200 HTTP status codes.</p>

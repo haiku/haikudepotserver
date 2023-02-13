@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Andrew Lindesay
+ * Copyright 2020-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.security;
@@ -11,7 +11,7 @@ import org.haiku.haikudepotserver.repository.controller.RepositoryController;
 import org.haiku.haikudepotserver.security.model.RepositoryAuthenticationDetails;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -16,7 +16,7 @@ import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
 import org.haiku.haikudepotserver.job.model.TestJobSpecificationImpl;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;

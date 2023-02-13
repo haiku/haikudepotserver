@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020, Andrew Lindesay
+ * Copyright 2013-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,7 @@ import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * <p>This automates the configuration of the create and modify timestamps against certain
