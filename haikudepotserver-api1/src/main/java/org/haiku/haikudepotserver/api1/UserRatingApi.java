@@ -1,18 +1,23 @@
 /*
-* Copyright 2014-2021, Andrew Lindesay
+* Copyright 2014-2023, Andrew Lindesay
 * Distributed under the terms of the MIT License.
 */
 
 package org.haiku.haikudepotserver.api1;
 
-import com.googlecode.jsonrpc4j.JsonRpcService;
-import org.haiku.haikudepotserver.api1.model.userrating.*;
+import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingResult;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionResult;
+import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsResult;
+import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingRequest;
+import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingResult;
 
 /**
  * <p>This API interface covers all aspects of user ratings of packages.</p>
  */
 @Deprecated
-@JsonRpcService("/__api/v1/userrating")
 public interface UserRatingApi {
 
     /**

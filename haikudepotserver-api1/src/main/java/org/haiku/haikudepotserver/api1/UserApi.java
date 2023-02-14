@@ -1,11 +1,10 @@
 /*
- * Copyright 2013-2021, Andrew Lindesay
+ * Copyright 2013-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1;
 
-import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsRequest;
 import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsResult;
 import org.haiku.haikudepotserver.api1.model.user.AuthenticateUserRequest;
@@ -22,7 +21,6 @@ import org.haiku.haikudepotserver.api1.model.user.GetUserUsageConditionsResult;
  */
 
 @Deprecated
-@JsonRpcService("/__api/v1/user")
 public interface UserApi {
 
     /**

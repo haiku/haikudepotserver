@@ -51,7 +51,6 @@
 
         <flexmark.version>0.64.0</flexmark.version>
         <freemarker.version>2.3.32</freemarker.version>
-        <jsonrpc4j.version>1.6</jsonrpc4j.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <opencsv.version>5.7.1</opencsv.version>
         <commons-collections4.version>4.4</commons-collections4.version>
@@ -177,21 +176,6 @@
                 </exclusions>
             </dependency>
 
-            <dependency>
-                <groupId>com.github.briandilley.jsonrpc4j</groupId>
-                <artifactId>jsonrpc4j</artifactId>
-                <version>${jsonrpc4j.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-annotations</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>

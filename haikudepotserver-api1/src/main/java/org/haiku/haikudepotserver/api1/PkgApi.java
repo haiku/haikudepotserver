@@ -1,11 +1,10 @@
 /*
- * Copyright 2013-2021, Andrew Lindesay
+ * Copyright 2013-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1;
 
-import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogRequest;
 import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogResult;
 import org.haiku.haikudepotserver.api1.model.pkg.IncrementViewCounterRequest;
@@ -16,7 +15,6 @@ import org.haiku.haikudepotserver.api1.model.pkg.IncrementViewCounterResult;
  */
 
 @Deprecated
-@JsonRpcService("/__api/v1/pkg")
 public interface PkgApi {
 
     /**

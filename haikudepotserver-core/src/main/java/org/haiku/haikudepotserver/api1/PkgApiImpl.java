@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.api1;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogRequest;
 import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogResult;
 import org.haiku.haikudepotserver.api1.model.pkg.IncrementViewCounterRequest;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 @Deprecated
 @Component("pkgApiImplV1")
-@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/pkg") // TODO - remove old endpoint
 public class PkgApiImpl implements PkgApi {
 
     private final PkgApiService pkgApiService;

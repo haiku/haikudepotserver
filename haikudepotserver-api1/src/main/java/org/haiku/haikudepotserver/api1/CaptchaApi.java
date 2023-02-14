@@ -1,11 +1,10 @@
 /*
- * Copyright 2013-2016, Andrew Lindesay
+ * Copyright 2013-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.api1;
 
-import com.googlecode.jsonrpc4j.JsonRpcService;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
 
@@ -17,7 +16,6 @@ import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
  * certain length of time.</p>
  */
 
-@JsonRpcService("/__api/v1/captcha")
 @Deprecated
 public interface CaptchaApi {
 

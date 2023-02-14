@@ -5,7 +5,8 @@
 package org.haiku.haikudepotserver.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.jsonrpc4j.ErrorResolver;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.haiku.haikudepotserver.api1.support.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -51,14 +49,15 @@ public class AuthenticationEntryPoint
 
         if (acceptsJson) {
             LOGGER.debug("responding entry point as json-rpc; {}", authException.getMessage());
-            ErrorResolver.JsonError error = new ErrorResolver.JsonError(
-                    Constants.ERROR_CODE_AUTHORIZATIONFAILURE,
-                    "authorizationfailure",
-                    null);
             response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString());
             objectMapper.writeValue(
                     response.getWriter(),
-                    Map.of("error", error, "jsonrpc", "2.0"));
+                    Map.of(
+                            "error",
+                            Map.of(
+                                    "code", Constants.ERROR_CODE_AUTHORIZATIONFAILURE,
+                                    "message", "authorizationfailure")
+                    ));
             // ^ note missing "id" is bad, but possibly unavoidable here.
         } else {
             LOGGER.debug("responding entry point as not json-rpc; {}", authException.getMessage());

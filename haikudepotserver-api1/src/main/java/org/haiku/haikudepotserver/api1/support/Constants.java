@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,8 @@ package org.haiku.haikudepotserver.api1.support;
 
 public interface Constants {
 
+    int ERROR_CODE_INVALID_REQUEST = -32600;
+    int ERROR_CODE_METHOD_NOT_FOUND = -32601;
     int ERROR_CODE_NOT_HANDLED = -32001;
 
     int ERROR_CODE_VALIDATION = -32800;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.api1;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsRequest;
 import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsResult;
@@ -26,13 +25,10 @@ import org.haiku.haikudepotserver.api2.model.CreateUserRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetUserRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetUserResultUserUsageConditionsAgreement;
 import org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsRequestEnvelope;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Deprecated
 @Component("userApiImplV1")
-@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/user") // TODO; legacy path - remove
 public class UserApiImpl implements UserApi {
 
     private final UserApiService userApiService;

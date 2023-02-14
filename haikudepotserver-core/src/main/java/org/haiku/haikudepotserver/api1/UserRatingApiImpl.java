@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.api1;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceImpl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.haiku.haikudepotserver.api1.model.userrating.AbstractGetUserRatingResult;
 import org.haiku.haikudepotserver.api1.model.userrating.AbstractUserRatingResult;
@@ -34,7 +33,6 @@ import java.util.Optional;
 
 @Deprecated
 @Component("userRatingApiImplV1")
-@AutoJsonRpcServiceImpl(additionalPaths = "/api/v1/userrating") // TODO; legacy path - remove
 public class UserRatingApiImpl implements UserRatingApi {
 
     private final UserRatingApiService userRatingApiService;
