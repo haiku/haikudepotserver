@@ -7,9 +7,12 @@ package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.escape.Escapers;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import jakarta.mail.internet.MimeUtility;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
@@ -28,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -146,7 +148,7 @@ public class PkgDownloadController {
 
             if (ImmutableSet.of("http", "https").contains(url.getProtocol())) {
                 response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-                response.setHeader(HttpHeaders.LOCATION, url.toString());
+                response.setHeader(HttpHeaders.LOCATION, MimeUtility.encodeText(url.toString()));
                 response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
 
                 PrintWriter writer = response.getWriter();
@@ -156,9 +158,9 @@ public class PkgDownloadController {
                 response.setContentType(MediaType.OCTET_STREAM.toString());
                 response.setHeader(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        String.format(
+                        MimeUtility.encodeText(String.format(
                                 "attachment; filename=\"%s\"",
-                                pkgVersion.getHpkgFilename())
+                                pkgVersion.getHpkgFilename()))
                 );
 
                 try (InputStream inputStream = url.openStream()) {

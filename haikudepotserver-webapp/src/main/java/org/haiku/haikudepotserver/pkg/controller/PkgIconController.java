@@ -271,8 +271,9 @@ public class PkgIconController extends AbstractController {
             PkgSupplement pkgSupplement,
             byte[] data,
             boolean streamData) throws IOException {
-        response.setHeader(HttpHeaders.CONTENT_LENGTH,Integer.toString(data.length));
-        response.setDateHeader(HttpHeaders.LAST_MODIFIED, pkgSupplement.getIconModifyTimestamp().getTime());
+        response.setContentLength(data.length);
+        response.setDateHeader(HttpHeaders.LAST_MODIFIED,
+                pkgSupplement.getIconModifyTimestamp().getTime());
 
         if (streamData) {
             OutputStream outputStream = response.getOutputStream();

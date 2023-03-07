@@ -9,6 +9,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
+import jakarta.mail.internet.MimeUtility;
 import org.haiku.haikudepotserver.support.IntArrayVersionComparator;
 import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.slf4j.Logger;
@@ -139,7 +140,7 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
         else {
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
             httpServletResponse.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-            httpServletResponse.setHeader(HEADER_MINIMUM_VERSION, minimumVersionString);
+            httpServletResponse.setHeader(HEADER_MINIMUM_VERSION, MimeUtility.encodeText(minimumVersionString));
             httpServletResponse.setContentType(MediaType.TEXT_PLAIN.toString());
 
             PrintWriter writer = httpServletResponse.getWriter();

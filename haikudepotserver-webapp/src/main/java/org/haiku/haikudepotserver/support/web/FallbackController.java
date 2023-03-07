@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.support.web;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
+import jakarta.mail.internet.MimeUtility;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.ComparatorUtils;
@@ -103,7 +104,7 @@ public class FallbackController {
             UriComponents uriComponents = builder.build();
 
             response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-            response.setHeader(HttpHeaders.LOCATION, uriComponents.toUriString());
+            response.setHeader(HttpHeaders.LOCATION, MimeUtility.encodeText(uriComponents.toUriString()));
 
             PrintWriter w = response.getWriter();
             w.format("redirecting to; %s", uriComponents.toUriString());

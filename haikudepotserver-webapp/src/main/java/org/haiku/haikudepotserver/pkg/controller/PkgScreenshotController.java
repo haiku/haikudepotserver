@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import jakarta.mail.internet.MimeUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
@@ -116,7 +117,7 @@ public class PkgScreenshotController extends AbstractController {
             case HEAD -> {
                 ByteCounterOutputStream byteCounter = new ByteCounterOutputStream(ByteStreams.nullOutputStream());
                 pkgScreenshotService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
-                response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(byteCounter.getCounter()));
+                response.setContentLength((int) byteCounter.getCounter());
             }
             case GET ->
                     pkgScreenshotService.writePkgScreenshotImage(response.getOutputStream(), context, screenshot, targetWidth, targetHeight);
@@ -198,11 +199,11 @@ public class PkgScreenshotController extends AbstractController {
         response.setContentType(mediaType.getCode());
         response.setHeader(
                 HttpHeaders.CONTENT_DISPOSITION,
-                String.format(
+                MimeUtility.encodeText(String.format(
                         "attachment; filename=\"%s__%s.%s\"",
                         screenshot.getPkgSupplement().getBasePkgName(),
                         screenshot.getCode(),
-                        extension));
+                        extension)));
 
         response.getOutputStream().write(data);
     }
@@ -258,7 +259,7 @@ public class PkgScreenshotController extends AbstractController {
                 new PkgScreenshotOptimizationJobSpecification(screenshotCode),
                 JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
 
-        response.setHeader(HEADER_SCREENSHOTCODE, screenshotCode);
+        response.setHeader(HEADER_SCREENSHOTCODE, MimeUtility.encodeText(screenshotCode));
         response.setStatus(HttpServletResponse.SC_OK);
     }
 

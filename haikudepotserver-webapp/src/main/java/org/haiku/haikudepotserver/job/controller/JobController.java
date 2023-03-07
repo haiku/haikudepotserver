@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import jakarta.mail.internet.MimeUtility;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
@@ -215,7 +216,7 @@ public class JobController extends AbstractController {
         );
 
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader(HEADER_DATAGUID, data.getGuid());
+        response.setHeader(HEADER_DATAGUID, MimeUtility.encodeText(data.getGuid()));
     }
 
     /**
@@ -282,7 +283,8 @@ public class JobController extends AbstractController {
         }
 
         response.setContentType(MediaType.CSV_UTF_8.toString());
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+ jobService.deriveDataFilename(guid));
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                MimeUtility.encodeText("attachment; filename="+ jobService.deriveDataFilename(guid)));
         response.setDateHeader(HttpHeaders.EXPIRES, 0);
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
 

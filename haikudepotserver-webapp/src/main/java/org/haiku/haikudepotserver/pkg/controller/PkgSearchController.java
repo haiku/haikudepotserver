@@ -13,6 +13,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import jakarta.mail.internet.MimeUtility;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -169,7 +170,7 @@ public class PkgSearchController {
         String uri = builder.build().toUriString();
 
         response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-        response.setHeader(HttpHeaders.LOCATION, uri);
+        response.setHeader(HttpHeaders.LOCATION, MimeUtility.encodeText(uri));
         response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
 
         PrintWriter printWriter = response.getWriter();
