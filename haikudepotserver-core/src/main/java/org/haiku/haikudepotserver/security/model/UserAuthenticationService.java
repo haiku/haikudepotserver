@@ -22,6 +22,10 @@ public interface UserAuthenticationService {
 
     String CLAIM_REQUIRES_AGREE_USER_USAGE_CONDITIONS = "ucnd";
 
+    int MIN_PASSWORD_LENGTH = 8;
+    int MIN_PASSWORD_UPPERCASE_CHAR = 1;
+    int MIN_PASSWORD_DIGITS_CHAR = 2;
+
     Optional<ObjectId> authenticateByNicknameAndPassword(String nickname, String passwordClear);
 
     void setPassword(User user, String passwordClear);

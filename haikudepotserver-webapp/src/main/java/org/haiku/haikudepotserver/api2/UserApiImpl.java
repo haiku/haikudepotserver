@@ -14,6 +14,8 @@ import org.haiku.haikudepotserver.api2.model.CompletePasswordResetRequestEnvelop
 import org.haiku.haikudepotserver.api2.model.CompletePasswordResetResponseEnvelope;
 import org.haiku.haikudepotserver.api2.model.CreateUserRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.CreateUserResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.GetPasswordRequirementsResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.GetPasswordRequirementsResult;
 import org.haiku.haikudepotserver.api2.model.GetUserRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetUserResponseEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsRequestEnvelope;
@@ -26,6 +28,7 @@ import org.haiku.haikudepotserver.api2.model.SearchUsersRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.SearchUsersResponseEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdateUserRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdateUserResponseEnvelope;
+import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -112,5 +115,11 @@ public class UserApiImpl extends AbstractApiImpl implements UserApi {
         return ResponseEntity.ok(new CompletePasswordResetResponseEnvelope().result(Map.of()));
     }
 
+    @Override
+    public ResponseEntity<GetPasswordRequirementsResponseEnvelope> getPasswordRequirements(Object body) {
+        return ResponseEntity.ok(
+                new GetPasswordRequirementsResponseEnvelope()
+                        .result(userApiService.getPasswordRequirements()));
+    }
 
 }

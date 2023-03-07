@@ -268,6 +268,29 @@ paths:
               schema:
                 $ref: "#/components/schemas/agreeUserUsageConditionsResponseEnvelope"
 
+  /__api/v2/user/get-password-requirements:
+    description: >
+      This endpoint will return specific settings related to
+      restrictions around the form of the password.
+    post:
+      tags:
+        - user
+      operationId: getPasswordRequirements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPasswordRequirementsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Data related to password requirements.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPasswordRequirementsResponseEnvelope"
+
 
 components:
   schemas:
@@ -584,3 +607,22 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     completePasswordResetResult:
       type: object
+
+    getPasswordRequirementsRequestEnvelope:
+      type: object
+    getPasswordRequirementsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getPasswordRequirementsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getPasswordRequirementsResult:
+      type: object
+      properties:
+        minPasswordLength:
+          type: integer
+        minPasswordUppercaseChar:
+          type: integer
+        minPasswordDigitsChar:
+          type: integer

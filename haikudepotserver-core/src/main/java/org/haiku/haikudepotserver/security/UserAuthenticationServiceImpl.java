@@ -216,17 +216,17 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     public boolean validatePassword(String passwordClear) {
         Preconditions.checkArgument(null != passwordClear, "the password clear must be supplied");
 
-        if (passwordClear.length() < 8) {
+        if (passwordClear.length() < MIN_PASSWORD_LENGTH) {
             return false;
         }
 
         // get a count of digits - should be at least two.
-        if (countMatches(passwordClear, c -> c >= 48 && c <= 57) < 2) {
+        if (countMatches(passwordClear, c -> c >= 48 && c <= 57) < MIN_PASSWORD_DIGITS_CHAR) {
             return false;
         }
 
         // get a count of upper case letters - should be at least one.
-        if (countMatches(passwordClear, c -> c >= 65 && c <= 90) < 1) {
+        if (countMatches(passwordClear, c -> c >= 65 && c <= 90) < MIN_PASSWORD_UPPERCASE_CHAR) {
             return false;
         }
 

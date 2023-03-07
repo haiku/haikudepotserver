@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.api2.model.AuthenticateUserResult;
 import org.haiku.haikudepotserver.api2.model.ChangePasswordRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.CompletePasswordResetRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.CreateUserRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.GetPasswordRequirementsResult;
 import org.haiku.haikudepotserver.api2.model.GetUserRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetUserResult;
 import org.haiku.haikudepotserver.api2.model.GetUserResultUserUsageConditionsAgreement;
@@ -479,6 +480,13 @@ public class UserApiService extends AbstractApiService {
         else {
             LOGGER.info("no changes in updating the user {}", user.toString());
         }
+    }
+
+    public GetPasswordRequirementsResult getPasswordRequirements() {
+        return new GetPasswordRequirementsResult()
+                .minPasswordDigitsChar(UserAuthenticationService.MIN_PASSWORD_DIGITS_CHAR)
+                .minPasswordUppercaseChar(UserAuthenticationService.MIN_PASSWORD_UPPERCASE_CHAR)
+                .minPasswordLength(UserAuthenticationService.MIN_PASSWORD_LENGTH);
     }
 
 }
