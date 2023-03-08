@@ -10,10 +10,10 @@
 
 angular.module('haikudepotserver').directive('pkgCategoryLabel',[
     '$log','$rootScope',
-    'messageSource','userState','breadcrumbFactory','breadcrumbs',
+    'messageSource', 'userState', 'breadcrumbFactory', 'breadcrumbs',
     function(
-        $log,$rootScope,
-        messageSource,userState,breadcrumbFactory,breadcrumbs) {
+        $log, $rootScope,
+        messageSource, userState, breadcrumbFactory, breadcrumbs) {
         return {
             restrict: 'E',
             link: function ($scope, element, attributes) {

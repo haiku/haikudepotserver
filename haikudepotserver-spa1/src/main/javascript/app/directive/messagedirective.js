@@ -23,16 +23,16 @@ angular.module('haikudepotserver').directive('message',[
                     var valueAssembled = value ? value : '';
                     var parameters = undefined;
 
-                    if(parametersExpr && parametersExpr.length && -1!=valueAssembled.indexOf('{')) {
+                    if (parametersExpr && parametersExpr.length && -1 !== valueAssembled.indexOf('{')) {
                         parameters = $scope.$eval(parametersExpr);
 
-                        if(null!=parameters && undefined!=parameters) {
+                        if(null != parameters) {
 
-                            if(!_.isArray(parameters)) {
+                            if (!_.isArray(parameters)) {
                                 parameters = [ parameters ];
                             }
 
-                            for(var i=0;i<parameters.length;i++) {
+                            for (var i = 0;i < parameters.length; i++) {
                                 valueAssembled = valueAssembled.replace('{'+i+'}',''+parameters[i]);
                             }
 

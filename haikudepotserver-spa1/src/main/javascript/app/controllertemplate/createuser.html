@@ -42,6 +42,7 @@
                     ng-change="passwordsChanged()"
                     valid-password=""
                     ng-model="newUser.passwordClear">
+            <password-requirements></password-requirements>
             <error-messages key-prefix="createUser.passwordClear" error="createUserForm.passwordClear.$error"></error-messages>
         </div>
 
