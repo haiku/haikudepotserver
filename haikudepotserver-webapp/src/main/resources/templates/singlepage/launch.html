@@ -17,8 +17,8 @@ web-resources and then this starts the java-script single page environment drive
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div th:replace="includes/favicons.html :: head"></div>
-    <div th:replace="includes/searchheadlink.html :: link"></div>
+    <div th:replace="~{includes/favicons.html :: head}"></div>
+    <div th:replace="~{includes/searchheadlink.html :: link}"></div>
 
     <script type="text/javascript" src="/__js/vendor.concat.min.js"></script>
     <hds:appscripts></hds:appscripts>

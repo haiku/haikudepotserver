@@ -5,6 +5,14 @@ server:
 logging:
   level:
     org:
+      hibernate:
+        validator:
+          internal:
+            properties:
+              # [mar.2023] Otherwise will yield too many logs of this form;
+              # WARN  o.h.v.i.p.j.JavaBeanExecutable - HV000254: Missing parameter metadata for SearchPkgsSortOrdering(String, int, String), which declares implicit or synthetic parameters. Automatic resolution of generic type information for method parameters may yield incorrect results if multiple parameters have the same erasure. To solve this, compile your code with the '-parameters' flag.
+              # This is probably to do with this bug; https://hibernate.atlassian.net/browse/HV-1852
+              javabean: ERROR
       apache:
         # Cayenne logs quite a bit of material
         # out; best to turn that quantity of logging down a bit.

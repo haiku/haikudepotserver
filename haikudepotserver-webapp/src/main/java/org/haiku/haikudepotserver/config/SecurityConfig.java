@@ -10,6 +10,7 @@ import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.AccessDeniedHandler;
 import org.haiku.haikudepotserver.security.AuthenticationEntryPoint;
 import org.haiku.haikudepotserver.security.BearerTokenAuthenticationFilter;
+import org.haiku.haikudepotserver.security.NoOpAuthenticationManager;
 import org.haiku.haikudepotserver.security.QueryParamAuthenticationFilter;
 import org.haiku.haikudepotserver.security.RepositoryAuthenticationDetailsSource;
 import org.haiku.haikudepotserver.security.RepositoryAuthenticationProvider;
@@ -17,6 +18,7 @@ import org.haiku.haikudepotserver.security.UserAuthenticationProvider;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -50,6 +52,11 @@ public class SecurityConfig {
         this.serverRuntime = serverRuntime;
         this.userAuthenticationService = userAuthenticationService;
         this.repositoryService = repositoryService;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        return new NoOpAuthenticationManager();
     }
 
     @Bean

@@ -10,9 +10,9 @@
     <title>Haiku Depot Server</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div th:replace="includes/favicons.html :: head"></div>
-    <div th:replace="includes/searchheadlink.html :: link"></div>
-    <div th:replace="multipage/includes/generatedstyle.html :: style"></div>
+    <div th:replace="~{includes/favicons.html :: head}"></div>
+    <div th:replace="~{includes/searchheadlink.html :: link}"></div>
+    <div th:replace="~{multipage/includes/generatedstyle.html :: style}"></div>
 
     <!--/*
     will use the same CSS as the main application
@@ -23,7 +23,7 @@
 
 <body>
 
-<div th:replace="multipage/includes/banner.html :: banner"></div>
+<div th:replace="~{multipage/includes/banner.html :: banner}"></div>
 
 <div class="container">
 
