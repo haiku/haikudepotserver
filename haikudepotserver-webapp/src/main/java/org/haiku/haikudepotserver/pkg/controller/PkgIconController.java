@@ -9,8 +9,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
@@ -24,9 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
@@ -211,7 +217,7 @@ public class PkgIconController extends AbstractController {
             Boolean fallback)
             throws IOException {
 
-        if (null == format) {
+        if (StringUtils.isBlank(format)) {
             throw new MissingOrBadFormat();
         }
 
@@ -244,7 +250,7 @@ public class PkgIconController extends AbstractController {
             }
             case org.haiku.haikudepotserver.dataobjects.MediaType.EXTENSION_PNG -> {
                 if (null == size) {
-                    throw new IllegalArgumentException("the size must be provided when requesting a PNG");
+                    throw new MissingOrBadSize();
                 }
                 size = normalizeSize(size);
                 Optional<byte[]> pngImageData = renderedPkgIconRepository.render(
@@ -261,7 +267,7 @@ public class PkgIconController extends AbstractController {
                     outputToResponse(response, pkgSupplement, data, requestMethod == RequestMethod.GET);
                 }
             }
-            default -> throw new IllegalStateException("unexpected format; " + format);
+            default -> throw new MissingOrBadFormat();
         }
 
     }
@@ -290,6 +296,9 @@ public class PkgIconController extends AbstractController {
 
     @ResponseStatus(value= HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason="the format must be supplied and must (presently) be 'png'")
     private static class MissingOrBadFormat extends RuntimeException {}
+
+    @ResponseStatus(value= HttpStatus.BAD_REQUEST, reason="the size must be supplied and must valid")
+    private static class MissingOrBadSize extends RuntimeException {}
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="the requested package was unable to found")
     private static class PkgNotFound extends RuntimeException {}

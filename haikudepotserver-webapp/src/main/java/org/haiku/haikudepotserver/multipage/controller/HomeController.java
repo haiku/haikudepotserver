@@ -8,10 +8,15 @@ package org.haiku.haikudepotserver.multipage.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.PkgCategory;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.model.Pagination;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
@@ -26,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -186,8 +190,14 @@ public class HomeController {
         data.setSearchExpression(searchExpression);
         data.setPkgVersions(pkgVersions);
 
-        if (0 != totalPkgVersions.intValue()) {
-            data.setPagination(new Pagination(totalPkgVersions.intValue(), offset, PAGESIZE));
+        int total = totalPkgVersions.intValue();
+
+        if (0 != total) {
+            data.setPagination(new Pagination(
+                    total,
+                    Math.max(0, Math.min(offset, total - 1)),
+                    PAGESIZE)
+            );
         }
 
         httpServletRequest.setAttribute(
