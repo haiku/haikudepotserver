@@ -32,7 +32,7 @@ if ! [[ "$choice" = 'y' ]]; then
   exit 1
 fi
 
-docker build --tag "docker.io/haiku/haikudepotserver:${HDS_VERSION}" .
+docker build --tag "ghcr.io/haiku/haikudepotserver:${HDS_VERSION}" .
 
 if [[ $? != 0 ]]; then
   echo "failed to create docker image for HaikuDepotServer"
@@ -44,7 +44,7 @@ if ! [[ "$choice" = 'y' ]]; then
   exit 1
 fi
 
-docker push "docker.io/haiku/haikudepotserver:${HDS_VERSION}"
+docker push "ghcr.io/haiku/haikudepotserver:${HDS_VERSION}"
 
 if [[ $? != 0 ]]; then
   echo "failed to push the docker image for HaikuDepotServer"
