@@ -37,7 +37,11 @@ COPY ./haikudepotserver-core/pom.xml /hds-src/haikudepotserver-core/pom.xml
 WORKDIR /hds-src
 
 # capture the dependencies into the image
-RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.3.0:go-offline
+#   [apl 2.apr.2023] temporary disabled owing to a missing `SNAPSHOT` dependency
+#   being used in the module.  See here;
+#   https://github.com/micrometer-metrics/micrometer/issues/3738
+#   Re-enable this line once the problem is resolved.
+# RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.3.0:go-offline
 
 COPY ./haikudepotserver-spa1/package.json /hds-src/haikudepotserver-spa1/package.json
 
