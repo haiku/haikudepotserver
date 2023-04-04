@@ -49,6 +49,17 @@ function readdirFullPathsAndFilterSync(dir, pattern) {
     .map(f => join(dir, f));
 }
 
+/**
+ * <p>This function will return the latest timestamp of the files that are
+ * provided.  If there are no files then it will return 0.</p>
+ */
+
+function getLatestTimestamp(files) {
+  return files
+    .map(f => statSync(f).mtimeMs)
+    .reduce((a, b) => Math.max(a, b), 0);
+}
+
 function concatenateFilesSync(targetFile, sourceFiles) {
 
   function minifyObject(extension, data) {
@@ -68,6 +79,14 @@ function concatenateFilesSync(targetFile, sourceFiles) {
 
   console.info(`will append ${sourceFiles.length} files to [${targetFile}]`)
 
+  const earliestSourceFileTimestamp = getLatestTimestamp(sourceFiles);
+  const targetFileTimestamp = existsSync(targetFile) ? statSync(targetFile).mtimeMs : 0;
+
+  if (earliestSourceFileTimestamp < targetFileTimestamp) {
+    console.debug(`will not re-create [${targetFile}] because it is up to date`);
+    return;
+  }
+
   ensureObjectNotExists(targetFile);
   ensureTargetParentExists(targetFile);
 
@@ -82,7 +101,6 @@ function concatenateFilesSync(targetFile, sourceFiles) {
     .forEach(fileAndData => {
       appendFileSync(targetFile, fileAndData.data, {encoding: 'utf8'});
       appendFileSync(targetFile, '\n\n');
-      const fileBasename = basename(fileAndData.filename);
     });
 }
 
@@ -107,14 +125,26 @@ function copyAllFilesSync(targetRoot, sourceRoot) {
           }
           recursiveCopyInternal(targetObject, sourceObject);
         } else if (stat.isFile()) {
-          ensureObjectNotExists(targetObject)
-          copyFileSync(sourceObject, targetObject);
+          const sourceFileTimestamp = statSync(sourceObject).mtimeMs;
+          const targetFileTimestamp = existsSync(targetObject) ? statSync(targetObject).mtimeMs : 0;
+
+          if (sourceFileTimestamp >= targetFileTimestamp) {
+            ensureObjectNotExists(targetObject)
+            copyFileSync(sourceObject, targetObject);
+          }
         }
       });
   }
 
   recursiveCopyInternal(targetRoot, sourceRoot);
 }
+
+/**
+ * <p>This function will create an index file that is intended to be used
+ * by the application to load the resources.  The index file will be
+ * created in the target directory and will contain the relative paths
+ * to the source files.</p>
+ */
 
 function createIndex(targetFile, indexBase, sourceBase, sourceFiles) {
 
@@ -134,6 +164,14 @@ function createIndex(targetFile, indexBase, sourceBase, sourceFiles) {
     }
 
     return translatePathToClasspathPath(file.substring(sourceBase.length));
+  }
+
+  const earliestSourceFileTimestamp = getLatestTimestamp(sourceFiles);
+  const targetFileTimestamp = existsSync(targetFile) ? statSync(targetFile).mtimeMs : 0;
+
+  if (earliestSourceFileTimestamp < targetFileTimestamp) {
+    console.debug(`will not re-create [${targetFile}] because it is up to date`);
+    return;
   }
 
   ensureObjectNotExists(targetFile);
