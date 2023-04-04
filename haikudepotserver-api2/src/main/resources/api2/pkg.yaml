@@ -682,6 +682,8 @@ components:
     getPkgPkgVersion:
       type: object
       properties:
+        active:
+          type: boolean
         major:
           type: string
         minor:

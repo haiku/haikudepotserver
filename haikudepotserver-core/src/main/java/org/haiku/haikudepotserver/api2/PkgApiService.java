@@ -290,11 +290,11 @@ public class PkgApiService extends AbstractApiService {
                 .pkgCategoryCodes(pkg.getPkgSupplement().getPkgPkgCategories()
                         .stream()
                         .map(ppc -> ppc.getPkgCategory().getCode())
-                        .collect(Collectors.toUnmodifiableList()))
+                        .toList())
                 .versions(pkgVersions
                         .stream()
                         .map(pv -> mapToResultPkgVersion(context, pv, naturalLanguage))
-                        .collect(Collectors.toUnmodifiableList()));
+                        .toList());
 
         if (null != repositorySource) {
             Optional<PkgUserRatingAggregate> userRatingAggregate = pkg.getPkgUserRatingAggregate(repositorySource.getRepository());
@@ -326,6 +326,7 @@ public class PkgApiService extends AbstractApiService {
                 pkgLocalizationService.resolvePkgVersionLocalization(context, pkgVersion, null, naturalLanguage);
 
         return new GetPkgPkgVersion()
+                .active(pkgVersion.getActive())
                 .isLatest(pkgVersion.getIsLatest())
                 .major(pkgVersion.getMajor())
                 .minor(pkgVersion.getMinor())

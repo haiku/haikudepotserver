@@ -433,7 +433,7 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.goDeactivate = function () {
-                var pv = $scope.pkg.versions[0];
+              var pv = $scope.pkg.versions[0];
 
               remoteProcedureCall.call(
                     constants.ENDPOINT_API_V2_PKG,
