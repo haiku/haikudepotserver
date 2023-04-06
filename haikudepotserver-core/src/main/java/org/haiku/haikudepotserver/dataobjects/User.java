@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class User extends _User implements MutableCreateAndModifyTimestamped {
 
-    private final static Pattern NICKNAME_PATTERN = Pattern.compile("^[a-z0-9]{4,16}$");
+    private final static Pattern NICKNAME_PATTERN = Pattern.compile("^[a-z0-9]{4,32}$");
     private final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
     private final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{10,32}$");
 
