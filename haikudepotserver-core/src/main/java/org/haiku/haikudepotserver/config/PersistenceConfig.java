@@ -9,7 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.DataChannelFilter;
 import org.apache.cayenne.LifecycleListener;
+import org.apache.cayenne.configuration.Constants;
+import org.apache.cayenne.configuration.server.ServerModule;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.di.MapBuilder;
+import org.apache.cayenne.velocity.VelocityModule;
 import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
@@ -27,7 +31,6 @@ import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener;
-import org.haiku.haikudepotserver.support.cayenne.ServerRuntimeFactory;
 import org.haiku.haikudepotserver.support.db.UserUsageConditionsInitializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +41,6 @@ import java.util.Collections;
 public class PersistenceConfig {
 
     @Bean(initMethod = "init")
-//    @DependsOn({"haikuDepotManagedDatabase"})
     public UserUsageConditionsInitializer userUsageConditionsInitializer(
             ServerRuntime serverRuntime,
             ObjectMapper objectMapper
@@ -51,8 +53,18 @@ public class PersistenceConfig {
             DataSource dataSource,
             @Value("${cayenne.query.cache.size:250}") Integer queryCacheSize
     ) {
-        ServerRuntimeFactory factory = new ServerRuntimeFactory(dataSource, queryCacheSize);
-        return factory.getObject();
+        return ServerRuntime.builder()
+                .addConfigs("cayenne-haikudepotserver.xml")
+                .dataSource(dataSource)
+                .addModule(new ServerModule())
+                .addModule(new VelocityModule())
+                .addModule(binder -> {
+                    MapBuilder<Object> props = binder.bindMap(Object.class, Constants.PROPERTIES_MAP);
+                    props.put(Constants.SERVER_OBJECT_RETAIN_STRATEGY_PROPERTY, "weak"); // hard|soft|weak
+                    props.put(Constants.SERVER_CONTEXTS_SYNC_PROPERTY, "true");
+                    props.put(Constants.QUERY_CACHE_SIZE_PROPERTY, queryCacheSize.toString());
+                })
+                .build();
     }
 
     // -------------------------------------
