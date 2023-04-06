@@ -33,7 +33,8 @@ angular.module('haikudepotserver')
         MEDIATYPE_PNG : 'image/png',
         MEDIATYPE_HAIKUVECTORICONFILE : 'application/x-vnd.haiku-icon',
 
-        PATTERN_USER_NICKNAME : /^[a-z0-9]{4,16}$/,
+        // TODO: use the data from the server rather than hard coding it here.
+        PATTERN_USER_NICKNAME : /^[a-z0-9]{4,32}$/,
         PATTERN_PKG_NAME : /^[^\s/=!<>-]+$/,
 
         KEY_NATURALLANGUAGECODE : 'natlangcode',

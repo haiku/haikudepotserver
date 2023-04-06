@@ -14,6 +14,7 @@ angular.module('haikudepotserver').controller(
             remoteProcedureCall, constants, errorHandling, referenceData, userState,
             messageSource, breadcrumbs, breadcrumbFactory) {
 
+            // TODO: use the data from the server rather than hard code it here
             $scope.userNicknamePattern = ('' + constants.PATTERN_USER_NICKNAME).replace(/^\//,'').replace(/\/$/,'');
             $scope.captchaToken = undefined;
             $scope.captchaImageUrl = undefined;
@@ -81,11 +82,11 @@ angular.module('haikudepotserver').controller(
             // removed.
 
             $scope.captchaResponseDidChange = function () {
-                $scope.createUserForm.captchaResponse.$setValidity('badresponse',true);
+                $scope.createUserForm.captchaResponse.$setValidity('badresponse', true);
             };
 
             $scope.nicknameDidChange = function () {
-                $scope.createUserForm.nickname.$setValidity('notunique',true);
+                $scope.createUserForm.nickname.$setValidity('notunique', true);
             };
 
             $scope.passwordsChanged = function () {
