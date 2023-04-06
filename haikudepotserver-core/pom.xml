@@ -112,6 +112,10 @@
             <groupId>org.imgscalr</groupId>
             <artifactId>imgscalr-lib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ar.com.hjg</groupId>
+            <artifactId>pngj</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
