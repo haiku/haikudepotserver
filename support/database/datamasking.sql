@@ -117,8 +117,11 @@ UPDATE haikudepot.user SET
 
 UPDATE haikudepot.user SET
   password_hash = 'f925e5a026bb425cc5691e101605eacaf5f05f71a10cf5a9ffb2f96828f8a0c6',
-  password_salt = 'cad3422ea02761f8',
-  email = nickname || '@example.com';
+  password_salt = 'cad3422ea02761f8';
+
+UPDATE haikudepot.user SET
+  email = nickname || '@example.com'
+WHERE email IS NOT NULL;
 
 -- remove special rights for all users except for root so that anybody getting
 -- this database dump is not able to ascertain who might have root access.
