@@ -663,8 +663,8 @@
 	<obj-entity name="UserUsageConditions" className="org.haiku.haikudepotserver.dataobjects.UserUsageConditions" lock-type="optimistic" dbEntityName="user_usage_conditions" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="copyMarkdown" type="java.lang.String" db-attribute-path="copy_markdown"/>
-		<obj-attribute name="minimumAge" type="Integer" db-attribute-path="minimum_age"/>
-		<obj-attribute name="ordering" type="Integer" db-attribute-path="ordering"/>
+		<obj-attribute name="minimumAge" type="java.lang.Integer" db-attribute-path="minimum_age"/>
+		<obj-attribute name="ordering" type="java.lang.Integer" db-attribute-path="ordering"/>
 	</obj-entity>
 	<obj-entity name="UserUsageConditionsAgreement" className="org.haiku.haikudepotserver.dataobjects.UserUsageConditionsAgreement" lock-type="optimistic" dbEntityName="user_usage_conditions_agreement" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
@@ -863,6 +863,9 @@
 	<db-relationship name="untitledRel1" source="repository" target="pkg_user_rating_aggregate" toMany="true">
 		<db-attribute-pair source="id" target="repository_id"/>
 	</db-relationship>
+	<db-relationship name="architecture" source="repository_source" target="architecture">
+		<db-attribute-pair source="architecture_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="pkg_versions" source="repository_source" target="pkg_version" toMany="true">
 		<db-attribute-pair source="id" target="repository_source_id"/>
 	</db-relationship>
@@ -874,9 +877,6 @@
 	</db-relationship>
 	<db-relationship name="repository_source_mirrors" source="repository_source" target="repository_source_mirror" toMany="true">
 		<db-attribute-pair source="id" target="repository_source_id"/>
-	</db-relationship>
-	<db-relationship name="architecture" source="repository_source" target="architecture">
-		<db-attribute-pair source="architecture_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="repository_source" source="repository_source_extra_identifier" target="repository_source">
 		<db-attribute-pair source="repository_source_id" target="id"/>
@@ -1169,6 +1169,7 @@ ORDER BY
   pv.id DESC]]></sql>
 	</query>
 	<query name="SearchPkgVersions" type="SQLTemplate" root="obj-entity" root-name="PkgVersion">
+		<property name="cayenne.GenericSelectQuery.cacheStrategy" value="NO_CACHE"/>
 		<property name="cayenne.GenericSelectQuery.fetchOffset" value="0"/>
 		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="false"/>
 		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
@@ -1306,6 +1307,10 @@ LIMIT #bind($search.limit)
 		<mode>all</mode>
 		<template>templates/v4_1/subclass.vm</template>
 		<superTemplate>templates/v4_1/superclass.vm</superTemplate>
+		<embeddableTemplate>templates/v4_1/embeddable-subclass.vm</embeddableTemplate>
+		<embeddableSuperTemplate>templates/v4_1/embeddable-superclass.vm</embeddableSuperTemplate>
+		<queryTemplate>templates/v4_1/datamap-subclass.vm</queryTemplate>
+		<querySuperTemplate>templates/v4_1/datamap-superclass.vm</querySuperTemplate>
 		<outputPattern>*.java</outputPattern>
 		<makePairs>true</makePairs>
 		<usePkgPath>true</usePkgPath>

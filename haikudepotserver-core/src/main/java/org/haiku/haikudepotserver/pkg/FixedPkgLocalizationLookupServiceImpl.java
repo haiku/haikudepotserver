@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class FixedPkgLocalizationLookupServiceImpl implements PkgLocalizationLookupService {
 
-    private Map<ObjectId, ResolvedPkgVersionLocalization> cachedResult;
+    private final Map<ObjectId, ResolvedPkgVersionLocalization> cachedResult;
 
     private final String naturalLanguageCode;
 
@@ -63,7 +63,7 @@ public class FixedPkgLocalizationLookupServiceImpl implements PkgLocalizationLoo
                 String summary = (String) dr.get("summary");
 
                 cachedResult.put(
-                        new ObjectId(PkgVersion.class.getSimpleName(), PkgVersion.ID_PK_COLUMN, pkgVersionId),
+                        ObjectId.of(PkgVersion.class.getSimpleName(), PkgVersion.ID_PK_COLUMN, pkgVersionId),
                         new ResolvedPkgVersionLocalization(title, summary, description));
             });
         }
