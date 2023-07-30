@@ -10,11 +10,12 @@
 # -------------------------------------
 # Assemble the build image with the dependencies
 
-FROM debian:11.6-slim as build
+FROM debian:12.1-slim as build
 
-RUN apt-get update
-RUN apt-get -y install wget python3 openjdk-17-jdk fontconfig fonts-dejavu-core lsb-release gnupg2
-RUN apt-get -y install postgresql postgresql-contrib
+RUN apt-get update && \
+    apt-get -y install openjdk-17-jdk && \
+    apt-get -y install wget python3 fontconfig fonts-dejavu-core lsb-release gnupg2 && \
+    apt-get -y install postgresql postgresql-contrib
 
 # copy the source into the build machine
 RUN mkdir /hds-src
@@ -71,9 +72,14 @@ RUN ./mvnw clean install
 # -------------------------------------
 # Create the container that will eventually run HDS
 
-FROM debian:11.6-slim AS runtime
+FROM debian:12.1-slim AS runtime
 
-RUN apt-get update && apt-get -y install wget optipng libpng16-16 curl openjdk-17-jre fontconfig fonts-dejavu-core
+# the handling here for `ca-certificates-java` is to get around a sequencing
+# problem that comes up with GitHub actions.
+RUN apt-get update && \
+    apt-get -y install openjdk-17-jre && \
+    apt-get -y install wget optipng libpng16-16 curl fontconfig fonts-dejavu-core
+
 
 ENV HDS_B_HTTP_PORT=8080
 ENV HDS_B_HTTP_ACTUATOR_PORT=8081
