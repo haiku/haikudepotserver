@@ -30,7 +30,11 @@ Distributed under the terms of the MIT License.
             Work through building Haiku operating system from source and then build the hvif2png tool using
             &quot;jam -q &quot;&lt;build&gt;hvif2png&quot;.  Note that you may need to install the
             &quot;libpng&quot; libraries for this to build and yield the hvif2png tool as a
-            build artifact.  The build product in this case will be a binary for the build host.
+            build artifact. On a debian-based host this can be achieved with
+            &quot;sudo apt-get install libpng-dev&quot;.
+        </para>
+        <para>
+            The build product in this case will be a binary for the build host.
         </para>
         <para>
             To install this on a development or deployment host, you will either need to
@@ -105,6 +109,21 @@ spring-boot:run</programlisting>
             data. See the section on
             <link linkend="deployment-settinguprepositories">settng up repositories</link>
             for details on loading-up some data to view.
+        </para>
+
+    </section>
+
+    <section>
+        <title>Database Setup from Blank State</title>
+
+        <para>
+            Assuming a blank Postgres database with a super-user authentication;
+        </para>
+
+        <para>
+            <programlisting>CREATE ROLE haikudepotserver WITH PASSWORD 'haikudepotserver' LOGIN;
+CREATE DATABASE haikudepotserver OWNER haikudepotserver;
+            </programlisting>
         </para>
 
     </section>
