@@ -39,7 +39,7 @@ angular.module('haikudepotserver').controller(
             }
 
             $scope.goQueuePkgVersionPayloadLengthPopulationJob = function() {
-                remoteProcedureCall.call(constants.ENDPOINT_API_V2_PKG, "queue-pkg-version-payload-length-population-job").then(
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_PKG_JOB, "queue-pkg-version-payload-length-population-job").then(
                     function() {
                         showDidAction('queuePkgVersionPayloadLengthPopulationJob');
                     },
