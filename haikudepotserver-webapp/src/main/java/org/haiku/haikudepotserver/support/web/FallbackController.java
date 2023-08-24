@@ -15,6 +15,7 @@ import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -65,6 +67,8 @@ public class FallbackController {
     private final String baseUrl;
     private final String defaultArchitectureCode;
 
+    private final String defaultRepositoryCode;
+
     @Autowired(required = false)
     private ServletContext servletContext;
 
@@ -76,13 +80,15 @@ public class FallbackController {
             RepositoryService repositoryService,
             @Value("classpath:/img/favicon.ico") Resource faviconResource,
             @Value("${hds.architecture.default.code}") String defaultArchitectureCode,
-            @Value("${hds.base-url}") String baseUrl) {
+            @Value("${hds.base-url}") String baseUrl,
+            @Value("${hds.repository.default.code}") String defaultRepositoryCode) {
         this.serverRuntime = serverRuntime;
         this.pkgService = pkgService;
         this.repositoryService = repositoryService;
         this.baseUrl = baseUrl;
         this.defaultArchitectureCode = defaultArchitectureCode;
         this.faviconResource = faviconResource;
+        this.defaultRepositoryCode = defaultRepositoryCode;
     }
 
     private String termDebug(String term) {
@@ -148,18 +154,29 @@ public class FallbackController {
     private Optional<PkgVersion> tryGetPkgVersion(ObjectContext context, String term) {
         return Optional.ofNullable(StringUtils.trimToNull(term))
                 .flatMap(t -> Pkg.tryGetByName(context, t))
-                .flatMap(pkg -> repositoryService.getRepositoriesForPkg(context, pkg)
-                        .stream()
-                        .flatMap(r -> r.getRepositorySources().stream())
-                        .sorted(ComparatorUtils.chainedComparator(
-                                Comparator.comparing(rs -> rs.getCode().equals(defaultArchitectureCode)),
-                                Comparator.comparing(_RepositorySource::getCode)))
-                        .map(rs -> pkgService.getLatestPkgVersionForPkg(context, pkg, rs))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .findFirst());
+                .flatMap(p -> findBestPkgVersion(context, p));
     }
 
+    private Optional<PkgVersion> findBestPkgVersion(ObjectContext context, Pkg pkg) {
+        List<RepositorySource> sortedRepositorySources = repositoryService.getRepositoriesForPkg(context, pkg)
+                .stream()
+                .flatMap(r -> r.getRepositorySources().stream())
+                .sorted(ComparatorUtils.chainedComparator(
+                        Comparator
+                                .comparing((RepositorySource rs) -> rs.getRepository().getCode().equals(defaultRepositoryCode))
+                                .reversed(),
+                        Comparator
+                                .comparing((RepositorySource rs) -> rs.getCode().equals(defaultArchitectureCode))
+                                .reversed(),
+                        Comparator.comparing(_RepositorySource::getCode)))
+                .toList();
+
+        return sortedRepositorySources.stream()
+                .map(rs -> pkgService.getLatestPkgVersionForPkg(context, pkg, rs))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
+    }
 
     @RequestMapping(value = "/{"+KEY_TERM+"}", method = { RequestMethod.GET, RequestMethod.HEAD } )
     public void fallback(
