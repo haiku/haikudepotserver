@@ -1233,7 +1233,13 @@ LEFT JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_
 LEFT JOIN haikudepot.prominence pr ON ppr.prominence_id = pr.id
 #end
 WHERE
-pv.is_latest = true
+1 = 1
+AND pv.is_latest = true
+#if(! $search.includeDevelopment)
+AND p.name NOT LIKE '%_devel'
+AND p.name NOT LIKE '%_source'
+AND p.name NOT LIKE '%_debuginfo'
+#end
 #if(! $search.includeInactive)
 AND p.active = true
 AND pv.active = true

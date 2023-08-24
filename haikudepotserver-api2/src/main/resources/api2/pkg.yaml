@@ -509,6 +509,13 @@ components:
               type: string
             daysSinceLatestVersion:
               type: integer
+            includeDevelopment:
+              type: boolean
+              description: >
+                Some packages are considered "development" related including
+                sources and debug-info. By providing this as false, these
+                packages will be excluded from the results. It will default
+                to true.
     searchPkgsResponseEnvelope:
       type: object
       properties:

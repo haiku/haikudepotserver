@@ -698,6 +698,7 @@ public class PkgApiService extends AbstractApiService {
                 Optional.ofNullable(request.getSortOrdering()).orElse(SearchPkgsSortOrdering.NAME).name()));
         specification.setArchitecture(getArchitecture(context, request.getArchitectureCode()));
         specification.setRepositories(transformCodesToRepositories(context, request.getRepositoryCodes()));
+        specification.setIncludeDevelopment(BooleanUtils.isTrue(request.getIncludeDevelopment()));
         specification.setLimit(request.getLimit());
         specification.setOffset(request.getOffset());
 

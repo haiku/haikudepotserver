@@ -1,22 +1,26 @@
 <div class="content-container home">
 
     <div id="search-criteria-container">
-        <div>
+        <div class="search-criteria-input-container">
             <repositories-chooser repositories="selectedRepositories"></repositories-chooser>
         </div>
-        <div>
+        <div class="search-criteria-input-container">
             <select
                     ng-model="selectedArchitecture"
                     ng-options="anArchitecture.code for anArchitecture in architectures">
             </select>
         </div>
-        <div>
+        <div class="search-criteria-input-container">
             <select
                     ng-model="selectedViewCriteriaTypeOption"
                     ng-options="aViewCriteriaTypeOptions.title for aViewCriteriaTypeOptions in viewCriteriaTypeOptions">
             </select>
         </div>
-        <div ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
+        <div class="search-criteria-input-container">
+            <input type="checkbox" ng-model="includeDevelopment">
+            <img src="/__img/developerresources.svg" img-downgrade="" alt="Include developers' resources">
+        </div>
+        <div class="search-criteria-input-container" ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
             <span ng-show="!pkgCategories">...</span>
             <select
                     ng-show="pkgCategories"
@@ -24,7 +28,7 @@
                     ng-options="aPkgCategory.title for aPkgCategory in pkgCategories">
             </select>
         </div>
-        <div>
+        <div class="search-criteria-input-container">
             <input
                     ng-model="searchExpression"
                     autocomplete="off"
@@ -35,6 +39,11 @@
             <button ng-click="goSearch()">
                 <message key="home.searchButton.title"></message>
             </button>
+        </div>
+        <div id="search-criteria-help">
+            <a ng-click="goShowSearchSpecificationHelp()" href="">
+                <img src="/__img/help.svg" img-downgrade="">
+            </a>
         </div>
     </div>
 
@@ -131,5 +140,18 @@
         </div>
     </div>
 </div>
+
+<modal-container show="showSearchSpecificationHelp" width="420" close="goHideSearchSpecificationHelp()">
+
+    <p>
+        The package search specification has a number of inputs.
+    </p>
+    <p>
+        The check-box and icon <img src="/__img/developerresources.svg" img-downgrade="">
+        controls if packages are shown which are likely to only be of interest to developers.
+        This includes source codes, debug information etc...
+    </p>
+
+</modal-container>
 
 <spinner spin="shouldSpin()"></spinner>

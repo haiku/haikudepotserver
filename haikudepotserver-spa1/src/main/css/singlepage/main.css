@@ -470,12 +470,16 @@ SEARCH BAR
     padding-right:4px;
 }
 
+#search-criteria-help {
+    float: right;
+}
+
 /*
 Within the search criteria to break-up the sections of the search criteria, this will put a dotted line
 between the sections.
 */
 
-#search-criteria-container > div:nth-child(n+2) {
+#search-criteria-container > div.search-criteria-input-container:nth-child(n+2) {
     border-left: 1px dotted black;
 }
 

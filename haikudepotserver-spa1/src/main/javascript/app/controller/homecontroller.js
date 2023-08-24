@@ -26,6 +26,7 @@ angular.module('haikudepotserver').controller(
             var KEY_PKGCATEGORYCODE = 'pkgcat';
             var KEY_REPOSITORYCODES = 'repos';
             var KEY_SEARCHEXPRESSION = 'srchexpr';
+            var KEY_INCLUDEDEVELOPMENT = 'incldev';
             var KEY_VIEWCRITERIATYPECODE = 'viewcrttyp';
 
             var ViewCriteriaTypes = {
@@ -40,6 +41,7 @@ angular.module('haikudepotserver').controller(
 
             var amFetchingPkgs = false;
 
+            $scope.showSearchSpecificationHelp = false;
             $scope.selectedViewCriteriaTypeOption = undefined;
             $scope.searchExpression = $location.search()[KEY_SEARCHEXPRESSION] ? $location.search()[KEY_SEARCHEXPRESSION] : '';
             $scope.lastRefetchPkgsSearchExpression = '';
@@ -49,6 +51,7 @@ angular.module('haikudepotserver').controller(
             $scope.selectedArchitecture = undefined;
             $scope.pkgCategories = undefined; // pulled in with a promise later...
             $scope.selectedPkgCategory = undefined;
+            $scope.includeDevelopment = 'true' === $location.search()[KEY_INCLUDEDEVELOPMENT];
             $scope.viewCriteriaTypeOptions = _.map(
                 [
                     ViewCriteriaTypes.FEATURED,
@@ -74,6 +77,16 @@ angular.module('haikudepotserver').controller(
                 if (chain && chain.length) {
                     chain.shift()(chain);
                 }
+            }
+
+            $scope.goShowSearchSpecificationHelp = function () {
+                $scope.showSearchSpecificationHelp = true;
+                return false;
+            }
+
+            $scope.goHideSearchSpecificationHelp = function () {
+                $scope.showSearchSpecificationHelp = false;
+                return false;
             }
 
             // This was only showing the summary when the search hit was in the summary, but will now
@@ -494,6 +507,13 @@ angular.module('haikudepotserver').controller(
                         }
                     });
 
+                    $scope.$watch('includeDevelopment', function (newValue, oldValue) {
+                        if(newValue !== oldValue) { // already initialized elsewhere
+                            $log.debug('includeDevelopment -> refetching pkgs');
+                            refetchPkgsAtFirstPage();
+                        }
+                    });
+
                     // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
 
                     $scope.$watch('selectedArchitecture', function (newValue, oldValue) {
@@ -608,7 +628,7 @@ angular.module('haikudepotserver').controller(
                         ).join(',')
                     );
                     $location.search(KEY_ARCHITECTURECODE,$scope.selectedArchitecture.code);
-                    $location.search(KEY_SEARCHEXPRESSION,$scope.searchExpression);
+                    $location.search(KEY_INCLUDEDEVELOPMENT,'' + !!($scope.includeDevelopment));
                     $location.search(KEY_VIEWCRITERIATYPECODE,$scope.selectedViewCriteriaTypeOption.code);
 
                     if (ViewCriteriaTypes.CATEGORIES === $scope.selectedViewCriteriaTypeOption.code) {
@@ -640,6 +660,7 @@ angular.module('haikudepotserver').controller(
                         }),
                         architectureCode: $scope.selectedArchitecture.code,
                         naturalLanguageCode : userState.naturalLanguageCode(),
+                        includeDevelopment: $scope.includeDevelopment,
                         offset: $scope.pkgs.offset,
                         limit: PAGESIZE
                     };

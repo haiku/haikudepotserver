@@ -52,6 +52,8 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     private NaturalLanguage naturalLanguage;
 
+    private Boolean includeDevelopment;
+
     public List<Repository> getRepositories() {
         return repositories;
     }
@@ -108,4 +110,11 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
         this.daysSinceLatestVersion = daysSinceLatestVersion;
     }
 
+    public Boolean getIncludeDevelopment() {
+        return includeDevelopment;
+    }
+
+    public void setIncludeDevelopment(Boolean includeDevelopment) {
+        this.includeDevelopment = includeDevelopment;
+    }
 }
