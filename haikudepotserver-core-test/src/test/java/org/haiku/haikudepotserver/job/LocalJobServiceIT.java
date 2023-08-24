@@ -7,31 +7,23 @@ package org.haiku.haikudepotserver.job;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.job.model.TestLockableJobSpecification;
-import org.haiku.haikudepotserver.job.model.TestNumberedLinesJobSpecification;
+import org.haiku.haikudepotserver.job.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import jakarta.annotation.Resource;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -162,10 +154,17 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
 
     }
 
+    private boolean checkStatus(String guid, JobSnapshot.Status status) {
+        return jobService.tryGetJob(guid)
+                .filter(js -> js.getStatus() == status)
+                .isPresent();
+    }
+
     private void assertStatus(String guid, JobSnapshot.Status status) {
-        Optional<? extends JobSnapshot> afterJob = jobService.tryGetJob(guid);
-        Assertions.assertThat(afterJob.isPresent()).isTrue();
-        Assertions.assertThat(afterJob.get().getStatus()).isEqualTo(status);
+        Awaitility.with()
+                .atMost(5, TimeUnit.SECONDS)
+                .pollDelay(1, TimeUnit.SECONDS)
+                .until(() -> checkStatus(guid, status));
     }
 
 
