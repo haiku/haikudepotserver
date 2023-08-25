@@ -93,8 +93,8 @@ RUN chmod 755 ${HDS_B_PROPBIN}
 COPY --from=build /hds-src/haikudepotserver-core/target/classes/build.properties ${HDS_B_INSTALL_ROOT}
 COPY --from=build /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${HDS_B_INSTALL_ROOT}/app.jar
 
-ENV HDS_B_HVIF2PNG_VERSION="hvif2png-hrev53013-linux-x86_64"
-ENV HDS_B_INSTALL_HVIF2PNG_PATH "${HDS_B_INSTALL_ROOT}/hvif2png-hrev53013+1/bin/hvif2png.sh"
+ENV HDS_B_HVIF2PNG_VERSION="hvif2png-hrev57235-linux-x86_64"
+ENV HDS_B_INSTALL_HVIF2PNG_PATH "${HDS_B_INSTALL_ROOT}/hvif2png-hrev57235/bin/hvif2png.sh"
 
 COPY ./support/deployment/config.properties ${HDS_B_INSTALL_ROOT}
 ADD ./support/deployment/${HDS_B_HVIF2PNG_VERSION}.tgz ${HDS_B_INSTALL_ROOT}

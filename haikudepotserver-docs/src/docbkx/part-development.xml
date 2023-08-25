@@ -274,7 +274,8 @@ CREATE DATABASE haikudepotserver OWNER haikudepotserver;
         </para>
 
         <para>
-            Use CTRL-D to terminate and write the output file.
+            Use CTRL-D to terminate and write the output file. An example content is to be found under
+            ".../support/deployment/hds_secrets".
         </para>
 
         <para>
