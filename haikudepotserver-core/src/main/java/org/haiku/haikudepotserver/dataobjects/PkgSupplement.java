@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022, Andrew Lindesay
+ * Copyright 2019-2023, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,11 +9,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
 import java.time.Clock;
 import java.util.*;
@@ -33,6 +33,25 @@ public class PkgSupplement extends _PkgSupplement implements MutableCreateAndMod
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(basePkgName), "the base pkg name must be supplied");
         return Optional.ofNullable(ObjectSelect.query(PkgSupplement.class).where(BASE_PKG_NAME.eq(basePkgName)).selectOne(context));
+    }
+
+    public static Optional<Date> getLatestIconModifyTimestamp(ObjectContext context) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        return Optional.ofNullable(
+                ObjectSelect.columnQuery(PkgSupplement.class, PkgSupplement.ICON_MODIFY_TIMESTAMP)
+                        .where(PkgSupplement.ICON_MODIFY_TIMESTAMP.isNotNull())
+                        .orderBy(PkgSupplement.ICON_MODIFY_TIMESTAMP.desc())
+                        .limit(1)
+                        .selectOne(context));
+    }
+
+    public static Optional<Date> tryGetLatestModifyTimestamp(ObjectContext context) {
+        Preconditions.checkArgument(null != context, "the context must be supplied");
+        return Optional.ofNullable(
+                ObjectSelect.columnQuery(PkgSupplement.class, PkgSupplement.MODIFY_TIMESTAMP)
+                        .orderBy(PkgSupplement.ICON_MODIFY_TIMESTAMP.desc())
+                        .limit(1)
+                        .selectOne(context));
     }
 
     /**

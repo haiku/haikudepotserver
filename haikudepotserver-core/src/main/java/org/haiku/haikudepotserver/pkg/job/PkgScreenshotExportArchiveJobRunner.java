@@ -13,6 +13,8 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
@@ -100,6 +102,17 @@ public class PkgScreenshotExportArchiveJobRunner
             query.setParams(Map.of("pkgName", specification.getPkgName()));
         }
         return query;
+    }
+
+    Date getLatestModifiedTimestamp(PkgScreenshotExportArchiveJobSpecification specification) {
+        if (Strings.isNullOrEmpty(specification.getPkgName())) {
+            return PkgSupplement.tryGetLatestModifyTimestamp(serverRuntime.newContext())
+                    .orElse(new Date(0L));
+        }
+
+        return Pkg.getByName(serverRuntime.newContext(), specification.getPkgName())
+                .getPkgSupplement()
+                .getLatestPkgModifyTimestampSecondAccuracy();
     }
 
 }

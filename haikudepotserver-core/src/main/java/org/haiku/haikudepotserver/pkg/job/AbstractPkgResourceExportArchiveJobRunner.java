@@ -79,6 +79,11 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
             query.setFetchLimit(getBatchSize());
             int countLastQuery;
 
+            // this coming early means that if a client is trying to find this data
+            // then they will find it more quickly saving time for the client.
+
+            appendArchiveInfo(state, getLatestModifiedTimestamp(specification));
+
             do {
                 query.setFetchOffset(offset);
                 List<DataRow> queryResults = context.performQuery(query);
@@ -91,8 +96,6 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
                 }
 
             } while(countLastQuery > 0);
-
-            appendArchiveInfo(state);
         }
 
         LOGGER.info("did produce report for {} entries in {}ms", offset, stopwatch.elapsed(TimeUnit.MILLISECONDS));
@@ -104,6 +107,8 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
     abstract SQLTemplate createQuery(T specification);
 
     abstract String getPathComponentTop();
+
+    abstract Date getLatestModifiedTimestamp(T specification);
 
     private void appendFromRawRows(State state, List<DataRow> rows)
             throws IOException {
@@ -118,15 +123,17 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
      * <p>Adds a little informational file into the tar-ball.</p>
      */
 
-    private void appendArchiveInfo(State state) throws IOException {
+    private void appendArchiveInfo(
+            State state,
+            Date latestModifiedTimestamp) throws IOException {
         ArchiveInfo archiveInfo = new ArchiveInfo(
-                DateTimeHelper.secondAccuracyDatePlusOneSecond(state.latestModifiedTimestamp),
+                DateTimeHelper.secondAccuracyDatePlusOneSecond(latestModifiedTimestamp),
                 runtimeInformationService.getProjectVersion());
 
         byte[] payload = objectMapper.writeValueAsBytes(archiveInfo);
         TarArchiveEntry tarEntry = new TarArchiveEntry(getPathComponentTop() + "/info.json");
         tarEntry.setSize(payload.length);
-        tarEntry.setModTime(roundTimeToSecondPlusOne(state.latestModifiedTimestamp));
+        tarEntry.setModTime(roundTimeToSecondPlusOne(latestModifiedTimestamp));
         state.tarArchiveOutputStream.putArchiveEntry(tarEntry);
         state.tarArchiveOutputStream.write(payload);
         state.tarArchiveOutputStream.closeArchiveEntry();

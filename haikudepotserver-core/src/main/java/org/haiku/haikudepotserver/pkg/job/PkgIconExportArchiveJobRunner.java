@@ -13,6 +13,7 @@ import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
@@ -101,6 +102,12 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
     SQLTemplate createQuery(PkgIconExportArchiveJobSpecification specification) {
         return (SQLTemplate) serverRuntime.newContext().getEntityResolver()
                 .getQueryDescriptor("AllPkgIcons").buildQuery();
+    }
+
+    @Override
+    Date getLatestModifiedTimestamp(PkgIconExportArchiveJobSpecification specification) {
+        return PkgSupplement.getLatestIconModifyTimestamp(serverRuntime.newContext())
+                .orElse(new Date(0L));
     }
 
 }
