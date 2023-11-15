@@ -10,10 +10,18 @@
 # -------------------------------------
 # Assemble the build image with the dependencies
 
-FROM debian:12.1-slim as build
+FROM debian:12.2-slim as build
 
 RUN apt-get update && \
-    apt-get -y install openjdk-17-jdk && \
+    apt-get -y install wget apt-transport-https gnupg
+
+RUN wget -O - "https://packages.adoptium.net/artifactory/api/gpg/key/public" | apt-key add - && \
+    echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+
+# the handling here for `ca-certificates-java` is to get around a sequencing
+# problem that comes up with GitHub actions.
+RUN apt-get update && \
+    apt-get -y install temurin-21-jdk && \
     apt-get -y install wget python3 fontconfig fonts-dejavu-core lsb-release gnupg2 && \
     apt-get -y install postgresql postgresql-contrib
 
@@ -37,12 +45,7 @@ COPY ./haikudepotserver-core/pom.xml /hds-src/haikudepotserver-core/pom.xml
 
 WORKDIR /hds-src
 
-# capture the dependencies into the image
-#   [apl 2.apr.2023] temporary disabled owing to a missing `SNAPSHOT` dependency
-#   being used in the module.  See here;
-#   https://github.com/micrometer-metrics/micrometer/issues/3738
-#   Re-enable this line once the problem is resolved.
-# RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.3.0:go-offline
+RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.6.1:go-offline
 
 COPY ./haikudepotserver-spa1/package.json /hds-src/haikudepotserver-spa1/package.json
 
@@ -72,14 +75,19 @@ RUN ./mvnw clean install
 # -------------------------------------
 # Create the container that will eventually run HDS
 
-FROM debian:12.1-slim AS runtime
+FROM debian:12.2-slim AS runtime
+
+RUN apt-get update && \
+    apt-get -y install wget apt-transport-https gnupg
+
+RUN wget -O - "https://packages.adoptium.net/artifactory/api/gpg/key/public" | apt-key add - && \
+    echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
 
 # the handling here for `ca-certificates-java` is to get around a sequencing
 # problem that comes up with GitHub actions.
 RUN apt-get update && \
-    apt-get -y install openjdk-17-jre && \
-    apt-get -y install wget optipng libpng16-16 curl fontconfig fonts-dejavu-core
-
+    apt-get -y install temurin-21-jre && \
+    apt-get -y install optipng libpng16-16 curl fontconfig fonts-dejavu-core
 
 ENV HDS_B_HTTP_PORT=8080
 ENV HDS_B_HTTP_ACTUATOR_PORT=8081
