@@ -1,0 +1,5 @@
+Types: deb
+URIs: https://packages.adoptium.net/artifactory/deb
+Suites: SUITE
+Components: main
+Signed-By: /adoptium/apt-keyring.gpg

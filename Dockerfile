@@ -8,18 +8,25 @@
 # a deployable stage.
 
 # -------------------------------------
-# Assemble the build image with the dependencies
+# Base image with the Eclipse Temurin repository setup.
 
-FROM debian:12.2-slim as build
+FROM debian:12.2-slim as base
 
 RUN apt-get update && \
     apt-get -y install wget apt-transport-https gnupg
 
-RUN wget -O - "https://packages.adoptium.net/artifactory/api/gpg/key/public" | apt-key add - && \
-    echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+RUN mkdir /adoptium
 
-# the handling here for `ca-certificates-java` is to get around a sequencing
-# problem that comes up with GitHub actions.
+RUN wget -O - "https://packages.adoptium.net/artifactory/api/gpg/key/public" | gpg --dearmour | dd of=/adoptium/apt-keyring.gpg
+COPY support/deployment/deb-adoptium-sources-template.txt /adoptium/deb-adoptium-sources-template.txt
+RUN OS_VERSION_CODENAME="$(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release)" && \
+    cat /adoptium/deb-adoptium-sources-template.txt | sed -e "s/SUITE/${OS_VERSION_CODENAME}/g" | dd of=/etc/apt/sources.list.d/adoptium.sources
+
+# -------------------------------------
+# Assemble the build image with the dependencies
+
+FROM base as build
+
 RUN apt-get update && \
     apt-get -y install temurin-21-jdk && \
     apt-get -y install wget python3 fontconfig fonts-dejavu-core lsb-release gnupg2 && \
@@ -75,16 +82,8 @@ RUN ./mvnw clean install
 # -------------------------------------
 # Create the container that will eventually run HDS
 
-FROM debian:12.2-slim AS runtime
+FROM base AS runtime
 
-RUN apt-get update && \
-    apt-get -y install wget apt-transport-https gnupg
-
-RUN wget -O - "https://packages.adoptium.net/artifactory/api/gpg/key/public" | apt-key add - && \
-    echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
-
-# the handling here for `ca-certificates-java` is to get around a sequencing
-# problem that comes up with GitHub actions.
 RUN apt-get update && \
     apt-get -y install temurin-21-jre && \
     apt-get -y install optipng libpng16-16 curl fontconfig fonts-dejavu-core
