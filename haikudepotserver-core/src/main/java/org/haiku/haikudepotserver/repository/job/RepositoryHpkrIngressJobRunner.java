@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.repository.job;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.ObjectUtils;
@@ -25,6 +26,8 @@ import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressException;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.support.FileHelper;
+import org.haiku.haikudepotserver.support.db.DatabaseConstants;
+import org.haiku.haikudepotserver.support.db.LockingTransactionListener;
 import org.haiku.pkg.HpkrFileExtractor;
 import org.haiku.pkg.PkgIterator;
 import org.haiku.pkg.model.Pkg;
@@ -40,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,6 +65,8 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryHpkrIngressJobRunner.class);
 
     private final static long TIMEOUT_REPOSITORY_SOURCE_FETCH = TimeUnit.SECONDS.toMillis(30);
+
+    private final static Duration TIMEOUT_ACQUIRE_LOCK = Duration.ofSeconds(5);
 
     @Deprecated // replaced with "identifier"
     private final static String PARAMETER_NAME_URL = "url";
@@ -97,17 +103,23 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                 .stream()
                 .filter(rs -> null == allowedRepositorySourceCodes || allowedRepositorySourceCodes.contains(rs.getCode()))
                 .forEach(rs ->
-                        serverRuntime.performInTransaction(() -> {
-                            try {
-                                runForRepositorySource(mainContext, rs);
-                            } catch (Throwable e) {
-                                LOGGER.error(
-                                        "a problem has arisen processing a repository file for repository source [{}]",
-                                        rs.getCode(), e);
-                            }
+                        serverRuntime.performInTransaction(
+                                () -> {
+                                    try {
+                                        runForRepositorySource(mainContext, rs);
+                                    } catch (Throwable e) {
+                                        LOGGER.error(
+                                                "a problem has arisen processing a repository file for repository source [{}]",
+                                                rs.getCode(), e);
+                                    }
 
-                            return null;
-                        })
+                                    return null;
+                                },
+                                new LockingTransactionListener(
+                                        deriveLockId(rs),
+                                        TIMEOUT_ACQUIRE_LOCK
+                                )
+                        )
                 );
     }
 
@@ -314,6 +326,17 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             }
 
         }
+    }
+
+    /**
+     * <p>This produces a long that is stable for a given {@link RepositorySource#getCode()}. This is then
+     * used for a global lock in the system for ensuring that two ingresses cannot proceed for the same
+     * repository source at the same time.</p>
+     */
+    private long deriveLockId(RepositorySource repositorySource) {
+        return DatabaseConstants.LOCK_ID_BASE_REPOSITORY_HPKR_INGRESS
+                + Math.abs(Hashing.sha256().hashBytes(
+                        repositorySource.getCode().getBytes(Charsets.US_ASCII)).asLong()) % 1000;
     }
 
 }
