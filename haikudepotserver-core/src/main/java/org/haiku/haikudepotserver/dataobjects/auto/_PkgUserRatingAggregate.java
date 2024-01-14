@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.NumericProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -17,14 +19,14 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgUserRatingAggregate extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Float> DERIVED_RATING = Property.create("derivedRating", Float.class);
-    public static final Property<Integer> DERIVED_RATING_SAMPLE_SIZE = Property.create("derivedRatingSampleSize", Integer.class);
-    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
-    public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
+    public static final NumericProperty<Float> DERIVED_RATING = PropertyFactory.createNumeric("derivedRating", Float.class);
+    public static final NumericProperty<Integer> DERIVED_RATING_SAMPLE_SIZE = PropertyFactory.createNumeric("derivedRatingSampleSize", Integer.class);
+    public static final EntityProperty<Pkg> PKG = PropertyFactory.createEntity("pkg", Pkg.class);
+    public static final EntityProperty<Repository> REPOSITORY = PropertyFactory.createEntity("repository", Repository.class);
 
     protected Float derivedRating;
     protected Integer derivedRatingSampleSize;

@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -16,12 +18,12 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersionLicense extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> BODY = Property.create("body", String.class);
-    public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
+    public static final StringProperty<String> BODY = PropertyFactory.createString("body", String.class);
+    public static final EntityProperty<PkgVersion> PKG_VERSION = PropertyFactory.createEntity("pkgVersion", PkgVersion.class);
 
     protected String body;
 

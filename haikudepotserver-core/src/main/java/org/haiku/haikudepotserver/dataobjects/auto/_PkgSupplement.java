@@ -6,7 +6,10 @@ import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgChangelog;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
@@ -23,20 +26,20 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgSupplement extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> BASE_PKG_NAME = Property.create("basePkgName", String.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<Timestamp> ICON_MODIFY_TIMESTAMP = Property.create("iconModifyTimestamp", Timestamp.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<List<PkgChangelog>> PKG_CHANGELOGS = Property.create("pkgChangelogs", List.class);
-    public static final Property<List<PkgIcon>> PKG_ICONS = Property.create("pkgIcons", List.class);
-    public static final Property<List<PkgLocalization>> PKG_LOCALIZATIONS = Property.create("pkgLocalizations", List.class);
-    public static final Property<List<PkgPkgCategory>> PKG_PKG_CATEGORIES = Property.create("pkgPkgCategories", List.class);
-    public static final Property<List<PkgScreenshot>> PKG_SCREENSHOTS = Property.create("pkgScreenshots", List.class);
-    public static final Property<List<Pkg>> PKGS = Property.create("pkgs", List.class);
+    public static final StringProperty<String> BASE_PKG_NAME = PropertyFactory.createString("basePkgName", String.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> ICON_MODIFY_TIMESTAMP = PropertyFactory.createDate("iconModifyTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final ListProperty<PkgChangelog> PKG_CHANGELOGS = PropertyFactory.createList("pkgChangelogs", PkgChangelog.class);
+    public static final ListProperty<PkgIcon> PKG_ICONS = PropertyFactory.createList("pkgIcons", PkgIcon.class);
+    public static final ListProperty<PkgLocalization> PKG_LOCALIZATIONS = PropertyFactory.createList("pkgLocalizations", PkgLocalization.class);
+    public static final ListProperty<PkgPkgCategory> PKG_PKG_CATEGORIES = PropertyFactory.createList("pkgPkgCategories", PkgPkgCategory.class);
+    public static final ListProperty<PkgScreenshot> PKG_SCREENSHOTS = PropertyFactory.createList("pkgScreenshots", PkgScreenshot.class);
+    public static final ListProperty<Pkg> PKGS = PropertyFactory.createList("pkgs", Pkg.class);
 
     protected String basePkgName;
     protected Timestamp createTimestamp;

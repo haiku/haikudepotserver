@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,7 +8,10 @@ package org.haiku.haikudepotserver.api2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
@@ -44,25 +47,18 @@ import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationRequestEnvelop
 import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionFilter;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgCategory;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.dataobjects.PkgPkgCategory;
-import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import jakarta.annotation.Resource;
+
+import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +76,7 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
         IntegrationTestSupportService.StandardTestData data = integrationTestSupportService.createStandardTestData();
 
-        // setup some categories as a start condition.
+        // setup some categories as a start condition noting that `pkg1` comes with the category "graphics" by default.
 
         {
             ObjectContext context = serverRuntime.newContext();
@@ -105,6 +101,9 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
                 .pkgName("pkg1")
                 .pkgCategoryCodes(List.of("business", "development"));
 
+        // not ideal, but ensure total ordering on the pkg supplement modifications results
+        Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100));
+
         // ------------------------------------
         pkgApiService.updatePkgCategories(request);
         // ------------------------------------
@@ -114,14 +113,25 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
 
         {
             ObjectContext context = serverRuntime.newContext();
-            PkgSupplement pkgSupplementAfter = Pkg.getByName(context, data.pkg1.getName()).getPkgSupplement();
+            Pkg pkg = Pkg.getByName(context, data.pkg1.getName());
 
             Assertions.assertThat(ImmutableSet.of("business", "development")).isEqualTo(
-                    pkgSupplementAfter.getPkgPkgCategories()
+                    pkg.getPkgSupplement().getPkgPkgCategories()
                             .stream()
                             .map(ppc -> ppc.getPkgCategory().getCode())
                             .collect(Collectors.toSet())
             );
+
+            List<PkgSupplementModification> modifications = PkgSupplementModification.findForPkg(context, pkg);
+            Assertions.assertThat(modifications.size()).isGreaterThanOrEqualTo(1);
+
+            PkgSupplementModification lastModification = modifications.getLast();
+            Assertions.assertThat(lastModification.getUser().getNickname()).isEqualTo("root");
+            Assertions.assertThat(lastModification.getContent()).isEqualTo("""
+                    categories changed for pkg [pkg1]
+                    removed: games,graphics
+                    added: development""");
+
         }
 
     }
@@ -350,9 +360,9 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
         setAuthenticatedUserToRoot();
         integrationTestSupportService.createStandardTestData();
 
-        byte[] sample16 = getResourceData("sample-16x16.png");
-        byte[] sample32 = getResourceData("sample-32x32.png");
-        byte[] sample64 = getResourceData("sample-64x64.png");
+        byte[] sample16 = getResourceData("sample-16x16-b.png");
+        byte[] sample32 = getResourceData("sample-32x32-b.png");
+        byte[] sample64 = getResourceData("sample-64x64-b.png");
 
         ConfigurePkgIconRequestEnvelope request = new ConfigurePkgIconRequestEnvelope()
                 .pkgName("pkg1")
@@ -376,13 +386,13 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext objectContext = serverRuntime.newContext();
-            Pkg pkgAfter = Pkg.getByName(objectContext, "pkg1");
+            ObjectContext context = serverRuntime.newContext();
+            Pkg pkgAfter = Pkg.getByName(context, "pkg1");
             PkgSupplement pkgSupplementAfter = pkgAfter.getPkgSupplement();
 
             org.haiku.haikudepotserver.dataobjects.MediaType mediaTypePng
                     = org.haiku.haikudepotserver.dataobjects.MediaType.getByCode(
-                    objectContext,
+                    context,
                     MediaType.PNG.toString());
 
             Assertions.assertThat(pkgSupplementAfter.getPkgIcons().size()).isEqualTo(3);
@@ -395,6 +405,29 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
 
             PkgIcon pkgIcon64 = pkgSupplementAfter.getPkgIcon(mediaTypePng, 64);
             Assertions.assertThat(pkgIcon64.getPkgIconImage().getData()).isEqualTo(sample64);
+
+            List<PkgSupplementModification> pkgSupplementModifications = ObjectSelect.query(PkgSupplementModification.class)
+                    .where(PkgSupplementModification.PKG_SUPPLEMENT.eq(pkgAfter.getPkgSupplement()))
+                    .orderBy(PkgSupplementModification.CREATE_TIMESTAMP.getName(), SortOrder.ASCENDING)
+                    .select(context);
+            Assertions.assertThat(pkgSupplementModifications.size()).isGreaterThanOrEqualTo(3);
+
+            List<PkgSupplementModification> pkgSupplementModificationsIcons = pkgSupplementModifications.subList(
+                    pkgSupplementModifications.size() - 3, pkgSupplementModifications.size());
+
+            for (PkgSupplementModification pkgSupplementModificationsIcon : pkgSupplementModificationsIcons) {
+                Assertions.assertThat(pkgSupplementModificationsIcon.getUserDescription()).isEqualTo("root");
+                Assertions.assertThat(pkgSupplementModificationsIcon.getUser().getNickname()).isEqualTo("root");
+                Assertions.assertThat(pkgSupplementModificationsIcon.getOriginSystemDescription()).isEqualTo("hds");
+            }
+
+            List<String> modificationsContentsIcon = pkgSupplementModificationsIcons.stream().map(PkgSupplementModification::getContent).toList();
+
+            Assertions.assertThat(modificationsContentsIcon).contains(
+                    "add icon for pkg [pkg1]; size [16]; media type [image/png]; sha256 [1efe577af19a58bf77e08e0014152c3ea84c56e3a6457b35799fa23fe0df92f4]",
+                    "add icon for pkg [pkg1]; size [32]; media type [image/png]; sha256 [3119b1789f6a76b518246a6cdb56d25b3b32fa7d7fb3e21adad675ebb924af35]",
+                    "add icon for pkg [pkg1]; size [64]; media type [image/png]; sha256 [deb2d2191c4412debbc26d8c8411b880fda35355bddfd90a4d2d29ef7c8a0563]"
+            );
         }
     }
 
@@ -465,9 +498,21 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         {
-            ObjectContext objectContext = serverRuntime.newContext();
-            PkgSupplement pkgSupplementAfter = Pkg.getByName(objectContext, "pkg1").getPkgSupplement();
+            ObjectContext context = serverRuntime.newContext();
+            PkgSupplement pkgSupplementAfter = Pkg.getByName(context, "pkg1").getPkgSupplement();
             Assertions.assertThat(pkgSupplementAfter.getPkgIcons().size()).isEqualTo(0);
+
+            List<PkgSupplementModification> pkgSupplementModifications = ObjectSelect.query(PkgSupplementModification.class)
+                    .where(PkgSupplementModification.PKG_SUPPLEMENT.eq(pkgSupplementAfter))
+                    .orderBy(PkgSupplementModification.CREATE_TIMESTAMP.getName(), SortOrder.ASCENDING)
+                    .select(context);
+            Assertions.assertThat(pkgSupplementModifications.size()).isGreaterThanOrEqualTo(1);
+
+            PkgSupplementModification pkgSupplementModificationLast = pkgSupplementModifications.getLast();
+            Assertions.assertThat(pkgSupplementModificationLast.getUserDescription()).isEqualTo("root");
+            Assertions.assertThat(pkgSupplementModificationLast.getUser().getNickname()).isEqualTo("root");
+            Assertions.assertThat(pkgSupplementModificationLast.getOriginSystemDescription()).isEqualTo("hds");
+            Assertions.assertThat(pkgSupplementModificationLast.getContent()).isEqualTo("remove icon for pkg [pkg1]");
         }
     }
 
@@ -550,6 +595,7 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
         }
 
         final String code1 = sortedScreenshotsBefore.get(1).getCode();
+        final String hash1 = sortedScreenshotsBefore.get(1).getHashSha256();
 
         RemovePkgScreenshotRequestEnvelope request = new RemovePkgScreenshotRequestEnvelope()
                 .code(code1);
@@ -559,12 +605,23 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         ObjectContext context = serverRuntime.newContext();
-        PkgSupplement pkgSupplementAfter = Pkg.getByName(context, data.pkg1.getName()).getPkgSupplement();
+        Pkg pkg = Pkg.getByName(context, data.pkg1.getName());
+        PkgSupplement pkgSupplementAfter = pkg.getPkgSupplement();
         List<org.haiku.haikudepotserver.dataobjects.PkgScreenshot> sortedScreenshotsAfter
                 = pkgSupplementAfter.getSortedPkgScreenshots();
 
         Assertions.assertThat(sortedScreenshotsAfter.size()).isEqualTo(sortedScreenshotsBefore.size()-1);
         Assertions.assertThat(sortedScreenshotsAfter.stream().anyMatch(s -> s.getCode().equals(code1))).isFalse();
+
+        List<PkgSupplementModification> modifications = PkgSupplementModification.findForPkg(context, pkg);
+        Assertions.assertThat(modifications.size()).isGreaterThanOrEqualTo(1);
+
+        PkgSupplementModification modification = modifications.getLast();
+        Assertions.assertThat(modification.getUser().getNickname()).isEqualTo("root");
+        Assertions.assertThat(modification.getUserDescription()).isEqualTo("root");
+        Assertions.assertThat(modification.getOriginSystemDescription()).isEqualTo("hds");
+        Assertions.assertThat(modification.getContent()).isEqualTo(
+                String.format("did delete screenshot [%s]; sha256 [%s]", code1, hash1));
     }
 
     /**
@@ -640,6 +697,37 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
                         org.haiku.haikudepotserver.dataobjects.PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg1, rule[0]).getTitle()
                 ).isEqualTo(rule[1]);
             }
+        }
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            PkgSupplement pkg1Supplement = Pkg.getByName(context, "pkg1").getPkgSupplement();
+
+            List<PkgSupplementModification> pkgSupplementModifications = ObjectSelect.query(PkgSupplementModification.class)
+                    .where(PkgSupplementModification.PKG_SUPPLEMENT.eq(pkg1Supplement))
+                    .orderBy(PkgSupplementModification.CREATE_TIMESTAMP.getName(), SortOrder.ASCENDING)
+                    .select(context);
+
+            List<PkgSupplementModification> relevantPkgSupplementModifications = pkgSupplementModifications.subList(
+                    pkgSupplementModifications.size() - 2, pkgSupplementModifications.size());
+
+            for (PkgSupplementModification pkgSupplementModification : relevantPkgSupplementModifications) {
+                Assertions.assertThat(pkgSupplementModification.getUserDescription()).isEqualTo("root");
+                Assertions.assertThat(pkgSupplementModification.getUser().getNickname()).isEqualTo("root");
+                Assertions.assertThat(pkgSupplementModification.getOriginSystemDescription()).isEqualTo("hds");
+            }
+
+            List<String> relevantPkgSupplementModificationContents = relevantPkgSupplementModifications.stream()
+                    .map(PkgSupplementModification::getContent)
+                    .toList();
+            Assertions.assertThat(relevantPkgSupplementModificationContents).contains(
+                    """
+changing localization for pkg [pkg1] in natural language [en];
+title: [flourescence]""",
+                    """
+changing localization for pkg [pkg1] in natural language [fr];
+title: [treacle]"""
+            );
         }
 
     }
@@ -750,14 +838,31 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
                 .pkgName("pkg1")
                 .content("  das Zimmer  ");
 
+        // not ideal, but ensure total ordering on the pkg supplement modifications results
+        Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100L));
+
         // ------------------------------------
         pkgApiService.updatePkgChangelog(request);
         // ------------------------------------
 
         {
             ObjectContext context = serverRuntime.newContext();
-            PkgSupplement pkgSupplementAfter = Pkg.getByName(context, "pkg1").getPkgSupplement();
-            Assertions.assertThat(pkgSupplementAfter.getPkgChangelog().get().getContent()).isEqualTo("das Zimmer");
+            Pkg pkgAfter = Pkg.getByName(context, "pkg1");
+            Assertions.assertThat(pkgAfter.getPkgSupplement().getPkgChangelog().get().getContent()).isEqualTo("das Zimmer");
+
+            List<PkgSupplementModification> pkgSupplementModifications = PkgSupplementModification.findForPkg(context, pkgAfter);
+            Assertions.assertThat(pkgSupplementModifications.size()).isGreaterThanOrEqualTo(1);
+
+            PkgSupplementModification pkgSupplementModification = pkgSupplementModifications.getLast();
+
+            Assertions.assertThat(pkgSupplementModification.getUserDescription()).isEqualTo("root");
+            Assertions.assertThat(pkgSupplementModification.getUser().getNickname()).isEqualTo("root");
+            Assertions.assertThat(pkgSupplementModification.getOriginSystemDescription()).isEqualTo("hds");
+            Assertions.assertThat(pkgSupplementModification.getContent()).isEqualTo(
+                    """
+updated the changelog for [pkg1];
+das Zimmer"""
+            );
         }
 
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019, Andrew Lindesay
+ * Copyright 2016-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,7 +27,10 @@ public interface PkgIconService {
      * <p>Removes all icons that are stored on this package.</p>
      */
 
-    void removePkgIcon(ObjectContext context, PkgSupplement pkgSupplement);
+    void removePkgIcon(
+            ObjectContext context,
+            PkgSupplementModificationAgent agent,
+            PkgSupplement pkgSupplement);
 
     /**
      * <p>This method will write the icon data supplied in the input to the package as its icon.  Note that the icon
@@ -43,6 +46,7 @@ public interface PkgIconService {
             MediaType mediaType,
             Integer expectedSize,
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement) throws IOException, BadPkgIconException;
 
     /**

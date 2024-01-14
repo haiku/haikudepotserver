@@ -6,7 +6,12 @@ import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
@@ -21,24 +26,24 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _User extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<Boolean> CAN_MANAGE_USERS = Property.create("canManageUsers", Boolean.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<String> EMAIL = Property.create("email", String.class);
-    public static final Property<Boolean> IS_ROOT = Property.create("isRoot", Boolean.class);
-    public static final Property<Timestamp> LAST_AUTHENTICATION_TIMESTAMP = Property.create("lastAuthenticationTimestamp", Timestamp.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<String> NICKNAME = Property.create("nickname", String.class);
-    public static final Property<String> PASSWORD_HASH = Property.create("passwordHash", String.class);
-    public static final Property<String> PASSWORD_SALT = Property.create("passwordSalt", String.class);
-    public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
-    public static final Property<List<PermissionUserPkg>> PERMISSION_USER_PKGS = Property.create("permissionUserPkgs", List.class);
-    public static final Property<List<UserPasswordResetToken>> USER_PASSWORD_RESET_TOKENS = Property.create("userPasswordResetTokens", List.class);
-    public static final Property<List<UserUsageConditionsAgreement>> USER_USAGE_CONDITIONS_AGREEMENTS = Property.create("userUsageConditionsAgreements", List.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final BaseProperty<Boolean> CAN_MANAGE_USERS = PropertyFactory.createBase("canManageUsers", Boolean.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final StringProperty<String> EMAIL = PropertyFactory.createString("email", String.class);
+    public static final BaseProperty<Boolean> IS_ROOT = PropertyFactory.createBase("isRoot", Boolean.class);
+    public static final DateProperty<Timestamp> LAST_AUTHENTICATION_TIMESTAMP = PropertyFactory.createDate("lastAuthenticationTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final StringProperty<String> NICKNAME = PropertyFactory.createString("nickname", String.class);
+    public static final StringProperty<String> PASSWORD_HASH = PropertyFactory.createString("passwordHash", String.class);
+    public static final StringProperty<String> PASSWORD_SALT = PropertyFactory.createString("passwordSalt", String.class);
+    public static final EntityProperty<NaturalLanguage> NATURAL_LANGUAGE = PropertyFactory.createEntity("naturalLanguage", NaturalLanguage.class);
+    public static final ListProperty<PermissionUserPkg> PERMISSION_USER_PKGS = PropertyFactory.createList("permissionUserPkgs", PermissionUserPkg.class);
+    public static final ListProperty<UserPasswordResetToken> USER_PASSWORD_RESET_TOKENS = PropertyFactory.createList("userPasswordResetTokens", UserPasswordResetToken.class);
+    public static final ListProperty<UserUsageConditionsAgreement> USER_USAGE_CONDITIONS_AGREEMENTS = PropertyFactory.createList("userUsageConditionsAgreements", UserUsageConditionsAgreement.class);
 
     protected Boolean active;
     protected Boolean canManageUsers;

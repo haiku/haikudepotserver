@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,10 +9,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.model.PkgIconService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +60,12 @@ public class IntegrationTestSupportService {
 
     private PkgScreenshot addPkgScreenshot(ObjectContext objectContext, Pkg pkg, String sourceLeafname) {
         try (InputStream inputStream = IntegrationTestSupportService.class.getResourceAsStream(sourceLeafname)) {
-            return pkgScreenshotService.storePkgScreenshotImage(inputStream, objectContext, pkg.getPkgSupplement(), null);
+            return pkgScreenshotService.storePkgScreenshotImage(
+                    inputStream,
+                    objectContext,
+                    new NonUserPkgSupplementModificationAgent(null, "test"),
+                    pkg.getPkgSupplement(),
+                    null);
         }
         catch(Exception e) {
             throw new IllegalStateException("an issue has arisen loading a sample screenshot into a test package",e);
@@ -78,6 +80,7 @@ public class IntegrationTestSupportService {
                     MediaType.getByCode(objectContext, com.google.common.net.MediaType.PNG.toString()),
                     size,
                     objectContext,
+                    new UserPkgSupplementModificationAgent(null), // no need to record a user here
                     pkg.getPkgSupplement());
         }
         catch(Exception e) {
@@ -94,6 +97,7 @@ public class IntegrationTestSupportService {
                     MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE),
                     null,
                     objectContext,
+                    null, // no need to record a change record here.
                     pkg.getPkgSupplement());
         }
         catch(Exception e) {
@@ -189,7 +193,11 @@ public class IntegrationTestSupportService {
         result.pkg1 = createPkg(context, "pkg1");
 
         pkgService.ensurePkgProminence(context, result.pkg1, result.repository, prominence.getOrdering());
-        pkgService.updatePkgChangelog(context, result.pkg1.getPkgSupplement(), "Stadt\r\nKarlsruhe\r\n");
+        pkgService.updatePkgChangelog(
+                context,
+                new NonUserPkgSupplementModificationAgent("cecil", "test"),
+                result.pkg1.getPkgSupplement(),
+                "Stadt\r\nKarlsruhe\r\n");
 
         ensureUserRatingAggregate(context, result.pkg1, result.repository, 3.5f, 4);
 

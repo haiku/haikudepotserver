@@ -6,7 +6,11 @@ import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -18,20 +22,20 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _Repository extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<String> DESCRIPTION = Property.create("description", String.class);
-    public static final Property<String> INFORMATION_URL = Property.create("informationUrl", String.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<String> NAME = Property.create("name", String.class);
-    public static final Property<String> PASSWORD_HASH = Property.create("passwordHash", String.class);
-    public static final Property<String> PASSWORD_SALT = Property.create("passwordSalt", String.class);
-    public static final Property<List<RepositorySource>> REPOSITORY_SOURCES = Property.create("repositorySources", List.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final StringProperty<String> DESCRIPTION = PropertyFactory.createString("description", String.class);
+    public static final StringProperty<String> INFORMATION_URL = PropertyFactory.createString("informationUrl", String.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final StringProperty<String> NAME = PropertyFactory.createString("name", String.class);
+    public static final StringProperty<String> PASSWORD_HASH = PropertyFactory.createString("passwordHash", String.class);
+    public static final StringProperty<String> PASSWORD_SALT = PropertyFactory.createString("passwordSalt", String.class);
+    public static final ListProperty<RepositorySource> REPOSITORY_SOURCES = PropertyFactory.createList("repositorySources", RepositorySource.class);
 
     protected Boolean active;
     protected String code;

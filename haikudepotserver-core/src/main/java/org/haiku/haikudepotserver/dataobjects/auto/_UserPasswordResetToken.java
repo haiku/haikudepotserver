@@ -5,7 +5,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -17,13 +20,13 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _UserPasswordResetToken extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<User> USER = Property.create("user", User.class);
+    public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final EntityProperty<User> USER = PropertyFactory.createEntity("user", User.class);
 
     protected String code;
     protected Timestamp createTimestamp;

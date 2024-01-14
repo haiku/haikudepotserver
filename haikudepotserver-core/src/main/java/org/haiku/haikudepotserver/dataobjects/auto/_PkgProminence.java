@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Prominence;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -18,13 +19,13 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgProminence extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
-    public static final Property<Prominence> PROMINENCE = Property.create("prominence", Prominence.class);
-    public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
+    public static final EntityProperty<Pkg> PKG = PropertyFactory.createEntity("pkg", Pkg.class);
+    public static final EntityProperty<Prominence> PROMINENCE = PropertyFactory.createEntity("prominence", Prominence.class);
+    public static final EntityProperty<Repository> REPOSITORY = PropertyFactory.createEntity("repository", Repository.class);
 
 
     protected Object pkg;

@@ -5,7 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
 import org.haiku.haikudepotserver.dataobjects.LocalizationContent;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -19,17 +21,17 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersionLocalization extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<LocalizationContent> DESCRIPTION_LOCALIZATION_CONTENT = Property.create("descriptionLocalizationContent", LocalizationContent.class);
-    public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
-    public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
-    public static final Property<LocalizationContent> SUMMARY_LOCALIZATION_CONTENT = Property.create("summaryLocalizationContent", LocalizationContent.class);
-    public static final Property<LocalizationContent> TITLE_LOCALIZATION_CONTENT = Property.create("titleLocalizationContent", LocalizationContent.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final EntityProperty<LocalizationContent> DESCRIPTION_LOCALIZATION_CONTENT = PropertyFactory.createEntity("descriptionLocalizationContent", LocalizationContent.class);
+    public static final EntityProperty<NaturalLanguage> NATURAL_LANGUAGE = PropertyFactory.createEntity("naturalLanguage", NaturalLanguage.class);
+    public static final EntityProperty<PkgVersion> PKG_VERSION = PropertyFactory.createEntity("pkgVersion", PkgVersion.class);
+    public static final EntityProperty<LocalizationContent> SUMMARY_LOCALIZATION_CONTENT = PropertyFactory.createEntity("summaryLocalizationContent", LocalizationContent.class);
+    public static final EntityProperty<LocalizationContent> TITLE_LOCALIZATION_CONTENT = PropertyFactory.createEntity("titleLocalizationContent", LocalizationContent.class);
 
     protected Timestamp createTimestamp;
     protected Timestamp modifyTimestamp;

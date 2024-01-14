@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,7 +43,13 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
 
         integrationTestSupportService.createStandardTestData();
 
+        {
+            ObjectContext context = serverRuntime.newContext();
+            integrationTestSupportService.createBasicUser(context, "samuel", "1c6002fb-bd4e-441f-bac7-7a4cc6b1e232");
+        }
+
         PkgCategoryCoverageImportSpreadsheetJobSpecification spec = new PkgCategoryCoverageImportSpreadsheetJobSpecification();
+        spec.setOwnerUserNickname("samuel");
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "input",
                 MediaType.CSV_UTF_8.toString(),

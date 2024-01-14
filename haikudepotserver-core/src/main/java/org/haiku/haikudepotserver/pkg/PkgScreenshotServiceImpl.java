@@ -20,6 +20,8 @@ import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
+import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
+import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
 import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +46,13 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
     private final ImageHelper imageHelper;
     private final PngOptimizationService pngOptimizationService;
 
-    public PkgScreenshotServiceImpl(PngOptimizationService pngOptimizationService) {
+    private final PkgSupplementModificationService pkgSupplementModificationService;
+
+    public PkgScreenshotServiceImpl(
+            PngOptimizationService pngOptimizationService,
+            PkgSupplementModificationService pkgSupplementModificationService) {
         this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
+        this.pkgSupplementModificationService = Preconditions.checkNotNull(pkgSupplementModificationService);
         imageHelper = new ImageHelper();
     }
 
@@ -62,7 +69,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
     public boolean optimizeScreenshot(ObjectContext context, PkgScreenshot screenshot)
             throws IOException {
         if (!pngOptimizationService.identityOptimization()) {
-            PkgScreenshotImage pkgScreenshotImage = screenshot.tryGetPkgScreenshotImage().get();
+            PkgScreenshotImage pkgScreenshotImage = screenshot.getPkgScreenshotImage();
 
             if (pkgScreenshotImage.getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.withoutParameters().toString())) {
 
@@ -149,12 +156,14 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
     public PkgScreenshot storePkgScreenshotImage(
             InputStream input,
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
             Integer ordering) throws IOException, BadPkgScreenshotException {
 
         Preconditions.checkArgument(null != input, "the input must be provided");
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement must be provided");
+        Preconditions.checkArgument(null != agent, "the agent must be supplied");
 
         byte[] pngData = ByteStreams.toByteArray(new BoundedInputStream(input, SCREENSHOT_SIZE_LIMIT));
         ImageHelper.Size size = imageHelper.derivePngSize(pngData);
@@ -169,7 +178,7 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         // reasonable.
 
         if (size.height > SCREENSHOT_SIDE_LIMIT || size.width > SCREENSHOT_SIDE_LIMIT) {
-            LOGGER.warn("attempt to store a screenshot image that is too large; " + size.toString());
+            LOGGER.warn("attempt to store a screenshot image that is too large; {}", size);
             throw new BadPkgScreenshotException();
         }
 
@@ -205,6 +214,12 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
         pkgSupplement.setModifyTimestamp();
 
+        pkgSupplementModificationService.appendModification(
+                context,
+                pkgSupplement,
+                agent,
+                String.format("added screenshot [%s]; sh256 [%s]; height %d; width %d", screenshot.getCode(), hashSha256, size.height, size.width));
+
         LOGGER.info("a screenshot #{} has been added to package [{}] ({})",
                 actualOrdering, pkgSupplement.getBasePkgName(), screenshot.getCode());
 
@@ -214,7 +229,16 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
     @Override
     public void deleteScreenshot(
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgScreenshot screenshot) {
+        Preconditions.checkArgument(null != agent, "the agent must be supplied");
+
+        pkgSupplementModificationService.appendModification(
+                context,
+                screenshot.getPkgSupplement(),
+                agent,
+                String.format("did delete screenshot [%s]; sha256 [%s]", screenshot.getCode(), screenshot.getHashSha256()));
+
         screenshot.setPkgSupplement(null);
         Optional<PkgScreenshotImage> image = screenshot.tryGetPkgScreenshotImage();
         image.ifPresent(context::deleteObjects);

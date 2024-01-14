@@ -214,6 +214,21 @@
 			<db-key-cache-size>10</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="pkg_supplement_modification" schema="haikudepot">
+		<db-attribute name="content" type="VARCHAR" isMandatory="true" length="65535"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="origin_system_description" type="VARCHAR" length="1024"/>
+		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="user_description" type="VARCHAR" length="1024"/>
+		<db-attribute name="user_id" type="BIGINT"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.pkg_supplement_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="pkg_url_type" schema="haikudepot">
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
@@ -552,6 +567,13 @@
 		<obj-attribute name="iconModifyTimestamp" type="java.sql.Timestamp" db-attribute-path="icon_modify_timestamp"/>
 		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 	</obj-entity>
+	<obj-entity name="PkgSupplementModification" className="org.haiku.haikudepotserver.dataobjects.PkgSupplementModification" dbEntityName="pkg_supplement_modification" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="content" type="java.lang.String" db-attribute-path="content"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="originSystemDescription" type="java.lang.String" lock="true" db-attribute-path="origin_system_description"/>
+		<obj-attribute name="userDescription" type="java.lang.String" lock="true" db-attribute-path="user_description"/>
+	</obj-entity>
 	<obj-entity name="PkgUrlType" className="org.haiku.haikudepotserver.dataobjects.PkgUrlType" readOnly="true" dbEntityName="pkg_url_type" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
@@ -791,6 +813,15 @@
 	<db-relationship name="pkgs" source="pkg_supplement" target="pkg" toMany="true">
 		<db-attribute-pair source="id" target="pkg_supplement_id"/>
 	</db-relationship>
+	<db-relationship name="untitledRel" source="pkg_supplement" target="pkg_supplement_modification" toMany="true">
+		<db-attribute-pair source="id" target="pkg_supplement_id"/>
+	</db-relationship>
+	<db-relationship name="pkg_supplement" source="pkg_supplement_modification" target="pkg_supplement">
+		<db-attribute-pair source="pkg_supplement_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="user" source="pkg_supplement_modification" target="user">
+		<db-attribute-pair source="user_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="pkg" source="pkg_user_rating_aggregate" target="pkg">
 		<db-attribute-pair source="pkg_id" target="id"/>
 	</db-relationship>
@@ -893,6 +924,9 @@
 	<db-relationship name="permission_user_pkgs" source="user" target="permission_user_pkg" toMany="true">
 		<db-attribute-pair source="id" target="user_id"/>
 	</db-relationship>
+	<db-relationship name="untitledRel" source="user" target="pkg_supplement_modification" toMany="true">
+		<db-attribute-pair source="id" target="user_id"/>
+	</db-relationship>
 	<db-relationship name="user_password_reset_tokens" source="user" target="user_password_reset_token" toMany="true">
 		<db-attribute-pair source="id" target="user_id"/>
 	</db-relationship>
@@ -959,6 +993,8 @@
 	<obj-relationship name="pkgPkgCategories" source="PkgSupplement" target="PkgPkgCategory" deleteRule="Deny" db-relationship-path="pkg_pkg_categories"/>
 	<obj-relationship name="pkgScreenshots" source="PkgSupplement" target="PkgScreenshot" deleteRule="Deny" db-relationship-path="pkg_screenshots"/>
 	<obj-relationship name="pkgs" source="PkgSupplement" target="Pkg" deleteRule="Deny" db-relationship-path="pkgs"/>
+	<obj-relationship name="pkgSupplement" source="PkgSupplementModification" target="PkgSupplement" lock="true" deleteRule="Nullify" db-relationship-path="pkg_supplement"/>
+	<obj-relationship name="user" source="PkgSupplementModification" target="User" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="pkg" source="PkgUserRatingAggregate" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="repository" source="PkgUserRatingAggregate" target="Repository" deleteRule="Nullify" db-relationship-path="repository"/>
 	<obj-relationship name="architecture" source="PkgVersion" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>

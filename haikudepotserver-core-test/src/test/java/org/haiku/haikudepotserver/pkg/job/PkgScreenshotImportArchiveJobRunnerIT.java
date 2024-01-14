@@ -16,6 +16,7 @@ import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -77,9 +78,15 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
 
         integrationTestSupportService.createStandardTestData();
 
+        {
+            ObjectContext context = serverRuntime.newContext();
+            integrationTestSupportService.createBasicUser(context, "hazel", "0ee3bac6-6477-4b59-b854-0e8e1e6a6e28");
+        }
+
         // now load in the data to the job's storage system.
 
         PkgScreenshotImportArchiveJobSpecification spec = new PkgScreenshotImportArchiveJobSpecification();
+        spec.setOwnerUserNickname("hazel");
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "sample-pkgscreenshotimportarchive-supplied.tgz",
                 MediaType.TAR.toString(),
@@ -149,9 +156,15 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
 
         integrationTestSupportService.createStandardTestData();
 
+        {
+            ObjectContext context = serverRuntime.newContext();
+            integrationTestSupportService.createBasicUser(context, "samuel", "0ee3bac6-6477-4b59-b854-0e8e1e6a6e28");
+        }
+
         // now load in the data to the job's storage system.
 
         PkgScreenshotImportArchiveJobSpecification spec = new PkgScreenshotImportArchiveJobSpecification();
+        spec.setOwnerUserNickname("samuel");
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "sample-pkgscreenshotimportarchive-supplied.tgz",
                 MediaType.TAR.toString(),
@@ -203,7 +216,18 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
                     "\"hscr/pkg1/23.png\",\"pkg1\",\"PRESENT\",\"\",\"");
             Assertions.assertThat(outputLines.get(5)).isEqualTo(
                     "\"hscr/notexists/3.png\",\"notexists\",\"NOTFOUND\",\"\",\"\"");
+        }
 
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Pkg pkg = Pkg.getByName(context, "pkg1");
+            List<PkgSupplementModification> modifications = PkgSupplementModification.findForPkg(context, pkg);
+            Assertions.assertThat(modifications.size()).isGreaterThanOrEqualTo(1);
+
+            PkgSupplementModification modification = modifications.getLast();
+            Assertions.assertThat(modification.getUser().getNickname()).isEqualTo("samuel");
+            Assertions.assertThat(modification.getOriginSystemDescription()).isEqualTo("hds");
+            Assertions.assertThat(modification.getContent()).startsWith("added screenshot [");
         }
 
     }

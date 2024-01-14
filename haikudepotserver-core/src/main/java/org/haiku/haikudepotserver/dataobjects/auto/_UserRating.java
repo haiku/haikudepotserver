@@ -5,7 +5,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.NumericProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -20,20 +25,20 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _UserRating extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<String> COMMENT = Property.create("comment", String.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<Short> RATING = Property.create("rating", Short.class);
-    public static final Property<NaturalLanguage> NATURAL_LANGUAGE = Property.create("naturalLanguage", NaturalLanguage.class);
-    public static final Property<PkgVersion> PKG_VERSION = Property.create("pkgVersion", PkgVersion.class);
-    public static final Property<User> USER = Property.create("user", User.class);
-    public static final Property<UserRatingStability> USER_RATING_STABILITY = Property.create("userRatingStability", UserRatingStability.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final StringProperty<String> COMMENT = PropertyFactory.createString("comment", String.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final NumericProperty<Short> RATING = PropertyFactory.createNumeric("rating", Short.class);
+    public static final EntityProperty<NaturalLanguage> NATURAL_LANGUAGE = PropertyFactory.createEntity("naturalLanguage", NaturalLanguage.class);
+    public static final EntityProperty<PkgVersion> PKG_VERSION = PropertyFactory.createEntity("pkgVersion", PkgVersion.class);
+    public static final EntityProperty<User> USER = PropertyFactory.createEntity("user", User.class);
+    public static final EntityProperty<UserRatingStability> USER_RATING_STABILITY = PropertyFactory.createEntity("userRatingStability", UserRatingStability.class);
 
     protected Boolean active;
     protected String code;

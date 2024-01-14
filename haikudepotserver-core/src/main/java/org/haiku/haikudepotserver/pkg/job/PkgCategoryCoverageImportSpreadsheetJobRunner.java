@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
+import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
@@ -21,6 +22,7 @@ import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.pkg.model.UserPkgSupplementModificationAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -60,6 +62,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
         Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null != specification);
         Preconditions.checkArgument(null != specification.getInputDataGuid(), "missing imput data guid on specification");
+        Preconditions.checkArgument(null != specification.getOwnerUserNickname(), "the owner user must be identified");
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
@@ -114,6 +117,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                         if (0 != row.length) {
 
                             ObjectContext rowContext = serverRuntime.newContext();
+                            User user = User.getByNickname(rowContext, specification.getOwnerUserNickname());
 
                             Action action = Action.NOACTION;
 
@@ -151,6 +155,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
 
                                         if (pkgService.updatePkgCategories(
                                                 rowContext,
+                                                new UserPkgSupplementModificationAgent(user),
                                                 pkgOptional.get(),
                                                 selectedPkgCategories)) {
                                             action = Action.UPDATED;
@@ -176,7 +181,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                                 rowOutput.add("");
                             }
 
-                            rowOutput.remove(rowOutput.size() - 1);
+                            rowOutput.removeLast();
                             rowOutput.add(action.name());
 
                             writer.writeNext(rowOutput.toArray(new String[0]));

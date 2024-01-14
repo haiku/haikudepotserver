@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,21 +10,14 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
-import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.pkg.model.PkgIconService;
-import org.haiku.haikudepotserver.pkg.model.PkgImportService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.pkg.model.Pkg;
@@ -98,6 +91,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
 
                 pkgLocalizationService.updatePkgLocalization(
                         setupObjectContext,
+                        new NonUserPkgSupplementModificationAgent("somebody", "test"),
                         persistedPkg.getPkgSupplement(),
                         NaturalLanguage.getByCode(setupObjectContext, NaturalLanguage.CODE_GERMAN),
                         "title_kingston_black",
@@ -112,6 +106,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                             MediaType.getByCode(setupObjectContext, com.google.common.net.MediaType.PNG.toString()),
                             32,
                             setupObjectContext,
+                            new UserPkgSupplementModificationAgent(null), // no user at this point
                             persistedPkg.getPkgSupplement());
                 }
                 setupObjectContext.commitChanges();
@@ -139,7 +134,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
         }
         // ---------------------------------
 
-        // check it has the icon and the localization.
+        // check it has the icon and the localization and that there is log for the modifications present
 
         {
             ObjectContext context = serverRuntime.newContext();
@@ -235,6 +230,21 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 PkgIcon pkgIcon = Iterables.getOnlyElement(pkgIcons);
                 byte[] actualIconData = pkgIcon.getPkgIconImage().getData();
                 Assertions.assertThat(actualIconData).hasSize(544);
+
+                // check to make sure that records about the modifications are present
+
+                List<PkgSupplementModification> pkgSupplementModifications = ObjectSelect.query(PkgSupplementModification.class)
+                        .where(PkgSupplementModification.PKG_SUPPLEMENT.eq(pkg.getPkgSupplement()))
+                        .orderBy(PkgSupplementModification.CREATE_TIMESTAMP.getName(), SortOrder.ASCENDING)
+                        .select(context);
+                Assertions.assertThat(pkgSupplementModifications).hasSize(1);
+
+                PkgSupplementModification pkgSupplementModification = pkgSupplementModifications.get(0);
+                Assertions.assertThat(pkgSupplementModification.getUserDescription()).isNull();
+                Assertions.assertThat(pkgSupplementModification.getUser()).isNull();
+                Assertions.assertThat(pkgSupplementModification.getOriginSystemDescription()).isEqualTo("hds-hpkg");
+                Assertions.assertThat(pkgSupplementModification.getContent()).isEqualTo(
+                        "add icon for pkg [testpkg]; size [null]; media type [application/x-vnd.haiku-icon]; sha256 [871eefa1582c96f774b44f902eb6cac05885d6ccda88700ab2e0fe99dba2319c]");
             }
         }
         finally {

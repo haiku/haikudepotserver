@@ -5,7 +5,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -18,14 +21,14 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _UserUsageConditionsAgreement extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<Timestamp> TIMESTAMP_AGREED = Property.create("timestampAgreed", Timestamp.class);
-    public static final Property<User> USER = Property.create("user", User.class);
-    public static final Property<UserUsageConditions> USER_USAGE_CONDITIONS = Property.create("userUsageConditions", UserUsageConditions.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final DateProperty<Timestamp> TIMESTAMP_AGREED = PropertyFactory.createDate("timestampAgreed", Timestamp.class);
+    public static final EntityProperty<User> USER = PropertyFactory.createEntity("user", User.class);
+    public static final EntityProperty<UserUsageConditions> USER_USAGE_CONDITIONS = PropertyFactory.createEntity("userUsageConditions", UserUsageConditions.class);
 
     protected Boolean active;
     protected Timestamp timestampAgreed;

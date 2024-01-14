@@ -6,7 +6,13 @@ import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.NumericProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionCopyright;
@@ -24,28 +30,28 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgVersion extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<Boolean> IS_LATEST = Property.create("isLatest", Boolean.class);
-    public static final Property<String> MAJOR = Property.create("major", String.class);
-    public static final Property<String> MICRO = Property.create("micro", String.class);
-    public static final Property<String> MINOR = Property.create("minor", String.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<Long> PAYLOAD_LENGTH = Property.create("payloadLength", Long.class);
-    public static final Property<String> PRE_RELEASE = Property.create("preRelease", String.class);
-    public static final Property<Integer> REVISION = Property.create("revision", Integer.class);
-    public static final Property<Long> VIEW_COUNTER = Property.create("viewCounter", Long.class);
-    public static final Property<Architecture> ARCHITECTURE = Property.create("architecture", Architecture.class);
-    public static final Property<Pkg> PKG = Property.create("pkg", Pkg.class);
-    public static final Property<List<PkgVersionCopyright>> PKG_VERSION_COPYRIGHTS = Property.create("pkgVersionCopyrights", List.class);
-    public static final Property<List<PkgVersionLicense>> PKG_VERSION_LICENSES = Property.create("pkgVersionLicenses", List.class);
-    public static final Property<List<PkgVersionLocalization>> PKG_VERSION_LOCALIZATIONS = Property.create("pkgVersionLocalizations", List.class);
-    public static final Property<List<PkgVersionUrl>> PKG_VERSION_URLS = Property.create("pkgVersionUrls", List.class);
-    public static final Property<RepositorySource> REPOSITORY_SOURCE = Property.create("repositorySource", RepositorySource.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final BaseProperty<Boolean> IS_LATEST = PropertyFactory.createBase("isLatest", Boolean.class);
+    public static final StringProperty<String> MAJOR = PropertyFactory.createString("major", String.class);
+    public static final StringProperty<String> MICRO = PropertyFactory.createString("micro", String.class);
+    public static final StringProperty<String> MINOR = PropertyFactory.createString("minor", String.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final NumericProperty<Long> PAYLOAD_LENGTH = PropertyFactory.createNumeric("payloadLength", Long.class);
+    public static final StringProperty<String> PRE_RELEASE = PropertyFactory.createString("preRelease", String.class);
+    public static final NumericProperty<Integer> REVISION = PropertyFactory.createNumeric("revision", Integer.class);
+    public static final NumericProperty<Long> VIEW_COUNTER = PropertyFactory.createNumeric("viewCounter", Long.class);
+    public static final EntityProperty<Architecture> ARCHITECTURE = PropertyFactory.createEntity("architecture", Architecture.class);
+    public static final EntityProperty<Pkg> PKG = PropertyFactory.createEntity("pkg", Pkg.class);
+    public static final ListProperty<PkgVersionCopyright> PKG_VERSION_COPYRIGHTS = PropertyFactory.createList("pkgVersionCopyrights", PkgVersionCopyright.class);
+    public static final ListProperty<PkgVersionLicense> PKG_VERSION_LICENSES = PropertyFactory.createList("pkgVersionLicenses", PkgVersionLicense.class);
+    public static final ListProperty<PkgVersionLocalization> PKG_VERSION_LOCALIZATIONS = PropertyFactory.createList("pkgVersionLocalizations", PkgVersionLocalization.class);
+    public static final ListProperty<PkgVersionUrl> PKG_VERSION_URLS = PropertyFactory.createList("pkgVersionUrls", PkgVersionUrl.class);
+    public static final EntityProperty<RepositorySource> REPOSITORY_SOURCE = PropertyFactory.createEntity("repositorySource", RepositorySource.class);
 
     protected Boolean active;
     protected Timestamp createTimestamp;

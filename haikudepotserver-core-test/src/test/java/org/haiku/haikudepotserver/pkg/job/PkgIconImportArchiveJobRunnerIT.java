@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,14 +10,18 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.pkg.model.NonUserPkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -27,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 import jakarta.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.util.List;
 
 @ContextConfiguration(classes = TestConfig.class)
 public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
@@ -51,6 +56,12 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
         integrationTestSupportService.createStandardTestData();
 
+        {
+            ObjectContext context = serverRuntime.newContext();
+            integrationTestSupportService.createBasicUser(context, "sebastian", "00e14317-275d-41bf-80b1-51c97dc194a7");
+            context.commitChanges();
+        }
+
         // check that there are no icons stored for pkg2.
 
         {
@@ -68,12 +79,14 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG).get(),
                     16, // expected size along both axiis
                     context,
+                    new NonUserPkgSupplementModificationAgent(null, "some system"),
                     Pkg.getByName(context, "pkg2").getPkgSupplement());
         }
 
         // now load in the data to the job's storage system.
 
         PkgIconImportArchiveJobSpecification spec = new PkgIconImportArchiveJobSpecification();
+        spec.setOwnerUserNickname("sebastian");
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "sample-pkgiconimportarchive-supplied.tgz",
                 MediaType.TAR.toString(),
@@ -110,6 +123,27 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
                             org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_PNG
                     ),
                     32).isPresent()).isTrue();
+
+            List<PkgSupplementModification> pkgSupplementModifications = ObjectSelect.query(PkgSupplementModification.class)
+                    .where(PkgSupplementModification.PKG_SUPPLEMENT.eq(pkg2.getPkgSupplement()))
+                    .orderBy(PkgSupplementModification.CREATE_TIMESTAMP.getName(), SortOrder.ASCENDING)
+                    .select(context);
+            Assertions.assertThat(pkgSupplementModifications).hasSize(2);
+
+            for (PkgSupplementModification pkgSupplementModification : pkgSupplementModifications) {
+                Assertions.assertThat(pkgSupplementModification.getUserDescription()).isEqualTo("sebastian");
+                Assertions.assertThat(pkgSupplementModification.getUser().getNickname()).isEqualTo("sebastian");
+                Assertions.assertThat(pkgSupplementModification.getOriginSystemDescription()).isEqualTo("hds");
+            }
+
+            List<String> pkgSupplementModificationContents = pkgSupplementModifications.stream()
+                    .map(PkgSupplementModification::getContent)
+                    .toList();
+
+            Assertions.assertThat(pkgSupplementModificationContents).contains(
+                    "add icon for pkg [pkg2]; size [null]; media type [application/x-vnd.haiku-icon]; sha256 [b19470bf4aceaa6f1a49bacba2aa92cd12cdeaaa80ce90a9bc7e123be41598f0]",
+                    "add icon for pkg [pkg2]; size [null]; media type [image/png]; sha256 [1da3094d0664cda1d632a19b899c9eca80dbade808f8395de1ea38da9a45d01f]"
+            );
         }
 
         // check that the output report is as expected.

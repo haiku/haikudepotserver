@@ -6,7 +6,12 @@ import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.NumericProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -19,20 +24,20 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgScreenshot extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<String> HASH_SHA256 = Property.create("hashSha256", String.class);
-    public static final Property<Integer> HEIGHT = Property.create("height", Integer.class);
-    public static final Property<Integer> LENGTH = Property.create("length", Integer.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<Integer> ORDERING = Property.create("ordering", Integer.class);
-    public static final Property<Integer> WIDTH = Property.create("width", Integer.class);
-    public static final Property<List<PkgScreenshotImage>> PKG_SCREENSHOT_IMAGES = Property.create("pkgScreenshotImages", List.class);
-    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
+    public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final StringProperty<String> HASH_SHA256 = PropertyFactory.createString("hashSha256", String.class);
+    public static final NumericProperty<Integer> HEIGHT = PropertyFactory.createNumeric("height", Integer.class);
+    public static final NumericProperty<Integer> LENGTH = PropertyFactory.createNumeric("length", Integer.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final NumericProperty<Integer> ORDERING = PropertyFactory.createNumeric("ordering", Integer.class);
+    public static final NumericProperty<Integer> WIDTH = PropertyFactory.createNumeric("width", Integer.class);
+    public static final ListProperty<PkgScreenshotImage> PKG_SCREENSHOT_IMAGES = PropertyFactory.createList("pkgScreenshotImages", PkgScreenshotImage.class);
+    public static final EntityProperty<PkgSupplement> PKG_SUPPLEMENT = PropertyFactory.createEntity("pkgSupplement", PkgSupplement.class);
 
     protected String code;
     protected Timestamp createTimestamp;

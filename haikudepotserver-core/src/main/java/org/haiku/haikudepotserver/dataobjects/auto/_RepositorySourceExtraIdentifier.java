@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -16,12 +18,12 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _RepositorySourceExtraIdentifier extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> IDENTIFIER = Property.create("identifier", String.class);
-    public static final Property<RepositorySource> REPOSITORY_SOURCE = Property.create("repositorySource", RepositorySource.class);
+    public static final StringProperty<String> IDENTIFIER = PropertyFactory.createString("identifier", String.class);
+    public static final EntityProperty<RepositorySource> REPOSITORY_SOURCE = PropertyFactory.createEntity("repositorySource", RepositorySource.class);
 
     protected String identifier;
 

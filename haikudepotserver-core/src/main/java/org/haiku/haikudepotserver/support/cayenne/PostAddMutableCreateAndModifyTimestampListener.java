@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2023, Andrew Lindesay
+ * Copyright 2013-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -47,6 +47,7 @@ public class PostAddMutableCreateAndModifyTimestampListener implements Lifecycle
         callbackRegistry.addListener(PkgLocalization.class, this);
         callbackRegistry.addListener(PkgChangelog.class, this);
         callbackRegistry.addListener(PkgSupplement.class, this);
+        callbackRegistry.addListener(PkgSupplementModification.class, this);
     }
 
     @Override

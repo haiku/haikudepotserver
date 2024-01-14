@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,6 +15,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
@@ -23,6 +24,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.pkg.model.UserPkgSupplementModificationAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -92,6 +94,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         Preconditions.checkArgument(null != jobService);
         Preconditions.checkArgument(null != specification);
         Preconditions.checkArgument(null != specification.getInputDataGuid(), "missing input data guid on specification");
+        Preconditions.checkArgument(null != specification.getOwnerUserNickname(), "the owner nickname is required");
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
@@ -122,7 +125,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
                         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
                 ) {
-                    clearPackagesIconsAppearingInArchive(tarArchiveInputStream, writer);
+                    clearPackagesIconsAppearingInArchive(specification, tarArchiveInputStream, writer);
                 }
 
                 // now load the icons in.
@@ -132,7 +135,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
                         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
                 ) {
-                    processEntriesFromArchive(tarArchiveInputStream, writer);
+                    processEntriesFromArchive(specification, tarArchiveInputStream, writer);
                 }
 
                 return true;
@@ -150,7 +153,11 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
      * <p>All packages appearing in the archive should first have their icons removed.</p>
      */
 
-    private void clearPackagesIconsAppearingInArchive(ArchiveInputStream archiveInputStream, CSVWriter writer) throws IOException {
+    private void clearPackagesIconsAppearingInArchive(
+            PkgIconImportArchiveJobSpecification specification,
+            ArchiveInputStream archiveInputStream,
+            CSVWriter writer) throws IOException {
+
         String[] row = new String[3];
         Set<String> pkgNamesProcessed = new HashSet<>();
         ArchiveEntry archiveEntry;
@@ -168,7 +175,11 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                     Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
                     if (pkgOptional.isPresent()) {
-                        pkgIconService.removePkgIcon(context, pkgOptional.get().getPkgSupplement());
+                        User user = User.getByNickname(context, specification.getOwnerUserNickname());
+                        pkgIconService.removePkgIcon(
+                                context,
+                                new UserPkgSupplementModificationAgent(user),
+                                pkgOptional.get().getPkgSupplement());
                         LOGGER.info("removed icons for pkg; {}", pkgName);
                         row[CSV_COLUMN_ACTION] = Action.REMOVED.name();
                     } else {
@@ -183,7 +194,10 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         }
     }
 
-    private void processEntriesFromArchive(ArchiveInputStream archiveInputStream, CSVWriter writer) throws IOException {
+    private void processEntriesFromArchive(
+            PkgIconImportArchiveJobSpecification specification,
+            ArchiveInputStream archiveInputStream,
+            CSVWriter writer) throws IOException {
         String[] row = new String[3];
 
         ArchiveEntry archiveEntry;
@@ -198,6 +212,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
                     if (archiveEntry.getSize() <= MAX_ICON_PAYLOAD) {
                         result = processMatchingFileEntryFromArchive(
+                                specification,
                                 archiveInputStream,
                                 nameMatcher.group(GROUP_PKGNAME),
                                 nameMatcher.group(GROUP_LEAFEXTENSION).toLowerCase());
@@ -226,11 +241,13 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
     }
 
     private ArchiveEntryResult processMatchingFileEntryFromArchive(
+            PkgIconImportArchiveJobSpecification specification,
             ArchiveInputStream archiveInputStream,
             String pkgName, String leafnameExtension)
             throws IOException {
 
         ObjectContext context = serverRuntime.newContext();
+        User user = User.getByNickname(context, specification.getOwnerUserNickname());
         Optional<Pkg> pkgOptional = Pkg.tryGetByName(context, pkgName);
 
         if (pkgOptional.isPresent()) {
@@ -258,6 +275,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                         mediaType.get(),
                         null, // there is no expected icon size
                         context,
+                        new UserPkgSupplementModificationAgent(user),
                         pkgOptional.get().getPkgSupplement());
             } catch (BadPkgIconException e) {
                 return new ArchiveEntryResult(Action.INVALID, e.getMessage());

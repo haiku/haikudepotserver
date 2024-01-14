@@ -142,6 +142,12 @@ SELECT hds_swap_user_rating_users_for_pkg_version_id(pv.id)
 FROM haikudepot.pkg_version pv
 WHERE EXISTS(SELECT ur.id FROM haikudepot.user_rating ur WHERE ur.pkg_version_id = pv.id);
 
+-- scramble the user who has made an edit to package data
+
+UPDATE haikudepot.pkg_supplement_modification SET
+    user_description = hds_scramble_chars(user_description)
+    WHERE user_description IS NOT NULL;
+
 -- clean up
 
 DROP FUNCTION hds_scramble_chars;

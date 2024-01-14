@@ -22,6 +22,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
+import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
@@ -30,6 +31,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
+import org.haiku.haikudepotserver.pkg.model.UserPkgSupplementModificationAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -89,6 +91,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
         Preconditions.checkArgument(null != specification);
         Preconditions.checkArgument(null != specification.getInputDataGuid(), "missing input data guid on specification");
         Preconditions.checkArgument(null != specification.getImportStrategy(), "missing import strategy on specification");
+        Preconditions.checkArgument(null != specification.getOwnerUserNickname(), "missing owner user on specification");
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
@@ -130,7 +133,8 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
                 if (specification.getImportStrategy() == PkgScreenshotImportArchiveJobSpecification.ImportStrategy.REPLACE) {
                     LOGGER.info("will delete persisted screenshots that are absent from the archive");
-                    int deleted = deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(writer, metadatas.values());
+                    int deleted = deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
+                            specification, writer, metadatas.values());
                     LOGGER.info("did delete {} persisted screenshots that are absent from the archive", deleted);
                 }
 
@@ -142,6 +146,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                 consumeScreenshotArchiveEntries(
                         jobDataWithByteSourceOptional.get().getByteSource(),
                         (ae) -> importScreenshotsFromArchiveAndReport(
+                                specification,
                                 writer,
                                 metadatas.get(ae.getPkgName()),
                                 ae.getArchiveInputStream(),
@@ -199,24 +204,28 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
      */
 
     private int deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
+            PkgScreenshotImportArchiveJobSpecification specification,
             final CSVWriter writer,
             Collection<ScreenshotImportMetadatas> metadatas) {
         return metadatas
                 .stream()
-                .mapToInt((m) -> deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(writer, m))
+                .mapToInt((m) -> deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(specification, writer, m))
                 .sum();
     }
 
     private int deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
+            PkgScreenshotImportArchiveJobSpecification specification,
             final CSVWriter writer,
             ScreenshotImportMetadatas metadata) {
         return metadata.getExistingScreenshots()
                 .stream()
-                .mapToInt((es) -> deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(writer, metadata, es))
+                .mapToInt((es) -> deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
+                        specification, writer, metadata, es))
                 .sum();
     }
 
     private int deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
+            PkgScreenshotImportArchiveJobSpecification specification,
             CSVWriter writer,
             ScreenshotImportMetadatas metadata,
             ExistingScreenshotMetadata existingScreenshot) {
@@ -236,7 +245,11 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                     pkgScreenshot.getCode()
             };
 
-            pkgScreenshotService.deleteScreenshot(context, pkgScreenshot);
+            pkgScreenshotService.deleteScreenshot(
+                    context,
+                    new UserPkgSupplementModificationAgent(User.getByNickname(context, specification.getOwnerUserNickname())),
+                    pkgScreenshot);
+
             writer.writeNext(row);
             context.commitChanges(); // job-length txn so won't *actually* be committed here.
 
@@ -339,6 +352,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
      */
 
     private void importScreenshotsFromArchiveAndReport(
+            PkgScreenshotImportArchiveJobSpecification specification,
             CSVWriter writer,
             ScreenshotImportMetadatas data,
             ArchiveInputStream archiveInputStream,
@@ -381,6 +395,8 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                     PkgScreenshot screenshot = pkgScreenshotService.storePkgScreenshotImage(
                             archiveInputStream,
                             context,
+                            new UserPkgSupplementModificationAgent(
+                                    User.getByNickname(context, specification.getOwnerUserNickname())),
                             Pkg.getByName(context, pkgName).getPkgSupplement(),
                             fromArchiveScreenshotMetadata.getDerivedOrder());
 

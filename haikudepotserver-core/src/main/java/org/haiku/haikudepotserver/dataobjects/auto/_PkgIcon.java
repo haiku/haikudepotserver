@@ -5,7 +5,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.NumericProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
@@ -19,14 +22,14 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgIcon extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Integer> SIZE = Property.create("size", Integer.class);
-    public static final Property<MediaType> MEDIA_TYPE = Property.create("mediaType", MediaType.class);
-    public static final Property<List<PkgIconImage>> PKG_ICON_IMAGES = Property.create("pkgIconImages", List.class);
-    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
+    public static final NumericProperty<Integer> SIZE = PropertyFactory.createNumeric("size", Integer.class);
+    public static final EntityProperty<MediaType> MEDIA_TYPE = PropertyFactory.createEntity("mediaType", MediaType.class);
+    public static final ListProperty<PkgIconImage> PKG_ICON_IMAGES = PropertyFactory.createList("pkgIconImages", PkgIconImage.class);
+    public static final EntityProperty<PkgSupplement> PKG_SUPPLEMENT = PropertyFactory.createEntity("pkgSupplement", PkgSupplement.class);
 
     protected Integer size;
 

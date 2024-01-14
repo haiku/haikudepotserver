@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019, Andrew Lindesay
+ * Copyright 2016-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,11 +12,13 @@ public interface PkgLocalizationService extends PkgLocalizationLookupService {
 
     /**
      * <p>This method will update the localization defined in the parameters to this method into the data
-     * structure for the package.</p>
+     * structure for the package. This will also write a "package supplicant modification" to capture
+     * the change.</p>
      */
 
     PkgLocalization updatePkgLocalization(
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
             NaturalLanguage naturalLanguage,
             String title,

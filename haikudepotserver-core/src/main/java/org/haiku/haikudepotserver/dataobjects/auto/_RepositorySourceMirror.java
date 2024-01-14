@@ -5,7 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -18,19 +22,19 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _RepositorySourceMirror extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<String> BASE_URL = Property.create("baseUrl", String.class);
-    public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<String> DESCRIPTION = Property.create("description", String.class);
-    public static final Property<Boolean> IS_PRIMARY = Property.create("isPrimary", Boolean.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<Country> COUNTRY = Property.create("country", Country.class);
-    public static final Property<RepositorySource> REPOSITORY_SOURCE = Property.create("repositorySource", RepositorySource.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final StringProperty<String> BASE_URL = PropertyFactory.createString("baseUrl", String.class);
+    public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final StringProperty<String> DESCRIPTION = PropertyFactory.createString("description", String.class);
+    public static final BaseProperty<Boolean> IS_PRIMARY = PropertyFactory.createBase("isPrimary", Boolean.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final EntityProperty<Country> COUNTRY = PropertyFactory.createEntity("country", Country.class);
+    public static final EntityProperty<RepositorySource> REPOSITORY_SOURCE = PropertyFactory.createEntity("repositorySource", RepositorySource.class);
 
     protected Boolean active;
     protected String baseUrl;

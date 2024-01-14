@@ -6,7 +6,12 @@ import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.PkgProminence;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
@@ -22,19 +27,19 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _Pkg extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<Timestamp> CREATE_TIMESTAMP = Property.create("createTimestamp", Timestamp.class);
-    public static final Property<Timestamp> MODIFY_TIMESTAMP = Property.create("modifyTimestamp", Timestamp.class);
-    public static final Property<String> NAME = Property.create("name", String.class);
-    public static final Property<List<PermissionUserPkg>> PERMISSION_USER_PKGS = Property.create("permissionUserPkgs", List.class);
-    public static final Property<List<PkgProminence>> PKG_PROMINENCES = Property.create("pkgProminences", List.class);
-    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
-    public static final Property<List<PkgUserRatingAggregate>> PKG_USER_RATING_AGGREGATES = Property.create("pkgUserRatingAggregates", List.class);
-    public static final Property<Publisher> PUBLISHER = Property.create("publisher", Publisher.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
+    public static final StringProperty<String> NAME = PropertyFactory.createString("name", String.class);
+    public static final ListProperty<PermissionUserPkg> PERMISSION_USER_PKGS = PropertyFactory.createList("permissionUserPkgs", PermissionUserPkg.class);
+    public static final ListProperty<PkgProminence> PKG_PROMINENCES = PropertyFactory.createList("pkgProminences", PkgProminence.class);
+    public static final EntityProperty<PkgSupplement> PKG_SUPPLEMENT = PropertyFactory.createEntity("pkgSupplement", PkgSupplement.class);
+    public static final ListProperty<PkgUserRatingAggregate> PKG_USER_RATING_AGGREGATES = PropertyFactory.createList("pkgUserRatingAggregates", PkgUserRatingAggregate.class);
+    public static final EntityProperty<Publisher> PUBLISHER = PropertyFactory.createEntity("publisher", Publisher.class);
 
     protected Boolean active;
     protected Timestamp createTimestamp;

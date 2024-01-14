@@ -12,7 +12,9 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestAppConfig;
 import org.haiku.haikudepotserver.config.TestServletConfig;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -22,6 +24,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import jakarta.annotation.Resource;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
@@ -67,10 +70,24 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         Assertions.assertThat(code).isNotEmpty();
 
         ObjectContext context = serverRuntime.newContext();
-        Optional<PkgScreenshot> screenshotOptional = PkgScreenshot.tryGetByCode(context, code);
-        Assertions.assertThat(screenshotOptional.isPresent()).isTrue();
-        Assertions.assertThat(screenshotOptional.get().getPkgSupplement().getBasePkgName()).isEqualTo("pkg1");
-        Assertions.assertThat(screenshotOptional.get().tryGetPkgScreenshotImage().get().getData()).isEqualTo(imageData);
+        PkgScreenshot screenshot = PkgScreenshot.getByCode(context, code);
+        Assertions.assertThat(screenshot.getPkgSupplement().getBasePkgName()).isEqualTo("pkg1");
+        Assertions.assertThat(screenshot.getPkgScreenshotImage().getData()).isEqualTo(imageData);
+
+        Pkg pkg = Pkg.getByName(context, screenshot.getPkgSupplement().getBasePkgName());
+        List<PkgSupplementModification> modifications = PkgSupplementModification.findForPkg(context, pkg);
+        Assertions.assertThat(modifications.size()).isGreaterThanOrEqualTo(1);
+
+        PkgSupplementModification modification = modifications.getLast();
+        Assertions.assertThat(modification.getUser().getNickname()).isEqualTo("root");
+        Assertions.assertThat(modification.getUserDescription()).isEqualTo("root");
+        Assertions.assertThat(modification.getOriginSystemDescription()).isEqualTo("hds");
+        Assertions.assertThat(modification.getContent()).isEqualTo(
+                String.format("added screenshot [%s]; sh256 [%s]; height %d; width %d",
+                        code,
+                        screenshot.getHashSha256(),
+                        screenshot.getHeight(),
+                        screenshot.getWidth()));
 
     }
 

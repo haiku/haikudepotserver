@@ -43,10 +43,14 @@ public interface PkgScreenshotService {
     PkgScreenshot storePkgScreenshotImage(
             InputStream input,
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkg,
             Integer ordering) throws IOException, BadPkgScreenshotException;
 
-    void deleteScreenshot(ObjectContext context, PkgScreenshot screenshot);
+    void deleteScreenshot(
+            ObjectContext context,
+            PkgSupplementModificationAgent agent,
+            PkgScreenshot screenshot);
 
     /**
      * <p>This method will re-order the screenshots according to the set of codes present in the supplied list.

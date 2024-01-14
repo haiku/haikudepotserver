@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,7 +13,8 @@ import com.google.common.io.ByteSource;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Uninterruptibles;
-import org.apache.commons.collections4.CollectionUtils;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
@@ -26,8 +27,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -185,6 +184,13 @@ public class LocalJobServiceImpl
         getJobRunner(specification.getJobTypeCode()).orElseThrow(() ->
                 new IllegalStateException("unable to run a job runner for the job type code; "
                         + specification.getJobTypeCode()));
+
+        if (null != specification.getOwnerUserNickname()) {
+            if (!User.NICKNAME_PATTERN.matcher(specification.getOwnerUserNickname()).matches()) {
+                throw new IllegalStateException("unable to run a job runner because the supplied owner user nickname ["
+                        + specification.getOwnerUserNickname() + "] is invalid");
+            }
+        }
 
         for (String guid : specification.getSuppliedDataGuids()) {
             if (tryGetData(guid).isEmpty()) {

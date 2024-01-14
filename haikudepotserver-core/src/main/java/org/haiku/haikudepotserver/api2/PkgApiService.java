@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023, Andrew Lindesay
+ * Copyright 2022-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -15,79 +15,24 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api2.model.ConfigurePkgIconPkgIcon;
-import org.haiku.haikudepotserver.api2.model.ConfigurePkgIconRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgChangelogRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgChangelogResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgIconsPkgIcon;
-import org.haiku.haikudepotserver.api2.model.GetPkgIconsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgIconsResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsPkgLocalization;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgPkgVersion;
-import org.haiku.haikudepotserver.api2.model.GetPkgPkgVersionUrl;
-import org.haiku.haikudepotserver.api2.model.GetPkgRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsScreenshot;
-import org.haiku.haikudepotserver.api2.model.GetPkgVersionLocalizationsPkgVersionLocalization;
-import org.haiku.haikudepotserver.api2.model.GetPkgVersionLocalizationsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgVersionLocalizationsResult;
-import org.haiku.haikudepotserver.api2.model.IncrementViewCounterRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.PkgVersionType;
-import org.haiku.haikudepotserver.api2.model.RemovePkgIconRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemovePkgScreenshotRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.ReorderPkgScreenshotsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsPkg;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsPkgVersion;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsResult;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsSortOrdering;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgCategoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgChangelogRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
-import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
-import org.haiku.haikudepotserver.dataobjects.PkgChangelog;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
-import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
-import org.haiku.haikudepotserver.dataobjects.PkgProminence;
-import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
-import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionCopyright;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionLicense;
 import org.haiku.haikudepotserver.dataobjects.Prominence;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
-import org.haiku.haikudepotserver.pkg.model.PkgIconService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
-import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.StringHelper;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -98,15 +43,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -211,6 +148,7 @@ public class PkgApiService extends AbstractApiService {
                     MediaType.getByCode(context, icon.getMediaTypeCode()),
                     icon.getSize(),
                     context,
+                    new UserPkgSupplementModificationAgent(tryObtainAuthenticatedUser(context).orElse(null)),
                     pkg.getPkgSupplement());
         }
         catch (IOException ioe) {
@@ -339,7 +277,7 @@ public class PkgApiService extends AbstractApiService {
                 .repositorySourceCode(pkgVersion.getRepositorySource().getCode())
                 .repositoryCode(pkgVersion.getRepositorySource().getRepository().getCode())
                 .architectureCode(pkgVersion.getArchitecture().getCode())
-                .copyrights(pkgVersion.getPkgVersionCopyrights().stream().map(PkgVersionCopyright::getBody).collect(Collectors.toUnmodifiableList()))
+                .copyrights(pkgVersion.getPkgVersionCopyrights().stream().map(PkgVersionCopyright::getBody).toList())
                 .licenses(pkgVersion.getPkgVersionLicenses().stream().map(PkgVersionLicense::getBody).collect(Collectors.toList()))
                 .viewCounter(pkgVersion.getViewCounter())
                 .hpkgDownloadURL(pkgService.createHpkgDownloadUrl(pkgVersion))
@@ -381,7 +319,7 @@ public class PkgApiService extends AbstractApiService {
                                         .compare(pv1.getArchitecture().getCode(), pv2.getArchitecture().getCode())
                                         .compare(pv1.toVersionCoordinates(), pv2.toVersionCoordinates(), vcc)
                                         .result())
-                        .collect(Collectors.toUnmodifiableList());
+                        .toList();
             }
 
             case SPECIFIC: {
@@ -438,7 +376,7 @@ public class PkgApiService extends AbstractApiService {
                         .map(pi -> new GetPkgIconsPkgIcon()
                                 .size(pi.getSize())
                                 .mediaTypeCode(pi.getMediaType().getCode()))
-                        .collect(Collectors.toUnmodifiableList()));
+                        .toList());
     }
 
     public GetPkgLocalizationsResult getPkgLocalizations(GetPkgLocalizationsRequestEnvelope request) {
@@ -618,7 +556,11 @@ public class PkgApiService extends AbstractApiService {
                     + pkg + "], but the user is not able to");
         }
 
-        pkgIconService.removePkgIcon(context, pkg.getPkgSupplement());
+        pkgIconService.removePkgIcon(
+                context,
+                new UserPkgSupplementModificationAgent(tryObtainAuthenticatedUser(context).orElse(null)),
+                pkg.getPkgSupplement());
+
         context.commitChanges();
         LOGGER.info("did remove icons for pkg {}", pkg.getName());
     }
@@ -641,7 +583,11 @@ public class PkgApiService extends AbstractApiService {
             throw new AccessDeniedException("unable to remove the package screenshot for package");
         }
 
-        pkgScreenshotService.deleteScreenshot(context, screenshot);
+        pkgScreenshotService.deleteScreenshot(
+                context,
+                new UserPkgSupplementModificationAgent(obtainAuthenticatedUser(context)),
+                screenshot);
+
         context.commitChanges();
 
         LOGGER.info("did remove the screenshot {}", request.getCode());
@@ -720,7 +666,7 @@ public class PkgApiService extends AbstractApiService {
                     .map(pv -> mapFromPkgVersionToSearchPkgPkg(
                             context, pv, naturalLanguage, specification,
                             localPkgLocalizationLookupService))
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
 
         return new SearchPkgsResult()
@@ -829,6 +775,8 @@ public class PkgApiService extends AbstractApiService {
                     + pkg + "], but the user is not able to");
         }
 
+        User user = obtainAuthenticatedUser(context);
+
         List<PkgCategory> pkgCategories = new ArrayList<>(PkgCategory.getByCodes(context, request.getPkgCategoryCodes()));
 
         if (pkgCategories.size() != request.getPkgCategoryCodes().size()) {
@@ -840,7 +788,7 @@ public class PkgApiService extends AbstractApiService {
             throw new ObjectNotFoundException(PkgCategory.class.getSimpleName(), null);
         }
 
-        pkgService.updatePkgCategories(context, pkg, pkgCategories);
+        pkgService.updatePkgCategories(context, new UserPkgSupplementModificationAgent(user), pkg, pkgCategories);
 
         context.commitChanges();
 
@@ -864,7 +812,14 @@ public class PkgApiService extends AbstractApiService {
             throw new AccessDeniedException("unable to edit the changelog for [" + pkg + "]");
         }
 
-        pkgService.updatePkgChangelog(context, pkg.getPkgSupplement(), StringUtils.trimToNull(request.getContent()));
+        User user = obtainAuthenticatedUser(context);
+
+        pkgService.updatePkgChangelog(
+                context,
+                new UserPkgSupplementModificationAgent(user),
+                pkg.getPkgSupplement(),
+                StringUtils.trimToNull(request.getContent()));
+
         context.commitChanges();
     }
 
@@ -875,7 +830,7 @@ public class PkgApiService extends AbstractApiService {
         final ObjectContext context = serverRuntime.newContext();
         Pkg pkg = getPkg(context, request.getPkgName());
 
-        obtainAuthenticatedUser(context);
+        User user = obtainAuthenticatedUser(context);
 
         if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
@@ -886,6 +841,7 @@ public class PkgApiService extends AbstractApiService {
 
         request.getPkgLocalizations().forEach(l -> pkgLocalizationService.updatePkgLocalization(
                     context,
+                    new UserPkgSupplementModificationAgent(user),
                     pkg.getPkgSupplement(),
                     getNaturalLanguage(context, l.getNaturalLanguageCode()),
                     l.getTitle(),

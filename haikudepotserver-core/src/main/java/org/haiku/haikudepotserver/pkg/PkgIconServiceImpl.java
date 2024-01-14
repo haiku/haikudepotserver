@@ -1,26 +1,22 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.base.Preconditions;
+import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.compress.utils.BoundedInputStream;
-import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.PkgIcon;
-import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
-import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
-import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
-import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
-import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,10 +39,14 @@ public class PkgIconServiceImpl implements PkgIconService {
     private final PngOptimizationService pngOptimizationService;
     private final ImageHelper imageHelper;
 
+    private final PkgSupplementModificationService pkgSupplementModificationService;
+
     public PkgIconServiceImpl(
             RenderedPkgIconRepository renderedPkgIconRepository,
+            PkgSupplementModificationService pkgSupplementModificationService,
             PngOptimizationService pngOptimizationService) {
         this.renderedPkgIconRepository = Preconditions.checkNotNull(renderedPkgIconRepository);
+        this.pkgSupplementModificationService = Preconditions.checkNotNull(pkgSupplementModificationService);
         this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
         imageHelper = new ImageHelper();
     }
@@ -66,12 +66,21 @@ public class PkgIconServiceImpl implements PkgIconService {
     }
 
     @Override
-    public void removePkgIcon(ObjectContext context, PkgSupplement pkgSupplement) {
+    public void removePkgIcon(ObjectContext context, PkgSupplementModificationAgent agent, PkgSupplement pkgSupplement) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkgSupplement, "the package must be supplied");
         context.deleteObjects(deriveDataObjectsToDelete(pkgSupplement.getPkgIcons()));
+
         pkgSupplement.setModifyTimestamp();
         pkgSupplement.setIconModifyTimestamp();
+
+        pkgSupplementModificationService.appendModification(
+                context,
+                pkgSupplement,
+                agent,
+                String.format("remove icon for pkg [%s]", pkgSupplement.getBasePkgName())
+        );
+
         renderedPkgIconRepository.evict(context, pkgSupplement);
     }
 
@@ -81,6 +90,7 @@ public class PkgIconServiceImpl implements PkgIconService {
             MediaType mediaType,
             Integer expectedSize,
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement) throws IOException, BadPkgIconException {
 
         Preconditions.checkArgument(null != context, "the context is not supplied");
@@ -157,6 +167,18 @@ public class PkgIconServiceImpl implements PkgIconService {
             } else {
                 LOGGER.info("the icon for package [{}] has been updated", pkgSupplement.getBasePkgName());
             }
+
+            pkgSupplementModificationService.appendModification(
+                    context,
+                    pkgSupplement,
+                    agent,
+                    String.format("add icon for pkg [%s]; size [%d]; media type [%s]; sha256 [%s]",
+                            pkgSupplement.getBasePkgName(),
+                            expectedSize,
+                            mediaType.getCode(),
+                            Hashing.sha256().hashBytes(imageData)
+                    )
+            );
         }
         else {
             LOGGER.info("no change to package icon for [{}] ", pkgSupplement.getBasePkgName());

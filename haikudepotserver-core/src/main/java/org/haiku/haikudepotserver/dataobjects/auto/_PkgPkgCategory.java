@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -17,12 +18,12 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgPkgCategory extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<PkgCategory> PKG_CATEGORY = Property.create("pkgCategory", PkgCategory.class);
-    public static final Property<PkgSupplement> PKG_SUPPLEMENT = Property.create("pkgSupplement", PkgSupplement.class);
+    public static final EntityProperty<PkgCategory> PKG_CATEGORY = PropertyFactory.createEntity("pkgCategory", PkgCategory.class);
+    public static final EntityProperty<PkgSupplement> PKG_SUPPLEMENT = PropertyFactory.createEntity("pkgSupplement", PkgSupplement.class);
 
 
     protected Object pkgCategory;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,21 +23,11 @@ import org.apache.cayenne.query.Query;
 import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgCategory;
-import org.haiku.haikudepotserver.dataobjects.PkgChangelog;
-import org.haiku.haikudepotserver.dataobjects.PkgPkgCategory;
-import org.haiku.haikudepotserver.dataobjects.PkgProminence;
-import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Prominence;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
+import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.SingleCollector;
@@ -52,13 +42,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -79,9 +65,13 @@ public class PkgServiceImpl implements PkgService {
 
     private final String defaultArchitectureCode;
 
+    private final PkgSupplementModificationService pkgSupplementModificationService;
+
     public PkgServiceImpl(
-            @Value("${hds.architecture.default.code}") String defaultArchitectureCode) {
+            @Value("${hds.architecture.default.code}") String defaultArchitectureCode,
+            PkgSupplementModificationService pkgSupplementModificationService) {
         this.defaultArchitectureCode = defaultArchitectureCode;
+        this.pkgSupplementModificationService = Preconditions.checkNotNull(pkgSupplementModificationService);
     }
 
     // ------------------------------
@@ -403,11 +393,13 @@ public class PkgServiceImpl implements PkgService {
     @Override
     public void updatePkgChangelog(
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
             String newContent) {
 
         Preconditions.checkArgument(null != context, "the context is not supplied");
         Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement is not supplied");
+        Preconditions.checkArgument(null != agent, "the agent is not supplied");
 
         Optional<PkgChangelog> pkgChangelogOptional = pkgSupplement.getPkgChangelog();
         newContent = StringUtils.trimToNull(newContent);
@@ -415,9 +407,20 @@ public class PkgServiceImpl implements PkgService {
         if (null == newContent) {
             pkgChangelogOptional.ifPresent(pcl -> {
                 context.deleteObject(pkgChangelogOptional.get());
+
+                pkgSupplementModificationService.appendModification(
+                        context,
+                        pkgSupplement,
+                        agent,
+                        String.format("removed the changelog for [%s]", pkgSupplement.getBasePkgName()));
+
                 LOGGER.info("did remove the changelog for; {}", pkgSupplement.getBasePkgName());
             });
         } else {
+            String oldContent = pkgChangelogOptional
+                    .map(PkgChangelog::getContent)
+                    .map(StringUtils::trimToNull)
+                    .orElse(null);
             newContent = newContent.replace("\r\n", "\n"); // windows to unix newline.
 
             PkgChangelog pkgChangelog = pkgChangelogOptional.orElseGet(() -> {
@@ -427,6 +430,17 @@ public class PkgServiceImpl implements PkgService {
             });
 
             pkgChangelog.setContent(newContent);
+
+            // write a pkg supplement modification entry for the change.
+
+            pkgSupplementModificationService.appendModification(
+                    context,
+                    pkgSupplement,
+                    agent,
+                    String.format("updated the changelog for [%s];\n%s",
+                            pkgSupplement.getBasePkgName(),
+                            StringUtils.abbreviateMiddle(newContent, "...", 80)));
+
             LOGGER.info("did update the changelog for; {}", pkgSupplement.getBasePkgName());
         }
 
@@ -577,15 +591,21 @@ public class PkgServiceImpl implements PkgService {
      */
 
     @Override
-    public boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories) {
+    public boolean updatePkgCategories(
+            ObjectContext context,
+            PkgSupplementModificationAgent agent,
+            Pkg pkg,
+            List<PkgCategory> pkgCategories) {
 
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(null != pkg, "the pkg must be provided");
         Preconditions.checkArgument(null != pkgCategories, "the pkg categories must be provided");
+        Preconditions.checkArgument(null != agent, "the agent must be provided");
 
         PkgSupplement pkgSupplement = pkg.getPkgSupplement();
         pkgCategories = new ArrayList<>(pkgCategories);
-        boolean didChange = false;
+        Set<String> removedCodes = new HashSet<>();
+        Set<String> addedCodes = new HashSet<>();
 
         // now go through and delete any of those pkg relationships to packages that are already present
         // and which are no longer required.  Also remove those that we already have from the list.
@@ -593,8 +613,8 @@ public class PkgServiceImpl implements PkgService {
         for (PkgPkgCategory pkgPkgCategory : ImmutableList.copyOf(pkgSupplement.getPkgPkgCategories())) {
             if (!pkgCategories.contains(pkgPkgCategory.getPkgCategory())) {
                 pkgSupplement.removeToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
+                removedCodes.add(pkgPkgCategory.getPkgCategory().getCode());
                 context.deleteObjects(pkgPkgCategory);
-                didChange = true;
             }
             else {
                 pkgCategories.remove(pkgPkgCategory.getPkgCategory());
@@ -607,16 +627,30 @@ public class PkgServiceImpl implements PkgService {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
             pkgPkgCategory.setPkgCategory(pkgCategory);
             pkgSupplement.addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
-            didChange = true;
+            addedCodes.add(pkgCategory.getCode());
         }
 
-        // now save and finish.
+        // record the change
 
-        if (didChange) {
-            pkg.setModifyTimestamp();
+        if (!removedCodes.isEmpty() || !addedCodes.isEmpty()) {
+
+            pkgSupplement.setModifyTimestamp();
+
+            String content = String.format("categories changed for pkg [%s]\nremoved: %s\nadded: %s",
+                    pkgSupplement.getBasePkgName(),
+                    removedCodes.stream().sorted().collect(Collectors.joining(",")),
+                    addedCodes.stream().sorted().collect(Collectors.joining(",")));
+
+            pkgSupplementModificationService.appendModification(
+                    context,
+                    pkgSupplement,
+                    agent,
+                    content);
+
+            return true;
         }
 
-        return didChange;
+        return false;
     }
 
     /**

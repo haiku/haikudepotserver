@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
@@ -17,13 +19,13 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _PkgScreenshotImage extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<byte[]> DATA = Property.create("data", byte[].class);
-    public static final Property<MediaType> MEDIA_TYPE = Property.create("mediaType", MediaType.class);
-    public static final Property<PkgScreenshot> PKG_SCREENSHOT = Property.create("pkgScreenshot", PkgScreenshot.class);
+    public static final BaseProperty<byte[]> DATA = PropertyFactory.createBase("data", byte[].class);
+    public static final EntityProperty<MediaType> MEDIA_TYPE = PropertyFactory.createEntity("mediaType", MediaType.class);
+    public static final EntityProperty<PkgScreenshot> PKG_SCREENSHOT = PropertyFactory.createEntity("pkgScreenshot", PkgScreenshot.class);
 
     protected byte[] data;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -124,6 +124,7 @@ public interface PkgService {
 
     void updatePkgChangelog(
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
             String newContent);
 
@@ -193,7 +194,11 @@ public interface PkgService {
      * @return true if a change was made.
      */
 
-    boolean updatePkgCategories(ObjectContext context, Pkg pkg, List<PkgCategory> pkgCategories);
+    boolean updatePkgCategories(
+            ObjectContext context,
+            PkgSupplementModificationAgent agent,
+            Pkg pkg,
+            List<PkgCategory> pkgCategories);
 
     /**
      * <p>This method will increment the view counter on a package version.  If it encounters an optimistic

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,8 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
+import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,12 @@ import java.util.stream.Collectors;
 
 @Service
 public class PkgLocalizationServiceImpl implements PkgLocalizationService {
+
+    private final PkgSupplementModificationService pkgSupplementModificationService;
+
+    public PkgLocalizationServiceImpl(PkgSupplementModificationService pkgSupplementModificationService) {
+        this.pkgSupplementModificationService = Preconditions.checkNotNull(pkgSupplementModificationService);
+    }
 
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgVersionLocalization pvl) {
         if(Strings.isNullOrEmpty(result.getTitle())
@@ -118,6 +126,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
     @Override
     public PkgLocalization updatePkgLocalization(
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
             NaturalLanguage naturalLanguage,
             String title,
@@ -126,14 +135,16 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
         Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement must be provided");
         Preconditions.checkArgument(null != naturalLanguage, "the naturallanguage must be provided");
+        Preconditions.checkArgument(null != agent, "the agent must be provided");
 
         return updatePkgLocalizationWithoutSideEffects(
-                context, pkgSupplement, naturalLanguage,
+                context, agent, pkgSupplement, naturalLanguage,
                 title, summary, description);
     }
 
     private PkgLocalization updatePkgLocalizationWithoutSideEffects(
             ObjectContext context,
+            PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
             NaturalLanguage naturalLanguage,
             String title,
@@ -161,6 +172,21 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             pkgSupplement.addToManyTarget(PkgSupplement.PKG_LOCALIZATIONS.getName(), created, true);
             return created;
         });
+
+        boolean titleChanged = !StringUtils.equals(title, pkgLocalization.getTitle());
+        boolean summaryChanged = !StringUtils.equals(summary, pkgLocalization.getSummary());
+        boolean descriptionChanged = !StringUtils.equals(description, pkgLocalization.getDescription());
+
+        if (titleChanged || summaryChanged || descriptionChanged) {
+            StringBuilder result = new StringBuilder();
+            result.append(String.format("changing localization for pkg [%s] in natural language [%s];",
+                    pkgSupplement.getBasePkgName(), naturalLanguage.getCode()));
+            result.append(createPkgSupplicantLocalizationElementChange("title", pkgLocalization.getTitle(), title));
+            result.append(createPkgSupplicantLocalizationElementChange("summary", pkgLocalization.getSummary(), summary));
+            result.append(createPkgSupplicantLocalizationElementChange("description", pkgLocalization.getDescription(), description));
+
+            pkgSupplementModificationService.appendModification(context, pkgSupplement, agent, result.toString());
+        }
 
         pkgLocalization.setTitle(title);
         pkgLocalization.setSummary(summary);
@@ -232,6 +258,19 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             return pkgVersionLocalization;
         }
 
+    }
+
+    private String createPkgSupplicantLocalizationElementChange(
+            String elementName,
+            String existingContent,
+            String newContent) {
+        if (!StringUtils.equals(existingContent, newContent)) {
+            if (StringUtils.isEmpty(newContent)) {
+                return String.format("\n%s: deleted", elementName);
+            }
+            return String.format("\n%s: [%s]", elementName, StringUtils.abbreviateMiddle(newContent, "...", 80));
+        }
+        return "";
     }
 
 }

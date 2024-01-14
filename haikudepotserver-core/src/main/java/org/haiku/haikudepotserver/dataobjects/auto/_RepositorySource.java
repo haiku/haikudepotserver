@@ -6,7 +6,12 @@ import java.io.ObjectOutputStream;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.BaseProperty;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.EntityProperty;
+import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -22,20 +27,20 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _RepositorySource extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Boolean> ACTIVE = Property.create("active", Boolean.class);
-    public static final Property<String> CODE = Property.create("code", String.class);
-    public static final Property<String> FORCED_INTERNAL_BASE_URL = Property.create("forcedInternalBaseUrl", String.class);
-    public static final Property<String> IDENTIFIER = Property.create("identifier", String.class);
-    public static final Property<Timestamp> LAST_IMPORT_TIMESTAMP = Property.create("lastImportTimestamp", Timestamp.class);
-    public static final Property<Architecture> ARCHITECTURE = Property.create("architecture", Architecture.class);
-    public static final Property<List<PkgVersion>> PKG_VERSIONS = Property.create("pkg_versions", List.class);
-    public static final Property<Repository> REPOSITORY = Property.create("repository", Repository.class);
-    public static final Property<List<RepositorySourceExtraIdentifier>> REPOSITORY_SOURCE_EXTRA_IDENTIFIERS = Property.create("repositorySourceExtraIdentifiers", List.class);
-    public static final Property<List<RepositorySourceMirror>> REPOSITORY_SOURCE_MIRRORS = Property.create("repositorySourceMirrors", List.class);
+    public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
+    public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final StringProperty<String> FORCED_INTERNAL_BASE_URL = PropertyFactory.createString("forcedInternalBaseUrl", String.class);
+    public static final StringProperty<String> IDENTIFIER = PropertyFactory.createString("identifier", String.class);
+    public static final DateProperty<Timestamp> LAST_IMPORT_TIMESTAMP = PropertyFactory.createDate("lastImportTimestamp", Timestamp.class);
+    public static final EntityProperty<Architecture> ARCHITECTURE = PropertyFactory.createEntity("architecture", Architecture.class);
+    public static final ListProperty<PkgVersion> PKG_VERSIONS = PropertyFactory.createList("pkg_versions", PkgVersion.class);
+    public static final EntityProperty<Repository> REPOSITORY = PropertyFactory.createEntity("repository", Repository.class);
+    public static final ListProperty<RepositorySourceExtraIdentifier> REPOSITORY_SOURCE_EXTRA_IDENTIFIERS = PropertyFactory.createList("repositorySourceExtraIdentifiers", RepositorySourceExtraIdentifier.class);
+    public static final ListProperty<RepositorySourceMirror> REPOSITORY_SOURCE_MIRRORS = PropertyFactory.createList("repositorySourceMirrors", RepositorySourceMirror.class);
 
     protected Boolean active;
     protected String code;

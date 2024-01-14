@@ -17,12 +17,10 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
+import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
-import org.haiku.haikudepotserver.pkg.model.PkgScreenshotOptimizationJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
-import org.haiku.haikudepotserver.pkg.model.SizeLimitReachedException;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ByteCounterOutputStream;
@@ -239,11 +237,16 @@ public class PkgScreenshotController extends AbstractController {
             throw new PkgAuthorizationFailure();
         }
 
+        User user = obtainAuthenticatedUser(context);
         String screenshotCode;
 
         try {
             screenshotCode = pkgScreenshotService.storePkgScreenshotImage(
-                    request.getInputStream(), context, pkg.getPkgSupplement(), null).getCode();
+                    request.getInputStream(),
+                    context,
+                    new UserPkgSupplementModificationAgent(user),
+                    pkg.getPkgSupplement(),
+                    null).getCode();
         } catch (SizeLimitReachedException sizeLimit) {
             LOGGER.warn("attempt to load in a screenshot larger than the size limit");
             throw new MissingOrBadFormat();

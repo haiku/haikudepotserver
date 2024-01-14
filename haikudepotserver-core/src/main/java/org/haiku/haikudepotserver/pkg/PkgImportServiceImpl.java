@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,27 +14,9 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.MediaType;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
-import org.haiku.haikudepotserver.dataobjects.PkgUrlType;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionCopyright;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionLicense;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionUrl;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
-import org.haiku.haikudepotserver.pkg.model.PkgIconService;
-import org.haiku.haikudepotserver.pkg.model.PkgImportService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.support.ExposureType;
-import org.haiku.haikudepotserver.support.HpkgHelper;
-import org.haiku.haikudepotserver.support.URLHelperService;
-import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.support.*;
 import org.haiku.pkg.AttributeContext;
 import org.haiku.pkg.HpkgFileExtractor;
 import org.haiku.pkg.model.Attribute;
@@ -51,7 +33,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -111,7 +92,6 @@ public class PkgImportServiceImpl implements PkgImportService {
             pkgServiceImpl.ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
             LOGGER.info("the package [{}] did not exist; will create", pkg.getName());
         } else {
-
             persistedPkg = persistedPkgOptional.get();
             pkgServiceImpl.ensurePkgProminence(objectContext, persistedPkg, repositorySource.getRepository());
 
@@ -383,8 +363,10 @@ public class PkgImportServiceImpl implements PkgImportService {
     }
 
     private void populateIconFromPayload(
-            ObjectContext objectContext, PkgVersion persistedPkgVersion,
-            AttributeContext context, Attribute attribute) {
+            ObjectContext objectContext,
+            PkgVersion persistedPkgVersion,
+            AttributeContext context,
+            Attribute attribute) {
         Attribute dataAttr = attribute.tryGetChildAttribute(AttributeId.DATA).orElse(null);
 
         if (null == dataAttr) {
@@ -409,6 +391,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                     MediaType.getByCode(objectContext, MediaType.MEDIATYPE_HAIKUVECTORICONFILE),
                     null,
                     objectContext,
+                    new NonUserPkgSupplementModificationAgent(null, PkgSupplementModificationAgent.HDS_HPKG_ORIGIN_SYSTEM_DESCRIPTION),
                     persistedPkgVersion.getPkg().getPkgSupplement());
         }
         catch (IOException ioe) {
