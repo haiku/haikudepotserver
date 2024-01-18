@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "id": "http://depot.haiku-os.org/schema/pkg/dumpexport.json",
+  "title": "PkgLocalizations",
+  "javaType": "org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalizations",
+  "type": "object",
+  "required": [
+    "name",
+    "localizations"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "The name of the package such as `gcompris` or `ultracopier`."
+    },
+    "localizations": {
+      "type": "array",
+      "description": "This is an array of translations for the package identified by the `name`. Each item indicates a single translation of a specific item such as the `title` for a specific language.",
+      "items": {
+        "type": "object",
+        "javaType": "org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalization",
+        "required": [
+          "code",
+          "naturalLanguageCode",
+          "content"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^title|summary|description$"
+          },
+          "createTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "This optional field indicates when the translation was created; millis since the epoch."
+          },
+          "modifyTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "This optional field indicates when the translation was last modified; millis since the epoch."
+          },
+          "naturalLanguageCode": {
+            "type": "string",
+            "description": "This is a two-character (Set 1) ISO-639 natural language code to identify the language of the translation.",
+            "pattern": "^[a-z]{2}$"
+          },
+          "content": {
+            "type": "string",
+            "pattern": "This is the localization for the package and the content type identified by the `code` field. If this is `null` or empty then it indicates there is no translation or the translation should be deleted."
+          },
+          "userDescription": {
+            "type": "string",
+            "description": "This is a description of the actor who edited the localization. This may not be able to be provided on read and so may be absent."
+          }
+        }
+      }
+    }
+  }
+}
