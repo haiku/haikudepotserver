@@ -81,6 +81,21 @@ Distributed under the terms of the MIT License.
     </section>
 
     <section>
+        <title>Package Supplement Modification</title>
+        <para>
+            Each time the user changes the Package Supplement (an icon, a screenshot, localization ...)
+            then a record is made as to who changed this. Because the data may change over time a
+            description of the change is captured instead of linking to the actual entity which has
+            changed.
+        </para>
+        <para>
+            The entry may not be linked to a user in the HDS system because the actual user who made the
+            change might have come from another system altogether. In any case, the field
+            &quot;user_description&quot; provides a description of user who did make the change.
+        </para>
+    </section>
+
+    <section>
         <title>User Usage Conditions</title>
         <para>
             User usage conditions are the terms by which a user is able to use the HDS system.  These

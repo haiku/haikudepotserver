@@ -38,25 +38,14 @@ Distributed under the terms of the MIT License.
         </warning>
 
         <para>
-            Authentication of invocations for both REST and JSON-RPC uses either &quot;basic authentication&quot; or
-            &quot;token bearer authentication&quot;.  The application does not support cookie-based sessions.  If
+            Authentication of invocations for both REST and JSON-RPC uses
+            &quot;token bearer authentication&quot;. The application does not support cookie-based sessions.  If
             the authentication fails then the request will continue unauthenticated; there is no 'challenge'
-            necessarily returned back to the caller.  A special API exists to provide a means to test a username
+            necessarily returned back to the caller. A special API exists to provide a means to test a username
             and password authentication for the purposes of a login panel or similar;
-            &quot;UserApi.authenticateUser(..)&quot;.  This method will return a token if the authentication
+            &quot;/__api/v2/user/authenticate-user&quot;. This endpoint will return a token if the authentication
             was successful.
         </para>
-
-        <section xml:id="security-authentication-basic">
-            <title>Basic Authentication</title>
-
-            <para>
-                This approach involves an HTTP header being included in each invocation that identifies the user
-                and also provides their password.  The value of the header includes a base-64 encoded string of the
-                username and password, separated by a colon.  This is an example of such a header
-                &quot;Authorization: Basic dXNlcjpwYXNzd29yZA&quot;.
-            </para>
-        </section>
 
         <section xml:id="security-authentication-tokenbearer">
             <title>Token Bearer</title>
@@ -64,8 +53,8 @@ Distributed under the terms of the MIT License.
             <para>
                 This is a system of authentication that relies on a token being supplied with a client API
                 invocation to the server.  The client will first use the API &quot;UserApi.authenticateUser(..)&quot;
-                to initially authenticate and obtain a token.  This token can then be used to authenticate further
-                API calls by including it in an HTTP header.  An (abbreviated) example of the header might be;
+                to initially authenticate and obtain a token. This token can then be used to authenticate further
+                API calls by including it in an HTTP header. An (abbreviated) example of the header might be;
                 &quot;Authorization: Bearer eyJhbGciOiJIUzI.eyJleHAiOjE0MDM5NDY.1ifnDTLvX3A&quot;.
             </para>
 

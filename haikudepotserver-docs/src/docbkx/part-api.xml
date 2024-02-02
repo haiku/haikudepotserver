@@ -159,6 +159,58 @@ Distributed under the terms of the MIT License.
                 payloads can be found at &quot;org.haiku.haikudepotserver.api1.support.ErrorResolverImpl&quot;.
             </para>
         </section>
+    </section>
+
+    <section>
+        <title>Raising, Waiting and Fetching Data for Background Jobs</title>
+
+        <para>
+            Some requests are instant and some take some time to complete. An example of an instant API is
+            fetching the details of a user. An example of a request that may take some time is producing an
+            archive of all of the icons for all packages in the system.
+        </para>
+
+        <para>
+            For the long-run requests the HDS API system provides an asynchronous interface with a generalized
+            pattern of interaction. This section covers how to use this pattern. The pattern generally follows
+            the following steps;
+        </para>
+
+        <para>
+            <itemizedlist>
+                <listitem>
+                    Create the job using a POST request to a specific job-creation API. An example would be a
+                    POST request to &quot;/__api/v2/pkg-job/queue-pkg-icon-export-archive-job&quot;. This API will return
+                    a job code.
+                </listitem>
+                <listitem>
+                    Poll until complete by sending a series of POST requests to
+                    &quot;/__api/v2/job/get-job&quot; with the job code and wait for the job status to
+                    be &quot;FINISHED&quot; or &quot;FAILED&quot; or &quot;CANCELLED&quot;.
+                </listitem>
+                <listitem>
+                    The &quot;get-job&quot; response has some data codes under &quot;generatedData&quot; which
+                    you can use to obtain the data.
+                </listitem>
+                <listitem>
+                    GET &quot;/__secured/jobdata/{datacode}/download&quot; to obtain the data. Note this will
+                    need to handle redirects.
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            Details about the specific API call signatures for any API with paths &quot;/__api/...&quot; can
+            be obtained from the Open-API specification in the &quot;haikudepotserver-api2&quot; module.
+        </para>
+
+        <para>
+            Some jobs may require data to be provided. An example of this might be where a tar-ball of screenshots
+            is uploaded to be imported. In this case, HDS provides an API to upload the data which will then return
+            a data code. Where required, the data code can be used with the API to start a job. To access the data
+            upload function, invoke a POST request to &quot;/__secured/jobdata&quot;. The API call will return the
+            data code in a response header &quot;X-HaikuDepotServer-DataGuid&quot;.
+        </para>
 
     </section>
 
@@ -173,45 +225,10 @@ Distributed under the terms of the MIT License.
         </para>
 
         <para>
-            To generate the DTO objects as Haiku-friendly C++ objects, use the &quot;jsonschema2cppmodel.py&quot;
-            tool.  To generate a parser that can be used with the &quot;BJson&quot; C++ class, use the
-            &quot;jsonschema2cppparser.py&quot; program.
-        </para>
-
-        <para>
-            <programlisting>python \
-jsonschema2cppmodel.py \
--i /So...erver-core/src/main/resources/schema/repository/dumpexport.json \
---outputdirectory /So...iku/src/apps/haikudepot/server/dumpexportrepository/
-
-python \
-jsonschema2cppparser.py \
--i /So...erver-core/src/main/resources/schema/repository/dumpexport.json \
---outputdirectory /So...iku/src/apps/haikudepot/server/dumpexportrepository/ \
---supportbulkcontainer
-</programlisting>
-        </para>
-
-        <para>
-            The parser will generate a &quot;BJsonEventListener&quot; sub-class for parsing a single object as
-            described by the schema.  It will also optionally generate a &quot;BJsonEventListener&quot;
-            that is able to handle a bulk-container structure.  The bulk container expects a structure of the
-            following form and raises events through an &quot;item listener&quot; object.
-        </para>
-
-        <para>
-            <programlisting>{
- &quot;items&quot;:[
-  { &quot;code&quot;: &quot;Adelaide&quot; },
-  { &quot;code&quot;: &quot;Brisbane&quot; },
-  { &quot;code&quot;: &quot;Melbourne&quot; }
- ]
-}
-            </programlisting>
-        </para>
-
-        <para>
-            Each of the JSON objects within the &quot;items&quot; should conform to the specified schema.
+            The HaikuDepot build system will use the schema to generate C++ objects. You can find this in the
+            &quot;build&quot; directory of the HaikuDepot source. The schema are read and are
+            trans-coded to C++ using Python scripts. The schema files are copied manually from HDS to the
+            HaikuDepot source.
         </para>
 
     </section>
@@ -252,7 +269,7 @@ jsonschema2cppparser.py \
         </section>
 
         <section xml:id="api-importrepositorydata">
-            <title>Import Repository Data</title>
+            <title>Trigger Import Repository Data</title>
 
             <para>
                 This API provides a mechanism by which an external client is able to trigger the application to
