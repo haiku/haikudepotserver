@@ -114,7 +114,7 @@ public interface JobService {
      * the job runner.</P>
      */
 
-    JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode) throws IOException;
+    JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode, JobDataEncoding encoding) throws IOException;
 
     /**
      * <p>This method will <em>provide</em> some data for a job to run; input data.  This would be called by
@@ -126,7 +126,7 @@ public interface JobService {
      * @return an identifier for the data to be referenced later when a job is loaded.
      */
 
-    JobData storeSuppliedData(String useCode, String mediaTypeCode, ByteSource byteSource) throws IOException;
+    JobData storeSuppliedData(String useCode, String mediaTypeCode, JobDataEncoding encoding, ByteSource byteSource) throws IOException;
 
     /**
      * <p>This method will return a job data with an object that is able to provide the octets of the data.</p>

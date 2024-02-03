@@ -14,6 +14,7 @@ public class CreateUserRatingRequest {
      * @deprecated use the {@link #repositorySourceCode} instead
      */
 
+    @Deprecated
     public String repositoryCode;
 
     /**

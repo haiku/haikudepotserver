@@ -24,15 +24,18 @@ public class JobData {
     private final String useCode;
     private final String guid;
     private final String mediaTypeCode;
+    private final JobDataEncoding encoding;
     private final Date createTimestamp;
 
-    public JobData(String guid, JobDataType dataType, String useCode, String mediaTypeCode) {
+    public JobData(String guid, JobDataType dataType, String useCode, String mediaTypeCode, JobDataEncoding encoding) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(guid), "the guid must be supplied to identify the data");
-        Preconditions.checkArgument(null!=dataType, "the data type must be provided");
+        Preconditions.checkArgument(null != dataType, "the data type must be provided");
+        Preconditions.checkArgument(null != encoding, "the encoding must be provided");
         this.guid = guid;
         this.dataType = dataType;
         this.useCode = useCode;
         this.mediaTypeCode = mediaTypeCode;
+        this.encoding = encoding;
         this.createTimestamp = new Date();
     }
 
@@ -46,6 +49,10 @@ public class JobData {
 
     public String getMediaTypeCode() {
         return mediaTypeCode;
+    }
+
+    public JobDataEncoding getEncoding() {
+        return encoding;
     }
 
     public JobDataType getDataType() {

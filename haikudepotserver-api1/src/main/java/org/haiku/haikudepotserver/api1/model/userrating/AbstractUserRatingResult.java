@@ -14,6 +14,7 @@ public class AbstractUserRatingResult {
          * @deprecated please use {@link #repositorySourceCode} instead.
          */
 
+        @Deprecated
         public String repositoryCode;
 
         /**

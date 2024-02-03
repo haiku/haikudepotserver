@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -90,6 +91,7 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "sample-pkgscreenshotimportarchive-supplied.tgz",
                 MediaType.TAR.toString(),
+                JobDataEncoding.GZIP,
                 getResourceByteSource("sample-pkgscreenshotimportarchive-supplied.tgz")
         ).getGuid());
         spec.setImportStrategy(PkgScreenshotImportArchiveJobSpecification.ImportStrategy.REPLACE);
@@ -168,6 +170,7 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "sample-pkgscreenshotimportarchive-supplied.tgz",
                 MediaType.TAR.toString(),
+                JobDataEncoding.GZIP,
                 getResourceByteSource("sample-pkgscreenshotimportarchive-supplied.tgz")
         ).getGuid());
         spec.setImportStrategy(PkgScreenshotImportArchiveJobSpecification.ImportStrategy.AUGMENT);

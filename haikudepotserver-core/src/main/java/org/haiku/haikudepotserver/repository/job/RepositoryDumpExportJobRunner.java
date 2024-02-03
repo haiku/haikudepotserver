@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -68,12 +69,13 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.JSON_UTF_8.toString());
+                MediaType.JSON_UTF_8.toString(),
+                JobDataEncoding.GZIP);
 
         try(
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(outputStream)
-                ) {
+                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
+                final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(gzipOutputStream)                ) {
 
             ObjectContext context = serverRuntime.newContext();
             List<Repository> repositories = Repository.getAll(context)

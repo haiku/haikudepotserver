@@ -7,14 +7,7 @@ package org.haiku.haikudepotserver.job;
 
 import com.google.common.io.ByteSource;
 import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.job.model.Job;
-import org.haiku.haikudepotserver.job.model.JobData;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.job.model.JobSpecification;
-import org.haiku.haikudepotserver.job.model.TestJobSpecificationImpl;
+import org.haiku.haikudepotserver.job.model.*;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -173,12 +166,12 @@ public class TestJobServiceImpl implements JobService {
     }
 
     @Override
-    public JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode) throws IOException {
+    public JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode, JobDataEncoding encoding) throws IOException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public JobData storeSuppliedData(String useCode, String mediaTypeCode, ByteSource byteSource) {
+    public JobData storeSuppliedData(String useCode, String mediaTypeCode, JobDataEncoding encoding, ByteSource byteSource) {
         throw new UnsupportedOperationException();
     }
 

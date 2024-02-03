@@ -8,10 +8,7 @@ package org.haiku.haikudepotserver.job;
 import com.google.common.base.Charsets;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.Uninterruptibles;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.job.model.TestNumberedLinesJobSpecification;
+import org.haiku.haikudepotserver.job.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,7 +27,8 @@ public class TestNumberedLinesJobRunner extends AbstractJobRunner<TestNumberedLi
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.PLAIN_TEXT_UTF_8.toString());
+                MediaType.PLAIN_TEXT_UTF_8.toString(),
+                JobDataEncoding.NONE);
 
         try (
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openStream();

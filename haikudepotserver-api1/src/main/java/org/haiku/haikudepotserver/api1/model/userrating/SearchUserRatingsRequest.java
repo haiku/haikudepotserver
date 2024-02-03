@@ -19,6 +19,7 @@ public class SearchUserRatingsRequest extends AbstractSearchRequest {
      * @deprecated use the {@link #repositorySourceCode} instead
      */
 
+    @Deprecated
     public String repositoryCode;
 
     /**

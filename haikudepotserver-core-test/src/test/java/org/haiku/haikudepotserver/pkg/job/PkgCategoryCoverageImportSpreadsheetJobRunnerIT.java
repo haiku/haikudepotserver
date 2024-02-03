@@ -15,6 +15,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -53,6 +54,7 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractInt
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "input",
                 MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE,
                 getResourceByteSource("sample-pkgcategorycoverageimportspreadsheet-supplied.csv")
         ).getGuid());
 

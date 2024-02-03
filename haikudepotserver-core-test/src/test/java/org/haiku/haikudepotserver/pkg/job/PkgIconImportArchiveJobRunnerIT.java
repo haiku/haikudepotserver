@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -90,6 +91,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
         spec.setInputDataGuid(jobService.storeSuppliedData(
                 "sample-pkgiconimportarchive-supplied.tgz",
                 MediaType.TAR.toString(),
+                JobDataEncoding.GZIP,
                 getResourceByteSource("sample-pkgiconimportarchive-supplied.tgz")
         ).getGuid());
 

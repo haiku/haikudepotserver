@@ -24,10 +24,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
@@ -97,7 +94,8 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.CSV_UTF_8.toString());
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE);
 
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 

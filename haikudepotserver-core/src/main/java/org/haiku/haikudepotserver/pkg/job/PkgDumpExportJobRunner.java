@@ -20,6 +20,7 @@ import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
@@ -79,7 +80,8 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.JSON_UTF_8.toString());
+                MediaType.JSON_UTF_8.toString(),
+                JobDataEncoding.GZIP);
 
         try (
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();

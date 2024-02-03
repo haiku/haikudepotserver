@@ -52,6 +52,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 @Component("pkgJobApiServiceV2")
@@ -263,9 +264,9 @@ public class PkgJobApiService extends AbstractApiService {
         AbstractJobSpecification spec;
 
         try {
-            spec = jobSpecificationClass.newInstance();
+            spec = jobSpecificationClass.getDeclaredConstructor().newInstance();
         }
-        catch(InstantiationException | IllegalAccessException e) {
+        catch(InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("unable to create the job specification for class; " + jobSpecificationClass.getSimpleName(), e);
         }
 

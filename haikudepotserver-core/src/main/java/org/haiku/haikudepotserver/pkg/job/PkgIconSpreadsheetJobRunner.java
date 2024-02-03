@@ -13,6 +13,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgIconConfiguration;
@@ -72,7 +73,8 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.CSV_UTF_8.toString());
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE);
 
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();

@@ -16,10 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.UserPkgSupplementModificationAgent;
@@ -68,7 +65,8 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.CSV_UTF_8.toString());
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE);
 
         // if there is input data then feed it in and process it to manipulate the packages'
         // categories.

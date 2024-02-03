@@ -17,10 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.pkg.model.BadPkgIconException;
 import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
@@ -100,7 +97,8 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.CSV_UTF_8.toString());
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE);
 
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 

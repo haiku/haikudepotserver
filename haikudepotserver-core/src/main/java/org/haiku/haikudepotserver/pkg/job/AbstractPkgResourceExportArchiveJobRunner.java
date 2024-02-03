@@ -16,6 +16,7 @@ import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
@@ -65,7 +66,8 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.TAR.toString());
+                MediaType.TAR.toString(),
+                JobDataEncoding.GZIP);
 
         try(
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();

@@ -186,6 +186,7 @@ public class JobController extends AbstractController {
             final HttpServletRequest request,
             final HttpServletResponse response,
             @RequestHeader(value = HttpHeaders.CONTENT_TYPE, required = false) String contentType,
+            @RequestHeader(value = HttpHeaders.CONTENT_ENCODING, required = false) String contentEncoding,
             @RequestParam(value = KEY_USECODE, required = false) String useCode)
     throws IOException {
 
@@ -207,6 +208,7 @@ public class JobController extends AbstractController {
         JobData data = jobService.storeSuppliedData(
                 useCode,
                 !Strings.isNullOrEmpty(contentType) ? contentType : MediaType.OCTET_STREAM.toString(),
+                JobDataEncoding.getByHeaderValue(contentEncoding),
                 new ByteSource() {
                     @Override
                     public InputStream openStream() throws IOException {

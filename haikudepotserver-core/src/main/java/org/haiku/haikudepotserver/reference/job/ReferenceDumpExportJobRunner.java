@@ -16,6 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.job.PkgDumpExportJobRunner;
@@ -68,7 +69,8 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.JSON_UTF_8.toString());
+                MediaType.JSON_UTF_8.toString(),
+                JobDataEncoding.GZIP);
 
         try (
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();

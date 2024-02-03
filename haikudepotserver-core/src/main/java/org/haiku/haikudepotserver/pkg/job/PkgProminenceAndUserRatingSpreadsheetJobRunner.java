@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgProminence;
 import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
@@ -63,7 +64,8 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.CSV_UTF_8.toString());
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE);
 
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();

@@ -10,10 +10,12 @@ import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotSpreadsheetJobSpecification;
@@ -61,7 +63,8 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.CSV_UTF_8.toString());
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE);
 
         try (
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();

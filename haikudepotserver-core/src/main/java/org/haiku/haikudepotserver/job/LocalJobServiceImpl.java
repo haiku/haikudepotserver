@@ -53,6 +53,8 @@ public class LocalJobServiceImpl
 
     private final static long TTL_DEFAULT = TimeUnit.HOURS.toMillis(2);
 
+    private final static String EXTENSION_DAT = "dat";
+
     private final DataStorageService dataStorageService;
 
     /**
@@ -277,7 +279,7 @@ public class LocalJobServiceImpl
         jobs.put(job.getGuid(), job);
         setInternalJobRunQueuedTimestamp(specification.getGuid());
         runSpecificationInCurrentThread(specification);
-        LOGGER.debug("{}; did run job immediately", specification.toString());
+        LOGGER.debug("{}; did run job immediately", specification);
 
         return job;
     }
@@ -290,7 +292,7 @@ public class LocalJobServiceImpl
         Preconditions.checkArgument(null != specification, "the job specification must be supplied to run the job");
         Optional<JobRunner> jobRunnerOptional = getJobRunner(specification.getJobTypeCode());
 
-        if(!jobRunnerOptional.isPresent()) {
+        if(jobRunnerOptional.isEmpty()) {
             LOGGER.error(
                     "{}; there is no job runner available for job type code '{}'; - failing",
                     specification.toString(),
@@ -333,7 +335,7 @@ public class LocalJobServiceImpl
         ImmutableList.copyOf(datas)
                 .stream()
                 .filter((d) -> System.currentTimeMillis() - d.getCreateTimestamp().getTime() > TTL_DEFAULT)
-                .filter((d) -> !tryFindInternalJobOwningJobData(d).isPresent())
+                .filter((d) -> tryFindInternalJobOwningJobData(d).isEmpty())
                 .forEach((d) -> {
                     if(dataStorageService.remove(d.getGuid())) {
                         LOGGER.info("did delete the expired unassociated job data; [{}]", d);
@@ -384,23 +386,12 @@ public class LocalJobServiceImpl
             for (Job job : ImmutableList.copyOf(jobs.values())) {
 
                 Long ttl = job.tryGetTimeToLiveMillis().orElse(TTL_DEFAULT);
-                Date quiesenceTimestamp = null;
-
-                switch (job.getStatus()) {
-
-                    case CANCELLED:
-                        quiesenceTimestamp = job.getCancelTimestamp();
-                        break;
-
-                    case FINISHED:
-                        quiesenceTimestamp = job.getFinishTimestamp();
-                        break;
-
-                    case FAILED:
-                        quiesenceTimestamp = job.getFailTimestamp();
-                        break;
-
-                }
+                Date quiesenceTimestamp = switch (job.getStatus()) {
+                    case CANCELLED -> job.getCancelTimestamp();
+                    case FINISHED -> job.getFinishTimestamp();
+                    case FAILED -> job.getFailTimestamp();
+                    default -> null;
+                };
 
                 if (null != quiesenceTimestamp) {
                     if (nowMillis - quiesenceTimestamp.getTime() > ttl) {
@@ -703,53 +694,48 @@ public class LocalJobServiceImpl
     @Override
     public String deriveDataFilename(String jobDataGuid) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobDataGuid));
+        return String.format(
+                "hds_%s_%s_%s.%s",
+                tryGetJobForData(jobDataGuid).map(JobSnapshot::getJobTypeCode).orElse("jobdata"),
+                DateTimeHelper.create14DigitDateTimeFormat().format(Instant.now()),
+                jobDataGuid.substring(0,4),
+                tryGetData(jobDataGuid).map(LocalJobServiceImpl::deriveExtension).orElse(EXTENSION_DAT));
+    }
 
-        String descriptor = "jobdata";
-        String extension = "dat";
+    private static String deriveExtensionWithoutEncoding(JobData jobData) {
+        if (!Strings.isNullOrEmpty(jobData.getMediaTypeCode())) {
+            MediaType jobDataMediaTypeNoParams = MediaType.parse(jobData.getMediaTypeCode()).withoutParameters();
 
-        Optional<JobData> jobDataOptional = tryGetData(jobDataGuid);
-
-        if(jobDataOptional.isPresent()) {
-
-            JobData jobData = jobDataOptional.get();
-            Optional<? extends JobSnapshot> jobOptional = tryGetJobForData(jobDataGuid);
-
-            if(jobOptional.isPresent()) {
-               descriptor = jobOptional.get().getJobTypeCode();
+            if (jobDataMediaTypeNoParams.equals(MediaType.CSV_UTF_8.withoutParameters())) {
+                return "csv";
             }
 
-            // TODO; get the extensions from a file etc...
-            if (!Strings.isNullOrEmpty(jobData.getMediaTypeCode())) {
-                MediaType jobDataMediaTypeNoParams = MediaType.parse(jobData.getMediaTypeCode()).withoutParameters();
+            if(jobDataMediaTypeNoParams.equals(MediaType.ZIP.withoutParameters())) {
+                return "zip";
+            }
 
-                if (jobDataMediaTypeNoParams.equals(MediaType.CSV_UTF_8.withoutParameters())) {
-                    extension = "csv";
-                }
+            if(jobDataMediaTypeNoParams.equals(MediaType.TAR.withoutParameters())) {
+                return "tar";
+            }
 
-                if(jobDataMediaTypeNoParams.equals(MediaType.ZIP.withoutParameters())) {
-                    extension = "zip";
-                }
+            if(jobDataMediaTypeNoParams.equals(MediaType.PLAIN_TEXT_UTF_8.withoutParameters())) {
+                return "txt";
+            }
 
-                if(jobDataMediaTypeNoParams.equals(MediaType.TAR.withoutParameters())) {
-                    extension = "tgz";
-                }
-
-                if(jobDataMediaTypeNoParams.equals(MediaType.PLAIN_TEXT_UTF_8.withoutParameters())) {
-                    extension = "txt";
-                }
-
-                if(jobDataMediaTypeNoParams.equals(MediaType.JSON_UTF_8.withoutParameters())) {
-                    extension = "json";
-                }
+            if(jobDataMediaTypeNoParams.equals(MediaType.JSON_UTF_8.withoutParameters())) {
+                return "json";
             }
         }
 
-        return String.format(
-                "hds_%s_%s_%s.%s",
-                descriptor,
-                DateTimeHelper.create14DigitDateTimeFormat().format(Instant.now()),
-                jobDataGuid.substring(0,4),
-                extension);
+        return EXTENSION_DAT;
+    }
+
+    private static String deriveExtension(JobData jobData) {
+        String extensionWithoutEncoding = deriveExtensionWithoutEncoding(jobData);
+        return switch (jobData.getEncoding()) {
+            case NONE -> extensionWithoutEncoding;
+            case GZIP -> extensionWithoutEncoding + ".gz";
+        };
     }
 
     @Override
@@ -762,14 +748,15 @@ public class LocalJobServiceImpl
     public JobDataWithByteSink storeGeneratedData(
             String jobGuid,
             String useCode,
-            String mediaTypeCode) throws IOException {
+            String mediaTypeCode,
+            JobDataEncoding encoding) throws IOException {
 
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobGuid));
 
         Job job = getInternalJob(jobGuid);
         String guid = UUID.randomUUID().toString();
 
-        JobData data = new JobData(guid, JobDataType.GENERATED,useCode,mediaTypeCode);
+        JobData data = new JobData(guid, JobDataType.GENERATED, useCode, mediaTypeCode, encoding);
         JobDataWithByteSink result = new JobDataWithByteSink(data,dataStorageService.put(guid));
 
         synchronized(this) {
@@ -782,7 +769,7 @@ public class LocalJobServiceImpl
     }
 
     @Override
-    public JobData storeSuppliedData(String useCode, String mediaTypeCode, ByteSource byteSource) throws IOException {
+    public JobData storeSuppliedData(String useCode, String mediaTypeCode, JobDataEncoding encoding, ByteSource byteSource) throws IOException {
         Preconditions.checkArgument(null!=byteSource, "the byte source must be supplied to provide data");
         String guid = UUID.randomUUID().toString();
         JobData data;
@@ -793,7 +780,7 @@ public class LocalJobServiceImpl
             // TODO; constrain this to a sensible size
 
             len = dataStorageService.put(guid).writeFrom(inputStream);
-            data = new JobData(guid, JobDataType.SUPPLIED, useCode, mediaTypeCode);
+            data = new JobData(guid, JobDataType.SUPPLIED, useCode, mediaTypeCode, encoding);
 
             synchronized (this) {
                 datas.add(data);

@@ -10,8 +10,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -52,7 +54,8 @@ public class MetricsGeneralReportJobRunner extends AbstractJobRunner<MetricsGene
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
                 "download",
-                MediaType.JSON_UTF_8.toString());
+                MediaType.JSON_UTF_8.toString(),
+                JobDataEncoding.GZIP);
 
         try (
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
