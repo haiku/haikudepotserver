@@ -47,156 +47,324 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi-generator-maven-plugin.version}</version>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
 
-                <configuration>
-                    <apiPackage>org.haiku.haikudepotserver.api2</apiPackage>
-                    <modelPackage>org.haiku.haikudepotserver.api2.model</modelPackage>
-                    <configOptions>
-                        <!-- useTags will use the tags from the spec to drive the generation -->
-                        <useTags>true</useTags>
-                        <interfaceOnly>true</interfaceOnly>
-                        <sourceFolder>src/gen/java/main</sourceFolder>
-                        <dateLibrary>java8</dateLibrary>
-                        <library>spring-boot</library>
-                        <skipDefaultInterface>true</skipDefaultInterface>
-                        <generateSupportingFiles>false</generateSupportingFiles>
-                        <useSpringBoot3>true</useSpringBoot3>
-                        <!-- removes some unused import problem -->
-                        <openApiNullable>false</openApiNullable>
-                    </configOptions>
-                </configuration>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openapitools</groupId>
+                        <artifactId>openapi-generator-maven-plugin</artifactId>
+                        <version>${openapi-generator-maven-plugin.version}</version>
 
-                <executions>
-
-                    <execution>
-                        <id>authorization-spring</id>
-                        <goals><goal>generate</goal></goals>
                         <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/authorization.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <apiPackage>org.haiku.haikudepotserver.api2</apiPackage>
+                            <modelPackage>org.haiku.haikudepotserver.api2.model</modelPackage>
+                            <configOptions>
+                                <!-- useTags will use the tags from the spec to drive the generation -->
+                                <useTags>true</useTags>
+                                <interfaceOnly>true</interfaceOnly>
+                                <sourceFolder>src/gen/java/main</sourceFolder>
+                                <dateLibrary>java8</dateLibrary>
+                                <library>spring-boot</library>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <generateSupportingFiles>false</generateSupportingFiles>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <!-- removes some unused import problem -->
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
                         </configuration>
-                    </execution>
 
-                    <execution>
-                        <id>authorization-job-spring</id>
-                        <goals><goal>generate</goal></goals>
+                        <executions>
+
+                            <execution>
+                                <id>authorization-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/authorization.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>authorization-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/authorization-job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>captcha-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/captcha.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>miscellaneous-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/miscellaneous.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>user-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/user.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>pkg-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/pkg.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>pkg-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/pkg-job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>repository-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/repository.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>repository-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/repository-job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>user-rating-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/user-rating.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>user-rating-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/user-rating-job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>metrics-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/metrics-job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
+        </profile>
+
+        <profile>
+            <id>python</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openapitools</groupId>
+                        <artifactId>openapi-generator-maven-plugin</artifactId>
+                        <version>${openapi-generator-maven-plugin.version}</version>
+
                         <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/authorization-job.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <apiPackage>haikudepotserver_api2</apiPackage>
+                            <modelPackage>haikudepotserver_api2_model</modelPackage>
+                            <configOptions>
+                                <!-- useTags will use the tags from the spec to drive the generation -->
+                                <useTags>true</useTags>
+                            </configOptions>
                         </configuration>
-                    </execution>
 
-                    <execution>
-                        <id>captcha-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/captcha.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                        <executions>
 
-                    <execution>
-                        <id>job-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/job.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>authorization-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/authorization.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>miscellaneous-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/miscellaneous.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>authorization-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/authorization-job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>user-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/user.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>captcha-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/captcha.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>pkg-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/pkg.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/job.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>pkg-job-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/pkg-job.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>miscellaneous-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/miscellaneous.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>repository-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/repository.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>user-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/user.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>user-rating-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/user-rating.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>pkg-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/pkg.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>user-rating-job-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/user-rating-job.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>pkg-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/pkg-job.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                    <execution>
-                        <id>metrics-job-spring</id>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${inputspec.basedir}/metrics-job.yaml</inputSpec>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                        </configuration>
-                    </execution>
+                            <execution>
+                                <id>repository-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/repository.yaml</inputSpec>
+                                </configuration>
+                            </execution>
 
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+                            <execution>
+                                <id>repository-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/repository-job.yaml</inputSpec>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>user-rating-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/user-rating.yaml</inputSpec>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>user-rating-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/user-rating-job.yaml</inputSpec>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>metrics-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/metrics-job.yaml</inputSpec>
+                                </configuration>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
+        </profile>
+
+
+    </profiles>
 
 </project>

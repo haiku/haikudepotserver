@@ -22,7 +22,8 @@ Distributed under the terms of the MIT License.
             <title>Clients</title>
             <para>
                 A client of this system's API may be a desktop application (eg; Haiku Depot) or may be logic in
-                a web page where the web page is using some java-script to call back to the server.
+                a web page where the web page is using some java-script to call back to the server. It is also
+                possible for other applications to also interact with HDS using its API.
             </para>
         </section>
 
@@ -159,6 +160,26 @@ Distributed under the terms of the MIT License.
                 payloads can be found at &quot;org.haiku.haikudepotserver.api1.support.ErrorResolverImpl&quot;.
             </para>
         </section>
+    </section>
+
+    <section>
+        <title>Generating RPC-over-REST API Client for Python</title>
+
+        <para>
+            The RPC-over-REST API is expressed as Open-API specifications. These specifications can be used
+            to generate code that represents a client. To generate a client for the Python language, issue
+            the following commands from the top level of the project;
+        </para>
+
+        <para>
+            <programlisting>./mvnw --projects haikudepotserver-api2 package -Ppython</programlisting>
+        </para>
+
+        <para>
+            The resulting code can be found at
+            &quot;./haikudepotserver-api2/target/generated-sources/openapi/openapi_client&quot;.
+        </para>
+
     </section>
 
     <section>
