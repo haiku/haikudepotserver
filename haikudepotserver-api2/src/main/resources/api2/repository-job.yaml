@@ -1,0 +1,49 @@
+# Copyright 2023, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Repository Job API
+  version: "2.0"
+tags:
+  - name: repository-job
+paths:
+  /__api/v2/repository-job/queue-repository-dump-export-job:
+    description: >
+      Enqueues a request to produce a JSON data payload carrying data about all of the
+      repositories in the HDS system.
+    post:
+      tags:
+        - repository-job
+      operationId: queueRepositoryDumpExportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queueRepositoryDumpExportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Information about the job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queueRepositoryDumpExportJobResponseEnvelope"
+
+components:
+  schemas:
+    queueRepositoryDumpExportJobRequestEnvelope:
+      type: object
+    queueRepositoryDumpExportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queueRepositoryDumpExportJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queueRepositoryDumpExportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string

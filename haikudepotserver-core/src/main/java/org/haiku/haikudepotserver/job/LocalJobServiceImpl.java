@@ -720,20 +720,26 @@ public class LocalJobServiceImpl
 
             // TODO; get the extensions from a file etc...
             if (!Strings.isNullOrEmpty(jobData.getMediaTypeCode())) {
-                if (jobData.getMediaTypeCode().startsWith(MediaType.CSV_UTF_8.withoutParameters().toString())) {
+                MediaType jobDataMediaTypeNoParams = MediaType.parse(jobData.getMediaTypeCode()).withoutParameters();
+
+                if (jobDataMediaTypeNoParams.equals(MediaType.CSV_UTF_8.withoutParameters())) {
                     extension = "csv";
                 }
 
-                if(jobData.getMediaTypeCode().equals(MediaType.ZIP.withoutParameters().toString())) {
+                if(jobDataMediaTypeNoParams.equals(MediaType.ZIP.withoutParameters())) {
                     extension = "zip";
                 }
 
-                if(jobData.getMediaTypeCode().equals(MediaType.TAR.withoutParameters().toString())) {
+                if(jobDataMediaTypeNoParams.equals(MediaType.TAR.withoutParameters())) {
                     extension = "tgz";
                 }
 
-                if(jobData.getMediaTypeCode().equals(MediaType.PLAIN_TEXT_UTF_8.withoutParameters().toString())) {
+                if(jobDataMediaTypeNoParams.equals(MediaType.PLAIN_TEXT_UTF_8.withoutParameters())) {
                     extension = "txt";
+                }
+
+                if(jobDataMediaTypeNoParams.equals(MediaType.JSON_UTF_8.withoutParameters())) {
+                    extension = "json";
                 }
             }
         }

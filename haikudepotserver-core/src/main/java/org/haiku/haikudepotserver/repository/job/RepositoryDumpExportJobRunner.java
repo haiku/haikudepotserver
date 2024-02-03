@@ -72,8 +72,7 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
 
         try(
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
-                final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(gzipOutputStream)
+                final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(outputStream)
                 ) {
 
             ObjectContext context = serverRuntime.newContext();

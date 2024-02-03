@@ -134,6 +134,17 @@ angular.module('haikudepotserver').controller(
                 );
             };
 
+            $scope.goRepositoryDumpExportReport = function () {
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_REPOSITORY_JOB, 'queue-repository-dump-export-job').then(
+                    function (data) {
+                        navigateToViewJobOrNotifyRejection(data.guid);
+                    },
+                    function (err) {
+                        errorHandling.handleRemoteProcedureCallError(err);
+                    }
+                );
+            };
+
         }
     ]
 );

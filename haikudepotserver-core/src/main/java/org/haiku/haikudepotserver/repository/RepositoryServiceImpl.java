@@ -92,24 +92,6 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     }
 
-    /**
-     * <p>If we are searching for "http" URLs then we may as well search for "https" URLs as well.</p>
-     */
-
-    private List<String> toRepositorySourceUrlVariants(String url) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "the url must be supplied");
-
-        if (url.startsWith("http:")) {
-            return ImmutableList.of(url, "https:" + url.substring(5));
-        }
-
-        if (url.startsWith("https:")) {
-            return ImmutableList.of(url, "http:" + url.substring(6));
-        }
-
-        return Collections.singletonList(url);
-    }
-
     // ------------------------------
     // SEARCH
 
