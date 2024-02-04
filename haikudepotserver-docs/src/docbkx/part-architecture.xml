@@ -89,6 +89,15 @@
         <section xml:id="architecture-applicationserverinfrastructure-ormanddata">
             <title>Object-Relational / Data</title>
 
+            <figure id="cayenne-diagram">
+                <title>Diagram of Apache Cayenne elements</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/img-diagram-cayenne.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+
             <para>
                 The object-relational mapping (ORM) technology used in the project is
                 <ulink url="http://cayenne.apache.org/">Apache Cayenne</ulink>.
