@@ -145,6 +145,21 @@ angular.module('haikudepotserver').controller(
                 );
             };
 
+            $scope.goReferenceDumpExportReport = function () {
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_MISCELLANEOUS_JOB,
+                    'queue-reference-dump-export-job',
+                    { 'naturalLanguageCode': userState.naturalLanguageCode() }
+                ).then(
+                    function (data) {
+                        navigateToViewJobOrNotifyRejection(data.guid);
+                    },
+                    function (err) {
+                        errorHandling.handleRemoteProcedureCallError(err);
+                    }
+                );
+            };
+
         }
     ]
 );

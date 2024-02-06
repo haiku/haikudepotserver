@@ -1,0 +1,53 @@
+# Copyright 2024, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+
+openapi: 3.0.3
+info:
+  title: HDS Miscellaneous Job API
+  version: "2.0"
+tags:
+  - name: miscellaneous-job
+paths:
+  /__api/v2/miscellaneous-job/queue-reference-dump-export-job:
+    description: >
+      Enqueues a request to produce a JSON data payload carrying reference data from the
+      HDS system such as countries, natural languages, pkg categories and rating stabilities.
+    post:
+      tags:
+        - miscellaneous-job
+      operationId: queueReferenceDumpExportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queueReferenceDumpExportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Information about the job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queueReferenceDumpExportJobResponseEnvelope"
+
+components:
+  schemas:
+    queueReferenceDumpExportJobRequestEnvelope:
+      type: object
+      required: ["naturalLanguageCode"]
+      properties:
+        naturalLanguageCode:
+          type: string
+    queueReferenceDumpExportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queueReferenceDumpExportJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queueReferenceDumpExportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string

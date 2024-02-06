@@ -24,6 +24,7 @@ angular.module('haikudepotserver')
         ENDPOINT_API_V2_PKG_JOB: '/__api/v2/pkg-job',
         ENDPOINT_API_V2_CAPTCHA : '/__api/v2/captcha',
         ENDPOINT_API_V2_MISCELLANEOUS : '/__api/v2/miscellaneous',
+        ENDPOINT_API_V2_MISCELLANEOUS_JOB : '/__api/v2/miscellaneous-job',
         ENDPOINT_API_V2_USER : '/__api/v2/user',
         ENDPOINT_API_V2_JOB : '/__api/v2/job',
         ENDPOINT_API_V2_USERRATING : '/__api/v2/user-rating',

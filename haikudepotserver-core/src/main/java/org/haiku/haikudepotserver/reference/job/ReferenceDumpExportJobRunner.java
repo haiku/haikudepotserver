@@ -19,6 +19,7 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.job.PkgDumpExportJobRunner;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
 import org.haiku.haikudepotserver.reference.model.dumpexport.*;
@@ -49,16 +50,21 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
     private final ServerRuntime serverRuntime;
     private final MessageSource messageSource;
     private final RuntimeInformationService runtimeInformationService;
+
+    private final NaturalLanguageService naturalLanguageService;
+
     private final ObjectMapper objectMapper;
 
     public ReferenceDumpExportJobRunner(
             ServerRuntime serverRuntime,
             MessageSource messageSource,
             RuntimeInformationService runtimeInformationService,
+            NaturalLanguageService naturalLanguageService,
             ObjectMapper objectMapper) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.messageSource = Preconditions.checkNotNull(messageSource);
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
+        this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
         this.objectMapper = Preconditions.checkNotNull(objectMapper);
     }
 
@@ -149,6 +155,8 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                                             nl.getTitleKey(),
                                             new Object[] {},
                                             naturalLanguage.toLocale()));
+                            dnl.setHasData(naturalLanguageService.hasData(nl.getCode()));
+                            dnl.setHasLocalizationMessages(naturalLanguageService.hasLocalizationMessages(nl.getCode()));
                             return dnl;
                         })
                         .collect(Collectors.toList()));

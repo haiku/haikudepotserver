@@ -132,6 +132,16 @@
                             </execution>
 
                             <execution>
+                                <id>miscellaneous-job-spring</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>spring</generatorName>
+                                    <inputSpec>${inputspec.basedir}/miscellaneous-job.yaml</inputSpec>
+                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                </configuration>
+                            </execution>
+
+                            <execution>
                                 <id>user-spring</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
@@ -240,7 +250,7 @@
                         <executions>
 
                             <execution>
-                                <id>authorization-spring</id>
+                                <id>authorization-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -249,7 +259,7 @@
                             </execution>
 
                             <execution>
-                                <id>authorization-job-spring</id>
+                                <id>authorization-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -259,7 +269,7 @@
                             </execution>
 
                             <execution>
-                                <id>captcha-spring</id>
+                                <id>captcha-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -268,7 +278,7 @@
                             </execution>
 
                             <execution>
-                                <id>job-spring</id>
+                                <id>job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -277,7 +287,7 @@
                             </execution>
 
                             <execution>
-                                <id>miscellaneous-spring</id>
+                                <id>miscellaneous-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -286,7 +296,16 @@
                             </execution>
 
                             <execution>
-                                <id>user-spring</id>
+                                <id>miscellaneous-job-python</id>
+                                <goals><goal>generate</goal></goals>
+                                <configuration>
+                                    <generatorName>python</generatorName>
+                                    <inputSpec>${inputspec.basedir}/miscellaneous-job.yaml</inputSpec>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>user-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -295,7 +314,7 @@
                             </execution>
 
                             <execution>
-                                <id>pkg-spring</id>
+                                <id>pkg-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -304,7 +323,7 @@
                             </execution>
 
                             <execution>
-                                <id>pkg-job-spring</id>
+                                <id>pkg-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -313,7 +332,7 @@
                             </execution>
 
                             <execution>
-                                <id>repository-spring</id>
+                                <id>repository-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -322,7 +341,7 @@
                             </execution>
 
                             <execution>
-                                <id>repository-job-spring</id>
+                                <id>repository-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -331,7 +350,7 @@
                             </execution>
 
                             <execution>
-                                <id>user-rating-spring</id>
+                                <id>user-rating-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -340,7 +359,7 @@
                             </execution>
 
                             <execution>
-                                <id>user-rating-job-spring</id>
+                                <id>user-rating-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
@@ -349,7 +368,7 @@
                             </execution>
 
                             <execution>
-                                <id>metrics-job-spring</id>
+                                <id>metrics-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
                                     <generatorName>python</generatorName>
