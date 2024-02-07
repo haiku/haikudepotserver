@@ -49,6 +49,10 @@ angular.module('haikudepotserver').controller(
                 );
             }
 
+            $scope.isAuthenticated = function () {
+                return !!userState.user();
+            };
+
             $scope.canTriggerImport = function () {
                 return $scope.repositorySource &&
                     $scope.repositorySource.active &&
@@ -110,6 +114,25 @@ angular.module('haikudepotserver').controller(
                             $scope.didTriggerImportRepositorySource = false;
                         }, 3000)
 
+                    },
+                    function (err) {
+                        errorHandling.handleRemoteProcedureCallError(err);
+                    }
+                );
+            };
+
+            $scope.goQueuePkgDumpExportJob = function () {
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG_JOB,
+                    "queue-pkg-dump-export-job",
+                    {
+                        repositorySourceCode: $scope.repositorySource.code,
+                        naturalLanguageCode : userState.naturalLanguageCode()
+                    }
+                ).then(
+                    function (data) {
+                        $log.info('queued pkg dump export job');
+                        breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:data.guid }))
                     },
                     function (err) {
                         errorHandling.handleRemoteProcedureCallError(err);

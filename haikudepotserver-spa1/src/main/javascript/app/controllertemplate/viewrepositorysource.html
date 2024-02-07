@@ -131,6 +131,11 @@
                 <message key="viewRepositorySource.includeInactiveRepositorySourceMirrorsAction.title"></message>
             </a>
         </li>
+        <li ng-show="isAuthenticated()">
+            <a href="" ng-click="goQueuePkgDumpExportJob()">
+                <message key="viewRepositorySource.queuePkgDumpExportJobAction.title"></message>
+            </a>
+        </li>
     </ul>
 
 </div>

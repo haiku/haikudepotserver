@@ -5,22 +5,7 @@
 package org.haiku.haikudepotserver.api2;
 
 import com.google.common.base.Preconditions;
-import org.haiku.haikudepotserver.api2.model.QueuePkgCategoryCoverageExportSpreadsheetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgCategoryCoverageImportSpreadsheetJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgCategoryCoverageImportSpreadsheetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconArchiveImportJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconArchiveImportJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconExportArchiveJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconSpreadsheetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgLocalizationCoverageExportSpreadsheetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgProminenceAndUserRatingSpreadsheetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotArchiveImportJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotArchiveImportJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotExportArchiveJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotExportArchiveJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotSpreadsheetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgVersionPayloadLengthPopulationJobResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -115,6 +100,13 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
         return ResponseEntity.ok(
                 new QueuePkgVersionPayloadLengthPopulationJobResponseEnvelope()
                         .result(pkgJobApiService.queuePkgVersionPayloadLengthPopulationJob()));
+    }
+
+    @Override
+    public ResponseEntity<QueuePkgDumpExportJobResponseEnvelope> queuePkgDumpExportJob(QueuePkgDumpExportJobRequestEnvelope queuePkgDumpExportJobRequestEnvelope) {
+        return ResponseEntity.ok(
+                new QueuePkgDumpExportJobResponseEnvelope()
+                        .result(pkgJobApiService.queuePkgDumpExportJob(queuePkgDumpExportJobRequestEnvelope)));
     }
 
 }

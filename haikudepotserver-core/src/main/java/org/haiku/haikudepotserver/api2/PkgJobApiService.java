@@ -9,22 +9,8 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api2.model.QueuePkgCategoryCoverageExportSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgCategoryCoverageImportSpreadsheetJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgCategoryCoverageImportSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconArchiveImportJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconArchiveImportJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconExportArchiveJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgIconSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgLocalizationCoverageExportSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgProminenceAndUserRatingSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotArchiveImportJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotArchiveImportJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotExportArchiveJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotExportArchiveJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgScreenshotSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgVersionLocalizationCoverageExportSpreadsheetJobResult;
-import org.haiku.haikudepotserver.api2.model.QueuePkgVersionPayloadLengthPopulationJobResult;
+import org.haiku.haikudepotserver.api2.model.*;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
@@ -32,22 +18,11 @@ import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobData;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
-import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageExportSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgIconSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationCoverageExportSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgProminenceAndUserRatingSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgScreenshotExportArchiveJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgScreenshotImportArchiveJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgScreenshotSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgVersionPayloadLengthPopulationJobSpecification;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -244,6 +219,22 @@ public class PkgJobApiService extends AbstractApiService {
                 .guid(queueSimplePkgJob(
                         PkgVersionPayloadLengthPopulationJobSpecification.class,
                         Permission.BULK_PKGVERSIONPAYLOADLENGTHPOPULATION));
+    }
+
+    public QueuePkgDumpExportJobResult queuePkgDumpExportJob(QueuePkgDumpExportJobRequestEnvelope request) {
+
+        final ObjectContext context = serverRuntime.newContext();
+        User user = obtainAuthenticatedUser(context);
+
+        PkgDumpExportJobSpecification specification = new PkgDumpExportJobSpecification();
+        specification.setOwnerUserNickname(user.getNickname());
+        specification.setNaturalLanguageCode(
+                Optional.ofNullable(request.getNaturalLanguageCode())
+                        .orElseGet(() -> user.getNaturalLanguage().getCode()));
+        specification.setRepositorySourceCode(request.getRepositorySourceCode());
+
+        return new QueuePkgDumpExportJobResult()
+                .guid(jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_NONE));
     }
 
     private String queueSimplePkgJob(

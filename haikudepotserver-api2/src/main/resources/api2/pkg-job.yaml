@@ -8,6 +8,29 @@ info:
 tags:
   - name: pkg-job
 paths:
+  /__api/v2/pkg-job/queue-pkg-dump-export-job:
+    description: >
+      This API initiates a background job to produce a JSON document that contains the details for the packages
+      within a repository.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgDumpExportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgDumpExportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgDumpExportJobResponseEnvelope"
+
 
   /__api/v2/pkg-job/queue-pkg-category-coverage-export-spreadsheet-job:
     description: >
@@ -486,3 +509,22 @@ components:
         - AUGMENT
         - REPLACE
 
+    queuePkgDumpExportJobRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+        repositorySourceCode:
+          type: string
+    queuePkgDumpExportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgDumpExportJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgDumpExportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
