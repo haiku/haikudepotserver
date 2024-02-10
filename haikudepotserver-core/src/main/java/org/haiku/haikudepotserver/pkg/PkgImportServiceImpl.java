@@ -178,7 +178,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         pkg.setActive(Boolean.TRUE);
 
         String basePkgName = pkgServiceImpl
-                .tryGetMainPkgNameForSubordinatePkg(objectContext, name)
+                .tryGetMainPkgNameForSubordinatePkg(name)
                 .orElse(name);
 
         PkgSupplement pkgSupplement = PkgSupplement

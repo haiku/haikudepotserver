@@ -180,9 +180,12 @@ public interface PkgService {
      * a special build of the package within the gcc2-hybrid build environment.</p>
      *
      * <p>Note that the combination <code>_x86_devel</code> is also possible.</p>
+     *
+     * <p>If the name given is not a subordinate name then this method will return an empty
+     * {@link Optional}.</p>
      */
 
-    Optional<String> tryGetMainPkgNameForSubordinatePkg(ObjectContext objectContext, String subordinatePkgName);
+    Optional<String> tryGetMainPkgNameForSubordinatePkg(String subordinatePkgName);
 
     String createHpkgDownloadUrl(PkgVersion pkgVersion);
 

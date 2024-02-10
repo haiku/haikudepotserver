@@ -8,6 +8,7 @@ info:
 tags:
   - name: pkg-job
 paths:
+
   /__api/v2/pkg-job/queue-pkg-dump-export-job:
     description: >
       This API initiates a background job to produce a JSON document that contains the details for the packages
@@ -30,7 +31,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/queuePkgDumpExportJobResponseEnvelope"
-
 
   /__api/v2/pkg-job/queue-pkg-category-coverage-export-spreadsheet-job:
     description: >

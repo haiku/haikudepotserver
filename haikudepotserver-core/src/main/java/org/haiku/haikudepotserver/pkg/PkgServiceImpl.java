@@ -557,9 +557,7 @@ public class PkgServiceImpl implements PkgService {
 
     @Override
     public Optional<String> tryGetMainPkgNameForSubordinatePkg(
-            ObjectContext objectContext,
             final String subordinatePkgName) {
-        Preconditions.checkArgument(null != objectContext, "the object context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(subordinatePkgName), "the pkg must be provided");
 
         return SUFFIXES_SUBORDINATE_PKG_NAMES

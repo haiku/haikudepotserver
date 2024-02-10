@@ -34,7 +34,6 @@ import java.util.zip.GZIPInputStream;
 @ContextConfiguration(classes = TestConfig.class)
 public class PkgDumpExportJobRunnerIT extends AbstractIntegrationTest {
 
-
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
 
