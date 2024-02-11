@@ -182,7 +182,7 @@ Distributed under the terms of the MIT License.
 
     </section>
 
-    <section>
+    <section xml:id="api-jobs-general">
         <title>Raising, Waiting and Fetching Data for Background Jobs</title>
 
         <para>

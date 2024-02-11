@@ -32,5 +32,6 @@ Distributed under the terms of the MIT License.
     <xi:include href="part-deployment.xml"/>
     <xi:include href="part-development.xml"/>
     <xi:include href="part-api.xml"/>
+    <xi:include href="part-integration.xml"/>
 
 </book>
