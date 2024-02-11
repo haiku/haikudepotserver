@@ -9,6 +9,37 @@ tags:
   - name: pkg-job
 paths:
 
+  /__api/v2/pkg-job/queue-pkg-dump-localization-export-job:
+    description: >
+      This API initiates a background job to produce a JSON document that contains a listing of all of the packages'
+      localizations. Included are localizations that are not supplied distributed from a package repository in the HPKR
+      file; meaning those that are supplied post-packaging by people.
+      
+      All active packages are listed even if they have no localizations.
+      
+      No authors are ascribed to the localizations.
+      
+      Subordinate packages such as those suffixed with `_x86` are not listed; in this case only the main package will
+      be listed. This is because the subordinate package shares localization with the main package.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgDumpLocalizationExportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgDumpLocalizationExportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgDumpLocalizationExportJobResponseEnvelope"
+
   /__api/v2/pkg-job/queue-pkg-dump-export-job:
     description: >
       This API initiates a background job to produce a JSON document that contains the details for the packages
@@ -524,6 +555,26 @@ components:
         error:
           $ref: "./error.yaml#/components/schemas/error"
     queuePkgDumpExportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgDumpLocalizationExportJobRequestEnvelope:
+      type: object
+      properties:
+        naturalLanguageCode:
+          type: string
+        repositorySourceCode:
+          type: string
+    queuePkgDumpLocalizationExportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgDumpLocalizationExportJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgDumpLocalizationExportJobResult:
       type: object
       properties:
         guid:

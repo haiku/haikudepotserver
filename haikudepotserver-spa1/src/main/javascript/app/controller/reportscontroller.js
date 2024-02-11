@@ -101,6 +101,10 @@ angular.module('haikudepotserver').controller(
                 goBasicPkgReport('queue-pkg-screenshot-export-archive-job');
             };
 
+            $scope.goPkgDumpLocalizationExport = function () {
+                goBasicPkgReport('queue-pkg-dump-localization-export-job');
+            };
+
             $scope.goMetricsGeneralReport = function() {
                 remoteProcedureCall.call(constants.ENDPOINT_API_V2_METRICS_JOB, 'queue-metrics-general-report').then(
                   function (data) {
@@ -136,6 +140,21 @@ angular.module('haikudepotserver').controller(
 
             $scope.goRepositoryDumpExportReport = function () {
                 remoteProcedureCall.call(constants.ENDPOINT_API_V2_REPOSITORY_JOB, 'queue-repository-dump-export-job').then(
+                    function (data) {
+                        navigateToViewJobOrNotifyRejection(data.guid);
+                    },
+                    function (err) {
+                        errorHandling.handleRemoteProcedureCallError(err);
+                    }
+                );
+            };
+
+            $scope.goReferenceDumpExportReport = function () {
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_MISCELLANEOUS_JOB,
+                    'queue-reference-dump-export-job',
+                    { 'naturalLanguageCode': userState.naturalLanguageCode() }
+                ).then(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },

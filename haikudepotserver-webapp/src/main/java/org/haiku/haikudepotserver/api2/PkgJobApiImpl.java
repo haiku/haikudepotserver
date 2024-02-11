@@ -109,4 +109,10 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
                         .result(pkgJobApiService.queuePkgDumpExportJob(queuePkgDumpExportJobRequestEnvelope)));
     }
 
+    @Override
+    public ResponseEntity<QueuePkgDumpLocalizationExportJobResponseEnvelope> queuePkgDumpLocalizationExportJob(QueuePkgDumpLocalizationExportJobRequestEnvelope queuePkgDumpLocalizationExportJobRequestEnvelope) {
+        return ResponseEntity.ok(
+                new QueuePkgDumpLocalizationExportJobResponseEnvelope()
+                        .result(pkgJobApiService.queuePkgDumpLocalizationExportJob()));
+    }
 }
