@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,6 +13,7 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.SQLTemplate;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 
@@ -48,9 +49,10 @@ public class FixedPkgLocalizationLookupServiceImpl implements PkgLocalizationLoo
                     .collect(Collectors.toSet());
 
             SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
-                    .getQueryDescriptor("PkgVersionLocalizationResolution").buildQuery();
+                    .getQueryDescriptor(_HaikuDepot.PKG_VERSION_LOCALIZATION_RESOLUTION_QUERYNAME).buildQuery();
             SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
-                    "naturalLanguageCode", naturalLanguage.getCode(),
+                    "naturalLanguageId", naturalLanguage.getObjectId().getIdSnapshot().get(NaturalLanguage.ID_PK_COLUMN),
+                    "englishNaturalLanguageId", NaturalLanguage.getEnglish(context).getObjectId().getIdSnapshot().get(NaturalLanguage.ID_PK_COLUMN),
                     "pkgVersionIds", pkgVersionIds));
             query.setFetchingDataRows(true);
 

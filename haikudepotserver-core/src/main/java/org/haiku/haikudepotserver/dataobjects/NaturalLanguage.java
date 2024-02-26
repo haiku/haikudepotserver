@@ -7,15 +7,19 @@ package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import jakarta.validation.constraints.NotNull;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.*;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.QueryCacheStrategy;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -26,15 +30,18 @@ import java.util.stream.Collectors;
  * referenced by <a href="https://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a> values such as "en", "de" etc...</P>
  */
 
-public class NaturalLanguage extends _NaturalLanguage implements Coded, CreateAndModifyTimestamped {
+public class NaturalLanguage extends _NaturalLanguage
+        implements Coded, CreateAndModifyTimestamped, Comparable<NaturalLanguage> {
 
     public final static String CODE_ENGLISH = "en";
     public final static String CODE_GERMAN = "de";
-    public final static String CODE_JAPANESE = "jp";
     public final static String CODE_SPANISH = "es";
     public final static String CODE_FRENCH = "fr";
-    public final static String CODE_RUSSIAN = "ru";
-    public final static String CODE_SLOVAK = "sk";
+
+    private final static Comparator<NaturalLanguage> COMPARATOR = Comparator
+            .comparing(NaturalLanguage::getLanguageCode)
+            .thenComparing(NaturalLanguage::getCountryCode)
+            .thenComparing(NaturalLanguage::getScriptCode);
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
@@ -75,6 +82,14 @@ public class NaturalLanguage extends _NaturalLanguage implements Coded, CreateAn
         return getAll(context).stream().map(NaturalLanguage::getCode).collect(Collectors.toList());
     }
 
+    public String getCode() {
+        return toCoordinates().getCode();
+    }
+
+    public NaturalLanguageCoordinates toCoordinates() {
+        return new NaturalLanguageCoordinates(getLanguageCode(), getCountryCode(), getScriptCode());
+    }
+
     public boolean isEnglish() {
         return CODE_ENGLISH.equals(getCode());
     }
@@ -89,6 +104,11 @@ public class NaturalLanguage extends _NaturalLanguage implements Coded, CreateAn
 
     public Locale toLocale() {
         return Locale.forLanguageTag(getCode());
+    }
+
+    @Override
+    public int compareTo(@NotNull NaturalLanguage other) {
+        return COMPARATOR.compare(this, other);
     }
 
     @Override

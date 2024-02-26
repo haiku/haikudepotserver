@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.context.ApplicationContext;
@@ -24,7 +23,6 @@ import org.thymeleaf.processor.element.IElementTagStructureHandler;
 import org.thymeleaf.spring6.context.SpringContextUtils;
 import org.thymeleaf.templatemode.TemplateMode;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,7 +75,7 @@ public class NaturalLanguageChooserContentProcessor extends AbstractElementTagPr
         return new NaturalLanguagesData(
                 NaturalLanguage.getAllPopular(objectContext)
                         .stream()
-                        .sorted(Comparator.comparing(_NaturalLanguage::getCode))
+                        .sorted()
                         .collect(Collectors.toList()),
                 NaturalLanguageWebHelper.deriveNaturalLanguage(
                         objectContext, request));

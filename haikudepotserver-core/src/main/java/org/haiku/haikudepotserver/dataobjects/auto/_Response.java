@@ -1,8 +1,13 @@
 package org.haiku.haikudepotserver.dataobjects.auto;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Date;
 
-import org.apache.cayenne.exp.Property;
+import org.apache.cayenne.exp.property.DateProperty;
+import org.apache.cayenne.exp.property.PropertyFactory;
+import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -13,33 +18,110 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
  */
 public abstract class _Response extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Date> CREATE_TIMESTAMP = Property.create("createTimestamp", Date.class);
-    public static final Property<String> RESPONSE = Property.create("response", String.class);
-    public static final Property<String> TOKEN = Property.create("token", String.class);
+    public static final DateProperty<Date> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Date.class);
+    public static final StringProperty<String> RESPONSE = PropertyFactory.createString("response", String.class);
+    public static final StringProperty<String> TOKEN = PropertyFactory.createString("token", String.class);
+
+    protected Date createTimestamp;
+    protected String response;
+    protected String token;
+
 
     public void setCreateTimestamp(Date createTimestamp) {
-        writeProperty("createTimestamp", createTimestamp);
+        beforePropertyWrite("createTimestamp", this.createTimestamp, createTimestamp);
+        this.createTimestamp = createTimestamp;
     }
+
     public Date getCreateTimestamp() {
-        return (Date)readProperty("createTimestamp");
+        beforePropertyRead("createTimestamp");
+        return this.createTimestamp;
     }
 
     public void setResponse(String response) {
-        writeProperty("response", response);
+        beforePropertyWrite("response", this.response, response);
+        this.response = response;
     }
+
     public String getResponse() {
-        return (String)readProperty("response");
+        beforePropertyRead("response");
+        return this.response;
     }
 
     public void setToken(String token) {
-        writeProperty("token", token);
+        beforePropertyWrite("token", this.token, token);
+        this.token = token;
     }
+
     public String getToken() {
-        return (String)readProperty("token");
+        beforePropertyRead("token");
+        return this.token;
+    }
+
+    @Override
+    public Object readPropertyDirectly(String propName) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch(propName) {
+            case "createTimestamp":
+                return this.createTimestamp;
+            case "response":
+                return this.response;
+            case "token":
+                return this.token;
+            default:
+                return super.readPropertyDirectly(propName);
+        }
+    }
+
+    @Override
+    public void writePropertyDirectly(String propName, Object val) {
+        if(propName == null) {
+            throw new IllegalArgumentException();
+        }
+
+        switch (propName) {
+            case "createTimestamp":
+                this.createTimestamp = (Date)val;
+                break;
+            case "response":
+                this.response = (String)val;
+                break;
+            case "token":
+                this.token = (String)val;
+                break;
+            default:
+                super.writePropertyDirectly(propName, val);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeSerialized(out);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        readSerialized(in);
+    }
+
+    @Override
+    protected void writeState(ObjectOutputStream out) throws IOException {
+        super.writeState(out);
+        out.writeObject(this.createTimestamp);
+        out.writeObject(this.response);
+        out.writeObject(this.token);
+    }
+
+    @Override
+    protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        super.readState(in);
+        this.createTimestamp = (Date)in.readObject();
+        this.response = (String)in.readObject();
+        this.token = (String)in.readObject();
     }
 
 }

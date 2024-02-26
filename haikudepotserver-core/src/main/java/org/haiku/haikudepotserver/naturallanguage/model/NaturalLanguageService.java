@@ -5,7 +5,10 @@
 
 package org.haiku.haikudepotserver.naturallanguage.model;
 
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * <p>This service is designed to help with more complex queries around natural languages.</p>
@@ -15,19 +18,18 @@ import java.util.Properties;
 
 public interface NaturalLanguageService {
 
+    /**
+     * <p>Returns a set of all natural languages that have localizations for the HDS user
+     * interface.</p>
+     */
+    Set<NaturalLanguageCoordinates> findNaturalLanguagesWithLocalizationMessages();
 
     /**
-     * <p>Returns true if the natural language provided has stored messages.</p>
+     * <p>Returns a set of all natural languages that have data in the HDS system for
+     * user ratings etc...</p>
      */
+    Set<NaturalLanguageCoordinates> findNaturalLanguagesWithData();
 
-    boolean hasLocalizationMessages(String naturalLanguageCode);
-
-    /**
-     * <p>Returns true if there is user data stored in the database for this language.</p>
-     */
-
-    boolean hasData(String naturalLanguageCode);
-
-    Properties getAllLocalizationMessages(String naturalLanguageCode);
+    Properties getAllLocalizationMessages(NaturalLanguageCoordinates naturalLanguageCoordinates);
 
 }

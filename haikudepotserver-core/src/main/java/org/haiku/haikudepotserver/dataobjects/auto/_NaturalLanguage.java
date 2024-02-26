@@ -23,22 +23,26 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final StringProperty<String> COUNTRY_CODE = PropertyFactory.createString("countryCode", String.class);
     public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
     public static final BaseProperty<Boolean> IS_POPULAR = PropertyFactory.createBase("isPopular", Boolean.class);
+    public static final StringProperty<String> LANGUAGE_CODE = PropertyFactory.createString("languageCode", String.class);
     public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
     public static final StringProperty<String> NAME = PropertyFactory.createString("name", String.class);
+    public static final StringProperty<String> SCRIPT_CODE = PropertyFactory.createString("scriptCode", String.class);
 
-    protected String code;
+    protected String countryCode;
     protected Timestamp createTimestamp;
     protected Boolean isPopular;
+    protected String languageCode;
     protected Timestamp modifyTimestamp;
     protected String name;
+    protected String scriptCode;
 
 
-    public String getCode() {
-        beforePropertyRead("code");
-        return this.code;
+    public String getCountryCode() {
+        beforePropertyRead("countryCode");
+        return this.countryCode;
     }
 
     public Timestamp getCreateTimestamp() {
@@ -51,6 +55,11 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
         return this.isPopular;
     }
 
+    public String getLanguageCode() {
+        beforePropertyRead("languageCode");
+        return this.languageCode;
+    }
+
     public Timestamp getModifyTimestamp() {
         beforePropertyRead("modifyTimestamp");
         return this.modifyTimestamp;
@@ -61,6 +70,11 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
         return this.name;
     }
 
+    public String getScriptCode() {
+        beforePropertyRead("scriptCode");
+        return this.scriptCode;
+    }
+
     @Override
     public Object readPropertyDirectly(String propName) {
         if(propName == null) {
@@ -68,16 +82,20 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
         }
 
         switch(propName) {
-            case "code":
-                return this.code;
+            case "countryCode":
+                return this.countryCode;
             case "createTimestamp":
                 return this.createTimestamp;
             case "isPopular":
                 return this.isPopular;
+            case "languageCode":
+                return this.languageCode;
             case "modifyTimestamp":
                 return this.modifyTimestamp;
             case "name":
                 return this.name;
+            case "scriptCode":
+                return this.scriptCode;
             default:
                 return super.readPropertyDirectly(propName);
         }
@@ -90,8 +108,8 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
         }
 
         switch (propName) {
-            case "code":
-                this.code = (String)val;
+            case "countryCode":
+                this.countryCode = (String)val;
                 break;
             case "createTimestamp":
                 this.createTimestamp = (Timestamp)val;
@@ -99,11 +117,17 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
             case "isPopular":
                 this.isPopular = (Boolean)val;
                 break;
+            case "languageCode":
+                this.languageCode = (String)val;
+                break;
             case "modifyTimestamp":
                 this.modifyTimestamp = (Timestamp)val;
                 break;
             case "name":
                 this.name = (String)val;
+                break;
+            case "scriptCode":
+                this.scriptCode = (String)val;
                 break;
             default:
                 super.writePropertyDirectly(propName, val);
@@ -121,21 +145,25 @@ public abstract class _NaturalLanguage extends AbstractDataObject {
     @Override
     protected void writeState(ObjectOutputStream out) throws IOException {
         super.writeState(out);
-        out.writeObject(this.code);
+        out.writeObject(this.countryCode);
         out.writeObject(this.createTimestamp);
         out.writeObject(this.isPopular);
+        out.writeObject(this.languageCode);
         out.writeObject(this.modifyTimestamp);
         out.writeObject(this.name);
+        out.writeObject(this.scriptCode);
     }
 
     @Override
     protected void readState(ObjectInputStream in) throws IOException, ClassNotFoundException {
         super.readState(in);
-        this.code = (String)in.readObject();
+        this.countryCode = (String)in.readObject();
         this.createTimestamp = (Timestamp)in.readObject();
         this.isPopular = (Boolean)in.readObject();
+        this.languageCode = (String)in.readObject();
         this.modifyTimestamp = (Timestamp)in.readObject();
         this.name = (String)in.readObject();
+        this.scriptCode = (String)in.readObject();
     }
 
 }

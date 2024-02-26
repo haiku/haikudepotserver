@@ -24,6 +24,7 @@ import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
@@ -227,7 +228,7 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkState(search.getLimit() > 0);
 
         SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
-                .getQueryDescriptor("SearchPkgVersions").buildQuery();
+                .getQueryDescriptor(_HaikuDepot.SEARCH_PKG_VERSIONS_QUERYNAME).buildQuery();
         Query query = sqlTemplate.createQuery(ImmutableMap.of(
                 "search", search,
                 "isTotal", false,
@@ -247,7 +248,7 @@ public class PkgServiceImpl implements PkgService {
             PkgSearchSpecification search) {
 
         SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
-                .getQueryDescriptor("SearchPkgVersions").buildQuery();
+                .getQueryDescriptor(_HaikuDepot.SEARCH_PKG_VERSIONS_QUERYNAME).buildQuery();
 
         SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
                 "search", search,

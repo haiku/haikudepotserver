@@ -21,6 +21,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -58,12 +60,17 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
      */
 
     private List<NaturalLanguage> getNaturalLanguages(ObjectContext context) {
+        Set<NaturalLanguageCoordinates> natLangCoordsWithData = naturalLanguageService.findNaturalLanguagesWithData();
         return ObjectSelect
                 .query(NaturalLanguage.class)
-                .orderBy(NaturalLanguage.CODE.asc())
+                .orderBy(
+                        NaturalLanguage.LANGUAGE_CODE.asc(),
+                        NaturalLanguage.COUNTRY_CODE.asc(),
+                        NaturalLanguage.SCRIPT_CODE.asc()
+                )
                 .select(context)
                 .stream()
-                .filter(nl -> naturalLanguageService.hasData(nl.getCode()))
+                .filter(nl -> natLangCoordsWithData.contains(nl.toCoordinates()))
                 .collect(Collectors.toList());
     }
 

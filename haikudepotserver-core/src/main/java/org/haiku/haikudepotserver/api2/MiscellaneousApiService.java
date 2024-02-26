@@ -42,6 +42,7 @@ import org.haiku.haikudepotserver.dataobjects.auto._User;
 import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.ContributorsService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component("miscellaneousApiServiceV2")
@@ -166,7 +168,7 @@ public class MiscellaneousApiService extends AbstractApiService {
 
         ObjectContext context = serverRuntime.newContext();
         NaturalLanguage naturalLanguage = getNaturalLanguage(context, request.getNaturalLanguageCode());
-        Properties allLocalizationMessages = naturalLanguageService.getAllLocalizationMessages(naturalLanguage.getCode());
+        Properties allLocalizationMessages = naturalLanguageService.getAllLocalizationMessages(naturalLanguage.toCoordinates());
 
         return new GetAllMessagesResult()
                 .messages(allLocalizationMessages.keySet().stream()
@@ -187,6 +189,9 @@ public class MiscellaneousApiService extends AbstractApiService {
                         .map(c -> getNaturalLanguage(context, c))
                         .orElse(null);
 
+        final Set<NaturalLanguageCoordinates> natLangCoordsWithData = naturalLanguageService.findNaturalLanguagesWithData();
+        final Set<NaturalLanguageCoordinates> natLangCoordsWithLocalizationMessages = naturalLanguageService.findNaturalLanguagesWithLocalizationMessages();
+
         return new GetAllNaturalLanguagesResult()
                 .naturalLanguages(
                         NaturalLanguage.getAll(context).stream()
@@ -199,8 +204,8 @@ public class MiscellaneousApiService extends AbstractApiService {
                                                 null, // params
                                                 naturalLanguage.toLocale()))
                                         .isPopular(nl.getIsPopular())
-                                        .hasData(naturalLanguageService.hasData(nl.getCode()))
-                                        .hasLocalizationMessages(naturalLanguageService.hasLocalizationMessages(nl.getCode())))
+                                        .hasData(natLangCoordsWithData.contains(nl.toCoordinates()))
+                                        .hasLocalizationMessages(natLangCoordsWithLocalizationMessages.contains(nl.toCoordinates())))
                                 .collect(Collectors.toList()));
     }
 

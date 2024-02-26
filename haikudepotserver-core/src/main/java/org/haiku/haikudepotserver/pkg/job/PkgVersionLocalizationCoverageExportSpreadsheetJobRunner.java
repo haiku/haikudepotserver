@@ -20,6 +20,7 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -68,12 +70,17 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
      */
 
     private List<NaturalLanguage> getNaturalLanguages(ObjectContext context) {
+        Set<NaturalLanguageCoordinates> naturalLanguagesWithData = naturalLanguageService.findNaturalLanguagesWithData();
         return ObjectSelect
                 .query(NaturalLanguage.class)
-                .orderBy(NaturalLanguage.CODE.asc())
+                .orderBy(
+                        NaturalLanguage.LANGUAGE_CODE.asc(),
+                        NaturalLanguage.COUNTRY_CODE.asc(),
+                        NaturalLanguage.SCRIPT_CODE.asc()
+                )
                 .select(context)
                 .stream()
-                .filter(nl -> naturalLanguageService.hasData(nl.getCode()))
+                .filter(nl -> naturalLanguagesWithData.contains(nl.toCoordinates()))
                 .collect(Collectors.toList());
     }
 
@@ -84,18 +91,19 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
             throws IOException, JobRunnerException {
 
         Preconditions.checkArgument(null != jobService);
-        Preconditions.checkArgument(null!=specification);
+        Preconditions.checkArgument(null != specification);
 
         final ObjectContext context = serverRuntime.newContext();
 
         final List<NaturalLanguage> naturalLanguages = getNaturalLanguages(context);
-        final List<Architecture> architectures = Architecture.getAllExceptByCode(
-                context,
-                List.of(Architecture.CODE_SOURCE, Architecture.CODE_ANY));
 
         if(naturalLanguages.isEmpty()) {
             throw new RuntimeException("there appear to be no natural languages in the system");
         }
+
+        final List<Architecture> architectures = Architecture.getAllExceptByCode(
+                context,
+                List.of(Architecture.CODE_SOURCE, Architecture.CODE_ANY));
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(

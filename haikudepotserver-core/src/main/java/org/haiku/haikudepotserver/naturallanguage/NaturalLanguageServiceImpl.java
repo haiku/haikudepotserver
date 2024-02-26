@@ -7,22 +7,17 @@ package org.haiku.haikudepotserver.naturallanguage;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
+import jakarta.validation.constraints.NotNull;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.cayenne.query.Query;
-import org.apache.cayenne.query.QueryCacheStrategy;
-import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
-import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
-import org.haiku.haikudepotserver.dataobjects.UserRating;
+import org.apache.cayenne.query.ColumnSelect;
+import org.apache.cayenne.query.ObjectSelect;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,12 +26,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -53,18 +46,20 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
     private final ServerRuntime serverRuntime;
     private final List<String> messageSourceBaseNames;
 
+    private final Lock naturalLanguageCoordinatesWithLocalizationMessagesLock = new ReentrantLock();
+
     /**
      * <p>This data cannot change over the life-span of the application server so
      * it is cached in memory.</p>
      */
 
-    private Set<String> naturalLanguageCodesWithLocalizationMessages = null;
+    private Set<NaturalLanguageCoordinates> naturalLanguageCoordinatesWithLocalizationMessages = null;
 
     /**
      * <p>Maintains a cache of all of the localized messages.</p>
      */
 
-    private final LoadingCache<String, Properties> allLocalizationMessages;
+    private final LoadingCache<NaturalLanguageCoordinates, Properties> allLocalizationMessages;
 
     public NaturalLanguageServiceImpl(
             ServerRuntime serverRuntime,
@@ -77,21 +72,21 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
                 .newBuilder()
                 .maximumSize(5)
                 .expireAfterAccess(1, TimeUnit.HOURS)
-                .build(new CacheLoader<String, Properties>() {
+                .build(new CacheLoader<>() {
                     @Override
-                    public Properties load(String key) {
-                        return assembleAllLocalizationMessages(key);
+                    public Properties load(@NotNull NaturalLanguageCoordinates key) {
+                        return assembleAllLocalizationMessagesUncached(key);
                     }
                 });
     }
 
-    private Properties assembleAllLocalizationMessages(String naturalLanguageCode) {
+    private Properties assembleAllLocalizationMessagesUncached(NaturalLanguageCoordinates naturalLanguageCoordinates) {
         Properties result = new Properties();
 
         // language-less case (eg xxx.properties)
         messageSourceBaseNames
                 .stream()
-                .map((bn) -> getLocalizationMessagesPrimative(null, bn))
+                .map((bn) -> tryGetLocalizationMessagesUncached(null, bn))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(result::putAll);
@@ -99,7 +94,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
         // now with the language as suffix (eg xxx_en.properties)
         messageSourceBaseNames
                 .stream()
-                .map((bn) -> getLocalizationMessagesPrimative(naturalLanguageCode, bn))
+                .map((bn) -> tryGetLocalizationMessagesUncached(naturalLanguageCoordinates, bn))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(result::putAll);
@@ -107,20 +102,22 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
         return result;
     }
 
-    private boolean hasLocalizationMessagesPrimative(String naturalLanguageCode) {
+    private boolean hasLocalizationMessagesUncached(NaturalLanguageCoordinates naturalLanguageCoordinates) {
         return messageSourceBaseNames
                 .stream()
-                .anyMatch((bn) -> getLocalizationMessagesPrimative(naturalLanguageCode, bn).isPresent());
+                .anyMatch((bn) -> tryGetLocalizationMessagesUncached(naturalLanguageCoordinates, bn).isPresent());
     }
 
-    private Optional<Properties> getLocalizationMessagesPrimative(String naturalLanguageCode, String naturalLanguageBaseName) {
+    private Optional<Properties> tryGetLocalizationMessagesUncached(
+            NaturalLanguageCoordinates naturalLanguageCoordinates,
+            String resourceBase) {
         Preconditions.checkArgument(
-                naturalLanguageBaseName.startsWith(PREFIX_BASE_NAME_CLASSPATH),
-                "the base name [" + naturalLanguageBaseName + "] is not valid because it is missing the expected prefix.");
+                resourceBase.startsWith(PREFIX_BASE_NAME_CLASSPATH),
+                "the base name [" + resourceBase + "] is not valid because it is missing the expected prefix.");
 
-        String resourceNamePrefix = naturalLanguageBaseName.substring(PREFIX_BASE_NAME_CLASSPATH.length());
+        String resourceNamePrefix = resourceBase.substring(PREFIX_BASE_NAME_CLASSPATH.length());
         String resourceName = "/" + resourceNamePrefix
-                + (null == naturalLanguageCode ? "" : "_" + naturalLanguageCode)
+                + (null == naturalLanguageCoordinates ? "" : "_" + naturalLanguageCoordinates.getCode())
                 + ".properties";
 
         try (InputStream inputStream = this.getClass().getResourceAsStream(resourceName)) {
@@ -137,105 +134,85 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
     }
 
     /**
-     * <p>Returns those natural languages that have localization.</p>
-     */
-
-    private Set<String> getNaturalLanguageCodesWithLocalizationMessages() {
-
-        if(null == naturalLanguageCodesWithLocalizationMessages) {
-            ObjectContext context = serverRuntime.newContext();
-
-            naturalLanguageCodesWithLocalizationMessages =
-                    NaturalLanguage.getAll(context)
-                            .stream()
-                            .map(NaturalLanguage::getCode)
-                            .filter(this::hasLocalizationMessagesPrimative)
-                            .collect(Collectors.toSet());
-
-            LOGGER.info("did find (and cache) {} natural languages with localization", naturalLanguageCodesWithLocalizationMessages.size());
-        }
-
-        return naturalLanguageCodesWithLocalizationMessages;
-    }
-
-    private Map<String, Boolean> assembleNaturalLanguageCodeUseMap(Query codeQuery) {
-        ObjectContext context = serverRuntime.newContext();
-        Map<String, Boolean> result = Maps.newConcurrentMap();
-        List<String> usedCodes = context.performQuery(codeQuery);
-
-        for (String naturalLanguageCode : NaturalLanguage.getAllCodes(context)) {
-            result.put(
-                    naturalLanguageCode,
-                    usedCodes.contains(naturalLanguageCode)
-            );
-        }
-
-        return result;
-    }
-
-    /**
      * <p>This method is supplied an EJBQL query that provides a list of the 'true' codes.  It returns
      * a list of all codes that have the 'true' codes set to true.</p>
      */
 
-    private Map<String, Boolean> assembleNaturalLanguageCodeUseMap(String ejbqlCodeQuery) {
-        EJBQLQuery query = new EJBQLQuery(ejbqlCodeQuery);
-        query.setCacheGroup(HaikuDepot.CacheGroup.NATURAL_LANGUAGE.name());
-        query.setCacheStrategy(QueryCacheStrategy.SHARED_CACHE);
-        return assembleNaturalLanguageCodeUseMap(query);
+    private Set<NaturalLanguageCoordinates> assembleNaturalLanguageCodeUseSet(ColumnSelect<Object[]> select) {
+        ObjectContext context = serverRuntime.newContext();
+        Set<NaturalLanguageCoordinates> naturalLanguageCoordinates = new HashSet<>();
+        select
+                .distinct()
+                .cacheGroup(HaikuDepot.CacheGroup.NATURAL_LANGUAGE.name())
+                .sharedCache()
+                .iterate(context, (row) -> naturalLanguageCoordinates.add(new NaturalLanguageCoordinates(
+                            Optional.ofNullable(row[0]).map(Object::toString).orElse(null),
+                            Optional.ofNullable(row[1]).map(Object::toString).orElse(null),
+                            Optional.ofNullable(row[2]).map(Object::toString).orElse(null))));
+        return naturalLanguageCoordinates;
     }
 
-    private Map<String,Boolean> getNaturalLanguageCodeHasPkgLocalization() {
-        return assembleNaturalLanguageCodeUseMap("SELECT DISTINCT pl.naturalLanguage.code FROM " + PkgLocalization.class.getSimpleName() + " pl");
+    private Set<NaturalLanguageCoordinates> getNaturalLanguageCoordinatesWithPkgLocalization() {
+        return assembleNaturalLanguageCodeUseSet(ObjectSelect.columnQuery(
+                        PkgLocalization.class,
+                        PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE),
+                        PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE),
+                        PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE)));
     }
 
-    private Map<String,Boolean> getNaturalLanguageCodeHasPkgVersionLocalization() {
-        return assembleNaturalLanguageCodeUseMap("SELECT DISTINCT pvl.naturalLanguage.code FROM " + PkgVersionLocalization.class.getSimpleName() + " pvl");
+    private Set<NaturalLanguageCoordinates> getNaturalLanguageCoordinatesWithPkgVersionLocalization() {
+        return assembleNaturalLanguageCodeUseSet(ObjectSelect.columnQuery(
+                        PkgVersionLocalization.class,
+                        PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE),
+                        PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE),
+                        PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE)));
     }
 
-    private Map<String,Boolean> getNaturalLanguageCodeHasUserRating() {
-        return assembleNaturalLanguageCodeUseMap("SELECT DISTINCT ur.naturalLanguage.code FROM " + UserRating.class.getSimpleName() + " ur");
+    private Set<NaturalLanguageCoordinates> getNaturalLanguageCoordinatesWithUserRating() {
+        return assembleNaturalLanguageCodeUseSet(ObjectSelect.columnQuery(
+                        UserRating.class,
+                        UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE),
+                        UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE),
+                        UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE)));
     }
-
-    /**
-     * <p>Returns true if the natural language provided has stored messages.</p>
-     */
 
     @Override
-    public boolean hasLocalizationMessages(String naturalLanguageCode) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode));
-        return getNaturalLanguageCodesWithLocalizationMessages().contains(naturalLanguageCode);
+    public Properties getAllLocalizationMessages(NaturalLanguageCoordinates naturalLanguageCoordinates) {
+        Preconditions.checkArgument(null != naturalLanguageCoordinates, "the natural language code must be supplied");
+        return allLocalizationMessages.getUnchecked(naturalLanguageCoordinates);
     }
 
-    /**
-     * <p>Returns true if there is user data stored in the database for this language.</p>
-     */
-
     @Override
-    public boolean hasData(String naturalLanguageCode) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");
+    public Set<NaturalLanguageCoordinates> findNaturalLanguagesWithLocalizationMessages() {
+        try {
+            naturalLanguageCoordinatesWithLocalizationMessagesLock.lock();
 
-        Boolean userRatingB = getNaturalLanguageCodeHasUserRating().get(naturalLanguageCode);
+            if (null == naturalLanguageCoordinatesWithLocalizationMessages) {
+                ObjectContext context = serverRuntime.newContext();
 
-        if (null != userRatingB && userRatingB) {
-            return true;
+                naturalLanguageCoordinatesWithLocalizationMessages =
+                        NaturalLanguage.getAll(context)
+                                .stream()
+                                .map(NaturalLanguage::toCoordinates)
+                                .filter(this::hasLocalizationMessagesUncached)
+                                .collect(Collectors.toSet());
+
+                LOGGER.info("did find (and cache) {} natural languages with localization", naturalLanguageCoordinatesWithLocalizationMessages.size());
+            }
+
+            return naturalLanguageCoordinatesWithLocalizationMessages;
         }
-
-        Boolean pkgVersionLocalizationB = getNaturalLanguageCodeHasPkgVersionLocalization().get(naturalLanguageCode);
-
-        if (null != pkgVersionLocalizationB && pkgVersionLocalizationB) {
-            return true;
+        finally {
+            naturalLanguageCoordinatesWithLocalizationMessagesLock.unlock();
         }
-
-        Boolean pkgLocalizationB = getNaturalLanguageCodeHasPkgLocalization().get(naturalLanguageCode);
-
-        return null != pkgLocalizationB && pkgLocalizationB;
     }
 
     @Override
-    public Properties getAllLocalizationMessages(String naturalLanguageCode) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");
-        return allLocalizationMessages.getUnchecked(naturalLanguageCode);
+    public Set<NaturalLanguageCoordinates> findNaturalLanguagesWithData() {
+        Set<NaturalLanguageCoordinates> result = new HashSet<>();
+        result.addAll(getNaturalLanguageCoordinatesWithUserRating());
+        result.addAll(getNaturalLanguageCoordinatesWithPkgVersionLocalization());
+        result.addAll(getNaturalLanguageCoordinatesWithPkgLocalization());
+        return Collections.unmodifiableSet(result);
     }
-
 }

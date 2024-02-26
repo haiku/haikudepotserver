@@ -47,12 +47,14 @@
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="natural_language" schema="haikudepot">
-		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="32"/>
+		<db-attribute name="country_code" type="VARCHAR" length="2"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="is_popular" type="BOOLEAN" isMandatory="true"/>
+		<db-attribute name="language_code" type="VARCHAR" isMandatory="true" length="3"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="script_code" type="VARCHAR" length="4"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.natural_language_seq</db-generator-name>
@@ -503,11 +505,13 @@
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 	</obj-entity>
 	<obj-entity name="NaturalLanguage" className="org.haiku.haikudepotserver.dataobjects.NaturalLanguage" readOnly="true" dbEntityName="natural_language" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
-		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+		<obj-attribute name="countryCode" type="java.lang.String" lock="true" db-attribute-path="country_code"/>
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
 		<obj-attribute name="isPopular" type="java.lang.Boolean" db-attribute-path="is_popular"/>
+		<obj-attribute name="languageCode" type="java.lang.String" lock="true" db-attribute-path="language_code"/>
 		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+		<obj-attribute name="scriptCode" type="java.lang.String" lock="true" db-attribute-path="script_code"/>
 	</obj-entity>
 	<obj-entity name="Permission" className="org.haiku.haikudepotserver.dataobjects.Permission" readOnly="true" dbEntityName="permission" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
@@ -1116,7 +1120,7 @@ t_loc_pv_l AS (
   	  ON nl.id = pvl_l.natural_language_id
   WHERE
     pv.id IN (#bind($pkgVersionIds))
-    AND nl.code = #bind($naturalLanguageCode)
+    AND nl.id = #bind($naturalLanguageId)
 ),
 t_loc_pv_e AS (
   SELECT
@@ -1137,7 +1141,7 @@ t_loc_pv_e AS (
     LEFT JOIN haikudepot.natural_language nl ON nl.id = pvl_l.natural_language_id
   WHERE
     pv.id IN (#bind($pkgVersionIds))
-    AND nl.code = 'en'
+    AND nl.id = #bind($englishNaturalLanguageId)
 ),
 t_loc_p_l AS (
   SELECT
@@ -1153,7 +1157,7 @@ t_loc_p_l AS (
     LEFT JOIN haikudepot.natural_language nl ON nl.id = pl.natural_language_id
   WHERE
     pv.id IN (#bind($pkgVersionIds))
-    AND nl.code = #bind($naturalLanguageCode)
+    AND nl.id = #bind($naturalLanguageId)
 ),
 t_loc_p_e AS (
   SELECT
@@ -1169,7 +1173,7 @@ t_loc_p_e AS (
     LEFT JOIN haikudepot.natural_language nl ON nl.id = pl.natural_language_id
   WHERE
     pv.id IN (#bind($pkgVersionIds))
-    AND nl.code = 'en'
+    AND nl.id = #bind($englishNaturalLanguageId)
 )
 SELECT
   #result('pv.id' 'Long' 'pv_id'),

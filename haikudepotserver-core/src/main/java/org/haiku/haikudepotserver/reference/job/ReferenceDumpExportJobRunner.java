@@ -21,6 +21,7 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.job.PkgDumpExportJobRunner;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
 import org.haiku.haikudepotserver.reference.model.dumpexport.*;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
@@ -131,6 +133,8 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
         ObjectContext context = serverRuntime.newContext();
         NaturalLanguage naturalLanguage = NaturalLanguage.tryGetByCode(context, specification.getNaturalLanguageCode())
                 .orElseGet(() -> NaturalLanguage.getEnglish(context));
+        Set<NaturalLanguageCoordinates> natLangCoordsWithData = naturalLanguageService.findNaturalLanguagesWithData();
+        Set<NaturalLanguageCoordinates> natLangCoordsWithLocalizations = naturalLanguageService.findNaturalLanguagesWithLocalizationMessages();
 
         dumpExportReference.setCountries(
                 Country.getAll(context)
@@ -150,13 +154,16 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                             DumpExportReferenceNaturalLanguage dnl = new DumpExportReferenceNaturalLanguage();
                             dnl.setIsPopular(nl.getIsPopular());
                             dnl.setCode(nl.getCode());
+                            dnl.setLanguageCode(nl.getLanguageCode());
+                            dnl.setCountryCode(nl.getCountryCode());
+                            dnl.setScriptCode(nl.getScriptCode());
                             dnl.setName(
                                     messageSource.getMessage(
                                             nl.getTitleKey(),
                                             new Object[] {},
                                             naturalLanguage.toLocale()));
-                            dnl.setHasData(naturalLanguageService.hasData(nl.getCode()));
-                            dnl.setHasLocalizationMessages(naturalLanguageService.hasLocalizationMessages(nl.getCode()));
+                            dnl.setHasData(natLangCoordsWithData.contains(nl.toCoordinates()));
+                            dnl.setHasLocalizationMessages(natLangCoordsWithLocalizations.contains(nl.toCoordinates()));
                             return dnl;
                         })
                         .collect(Collectors.toList()));

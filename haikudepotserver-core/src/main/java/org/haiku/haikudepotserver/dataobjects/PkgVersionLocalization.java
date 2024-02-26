@@ -53,7 +53,10 @@ public class PkgVersionLocalization extends _PkgVersionLocalization implements M
                 .and(PKG_VERSION.dot(PkgVersion.ACTIVE).isTrue())
                 .orderBy(
                         PKG_VERSION.dot(PkgVersion.ARCHITECTURE).dot(Architecture.CODE).desc(),
-                        NATURAL_LANGUAGE.dot(NaturalLanguage.CODE).asc())
+                        NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE).asc(),
+                        NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE).asc(),
+                        NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE).asc()
+                )
                 .selectFirst(context));
     }
 

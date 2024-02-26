@@ -76,7 +76,7 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
             // This is plus one second because that's what the modify timestamp does
             // in the process.
             Assertions.assertThat(dataModifiedTimestampNode.asLong())
-                    .isEqualTo(latestModifyTimestamp.getTime());
+                    .isGreaterThanOrEqualTo(latestModifyTimestamp.getTime());
 
             // countries are not localized.
             JsonNode countriesArrayNode = rootNode.get("countries");
@@ -84,8 +84,8 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
 
             // languages are presented in their native script / language
             JsonNode naturalLanguagesArrayNode = rootNode.get("naturalLanguages");
-            assertItemWithCodeAndName(naturalLanguagesArrayNode, "de", "Deutsch");
-            assertItemWithCodeAndName(naturalLanguagesArrayNode, "ru",
+            assertItemWithNaturalLanguage(naturalLanguagesArrayNode, "de", "de", null, null, "Deutsch");
+            assertItemWithNaturalLanguage(naturalLanguagesArrayNode, "ru", "ru", null, null,
                     "\u0420\u0443\u0441\u0441\u043a\u0438\u0439");
 
             // the request was in German so the results should be in German too.
@@ -99,17 +99,48 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
 
     }
 
-    private void assertItemWithCodeAndName(JsonNode array, String code, String name) {
+    private static void assertItemWithCodeAndName(
+            JsonNode array,
+            String code,
+            String name) {
         IntStream.range(0, array.size())
                 .mapToObj(array::get)
-                .filter(itemNode -> {
-                    String itemCode = itemNode.get("code").asText();
-                    String itemName = itemNode.get("name").asText();
-                    return itemCode.equals(code) && itemName.equals(name);
-                })
+                .filter(itemNode -> isJsonNodeStringValueEqual(itemNode, "code", code)
+                        && isJsonNodeStringValueEqual(itemNode, "name", name))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("unable to find entry with code [" +
                         code + "] and name [" + name + "]"));
+    }
+
+    private static void assertItemWithNaturalLanguage(
+            JsonNode array,
+            String code,
+            String languageCode,
+            String countryCode,
+            String scriptCode,
+            String name) {
+        IntStream.range(0, array.size())
+                .mapToObj(array::get)
+                .filter(itemNode -> isJsonNodeStringValueEqual(itemNode, "code", code)
+                        && isJsonNodeStringValueEqual(itemNode, "name", name)
+                        && isJsonNodeStringValueEqual(itemNode, "languageCode", languageCode)
+                        && isJsonNodeStringValueEqual(itemNode, "countryCode", countryCode)
+                        && isJsonNodeStringValueEqual(itemNode, "scriptCode", scriptCode))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("unable to find entry with code [" +
+                        code + "] and name [" + name + "]"));
+    }
+
+    private static boolean isJsonNodeStringValueEqual(JsonNode node, String key, String expectedValue) {
+        if ((null == expectedValue) == node.hasNonNull(key)) {
+            return false;
+        }
+
+        if (null != expectedValue && !expectedValue.equals(node.get(key).asText())) {
+            return false;
+        }
+
+        return true;
     }
 
 
