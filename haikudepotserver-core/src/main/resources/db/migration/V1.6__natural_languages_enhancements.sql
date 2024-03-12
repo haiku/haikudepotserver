@@ -18,4 +18,5 @@ UPDATE haikudepot.natural_language SET language_code = code;
 
 ALTER TABLE haikudepot.natural_language ALTER COLUMN language_code SET NOT NULL;
 
-ALTER TABLE haikudepot.natural_language DROP COLUMN code;
+-- [apl 12.mar.2024] moved to later migration
+-- ALTER TABLE haikudepot.natural_language DROP COLUMN code;
