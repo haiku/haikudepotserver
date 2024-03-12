@@ -33,6 +33,7 @@ import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChann
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener;
 import org.haiku.haikudepotserver.support.db.UserUsageConditionsInitializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
 
 import javax.sql.DataSource;
@@ -49,6 +50,7 @@ public class PersistenceConfig {
     }
 
     @Bean
+    @DependsOnDatabaseInitialization
     public ServerRuntime serverRuntime(
             DataSource dataSource,
             @Value("${cayenne.query.cache.size:250}") Integer queryCacheSize

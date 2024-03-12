@@ -14,6 +14,7 @@ import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -95,7 +96,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
         if(!result.hasAll()) {
             PkgVersionLocalization.getForPkgVersionAndNaturalLanguageCode(
-                    context, pkgVersion, NaturalLanguage.CODE_ENGLISH)
+                    context, pkgVersion, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH)
                     .ifPresent(pvlEn -> fill(result, searchPattern, pvlEn));
         }
 
@@ -103,7 +104,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             PkgLocalization.tryGetForPkgAndNaturalLanguageCode(
                     context,
                     pkgVersion.getPkg(),
-                    NaturalLanguage.CODE_ENGLISH)
+                    NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH)
                     .ifPresent(plEn -> fill(result, searchPattern, plEn));
         }
 

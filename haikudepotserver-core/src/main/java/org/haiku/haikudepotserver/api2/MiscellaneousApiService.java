@@ -112,7 +112,7 @@ public class MiscellaneousApiService extends AbstractApiService {
         }
 
         if (null != request.getNaturalLanguageCode()) {
-            specification.setNaturalLanguageCode(getNaturalLanguage(context, request.getNaturalLanguageCode()).getCode());
+            specification.setNaturalLanguageCoordinates(NaturalLanguageCoordinates.fromCode(request.getNaturalLanguageCode()));
         }
 
         if (null != request.getPkgNames()) {
@@ -202,7 +202,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                                                 : messageSource.getMessage(
                                                 nl.getTitleKey(),
                                                 null, // params
-                                                naturalLanguage.toLocale()))
+                                                naturalLanguage.toCoordinates().toLocale()))
                                         .isPopular(nl.getIsPopular())
                                         .hasData(natLangCoordsWithData.contains(nl.toCoordinates()))
                                         .hasLocalizationMessages(natLangCoordsWithLocalizationMessages.contains(nl.toCoordinates())))
@@ -228,7 +228,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                                         : messageSource.getMessage(
                                         pc.getTitleKey(),
                                         null, // params
-                                        naturalLanguage.toLocale()))
+                                        naturalLanguage.toCoordinates().toLocale()))
                         )
                         .collect(Collectors.toList()));
     }
@@ -268,7 +268,7 @@ public class MiscellaneousApiService extends AbstractApiService {
                                         : messageSource.getMessage(
                                         urs.getTitleKey(),
                                         null, // params
-                                        naturalLanguage.toLocale())))
+                                        naturalLanguage.toCoordinates().toLocale())))
                         .collect(Collectors.toList()));
     }
 

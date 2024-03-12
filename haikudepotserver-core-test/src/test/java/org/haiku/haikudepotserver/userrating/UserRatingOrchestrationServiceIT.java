@@ -20,6 +20,7 @@ import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -51,7 +52,7 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         UserRating userRating = context.newObject(UserRating.class);
         userRating.setUser(user);
         userRating.setPkgVersion(pkgVersion);
-        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH));
+        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH));
         userRating.setRating(rating);
         return userRating;
     }

@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
 import org.haiku.haikudepotserver.pkg.model.NonUserPkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -55,7 +56,7 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1 =
                     org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "pkg1");
-            NaturalLanguage naturalLanguageGerman = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN);
+            NaturalLanguage naturalLanguageGerman = NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN);
 
             // ---------------------------------
             pkgLocalizationService.updatePkgLocalization(
@@ -77,7 +78,7 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
                     org.haiku.haikudepotserver.dataobjects.Pkg.getByName(
                             context, "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
 
-            PkgLocalization pkgLocalization = pkg1Devel.getPkgSupplement().getPkgLocalization(NaturalLanguage.CODE_GERMAN).get();
+            PkgLocalization pkgLocalization = pkg1Devel.getPkgSupplement().getPkgLocalization(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN).get();
 
             Assertions.assertThat(pkgLocalization.getTitle()).isEqualTo("title_kokako");
             Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kokako");

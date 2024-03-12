@@ -30,11 +30,11 @@ import org.haiku.haikudepotserver.api2.model.UpdateUserRequestEnvelope;
 import org.haiku.haikudepotserver.captcha.model.Captcha;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetException;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetServiceImpl;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.junit.jupiter.api.Test;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
@@ -77,7 +77,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             User user = User.getByNickname(context, "testuser");
-            Assertions.assertThat(user.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
+            Assertions.assertThat(user.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN);
         }
 
     }

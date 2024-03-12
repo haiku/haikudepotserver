@@ -77,8 +77,9 @@ public class NaturalLanguageChooserContentProcessor extends AbstractElementTagPr
                         .stream()
                         .sorted()
                         .collect(Collectors.toList()),
-                NaturalLanguageWebHelper.deriveNaturalLanguage(
-                        objectContext, request));
+                NaturalLanguage.getByCoordinates(
+                        objectContext,
+                        NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(request)));
     }
 
     private void addElementsForNaturalLanguageData(

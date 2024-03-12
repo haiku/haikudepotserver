@@ -38,15 +38,15 @@ public class FeedServiceImpl implements FeedService {
                 .fromHttpUrl(baseUrl)
                 .path(PATH_ROOT + "/pkg.atom");
 
-        if(null!=specification.getNaturalLanguageCode()) {
-            builder.queryParam(KEY_NATURALLANGUAGECODE, specification.getNaturalLanguageCode());
+        if(null != specification.getNaturalLanguageCoordinates()) {
+            builder.queryParam(KEY_NATURALLANGUAGECODE, specification.getNaturalLanguageCoordinates().getCode());
         }
 
-        if(null!=specification.getLimit()) {
+        if(null != specification.getLimit()) {
             builder.queryParam(KEY_LIMIT, specification.getLimit().toString());
         }
 
-        if(null!=specification.getSupplierTypes()) {
+        if(null != specification.getSupplierTypes()) {
             builder.queryParam(
                     KEY_TYPES,
                     specification.getSupplierTypes()
@@ -56,9 +56,9 @@ public class FeedServiceImpl implements FeedService {
             );
         }
 
-        if(null!=specification.getPkgNames()) {
+        if(null != specification.getPkgNames()) {
             // split on hyphens because hyphens are not allowed in package names
-            builder.queryParam(KEY_PKGNAMES, String.join("-",specification.getPkgNames()));
+            builder.queryParam(KEY_PKGNAMES, String.join("-", specification.getPkgNames()));
         }
 
         return builder.build().toString();

@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.QueryCacheStrategy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
@@ -33,15 +34,10 @@ import java.util.stream.Collectors;
 public class NaturalLanguage extends _NaturalLanguage
         implements Coded, CreateAndModifyTimestamped, Comparable<NaturalLanguage> {
 
-    public final static String CODE_ENGLISH = "en";
-    public final static String CODE_GERMAN = "de";
-    public final static String CODE_SPANISH = "es";
-    public final static String CODE_FRENCH = "fr";
-
     private final static Comparator<NaturalLanguage> COMPARATOR = Comparator
-            .comparing(NaturalLanguage::getLanguageCode)
-            .thenComparing(NaturalLanguage::getCountryCode)
-            .thenComparing(NaturalLanguage::getScriptCode);
+            .comparing(NaturalLanguage::getLanguageCode, StringUtils::compare)
+            .thenComparing(NaturalLanguage::getCountryCode, StringUtils::compare)
+            .thenComparing(NaturalLanguage::getScriptCode, StringUtils::compare);
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
@@ -57,10 +53,24 @@ public class NaturalLanguage extends _NaturalLanguage
         return getAll(context).stream().filter(_NaturalLanguage::getIsPopular).collect(Collectors.toList());
     }
 
+    public static Optional<NaturalLanguage> tryGetByCoordinates(ObjectContext context, final NaturalLanguageCoordinates coordinates) {
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != coordinates, "the coordinates must be provided");
+        return getAll(context).stream().filter(nl -> 0 == nl.compareTo(coordinates)).collect(SingleCollector.optional());
+    }
+
     public static Optional<NaturalLanguage> tryGetByCode(ObjectContext context, final String code) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
-        return getAll(context).stream().filter(nl -> nl.getCode().equals(code)).collect(SingleCollector.optional());
+        return tryGetByCoordinates(context, NaturalLanguageCoordinates.fromCode(code));
+    }
+
+    public static NaturalLanguage getByCoordinates(ObjectContext context, final NaturalLanguageCoordinates coordinates) {
+        Preconditions.checkArgument(null != context, "the context must be provided");
+        Preconditions.checkArgument(null != coordinates, "the coordinates must be provided");
+        return tryGetByCoordinates(context, coordinates)
+                .orElseThrow(() -> new IllegalStateException(
+                        "unable to find natural language with code [" + coordinates.getCode() + "]"));
     }
 
     public static NaturalLanguage getByCode(ObjectContext context, final String code) {
@@ -70,16 +80,7 @@ public class NaturalLanguage extends _NaturalLanguage
     }
 
     public static NaturalLanguage getEnglish(ObjectContext context) {
-        return tryGetByCode(context, CODE_ENGLISH).get();
-    }
-
-    /**
-     * <p>This method will return all of the natural language codes in the system.</p>
-     */
-
-    public static List<String> getAllCodes(ObjectContext context) {
-        Preconditions.checkArgument(null != context, "the context must be provided");
-        return getAll(context).stream().map(NaturalLanguage::getCode).collect(Collectors.toList());
+        return tryGetByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH).get();
     }
 
     public String getCode() {
@@ -87,11 +88,11 @@ public class NaturalLanguage extends _NaturalLanguage
     }
 
     public NaturalLanguageCoordinates toCoordinates() {
-        return new NaturalLanguageCoordinates(getLanguageCode(), getCountryCode(), getScriptCode());
+        return new NaturalLanguageCoordinates(getLanguageCode(), getScriptCode(), getCountryCode());
     }
 
     public boolean isEnglish() {
-        return CODE_ENGLISH.equals(getCode());
+        return NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH.equals(getCode());
     }
 
     /**
@@ -99,16 +100,16 @@ public class NaturalLanguage extends _NaturalLanguage
      */
 
     public String getTitleKey() {
-        return String.format("naturalLanguage.%s",getCode().toLowerCase());
-    }
-
-    public Locale toLocale() {
-        return Locale.forLanguageTag(getCode());
+        return String.format("naturalLanguage.%s", getCode());
     }
 
     @Override
     public int compareTo(@NotNull NaturalLanguage other) {
         return COMPARATOR.compare(this, other);
+    }
+
+    public int compareTo(@NotNull NaturalLanguageCoordinates coordinates) {
+        return toCoordinates().compareTo(coordinates);
     }
 
     @Override

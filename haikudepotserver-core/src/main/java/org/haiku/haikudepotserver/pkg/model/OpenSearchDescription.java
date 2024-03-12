@@ -5,6 +5,8 @@
 
 package org.haiku.haikudepotserver.pkg.model;
 
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+
 /**
  * <p>This model object is used to describe the data required to fill the freemarker template
  * that renders out an OpenSearch definition.  See
@@ -15,7 +17,7 @@ public class OpenSearchDescription {
 
     private String description;
     private String baseUrl;
-    private String naturalLanguageCode;
+    private NaturalLanguageCoordinates naturalLanguageCoordinates;
     private String shortName;
 
     public String getShortName() {
@@ -42,11 +44,11 @@ public class OpenSearchDescription {
         this.baseUrl = baseUrl;
     }
 
-    public String getNaturalLanguageCode() {
-        return naturalLanguageCode;
+    public NaturalLanguageCoordinates getNaturalLanguageCoordinates() {
+        return naturalLanguageCoordinates;
     }
 
-    public void setNaturalLanguageCode(String naturalLanguageCode) {
-        this.naturalLanguageCode = naturalLanguageCode;
+    public void setNaturalLanguageCoordinates(NaturalLanguageCoordinates naturalLanguageCoordinates) {
+        this.naturalLanguageCoordinates = naturalLanguageCoordinates;
     }
 }

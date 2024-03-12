@@ -10,17 +10,20 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ColumnSelect;
 import org.apache.cayenne.query.ObjectSelect;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -46,6 +49,8 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
     private final ServerRuntime serverRuntime;
     private final List<String> messageSourceBaseNames;
 
+    private final MessageSource messageSource;
+
     private final Lock naturalLanguageCoordinatesWithLocalizationMessagesLock = new ReentrantLock();
 
     /**
@@ -63,9 +68,11 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
 
     public NaturalLanguageServiceImpl(
             ServerRuntime serverRuntime,
+            MessageSource messageSource,
             @Qualifier("messageSourceBaseNames") List<String> messageSourceBaseNames
     ) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.messageSource = Preconditions.checkNotNull(messageSource);
         this.messageSourceBaseNames = Preconditions.checkNotNull(messageSourceBaseNames);
 
         allLocalizationMessages = CacheBuilder
@@ -78,6 +85,27 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
                         return assembleAllLocalizationMessagesUncached(key);
                     }
                 });
+    }
+
+    @PostConstruct
+    public void init() {
+        ObjectContext context = serverRuntime.newContext();
+        List<NaturalLanguage> naturalLanguages = NaturalLanguage.getAll(context);
+
+        LOGGER.info("will check {} natural languages for compatibility", naturalLanguages.size());
+
+        // Check to make sure that there is a localization for each of the language's names. We can do this in the
+        // English locale because "any value will do" as there is only one localization file for this.
+        naturalLanguages
+                .stream()
+                .map(NaturalLanguage::getTitleKey)
+                .forEach(key -> messageSource.getMessage(key, new Object[]{}, Locale.ENGLISH));
+
+        // Check that the natural langauges that are present are able to be dealt with by the Java locale system.
+        naturalLanguages
+                .stream()
+                .map(NaturalLanguage::toCoordinates)
+                .forEach(NaturalLanguageServiceImpl::verifyNaturalLanguageLocaleConversion);
     }
 
     private Properties assembleAllLocalizationMessagesUncached(NaturalLanguageCoordinates naturalLanguageCoordinates) {
@@ -156,24 +184,24 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
         return assembleNaturalLanguageCodeUseSet(ObjectSelect.columnQuery(
                         PkgLocalization.class,
                         PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE),
-                        PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE),
-                        PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE)));
+                        PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE),
+                        PkgLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE)));
     }
 
     private Set<NaturalLanguageCoordinates> getNaturalLanguageCoordinatesWithPkgVersionLocalization() {
         return assembleNaturalLanguageCodeUseSet(ObjectSelect.columnQuery(
                         PkgVersionLocalization.class,
                         PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE),
-                        PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE),
-                        PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE)));
+                        PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE),
+                        PkgVersionLocalization.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE)));
     }
 
     private Set<NaturalLanguageCoordinates> getNaturalLanguageCoordinatesWithUserRating() {
         return assembleNaturalLanguageCodeUseSet(ObjectSelect.columnQuery(
                         UserRating.class,
                         UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE),
-                        UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE),
-                        UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE)));
+                        UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE),
+                        UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE)));
     }
 
     @Override
@@ -214,5 +242,26 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
         result.addAll(getNaturalLanguageCoordinatesWithPkgVersionLocalization());
         result.addAll(getNaturalLanguageCoordinatesWithPkgLocalization());
         return Collections.unmodifiableSet(result);
+    }
+
+    private static void verifyNaturalLanguageLocaleConversion(NaturalLanguageCoordinates coordinates) {
+        Locale locale = coordinates.toLocale();
+
+        if (!Objects.equals(StringUtils.trimToNull(locale.getLanguage()), coordinates.languageCode())) {
+            throw new IllegalStateException("locale representation on [" + coordinates + "] mismatched on langauge");
+        }
+
+        if (!Objects.equals(StringUtils.trimToNull(locale.getCountry()), coordinates.countryCode())) {
+            throw new IllegalStateException("locale representation on [" + coordinates + "] mismatched on country");
+        }
+
+        if (!Objects.equals(StringUtils.trimToNull(locale.getScript()), coordinates.scriptCode())) {
+            throw new IllegalStateException("locale representation on [" + coordinates + "] mismatched on script");
+        }
+
+        if (!Objects.equals(StringUtils.trimToNull(locale.toLanguageTag()), coordinates.getCode())) {
+            throw new IllegalStateException("locale representation on [" + coordinates + "] mismatched on language-tag / code");
+        }
+
     }
 }

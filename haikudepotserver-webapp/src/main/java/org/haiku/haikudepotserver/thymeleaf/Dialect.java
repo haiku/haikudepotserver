@@ -68,7 +68,6 @@ public class Dialect implements IProcessorDialect, IExpressionObjectDialect {
     @Override
     public Set<IProcessor> getProcessors(String dialectPrefix) {
         return Set.of(
-                new IncludePassiveContentProcessor(dialectPrefix),
                 new PaginationLinksContentProcessor(dialectPrefix),
                 new NaturalLanguageChooserContentProcessor(dialectPrefix),
                 new PkgIconContentProcessor(dialectPrefix),

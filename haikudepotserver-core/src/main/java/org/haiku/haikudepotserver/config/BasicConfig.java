@@ -126,7 +126,7 @@ public class BasicConfig {
             @Qualifier("messageSourceBaseNames") List<String> basenames) {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setDefaultEncoding(Charsets.UTF_8.name());
-        messageSource.setBasenames(basenames.toArray(new String[basenames.size()]));
+        messageSource.setBasenames(basenames.toArray(new String[0]));
         return messageSource;
     }
 

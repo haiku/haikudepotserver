@@ -9,21 +9,19 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.net.MediaType;
-import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api1.support.Constants;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.haiku.haikudepotserver.api1.support.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -77,7 +75,7 @@ public class ErrorServlet extends HttpServlet {
         try {
             String jsonRpcErrorCodeString = req.getParameter(PARAM_JSONRPCERRORCODE);
             Integer jsonRpcErrorCode = Strings.isNullOrEmpty(jsonRpcErrorCodeString) ? null : Integer.parseInt(jsonRpcErrorCodeString);
-            byte[] pageBytes = renderPageToByteArrayOrFallback(req.getLocale().getLanguage(), jsonRpcErrorCode, resp.getStatus());
+            byte[] pageBytes = renderPageToByteArrayOrFallback(req.getLocale(), jsonRpcErrorCode, resp.getStatus());
             resp.setContentType(MediaType.HTML_UTF_8.toString());
             resp.setContentLength(pageBytes.length);
             resp.getOutputStream().write(pageBytes);
@@ -102,9 +100,8 @@ public class ErrorServlet extends HttpServlet {
     }
 
     private void renderTextualMessages(
-            Writer out, String naturalLanguageCode,
+            Writer out, Locale locale,
             Integer jsonRpcErrorCode, Integer httpStatusCode) throws IOException {
-        Locale locale = new Locale(naturalLanguageCode);
         String title = messageSource.getMessage("error.title", null, locale);
         String body = messageSource.getMessage(deriveBodyKey(jsonRpcErrorCode, httpStatusCode), null, locale);
         String actionTitle = messageSource.getMessage("error.action.title", null, locale);
@@ -127,13 +124,13 @@ public class ErrorServlet extends HttpServlet {
     }
 
     private byte[] renderPageToByteArrayOrFallback(
-            String naturalLanguageCode,
+            Locale locale,
             Integer jsonRpcErrorCode, Integer httpStatusCode) {
 
         byte[] result = fallbackPageGeneralBytes;
 
         try {
-            result = renderPageToByteArray(naturalLanguageCode, jsonRpcErrorCode, httpStatusCode);
+            result = renderPageToByteArray(locale, jsonRpcErrorCode, httpStatusCode);
         } catch (Throwable ignore) {
             // ignore
         }
@@ -142,13 +139,13 @@ public class ErrorServlet extends HttpServlet {
     }
 
     private byte[] renderPageToByteArray(
-            String naturalLanguageCode,
+            Locale locale,
             Integer jsonRpcErrorCode, Integer httpStatusCode) throws IOException {
         try (
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8) )
         {
-            renderPage(writer, naturalLanguageCode, jsonRpcErrorCode, httpStatusCode);
+            renderPage(writer, locale, jsonRpcErrorCode, httpStatusCode);
             writer.flush();
             outputStream.flush();
             return outputStream.toByteArray();
@@ -161,11 +158,11 @@ public class ErrorServlet extends HttpServlet {
      */
 
     private void renderPage(
-            Writer out, String naturalLanguageCode,
+            Writer out, Locale locale,
             Integer jsonRpcErrorCode, Integer httpStatusCode) throws IOException {
 
-        if (StringUtils.isBlank(naturalLanguageCode)) {
-            naturalLanguageCode = NaturalLanguage.CODE_ENGLISH;
+        if (null == locale) {
+            locale = Locale.ENGLISH;
         }
 
         out.append("<html>\n");
@@ -191,7 +188,7 @@ public class ErrorServlet extends HttpServlet {
 
         renderTextualMessages(
                 out,
-                naturalLanguageCode,
+                locale,
                 jsonRpcErrorCode,
                 httpStatusCode);
 

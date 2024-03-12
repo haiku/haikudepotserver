@@ -15,11 +15,11 @@ import com.google.common.collect.ImmutableList;
 import com.rometools.rome.feed.synd.*;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.feed.FeedServiceImpl;
 import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.feed.model.SyndEntrySupplier;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,16 +88,16 @@ public class FeedController {
                 });
     }
 
-    private SyndFeed createFeed(FeedSpecification key) {
-        Preconditions.checkNotNull(key);
+    private SyndFeed createFeed(FeedSpecification specification) {
+        Preconditions.checkNotNull(specification);
         Locale locale = Locale.ENGLISH;
 
-        if (!Strings.isNullOrEmpty(key.getNaturalLanguageCode())) {
-            locale = new Locale(key.getNaturalLanguageCode());
+        if (null != specification.getNaturalLanguageCoordinates()) {
+            locale = specification.getNaturalLanguageCoordinates().toLocale();
         }
 
         SyndFeed feed = new SyndFeedImpl();
-        feed.setFeedType(key.getFeedType().getFeedType());
+        feed.setFeedType(specification.getFeedType().getFeedType());
         feed.setTitle(FEED_TITLE);
         feed.setDescription(messageSource.getMessage("feed.description", new Object[] {}, locale));
         feed.setLink(baseUrl);
@@ -111,15 +111,15 @@ public class FeedController {
         List<SyndEntry> entries = new ArrayList<>();
 
         for(SyndEntrySupplier supplier : syndEntrySuppliers) {
-            entries.addAll(supplier.generate(key));
+            entries.addAll(supplier.generate(specification));
         }
 
         // sort the entries and then take the first number of them up to the limit.
 
         entries.sort((o1, o2) -> -1 * o1.getPublishedDate().compareTo(o2.getPublishedDate()));
 
-        if(entries.size() > key.getLimit()) {
-            entries = entries.subList(0,key.getLimit());
+        if(entries.size() > specification.getLimit()) {
+            entries = entries.subList(0,specification.getLimit());
         }
 
         feed.setEntries(entries);
@@ -150,7 +150,10 @@ public class FeedController {
         FeedSpecification specification = new FeedSpecification();
         specification.setFeedType(feedType);
         specification.setLimit(limit);
-        specification.setNaturalLanguageCode(!Strings.isNullOrEmpty(naturalLanguageCode) ? naturalLanguageCode : NaturalLanguage.CODE_ENGLISH);
+        specification.setNaturalLanguageCoordinates(
+                !Strings.isNullOrEmpty(naturalLanguageCode)
+                        ? NaturalLanguageCoordinates.fromCode(naturalLanguageCode)
+                        : NaturalLanguageCoordinates.english());
 
         if(Strings.isNullOrEmpty(types)) {
             specification.setSupplierTypes(ImmutableList.copyOf(FeedSpecification.SupplierType.values()));

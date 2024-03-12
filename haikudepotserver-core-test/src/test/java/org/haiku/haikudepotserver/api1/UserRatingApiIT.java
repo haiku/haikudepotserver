@@ -27,6 +27,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -50,7 +51,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         integrationTestSupportService.agreeToUserUsageConditions(context, user);
 
         UserRating userRating = context.newObject(UserRating.class);
-        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH));
+        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH));
         userRating.setComment("How now brown cow");
         userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,
@@ -69,7 +70,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(result.active).isTrue();
         Assertions.assertThat(Strings.isNullOrEmpty(result.code)).isFalse();
         Assertions.assertThat(result.comment).isEqualTo("How now brown cow");
-        Assertions.assertThat(result.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_SPANISH);
+        Assertions.assertThat(result.naturalLanguageCode).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH);
         Assertions.assertThat(result.createTimestamp).isNotNull();
         Assertions.assertThat(result.modifyTimestamp).isNotNull();
         Assertions.assertThat(result.rating).isEqualTo((short) 3);
@@ -96,7 +97,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         request.active = false;
         request.rating = (short) 1;
         request.comment = "Highlighter orange";
-        request.naturalLanguageCode = NaturalLanguage.CODE_GERMAN;
+        request.naturalLanguageCode = NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN;
         request.code = userRatingCode;
         request.userRatingStabilityCode = UserRatingStability.CODE_MOSTLYSTABLE;
         request.filter = ImmutableList.copyOf(UpdateUserRatingRequest.Filter.values());
@@ -111,7 +112,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.getActive()).isFalse();
             Assertions.assertThat(userRating.getRating()).isEqualTo((short) 1);
             Assertions.assertThat(userRating.getComment()).isEqualTo("Highlighter orange");
-            Assertions.assertThat(userRating.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
+            Assertions.assertThat(userRating.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN);
             Assertions.assertThat(userRating.getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_MOSTLYSTABLE);
         }
     }
@@ -155,7 +156,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         setAuthenticatedUser("testuser");
 
         CreateUserRatingRequest request = new CreateUserRatingRequest();
-        request.naturalLanguageCode = NaturalLanguage.CODE_SPANISH;
+        request.naturalLanguageCode = NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH;
         request.userNickname = "testuser";
         request.repositoryCode = "testrepo";
         request.userRatingStabilityCode = UserRatingStability.CODE_VERYUNSTABLE;
@@ -176,7 +177,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRatingOptional.isPresent()).isTrue();
             Assertions.assertThat(userRatingOptional.get().getActive()).isTrue();
             Assertions.assertThat(userRatingOptional.get().getComment()).isEqualTo("The supermarket has gone crazy");
-            Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_SPANISH);
+            Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH);
             Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 5);
             Assertions.assertThat(userRatingOptional.get().getUser().getNickname()).isEqualTo("testuser");
             Assertions.assertThat(userRatingOptional.get().getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_VERYUNSTABLE);
@@ -220,7 +221,7 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.comment).isEqualTo("Southern hemisphere winter");
             Assertions.assertThat(userRating.createTimestamp).isNotNull();
             Assertions.assertThat(userRating.modifyTimestamp).isNotNull();
-            Assertions.assertThat(userRating.naturalLanguageCode).isEqualTo(NaturalLanguage.CODE_ENGLISH);
+            Assertions.assertThat(userRating.naturalLanguageCode).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH);
             Assertions.assertThat(userRating.pkgVersion.pkg.name).isEqualTo("pkg3");
             Assertions.assertThat(userRating.pkgVersion.repositoryCode).isEqualTo("testrepo");
             Assertions.assertThat(userRating.pkgVersion.repositorySourceCode).isEqualTo("testreposrc_xyz");

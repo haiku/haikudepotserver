@@ -39,8 +39,6 @@ public class LoggingFilter implements Filter {
 
     private final static String VALUE_ABSENT = "-";
 
-    public final static String USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT = "X-HDS-Client";
-
     private enum Agent {
         HAIKUDEPOT("hd"),
         WEBPOSITIVE("wpo"),
@@ -105,11 +103,6 @@ public class LoggingFilter implements Filter {
 
                 return Optional.of(Agent.SAFARI);
             }
-
-            if (userAgent.equals(USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT)) {
-                return Optional.of(Agent.HAIKUDEPOT);
-            }
-
         }
 
         return Optional.empty();

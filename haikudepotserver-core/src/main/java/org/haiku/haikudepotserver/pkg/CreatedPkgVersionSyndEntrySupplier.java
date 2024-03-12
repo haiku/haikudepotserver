@@ -143,9 +143,8 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
     }
 
     private NaturalLanguage deriveNaturalLanguage(ObjectContext context, final FeedSpecification specification) {
-        return Optional.ofNullable(specification.getNaturalLanguageCode())
-                .map(StringUtils::trimToNull)
-                .map(c -> NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode()))
+        return Optional.ofNullable(specification.getNaturalLanguageCoordinates())
+                .map(coordinates -> NaturalLanguage.getByCoordinates(context, coordinates))
                 .orElse(NaturalLanguage.getEnglish(context));
     }
 

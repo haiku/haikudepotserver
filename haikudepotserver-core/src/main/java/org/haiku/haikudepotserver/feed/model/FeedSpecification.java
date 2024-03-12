@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.feed.model;
 
 import com.google.common.net.MediaType;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 
 import java.util.List;
 import java.util.Objects;
@@ -55,7 +56,7 @@ public class FeedSpecification {
     }
 
     private FeedType feedType;
-    private String naturalLanguageCode;
+    private NaturalLanguageCoordinates naturalLanguageCoordinates;
     private List<String> pkgNames;
     private Integer limit;
     private List<SupplierType> supplierTypes;
@@ -68,12 +69,12 @@ public class FeedSpecification {
         this.feedType = feedType;
     }
 
-    public String getNaturalLanguageCode() {
-        return naturalLanguageCode;
+    public NaturalLanguageCoordinates getNaturalLanguageCoordinates() {
+        return naturalLanguageCoordinates;
     }
 
-    public void setNaturalLanguageCode(String naturalLanguageCode) {
-        this.naturalLanguageCode = naturalLanguageCode;
+    public void setNaturalLanguageCoordinates(NaturalLanguageCoordinates value) {
+        this.naturalLanguageCoordinates = value;
     }
 
     public List<String> getPkgNames() {
@@ -109,7 +110,7 @@ public class FeedSpecification {
 
         if (!feedType.equals(that.feedType)) return false;
         if (!limit.equals(that.limit)) return false;
-        if (!naturalLanguageCode.equals(that.naturalLanguageCode)) return false;
+        if (!naturalLanguageCoordinates.equals(that.naturalLanguageCoordinates)) return false;
         if (!Objects.equals(pkgNames, that.pkgNames)) return false;
         if (!supplierTypes.equals(that.supplierTypes)) return false;
 
@@ -118,7 +119,7 @@ public class FeedSpecification {
 
     @Override
     public int hashCode() {
-        int result = naturalLanguageCode.hashCode();
+        int result = naturalLanguageCoordinates.hashCode();
         result = 31 * result + (pkgNames != null ? pkgNames.hashCode() : 0);
         result = 31 * result + limit.hashCode();
         result = 31 * result + supplierTypes.hashCode();

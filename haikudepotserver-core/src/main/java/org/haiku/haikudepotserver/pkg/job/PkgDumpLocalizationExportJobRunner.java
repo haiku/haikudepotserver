@@ -25,6 +25,8 @@ import org.haiku.haikudepotserver.pkg.model.PkgLocalizationContentType;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalization;
 import org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalizations;
+import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportPkgLocalizationNaturalLanguage;
+import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceNaturalLanguage;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
@@ -171,10 +173,19 @@ public class PkgDumpLocalizationExportJobRunner extends AbstractJobRunner<PkgDum
                     result.setCode(type.name().toLowerCase(Locale.ROOT));
                     result.setCreateTimestamp(pkgLocalization.getCreateTimestamp().getTime());
                     result.setModifyTimestamp(pkgLocalization.getModifyTimestamp().getTime());
-                    result.setNaturalLanguageCode(pkgLocalization.getNaturalLanguage().getCode());
+                    result.setNaturalLanguage(createDumpExportPkgLocalizationNaturalLanguage(pkgLocalization.getNaturalLanguage()));
                     result.setContent(contentSupplier.get());
                     return result;
                 });
+    }
+
+    private static DumpExportPkgLocalizationNaturalLanguage createDumpExportPkgLocalizationNaturalLanguage(NaturalLanguage naturalLanguage) {
+        DumpExportPkgLocalizationNaturalLanguage result = new DumpExportPkgLocalizationNaturalLanguage();
+        result.setScriptCode(naturalLanguage.getScriptCode());
+        result.setCountryCode(naturalLanguage.getCountryCode());
+        result.setLanguageCode(naturalLanguage.getLanguageCode());
+        result.setCode(naturalLanguage.getCode());
+        return result;
     }
 
     private static DumpExportPkgLocalizations createDumpExportPkgLocalizations(Pkg pkg) {

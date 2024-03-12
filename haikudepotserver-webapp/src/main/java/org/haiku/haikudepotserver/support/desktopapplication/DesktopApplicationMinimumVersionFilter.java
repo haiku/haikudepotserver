@@ -1,34 +1,23 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.desktopapplication;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import jakarta.mail.internet.MimeUtility;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.haiku.haikudepotserver.support.IntArrayVersionComparator;
-import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 /**
  * <p>The desktop application develops over time and older versions of the desktop
@@ -38,70 +27,18 @@ import java.util.regex.Pattern;
 
 public class DesktopApplicationMinimumVersionFilter implements Filter {
 
-    private final static Pattern PATTERN_MINIMUMVERSIONSTRING = Pattern.compile("^[0-9]+(\\.[0-9]+)*$");
-    private final static Pattern PATTERN_DESKTOPAPPLICATIONUSERAGENT = Pattern.compile("^HaikuDepot/([0-9]+(\\.[0-9]+)*)");
     public final static String HEADER_MINIMUM_VERSION = "X-Desktop-Application-Minimum-Version";
 
     protected static Logger LOGGER = LoggerFactory.getLogger(DesktopApplicationMinimumVersionFilter.class);
-
-    private final String minimumVersionString;
 
     private final int[] minimumVersion;
 
     private final IntArrayVersionComparator intArrayVersionComparator = new IntArrayVersionComparator();
 
     public DesktopApplicationMinimumVersionFilter(String minimumVersionString) {
-        this.minimumVersionString = minimumVersionString;
-        this.minimumVersion = deriveVersion(minimumVersionString);
-    }
-
-    private int[] deriveVersion(String versionString) {
-        if (!Strings.isNullOrEmpty(versionString)) {
-            int[] version = parseVersion(versionString);
-
-            if (null == version) {
-                throw new IllegalStateException("not able to parse the minimum version string; " + versionString);
-            }
-
-            LOGGER.info("desktop application min version; {}", versionString);
-            return version;
-        }
-
-        return null;
-    }
-
-    private int[] parseVersion(String versionString) {
-        if (PATTERN_MINIMUMVERSIONSTRING.matcher(versionString).matches()) {
-            List<String> items = Lists.newArrayList(Splitter.on('.').split(versionString));
-            int[] result = new int[items.size()];
-
-            for (int i = 0; i < items.size(); i++) {
-                result[i] = Integer.parseInt(items.get(i));
-            }
-
-            return result;
-        }
-
-        return null;
-    }
-
-    private int[] parseVersionFromUserAgentString(String userAgentString) {
-
-        if (!Strings.isNullOrEmpty(userAgentString)) {
-
-            // hopefully this can be dropped soon.
-             if (userAgentString.equals(LoggingFilter.USERAGENT_LEGACY_HAIKUDEPOTUSERAGENT)) {
-                 return new int[] { 0, 0, 0};
-             }
-
-            Matcher desktopApplicationUserAgentMatcher = PATTERN_DESKTOPAPPLICATIONUSERAGENT.matcher(userAgentString);
-
-            if (desktopApplicationUserAgentMatcher.matches()) {
-                return parseVersion(desktopApplicationUserAgentMatcher.group(1));
-            }
-        }
-
-        return null;
+        this.minimumVersion = Optional.ofNullable(minimumVersionString)
+                        .map(DesktopApplicationHelper::deriveVersion)
+                                .orElse(null);
     }
 
     /**
@@ -109,16 +46,18 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
      */
 
     private boolean checkVersion(String userAgentString) {
-
         if (null == minimumVersion) {
             return true;
         }
 
-        int[] requestVersion = parseVersionFromUserAgentString(userAgentString);
+        // don't worry if it is not the desktop application
+        if (!DesktopApplicationHelper.matchesUserAgent(userAgentString)) {
+            return true;
+        }
 
-        return
-                null == requestVersion
-                || intArrayVersionComparator.compare(requestVersion, minimumVersion) >= 0;
+        return DesktopApplicationHelper.tryDeriveVersionFromUserAgent(userAgentString)
+                .filter(version -> intArrayVersionComparator.compare(version, minimumVersion) >= 0)
+                .isPresent();
     }
 
     @Override
@@ -138,6 +77,8 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
             chain.doFilter(request, response);
         }
         else {
+            String minimumVersionString = DesktopApplicationHelper.versionToString(minimumVersion);
+
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
             httpServletResponse.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
             httpServletResponse.setHeader(HEADER_MINIMUM_VERSION, MimeUtility.encodeText(minimumVersionString));

@@ -132,7 +132,9 @@ public class HomeController {
             pkgCategoryOptional = PkgCategory.tryGetByCode(context, pkgCategoryCode);
         }
 
-        NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest);
+        NaturalLanguage naturalLanguage = NaturalLanguage.getByCoordinates(
+                context,
+                NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(httpServletRequest));
         searchSpecification.setNaturalLanguage(naturalLanguage);
 
         switch (null == viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {
