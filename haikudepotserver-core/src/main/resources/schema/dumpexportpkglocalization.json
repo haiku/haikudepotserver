@@ -22,6 +22,7 @@
         "javaType": "org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalization",
         "required": [
           "code",
+          "naturalLanguage",
           "naturalLanguageCode",
           "content"
         ],
@@ -40,10 +41,29 @@
             "format": "int64",
             "description": "This optional field indicates when the translation was last modified; millis since the epoch."
           },
-          "naturalLanguageCode": {
-            "type": "string",
-            "description": "This is a two-character (Set 1) ISO-639 natural language code to identify the language of the translation.",
-            "pattern": "^[a-z]{2}$"
+          "naturalLanguage": {
+            "javaType": "org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportPkgLocalizationNaturalLanguage",
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "languageCode": {
+                "type": "string",
+                "description": "This is an ISO-639 two or three lower-case letter language code. An example is \"de\" for German",
+                "pattern": "^[a-z]{2,3}$"
+              },
+              "countryCode": {
+                "type": "string",
+                "description": "This is an ISO-3166 country code. It is normally 2 upper case letters but there are cases where numbers are also used. An example is \"AU\" for Australia",
+                "pattern": "^[A-Z0-9]{2,3}$"
+              },
+              "scriptCode": {
+                "type": "string",
+                "description": "This is an ISO-15924 registry code. An example is \"Latn\" for Latin script.",
+                "pattern": "^[A-Z][a-z]{3}$"
+              }
+            }
           },
           "content": {
             "type": "string",

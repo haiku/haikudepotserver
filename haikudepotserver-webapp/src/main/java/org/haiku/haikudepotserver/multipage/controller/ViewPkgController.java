@@ -132,7 +132,9 @@ public class ViewPkgController {
         }
 
         ViewPkgVersionData data = new ViewPkgVersionData();
-        NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, httpServletRequest);
+        NaturalLanguage naturalLanguage = NaturalLanguage.getByCoordinates(
+                context,
+                NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(httpServletRequest));
 
         data.setPkgVersion(pkgVersionOptional.get());
         data.setResolvedPkgVersionLocalization(

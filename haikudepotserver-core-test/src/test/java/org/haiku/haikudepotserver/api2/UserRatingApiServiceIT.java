@@ -30,6 +30,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -54,7 +55,7 @@ public class UserRatingApiServiceIT extends AbstractIntegrationTest {
         integrationTestSupportService.agreeToUserUsageConditions(context, user);
 
         UserRating userRating = context.newObject(UserRating.class);
-        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH));
+        userRating.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH));
         userRating.setComment("How now brown cow");
         userRating.setPkgVersion(pkgService.getLatestPkgVersionForPkg(
                 context,
@@ -96,7 +97,7 @@ public class UserRatingApiServiceIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRating.getActive()).isFalse();
             Assertions.assertThat(userRating.getRating()).isEqualTo((short) 1);
             Assertions.assertThat(userRating.getComment()).isEqualTo("Highlighter orange");
-            Assertions.assertThat(userRating.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_GERMAN);
+            Assertions.assertThat(userRating.getNaturalLanguage().getCode()).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN);
             Assertions.assertThat(userRating.getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_MOSTLYSTABLE);
         }
     }
@@ -207,7 +208,7 @@ public class UserRatingApiServiceIT extends AbstractIntegrationTest {
             Assertions.assertThat(userRatingOptional.isPresent()).isTrue();
             Assertions.assertThat(userRatingOptional.get().getActive()).isTrue();
             Assertions.assertThat(userRatingOptional.get().getComment()).isEqualTo("The supermarket has gone crazy");
-            Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguage.CODE_SPANISH);
+            Assertions.assertThat(userRatingOptional.get().getNaturalLanguage().getCode()).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH);
             Assertions.assertThat(userRatingOptional.get().getRating()).isEqualTo((short) 5);
             Assertions.assertThat(userRatingOptional.get().getUser().getNickname()).isEqualTo("testuser");
             Assertions.assertThat(userRatingOptional.get().getUserRatingStability().getCode()).isEqualTo(UserRatingStability.CODE_VERYUNSTABLE);

@@ -10,6 +10,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,21 +210,21 @@ public class IntegrationTestSupportService {
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH));
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH));
             pkgLocalization.setTitle("Package 1");
             pkgLocalization.setPkgSupplement(result.pkg1.getPkgSupplement());
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_GERMAN));
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN));
             pkgLocalization.setTitle("Packet 1");
             pkgLocalization.setPkgSupplement(result.pkg1.getPkgSupplement());
         }
 
         {
             PkgLocalization pkgLocalization = context.newObject(PkgLocalization.class);
-            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH));
+            pkgLocalization.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH));
             pkgLocalization.setTitle("Ping 1");
             pkgLocalization.setPkgSupplement(result.pkg1.getPkgSupplement());
         }
@@ -265,7 +266,7 @@ public class IntegrationTestSupportService {
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86_64,
-                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH),
+                NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH),
                 null,
                 "pkg1Version2SummarySpanish_feijoa",
                 "pkg1Version2DescriptionSpanish_mango");
@@ -285,7 +286,7 @@ public class IntegrationTestSupportService {
         pkgLocalizationService.updatePkgVersionLocalization(
                 context,
                 result.pkg1Version2x86_gcc2,
-                NaturalLanguage.getByCode(context, NaturalLanguage.CODE_SPANISH),
+                NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_SPANISH),
                 null,
                 "pkg1Version2SummarySpanish_apple",
                 "pkg1Version2DescriptionSpanish_guava");
@@ -365,7 +366,7 @@ public class IntegrationTestSupportService {
         User user = context.newObject(User.class);
         user.setNickname(nickname);
         userAuthenticationService.setPassword(user, passwordClear);
-        user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH));
+        user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH));
         context.commitChanges();
         return user;
     }
@@ -395,7 +396,7 @@ public class IntegrationTestSupportService {
                 RepositorySource.getByCode(context, "testreposrc_xyz"),
                 Collections.singletonList(x86_64)).get();
 
-        NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH);
+        NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH);
 
         {
             User user = createBasicUser(context, "urtest1", "password");

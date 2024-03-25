@@ -15,7 +15,6 @@ import com.rometools.rome.feed.synd.SyndEntryImpl;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
-import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -155,7 +153,7 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
                                                 .orElse(ur.getPkgVersion().getPkg().getName()),
                                         ur.getUser().getNickname()
                                 },
-                                new Locale(specification.getNaturalLanguageCode())
+                                specification.getNaturalLanguageCoordinates().toLocale()
                         ));
 
                         String contentString = ur.getComment();
@@ -187,9 +185,8 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
     }
 
     private NaturalLanguage deriveNaturalLanguage(ObjectContext context, final FeedSpecification specification) {
-        return Optional.ofNullable(specification.getNaturalLanguageCode())
-                .map(StringUtils::trimToNull)
-                .map(c -> NaturalLanguage.getByCode(context, specification.getNaturalLanguageCode()))
+        return Optional.ofNullable(specification.getNaturalLanguageCoordinates())
+                .map(c -> NaturalLanguage.getByCoordinates(context, c))
                 .orElse(NaturalLanguage.getEnglish(context));
     }
 

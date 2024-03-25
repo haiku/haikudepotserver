@@ -19,6 +19,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.OpenSearchDescription;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,27 +93,26 @@ public class PkgSearchController {
         Preconditions.checkArgument(null!=response);
         Preconditions.checkArgument(null!=request);
 
-        ObjectContext context = serverRuntime.newContext();
         OpenSearchDescription model = new OpenSearchDescription();
-        NaturalLanguage naturalLanguage = NaturalLanguageWebHelper.deriveNaturalLanguage(context, request);
+        NaturalLanguageCoordinates naturalLanguageCoordinates = NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(request);
 
         model.setShortName(messageSource.getMessage(
                 "opensearchdescription.shortname" + (isProduction ? "" : ".nonProductionDeploy"),
                 new Object[] {},
-                naturalLanguage.toLocale()));
+                naturalLanguageCoordinates.toLocale()));
         model.setBaseUrl(baseUrl);
-        model.setNaturalLanguageCode(naturalLanguage.getCode());
+        model.setNaturalLanguageCoordinates(naturalLanguageCoordinates);
         model.setDescription(messageSource.getMessage(
                 "opensearchdescription.description",
                 new Object[] {},
-                naturalLanguage.toLocale()));
+                naturalLanguageCoordinates.toLocale()));
 
         BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
 
         response.setContentType("application/opensearchdescription+xml");
 
         try {
-            Template template = freemarkerConfiguration.getTemplate("opensearchdescription-body_" + naturalLanguage.getCode());
+            Template template = freemarkerConfiguration.getTemplate("opensearchdescription-body_" + naturalLanguageCoordinates.getCode());
             template.process(wrapper.wrap(model), response.getWriter());
         }
         catch (TemplateException e) {

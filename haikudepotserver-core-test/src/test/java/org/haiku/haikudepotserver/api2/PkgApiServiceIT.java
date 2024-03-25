@@ -48,6 +48,7 @@ import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionFilter;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.config.TestConfig;
@@ -687,9 +688,9 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg1 = Pkg.getByName(context, "pkg1");
             List<String[]> rules = ImmutableList.of(
-                    new String[] { NaturalLanguage.CODE_ENGLISH, "flourescence" },
-                    new String[] { NaturalLanguage.CODE_FRENCH, "treacle" },
-                    new String[] { NaturalLanguage.CODE_GERMAN, "Packet 1" }
+                    new String[] { NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH, "flourescence" },
+                    new String[] { NaturalLanguageCoordinates.LANGUAGE_CODE_FRENCH, "treacle" },
+                    new String[] { NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN, "Packet 1" }
             );
 
             for(String[] rule : rules) {

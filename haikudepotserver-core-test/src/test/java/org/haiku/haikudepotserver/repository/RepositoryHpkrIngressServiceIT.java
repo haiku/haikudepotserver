@@ -31,6 +31,7 @@ import org.haiku.haikudepotserver.job.Jobs;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -277,7 +278,7 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                             true).size())
                             .isEqualTo(1); // include inactive
 
-                    PkgVersionLocalization localization = pkgVersion.getPkgVersionLocalization(NaturalLanguage.getByCode(context, NaturalLanguage.CODE_ENGLISH)).get();
+                    PkgVersionLocalization localization = pkgVersion.getPkgVersionLocalization(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH)).get();
                     Assertions.assertThat(localization.getDescription().get()).startsWith("FFmpeg is a complete, cro");
                     Assertions.assertThat(localization.getSummary().get()).startsWith("Audio and video rec");
 

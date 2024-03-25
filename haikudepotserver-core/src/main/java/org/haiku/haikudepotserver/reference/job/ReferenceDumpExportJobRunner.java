@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
@@ -150,6 +151,12 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
         dumpExportReference.setNaturalLanguages(
                 NaturalLanguage.getAll(context)
                         .stream()
+                        .filter(nl -> !specification.isFilterForSimpleTwoCharLanguageCodes()
+                                || (2 == StringUtils.length(nl.getLanguageCode())
+                                    && null == nl.getCountryCode()
+                                    && null == nl.getScriptCode()))
+                        // ^ temporary measure until R1B5 has settled and all clients can cope with more complex
+                        // natural languages.
                         .map(nl -> {
                             DumpExportReferenceNaturalLanguage dnl = new DumpExportReferenceNaturalLanguage();
                             dnl.setIsPopular(nl.getIsPopular());
@@ -161,7 +168,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                                     messageSource.getMessage(
                                             nl.getTitleKey(),
                                             new Object[] {},
-                                            naturalLanguage.toLocale()));
+                                            naturalLanguage.toCoordinates().toLocale()));
                             dnl.setHasData(natLangCoordsWithData.contains(nl.toCoordinates()));
                             dnl.setHasLocalizationMessages(natLangCoordsWithLocalizations.contains(nl.toCoordinates()));
                             return dnl;
@@ -178,7 +185,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                                     messageSource.getMessage(
                                             pc.getTitleKey(),
                                             new Object[] {},
-                                            naturalLanguage.toLocale()));
+                                            naturalLanguage.toCoordinates().toLocale()));
                             return dpc;
                         })
                         .collect(Collectors.toList()));
@@ -194,7 +201,7 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                                     messageSource.getMessage(
                                             urs.getTitleKey(),
                                             new Object[] {},
-                                            naturalLanguage.toLocale()));
+                                            naturalLanguage.toCoordinates().toLocale()));
                             return derurs;
                         })
                         .collect(Collectors.toList()));

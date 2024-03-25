@@ -31,8 +31,8 @@ import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
-import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
 import org.haiku.haikudepotserver.feed.model.FeedService;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
@@ -279,7 +279,7 @@ public class MiscelaneousApiServiceIT extends AbstractIntegrationTest {
         // this is a bit rough, but will do for assertion...
         Map<String,String> queryParams = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(url.getQuery());
         Assertions.assertThat(queryParams.get(FeedService.KEY_LIMIT)).isEqualTo("55");
-        Assertions.assertThat(queryParams.get(FeedService.KEY_NATURALLANGUAGECODE)).isEqualTo(NaturalLanguage.CODE_GERMAN);
+        Assertions.assertThat(queryParams.get(FeedService.KEY_NATURALLANGUAGECODE)).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN);
         Assertions.assertThat(queryParams.get(FeedService.KEY_PKGNAMES)).isEqualTo(String.join("-",data.pkg1.getName(), data.pkg2.getName()));
         Assertions.assertThat(queryParams.get(FeedService.KEY_TYPES)).isEqualTo(GenerateFeedUrlSupplierType.CREATEDPKGVERSION.name());
 

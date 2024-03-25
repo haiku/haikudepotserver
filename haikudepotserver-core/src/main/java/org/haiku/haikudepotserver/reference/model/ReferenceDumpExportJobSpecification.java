@@ -18,6 +18,14 @@ public class ReferenceDumpExportJobSpecification extends AbstractJobSpecificatio
 
     private String naturalLanguageCode;
 
+    /**
+     * <p>This flag will control that only natural languages with two-character codes will be returned; no script
+     * or countries are allowed. This is a temporary arrangement to support older HaikuDepot clients that cannot
+     * deal with more complex language codes. After R1B5 this can probably be removed.</p>
+     */
+    @Deprecated
+    private boolean filterForSimpleTwoCharLanguageCodes = false;
+
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
         return Optional.of(TimeUnit.MINUTES.toMillis(TTL_MINUTES));
@@ -31,13 +39,24 @@ public class ReferenceDumpExportJobSpecification extends AbstractJobSpecificatio
         this.naturalLanguageCode = naturalLanguageCode;
     }
 
+    @Deprecated
+    public boolean isFilterForSimpleTwoCharLanguageCodes() {
+        return filterForSimpleTwoCharLanguageCodes;
+    }
+
+    @Deprecated
+    public void setFilterForSimpleTwoCharLanguageCodes(boolean filterForSimpleTwoCharLanguageCodes) {
+        this.filterForSimpleTwoCharLanguageCodes = filterForSimpleTwoCharLanguageCodes;
+    }
+
     public boolean isEquivalent(JobSpecification other) {
         if (!super.isEquivalent(other)) {
             return false;
         }
 
         ReferenceDumpExportJobSpecification pkgOther = ReferenceDumpExportJobSpecification.class.cast(other);
-        return Objects.equals(pkgOther.getNaturalLanguageCode(), getNaturalLanguageCode());
+        return Objects.equals(pkgOther.getNaturalLanguageCode(), getNaturalLanguageCode())
+                && pkgOther.isFilterForSimpleTwoCharLanguageCodes() == isFilterForSimpleTwoCharLanguageCodes();
     }
 
 }

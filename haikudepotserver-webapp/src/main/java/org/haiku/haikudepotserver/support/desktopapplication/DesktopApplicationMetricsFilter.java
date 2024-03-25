@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Andrew Lindesay
+ * Copyright 2023-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,18 +7,12 @@ package org.haiku.haikudepotserver.support.desktopapplication;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.haiku.haikudepotserver.metrics.MetricsConstants;
 import org.springframework.http.HttpHeaders;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,8 +23,6 @@ public class DesktopApplicationMetricsFilter implements Filter {
 
     private final MeterRegistry meterRegistry;
 
-    private static final String USER_AGENT_PREFIX_HAIKU_DEPOT = "HaikuDepot/";
-
     public DesktopApplicationMetricsFilter(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
     }
@@ -38,9 +30,7 @@ public class DesktopApplicationMetricsFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         if (servletRequest instanceof HttpServletRequest httpServletRequest) {
-            Optional.ofNullable(httpServletRequest.getHeader(HttpHeaders.USER_AGENT))
-                    .filter(h -> h.startsWith(USER_AGENT_PREFIX_HAIKU_DEPOT))
-                    .map(h -> h.substring(USER_AGENT_PREFIX_HAIKU_DEPOT.length()))
+            DesktopApplicationHelper.tryDeriveVersionFromUserAgent(httpServletRequest.getHeader(HttpHeaders.USER_AGENT))
                     .ifPresent(this::incrementCounterForDesktopApplicationVersion);
         }
 
@@ -57,10 +47,10 @@ public class DesktopApplicationMetricsFilter implements Filter {
         Filter.super.destroy();
     }
 
-    private void incrementCounterForDesktopApplicationVersion(String version) {
+    private void incrementCounterForDesktopApplicationVersion(int[] version) {
         meterRegistry.counter(
                         MetricsConstants.COUNTER_NAME_DESKTOP_REQUESTS,
-                        Set.of(Tag.of(MetricsConstants.TAG_NAME_VERSION, version)))
+                        Set.of(Tag.of(MetricsConstants.TAG_NAME_VERSION, DesktopApplicationHelper.versionToString(version))))
                 .increment();
     }
 

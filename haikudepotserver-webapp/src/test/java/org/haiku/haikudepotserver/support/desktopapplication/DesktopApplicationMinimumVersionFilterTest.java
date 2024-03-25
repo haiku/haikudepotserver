@@ -83,13 +83,6 @@ public class DesktopApplicationMinimumVersionFilterTest {
     }
 
     @Test
-    public void checkFilter_fails_legacyVersion() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(HttpHeaders.USER_AGENT, "X-HDS-Client");
-        checkFilter_fails(request);
-    }
-
-    @Test
     public void checkFilter_fails_unacceptableDesktopApplication() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.USER_AGENT, "HaikuDepot/1.2");

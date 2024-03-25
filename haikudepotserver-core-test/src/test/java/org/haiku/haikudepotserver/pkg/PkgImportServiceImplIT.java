@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.*;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.pkg.model.Pkg;
@@ -93,7 +94,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                         setupObjectContext,
                         new NonUserPkgSupplementModificationAgent("somebody", "test"),
                         persistedPkg.getPkgSupplement(),
-                        NaturalLanguage.getByCode(setupObjectContext, NaturalLanguage.CODE_GERMAN),
+                        NaturalLanguage.getByCode(setupObjectContext, NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN),
                         "title_kingston_black",
                         "summary_kingston_black",
                         "description_kingston_black");
@@ -146,7 +147,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().size()).isEqualTo(1);
             Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().get(0).getSize()).isEqualTo(32);
 
-            PkgLocalization pkgLocalization = persistedDevelPkgSupplement.getPkgLocalization(NaturalLanguage.CODE_GERMAN).get();
+            PkgLocalization pkgLocalization = persistedDevelPkgSupplement.getPkgLocalization(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN).get();
 
             Assertions.assertThat(pkgLocalization.getTitle()).isEqualTo("title_kingston_black");
             Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kingston_black");

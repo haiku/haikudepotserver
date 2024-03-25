@@ -10,10 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
     public void testRun() throws Exception {
 
         ReferenceDumpExportJobSpecification specification = new ReferenceDumpExportJobSpecification();
-        specification.setNaturalLanguageCode(NaturalLanguage.CODE_GERMAN);
+        specification.setNaturalLanguageCode(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN);
         java.util.Date latestModifyTimestamp = new java.util.Date(runtimeInformationService.getBuildTimestamp().toEpochMilli());
 
         // ------------------------------------

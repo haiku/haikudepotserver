@@ -6,6 +6,7 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
@@ -141,8 +142,7 @@ public class PkgDumpLocalizationExportJobRunnerIT extends AbstractIntegrationTes
 
             for (int i = 0; i < localizationsNode.size(); i++) {
                 JsonNode localizationNode = localizationsNode.get(i);
-
-                if (localizationNode.get("naturalLanguageCode").asText().equals(naturalLanguageCode)
+                if (localizationNode.get("naturalLanguage").get("code").asText().equals(naturalLanguageCode)
                     && localizationNode.get("code").asText().equals(localizationTypeCode)) {
                     return localizationNode.get("content").asText();
                 }
