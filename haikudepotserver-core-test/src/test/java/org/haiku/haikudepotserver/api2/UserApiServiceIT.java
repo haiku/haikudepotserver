@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -93,7 +93,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
                 .nickname("testuser")
                 .passwordClear("Ue4nI92Rw")
                 .naturalLanguageCode("en")
-                .userUsageConditionsCode("UUC2021V01");
+                .userUsageConditionsCode("UUC2024V01");
 
         // ------------------------------------
         userApiService.createUser(request);
@@ -108,7 +108,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
         Assertions.assertThat(user.getNaturalLanguage().getCode()).isEqualTo("en");
         Assertions.assertThat(user.getLastAuthenticationTimestamp()).isNull();
         Assertions.assertThat(user.tryGetUserUsageConditionsAgreement().get().getUserUsageConditions().getCode())
-                .isEqualTo("UUC2021V01");
+                .isEqualTo("UUC2024V01");
 
         Assertions
                 .assertThat(userAuthenticationService.authenticateByNicknameAndPassword("testuser", "Ue4nI92Rw").get())
@@ -153,7 +153,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
 
         // just check the few things that come with the additional user usage agreement
         Assertions.assertThat(result.getUserUsageConditionsAgreement().getTimestampAgreed()).isNotNull();
-        Assertions.assertThat(result.getUserUsageConditionsAgreement().getUserUsageConditionsCode()).isEqualTo("UUC2021V01");
+        Assertions.assertThat(result.getUserUsageConditionsAgreement().getUserUsageConditionsCode()).isEqualTo("UUC2024V01");
     }
 
     @Test
