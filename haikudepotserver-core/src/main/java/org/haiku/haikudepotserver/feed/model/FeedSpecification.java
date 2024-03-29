@@ -6,7 +6,7 @@
 package org.haiku.haikudepotserver.feed.model;
 
 import com.google.common.net.MediaType;
-import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 
 import java.util.List;
 import java.util.Objects;

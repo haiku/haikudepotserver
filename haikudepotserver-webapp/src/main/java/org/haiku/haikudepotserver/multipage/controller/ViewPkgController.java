@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,15 +7,16 @@ package org.haiku.haikudepotserver.multipage.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.MultipageObjectNotFoundException;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
-import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -68,6 +69,7 @@ public class ViewPkgController {
     @RequestMapping(value = "{name}/{repositoryCode}/{repositorySourceCode}/{major}/{minor}/{micro}/{preRelease}/{revision}/{architectureCode}", method = RequestMethod.GET)
     public ModelAndView viewPkg(
             HttpServletRequest httpServletRequest,
+            Locale locale,
             @PathVariable(value="repositoryCode") String repositoryCode,
             @PathVariable(value="repositorySourceCode") String repositorySourceCode,
             @PathVariable(value="name") String pkgName,
@@ -132,9 +134,7 @@ public class ViewPkgController {
         }
 
         ViewPkgVersionData data = new ViewPkgVersionData();
-        NaturalLanguage naturalLanguage = NaturalLanguage.getByCoordinates(
-                context,
-                NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(httpServletRequest));
+        NaturalLanguage naturalLanguage = NaturalLanguage.getByCoordinates(context, NaturalLanguageCoordinates.fromLocale(locale));
 
         data.setPkgVersion(pkgVersionOptional.get());
         data.setResolvedPkgVersionLocalization(

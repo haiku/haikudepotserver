@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.config;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -23,12 +22,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 @Import({BasicConfig.class, ScheduleConfig.class})
 @PropertySource(

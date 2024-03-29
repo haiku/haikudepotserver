@@ -5,7 +5,7 @@
 
 package org.haiku.haikudepotserver.pkg.model;
 
-import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 
 /**
  * <p>This model object is used to describe the data required to fill the freemarker template

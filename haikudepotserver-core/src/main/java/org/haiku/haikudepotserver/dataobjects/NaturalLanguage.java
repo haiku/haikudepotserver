@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018, Andrew Lindesay
+ * Copyright 2014-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,12 +17,13 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
-import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.naturallanguage.NaturalLanguageCodeComparator;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,12 +33,9 @@ import java.util.stream.Collectors;
  */
 
 public class NaturalLanguage extends _NaturalLanguage
-        implements Coded, CreateAndModifyTimestamped, Comparable<NaturalLanguage> {
+        implements Coded, NaturalLanguageCoded, CreateAndModifyTimestamped, Comparable<NaturalLanguage> {
 
-    private final static Comparator<NaturalLanguage> COMPARATOR = Comparator
-            .comparing(NaturalLanguage::getLanguageCode, StringUtils::compare)
-            .thenComparing(NaturalLanguage::getCountryCode, StringUtils::compare)
-            .thenComparing(NaturalLanguage::getScriptCode, StringUtils::compare);
+    private final static Comparator<NaturalLanguageCoded> NATURAL_LANGUAGE_CODE_COMPARATOR = new NaturalLanguageCodeComparator();
 
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
@@ -80,7 +78,8 @@ public class NaturalLanguage extends _NaturalLanguage
     }
 
     public static NaturalLanguage getEnglish(ObjectContext context) {
-        return tryGetByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH).get();
+        return tryGetByCoordinates(context, NaturalLanguageCoordinates.english())
+                .orElseThrow(() -> new IllegalStateException("the english language must be present"));
     }
 
     public String getCode() {
@@ -89,10 +88,6 @@ public class NaturalLanguage extends _NaturalLanguage
 
     public NaturalLanguageCoordinates toCoordinates() {
         return new NaturalLanguageCoordinates(getLanguageCode(), getScriptCode(), getCountryCode());
-    }
-
-    public boolean isEnglish() {
-        return NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH.equals(getCode());
     }
 
     /**
@@ -105,7 +100,7 @@ public class NaturalLanguage extends _NaturalLanguage
 
     @Override
     public int compareTo(@NotNull NaturalLanguage other) {
-        return COMPARATOR.compare(this, other);
+        return NaturalLanguageCoded.NATURAL_LANGUAGE_CODE_COMPARATOR.compare(this, other);
     }
 
     public int compareTo(@NotNull NaturalLanguageCoordinates coordinates) {

@@ -6,6 +6,7 @@ package org.haiku.haikudepotserver.reference.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fest.assertions.Assertions;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

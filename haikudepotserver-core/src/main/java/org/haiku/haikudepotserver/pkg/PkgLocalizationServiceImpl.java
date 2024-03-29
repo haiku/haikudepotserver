@@ -14,7 +14,7 @@ import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
 import org.haiku.haikudepotserver.pkg.model.ResolvedPkgVersionLocalization;
-import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;

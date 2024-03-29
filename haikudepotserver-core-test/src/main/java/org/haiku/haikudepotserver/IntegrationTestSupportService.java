@@ -10,7 +10,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.*;
-import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -396,7 +396,8 @@ public class IntegrationTestSupportService {
                 RepositorySource.getByCode(context, "testreposrc_xyz"),
                 Collections.singletonList(x86_64)).get();
 
-        NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH);
+        NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.
+                LANGUAGE_CODE_ENGLISH);
 
         {
             User user = createBasicUser(context, "urtest1", "password");

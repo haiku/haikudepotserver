@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,13 +14,17 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import jakarta.mail.internet.MimeUtility;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.pkg.model.OpenSearchDescription;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
-import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -30,11 +34,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -88,13 +91,14 @@ public class PkgSearchController {
     @RequestMapping(value = "/opensearch.xml", method = RequestMethod.GET)
     public void handleOpenSearchDescription(
             HttpServletResponse response,
-            HttpServletRequest request
+            HttpServletRequest request,
+            Locale locale
     ) throws IOException {
-        Preconditions.checkArgument(null!=response);
-        Preconditions.checkArgument(null!=request);
+        Preconditions.checkArgument(null != response);
+        Preconditions.checkArgument(null != request);
 
         OpenSearchDescription model = new OpenSearchDescription();
-        NaturalLanguageCoordinates naturalLanguageCoordinates = NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(request);
+        NaturalLanguageCoordinates naturalLanguageCoordinates = NaturalLanguageCoordinates.fromLocale(locale);
 
         model.setShortName(messageSource.getMessage(
                 "opensearchdescription.shortname" + (isProduction ? "" : ".nonProductionDeploy"),

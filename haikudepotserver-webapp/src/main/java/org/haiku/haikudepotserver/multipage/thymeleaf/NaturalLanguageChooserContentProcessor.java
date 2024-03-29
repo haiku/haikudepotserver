@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023, Andrew Lindesay
+ * Copyright 2022-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.multipage.thymeleaf;
@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -79,7 +79,7 @@ public class NaturalLanguageChooserContentProcessor extends AbstractElementTagPr
                         .collect(Collectors.toList()),
                 NaturalLanguage.getByCoordinates(
                         objectContext,
-                        NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(request)));
+                        NaturalLanguageCoordinates.fromLocale(context.getLocale())));
     }
 
     private void addElementsForNaturalLanguageData(

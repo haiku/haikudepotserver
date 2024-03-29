@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,18 +12,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.PkgCategory;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.model.Pagination;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
-import org.haiku.haikudepotserver.support.web.NaturalLanguageWebHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,10 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -93,6 +86,7 @@ public class HomeController {
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView home(
             HttpServletRequest httpServletRequest,
+            Locale locale,
             @RequestParam(value = KEY_OFFSET, defaultValue = "0") Integer offset,
             @RequestParam(value = KEY_REPOSITORIESCODES, required = false) String repositoryCodes,
             @RequestParam(value = KEY_ARCHITECTURECODE, required = false) String architectureCode,
@@ -132,9 +126,8 @@ public class HomeController {
             pkgCategoryOptional = PkgCategory.tryGetByCode(context, pkgCategoryCode);
         }
 
-        NaturalLanguage naturalLanguage = NaturalLanguage.getByCoordinates(
-                context,
-                NaturalLanguageWebHelper.deriveNaturalLanguageCoordinates(httpServletRequest));
+        NaturalLanguage naturalLanguage = NaturalLanguage.getByCoordinates(context, NaturalLanguageCoordinates.fromLocale(locale));
+
         searchSpecification.setNaturalLanguage(naturalLanguage);
 
         switch (null == viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {

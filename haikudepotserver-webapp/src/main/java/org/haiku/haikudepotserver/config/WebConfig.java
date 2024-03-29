@@ -1,27 +1,23 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024 Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import java.util.List;
 
-@EnableWebMvc
+//@EnableWebMvc
 @EnableWebSecurity
 @ComponentScan(
         basePackages = { "org.haiku.haikudepotserver" },
@@ -41,13 +37,6 @@ public class WebConfig implements WebMvcConfigurer {
                 "classpath:/img/");
         registry.addResourceHandler(WebConstants.ANT_PATTERN_DOCS).addResourceLocations("classpath:/docs/");
         registry.addResourceHandler("favicon.ico").addResourceLocations("classpath:/img/favicon.ico");
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-//        registry
-//                .addInterceptor(new LocaleChangeInterceptor())
-//                .addPathPatterns(MultipageConstants.PATH_MULTIPAGE + "/**");
     }
 
     @Override

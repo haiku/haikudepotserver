@@ -14,7 +14,7 @@ logging:
               # This is probably to do with this bug; https://hibernate.atlassian.net/browse/HV-1852
               javabean: ERROR
       apache:
-        # Cayenne logs quite a bit of material
+        # Cayenne logs quite a bit of mterial
         # out; best to turn that quantity of logging down a bit.
         cayenne: WARN
     com:

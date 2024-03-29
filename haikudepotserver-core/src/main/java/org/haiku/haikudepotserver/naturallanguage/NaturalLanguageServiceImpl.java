@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,8 +18,9 @@ import org.apache.cayenne.query.ColumnSelect;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
-import org.haiku.haikudepotserver.reference.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -242,6 +243,43 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
         result.addAll(getNaturalLanguageCoordinatesWithPkgVersionLocalization());
         result.addAll(getNaturalLanguageCoordinatesWithPkgLocalization());
         return Collections.unmodifiableSet(result);
+    }
+
+    @Override
+    public List<? extends NaturalLanguageCoded> getAllSupportedCoordinates() {
+        ObjectContext objectContext = serverRuntime.newContext();
+        return NaturalLanguage.getAll(objectContext).stream().map(NaturalLanguage::toCoordinates).toList();
+    }
+
+    @Override
+    public <T extends NaturalLanguageCoded> Optional<T> tryGetBestMatchFromList(List<T> codeSortedNaturalLanguages, NaturalLanguageCoded targetCoded) {
+        Preconditions.checkArgument(null != targetCoded, "the coordinates must be provided");
+        Preconditions.checkArgument(null != codeSortedNaturalLanguages, "the coordinates must be provided");
+
+        return tryGetNaturalLanguageFromListByCoordinates(codeSortedNaturalLanguages, targetCoded)
+                .or(() -> tryGetNaturalLanguageFromListByCoordinates(
+                        codeSortedNaturalLanguages,
+                        new NaturalLanguageCoordinates(targetCoded.getLanguageCode(), null, targetCoded.getCountryCode())))
+                .or(() -> tryGetNaturalLanguageFromListByCoordinates(
+                        codeSortedNaturalLanguages,
+                        new NaturalLanguageCoordinates(targetCoded.getLanguageCode(), null, null)));
+    }
+
+    private static <T extends NaturalLanguageCoded> Optional<T> tryGetNaturalLanguageFromListByCoordinates(
+            List<T> codeSortedNaturalLanguages, NaturalLanguageCoded coordinates) {
+        for (int i = 0; i < codeSortedNaturalLanguages.size(); i++) {
+            int cmp = NATURAL_LANGUAGE_CODE_COMPARATOR.compare(codeSortedNaturalLanguages.get(i), coordinates);
+
+            if (0 == cmp) {
+                return Optional.of(codeSortedNaturalLanguages.get(i));
+            }
+
+            if (cmp > 0) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.empty();
     }
 
     private static void verifyNaturalLanguageLocaleConversion(NaturalLanguageCoordinates coordinates) {

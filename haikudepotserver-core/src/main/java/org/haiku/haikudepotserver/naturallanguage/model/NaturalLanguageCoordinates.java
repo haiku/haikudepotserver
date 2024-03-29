@@ -2,11 +2,12 @@
  * Copyright 2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
-package org.haiku.haikudepotserver.reference.model;
+package org.haiku.haikudepotserver.naturallanguage.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.reference.model.MalformedNaturalLanguageCodeException;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
  */
 
 public record NaturalLanguageCoordinates(String languageCode, String scriptCode, String countryCode)
-        implements Comparable<NaturalLanguageCoordinates> {
+        implements NaturalLanguageCoded, Comparable<NaturalLanguageCoordinates> {
 
     public final static Pattern PATTERN_LANGUAGE_CODE = Pattern.compile("^[a-z]{2,3}$");
 
@@ -98,6 +99,15 @@ public record NaturalLanguageCoordinates(String languageCode, String scriptCode,
         );
     }
 
+    public static NaturalLanguageCoordinates fromCoded(NaturalLanguageCoded coded) {
+        Preconditions.checkArgument(null != coded, "the coded was expected");
+        return new NaturalLanguageCoordinates(
+                coded.getLanguageCode(),
+                coded.getScriptCode(),
+                coded.getCountryCode()
+        );
+    }
+
     public NaturalLanguageCoordinates {
         Preconditions.checkArgument(null != languageCode, "language code is required");
 
@@ -124,6 +134,21 @@ public record NaturalLanguageCoordinates(String languageCode, String scriptCode,
                 .map(StringUtils::trimToNull)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining("-"));
+    }
+
+    @Override
+    public String getLanguageCode() {
+        return languageCode();
+    }
+
+    @Override
+    public String getScriptCode() {
+        return scriptCode();
+    }
+
+    @Override
+    public String getCountryCode() {
+        return countryCode();
     }
 
     public Locale toLocale() {
