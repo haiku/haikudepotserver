@@ -10,6 +10,7 @@ import jakarta.mail.internet.MimeUtility;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.support.IntArrayVersionComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +38,9 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
 
     public DesktopApplicationMinimumVersionFilter(String minimumVersionString) {
         this.minimumVersion = Optional.ofNullable(minimumVersionString)
-                        .map(DesktopApplicationHelper::deriveVersion)
-                                .orElse(null);
+                .filter(StringUtils::isNotBlank)
+                .map(DesktopApplicationHelper::deriveVersion)
+                .orElse(null);
     }
 
     /**
@@ -75,8 +77,7 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
 
         if (checkVersion(userAgentString)) {
             chain.doFilter(request, response);
-        }
-        else {
+        } else {
             String minimumVersionString = DesktopApplicationHelper.versionToString(minimumVersion);
 
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
