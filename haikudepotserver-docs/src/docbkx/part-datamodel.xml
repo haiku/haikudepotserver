@@ -106,4 +106,46 @@ Distributed under the terms of the MIT License.
         </para>
     </section>
 
+    <section>
+        <title>Natural Languages</title>
+        <para>
+            A natural language is something like German, Icelandic or Thai. The fallback language for HDS is
+            English. A language is identified in the &quot;natural_language&quot; table by the following pieces
+            of data;
+        </para>
+
+        <para>
+            <itemizedlist>
+                <listitem>
+                    Language code; this is a 2 or 3 character lower case code such as &quot;fr&quot; or
+                    &quot;fur&quot;. The standard for these codes is ISO-3166-1.
+                </listitem>
+                <listitem>
+                    Country code; this is generally a two letter upper case code such as &quot;DE&quot;
+                    or &quot;NZ&quot;. The standard for these code is ISO-3166 or sometimes a UN M49 code such as
+                    &quot;419&quot; corresponding to Latin America and the Caribbean.
+                </listitem>
+                <listitem>
+                    Script code; this is a 4 character code that has a leading upper-case such as
+                    &quot;Latn&quot;. The standard for this is ISO-15924.
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            Sometimes the natural language is identified by the individual codes above or an overall code
+            can be assembled by combining the codes above. The components are separated by a hyphen and ordering
+            is language code, script code and then country code. For example &quot;en-US&quot; or
+            &quot;sr-Latn-BA&quot;. On parse, either a hyphen or an underscore is accepted.
+        </para>
+
+        <para>
+            An ORM class &quot;NaturalLanguage&quot; exists to express a natural language in the database.
+            An in-memory representation is provided by &quot;NaturalLanguageCoordinate&quot; and
+            an interface &quot;NaturalLanguageCoded&quot; defines accessors for the codes and is implemented by
+            both &quot;NaturalLanguage&quot; and &quot;NaturalLanguageCoordinate&quot;.
+        </para>
+
+    </section>
+
 </chapter>
