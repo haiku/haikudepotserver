@@ -1,0 +1,32 @@
+<p>
+    This process will accept a tar archive file that has been gzip-compressed.  The typical
+    file-extension for this archive format is "<code>.tgz</code>", but a file-extension of
+    "<code>.tar.gz</code>" is also sometimes used.  The files in the archive should have the
+    following nomenclature; &quot;<code>hicn/beshare/icon.hvif</code>&quot;.  In this example, a HVIF
+    vector icon is being suppplied for the "beshare" package.
+</p>
+
+<p>
+    Sometimes vector icon data is not available.  In this case a combination of 16, 32 and 64
+    pixel-square PNG images may be supplied.  In this case, the following archive-entry
+    nomenclature would be used; &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+    For each package that has icons modified by this process, previous icon data will be
+    removed.
+</p>
+
+<p>
+    The importing of a tar file of icons is &quot;atomic&quot; which means that it will either
+    process the archive entirely or it will not modify the server-side data.  This is in
+    relation to runtime errors such as invalid input data which prevent the process from
+    running at all.
+</p>
+
+<p>
+    Problems such as missing packages as well as the successful loading of an icon is reported
+    back to the operator via a generated CSV file.
+</p>
+
+

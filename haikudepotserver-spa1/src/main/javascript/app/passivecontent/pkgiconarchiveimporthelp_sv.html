@@ -1,0 +1,36 @@
+
+<p>
+    Denna process kommer att acceptera en tar-arkivfil som har gzip-komprimerats. Det typiska
+    filtillägget för detta arkivformat är "<code>.tgz</code>", men ett filtillägg av
+    "<code>.tar.gz</code>" används också ibland. Filerna i arkivet bör ha
+    följande nomenklatur; &quot;<code>hicn/beshare/icon.hvif</code>&quot;. I det här exemplet, en HVIF
+    vektorikonen tillhandahålls för "beshare"-paketet.
+</p>
+
+
+<p>
+    Ibland är vektorikondata inte tillgänglig. I det här fallet en kombination av 16, 32 och 64
+    pixelkvadrat PNG-bilder kan tillhandahållas. I det här fallet följande arkivpost
+    nomenklatur skulle användas; &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+
+<p>
+    För varje paket som har ikoner som modifierats av denna process kommer tidigare ikondata att vara
+    tog bort.
+</p>
+
+<p>
+    Importen av en tar-fil med ikoner är &quot;atomic&quot; vilket betyder att det kommer att göra det heller
+    bearbeta arkivet helt, annars kommer det inte att ändra data på serversidan. Det här är inne
+    samband med körtidsfel såsom ogiltiga indata som hindrar processen från
+    springer överhuvudtaget.
+</p>
+
+
+<p>
+    Problem som saknade paket samt lyckad laddning av en ikon rapporteras
+    tillbaka till operatören via en genererad CSV-fil.
+</p>
+
+
