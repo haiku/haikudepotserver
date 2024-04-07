@@ -1,0 +1,21 @@
+<p>
+    Questo processo accetter&agrave; un file di archivio tar che &egrave; stato compresso con gzip. La tipica estensione di file per questo formato di archivio &egrave; "<code>.tgz</code>", ma a volte viene utilizzata anche un&apos;estensione di file "<code>.tar.gz</code>". I file nell&apos;archivio dovrebbero avere la seguente nomenclatura; &quot;code>hicn/beshare/icon.hvif</code>&quot;. In questo esempio, viene fornita un&apos;icona vettoriale HVIF per il pacchetto "beshare".
+</p>
+
+<p>
+A volte i dati delle icone vettoriali non sono disponibili. In questo caso pu&ograve; essere fornita una combinazione di immagini PNG quadrate da 16, 32 e 64 pixel. In questo caso, verrebbe utilizzata la seguente nomenclatura delle voci di archivio; &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+Per ogni pacchetto con icone modificate da questo processo, i dati dell&apos;icona precedente verranno rimossi.
+</p>
+
+<p>
+L&apos;importazione di un file tar di icone &egrave; &quot;atomic&quot; il che significa che elaborer&agrave; interamente l&apos;archivio o non modificher&agrave; i dati lato server. Questo &egrave; in relazione a errori di runtime come dati di input non validi che impediscono del tutto l&apos;esecuzione del processo.
+</p>
+
+<p>
+Problemi come pacchetti mancanti e il corretto caricamento di un&apos;icona vengono segnalati all&apos;operatore tramite un file CSV generato.
+</p>
+
+

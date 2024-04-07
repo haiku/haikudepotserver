@@ -1,0 +1,35 @@
+<p>
+    Este proceso aceptará un archivo tar comprimido con gzip. La extensión típica
+    de este formato de archivo es "<code>.tgz</code>", pero a veces también se utiliza la
+    extensión "<code>.tar.gz</code>".
+
+    Los ficheros del archivo deben tener la siguiente nomenclatura;
+    &quot;<code>hicn/beshare/icon.hvif</code>&quot;.
+    En este ejemplo, se suministra un icono vectorial HVIF para el paquete "beshare".
+</p>
+
+<p>
+    A veces no se dispone de datos de iconos vectoriales.  En este caso, se puede
+    suministrar una combinación de imágenes PNG de 16, 32 y 64 píxeles cuadrados.
+    En este caso, se utilizaría la siguiente nomenclatura de entrada de archivo;
+    &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+   Para cada paquete que tenga iconos modificados por este proceso, se eliminarán
+   los datos de iconos anteriores.
+</p>
+
+<p>
+   La importación de un archivo tar de iconos es &quot;atómica&quot; significa que o bien
+   procesará el archivo por completo, o no modificará los datos del lado del servidor.
+   Lo anterior en relación con los errores en tiempo de ejecución, tales como datos de
+   entrada no válidos que impiden que el proceso se ejecute en absoluto.
+</p>
+
+<p>
+    Problemas tales como paquetes faltantes, así como la carga exitosa de un icono
+    se informa de nuevo al operador a través de un archivo CSV generado.
+</p>
+
+

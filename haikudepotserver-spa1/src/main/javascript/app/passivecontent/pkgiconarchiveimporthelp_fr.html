@@ -1,0 +1,21 @@
+<p>
+    Ce processus acceptera un fichier archive tar qui a été compressée avec gzip.  L'extension de fichier typique pour ce format d'archive est « <code>.tgz</code> », mais une extension de fichier « <code>.tar.gz</code> » est également parfois utilisée.  Les fichiers de l'archive doivent avoir la structure suivante ; &quot;<code>hicn/beshare/icon.hvif</code>&quot;.  Dans cet exemple, une icone vectorielle HVIF est fournie pour le paquet « beshare ». 
+</p>
+
+<p>
+    Parfois une icone vectorielle n'est pas disponible. Dans ce cas une combinaison d'images PNG de 16, 32 et 64 pixel-carré PNG images peut être fournie. Dans ce cas, les entrées de l'archive utiliseront la structure suivante; &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+    Pour chaque paquet ayant des icones modifiées par ce processus, les icones précédentes seront supprimées.
+</p>
+
+<p>
+    L'importation d'un fichier tar d'icones est  &quot;atomique&quot; ce qui veut dire que soit l'archive complète sera traitée soit les données du serveur ne seront pas modifiées. Ceci est en relation avec les erreurs d'exécution telles que des doonéées d'entrée invalides qui empêchent complètement le processus de s'exécuter.
+</p>
+
+<p>
+    Les problèmes tels que les paquets manquants aussi bien que le chargement réussi d'une icone seront reportés à l'opérateur via la génération d'un fichier CSV.
+</p>
+
+
