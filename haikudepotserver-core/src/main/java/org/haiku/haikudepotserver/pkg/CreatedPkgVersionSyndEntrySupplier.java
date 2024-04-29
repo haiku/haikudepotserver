@@ -16,7 +16,6 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectSelect;
-import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
@@ -144,7 +143,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
     private NaturalLanguage deriveNaturalLanguage(ObjectContext context, final FeedSpecification specification) {
         return Optional.ofNullable(specification.getNaturalLanguageCoordinates())
-                .map(coordinates -> NaturalLanguage.getByCoordinates(context, coordinates))
+                .map(coordinates -> NaturalLanguage.getByNaturalLanguage(context, coordinates))
                 .orElse(NaturalLanguage.getEnglish(context));
     }
 

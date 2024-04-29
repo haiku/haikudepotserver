@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
@@ -87,10 +88,10 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         }
 
         if(!result.hasAll()) {
-            PkgLocalization.tryGetForPkgAndNaturalLanguageCode(
+            PkgLocalization.tryGetForPkgAndNaturalLanguage(
                     context,
                     pkgVersion.getPkg(),
-                    naturalLanguage.getCode())
+                    naturalLanguage)
                     .ifPresent(plNl -> fill(result, searchPattern, plNl));
         }
 
@@ -101,10 +102,10 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         }
 
         if(!result.hasAll()) {
-            PkgLocalization.tryGetForPkgAndNaturalLanguageCode(
+            PkgLocalization.tryGetForPkgAndNaturalLanguage(
                     context,
                     pkgVersion.getPkg(),
-                    NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH)
+                    NaturalLanguageCoordinates.english())
                     .ifPresent(plEn -> fill(result, searchPattern, plEn));
         }
 
@@ -129,7 +130,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             ObjectContext context,
             PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
-            NaturalLanguage naturalLanguage,
+            NaturalLanguageCoded naturalLanguage,
             String title,
             String summary,
             String description) {
@@ -147,7 +148,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             ObjectContext context,
             PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
-            NaturalLanguage naturalLanguage,
+            NaturalLanguageCoded naturalLanguage,
             String title,
             String summary,
             String description) {
@@ -169,7 +170,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
         PkgLocalization pkgLocalization = pkgLocalizationOptional.orElseGet(() -> {
             PkgLocalization created = context.newObject(PkgLocalization.class);
-            created.setNaturalLanguage(naturalLanguage);
+            created.setNaturalLanguage(NaturalLanguage.getByNaturalLanguage(context, naturalLanguage));
             pkgSupplement.addToManyTarget(PkgSupplement.PKG_LOCALIZATIONS.getName(), created, true);
             return created;
         });
@@ -181,7 +182,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         if (titleChanged || summaryChanged || descriptionChanged) {
             StringBuilder result = new StringBuilder();
             result.append(String.format("changing localization for pkg [%s] in natural language [%s];",
-                    pkgSupplement.getBasePkgName(), naturalLanguage.getCode()));
+                    pkgSupplement.getBasePkgName(), NaturalLanguageCoordinates.fromCoded(naturalLanguage)));
             result.append(createPkgSupplicantLocalizationElementChange("title", pkgLocalization.getTitle(), title));
             result.append(createPkgSupplicantLocalizationElementChange("summary", pkgLocalization.getSummary(), summary));
             result.append(createPkgSupplicantLocalizationElementChange("description", pkgLocalization.getDescription(), description));
@@ -202,7 +203,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
     public PkgVersionLocalization updatePkgVersionLocalization(
             ObjectContext context,
             PkgVersion pkgVersion,
-            NaturalLanguage naturalLanguage,
+            NaturalLanguageCoded naturalLanguage,
             String title,
             String summary,
             String description) {
@@ -238,7 +239,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
 
             if (pkgVersionLocalizationOptional.isEmpty()) {
                 pkgVersionLocalization = context.newObject(PkgVersionLocalization.class);
-                pkgVersionLocalization.setNaturalLanguage(naturalLanguage);
+                pkgVersionLocalization.setNaturalLanguage(NaturalLanguage.getByNaturalLanguage(context, naturalLanguage));
                 pkgVersion.addToManyTarget(PkgVersion.PKG_VERSION_LOCALIZATIONS.getName(), pkgVersionLocalization, true);
             } else {
                 pkgVersionLocalization = pkgVersionLocalizationOptional.get();

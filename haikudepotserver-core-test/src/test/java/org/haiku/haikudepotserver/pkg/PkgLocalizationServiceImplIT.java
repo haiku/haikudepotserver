@@ -78,7 +78,8 @@ public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
                     org.haiku.haikudepotserver.dataobjects.Pkg.getByName(
                             context, "pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
 
-            PkgLocalization pkgLocalization = pkg1Devel.getPkgSupplement().getPkgLocalization(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN).get();
+            PkgLocalization pkgLocalization = pkg1Devel.getPkgSupplement().getPkgLocalization(
+                    NaturalLanguageCoordinates.fromCode(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN)).get();
 
             Assertions.assertThat(pkgLocalization.getTitle()).isEqualTo("title_kokako");
             Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kokako");

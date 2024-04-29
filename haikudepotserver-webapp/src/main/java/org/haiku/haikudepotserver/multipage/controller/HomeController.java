@@ -126,7 +126,7 @@ public class HomeController {
             pkgCategoryOptional = PkgCategory.tryGetByCode(context, pkgCategoryCode);
         }
 
-        NaturalLanguage naturalLanguage = NaturalLanguage.getByCoordinates(context, NaturalLanguageCoordinates.fromLocale(locale));
+        NaturalLanguage naturalLanguage = NaturalLanguage.getByNaturalLanguage(context, NaturalLanguageCoordinates.fromLocale(locale));
 
         searchSpecification.setNaturalLanguage(naturalLanguage);
 

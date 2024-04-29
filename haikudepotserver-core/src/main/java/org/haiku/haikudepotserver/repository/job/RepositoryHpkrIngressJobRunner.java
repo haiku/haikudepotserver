@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -274,8 +274,8 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
             // [apl 6.aug.2014] #5
             // Packages may be removed from a repository.  In this case there is no trigger to indicate that the
-            // package version should be removed.  Check all of the packages that have an active version in this
-            // repository and then if the package simply doesn't exist in that repository any more, mark all of
+            // package version should be removed.  Check all the packages that have an active version in this
+            // repository and then if the package simply doesn't exist in that repository anymore, mark all of
             // those versions are inactive.
 
             pkgService.fetchPkgNamesWithAnyPkgVersionAssociatedWithRepositorySource(
@@ -309,7 +309,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
             if (null != temporaryFile && temporaryFile.exists()) {
                 if (!temporaryFile.delete()) {
-                    LOGGER.error("unable to delete the file; {}" + temporaryFile.getAbsolutePath());
+                    LOGGER.error("unable to delete the file; {}", temporaryFile.getAbsolutePath());
                 }
             }
 

@@ -26,7 +26,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalization;
 import org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalizations;
 import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportPkgLocalizationNaturalLanguage;
-import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportReferenceNaturalLanguage;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
@@ -170,7 +169,7 @@ public class PkgDumpLocalizationExportJobRunner extends AbstractJobRunner<PkgDum
                 .filter(StringUtils::isNotBlank)
                 .map(c -> {
                     DumpExportPkgLocalization result = new DumpExportPkgLocalization();
-                    result.setCode(type.name().toLowerCase(Locale.ROOT));
+                    result.setCode(type.getCode());
                     result.setCreateTimestamp(pkgLocalization.getCreateTimestamp().getTime());
                     result.setModifyTimestamp(pkgLocalization.getModifyTimestamp().getTime());
                     result.setNaturalLanguage(createDumpExportPkgLocalizationNaturalLanguage(pkgLocalization.getNaturalLanguage()));

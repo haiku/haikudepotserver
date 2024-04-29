@@ -147,7 +147,8 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().size()).isEqualTo(1);
             Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().get(0).getSize()).isEqualTo(32);
 
-            PkgLocalization pkgLocalization = persistedDevelPkgSupplement.getPkgLocalization(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN).get();
+            PkgLocalization pkgLocalization = persistedDevelPkgSupplement.getPkgLocalization(
+                    NaturalLanguageCoordinates.fromCode(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN)).get();
 
             Assertions.assertThat(pkgLocalization.getTitle()).isEqualTo("title_kingston_black");
             Assertions.assertThat(pkgLocalization.getSummary()).isEqualTo("summary_kingston_black");

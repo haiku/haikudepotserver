@@ -23,6 +23,7 @@ import org.haiku.haikudepotserver.dataobjects.Prominence;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
@@ -450,7 +451,7 @@ public class PkgApiService extends AbstractApiService {
 
         return new GetPkgVersionLocalizationsResult()
                 .pkgVersionLocalizations(request.getNaturalLanguageCodes().stream()
-                        .map(pkgVersion::getPkgVersionLocalization)
+                        .map(code -> pkgVersion.getPkgVersionLocalization(NaturalLanguageCoordinates.fromCode(code)))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .map(pvl -> new GetPkgVersionLocalizationsPkgVersionLocalization()

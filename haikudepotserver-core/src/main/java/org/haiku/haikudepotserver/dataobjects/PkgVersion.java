@@ -1,12 +1,11 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
@@ -16,14 +15,15 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
@@ -176,20 +176,11 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
      * English language data is hard-coded into the package payload, english will always be available.</p>
      */
 
-    public Optional<PkgVersionLocalization> getPkgVersionLocalization(final NaturalLanguage naturalLanguage) {
-        return getPkgVersionLocalization(naturalLanguage.getCode());
-    }
-
-    /**
-     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
-     * English language data is hard-coded into the package payload, english will always be available.</p>
-     */
-
-    public Optional<PkgVersionLocalization> getPkgVersionLocalization(final String naturalLanguageCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
+    public Optional<PkgVersionLocalization> getPkgVersionLocalization(final NaturalLanguageCoded naturalLanguage) {
+        Preconditions.checkArgument(null != naturalLanguage);
         return getPkgVersionLocalizations()
                 .stream()
-                .filter(pvl -> pvl.getNaturalLanguage().getCode().equals(naturalLanguageCode))
+                .filter(pvl -> 0 == NaturalLanguageCoded.NATURAL_LANGUAGE_CODE_COMPARATOR.compare(pvl.getNaturalLanguage(), naturalLanguage))
                 .collect(SingleCollector.optional());
     }
 

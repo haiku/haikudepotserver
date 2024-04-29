@@ -1,0 +1,42 @@
+{
+  "info": {
+    "anything": "this will be skipped"
+  },
+  "items": [
+    {
+      "pkgName": "bluesky",
+      "localizations": [
+        {
+          "code": "title",
+          "naturalLanguage": {
+            "code": "pt_BR",
+            "languageCode": "pt",
+            "countryCode": "BR"
+          },
+          "content": "     Es geht nicht um das Geld!  ",
+          "userDescription": "Matai Rena"
+        },
+        {
+          "code": "summary",
+          "naturalLanguage": {
+            "code": "pt_BR",
+            "languageCode": "pt",
+            "countryCode": "BR"
+          },
+          "content": "So kann es nicht sein!",
+          "userDescription": "Matai Rena"
+        },
+        {
+          "code": "description",
+          "naturalLanguage": {
+            "code": "pt_BR",
+            "languageCode": "pt",
+            "countryCode": "BR"
+          },
+          "content": "Hönig ist besonders gut auf Toast",
+          "userDescription": "Susan Peabody"
+        }
+      ]
+    }
+  ]
+}

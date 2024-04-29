@@ -143,11 +143,11 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
      */
 
     public List<? extends AuthorizationPkgRule> getAuthorizationPkgRules(final Pkg pkg) {
-        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(pkg, "the package is required");
 
         return getPermissionUserPkgs()
                 .stream()
-                .filter(pup -> null == pup.getPkg() || pup.getPkg().equals(pkg))
+                .filter(pup -> null == pup.getPkg() || pup.getPkg().getName().equals(pkg.getName()))
                 .collect(Collectors.toList());
     }
 

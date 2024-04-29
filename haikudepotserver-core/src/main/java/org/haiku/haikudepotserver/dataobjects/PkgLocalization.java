@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Andrew Lindesay
+ * Copyright 2016-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.validation.ValidationResult;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
@@ -32,16 +33,19 @@ public class PkgLocalization extends _PkgLocalization implements MutableCreateAn
                 .select(context);
     }
 
-    public static PkgLocalization getForPkgAndNaturalLanguageCode(ObjectContext context, Pkg pkg, final String naturalLanguageCode) {
-        return tryGetForPkgAndNaturalLanguageCode(context, pkg, naturalLanguageCode)
+    public static PkgLocalization getForPkgAndNaturalLanguage(ObjectContext context, Pkg pkg, final NaturalLanguageCoded naturalLanguage) {
+        return tryGetForPkgAndNaturalLanguage(context, pkg, naturalLanguage)
                 .orElseThrow(() -> new ObjectNotFoundException(PkgLocalization.class.getSimpleName(), null));
     }
 
-    public static Optional<PkgLocalization> tryGetForPkgAndNaturalLanguageCode(ObjectContext context, Pkg pkg, final String naturalLanguageCode) {
+    public static Optional<PkgLocalization> tryGetForPkgAndNaturalLanguage(ObjectContext context, Pkg pkg, final NaturalLanguageCoded naturalLanguage) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(null != pkg, "the pkg must be supplied");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(naturalLanguageCode), "the natural language code must be supplied");
-        return findForPkg(context, pkg).stream().filter(l -> l.getNaturalLanguage().getCode().equals(naturalLanguageCode)).collect(SingleCollector.optional());
+        Preconditions.checkArgument(null != naturalLanguage, "the natural language must be supplied");
+        return findForPkg(context, pkg)
+                .stream()
+                .filter(l -> 0 == NaturalLanguageCoded.NATURAL_LANGUAGE_CODE_COMPARATOR.compare(l.getNaturalLanguage(), naturalLanguage))
+                .collect(SingleCollector.optional());
     }
 
     // TODO; this is not so good because it mutates the data when validating.

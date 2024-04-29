@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.pkg.model;
 
 import org.apache.cayenne.ObjectContext;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 
 public interface PkgLocalizationService extends PkgLocalizationLookupService {
 
@@ -20,7 +21,7 @@ public interface PkgLocalizationService extends PkgLocalizationLookupService {
             ObjectContext context,
             PkgSupplementModificationAgent agent,
             PkgSupplement pkgSupplement,
-            NaturalLanguage naturalLanguage,
+            NaturalLanguageCoded naturalLanguage,
             String title,
             String summary,
             String description);
@@ -35,7 +36,7 @@ public interface PkgLocalizationService extends PkgLocalizationLookupService {
     PkgVersionLocalization updatePkgVersionLocalization(
             ObjectContext context,
             PkgVersion pkgVersion,
-            NaturalLanguage naturalLanguage,
+            NaturalLanguageCoded naturalLanguage,
             String title,
             String summary,
             String description);

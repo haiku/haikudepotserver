@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023, Andrew Lindesay
+ * Copyright 2019-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,7 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
@@ -126,8 +127,12 @@ public class PkgSupplement extends _PkgSupplement implements MutableCreateAndMod
      * English language data is hard-coded into the package payload, english will always be available.</p>
      */
 
-    public Optional<PkgLocalization> getPkgLocalization(final NaturalLanguage naturalLanguage) {
-        return getPkgLocalization(naturalLanguage.getCode());
+    public Optional<PkgLocalization> getPkgLocalization(final NaturalLanguageCoded naturalLanguage) {
+        Preconditions.checkArgument(null != naturalLanguage);
+        return getPkgLocalizations()
+                .stream()
+                .filter(pl -> 0 == NaturalLanguageCoded.NATURAL_LANGUAGE_CODE_COMPARATOR.compare(pl.getNaturalLanguage(), naturalLanguage))
+                .collect(SingleCollector.optional());
     }
 
     /**

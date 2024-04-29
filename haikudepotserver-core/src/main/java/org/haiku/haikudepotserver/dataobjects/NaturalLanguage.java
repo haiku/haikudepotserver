@@ -11,7 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.QueryCacheStrategy;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.haiku.haikudepotserver.dataobjects.auto._NaturalLanguage;
@@ -51,24 +50,24 @@ public class NaturalLanguage extends _NaturalLanguage
         return getAll(context).stream().filter(_NaturalLanguage::getIsPopular).collect(Collectors.toList());
     }
 
-    public static Optional<NaturalLanguage> tryGetByCoordinates(ObjectContext context, final NaturalLanguageCoordinates coordinates) {
+    public static Optional<NaturalLanguage> tryGetByNaturalLanguage(ObjectContext context, final NaturalLanguageCoded naturalLanguage) {
         Preconditions.checkArgument(null != context, "the context must be provided");
-        Preconditions.checkArgument(null != coordinates, "the coordinates must be provided");
-        return getAll(context).stream().filter(nl -> 0 == nl.compareTo(coordinates)).collect(SingleCollector.optional());
+        Preconditions.checkArgument(null != naturalLanguage, "the coordinates must be provided");
+        return getAll(context).stream().filter(nl -> 0 == NaturalLanguageCoded.NATURAL_LANGUAGE_CODE_COMPARATOR.compare(nl, naturalLanguage)).collect(SingleCollector.optional());
     }
 
     public static Optional<NaturalLanguage> tryGetByCode(ObjectContext context, final String code) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(code), "the code must be provided");
-        return tryGetByCoordinates(context, NaturalLanguageCoordinates.fromCode(code));
+        return tryGetByNaturalLanguage(context, NaturalLanguageCoordinates.fromCode(code));
     }
 
-    public static NaturalLanguage getByCoordinates(ObjectContext context, final NaturalLanguageCoordinates coordinates) {
+    public static NaturalLanguage getByNaturalLanguage(ObjectContext context, final NaturalLanguageCoded naturalLanguage) {
         Preconditions.checkArgument(null != context, "the context must be provided");
-        Preconditions.checkArgument(null != coordinates, "the coordinates must be provided");
-        return tryGetByCoordinates(context, coordinates)
+        Preconditions.checkArgument(null != naturalLanguage, "the coded must be provided");
+        return tryGetByNaturalLanguage(context, naturalLanguage)
                 .orElseThrow(() -> new IllegalStateException(
-                        "unable to find natural language with code [" + coordinates.getCode() + "]"));
+                        "unable to find natural language with code [" + NaturalLanguageCoordinates.fromCoded(naturalLanguage) + "]"));
     }
 
     public static NaturalLanguage getByCode(ObjectContext context, final String code) {
@@ -78,7 +77,7 @@ public class NaturalLanguage extends _NaturalLanguage
     }
 
     public static NaturalLanguage getEnglish(ObjectContext context) {
-        return tryGetByCoordinates(context, NaturalLanguageCoordinates.english())
+        return tryGetByNaturalLanguage(context, NaturalLanguageCoordinates.english())
                 .orElseThrow(() -> new IllegalStateException("the english language must be present"));
     }
 

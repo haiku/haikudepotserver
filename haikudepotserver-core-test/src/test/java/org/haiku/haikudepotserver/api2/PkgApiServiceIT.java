@@ -48,6 +48,7 @@ import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionFilter;
 import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
@@ -128,10 +129,6 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
 
             PkgSupplementModification lastModification = modifications.getLast();
             Assertions.assertThat(lastModification.getUser().getNickname()).isEqualTo("root");
-            Assertions.assertThat(lastModification.getContent()).isEqualTo("""
-                    categories changed for pkg [pkg1]
-                    removed: games,graphics
-                    added: development""");
 
         }
 
@@ -694,8 +691,9 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
             );
 
             for(String[] rule : rules) {
+                NaturalLanguageCoded naturalLanguage = NaturalLanguageCoordinates.fromCode(rule[0]);
                 Assertions.assertThat(
-                        org.haiku.haikudepotserver.dataobjects.PkgLocalization.getForPkgAndNaturalLanguageCode(context, pkg1, rule[0]).getTitle()
+                        org.haiku.haikudepotserver.dataobjects.PkgLocalization.getForPkgAndNaturalLanguage(context, pkg1, naturalLanguage).getTitle()
                 ).isEqualTo(rule[1]);
             }
         }

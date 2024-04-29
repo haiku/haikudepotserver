@@ -101,6 +101,11 @@ public record NaturalLanguageCoordinates(String languageCode, String scriptCode,
 
     public static NaturalLanguageCoordinates fromCoded(NaturalLanguageCoded coded) {
         Preconditions.checkArgument(null != coded, "the coded was expected");
+
+        if (coded instanceof NaturalLanguageCoordinates nlc) {
+            return nlc;
+        }
+
         return new NaturalLanguageCoordinates(
                 coded.getLanguageCode(),
                 coded.getScriptCode(),
@@ -163,6 +168,19 @@ public record NaturalLanguageCoordinates(String languageCode, String scriptCode,
     public int compareTo(NaturalLanguageCoordinates o) {
         Preconditions.checkArgument(null != o);
         return COMPARATOR.compare(this, o);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NaturalLanguageCoordinates that = (NaturalLanguageCoordinates) o;
+        return Objects.equals(languageCode, that.languageCode) && Objects.equals(scriptCode, that.scriptCode) && Objects.equals(countryCode, that.countryCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(languageCode, scriptCode, countryCode);
     }
 
     @Override

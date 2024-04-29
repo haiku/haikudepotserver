@@ -186,7 +186,7 @@ public class CreatedUserRatingSyndEntrySupplier implements SyndEntrySupplier {
 
     private NaturalLanguage deriveNaturalLanguage(ObjectContext context, final FeedSpecification specification) {
         return Optional.ofNullable(specification.getNaturalLanguageCoordinates())
-                .map(c -> NaturalLanguage.getByCoordinates(context, c))
+                .map(c -> NaturalLanguage.getByNaturalLanguage(context, c))
                 .orElse(NaturalLanguage.getEnglish(context));
     }
 
