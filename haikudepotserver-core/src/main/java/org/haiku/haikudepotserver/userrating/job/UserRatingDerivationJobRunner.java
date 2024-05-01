@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class UserRatingDerivationJobRunner
         extends AbstractJobRunner<UserRatingDerivationJobSpecification> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingDerivationJobRunner.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(UserRatingDerivationJobRunner.class);
 
     private final UserRatingService userRatingService;
 

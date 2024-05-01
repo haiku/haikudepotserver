@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component("metricsJobApiServiceV2")
 public class MetricsJobApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(MetricsJobApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(MetricsJobApiService.class);
 
     private final ServerRuntime serverRuntime;
     private final JobService jobService;

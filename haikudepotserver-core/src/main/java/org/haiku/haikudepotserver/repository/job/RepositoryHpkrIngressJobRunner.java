@@ -197,7 +197,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
         } finally {
             if (null != temporaryFile && temporaryFile.exists()) {
                 if (!temporaryFile.delete()) {
-                    LOGGER.error("unable to delete the file; {}" + temporaryFile.getAbsolutePath());
+                    LOGGER.error("unable to delete the file; {}", temporaryFile.getAbsolutePath());
                 }
             }
         }

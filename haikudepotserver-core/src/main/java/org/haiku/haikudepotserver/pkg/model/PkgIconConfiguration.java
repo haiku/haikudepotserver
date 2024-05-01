@@ -16,8 +16,8 @@ import org.haiku.haikudepotserver.dataobjects.MediaType;
  */
 public class PkgIconConfiguration implements Comparable<PkgIconConfiguration> {
 
-    private MediaType mediaType;
-    private Integer size;
+    private final MediaType mediaType;
+    private final Integer size;
 
     public PkgIconConfiguration(MediaType mediaType, Integer size) {
         Preconditions.checkState(null!=mediaType, "the media type is required");

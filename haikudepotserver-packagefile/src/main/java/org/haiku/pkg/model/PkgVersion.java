@@ -46,7 +46,7 @@ public class PkgVersion {
     }
 
     private void appendDotValue(StringBuilder stringBuilder, String value) {
-        if(0 != stringBuilder.length()) {
+        if(!stringBuilder.isEmpty()) {
             stringBuilder.append('.');
         }
 

@@ -105,7 +105,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
 
                 }
 
-                writer.writeNext(headings.toArray(new String[headings.size()]));
+                writer.writeNext(headings.toArray(new String[0]));
             }
 
             // stream out the packages.
@@ -135,7 +135,7 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                                     ).map(pi -> MARKER).orElse(""));
                         }
 
-                        writer.writeNext(cells.toArray(new String[cells.size()]));
+                        writer.writeNext(cells.toArray(new String[0]));
 
                         return true;
                     });

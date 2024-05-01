@@ -15,6 +15,7 @@ import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.dataobjects.support.CreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ public class Country extends _Country implements Coded, CreateAndModifyTimestamp
 
     public final static String CODE_NZ = "NZ";
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static List<Country> getAll(ObjectContext context) {

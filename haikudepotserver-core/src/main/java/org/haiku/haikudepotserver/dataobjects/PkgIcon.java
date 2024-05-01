@@ -10,8 +10,6 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgIcon;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
-import java.util.Optional;
-
 public class PkgIcon extends _PkgIcon {
 
     private final static String VALIDATION_REQUIREDFORBITMAP = "requiredforbitmap";
@@ -53,16 +51,11 @@ public class PkgIcon extends _PkgIcon {
      */
 
     public static String deriveFilename(String mediaTypeCode, Integer size) {
-        switch(mediaTypeCode) {
-            case MediaType.MEDIATYPE_HAIKUVECTORICONFILE:
-                return "icon.hvif";
-
-            case MediaType.MEDIATYPE_PNG:
-                return Integer.toString(size) + ".png";
-
-            default:
-                throw new IllegalStateException("unsupported media type; " + mediaTypeCode);
-        }
+        return switch (mediaTypeCode) {
+            case MediaType.MEDIATYPE_HAIKUVECTORICONFILE -> "icon.hvif";
+            case MediaType.MEDIATYPE_PNG -> size + ".png";
+            default -> throw new IllegalStateException("unsupported media type; " + mediaTypeCode);
+        };
     }
 
 }

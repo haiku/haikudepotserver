@@ -47,7 +47,7 @@ import java.util.Optional;
 @Component
 public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRatingSpreadsheetJobSpecification> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(UserRatingSpreadsheetJobRunner.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserRatingSpreadsheetJobRunner.class);
 
     private final ServerRuntime serverRuntime;
     private final UserRatingService userRatingService;
@@ -87,7 +87,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             if (!Strings.isNullOrEmpty(specification.getRepositoryCode())) {
                 paramRepositoryOptional = Repository.tryGetByCode(context, specification.getRepositoryCode());
 
-                if(!paramRepositoryOptional.isPresent()) {
+                if(paramRepositoryOptional.isEmpty()) {
                     throw new IllegalStateException("unable to find the repository; " + specification.getRepositoryCode());
                 }
             }
@@ -95,7 +95,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             if (!Strings.isNullOrEmpty(specification.getUserNickname())) {
                 paramUserOptional = User.tryGetByNickname(context, specification.getUserNickname());
 
-                if(!paramUserOptional.isPresent()) {
+                if(paramUserOptional.isEmpty()) {
                     throw new IllegalStateException("unable to find the user; " + specification.getUserNickname());
                 }
             }
@@ -103,7 +103,7 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             if (!Strings.isNullOrEmpty(specification.getPkgName())) {
                 paramPkgOptional = Pkg.tryGetByName(context, specification.getPkgName());
 
-                if (!paramPkgOptional.isPresent()) {
+                if (paramPkgOptional.isEmpty()) {
                     throw new IllegalStateException("unable to find the package; " + specification.getPkgName());
                 }
             }

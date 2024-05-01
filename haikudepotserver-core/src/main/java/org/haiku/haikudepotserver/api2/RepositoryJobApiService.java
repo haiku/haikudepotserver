@@ -26,7 +26,7 @@ import java.util.Optional;
 @Component("repositoryJobApiServiceV2")
 public class RepositoryJobApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryJobApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(RepositoryJobApiService.class);
 
     private final ServerRuntime serverRuntime;
 

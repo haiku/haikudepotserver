@@ -28,7 +28,7 @@ import java.util.Optional;
 @Component("userRatingJobApiServiceV2")
 public class UserRatingJobApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingJobApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(UserRatingJobApiService.class);
 
     private final ServerRuntime serverRuntime;
     private final PermissionEvaluator permissionEvaluator;

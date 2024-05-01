@@ -25,7 +25,7 @@ class Hvif2PngHvifRenderingServiceImpl
         extends AbstractExternalToolService<Hvif2PngHvifRenderingServiceImpl.Context>
         implements HvifRenderingService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(Hvif2PngHvifRenderingServiceImpl.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(Hvif2PngHvifRenderingServiceImpl.class);
 
     private final String hvif2pngPath;
 

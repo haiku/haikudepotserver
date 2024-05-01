@@ -16,12 +16,14 @@ import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
+import java.io.Serial;
 import java.time.Clock;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PkgSupplement extends _PkgSupplement implements MutableCreateAndModifyTimestamped {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static PkgSupplement getByBasePkgName(ObjectContext context, String basePkgName) {
@@ -86,18 +88,13 @@ public class PkgSupplement extends _PkgSupplement implements MutableCreateAndMod
 
         List<PkgIcon> icons = getPkgIcons(mediaType,size);
 
-        switch (icons.size()) {
-            case 0:
-                return Optional.empty();
-
-            case 1:
-                return Optional.of(icons.get(0));
-
-            default:
-                throw new IllegalStateException("more than one pkg icon of media type "
-                        + mediaType.getCode() + " of size " + size + " on pkg "
-                        + getBasePkgName());
-        }
+        return switch (icons.size()) {
+            case 0 -> Optional.empty();
+            case 1 -> Optional.of(icons.getFirst());
+            default -> throw new IllegalStateException("more than one pkg icon of media type "
+                    + mediaType.getCode() + " of size " + size + " on pkg "
+                    + getBasePkgName());
+        };
     }
 
     private List<PkgIcon> getPkgIcons(final MediaType mediaType, final Integer size) {
@@ -132,19 +129,6 @@ public class PkgSupplement extends _PkgSupplement implements MutableCreateAndMod
         return getPkgLocalizations()
                 .stream()
                 .filter(pl -> 0 == NaturalLanguageCoded.NATURAL_LANGUAGE_CODE_COMPARATOR.compare(pl.getNaturalLanguage(), naturalLanguage))
-                .collect(SingleCollector.optional());
-    }
-
-    /**
-     * <p>This will try to find localized data for the pkg version for the supplied natural language.  Because
-     * English language data is hard-coded into the package payload, english will always be available.</p>
-     */
-
-    public Optional<PkgLocalization> getPkgLocalization(final String naturalLanguageCode) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(naturalLanguageCode));
-        return getPkgLocalizations()
-                .stream()
-                .filter(pl -> pl.getNaturalLanguage().getCode().equals(naturalLanguageCode))
                 .collect(SingleCollector.optional());
     }
 

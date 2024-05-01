@@ -30,7 +30,7 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
 
     public final static String HEADER_MINIMUM_VERSION = "X-Desktop-Application-Minimum-Version";
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(DesktopApplicationMinimumVersionFilter.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(DesktopApplicationMinimumVersionFilter.class);
 
     private final int[] minimumVersion;
 
@@ -95,10 +95,6 @@ public class DesktopApplicationMinimumVersionFilter implements Filter {
 
             LOGGER.debug("rejected desktop client owing to older version; {}", userAgentString);
         }
-    }
-
-    @Override
-    public void destroy() {
     }
 
 }

@@ -6,7 +6,7 @@
 package org.haiku.haikudepotserver.support.cayenne;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import jakarta.annotation.PostConstruct;
 import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.ObjectContext;
@@ -16,7 +16,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class QueryCacheRemoveGroupListener implements LifecycleListener {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(QueryCacheRemoveGroupListener.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(QueryCacheRemoveGroupListener.class);
 
     private final ServerRuntime serverRuntime;
 
@@ -65,16 +64,13 @@ public class QueryCacheRemoveGroupListener implements LifecycleListener {
         }
 
         {
-            StringBuilder msg = new StringBuilder();
+            String msg = "changes in entities (" +
+                    entityClasses.stream().map(Class::getSimpleName).collect(Collectors.joining(",")) +
+                    ") remove group caches (" +
+                    String.join(",", groups) +
+                    ")";
 
-            msg.append("changes in entities (");
-            msg.append(String.join(",", entityClasses.stream().map(Class::getSimpleName).collect(Collectors.toList())));
-
-            msg.append(") remove group caches (");
-            msg.append(String.join(",",groups));
-            msg.append(")");
-
-            LOGGER.info(msg.toString());
+            LOGGER.info(msg);
         }
     }
 

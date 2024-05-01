@@ -45,7 +45,7 @@ import java.io.IOException;
 })
 public class PkgScreenshotController extends AbstractController {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotController.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotController.class);
 
     final static String SEGMENT_SCREENSHOT = "__pkgscreenshot";
     final static String SEGMENT_SCREENSHOT_LEGACY = "pkgscreenshot";
@@ -180,7 +180,8 @@ public class PkgScreenshotController extends AbstractController {
         PkgScreenshot screenshot = PkgScreenshot.tryGetByCode(context, screenshotCode)
                 .orElseThrow(ScreenshotNotFound::new);
         byte[] data = screenshot.getPkgScreenshotImage().getData();
-        org.haiku.haikudepotserver.dataobjects.MediaType mediaType = screenshot.tryGetPkgScreenshotImage().get().getMediaType();
+        org.haiku.haikudepotserver.dataobjects.MediaType mediaType =
+                screenshot.getPkgScreenshotImage().getMediaType();
 
         // TODO - find a better way to do this.
         String extension = null;

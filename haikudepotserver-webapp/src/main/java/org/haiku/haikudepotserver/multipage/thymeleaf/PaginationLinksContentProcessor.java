@@ -4,17 +4,13 @@
  */
 package org.haiku.haikudepotserver.multipage.thymeleaf;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.multipage.model.Pagination;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.context.ITemplateContext;
-import org.thymeleaf.expression.IExpressionObjects;
-import org.thymeleaf.model.IAttribute;
-import org.thymeleaf.model.IModel;
-import org.thymeleaf.model.IModelFactory;
-import org.thymeleaf.model.IOpenElementTag;
-import org.thymeleaf.model.IProcessableElementTag;
+import org.thymeleaf.model.*;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
 import org.thymeleaf.standard.expression.IStandardExpression;
@@ -22,7 +18,6 @@ import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

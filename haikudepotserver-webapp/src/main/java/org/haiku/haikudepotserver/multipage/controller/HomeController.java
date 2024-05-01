@@ -177,7 +177,7 @@ public class HomeController {
 
         data.setAllRepositories(Repository.getAllActive(context));
         data.setAllPkgCategories(PkgCategory.getAll(context));
-        data.setPkgCategory(pkgCategoryOptional.orElseGet(() -> PkgCategory.getAll(context).get(0)));
+        data.setPkgCategory(pkgCategoryOptional.orElseGet(() -> PkgCategory.getAll(context).getFirst()));
 
         data.setAllViewCriteriaTypes(ImmutableList.copyOf(ViewCriteriaType.values()));
         data.setViewCriteriaType(viewCriteriaType);

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component("miscellaneousJobApiServiceV2")
 public class MiscellaneousJobApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryJobApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(RepositoryJobApiService.class);
 
     private final ServerRuntime serverRuntime;
 

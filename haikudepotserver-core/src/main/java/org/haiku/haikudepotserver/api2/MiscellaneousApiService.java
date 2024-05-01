@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 @Component("miscellaneousApiServiceV2")
 public class MiscellaneousApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(MiscellaneousApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(MiscellaneousApiService.class);
 
     private final ServerRuntime serverRuntime;
     private final RuntimeInformationService runtimeInformationService;

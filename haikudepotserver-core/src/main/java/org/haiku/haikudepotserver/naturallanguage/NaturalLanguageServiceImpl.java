@@ -267,11 +267,11 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
 
     private static <T extends NaturalLanguageCoded> Optional<T> tryGetNaturalLanguageFromListByCoordinates(
             List<T> codeSortedNaturalLanguages, NaturalLanguageCoded coordinates) {
-        for (int i = 0; i < codeSortedNaturalLanguages.size(); i++) {
-            int cmp = NATURAL_LANGUAGE_CODE_COMPARATOR.compare(codeSortedNaturalLanguages.get(i), coordinates);
+        for (T codeSortedNaturalLanguage : codeSortedNaturalLanguages) {
+            int cmp = NATURAL_LANGUAGE_CODE_COMPARATOR.compare(codeSortedNaturalLanguage, coordinates);
 
             if (0 == cmp) {
-                return Optional.of(codeSortedNaturalLanguages.get(i));
+                return Optional.of(codeSortedNaturalLanguage);
             }
 
             if (cmp > 0) {

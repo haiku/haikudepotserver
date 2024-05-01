@@ -34,8 +34,6 @@ import java.util.stream.Collectors;
 public class NaturalLanguage extends _NaturalLanguage
         implements Coded, NaturalLanguageCoded, CreateAndModifyTimestamped, Comparable<NaturalLanguage> {
 
-    private final static Comparator<NaturalLanguageCoded> NATURAL_LANGUAGE_CODE_COMPARATOR = new NaturalLanguageCodeComparator();
-
     public static List<NaturalLanguage> getAll(ObjectContext context) {
         Preconditions.checkArgument(null != context, "the context must be provided");
         return ObjectSelect

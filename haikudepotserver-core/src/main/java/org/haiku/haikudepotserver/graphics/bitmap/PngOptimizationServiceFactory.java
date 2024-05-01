@@ -16,7 +16,7 @@ import org.springframework.beans.factory.FactoryBean;
 
 public class PngOptimizationServiceFactory implements FactoryBean<PngOptimizationService> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PngOptimizationServiceFactory.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(PngOptimizationServiceFactory.class);
 
     private final String optiPngPath;
 

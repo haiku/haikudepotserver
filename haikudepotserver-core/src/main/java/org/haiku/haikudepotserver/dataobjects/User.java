@@ -51,11 +51,11 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
 
         List result = context.performQuery(objectIdQuery);
 
-        switch(result.size()) {
-            case 0: throw new IllegalStateException("unable to find the user from the objectid; " + objectId.toString());
-            case 1: return (User) result.get(0);
-            default: throw new IllegalStateException("more than one user returned from an objectid lookup");
-        }
+        return switch (result.size()) {
+            case 0 -> throw new IllegalStateException("unable to find the user from the objectid; " + objectId.toString());
+            case 1 -> (User) result.getFirst();
+            default -> throw new IllegalStateException("more than one user returned from an objectid lookup");
+        };
     }
 
     public static User getByNickname(ObjectContext context, String nickname) {

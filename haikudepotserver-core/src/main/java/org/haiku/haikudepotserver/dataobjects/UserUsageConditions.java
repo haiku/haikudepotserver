@@ -13,11 +13,13 @@ import org.apache.cayenne.query.SortOrder;
 import org.haiku.haikudepotserver.dataobjects.auto._UserUsageConditions;
 import org.haiku.haikudepotserver.support.SingleCollector;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 
 public class UserUsageConditions extends _UserUsageConditions {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static UserUsageConditions getLatest(ObjectContext context) {

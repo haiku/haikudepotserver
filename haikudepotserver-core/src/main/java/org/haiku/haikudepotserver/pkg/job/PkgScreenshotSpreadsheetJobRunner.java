@@ -10,7 +10,6 @@ import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;

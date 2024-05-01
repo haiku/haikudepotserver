@@ -7,12 +7,14 @@ package org.haiku.haikudepotserver.dataobjects;
 
 import org.haiku.haikudepotserver.dataobjects.auto._UserUsageConditionsAgreement;
 
+import java.io.Serial;
 import java.sql.Timestamp;
 import java.time.Clock;
 
 public class UserUsageConditionsAgreement
         extends _UserUsageConditionsAgreement {
 
+    @Serial
     private static final long serialVersionUID = 1L; 
 
     @Override

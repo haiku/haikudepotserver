@@ -12,31 +12,7 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api2.model.AgreeUserUsageConditionsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.AuthenticateUserRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.AuthenticateUserResult;
-import org.haiku.haikudepotserver.api2.model.ChangePasswordRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CompletePasswordResetRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CreateUserRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPasswordRequirementsResult;
-import org.haiku.haikudepotserver.api2.model.GetUserRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserResult;
-import org.haiku.haikudepotserver.api2.model.GetUserResultUserUsageConditionsAgreement;
-import org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsResult;
-import org.haiku.haikudepotserver.api2.model.InitiatePasswordResetRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RenewTokenRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RenewTokenResult;
-import org.haiku.haikudepotserver.api2.model.SearchUsersRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchUsersResult;
-import org.haiku.haikudepotserver.api2.model.SearchUsersUser;
-import org.haiku.haikudepotserver.api2.model.UpdateUserFilter;
-import org.haiku.haikudepotserver.api2.model.UpdateUserRequestEnvelope;
-import org.haiku.haikudepotserver.support.exception.CaptchaBadResponseException;
-import org.haiku.haikudepotserver.support.exception.InvalidUserUsageConditionsException;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
-import org.haiku.haikudepotserver.support.exception.ValidationException;
-import org.haiku.haikudepotserver.support.exception.ValidationFailure;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
@@ -48,10 +24,10 @@ import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
+import org.haiku.haikudepotserver.support.exception.*;
 import org.haiku.haikudepotserver.user.model.UserSearchSpecification;
 import org.haiku.haikudepotserver.user.model.UserService;
 import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecification;
-import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -63,12 +39,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Component("userApiServiceV2")
 public class UserApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(UserApiService.class);
 
     private final ServerRuntime serverRuntime;
     private final PermissionEvaluator permissionEvaluator;
@@ -408,7 +383,7 @@ public class UserApiService extends AbstractApiService {
                     .map(u -> new SearchUsersUser()
                             .active(u.getActive())
                             .nickname(u.getNickname()))
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
 
         return new SearchUsersResult()

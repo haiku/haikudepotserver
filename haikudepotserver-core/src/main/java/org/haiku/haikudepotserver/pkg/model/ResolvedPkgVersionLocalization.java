@@ -51,7 +51,7 @@ public class ResolvedPkgVersionLocalization {
     }
 
     public boolean hasAll() {
-        return null!=title && null!=summary && null!=description;
+        return null != title && null != summary && null != description;
     }
 
 }

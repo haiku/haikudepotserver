@@ -10,8 +10,11 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceExtraIdentifier;
 
+import java.io.Serial;
+
 public class RepositorySourceExtraIdentifier extends _RepositorySourceExtraIdentifier {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Override

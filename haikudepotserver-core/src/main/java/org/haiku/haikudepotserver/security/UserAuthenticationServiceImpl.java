@@ -318,7 +318,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
      */
 
     private Optional<SignedJWT> verifyToken(String payload) {
-        if (null != payload && 0 != payload.length()) {
+        if (null != payload && !payload.isEmpty()) {
             try {
                 SignedJWT signedJWT = SignedJWT.parse(payload);
 

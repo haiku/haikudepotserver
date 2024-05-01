@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DatabaseCaptchaRepository implements CaptchaRepository {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(DatabaseCaptchaRepository.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(DatabaseCaptchaRepository.class);
 
     private final ServerRuntime serverRuntime;
 

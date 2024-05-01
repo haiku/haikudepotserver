@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 
+import java.io.Serial;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -26,6 +27,7 @@ public class RepositorySourceMirror
         extends _RepositorySourceMirror
         implements MutableCreateAndModifyTimestamped, Comparable<RepositorySourceMirror> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static RepositorySourceMirror getByCode(

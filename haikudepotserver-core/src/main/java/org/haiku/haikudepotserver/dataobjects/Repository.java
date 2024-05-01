@@ -79,12 +79,6 @@ public class Repository extends _Repository implements MutableCreateAndModifyTim
                 .select(context);
     }
 
-    public Optional<RepositorySource> tryGetRepositorySourceForArchitectureCode(String architectureCode) {
-        return getRepositorySources().stream()
-                .filter(rs -> rs.getArchitecture().getCode().equals(architectureCode))
-                .collect(SingleCollector.optional());
-    }
-
     public Optional<RepositorySource> tryGetRepositorySourceForArchitecture(Architecture architecture) {
         if (architecture.getCode().equals(Architecture.CODE_ANY)) {
             return getRepositorySources().stream().findFirst();

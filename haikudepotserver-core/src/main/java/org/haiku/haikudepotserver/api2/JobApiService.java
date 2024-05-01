@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Component("jobApiServiceV2")
 public class JobApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(JobApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(JobApiService.class);
 
     private final ServerRuntime serverRuntime;
     private final PermissionEvaluator permissionEvaluator;

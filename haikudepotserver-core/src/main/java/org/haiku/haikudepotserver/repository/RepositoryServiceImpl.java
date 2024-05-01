@@ -37,7 +37,7 @@ import java.util.List;
 @Service
 public class RepositoryServiceImpl implements RepositoryService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryServiceImpl.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(RepositoryServiceImpl.class);
 
     private final PasswordEncoder passwordEncoder;
 
@@ -75,17 +75,15 @@ public class RepositoryServiceImpl implements RepositoryService {
         Preconditions.checkArgument(null!=context);
         Preconditions.checkArgument(null!=pkg);
 
-        StringBuilder ejbql = new StringBuilder();
+        String ejbql = "SELECT DISTINCT r FROM\n" +
+                Repository.class.getSimpleName() +
+                " r WHERE r.active = true AND EXISTS (SELECT pv FROM \n" +
+                PkgVersion.class.getSimpleName() +
+                " pv WHERE pv.repositorySource.repository=r" +
+                " AND pv.pkg=:pkg" +
+                ") ORDER BY r.code";
 
-        ejbql.append("SELECT DISTINCT r FROM\n");
-        ejbql.append(Repository.class.getSimpleName());
-        ejbql.append(" r WHERE r.active = true AND EXISTS (SELECT pv FROM \n");
-        ejbql.append(PkgVersion.class.getSimpleName());
-        ejbql.append(" pv WHERE pv.repositorySource.repository=r");
-        ejbql.append(" AND pv.pkg=:pkg");
-        ejbql.append(") ORDER BY r.code");
-
-        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
+        EJBQLQuery query = new EJBQLQuery(ejbql);
         query.setParameter("pkg", pkg);
 
         return (List<Repository>) context.performQuery(query);

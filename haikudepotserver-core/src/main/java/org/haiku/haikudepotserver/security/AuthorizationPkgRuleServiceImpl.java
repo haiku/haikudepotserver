@@ -43,13 +43,13 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
 
         List<String> clauses = new ArrayList<>();
 
-        if(null!= specification.getPermissions()) {
+        if (null != specification.getPermissions()) {
 
             StringBuilder query = new StringBuilder();
             query.append('(');
 
-            for(int i=0;i< specification.getPermissions().size();i++) {
-                if(0!=i) {
+            for (int i = 0; i < specification.getPermissions().size(); i++) {
+                if (0 != i) {
                     query.append(" OR ");
                 }
 
@@ -65,18 +65,18 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
 
         if (null != specification.getUser()) {
             parameterAccumulator.add(specification.getUser());
-            clauses.add("r.user=?"+parameterAccumulator.size());
+            clauses.add("r.user=?" + parameterAccumulator.size());
 
-            if(!specification.getIncludeInactive()) {
+            if (!specification.getIncludeInactive()) {
                 clauses.add("r.user." + User.ACTIVE.getName() + "=true");
             }
         }
 
         if (null != specification.getPkg()) {
             parameterAccumulator.add(specification.getPkg());
-            clauses.add("r.pkg=?"+parameterAccumulator.size());
+            clauses.add("r.pkg=?" + parameterAccumulator.size());
 
-            if(!specification.getIncludeInactive()) {
+            if (!specification.getIncludeInactive()) {
                 clauses.add("r.pkg." + Pkg.ACTIVE.getName() + "=true");
             }
         }
@@ -96,7 +96,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
 
         // special case.
 
-        if(null!=specification.getPermissions() && specification.getPermissions().isEmpty()) {
+        if (null != specification.getPermissions() && specification.getPermissions().isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -108,7 +108,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
         queryBuilder.append(PermissionUserPkg.class.getSimpleName());
         queryBuilder.append(" AS r");
 
-        if(whereClause.length() > 0) {
+        if (!whereClause.isEmpty()) {
             queryBuilder.append(" WHERE ");
             queryBuilder.append(whereClause);
         }
@@ -117,8 +117,8 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
 
         EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
 
-        for(int i=0;i<parameterAccumulator.size();i++) {
-            query.setParameter(i+1,parameterAccumulator.get(i));
+        for (int i = 0; i < parameterAccumulator.size(); i++) {
+            query.setParameter(i + 1, parameterAccumulator.get(i));
         }
 
         query.setFetchLimit(specification.getLimit());
@@ -136,7 +136,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(null != specification, "the specification must be provided");
 
-        if(null!=specification.getPermissions() && specification.getPermissions().isEmpty()) {
+        if (null != specification.getPermissions() && specification.getPermissions().isEmpty()) {
             return 0;
         }
 
@@ -148,21 +148,21 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
         queryBuilder.append(PermissionUserPkg.class.getSimpleName());
         queryBuilder.append(" AS r");
 
-        if(whereClause.length() > 0) {
+        if (!whereClause.isEmpty()) {
             queryBuilder.append(" WHERE ");
             queryBuilder.append(whereClause);
         }
 
         EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
 
-        for(int i=0;i<parameterAccumulator.size();i++) {
-            query.setParameter(i+1,parameterAccumulator.get(i));
+        for (int i = 0; i < parameterAccumulator.size(); i++) {
+            query.setParameter(i + 1, parameterAccumulator.get(i));
         }
 
         @SuppressWarnings("unchecked") List<Number> result = context.performQuery(query);
 
         if (result.size() == 1) {
-            return result.get(0).longValue();
+            return result.getFirst().longValue();
         }
         throw new IllegalStateException("expected 1 row from count query, but got " + result.size());
     }
@@ -180,7 +180,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
 
         Expression baseE = PermissionUserPkg.USER.eq(user).andExp(PermissionUserPkg.PERMISSION.eq(permission));
 
-        if(ObjectSelect.query(PermissionUserPkg.class).where(baseE)
+        if (ObjectSelect.query(PermissionUserPkg.class).where(baseE)
                 .and(PermissionUserPkg.PKG.isNull())
                 .count()
                 .selectFirst(context) > 0) {
@@ -204,7 +204,7 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
         Preconditions.checkArgument(null != permission, "the permission must be provided");
         Preconditions.checkArgument(null != user, "the user must be provided");
 
-        if(user.getIsRoot()) {
+        if (user.getIsRoot()) {
             throw new IllegalStateException("when creating an authorization rule, the rule is not able to be applied to a root user");
         }
 

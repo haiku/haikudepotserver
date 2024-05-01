@@ -43,12 +43,11 @@ public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScree
     public Optional<PkgScreenshotImage> tryGetPkgScreenshotImage() {
         List<PkgScreenshotImage> images = getPkgScreenshotImages();
 
-        switch(images.size()) {
-            case 0: return Optional.empty();
-            case 1: return Optional.of(images.get(0));
-            default:
-                throw new IllegalStateException("more than one pkg icon image found on an icon image");
-        }
+        return switch (images.size()) {
+            case 0 -> Optional.empty();
+            case 1 -> Optional.of(images.getFirst());
+            default -> throw new IllegalStateException("more than one pkg icon image found on an icon image");
+        };
     }
 
     @Override

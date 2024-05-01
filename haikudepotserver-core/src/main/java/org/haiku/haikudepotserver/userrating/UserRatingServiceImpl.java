@@ -12,13 +12,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.dataobjects.UserRating;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -31,17 +25,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class UserRatingServiceImpl implements UserRatingService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(UserRatingServiceImpl.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(UserRatingServiceImpl.class);
 
     private final ServerRuntime serverRuntime;
     private final int userRatingDerivationVersionsBack;
@@ -223,7 +213,7 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         switch (result.size()) {
             case 1:
-                return result.get(0).longValue();
+                return result.getFirst().longValue();
 
             default:
                 throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
@@ -286,7 +276,7 @@ public class UserRatingServiceImpl implements UserRatingService {
                 queryBuilder.append(" OR ");
             }
 
-            queryBuilder.append("ur.pkgVersion=?" + (i + 1));
+            queryBuilder.append("ur.pkgVersion=?").append(i + 1);
         }
 
         queryBuilder.append(")");
@@ -308,14 +298,13 @@ public class UserRatingServiceImpl implements UserRatingService {
     public void updateUserRatingDerivationsForAllPkgs() {
         ObjectContext context = serverRuntime.newContext();
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("SELECT p.name FROM ");
-        builder.append(Pkg.class.getSimpleName());
-        builder.append(" p");
-        builder.append(" WHERE p.active=true");
-        builder.append(" ORDER BY p.name DESC");
+        String builder = "SELECT p.name FROM " +
+                Pkg.class.getSimpleName() +
+                " p" +
+                " WHERE p.active=true" +
+                " ORDER BY p.name DESC";
 
-        List<String> pkgNames = context.performQuery(new EJBQLQuery(builder.toString()));
+        List<String> pkgNames = context.performQuery(new EJBQLQuery(builder));
 
         LOGGER.info("will derive and store user ratings for {} packages", pkgNames.size());
 
@@ -337,17 +326,16 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         ObjectContext context = serverRuntime.newContext();
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("SELECT r.code FROM\n");
-        builder.append(Repository.class.getSimpleName());
-        builder.append(" r\n");
-        builder.append("WHERE EXISTS(SELECT pv FROM\n");
-        builder.append(PkgVersion.class.getSimpleName());
-        builder.append(" pv WHERE pv.pkg.name = :name\n");
-        builder.append(" AND pv.repositorySource.repository = r)\n");
-        builder.append("ORDER BY r.code DESC");
+        String builder = "SELECT r.code FROM\n" +
+                Repository.class.getSimpleName() +
+                " r\n" +
+                "WHERE EXISTS(SELECT pv FROM\n" +
+                PkgVersion.class.getSimpleName() +
+                " pv WHERE pv.pkg.name = :name\n" +
+                " AND pv.repositorySource.repository = r)\n" +
+                "ORDER BY r.code DESC";
 
-        EJBQLQuery query = new EJBQLQuery(builder.toString());
+        EJBQLQuery query = new EJBQLQuery(builder);
         query.setParameter("name", pkgName);
         List<String> repositoryCodes = (List<String>) context.performQuery(query);
 
@@ -465,7 +453,7 @@ public class UserRatingServiceImpl implements UserRatingService {
             final VersionCoordinates oldestVersionCoordinates;
 
             if (versionCoordinates.size() < userRatingDerivationVersionsBack + 1) {
-                oldestVersionCoordinates = versionCoordinates.get(0);
+                oldestVersionCoordinates = versionCoordinates.getFirst();
             }
             else {
                 oldestVersionCoordinates = versionCoordinates.get(versionCoordinates.size() - (userRatingDerivationVersionsBack +1));

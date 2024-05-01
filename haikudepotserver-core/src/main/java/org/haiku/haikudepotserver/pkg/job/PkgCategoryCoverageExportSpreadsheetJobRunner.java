@@ -111,7 +111,7 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                         }
 
                         cols.add(""); // no action
-                        writer.writeNext(cols.toArray(new String[cols.size()]));
+                        writer.writeNext(cols.toArray(new String[0]));
                         return true; // keep going!
                     }
             );

@@ -45,9 +45,9 @@ abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecificatio
         headings.add("repository-codes"); // 1
         headings.add("any-summary"); // 2
         headings.add("none"); // 3
-        Collections.addAll(headings, pkgCategoryCodes.toArray(new String[pkgCategoryCodes.size()]));
+        Collections.addAll(headings, pkgCategoryCodes.toArray(new String[0]));
         headings.add("action");
-        return headings.toArray(new String[headings.size()]);
+        return headings.toArray(new String[0]);
     }
 
 }

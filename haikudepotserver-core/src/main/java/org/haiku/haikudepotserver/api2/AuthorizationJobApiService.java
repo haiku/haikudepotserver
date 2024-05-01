@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component("authorizationJobApiServiceV2")
 public class AuthorizationJobApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationJobApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AuthorizationJobApiService.class);
 
     private final PermissionEvaluator permissionEvaluator;
     private final JobService jobService;

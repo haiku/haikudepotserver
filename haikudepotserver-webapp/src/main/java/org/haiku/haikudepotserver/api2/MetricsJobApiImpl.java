@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class MetricsJobApiImpl implements MetricsJobApi {
 
-    private MetricsJobApiService metricsJobApiService;
+    private final MetricsJobApiService metricsJobApiService;
 
     public MetricsJobApiImpl(MetricsJobApiService metricsJobApiService) {
         this.metricsJobApiService = Preconditions.checkNotNull(metricsJobApiService);

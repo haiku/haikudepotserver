@@ -180,14 +180,13 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         boolean descriptionChanged = !StringUtils.equals(description, pkgLocalization.getDescription());
 
         if (titleChanged || summaryChanged || descriptionChanged) {
-            StringBuilder result = new StringBuilder();
-            result.append(String.format("changing localization for pkg [%s] in natural language [%s];",
-                    pkgSupplement.getBasePkgName(), NaturalLanguageCoordinates.fromCoded(naturalLanguage)));
-            result.append(createPkgSupplicantLocalizationElementChange("title", pkgLocalization.getTitle(), title));
-            result.append(createPkgSupplicantLocalizationElementChange("summary", pkgLocalization.getSummary(), summary));
-            result.append(createPkgSupplicantLocalizationElementChange("description", pkgLocalization.getDescription(), description));
+            String result = String.format("changing localization for pkg [%s] in natural language [%s];",
+                    pkgSupplement.getBasePkgName(), NaturalLanguageCoordinates.fromCoded(naturalLanguage)) +
+                    createPkgSupplicantLocalizationElementChange("title", pkgLocalization.getTitle(), title) +
+                    createPkgSupplicantLocalizationElementChange("summary", pkgLocalization.getSummary(), summary) +
+                    createPkgSupplicantLocalizationElementChange("description", pkgLocalization.getDescription(), description);
 
-            pkgSupplementModificationService.appendModification(context, pkgSupplement, agent, result.toString());
+            pkgSupplementModificationService.appendModification(context, pkgSupplement, agent, result);
         }
 
         pkgLocalization.setTitle(title);

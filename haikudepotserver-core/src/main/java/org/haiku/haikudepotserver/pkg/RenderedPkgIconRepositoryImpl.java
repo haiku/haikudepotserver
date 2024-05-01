@@ -152,7 +152,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
                     }
 
                     if(!pkgIconList.isEmpty()) {
-                        return Optional.of(pkgIconList.get(pkgIconList.size()-1).getPkgIconImage().getData());
+                        return Optional.of(pkgIconList.get(pkgIconList.size() - 1).getPkgIconImage().getData());
                     }
 
                 }

@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 public abstract class AbstractApiImpl {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AbstractApiImpl.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractApiImpl.class);
 
     @ExceptionHandler
     @ResponseBody

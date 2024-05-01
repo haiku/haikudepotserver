@@ -14,13 +14,11 @@ import org.haiku.haikudepotserver.job.model.JobSnapshot;
 public class Jobs {
 
     public static boolean isQueuedOrStarted(JobSnapshot job) {
-        switch(job.getStatus()) {
-            case QUEUED:
-            case STARTED:
-                return true;
-        }
+        return switch (job.getStatus()) {
+            case QUEUED, STARTED -> true;
+            default -> false;
+        };
 
-        return false;
     }
 
 }

@@ -215,7 +215,7 @@ public class RepositorySource extends _RepositorySource {
                 .stream()
                 .map(RepositorySourceExtraIdentifier::getIdentifier)
                 .sorted()
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     public Optional<RepositorySourceExtraIdentifier> tryGetRepositorySourceExtraIdentifierForIdentifier(String identifier) {

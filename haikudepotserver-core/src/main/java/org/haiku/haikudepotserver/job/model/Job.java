@@ -186,13 +186,11 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
     }
 
     public boolean isQueuedOrStarted() {
-        switch(getStatus()) {
-            case QUEUED:
-            case STARTED:
-                return true;
-        }
+        return switch (getStatus()) {
+            case QUEUED, STARTED -> true;
+            default -> false;
+        };
 
-        return false;
     }
 
     @Override

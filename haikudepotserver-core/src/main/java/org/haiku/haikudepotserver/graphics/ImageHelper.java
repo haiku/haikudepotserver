@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImageHelper {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 
     private static final int[] HVIF_MAGIC = {
             0x6e, 0x63, 0x69, 0x66
@@ -38,12 +38,12 @@ public class ImageHelper {
     public boolean looksLikeHaikuVectorIconFormat(byte[] data) {
         Preconditions.checkNotNull(data);
 
-        if(data.length < 4) {
+        if (data.length < 4) {
             return false;
         }
 
-        for(int i=0;i< HVIF_MAGIC.length;i++) {
-            if((0xff & data[i]) != HVIF_MAGIC[i]) {
+        for (int i = 0; i < HVIF_MAGIC.length; i++) {
+            if ((0xff & data[i]) != HVIF_MAGIC[i]) {
                 LOGGER.trace("the magic header is not present in the hvif data");
                 return false;
             }
@@ -60,14 +60,14 @@ public class ImageHelper {
     public Size derivePngSize(byte[] data) {
         Preconditions.checkNotNull(data);
 
-        if(data.length < 8 + 4 + 4 + 4 + 4) {
+        if (data.length < 8 + 4 + 4 + 4 + 4) {
             return null;
         }
 
         // check for the magic header.
 
-        for(int i=0;i< PNG_MAGIC.length;i++) {
-            if((0xff & data[i]) != PNG_MAGIC[i]) {
+        for (int i = 0; i < PNG_MAGIC.length; i++) {
+            if ((0xff & data[i]) != PNG_MAGIC[i]) {
                 LOGGER.trace("the magic header is not present in the png data");
                 return null;
             }
@@ -79,8 +79,8 @@ public class ImageHelper {
 
         // check for the expected first chunk header.
 
-        for(int i=0;i<PNG_IHDR.length;i++) {
-            if((0xff & data[12+i]) != PNG_IHDR[i]) {
+        for (int i = 0; i < PNG_IHDR.length; i++) {
+            if ((0xff & data[12 + i]) != PNG_IHDR[i]) {
                 LOGGER.trace("the IHDR chunk is not present in the png data");
                 return null;
             }
@@ -89,8 +89,8 @@ public class ImageHelper {
         // now get the width and height.
 
         Size size = new Size();
-        size.width = parseInt32(data,16);
-        size.height = parseInt32(data,20);
+        size.width = parseInt32(data, 16);
+        size.height = parseInt32(data, 20);
 
         return size;
     }
@@ -98,9 +98,9 @@ public class ImageHelper {
     private int parseInt32(byte[] data, int offset) {
         return
                 (0xff & data[offset]) << 24
-                        | (0xff & data[offset+1]) << 16
-                        | (0xff & data[offset+2]) << 8
-                        | (0xff & data[offset+3]);
+                        | (0xff & data[offset + 1]) << 16
+                        | (0xff & data[offset + 2]) << 8
+                        | (0xff & data[offset + 3]);
     }
 
     public static class Size {

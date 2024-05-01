@@ -8,11 +8,10 @@ package org.haiku.haikudepotserver.pkg.model;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
-import org.haiku.haikudepotserver.dataobjects.Repository;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,8 +28,6 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
         VERSIONCREATETIMESTAMP,
         VERSIONVIEWCOUNTER
     }
-
-    private List<String> pkgNames;
 
     /**
      * @since 2015-05-27
@@ -68,14 +65,6 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
         this.naturalLanguage = naturalLanguage;
-    }
-
-    public List<String> getPkgNames() {
-        return pkgNames;
-    }
-
-    public void setPkgNames(List<String> pkgNames) {
-        this.pkgNames = pkgNames;
     }
 
     public Architecture getArchitecture() {

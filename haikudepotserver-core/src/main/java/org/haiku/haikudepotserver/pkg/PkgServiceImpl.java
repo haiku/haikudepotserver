@@ -56,7 +56,7 @@ public class PkgServiceImpl implements PkgService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgServiceImpl.class);
 
-    private static List<String> SUFFIXES_SUBORDINATE_PKG_NAMES = ImmutableList.of(
+    private final static List<String> SUFFIXES_SUBORDINATE_PKG_NAMES = ImmutableList.of(
             SUFFIX_PKG_DEVELOPMENT,
             SUFFIX_PKG_X86,
             SUFFIX_PKG_X86 + SUFFIX_PKG_DEVELOPMENT);
@@ -257,7 +257,7 @@ public class PkgServiceImpl implements PkgService {
         ));
         query.setFetchingDataRows(true);
 
-        DataRow dataRow = (DataRow) (context.performQuery(query)).get(0);
+        DataRow dataRow = (DataRow) (context.performQuery(query)).getFirst();
         Number newTotal = (Number) dataRow.get("total");
 
         return newTotal.longValue();
@@ -315,7 +315,7 @@ public class PkgServiceImpl implements PkgService {
         List<Object> result = (List<Object>) context.performQuery(query);
 
         if(1==result.size()) {
-            return ((Number) result.get(0)).longValue();
+            return ((Number) result.getFirst()).longValue();
         }
 
         throw new IllegalStateException("expecting one result with the total record count");
@@ -492,18 +492,17 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(null != repositorySource, "the repository soures must be provided");
 
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("SELECT p.name FROM ");
-        queryBuilder.append(Pkg.class.getSimpleName());
-        queryBuilder.append(" p WHERE EXISTS(SELECT pv FROM ");
-        queryBuilder.append(PkgVersion.class.getSimpleName());
-        queryBuilder.append(" pv WHERE pv.");
-        queryBuilder.append(PkgVersion.PKG.getName());
-        queryBuilder.append("=p AND pv.");
-        queryBuilder.append(PkgVersion.REPOSITORY_SOURCE.getName());
-        queryBuilder.append("=:repositorySource)");
+        String queryBuilder = "SELECT p.name FROM " +
+                Pkg.class.getSimpleName() +
+                " p WHERE EXISTS(SELECT pv FROM " +
+                PkgVersion.class.getSimpleName() +
+                " pv WHERE pv." +
+                PkgVersion.PKG.getName() +
+                "=p AND pv." +
+                PkgVersion.REPOSITORY_SOURCE.getName() +
+                "=:repositorySource)";
 
-        EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
+        EJBQLQuery query = new EJBQLQuery(queryBuilder);
         query.setParameter("repositorySource", repositorySource);
 
         return ImmutableSet.copyOf(context.performQuery(query));

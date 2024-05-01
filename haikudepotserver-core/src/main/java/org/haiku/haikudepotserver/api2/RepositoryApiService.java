@@ -75,7 +75,7 @@ import java.util.stream.Collectors;
 @Component("repositoryApiServiceV2")
 public class RepositoryApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(RepositoryApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(RepositoryApiService.class);
 
     private final ServerRuntime serverRuntime;
     private final PermissionEvaluator permissionEvaluator;
@@ -283,7 +283,7 @@ public class RepositoryApiService extends AbstractApiService {
                                         .orElse(null))
                                 .lastImportTimestamp(Optional.ofNullable(rs.getLastImportTimestamp()).map(Date::getTime).orElse(null))
                         )
-                        .collect(Collectors.toUnmodifiableList())
+                        .toList()
                 );
     }
 
@@ -319,7 +319,7 @@ public class RepositoryApiService extends AbstractApiService {
                                 .isPrimary(rsm.getIsPrimary())
                                 .code(rsm.getCode())
                         )
-                        .collect(Collectors.toUnmodifiableList())
+                        .toList()
                 )
                 .forcedInternalBaseUrl(canEdit ? repositorySource.getForcedInternalBaseUrl() : null);
     }
@@ -411,7 +411,7 @@ public class RepositoryApiService extends AbstractApiService {
                             .active(r.getActive())
                             .name(r.getName())
                             .code(r.getCode()))
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
         }
 
         return new SearchRepositoriesResult()
@@ -490,7 +490,7 @@ public class RepositoryApiService extends AbstractApiService {
 
                     String name = request.getName().trim();
 
-                    if (0 == name.length()) {
+                    if (name.isEmpty()) {
                         throw new ValidationException(new ValidationFailure(Repository.NAME.getName(), "invalid"));
                     }
 

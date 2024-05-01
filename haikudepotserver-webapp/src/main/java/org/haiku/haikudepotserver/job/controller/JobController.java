@@ -246,7 +246,7 @@ public class JobController extends AbstractController {
 
         if(!Strings.isNullOrEmpty(job.getOwnerUserNickname())) {
 
-            User user = tryObtainAuthenticatedUser(context).orElseThrow(() -> {
+            tryObtainAuthenticatedUser(context).orElseThrow(() -> {
                 LOGGER.warn("attempt to obtain job data {} with no authenticated user", guid);
                 return new JobDataAuthorizationFailure();
             });

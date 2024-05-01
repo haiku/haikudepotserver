@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 @Service
 public class PkgImportServiceImpl implements PkgImportService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgImportServiceImpl.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(PkgImportServiceImpl.class);
 
     private final PkgServiceImpl pkgServiceImpl;
     private final PkgIconService pkgIconService;

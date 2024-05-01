@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-//@EnableWebMvc
+//@EnableWebMvc <-- is done manually so that locales can be setup
 @EnableWebSecurity
 @ComponentScan(
         basePackages = { "org.haiku.haikudepotserver" },

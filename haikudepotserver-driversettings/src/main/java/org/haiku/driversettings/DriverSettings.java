@@ -181,7 +181,7 @@ public class DriverSettings {
         private final String content;
 
         Token(String content) {
-            Preconditions.checkArgument(null != content && 0 != content.length(), "bad token; zero length");
+            Preconditions.checkArgument(null != content && !content.isEmpty(), "bad token; zero length");
             this.tokenType = TokenType.WORD;
             this.content = content;
         }

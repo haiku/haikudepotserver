@@ -42,7 +42,7 @@ import java.util.UUID;
 @Service
 public class PasswordResetServiceImpl implements PasswordResetService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PasswordResetServiceImpl.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(PasswordResetServiceImpl.class);
 
     private final static String MAIL_SUBJECT = "passwordreset-subject";
     private final static String MAIL_PLAINTEXT = "passwordreset-plaintext";
@@ -247,7 +247,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         if(tokens.isEmpty()) {
             LOGGER.debug("no expired tokens to delete");
         } else {
-            context.deleteObjects(tokens.toArray(new UserPasswordResetToken[tokens.size()]));
+            context.deleteObjects(tokens.toArray(new UserPasswordResetToken[0]));
             context.commitChanges();
             LOGGER.info("did delete {} expired tokens", tokens.size());
         }

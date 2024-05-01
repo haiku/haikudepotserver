@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Service
 public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgIconServiceImpl.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(PkgIconServiceImpl.class);
 
     private static final HashFunction HASH_FUNCTION = Hashing.sha256();
 

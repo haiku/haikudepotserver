@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @Component("authorizationApiServiceV2")
 public class AuthorizationApiService extends AbstractApiService {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(AuthorizationApiService.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AuthorizationApiService.class);
 
     private final ServerRuntime serverRuntime;
     private final PermissionEvaluator permissionEvaluator;

@@ -10,10 +10,12 @@ import org.apache.cayenne.query.SortOrder;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgSupplementModification;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 
+import java.io.Serial;
 import java.util.List;
 
 public class PkgSupplementModification extends _PkgSupplementModification implements MutableCreateAndModifyTimestamped {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static List<PkgSupplementModification> findForPkg(ObjectContext context, Pkg pkg) {

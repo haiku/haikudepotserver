@@ -30,6 +30,6 @@ class FallbackHvifRenderingServiceImpl implements HvifRenderingService {
 
     @Override
     public byte[] render(int size, byte[] input) throws IOException {
-        return generic(16==size||32==size||48==size ? size : 64);
+        return generic(16==size || 32==size || 48==size ? size : 64);
     }
 }

@@ -45,7 +45,7 @@ public class FixedPkgLocalizationLookupServiceImpl implements PkgLocalizationLoo
         if (!pkgVersions.isEmpty()) {
             Set<Long> pkgVersionIds = pkgVersions
                     .stream()
-                    .map((pv) -> Long.class.cast(pv.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN)))
+                    .map((pv) -> (Long) pv.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN))
                     .collect(Collectors.toSet());
 
             SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()

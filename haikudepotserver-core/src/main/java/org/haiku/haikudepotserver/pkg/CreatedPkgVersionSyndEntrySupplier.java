@@ -33,7 +33,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
 @Component
 public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(CreatedPkgVersionSyndEntrySupplier.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(CreatedPkgVersionSyndEntrySupplier.class);
 
     private final ServerRuntime serverRuntime;
     private final String baseUrl;
@@ -105,7 +104,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                                                 "%s_::_%s_::_%s",
                                                 this.getClass().getCanonicalName(),
                                                 pv.getPkg().getName(),
-                                                pv.toVersionCoordinates().toString())).toString());
+                                                pv.toVersionCoordinates().toString())));
 
                         {
                             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#!", "pkg");
@@ -122,8 +121,8 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                                         Optional.ofNullable(resolvedPkgVersionLocalization.getTitle()).orElse(pv.getPkg().getName()),
                                         pv.toVersionCoordinates().toString()
                                 },
-                                new Locale(naturalLanguage.getCode())
-                        ));
+                                naturalLanguage.toCoordinates().toLocale())
+                        );
 
                         {
                             SyndContent content = new SyndContentImpl();

@@ -21,7 +21,4 @@ public class SessionListener implements HttpSessionListener {
         throw new IllegalStateException("this application does not use sessions; one was created.");
     }
 
-    @Override
-    public void sessionDestroyed(HttpSessionEvent se) {
-    }
 }

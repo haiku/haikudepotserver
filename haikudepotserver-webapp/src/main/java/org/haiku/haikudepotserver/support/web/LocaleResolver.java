@@ -84,10 +84,10 @@ public class LocaleResolver implements org.springframework.web.servlet.LocaleRes
 
         List<Locale> headerLocales = Collections.list(request.getLocales());
 
-        for (int i = 0; i < headerLocales.size(); i++) {
+        for (Locale headerLocale : headerLocales) {
             Optional<NaturalLanguageCoordinates> result = naturalLanguageService.tryGetBestMatchFromList(
                     codeSortedPossibleCoordinates,
-                    NaturalLanguageCoordinates.fromLocale(headerLocales.get(i)));
+                    NaturalLanguageCoordinates.fromLocale(headerLocale));
 
             if (result.isPresent()) {
                 return result;

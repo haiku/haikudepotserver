@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class HvifRenderingServiceFactory implements FactoryBean<HvifRenderingService> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(HvifRenderingServiceFactory.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(HvifRenderingServiceFactory.class);
 
     private final String hvif2pngPath;
 

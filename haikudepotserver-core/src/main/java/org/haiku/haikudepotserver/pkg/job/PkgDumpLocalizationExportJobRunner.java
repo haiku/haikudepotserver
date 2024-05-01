@@ -50,7 +50,7 @@ import java.util.zip.GZIPOutputStream;
 @Component
 public class PkgDumpLocalizationExportJobRunner extends AbstractJobRunner<PkgDumpLocalizationExportJobSpecification> {
 
-    protected static Logger LOGGER = LoggerFactory.getLogger(PkgDumpLocalizationExportJobRunner.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(PkgDumpLocalizationExportJobRunner.class);
 
     private final static int BATCH_SIZE = 100;
 

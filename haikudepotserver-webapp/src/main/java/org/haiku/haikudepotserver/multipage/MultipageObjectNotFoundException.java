@@ -21,7 +21,7 @@ public class MultipageObjectNotFoundException extends Exception {
     public MultipageObjectNotFoundException(String entityName, Object identifier) {
         super();
 
-        if (null == entityName || 0 == entityName.length()) {
+        if (null == entityName || entityName.isEmpty()) {
             throw new IllegalStateException("the entity name is required");
         }
 

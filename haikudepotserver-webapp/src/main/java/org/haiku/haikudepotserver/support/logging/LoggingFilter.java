@@ -147,10 +147,6 @@ public class LoggingFilter implements Filter {
 
     }
 
-    @Override
-    public void destroy() {
-    }
-
     private static Optional<ObjectId> tryGetAuthenticatedUserObjectId() {
         return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .filter(Authentication::isAuthenticated)
