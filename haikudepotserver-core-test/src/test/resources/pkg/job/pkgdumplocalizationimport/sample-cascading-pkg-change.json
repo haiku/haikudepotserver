@@ -1,0 +1,42 @@
+{
+  "info": {
+    "anything": "this will be skipped"
+  },
+  "items": [
+    {
+      "pkgName": "bluesky",
+      "localizations": [
+        {
+          "code": "title",
+          "naturalLanguage": {
+            "code": "pt_BR",
+            "languageCode": "pt",
+            "countryCode": "BR"
+          },
+          "content": "Fumble",
+          "userDescription": "Brandy Snap"
+        },
+        {
+          "code": "title",
+          "naturalLanguage": {
+            "code": "pt_BR",
+            "languageCode": "pt",
+            "countryCode": "BR"
+          },
+          "content": "Bumble",
+          "userDescription": "Rhubarb Cake"
+        },
+        {
+          "code": "title",
+          "naturalLanguage": {
+            "code": "pt_BR",
+            "languageCode": "pt",
+            "countryCode": "BR"
+          },
+          "content": "Stumble",
+          "userDescription": "Apple Pie"
+        }
+      ]
+    }
+  ]
+}

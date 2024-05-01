@@ -1,0 +1,22 @@
+{
+  "info": {
+    "anything": "this will be skipped"
+  },
+  "items": [
+    {
+      "pkgName": "bluesky_devel",
+      "localizations": [
+        {
+          "code": "title",
+          "naturalLanguage": {
+            "code": "pt_BR",
+            "languageCode": "pt",
+            "countryCode": "BR"
+          },
+          "content": "Blue Bird",
+          "userDescription": "Fan Tail"
+        }
+      ]
+    }
+  ]
+}

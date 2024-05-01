@@ -19,7 +19,6 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
-import org.haiku.haikudepotserver.pkg.PkgLocalizationServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgDumpLocalizationImportJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
@@ -31,6 +30,7 @@ import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -43,8 +43,6 @@ public class PkgDumpLocalizationImportJobRunnerIT extends AbstractIntegrationTes
     private JobService jobService;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private PkgLocalizationServiceImpl pkgLocalizationServiceImpl;
 
     @Test
     public void testRun() throws IOException {
@@ -56,15 +54,7 @@ public class PkgDumpLocalizationImportJobRunnerIT extends AbstractIntegrationTes
             User user = integrationTestSupportService.createBasicUser(context, "samuel", "1c6002fb-bd4e-441f-bac7-7a4cc6b1e232");
             Pkg pkg = integrationTestSupportService.createPkg(context, "bluesky");
             integrationTestSupportService.agreeToUserUsageConditions(context, user);
-
-            PermissionUserPkg permissionUserPkg = context.newObject(PermissionUserPkg.class);
-            permissionUserPkg.setPkg(pkg);
-            permissionUserPkg.setUser(user);
-            permissionUserPkg.setPermission(Permission.getByCode(
-                    context,
-                    org.haiku.haikudepotserver.security.model.Permission.PKG_EDITLOCALIZATION.name().toLowerCase(Locale.ROOT)));
-            user.addToPermissionUserPkgs(permissionUserPkg);
-
+            createPermissionForPkg(context, user, pkg);
             context.commitChanges();
         }
 
@@ -127,7 +117,7 @@ public class PkgDumpLocalizationImportJobRunnerIT extends AbstractIntegrationTes
                 Assertions.assertThat(modification.getUserDescription()).endsWith("(auth:samuel)");
             }
 
-            PkgSupplementModification modification0 = modifications.get(0);
+            PkgSupplementModification modification0 = modifications.getFirst();
             Assertions.assertThat(modification0.getUserDescription()).isEqualTo("Susan Peabody (auth:samuel)");
             Assertions.assertThat(modification0.getContent()).isEqualTo("""
                     changing localization for pkg [bluesky] in natural language [pt-BR];
@@ -203,6 +193,64 @@ public class PkgDumpLocalizationImportJobRunnerIT extends AbstractIntegrationTes
     }
 
     /**
+     * <p>Packages with suffixes like `_devel` are not allowed to have their localization
+     * set; so this should fail.</p>
+     */
+
+    @Test
+    public void testRun_disallowedSubordinatePkg() throws IOException {
+
+        integrationTestSupportService.createStandardTestData();
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            User user = integrationTestSupportService.createBasicUser(context, "samuel", "1c6002fb-bd4e-441f-bac7-7a4cc6b1e232");
+            Pkg pkgRegular = integrationTestSupportService.createPkg(context, "bluesky");
+            Pkg pkgDevel = integrationTestSupportService.createPkg(context, "bluesky_devel");
+            integrationTestSupportService.agreeToUserUsageConditions(context, user);
+            Stream.of(pkgRegular, pkgDevel).forEach(p -> createPermissionForPkg(context, user, p));
+            context.commitChanges();
+        }
+
+        PkgDumpLocalizationImportJobSpecification spec = new PkgDumpLocalizationImportJobSpecification();
+        spec.setOriginSystemDescription("flamingo");
+        spec.setOwnerUserNickname("samuel");
+        spec.setInputDataGuid(jobService.storeSuppliedData(
+                "input",
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE,
+                getResourceByteSource("pkg/job/pkgdumplocalizationimport/sample-devel-pkg-change.json")
+        ).getGuid());
+
+        // ------------------------------------
+        String guid = jobService.submit(
+                spec,
+                JobSnapshot.COALESCE_STATUSES_NONE);
+        // ------------------------------------
+
+        jobService.awaitJobFinishedUninterruptibly(guid, 10000);
+        JobSnapshot snapshot = jobService.tryGetJob(guid).orElseThrow();
+        Assertions.assertThat(snapshot.getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
+        JsonNode generatedJsonNode = getOutputTreeForSnapshot(snapshot);
+
+        JsonNode item0Node = generatedJsonNode.at("/items/0");
+        Assertions.assertThat(item0Node.get("pkgName").asText()).isEqualTo("bluesky_devel");
+        Assertions.assertThat(item0Node.get("status").asText()).isEqualTo("ERROR");
+        Assertions.assertThat(item0Node.get("error").get("message").asText())
+                .isEqualTo("the pkg [bluesky_devel] is unable to have localizations be imported");
+
+        // check to make sure that no localization data was written to the database
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Pkg pkg = Pkg.getByName(context, "bluesky");
+            Assertions.assertThat(pkg.getPkgSupplement().getPkgLocalizations()).isEmpty();
+            Assertions.assertThat(PkgSupplementModification.findForPkg(context, pkg)).isEmpty();
+        }
+
+    }
+
+    /**
      * <p>Tests the situation when a no-op localization change comes through.</p>
      */
 
@@ -224,13 +272,7 @@ public class PkgDumpLocalizationImportJobRunnerIT extends AbstractIntegrationTes
             localization.setSummary("So kann es nicht sein!");
             localization.setTitle("Es geht nicht um das Geld!");
 
-            PermissionUserPkg permissionUserPkg = context.newObject(PermissionUserPkg.class);
-            permissionUserPkg.setPkg(pkg);
-            permissionUserPkg.setUser(user);
-            permissionUserPkg.setPermission(Permission.getByCode(
-                    context,
-                    org.haiku.haikudepotserver.security.model.Permission.PKG_EDITLOCALIZATION.name().toLowerCase(Locale.ROOT)));
-            user.addToPermissionUserPkgs(permissionUserPkg);
+            createPermissionForPkg(context, user, pkg);
 
             context.commitChanges();
         }
@@ -268,6 +310,99 @@ public class PkgDumpLocalizationImportJobRunnerIT extends AbstractIntegrationTes
             Assertions.assertThat(PkgSupplementModification.findForPkg(context, pkg)).isEmpty();
         }
 
+    }
+
+    /**
+     * <p>This test is checking what happens when there are more than one changes for the same
+     * field on the same package. The final change should be the only change that gets stored.
+     * </p>
+     */
+
+    @Test
+    public void testRun_cascadingChange() throws IOException {
+
+        integrationTestSupportService.createStandardTestData();
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            User user = integrationTestSupportService.createBasicUser(context, "samuel", "1c6002fb-bd4e-441f-bac7-7a4cc6b1e232");
+            Pkg pkg = integrationTestSupportService.createPkg(context, "bluesky");
+            integrationTestSupportService.agreeToUserUsageConditions(context, user);
+            createPermissionForPkg(context, user, pkg);
+            context.commitChanges();
+        }
+
+        PkgDumpLocalizationImportJobSpecification spec = new PkgDumpLocalizationImportJobSpecification();
+        spec.setOriginSystemDescription("flamingo");
+        spec.setOwnerUserNickname("samuel");
+        spec.setInputDataGuid(jobService.storeSuppliedData(
+                "input",
+                MediaType.CSV_UTF_8.toString(),
+                JobDataEncoding.NONE,
+                getResourceByteSource("pkg/job/pkgdumplocalizationimport/sample-cascading-pkg-change.json")
+        ).getGuid());
+
+        // ------------------------------------
+        String guid = jobService.submit(
+                spec,
+                JobSnapshot.COALESCE_STATUSES_NONE);
+        // ------------------------------------
+
+        jobService.awaitJobFinishedUninterruptibly(guid, 10000);
+        JobSnapshot snapshot = jobService.tryGetJob(guid).orElseThrow();
+        Assertions.assertThat(snapshot.getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
+        JsonNode generatedJsonNode = getOutputTreeForSnapshot(snapshot);
+
+        // first check that the output data is correct.
+
+        JsonNode item0Node = generatedJsonNode.at("/items/0");
+        Assertions.assertThat(item0Node.get("pkgName").asText()).isEqualTo("bluesky");
+        Assertions.assertThat(item0Node.get("status").asText()).isEqualTo("UPDATED");
+
+        // check to make sure that the localizations have been loaded into the database.
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Pkg pkg = Pkg.getByName(context, "bluesky");
+            PkgLocalization ptBrLoc = pkg.getPkgSupplement()
+                    .getPkgLocalization(NaturalLanguageCoordinates.fromCode("pt_BR"))
+                    .orElseThrow(() -> new AssertionError("expected localization to be present"));
+            Assertions.assertThat(ptBrLoc.getTitle()).isEqualTo("Stumble");
+            // ^^ note the string was trimmed.
+            Assertions.assertThat(ptBrLoc.getSummary()).isNull();
+            Assertions.assertThat(ptBrLoc.getDescription()).isNull();
+        }
+
+        // check to make sure that change record have been written. Here we expect that there will be a
+        // change record for the two authors in the input file.
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Pkg pkg = Pkg.getByName(context, "bluesky");
+            List<PkgSupplementModification> modifications = PkgSupplementModification.findForPkg(context, pkg)
+                    .stream()
+                    .sorted(Comparator.comparing(PkgSupplementModification::getContent))
+                    .toList();
+            PkgSupplementModification modification = modifications.getLast();
+
+            Assertions.assertThat(modification.getUser()).isNull();
+            Assertions.assertThat(modification.getOriginSystemDescription()).isEqualTo("flamingo");
+            Assertions.assertThat(modification.getUserDescription()).isEqualTo("Apple Pie (auth:samuel)");
+            Assertions.assertThat(modification.getContent()).isEqualTo("""
+                    changing localization for pkg [bluesky] in natural language [pt-BR];
+                    title: [Stumble]""");
+        }
+
+    }
+
+    private void createPermissionForPkg(ObjectContext context, User user, Pkg pkg) {
+        PermissionUserPkg permissionUserPkg = context.newObject(PermissionUserPkg.class);
+        permissionUserPkg.setPkg(pkg);
+        permissionUserPkg.setUser(user);
+        permissionUserPkg.setPermission(Permission.getByCode(
+                context,
+                org.haiku.haikudepotserver.security.model.Permission.PKG_EDITLOCALIZATION.name().toLowerCase(Locale.ROOT)));
+        user.addToPermissionUserPkgs(permissionUserPkg);
     }
 
     private JsonNode getOutputTreeForSnapshot(JobSnapshot snapshot) throws IOException {
