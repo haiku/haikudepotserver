@@ -40,6 +40,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgDumpLocalizationExportJobResponseEnvelope"
 
+  /__api/v2/pkg-job/queue-pkg-dump-localization-import-job:
+    description: >
+      This API initiates a background job to consume a JSON document that contains changes to packages'
+      localizations.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgDumpLocalizationImportJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgDumpLocalizationImportJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgDumpLocalizationImportJobResponseEnvelope"
+
+
   /__api/v2/pkg-job/queue-pkg-dump-export-job:
     description: >
       This API initiates a background job to produce a JSON document that contains the details for the packages
@@ -575,6 +599,29 @@ components:
         error:
           $ref: "./error.yaml#/components/schemas/error"
     queuePkgDumpLocalizationExportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgDumpLocalizationImportJobRequestEnvelope:
+      type: object
+      required:
+        - originSystemDescription
+        - inputDataGuid
+      properties:
+        originSystemDescription:
+          type: string
+        inputDataGuid:
+          type: string
+    queuePkgDumpLocalizationImportJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgDumpLocalizationImportJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgDumpLocalizationImportJobResult:
       type: object
       properties:
         guid:

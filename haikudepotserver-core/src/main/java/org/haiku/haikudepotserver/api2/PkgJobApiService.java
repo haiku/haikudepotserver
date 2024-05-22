@@ -245,6 +245,17 @@ public class PkgJobApiService extends AbstractApiService {
                 .guid(jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_NONE));
     }
 
+    public QueuePkgDumpLocalizationImportJobResult queuePkgDumpLocalizationImportJob(QueuePkgDumpLocalizationImportJobRequestEnvelope request) {
+        final ObjectContext context = serverRuntime.newContext();
+        User user = obtainAuthenticatedUser(context);
+        PkgDumpLocalizationImportJobSpecification specification = new PkgDumpLocalizationImportJobSpecification();
+        specification.setOwnerUserNickname(user.getNickname());
+        specification.setOriginSystemDescription(request.getOriginSystemDescription());
+        specification.setInputDataGuid(request.getInputDataGuid());
+        return new QueuePkgDumpLocalizationImportJobResult()
+                .guid(jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_NONE));
+    }
+
     private String queueSimplePkgJob(
             Class<? extends AbstractJobSpecification> jobSpecificationClass,
             Permission permission) {
