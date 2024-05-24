@@ -239,12 +239,12 @@
                         <version>${openapi-generator-maven-plugin.version}</version>
 
                         <configuration>
-                            <apiPackage>haikudepotserver_api2</apiPackage>
-                            <modelPackage>haikudepotserver_api2_model</modelPackage>
                             <configOptions>
                                 <!-- useTags will use the tags from the spec to drive the generation -->
                                 <useTags>true</useTags>
                             </configOptions>
+                            <generatorName>python</generatorName>
+                            <generateSupportingFiles>true</generateSupportingFiles>
                         </configuration>
 
                         <executions>
@@ -253,8 +253,9 @@
                                 <id>authorization-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/authorization.yaml</inputSpec>
+                                    <packageName>hds_authorization_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/authorization</output>
                                 </configuration>
                             </execution>
 
@@ -262,9 +263,9 @@
                                 <id>authorization-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/authorization-job.yaml</inputSpec>
-                                    <generateSupportingFiles>false</generateSupportingFiles>
+                                    <packageName>hds_authorization_job_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/authorization-job</output>
                                 </configuration>
                             </execution>
 
@@ -272,8 +273,9 @@
                                 <id>captcha-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/captcha.yaml</inputSpec>
+                                    <packageName>hds_captcha_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/captcha</output>
                                 </configuration>
                             </execution>
 
@@ -281,8 +283,9 @@
                                 <id>job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/job.yaml</inputSpec>
+                                    <packageName>hds_job_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/job</output>
                                 </configuration>
                             </execution>
 
@@ -290,8 +293,9 @@
                                 <id>miscellaneous-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/miscellaneous.yaml</inputSpec>
+                                    <packageName>hds_miscellaneous_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/miscellaneous</output>
                                 </configuration>
                             </execution>
 
@@ -299,8 +303,9 @@
                                 <id>miscellaneous-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/miscellaneous-job.yaml</inputSpec>
+                                    <packageName>hds_miscellaneous_job_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/miscellaneous-job</output>
                                 </configuration>
                             </execution>
 
@@ -308,8 +313,9 @@
                                 <id>user-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/user.yaml</inputSpec>
+                                    <packageName>hds_user_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/user</output>
                                 </configuration>
                             </execution>
 
@@ -317,8 +323,9 @@
                                 <id>pkg-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/pkg.yaml</inputSpec>
+                                    <packageName>hds_pkg_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/pkg</output>
                                 </configuration>
                             </execution>
 
@@ -326,8 +333,9 @@
                                 <id>pkg-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/pkg-job.yaml</inputSpec>
+                                    <packageName>hds_pkg_job_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/pkg-job</output>
                                 </configuration>
                             </execution>
 
@@ -335,8 +343,9 @@
                                 <id>repository-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/repository.yaml</inputSpec>
+                                    <packageName>hds_repository_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/repository</output>
                                 </configuration>
                             </execution>
 
@@ -344,8 +353,9 @@
                                 <id>repository-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/repository-job.yaml</inputSpec>
+                                    <packageName>hds_repository_job_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/repository-job</output>
                                 </configuration>
                             </execution>
 
@@ -353,8 +363,9 @@
                                 <id>user-rating-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/user-rating.yaml</inputSpec>
+                                    <packageName>hds_user_rating_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/user-rating</output>
                                 </configuration>
                             </execution>
 
@@ -362,8 +373,9 @@
                                 <id>user-rating-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/user-rating-job.yaml</inputSpec>
+                                    <packageName>hds_user_rating_job_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/user-rating-job</output>
                                 </configuration>
                             </execution>
 
@@ -371,8 +383,9 @@
                                 <id>metrics-job-python</id>
                                 <goals><goal>generate</goal></goals>
                                 <configuration>
-                                    <generatorName>python</generatorName>
                                     <inputSpec>${inputspec.basedir}/metrics-job.yaml</inputSpec>
+                                    <packageName>hds_metrics_job_client</packageName>
+                                    <output>${project.build.directory}/generated-sources/openapi/python-client/metrics-job</output>
                                 </configuration>
                             </execution>
 

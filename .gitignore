@@ -1,5 +1,5 @@
 .*
-*.iml
+**/*.iml
 support/*.pyc
 support/__pycache__/
 target
@@ -9,4 +9,4 @@ haikudepotserver-webapp/src/main/webapp/js/lib/**
 haikudepotserver-webapp/src/main/resources/local.properties
 haikudepotserver-spa1/node
 
-
+support/client-tools/hds_*_client/**
