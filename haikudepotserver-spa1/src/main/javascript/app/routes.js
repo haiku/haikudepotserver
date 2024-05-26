@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,6 +17,7 @@ angular.module('haikudepotserver').config(
                 .when('/jobs', {controller:'ListJobsController',templateUrl:controllerTemplatePathPrefix + '/listjobs.html'})
                 .when('/pkgcategorycoverageimportspreadsheet', {controller:'PkgCategoryCoverageImportSpreadsheetController',templateUrl:controllerTemplatePathPrefix + '/pkgcategorycoverageimportspreadsheet.html'})
                 .when('/pkgiconarchiveimport', {controller:'PkgIconArchiveImportController',templateUrl:controllerTemplatePathPrefix + '/pkgiconarchiveimport.html'})
+                .when('/pkglocalizationimport', {controller:'PkgLocalizationImportController',templateUrl:controllerTemplatePathPrefix + '/pkglocalizationimport.html'})
                 .when('/pkgscreenshotarchiveimport',{controller:'PkgScreenshotArchiveImportController',templateUrl:controllerTemplatePathPrefix + '/pkgscreenshotarchiveimport.html'})
                 .when('/job/:guid', {controller:'ViewJobController',templateUrl:controllerTemplatePathPrefix + '/viewjob.html'})
                 .when('/reports', {controller:'ReportsController',templateUrl:controllerTemplatePathPrefix + '/reports.html'})

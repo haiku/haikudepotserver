@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -604,6 +604,13 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return applyDefaults({
                         titleKey : 'breadcrumb.pkgIconArchiveImport.title',
                         path : '/pkgiconarchiveimport'
+                    });
+                },
+
+                createPkgLocalizationImport : function() {
+                    return applyDefaults({
+                        titleKey : 'breadcrumb.pkgLocalizationImport.title',
+                        path : '/pkglocalizationimport'
                     });
                 },
 
