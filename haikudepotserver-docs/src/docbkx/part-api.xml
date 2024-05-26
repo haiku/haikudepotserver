@@ -188,7 +188,7 @@ Distributed under the terms of the MIT License.
         <para>
             Some requests are instant and some take some time to complete. An example of an instant API is
             fetching the details of a user. An example of a request that may take some time is producing an
-            archive of all of the icons for all packages in the system.
+            archive of all the icons for all packages in the system.
         </para>
 
         <para>
@@ -231,6 +231,10 @@ Distributed under the terms of the MIT License.
             a data code. Where required, the data code can be used with the API to start a job. To access the data
             upload function, invoke a POST request to &quot;/__secured/jobdata&quot;. The API call will return the
             data code in a response header &quot;X-HaikuDepotServer-DataGuid&quot;.
+        </para>
+
+        <para>
+            See an example using the Python language at "support/client-tools/run_pkg_localization_import.py".
         </para>
 
     </section>
