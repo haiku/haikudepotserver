@@ -29,3 +29,17 @@ run_pkg_localization_import.py \
 ```
 
 You can specify the HDS system to communicate with using the `-u` switch.
+
+# Screenshot upload
+
+Some web-browsers using the HDS web interface encounter issues with the functions related to uploading screenshots. For users experiencing these difficulties, the `screenshot_upload.py` tool can be used to upload screenshots for a package. The script would be used as follows;
+
+```bash
+python3 \
+screenshot_upload.py \
+--username somebody \
+--pkgname somepkg \
+/x/y/z/file1.png \
+/x/y/z/file2.png \
+/x/y/z/file3.png
+```
