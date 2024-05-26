@@ -10,7 +10,7 @@
 # -------------------------------------
 # Base image with the Eclipse Temurin repository setup.
 
-FROM debian:12.2-slim as base
+FROM debian:12.5-slim as base
 
 RUN apt-get update && \
     apt-get -y install wget apt-transport-https gnupg
