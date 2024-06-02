@@ -45,6 +45,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * <p>This object is responsible for migrating a HPKR file from a remote repository into the Haiku Depot Server
@@ -71,16 +72,19 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     private final PkgService pkgService;
     private final PkgImportService pkgImportService;
     private final boolean shouldPopulateFromPayload;
+    private final Pattern allowedPkgNamePattern;
 
     public RepositoryHpkrIngressJobRunner(
             ServerRuntime serverRuntime,
             PkgService pkgService,
             PkgImportService pkgImportService,
-            @Value("${hds.repository.import.populate-from-payload:false}") boolean shouldPopulateFromPayload) {
+            @Value("${hds.repository.import.populate-from-payload:false}") boolean shouldPopulateFromPayload,
+            @Value("${hds.repository.import.allowed-pkg-name-pattern:}") Pattern allowedPkgNamePattern) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgService = Preconditions.checkNotNull(pkgService);
         this.pkgImportService = Preconditions.checkNotNull(pkgImportService);
         this.shouldPopulateFromPayload = shouldPopulateFromPayload;
+        this.allowedPkgNamePattern = allowedPkgNamePattern;
     }
 
     @Override
@@ -252,23 +256,27 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             PkgIterator pkgIterator = new PkgIterator(fileExtractor.getPackageAttributesIterator());
 
             while (pkgIterator.hasNext()) {
-
-                ObjectContext pkgImportContext = serverRuntime.newContext();
-
                 Pkg pkg = pkgIterator.next();
+
                 repositoryImportPkgNames.add(pkg.getName());
 
-                try {
-                    pkgImportService.importFrom(
-                        pkgImportContext,
-                        repositorySource.getObjectId(),
-                        pkg,
-                        shouldPopulateFromPayload);
+                if (null == allowedPkgNamePattern || allowedPkgNamePattern.matcher(pkg.getName()).matches()) {
+                    ObjectContext pkgImportContext = serverRuntime.newContext();
 
-                    pkgImportContext.commitChanges();
+                    try {
+                        pkgImportService.importFrom(
+                                pkgImportContext,
+                                repositorySource.getObjectId(),
+                                pkg,
+                                shouldPopulateFromPayload);
+
+                        pkgImportContext.commitChanges();
+                    } catch (Throwable th) {
+                        throw new RepositoryHpkrIngressException("unable to store package [" + pkg + "]", th);
+                    }
                 }
-                catch(Throwable th) {
-                    throw new RepositoryHpkrIngressException("unable to store package [" + pkg + "]", th);
+                else {
+                    LOGGER.info("skipping pkg [{}] because it is not in the allowed pkg name pattern", pkg.getName());
                 }
             }
 
