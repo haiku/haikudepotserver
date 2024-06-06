@@ -45,7 +45,6 @@ COPY ./haikudepotserver-core-test/pom.xml /hds-src/haikudepotserver-core-test/po
 COPY ./haikudepotserver-api1/pom.xml /hds-src/haikudepotserver-api1/pom.xml
 COPY ./haikudepotserver-api2/pom.xml /hds-src/haikudepotserver-api2/pom.xml
 COPY ./haikudepotserver-packagefile/pom.xml /hds-src/haikudepotserver-packagefile/pom.xml
-COPY ./haikudepotserver-docs/pom.xml /hds-src/haikudepotserver-docs/pom.xml
 COPY ./haikudepotserver-spa1/pom.xml /hds-src/haikudepotserver-spa1/pom.xml
 COPY ./haikudepotserver-webapp/pom.xml /hds-src/haikudepotserver-webapp/pom.xml
 COPY ./haikudepotserver-core/pom.xml /hds-src/haikudepotserver-core/pom.xml
@@ -66,7 +65,6 @@ COPY ./haikudepotserver-driversettings /hds-src/haikudepotserver-driversettings
 COPY ./haikudepotserver-core-test /hds-src/haikudepotserver-core-test
 COPY ./haikudepotserver-api2 /hds-src/haikudepotserver-api2
 COPY ./haikudepotserver-packagefile /hds-src/haikudepotserver-packagefile
-COPY ./haikudepotserver-docs /hds-src/haikudepotserver-docs
 COPY ./haikudepotserver-webapp /hds-src/haikudepotserver-webapp
 COPY ./haikudepotserver-spa1 /hds-src/haikudepotserver-spa1
 COPY ./haikudepotserver-api1 /hds-src/haikudepotserver-api1
@@ -91,11 +89,7 @@ RUN apt-get update && \
 ENV HDS_B_HTTP_PORT=8080
 ENV HDS_B_HTTP_ACTUATOR_PORT=8081
 ENV HDS_B_INSTALL_ROOT="/opt/haikudepotserver"
-ENV HDS_B_PROPBIN="/opt/haikudepotserver/prop.sh"
 RUN mkdir ${HDS_B_INSTALL_ROOT}
-
-COPY ./support/deployment/prop.sh ${HDS_B_PROPBIN}
-RUN chmod 755 ${HDS_B_PROPBIN}
 
 COPY --from=build /hds-src/haikudepotserver-core/target/classes/build.properties ${HDS_B_INSTALL_ROOT}
 COPY --from=build /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${HDS_B_INSTALL_ROOT}/app.jar
@@ -105,18 +99,21 @@ ENV HDS_B_INSTALL_HVIF2PNG_PATH "${HDS_B_INSTALL_ROOT}/hvif2png-hrev57235/bin/hv
 
 COPY ./support/deployment/config.properties ${HDS_B_INSTALL_ROOT}
 ADD ./support/deployment/${HDS_B_HVIF2PNG_VERSION}.tgz ${HDS_B_INSTALL_ROOT}
-COPY ./support/deployment/launch.sh ${HDS_B_INSTALL_ROOT}
-RUN chmod 755 ${HDS_B_INSTALL_ROOT}/launch.sh
 
-RUN echo "\
-HDS_ROOT=${HDS_B_INSTALL_ROOT}\n\
-JAVA_BIN=java\n\
-HDS_HVIF2PNG_PATH=${HDS_B_INSTALL_HVIF2PNG_PATH}\n\
-HDS_PORT=${HDS_B_HTTP_PORT}\n\
-HDS_ACTUATOR_PORT=${HDS_B_HTTP_ACTUATOR_PORT}\n\
-" >> ${HDS_B_INSTALL_ROOT}/launchenv.sh
-
-CMD [ "/opt/haikudepotserver/launch.sh" ]
+CMD \
+    java \
+    -Dfile.encoding=UTF-8 \
+    -Duser.timezone=GMT0 \
+    -Xms320m \
+    -Xmx512m \
+    -Djava.net.preferIPv4Stack=true \
+    -Djava.awt.headless=true \
+    -Dconfig.properties=file://${HDS_B_INSTALL_ROOT}/config.properties \
+    -Dhds.hvif2png.path=${HDS_B_INSTALL_HVIF2PNG_PATH} \
+    -Dserver.port=${HDS_B_HTTP_PORT} \
+    -Dmanagement.server.port=${HDS_B_HTTP_ACTUATOR_PORT} \
+    -jar \
+    ${HDS_B_INSTALL_ROOT}/app.jar
 
 HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:${HDS_B_HTTP_ACTUATOR_PORT}/actuator/health
 EXPOSE ${HDS_B_HTTP_PORT} ${HDS_B_HTTP_ACTUATOR_PORT}

@@ -13,23 +13,35 @@ This web application is an online tool for working with the software packages of
 * A user interface to manipulate the _additional data_.
 * A mechanism to vend this _additional data_ to HaikuDepot, a desktop application for managing packages.
 
-## Deployments
+## Useful Links and resources
 
-| Environment | Modern Web | Simple Web |
-| --- | --- | --- |
-| Production | https://depot.haiku-os.org | https://depot.haiku-os.org/__multipage |
+- [Haiku Depot Server web interface](https://depot.haiku-os.org)
+- [Haiku Depot Server simplified web interface](https://depot.haiku-os.org/__multipage)
+- [Haiku Depot Server Source code + issue tracking](https://github.com/haiku/haikudepotserver)
+- [Haiku Depot Server mailing list](http://www.freelists.org/list/haiku-depot-web) to discuss and coordinate the project.
+- [Haiku Depot Server license](LICENSE.TXT)
+- [Haiku operating system project homepage](http://www.haiku-os.org)
+- [HaikuPorts project homepage](https://github.com/haikuports/haikuports/wiki) (for external packages)
+- [Haiku package management documentation](https://github.com/haiku/haiku/blob/master/docs/develop/packages)
 
-## Mailing List
+## Documentation
 
-A [mailing list](http://www.freelists.org/list/haiku-depot-web) exists to discuss and coordinate the project.
+### General System and Architecture
 
-## Documentation and Development
+- [Overview](docs/overview.md)
+- [Architecture](docs/architecture.md)
+- [API](docs/api.md)
+- [Security](docs/security.md)
+- [Data Model](docs/data-model.md)
+- [Integration](docs/integration.md)
+- [Repositories](docs/repositories.md)
+- [User Ratings](docs/user-rating.md)
+- [Data Localization](docs/data-localization.md)
+- [HDS Application Localization](docs/application-localization.md)
 
-Assuming the application server is deployed, you should be able to see relatively recent documentation
-[here](http://depot.haiku-os.org/__docs/index.html).
+### Development and Deployment
 
-## Other Helpful Resources
-
-* [Haiku homepage](http://www.haiku-os.org)
-* [HaikuPorts homepage](https://github.com/haikuports/haikuports/wiki) (for external packages)
-* Haiku [package management documentation](https://github.com/haiku/haiku/blob/master/docs/develop/packages)
+- [hvif2png](docs/hvif2png.md)
+- [Local Development](docs/local-development.md)
+- [Kubernetes Development](docs/kubernetes-development.md)
+- [Deployment](docs/deployment.md)

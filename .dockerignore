@@ -1,0 +1,4 @@
+**/target
+haikudepotserver-webapp/src/main/resources/local.properties
+haikudepotserver-spa1/node
+haikudepotserver-spa1/node_modules

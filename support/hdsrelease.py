@@ -57,7 +57,7 @@ futureVersion = rootPomCurrentVersionPrefix + str(int(rootPomCurrentVersionSuffi
 # ----------------
 # CHECK CURRENT CONSISTENCY
 
-# This will make sure that all of the modules have the same version.
+# This will make sure that all the modules have the same version.
 
 print("will check version consistency")
 

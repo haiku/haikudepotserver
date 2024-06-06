@@ -14,6 +14,5 @@ public class WebConstants {
     public final static String ANT_PATTERN_JS = "/__js/**";
     public final static String ANT_PATTERN_CSS = "/__css/**";
     public final static String ANT_PATTERN_IMG = "/__img/**";
-    public final static String ANT_PATTERN_DOCS = "/__docs/**";
 
 }

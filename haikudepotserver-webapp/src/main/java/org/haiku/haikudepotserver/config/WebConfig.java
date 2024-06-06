@@ -35,7 +35,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler(WebConstants.ANT_PATTERN_IMG).addResourceLocations(
                 "classpath:/spa1/img/",
                 "classpath:/img/");
-        registry.addResourceHandler(WebConstants.ANT_PATTERN_DOCS).addResourceLocations("classpath:/docs/");
         registry.addResourceHandler("favicon.ico").addResourceLocations("classpath:/img/favicon.ico");
     }
 

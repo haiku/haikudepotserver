@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haikudepotserver-webapp
+  labels:
+    app: haikudepotserver-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: haikudepotserver-webapp
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: haikudepotserver-webapp
+    spec:
+      containers:
+        - name: haikudepotserver-webapp
+          image: ghcr.io/haiku/haikudepotserver:1.0.161
+          env:
+            # Don't test the SMTP server to see if the POD is healthy.
+            - name: MANAGEMENT_HEALTH_MAIL_ENABLED
+              value: "false"
+            - name: SPRING_MAIL_HOST
+              value: "smtp"
+            - name: HDS_AUTHENTICATION_JWS_ISSUER
+              value: "dev.hds"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://haikudepotserver-pg-svc:5432/haikudepotserver"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: haikudepotserver
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: haikudepotserver
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: "2Gi"
+            requests:
+              cpu: "0.50"
+              memory: "512Mi"
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: haikudepotserver-webapp-svc
+spec:
+  selector:
+    app: haikudepotserver-webapp
+  type: NodePort
+  ports:
+    - name: www
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080

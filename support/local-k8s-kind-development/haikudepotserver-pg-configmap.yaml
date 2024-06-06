@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haikudepotserver-pg-secret
+  labels:
+    app: haikudepotserver-pg
+data:
+  POSTGRES_DB: haikudepotserver
+  POSTGRES_USER: haikudepotserver
+  POSTGRES_PASSWORD: haikudepotserver
