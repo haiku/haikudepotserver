@@ -28,7 +28,6 @@ This web application is an online tool for working with the software packages of
 
 ### General System and Architecture
 
-- [Overview](docs/overview.md)
 - [Architecture](docs/architecture.md)
 - [API](docs/api.md)
 - [Security](docs/security.md)
