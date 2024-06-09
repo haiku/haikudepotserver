@@ -42,5 +42,5 @@ This web application is an online tool for working with the software packages of
 
 - [hvif2png](docs/hvif2png.md)
 - [Local Development](docs/local-development.md)
-- [Kubernetes Development](docs/kubernetes-development.md)
+- [Kubernetes Development](docs/k8s-development.md)
 - [Deployment](docs/deployment.md)
