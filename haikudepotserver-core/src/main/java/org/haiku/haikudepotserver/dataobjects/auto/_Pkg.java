@@ -16,7 +16,6 @@ import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.PkgProminence;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
-import org.haiku.haikudepotserver.dataobjects.Publisher;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
 /**
@@ -39,7 +38,6 @@ public abstract class _Pkg extends AbstractDataObject {
     public static final ListProperty<PkgProminence> PKG_PROMINENCES = PropertyFactory.createList("pkgProminences", PkgProminence.class);
     public static final EntityProperty<PkgSupplement> PKG_SUPPLEMENT = PropertyFactory.createEntity("pkgSupplement", PkgSupplement.class);
     public static final ListProperty<PkgUserRatingAggregate> PKG_USER_RATING_AGGREGATES = PropertyFactory.createList("pkgUserRatingAggregates", PkgUserRatingAggregate.class);
-    public static final EntityProperty<Publisher> PUBLISHER = PropertyFactory.createEntity("publisher", Publisher.class);
 
     protected Boolean active;
     protected Timestamp createTimestamp;
@@ -50,7 +48,6 @@ public abstract class _Pkg extends AbstractDataObject {
     protected Object pkgProminences;
     protected Object pkgSupplement;
     protected Object pkgUserRatingAggregates;
-    protected Object publisher;
 
     public void setActive(Boolean active) {
         beforePropertyWrite("active", this.active, active);
@@ -139,14 +136,6 @@ public abstract class _Pkg extends AbstractDataObject {
         return (List<PkgUserRatingAggregate>)readProperty("pkgUserRatingAggregates");
     }
 
-    public void setPublisher(Publisher publisher) {
-        setToOneTarget("publisher", publisher, true);
-    }
-
-    public Publisher getPublisher() {
-        return (Publisher)readProperty("publisher");
-    }
-
     @Override
     public Object readPropertyDirectly(String propName) {
         if(propName == null) {
@@ -170,8 +159,6 @@ public abstract class _Pkg extends AbstractDataObject {
                 return this.pkgSupplement;
             case "pkgUserRatingAggregates":
                 return this.pkgUserRatingAggregates;
-            case "publisher":
-                return this.publisher;
             default:
                 return super.readPropertyDirectly(propName);
         }
@@ -208,9 +195,6 @@ public abstract class _Pkg extends AbstractDataObject {
             case "pkgUserRatingAggregates":
                 this.pkgUserRatingAggregates = val;
                 break;
-            case "publisher":
-                this.publisher = val;
-                break;
             default:
                 super.writePropertyDirectly(propName, val);
         }
@@ -235,7 +219,6 @@ public abstract class _Pkg extends AbstractDataObject {
         out.writeObject(this.pkgProminences);
         out.writeObject(this.pkgSupplement);
         out.writeObject(this.pkgUserRatingAggregates);
-        out.writeObject(this.publisher);
     }
 
     @Override
@@ -249,7 +232,6 @@ public abstract class _Pkg extends AbstractDataObject {
         this.pkgProminences = in.readObject();
         this.pkgSupplement = in.readObject();
         this.pkgUserRatingAggregates = in.readObject();
-        this.publisher = in.readObject();
     }
 
 }
