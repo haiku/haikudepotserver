@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2022-2023, Andrew Lindesay
+# Copyright 2022-2024, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -21,6 +21,8 @@ RUN wget -O - "https://packages.adoptium.net/artifactory/api/gpg/key/public" | g
 COPY support/deployment/deb-adoptium-sources-template.txt /adoptium/deb-adoptium-sources-template.txt
 RUN OS_VERSION_CODENAME="$(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release)" && \
     cat /adoptium/deb-adoptium-sources-template.txt | sed -e "s/SUITE/${OS_VERSION_CODENAME}/g" | dd of=/etc/apt/sources.list.d/adoptium.sources
+
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 # -------------------------------------
 # Assemble the build image with the dependencies
