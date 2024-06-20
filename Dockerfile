@@ -13,7 +13,7 @@
 FROM debian:12.5-slim as base
 
 RUN apt-get update && \
-    apt-get -y install wget apt-transport-https gnupg
+    apt-get -y install wget apt-transport-https gnupg locales
 
 RUN mkdir /adoptium
 
