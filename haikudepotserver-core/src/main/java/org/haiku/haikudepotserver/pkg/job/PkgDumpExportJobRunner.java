@@ -42,10 +42,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
@@ -219,6 +216,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         Preconditions.checkArgument(null != pkgVersionsUnderCommonPkg && !pkgVersionsUnderCommonPkg.isEmpty());
 
         Pkg pkg = pkgVersionsUnderCommonPkg.getFirst().getPkg(); // any will do to get the pkg.
+        PkgUserRatingAggregate userRatingAggregate = pkg.getPkgUserRatingAggregate(repositorySource.getRepository()).orElse(null);
 
         DumpExportPkg dumpExportPkg = new DumpExportPkg();
         dumpExportPkg.setCreateTimestamp(pkg.getCreateTimestamp().getTime());
@@ -227,10 +225,12 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         dumpExportPkg.setHasChangelog(pkg.getPkgSupplement().getPkgChangelog().isPresent());
         dumpExportPkg.setProminenceOrdering(pkg.tryGetPkgProminence(repositorySource.getRepository())
                 .map((p) -> p.getProminence().getOrdering()).map(Number::longValue).orElse(null));
-        dumpExportPkg.setDerivedRating(
-                pkg.getPkgUserRatingAggregate(repositorySource.getRepository())
-                        .map((v) -> v.getDerivedRating().doubleValue()).orElse(null));
-
+        dumpExportPkg.setDerivedRating(Optional.ofNullable(userRatingAggregate)
+                .map((v) -> v.getDerivedRating().doubleValue())
+                .orElse(null));
+        dumpExportPkg.setDerivedRatingSampleSize(Optional.ofNullable(userRatingAggregate)
+                .map((v) -> v.getDerivedRatingSampleSize().longValue())
+                .orElse(0L));
         dumpExportPkg.setPkgCategories(
                 pkg.getPkgSupplement().getPkgPkgCategories().stream().map((ppc) -> {
                     DumpExportPkgCategory dumpExportPkgCategory = new DumpExportPkgCategory();
