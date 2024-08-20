@@ -44,7 +44,7 @@ angular.module('haikudepotserver').controller(
             // input for this importation process.
 
             function validateImportDataFile(file, model) {
-                model.$setValidity('badsize',undefined === file || (file.size > 24 && file.size < IMPORT_SIZE_LIMIT));
+                model.$setValidity('badsize',undefined === file || !(file.size > 24 && file.size < IMPORT_SIZE_LIMIT));
             }
 
             function importDataFileDidChange() {
