@@ -11,3 +11,7 @@ The file "tipster-1.1.1-1-x86_64.hpkg" was obtained from;
 https://eu.hpkg.haiku-os.org/haikuports/master/x86_64/current/packages/tipster-1.1.1-1-x86_64.hpkg
 
 2021-02-08
+
+---
+
+The file `artificial...hpkg` was made by <apl@lindesay.co.nz>

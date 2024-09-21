@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.airlift.compress.Decompressor;
+import io.airlift.compress.zstd.ZstdDecompressor;
 import org.haiku.pkg.HpkException;
 import org.haiku.pkg.FileHelper;
 
@@ -220,55 +222,21 @@ public class HpkHeapReader implements Closeable, HeapReader {
     private void readHeapChunk(int index, byte[] buffer) throws IOException {
 
         randomAccessFile.seek(getHeapChunkAbsoluteFileOffset(index));
+
         int chunkUncompressedLength = getHeapChunkUncompressedLength(index);
+        int chunkCompressedLength = getHeapChunkCompressedLength(index);
 
         if (isHeapChunkCompressed(index) || HeapCompression.NONE == compression) {
 
             switch(compression) {
                 case NONE:
                     throw new IllegalStateException();
-
                 case ZLIB:
-                {
-                    byte[] deflatedBuffer = new byte[getHeapChunkCompressedLength(index)];
-                    readFully(deflatedBuffer);
-
-                    Inflater inflater = new Inflater();
-                    inflater.setInput(deflatedBuffer);
-
-                    try {
-                        int read;
-
-                        if (chunkUncompressedLength != (read = inflater.inflate(buffer))) {
-
-                            // the last chunk size uncompressed may be smaller than the chunk size,
-                            // so don't throw an exception if this happens.
-
-                            if (index < getHeapChunkCount() - 1) {
-                                String message = String.format("a compressed heap chunk inflated to %d bytes; was expecting %d",read,chunkUncompressedLength);
-
-                                if (inflater.needsInput()) {
-                                    message += "; needs input";
-                                }
-
-                                if (inflater.needsDictionary()) {
-                                    message += "; needs dictionary";
-                                }
-
-                                throw new HpkException(message);
-                            }
-                        }
-
-                        if (!inflater.finished()) {
-                            throw new HpkException(String.format("incomplete inflation of input data while reading chunk %d",index));
-                        }
-                    }
-                    catch (DataFormatException dfe) {
-                        throw new HpkException("unable to inflate (decompress) heap chunk "+index,dfe);
-                    }
-                }
-                break;
-
+                    readHeapChunkZlibAtFileOffset(index, buffer, chunkCompressedLength, chunkUncompressedLength);
+                    break;
+                case ZSTD:
+                    readHeapChunkZstdAtFileOffset(index, buffer, chunkCompressedLength, chunkUncompressedLength);
+                    break;
                 default:
                     throw new IllegalStateException("unsupported compression; "+compression);
             }
@@ -280,6 +248,52 @@ public class HpkHeapReader implements Closeable, HeapReader {
                 throw new HpkException(String.format("problem reading chunk %d of heap; only read %d of %d bytes",index,read,buffer.length));
             }
         }
+    }
+
+    private void readHeapChunkZlibAtFileOffset(int index, byte[] buffer, int chunkCompressedLength, int chunkUncompressedLength) throws IOException {
+        byte[] deflatedBuffer = new byte[chunkCompressedLength];
+        readFully(deflatedBuffer);
+
+        Inflater inflater = new Inflater();
+        inflater.setInput(deflatedBuffer);
+
+        try {
+            int read;
+
+            if (chunkUncompressedLength != (read = inflater.inflate(buffer))) {
+
+                // the last chunk size uncompressed may be smaller than the chunk size,
+                // so don't throw an exception if this happens.
+
+                if (index < getHeapChunkCount() - 1) {
+                    String message = String.format("a compressed heap chunk inflated to %d bytes; was expecting %d",read,chunkUncompressedLength);
+
+                    if (inflater.needsInput()) {
+                        message += "; needs input";
+                    }
+
+                    if (inflater.needsDictionary()) {
+                        message += "; needs dictionary";
+                    }
+
+                    throw new HpkException(message);
+                }
+            }
+
+            if (!inflater.finished()) {
+                throw new HpkException(String.format("incomplete inflation of input data while reading chunk %d",index));
+            }
+        }
+        catch (DataFormatException dfe) {
+            throw new HpkException("unable to inflate (decompress) heap chunk "+index,dfe);
+        }
+    }
+
+    private void readHeapChunkZstdAtFileOffset(int index, byte[] buffer, int chunkCompressedLength, int chunkUncompressedLength) throws IOException {
+        byte[] compressedBuffer = new byte[chunkCompressedLength];
+        readFully(compressedBuffer);
+        Decompressor decompressor = new ZstdDecompressor();
+        decompressor.decompress(compressedBuffer, 0, chunkCompressedLength, buffer, 0, chunkUncompressedLength);
     }
 
     @Override

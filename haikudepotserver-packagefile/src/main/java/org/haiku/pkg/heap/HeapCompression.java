@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,7 +12,8 @@ import java.util.Optional;
 
 public enum HeapCompression {
     NONE(0),
-    ZLIB(1);
+    ZLIB(1),
+    ZSTD(2);
 
     /**
      * <p>This appears in the binary file as a means of identifying the heap compression.</p>

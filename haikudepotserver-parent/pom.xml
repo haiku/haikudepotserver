@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!--
-  ~ Copyright 2018-2023, Andrew Lindesay
+  ~ Copyright 2018-2024, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -50,12 +50,12 @@
         <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
         <maven-failsafe-plugin.version>3.2.3</maven-failsafe-plugin.version>
         <jsonschema2pojo-maven-plugin.version>1.2.1</jsonschema2pojo-maven-plugin.version>
-        <docbkx-maven-plugin.version>2.0.17</docbkx-maven-plugin.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.32</freemarker.version>
         <hikaricp.version>5.1.0</hikaricp.version>
         <opencsv.version>5.9</opencsv.version>
+        <aircompressor.version>2.0.2</aircompressor.version>
 
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
@@ -204,6 +204,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>${commons-csv.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.airlift</groupId>
+                <artifactId>aircompressor</artifactId>
+                <version>${aircompressor.version}</version>
             </dependency>
 
             <dependency>

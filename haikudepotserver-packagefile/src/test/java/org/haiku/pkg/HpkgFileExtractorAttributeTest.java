@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022, Andrew Lindesay
+ * Copyright 2021-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.pkg;
@@ -17,23 +17,26 @@ import org.haiku.pkg.model.StringAttribute;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class HpkgFileExtractorAttributeTest extends AbstractHpkTest {
 
-    private static final String RESOURCE_TEST = "tipster-1.1.1-1-x86_64.hpkg";
+    private static final String RESOURCE_TIPSTER_TEST = "tipster-1.1.1-1-x86_64.hpkg";
+    private static final String RESOURCE_ARTIFICIAL_TEST = "artificial-1.0.0-any.hpkg";
 
     private static final int[] HVIF_MAGIC = {
             0x6e, 0x63, 0x69, 0x66
     };
 
+    /**
+     * <p>This test file is using the Zlib algorithm to compress the chunks in the HPKG payload.</p>
+     */
+
     @Test
     public void testReadFile() throws Exception {
 
-        File hpkgFile = prepareTestFile(RESOURCE_TEST);
+        File hpkgFile = prepareTestFile(RESOURCE_TIPSTER_TEST);
 
         try (HpkgFileExtractor hpkgFileExtractor = new HpkgFileExtractor(hpkgFile)) {
 
@@ -74,6 +77,29 @@ public class HpkgFileExtractorAttributeTest extends AbstractHpkTest {
             ByteSource iconDataByteSource = (ByteSource) iconBinaryData.getValue(tocContext);
             byte[] iconBytes = iconDataByteSource.read();
             assertIsHvif(iconBytes);
+        }
+    }
+
+    /**
+     * <p>There are different compression algorithms that can be used to compress the chunks in the payload. In this
+     * case the sample data is using the Zstd algorithm.</p>
+     */
+
+    @Test
+    public void testReadFileUsingZstd() throws Exception {
+
+        File hpkgFile = prepareTestFile(RESOURCE_ARTIFICIAL_TEST);
+
+        try (HpkgFileExtractor hpkgFileExtractor = new HpkgFileExtractor(hpkgFile)) {
+
+            AttributeContext tocContext = hpkgFileExtractor.getTocContext();
+            List<Attribute> tocAttributes = toList(hpkgFileExtractor.getTocIterator());
+            Set<String> tocfilenames = tocAttributes.stream()
+                    .map(a -> (String) a.getValue(tocContext))
+                    .collect(Collectors.toSet());
+            Assertions.assertThat(tocfilenames).containsOnly("some_file", "test-1.0.0-any.hpkg", ".PackageInfo");
+            // ^ oops, the hpkg ended up in hpkg payload; doesn't matter for this test as we only need to see
+            // that the HPKG was read OK.
         }
     }
 
