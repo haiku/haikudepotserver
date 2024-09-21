@@ -90,8 +90,8 @@ public class PkgSearchController {
 
     @RequestMapping(value = "/opensearch.xml", method = RequestMethod.GET)
     public void handleOpenSearchDescription(
-            HttpServletResponse response,
             HttpServletRequest request,
+            HttpServletResponse response,
             Locale locale
     ) throws IOException {
         Preconditions.checkArgument(null != response);
@@ -116,7 +116,9 @@ public class PkgSearchController {
         response.setContentType("application/opensearchdescription+xml");
 
         try {
-            Template template = freemarkerConfiguration.getTemplate("opensearchdescription-body_" + naturalLanguageCoordinates.getCode());
+            // It looks like the Freemarker loading system is only able to deal with the language code without
+            // country or variants.
+            Template template = freemarkerConfiguration.getTemplate("opensearchdescription-body_" + naturalLanguageCoordinates.getLanguageCode());
             template.process(wrapper.wrap(model), response.getWriter());
         }
         catch (TemplateException e) {

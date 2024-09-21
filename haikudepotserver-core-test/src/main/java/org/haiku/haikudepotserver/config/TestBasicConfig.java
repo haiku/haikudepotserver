@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,6 +29,7 @@ public class TestBasicConfig {
     public List<String> messageSourceBaseNames() {
         return ImmutableList.of(
                 "classpath:messages",
+                "classpath:webmessages",
                 "classpath:naturallanguagemessages"
         );
     }
