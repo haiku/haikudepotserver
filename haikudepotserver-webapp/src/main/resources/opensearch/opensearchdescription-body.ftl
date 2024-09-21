@@ -12,6 +12,6 @@
     <Image width="32" height="32" type="image/png">${baseUrl}/__img/haikudepot32.png</Image>
     <Image width="64" height="64" type="image/png">${baseUrl}/__img/haikudepot64.png</Image>
     <Image width="16" height="16" type="image/x-icon">${baseUrl}/__img/favicon.ico</Image>
-    <Url type="text/html" template="${baseUrl}/__pkgsearch/search?srchexpr={searchTerms}&amp;natlangcode=${naturalLanguageCode}"/>
-    <Language>${naturalLanguageCode}</Language>
+    <Url type="text/html" template="${baseUrl}/__pkgsearch/search?srchexpr={searchTerms}&amp;natlangcode=${naturalLanguageCoordinates.code}"/>
+    <Language>${naturalLanguageCoordinates.code}</Language>
 </OpenSearchDescription>
