@@ -20,6 +20,7 @@ import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 import org.haiku.haikudepotserver.dataobjects.support.Coded;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.SingleCollector;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
@@ -59,7 +60,7 @@ public class Repository extends _Repository implements MutableCreateAndModifyTim
 
     public static Repository getByCode(ObjectContext context, String code) {
         return tryGetByCode(context, code).orElseThrow(
-                () -> new IllegalStateException("unable to find repository by code [" + code + "]"));
+                () -> new ObjectNotFoundException(Repository.class.getSimpleName(), code));
     }
 
     public static List<Repository> getAllActive(ObjectContext context) {

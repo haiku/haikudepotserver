@@ -13,6 +13,7 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +22,7 @@ public class PkgScreenshot extends _PkgScreenshot implements Comparable<PkgScree
 
     public static PkgScreenshot getByCode(ObjectContext context, String code) {
         return tryGetByCode(context, code)
-                .orElseThrow(() -> new IllegalStateException("unable to find the screenshot with code [" + code + "]"));
+                .orElseThrow(() -> new ObjectNotFoundException(PkgScreenshot.class.getSimpleName(), code));
     }
 
     public static Optional<PkgScreenshot> tryGetByCode(ObjectContext context, String code) {

@@ -22,6 +22,8 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -60,7 +62,7 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
 
     public static User getByNickname(ObjectContext context, String nickname) {
         return tryGetByNickname(context, nickname)
-                .orElseThrow(() -> new IllegalStateException("unable to get the user for nickname [" + nickname + "]"));
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), nickname));
     }
 
     public static Optional<User> tryGetByNickname(ObjectContext context, String nickname) {

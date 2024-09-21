@@ -21,6 +21,7 @@ import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.SingleCollector;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
@@ -30,7 +31,6 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class RepositorySource extends _RepositorySource {
 
@@ -48,8 +48,7 @@ public class RepositorySource extends _RepositorySource {
 
     public static RepositorySource getByCode(ObjectContext context, String code) {
         return tryGetByCode(context, code)
-                .orElseThrow(() -> new IllegalStateException(
-                        "unable to find the repository source for code [" + code + "]"));
+                .orElseThrow(() -> new ObjectNotFoundException(RepositorySource.class.getSimpleName(), code));
     }
 
     public static Optional<RepositorySource> tryGetByCode(ObjectContext context, String code) {

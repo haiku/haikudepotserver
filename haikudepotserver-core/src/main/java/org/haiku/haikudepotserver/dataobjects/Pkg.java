@@ -31,7 +31,7 @@ public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
 
     public static Pkg getByName(ObjectContext context, String name) {
         return tryGetByName(context, name)
-                .orElseThrow(() -> new IllegalStateException("unable to find pkg for name [" + name + "]"));
+                .orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), name));
     }
 
     public static Optional<Pkg> tryGetByName(ObjectContext context, String name) {
